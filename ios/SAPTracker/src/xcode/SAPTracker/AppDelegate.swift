@@ -11,53 +11,36 @@ import CoreData
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    struct NotificationType {
-        static let openUrl = "openUrl"
-    }
     
     var window: UIWindow?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
 
-        // set up connection logging for debug builds
+        // Set up connection logging for debug builds
         #if DEBUG
-        AFNetworkActivityLogger.sharedLogger().startLogging()
-        AFNetworkActivityLogger.sharedLogger().level = AFHTTPRequestLoggerLevel.AFLoggerLevelDebug
+        //AFNetworkActivityLogger.sharedLogger().startLogging()
+        //AFNetworkActivityLogger.sharedLogger().level = AFHTTPRequestLoggerLevel.AFLoggerLevelDebug
         #endif
         
-        // initialize core data, migrate database if needed, or delete if migration needed but not possible
+        // Initialize core data, migrate database if needed, or delete if migration needed but not possible
         DataManager.sharedManager
         
-        // start timer in case GPS fixes need to be sent
+        // Start timer in case GPS fixes need to be sent
         SendGPSFixController.sharedManager.timer()
         
-        // set up styling
-        UINavigationBar.appearance().setBackgroundImage(UIImage(named: "navbar_bg"), forBarMetrics: UIBarMetrics.Default)
-        UINavigationBar.appearance().tintColor = UIColor.whiteColor()
-        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor(), NSFontAttributeName: UIFont(name: "OpenSans-Bold", size: CGFloat(17.0))!]
-        UIPageControl.appearance().pageIndicatorTintColor = UIColor.lightGrayColor()
-        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor.blackColor()
-        UIPageControl.appearance().backgroundColor = UIColor.whiteColor()
+        // Setup
+        self.setupNavigationBarApperance()
+        self.setupPageControlApperance()
+
+        // FIXME: - Still need this?
         // needed for missing Swift method
-        Appearance.setAppearance()
+        //Appearance.setAppearance()
+        
         return true
     }
     
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
-        
-        // Extract url string from deeplink
-        var urlString = url.absoluteString
-        let appPrefix : String = "comsapsailingtracker://"
-        urlString = urlString.hasPrefix(appPrefix) ? urlString.substringFromIndex(appPrefix.endIndex) : urlString
-        let httpPrefix : String = "http//"
-        urlString = urlString.hasPrefix(httpPrefix) ? "http://" + urlString.substringFromIndex(httpPrefix.endIndex) : urlString
-        let httpsPrefix : String = "https//"
-        urlString = urlString.hasPrefix(httpsPrefix) ? "https://" + urlString.substringFromIndex(httpsPrefix.endIndex) : urlString
-        
-        // Save this url 
-        Preferences.setLastCheckInURLString(urlString)
-        
-        // Handled successful
+        Preferences.setLastCheckInURLString(self.urlStringForDeeplink(url))
         return true
     }
 
@@ -85,6 +68,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         DataManager.sharedManager.saveContext()
     }
 
-
+    // MARK: - Setups
+    
+    private func setupNavigationBarApperance() {
+        let tintColor = UIColor(hex: 0x009de0)
+        UINavigationBar.appearance().tintColor = tintColor
+        UINavigationBar.appearance().titleTextAttributes =
+            [NSForegroundColorAttributeName: tintColor,
+             NSFontAttributeName: UIFont(name: "OpenSans-Bold", size: CGFloat(17.0))!
+        ]
+    }
+    
+    private func setupPageControlApperance() {
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor.lightGrayColor()
+        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor.blackColor()
+    }
+    
+    // MARK: - Helper
+    
+    private func urlStringForDeeplink(url: NSURL) -> String {
+        var urlString = url.absoluteString
+        let appPrefix : String = "comsapsailingtracker://"
+        
+        // FIXME: - Two prefixes are not allowed 
+        // Deeplink needs another structure (if possible) because of allowed characters in URL
+        // https:// -> http//
+        urlString = urlString.hasPrefix(appPrefix) ? urlString.substringFromIndex(appPrefix.endIndex) : urlString
+        let httpPrefix : String = "http//"
+        urlString = urlString.hasPrefix(httpPrefix) ? "http://" + urlString.substringFromIndex(httpPrefix.endIndex) : urlString
+        let httpsPrefix : String = "https//"
+        urlString = urlString.hasPrefix(httpsPrefix) ? "https://" + urlString.substringFromIndex(httpsPrefix.endIndex) : urlString
+        return urlString
+    }
+    
 }
 

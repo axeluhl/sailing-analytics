@@ -23,30 +23,30 @@ extension UIColor {
     }
 }
 
-/* Needed for setting border color in Interface Builder. */
-extension CALayer {
-    var borderUIColor: UIColor {
-        get {
-            return UIColor(CGColor: self.borderColor!)
-        }
-        set {
-            self.borderColor = newValue.CGColor
-        }
-    }
-}
+///* Needed for setting border color in Interface Builder. */
+//extension CALayer {
+//    var borderUIColor: UIColor {
+//        get {
+//            return UIColor(CGColor: self.borderColor!)
+//        }
+//        set {
+//            self.borderColor = newValue.CGColor
+//        }
+//    }
+//}
 
-/* Needed for bottom status labels. */
-class PaddedLabel : UILabel {
-    override func drawTextInRect(rect: CGRect) {
-        let insets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-        return super.drawTextInRect(UIEdgeInsetsInsetRect(rect, insets))
-    }
-}
+///* Needed for bottom status labels. */
+//class PaddedLabel : UILabel {
+//    override func drawTextInRect(rect: CGRect) {
+//        let insets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
+//        return super.drawTextInRect(UIEdgeInsetsInsetRect(rect, insets))
+//    }
+//}
 
-/* Needed for programmatically setting button heights in iOS 7. */
-struct ButtonHeight {
-    static let bigButtonPortrait = CGFloat(75.0)
-    static let bigButtonLandscape = CGFloat(50.0)
-    static let smallButtonPortrait = CGFloat(50.0)
-    static let smallButtonLandscape = CGFloat(50.0)
-}
+///* Needed for programmatically setting button heights in iOS 7. */
+//struct ButtonHeight {
+//    static let bigButtonPortrait = CGFloat(75.0)
+//    static let bigButtonLandscape = CGFloat(50.0)
+//    static let smallButtonPortrait = CGFloat(50.0)
+//    static let smallButtonLandscape = CGFloat(50.0)
+//}

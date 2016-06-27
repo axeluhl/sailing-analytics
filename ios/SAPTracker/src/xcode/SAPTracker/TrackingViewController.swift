@@ -8,88 +8,80 @@
 
 import Foundation
 
-class TrackingViewController : UIViewController {
+class TrackingViewController : UIViewController, UITableViewDataSource, UITableViewDelegate {
     
-    struct Color {
-        static let GpsActive = UIColor(hex: 0x8AB54D)
-        static let GpsInactive = UIColor(hex: 0x445A2F)
-        static let Green = UIColor(hex: 0x408000)
-        static let Red = UIColor(hex: 0xFF0000)
-        static let Orange = UIColor(hex: 0xFF8000)
+    struct CellIdentifier {
+        static let StatusCell = "StatusCell"
+        static let ModeCell = "ModeCell"
+        static let ChachedFixesCell = "CachedFixesCell"
+        static let GPSAccuracyCell = "GPSAccuracyCell"
     }
     
-    @IBOutlet weak var gpsAccuracy: UILabel!
-    @IBOutlet weak var trackingStatusLabel: UILabel!
-    @IBOutlet weak var cachedFixesLabel: UILabel!
-    @IBOutlet weak var onlineModeLabel: UILabel!
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     
-    /* Register for notifications. Set up timer */
+    let rows = [
+        CellIdentifier.StatusCell,
+        CellIdentifier.ModeCell,
+        CellIdentifier.ChachedFixesCell,
+        CellIdentifier.GPSAccuracyCell
+    ]
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-  
-        // set values
-        navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
-        cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
-        
-        // set online/buffering label
-        networkAvailabilityChanged()
-        
-        // register for notifications
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(TrackingViewController.networkAvailabilityChanged), name:APIManager.NotificationType.networkAvailabilityChanged, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(TrackingViewController.newLocation(_:)), name:LocationManager.NotificationType.newLocation, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(TrackingViewController.locationManagerFailed(_:)), name:LocationManager.NotificationType.locationManagerFailed, object: nil)
+        self.setupNavigationBarTitle()
     }
 	
-	// MARK:- Buttons
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+        self.tableViewHeight.constant = tableView.contentSize.height
+    }
+    
+    // MARK: - Setups
+    
+    private func setupNavigationBarTitle() {
+        navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
+    }
+    
+	// MARK: - Actions
 	
 	/* Stop tracking, go back to regattas view */
 	@IBAction func stopTrackingButtonTapped(sender: AnyObject) {
-		
-		let alertController = UIAlertController(title: NSLocalizedString("Stop tracking?", comment: ""), message: "", preferredStyle: .Alert)
-		let aCancel = UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .Cancel, handler: nil)
-		alertController.addAction(aCancel)
-		let aStop = UIAlertAction(title: NSLocalizedString("Stop", comment: ""), style: .Default) { action in
+		let alertTitle = NSLocalizedString("Stop tracking?", comment: "")
+		let alertController = UIAlertController(title: alertTitle,
+		                                        message: "",
+		                                        preferredStyle: .Alert)
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+		let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+        let stopTitle = NSLocalizedString("Stop", comment: "")
+		let stopAction = UIAlertAction(title: stopTitle, style: .Default) { action in
 			LocationManager.sharedManager.stopTracking()
 			SendGPSFixController.sharedManager.checkIn = nil
 			self.dismissViewControllerAnimated(true, completion: nil)
 		}
-		alertController.addAction(aStop)
+        alertController.addAction(cancelAction)
+		alertController.addAction(stopAction)
 		presentViewController(alertController, animated: true, completion: nil)
 	}
 
-    // MARK:- Notifications
+    // MARK: - UITableViewDataSourceDelegate
     
-    deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
-    }
-    
-    func networkAvailabilityChanged() {
-        if (APIManager.sharedManager.networkAvailable) {
-            if !BatteryManager.sharedManager.batterySaving {
-                onlineModeLabel.text = NSLocalizedString("Online", comment: "")
-                onlineModeLabel.textColor = Color.Green
-            } else {
-                onlineModeLabel.text = NSLocalizedString("Battery Saving", comment: "")
-                onlineModeLabel.textColor = Color.Orange
-            }
-        } else {
-            onlineModeLabel.text = NSLocalizedString("Offline", comment: "")
-            onlineModeLabel.textColor = Color.Red
-        }
-    }
-    
-    func newLocation(notification: NSNotification) {
-        let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as! Double
-        gpsAccuracy.text = "~ " + String(format: "%.0f", horizontalAccuracy) + " m"
-        trackingStatusLabel.text = NSLocalizedString("Tracking", comment: "")
-        trackingStatusLabel.textColor = Color.Green
-        cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
-    }
-    
-    func locationManagerFailed(notification: NSNotification) {
-        gpsAccuracy.text = NSLocalizedString("No GPS", comment: "")
-        trackingStatusLabel.text = NSLocalizedString("Not Tracking", comment: "")
-        trackingStatusLabel.textColor = Color.Red
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return rows.count
     }
 
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        return tableView.dequeueReusableCellWithIdentifier(rows[indexPath.row]) ?? UITableViewCell()
+    }
+    
+    // MARK: - UITableViewDelegate
+    
+    func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 52
+    }
+    
+    func tableView(tableView: UITableView, estimatedHeightForFooterInSection section: Int) -> CGFloat {
+        return 0
+    }
+    
 }

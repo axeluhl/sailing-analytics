@@ -321,8 +321,12 @@
 		C852BAA21CF5E1EA0093B0C5 /* CheckInRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAA11CF5E1EA0093B0C5 /* CheckInRequestManager.swift */; };
 		C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAAA1CF736680093B0C5 /* Preferences.swift */; };
 		C852BAAD1CF757950093B0C5 /* CheckInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAAC1CF757950093B0C5 /* CheckInViewController.swift */; };
-		C8603D4A1C528832002B2F28 /* Acknowledgements.markdown in Sources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
+		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
+		C89C5FCA1D06CECD002AAAD2 /* StatusTrackingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* StatusTrackingTableViewCell.swift */; };
+		C89C5FCC1D06CF0C002AAAD2 /* GPSAccuracyTrackingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* GPSAccuracyTrackingTableViewCell.swift */; };
+		C89C5FCE1D06CF26002AAAD2 /* CachedFixesTrackingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCD1D06CF26002AAAD2 /* CachedFixesTrackingTableViewCell.swift */; };
+		C89C5FD01D06CF46002AAAD2 /* ModeTrackingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCF1D06CF46002AAAD2 /* ModeTrackingTableViewCell.swift */; };
 		C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C8A4400A1C18153600DF70A0 /* Settings.bundle */; };
 		C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BBAC781C52649E004CA551 /* LicenseViewController.swift */; };
 		EEB2FC8E79793611ABC022B9 /* libPods-SAPTrackerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CDE153BDE8C83E9A084A24F1 /* libPods-SAPTrackerTests.a */; };
@@ -707,6 +711,11 @@
 		C852BAAA1CF736680093B0C5 /* Preferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		C852BAAC1CF757950093B0C5 /* CheckInViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInViewController.swift; sourceTree = "<group>"; };
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
+		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
+		C89C5FC91D06CECD002AAAD2 /* StatusTrackingTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusTrackingTableViewCell.swift; sourceTree = "<group>"; };
+		C89C5FCB1D06CF0C002AAAD2 /* GPSAccuracyTrackingTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSAccuracyTrackingTableViewCell.swift; sourceTree = "<group>"; };
+		C89C5FCD1D06CF26002AAAD2 /* CachedFixesTrackingTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CachedFixesTrackingTableViewCell.swift; sourceTree = "<group>"; };
+		C89C5FCF1D06CF46002AAAD2 /* ModeTrackingTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModeTrackingTableViewCell.swift; sourceTree = "<group>"; };
 		C8A4400A1C18153600DF70A0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
 		C8BBAC781C52649E004CA551 /* LicenseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseViewController.swift; sourceTree = "<group>"; };
@@ -765,21 +774,12 @@
 		7F06590119F7FE920077FF95 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				7F83F15719F154F000C53328 /* HomeViewController.swift */,
-				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
+				C8BBAC781C52649E004CA551 /* LicenseViewController.swift */,
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
-				7F99DE3B1A126554009B3619 /* RegattaViewController.swift */,
-				7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */,
-				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
-				7F193A901A39E54600D71773 /* GPSAccuracyView.swift */,
-				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
-				7F193A8E1A39ACF500D71773 /* TimerViewController.swift */,
-				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
-				7F8B8D421A373D4400C34B88 /* CourseViewController.swift */,
-				7F72C73F1A2DEA2100F48EE8 /* Resources */,
-				7F72C7401A2DEA3300F48EE8 /* Helpers */,
-				C8BBAC781C52649E004CA551 /* LicenseViewController.swift */,
+				7F83F15719F154F000C53328 /* HomeViewController.swift */,
+				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
+				C89C60101D0FF036002AAAD2 /* Regatta */,
 			);
 			name = ViewController;
 			sourceTree = "<group>";
@@ -1069,22 +1069,6 @@
 			path = flags;
 			sourceTree = "<group>";
 		};
-		7F72C73F1A2DEA2100F48EE8 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
-				7F83F15919F154F000C53328 /* Main.storyboard */,
-				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
-				7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */,
-				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
-				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
-				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
-				7F87DDE21A973C7400704AC4 /* eula-ios.html */,
-				7F87DDDD1A97339300704AC4 /* Localizable.strings */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-		};
 		7F72C7401A2DEA3300F48EE8 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -1121,12 +1105,18 @@
 		7F83F15219F154F000C53328 /* SAPTracker */ = {
 			isa = PBXGroup;
 			children = (
+				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
+				7F83F15919F154F000C53328 /* Main.storyboard */,
+				7F87DDDD1A97339300704AC4 /* Localizable.strings */,
+				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
+				C89C60131D0FF61E002AAAD2 /* Resources */,
+				C89C5FC31D06A269002AAAD2 /* Views */,
 				C852BAA91CF736440093B0C5 /* Preferences */,
 				7F83F15519F154F000C53328 /* AppDelegate.swift */,
+				7F72C7401A2DEA3300F48EE8 /* Helpers */,
 				7F06590119F7FE920077FF95 /* ViewController */,
 				7F06590219F7FEA40077FF95 /* DataController */,
 				7F06590019F7FE750077FF95 /* Model */,
-				7F14A0031A13B9A6001C1ECB /* Flags */,
 				7F83F15319F154F000C53328 /* Supporting Files */,
 			);
 			path = SAPTracker;
@@ -1199,6 +1189,78 @@
 				C852BAAA1CF736680093B0C5 /* Preferences.swift */,
 			);
 			name = Preferences;
+			sourceTree = "<group>";
+		};
+		C89C5FC31D06A269002AAAD2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				7F193A901A39E54600D71773 /* GPSAccuracyView.swift */,
+				C89C5FC41D06A289002AAAD2 /* GradientView.swift */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		C89C5FC61D06CE62002AAAD2 /* Tracking */ = {
+			isa = PBXGroup;
+			children = (
+				C89C5FC81D06CEA0002AAAD2 /* Cells */,
+				C89C5FC71D06CE87002AAAD2 /* Pages */,
+				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
+				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
+			);
+			name = Tracking;
+			sourceTree = "<group>";
+		};
+		C89C5FC71D06CE87002AAAD2 /* Pages */ = {
+			isa = PBXGroup;
+			children = (
+				7F193A8E1A39ACF500D71773 /* TimerViewController.swift */,
+				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
+				7F8B8D421A373D4400C34B88 /* CourseViewController.swift */,
+			);
+			name = Pages;
+			sourceTree = "<group>";
+		};
+		C89C5FC81D06CEA0002AAAD2 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				C89C5FC91D06CECD002AAAD2 /* StatusTrackingTableViewCell.swift */,
+				C89C5FCB1D06CF0C002AAAD2 /* GPSAccuracyTrackingTableViewCell.swift */,
+				C89C5FCD1D06CF26002AAAD2 /* CachedFixesTrackingTableViewCell.swift */,
+				C89C5FCF1D06CF46002AAAD2 /* ModeTrackingTableViewCell.swift */,
+			);
+			name = Cells;
+			sourceTree = "<group>";
+		};
+		C89C60101D0FF036002AAAD2 /* Regatta */ = {
+			isa = PBXGroup;
+			children = (
+				7F99DE3B1A126554009B3619 /* RegattaViewController.swift */,
+				7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */,
+				C89C5FC61D06CE62002AAAD2 /* Tracking */,
+			);
+			name = Regatta;
+			sourceTree = "<group>";
+		};
+		C89C60131D0FF61E002AAAD2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				7F87DDE21A973C7400704AC4 /* eula-ios.html */,
+				7F14A0031A13B9A6001C1ECB /* Flags */,
+				C89C60141D0FF63C002AAAD2 /* Fonts */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		C89C60141D0FF63C002AAAD2 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */,
+				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
+				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
+				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
+			);
+			name = Fonts;
 			sourceTree = "<group>";
 		};
 		C8B31F781B68DAD400C8A809 /* Products */ = {
@@ -1757,6 +1819,7 @@
 				7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */,
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
+				C89C5FD01D06CF46002AAAD2 /* ModeTrackingTableViewCell.swift in Sources */,
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
 				C852BA971CF2302D0093B0C5 /* CameraController.swift in Sources */,
 				7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */,
@@ -1766,6 +1829,8 @@
 				7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				7FCDB6631A1636610075D7D9 /* Event.swift in Sources */,
+				C89C5FCC1D06CF0C002AAAD2 /* GPSAccuracyTrackingTableViewCell.swift in Sources */,
+				C89C5FCA1D06CECD002AAAD2 /* StatusTrackingTableViewCell.swift in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
 				7FCDB6621A1636610075D7D9 /* GPSFix.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
@@ -1775,10 +1840,10 @@
 				7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */,
 				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
 				C852BAAD1CF757950093B0C5 /* CheckInViewController.swift in Sources */,
-				C8603D4A1C528832002B2F28 /* Acknowledgements.markdown in Sources */,
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
 				9E95C3D61C723AB30016632B /* Constants.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
+				C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */,
 				C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
 				7FCDB6651A1636610075D7D9 /* Competitor.swift in Sources */,
@@ -1786,6 +1851,7 @@
 				7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
 				7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */,
+				C89C5FCE1D06CF26002AAAD2 /* CachedFixesTrackingTableViewCell.swift in Sources */,
 				7F0658FF19F7EE910077FF95 /* CheckInData.swift in Sources */,
 				7F193A911A39E54600D71773 /* GPSAccuracyView.swift in Sources */,
 			);

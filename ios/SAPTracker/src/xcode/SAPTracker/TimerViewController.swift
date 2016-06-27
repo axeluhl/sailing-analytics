@@ -10,25 +10,36 @@ import Foundation
 
 class TimerViewController: UIViewController {
 
-    @IBOutlet weak var trackingTimeLabel: UILabel!
+    private let startDate = NSDate()
+    private let dateFormatter = NSDateFormatter()
     
-    let startDate = NSDate()
-    let dateFormatter = NSDateFormatter()
+    @IBOutlet weak var trackingTimeLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // start tracking timer
-        let timer = NSTimer(timeInterval: 0.1, target: self, selector: #selector(TimerViewController.timer(_:)), userInfo: nil, repeats: true)
-        NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)
-        dateFormatter.dateFormat = "HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
-        
+        self.setupDateFormatter()
+        self.setupTimer()
     }
     
-    // MARK:- Timer
+    // MARK: - Setups
     
-    func timer(timer: NSTimer) {
+    private func setupDateFormatter() {
+        dateFormatter.dateFormat = "HH:mm:ss"
+        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
+    }
+    
+    private func setupTimer() {
+        let timer = NSTimer(timeInterval: 0.1,
+                            target: self,
+                            selector: #selector(tick),
+                            userInfo: nil,
+                            repeats: true)
+        NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)    
+    }
+    
+    // MARK: - Timer
+    
+    @objc private func tick(timer: NSTimer) {
         let currentDate = NSDate()
         let timeInterval = currentDate.timeIntervalSinceDate(startDate)
         let timerDate = NSDate(timeIntervalSince1970: timeInterval)

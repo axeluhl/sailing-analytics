@@ -1,33 +1,31 @@
 //
-//  HeadingViewController.swift
+//  CachedFixesTrackingTableViewCell.swift
 //  SAPTracker
 //
-//  Created by computing on 09/12/14.
-//  Copyright (c) 2014 com.sap.sailing. All rights reserved.
+//  Created by Raimund Wege on 07.06.16.
+//  Copyright © 2016 com.sap.sailing. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
-class CourseViewController: UIViewController {
+class CachedFixesTrackingTableViewCell: UITableViewCell {
+
+    @IBOutlet weak var cachedFixesLabel: UILabel!
     
-    private let defaultCourseText = "- °"
-    
-    @IBOutlet weak var courseLabel: UILabel!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        self.setupCourseLabel()
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.setupCachedFixesLabel()
         self.subscribeForNotifications()
     }
-
+    
     deinit {
         self.unsubscribeFromNotifications()
     }
     
     // MARK: - Setups
     
-    private func setupCourseLabel() {
-        self.courseLabel.text = defaultCourseText
+    private func setupCachedFixesLabel() {
+        self.cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
     }
     
     // MARK: - Notifications
@@ -44,8 +42,9 @@ class CourseViewController: UIViewController {
     }
     
     func newLocation(notification: NSNotification) {
-        let course = notification.userInfo!["course"] as! Double
-        self.courseLabel.text = course < 0 ? defaultCourseText : String(format: "%.0f °", course)
+        dispatch_async(dispatch_get_main_queue(), {
+            self.setupCachedFixesLabel()
+        })
     }
     
 }

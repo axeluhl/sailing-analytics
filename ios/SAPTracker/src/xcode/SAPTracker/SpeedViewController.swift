@@ -10,28 +10,36 @@ import Foundation
 
 class SpeedViewController: UIViewController {
  
-    let knPerMs = 1.94552529182879
+    private let mpsToKn = 1.94552529182879
     
     @IBOutlet weak var speedLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // React on new locations
+        self.subscribeForNotifications()
+    }
+    
+    deinit {
+        self.unsubscribeFromNotifications()
+    }
+    
+    // MARK: - Notifications
+    
+    private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(SpeedViewController.newLocation(_:)),
+                                                         selector:#selector(newLocation),
                                                          name:LocationManager.NotificationType.newLocation,
                                                          object: nil)
     }
     
-    deinit {
+    private func unsubscribeFromNotifications() {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
     func newLocation(notification: NSNotification) {
-        let ms = notification.userInfo!["speed"] as! Double
-        if(ms >= 0) {
-            let kn = ms * knPerMs
+        let mps = notification.userInfo!["speed"] as! Double
+        if mps >= 0 {
+            let kn = mps * mpsToKn
             speedLabel.text = String(format: "%0.1f kn", kn)
         } else {
             speedLabel.text = "– kn"

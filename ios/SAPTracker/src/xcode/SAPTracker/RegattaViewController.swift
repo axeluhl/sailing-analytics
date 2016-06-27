@@ -15,6 +15,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     enum ActionSheet: Int {
         case Menu
     }
+    
     enum AlertView: Int {
         case CheckOut, Image, UploadFailed
     }
@@ -26,40 +27,27 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     var sourceTypes = [UIImagePickerControllerSourceType]()
     var sourceTypeNames = [String]()
     
-    @IBOutlet weak var imageView: UIImageView!
-    @IBOutlet weak var yourTeamPhotoButton: UIButton!
-    @IBOutlet weak var editTeamPhotoButton: UIButton!
-	@IBOutlet weak var retryUploadTeamPhotoButton: UIButton!
-    @IBOutlet weak var nameLabel: UILabel!
-    @IBOutlet weak var flagImageView: UIImageView!
-    @IBOutlet weak var sailLabel: UILabel!
+    @IBOutlet weak var teamImageView: UIImageView!
+    @IBOutlet weak var teamImageAddButton: UIButton!
+    @IBOutlet weak var teamImageEditButton: UIButton!
+	@IBOutlet weak var teamImageRetryButton: UIButton!
+    @IBOutlet weak var competitorNameLabel: UILabel!
+    @IBOutlet weak var competitorFlagImageView: UIImageView!
+    @IBOutlet weak var competitorSailLabel: UILabel!
     @IBOutlet weak var regattaStartLabel: UILabel!
-    @IBOutlet weak var daysHeight: NSLayoutConstraint!
-    @IBOutlet weak var daysLabel: UILabel!
-    @IBOutlet weak var hoursHeight: NSLayoutConstraint!
-    @IBOutlet weak var hoursLabel: UILabel!
-    @IBOutlet weak var minutesHeight: NSLayoutConstraint!
-    @IBOutlet weak var minutesLabel: UILabel!
-    @IBOutlet weak var lastSyncLabel: UILabel!
-    @IBOutlet weak var leaderBoardButton: UIButton!
-    @IBOutlet weak var openEventButton: UIButton!
+    @IBOutlet weak var countdownView: UIView!
+    @IBOutlet weak var countdownViewHeight: NSLayoutConstraint!
+    @IBOutlet weak var countdownDaysLabel: UILabel!
+    @IBOutlet weak var countdownHoursLabel: UILabel!
+    @IBOutlet weak var countdownMinutesLabel: UILabel!
+    @IBOutlet weak var leaderboardButton: UIButton!
+    @IBOutlet weak var eventButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
-    @IBOutlet weak var leaderBoardButtonHeight: NSLayoutConstraint!
-    @IBOutlet weak var announcementsLabel: PaddedLabel!
+    @IBOutlet weak var announcementsLabel: UILabel!
     
-    var dateFormatter: NSDateFormatter
-    
-    var isFinished: Bool = false
     let secondsInDay: Double = 60 * 60 * 24
     let secondsInHour: Double = 60 * 60
-    var loop: NSTimer?
-    
-    /* Setup date formatter for last sync. */
-    required init(coder aDecoder: NSCoder) {
-        dateFormatter = NSDateFormatter()
-        dateFormatter.dateFormat = "MMM d, yyyy, h:mm a" // As per request - see mail 19.02.2016
-        super.init(coder: aDecoder)!
-    }
+    var timer: NSTimer?
 	
 	var uploadKey: String {
 		return RegattaViewUserDefaults.UploadDidFail + "_" + DataManager.sharedManager.selectedCheckIn!.competitorId
@@ -70,37 +58,37 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         // set values
         navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
 
-        openEventButton.setTitle(NSLocalizedString("Show Event", comment: ""), forState: UIControlState.Normal)
+        self.eventButton.setTitle(NSLocalizedString("Show Event", comment: ""), forState: UIControlState.Normal)
 		
-		retryUploadTeamPhotoButton.hidden = !NSUserDefaults.standardUserDefaults().boolForKey(uploadKey)
+		self.teamImageRetryButton.hidden = !NSUserDefaults.standardUserDefaults().boolForKey(uploadKey)
         
-        // set regatta image, either load it from server or load from core data
+        // Set regatta image, either load it from server or load from core data
         if DataManager.sharedManager.selectedCheckIn?.userImage != nil {
-            imageView.image = UIImage(data:  DataManager.sharedManager.selectedCheckIn!.userImage!)
-            self.yourTeamPhotoButton.hidden = true
+            self.teamImageView.image = UIImage(data:  DataManager.sharedManager.selectedCheckIn!.userImage!)
+            self.teamImageAddButton.hidden = true
         } else if DataManager.sharedManager.selectedCheckIn?.imageUrl != nil {
             let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl!)
             let urlRequest = NSURLRequest(URL: imageUrl!)
-            imageView.setImageWithURLRequest(urlRequest,
-                placeholderImage: nil,
-                success: { (request:NSURLRequest!,response:NSHTTPURLResponse!, image:UIImage!) -> Void in
-                    self.imageView.image = image
-                    self.yourTeamPhotoButton.hidden = true
+            self.teamImageView.setImageWithURLRequest(urlRequest,
+                                                      placeholderImage: nil,
+                                                      success: { (request:NSURLRequest!,response:NSHTTPURLResponse!, image:UIImage!) -> Void in
+                    self.teamImageView.image = image
+                    self.teamImageAddButton.hidden = true
                 },
                 failure: { (request:NSURLRequest!,response:NSHTTPURLResponse!, error:NSError!) -> Void in
-                    self.editTeamPhotoButton.hidden = true
-					self.yourTeamPhotoButton.hidden = !self.retryUploadTeamPhotoButton.hidden
+                    self.teamImageEditButton.hidden = true
+					self.teamImageAddButton.hidden = !self.teamImageRetryButton.hidden
                 }
             )
         } else {
-            self.editTeamPhotoButton.hidden = true
-			self.yourTeamPhotoButton.hidden = !self.retryUploadTeamPhotoButton.hidden
+            self.teamImageEditButton.hidden = true
+			self.teamImageAddButton.hidden = !self.teamImageRetryButton.hidden
         }
         if (DataManager.sharedManager.selectedCheckIn?.competitor != nil) {
             let competitor = DataManager.sharedManager.selectedCheckIn!.competitor!
-            nameLabel.text = competitor.name
-            flagImageView.image = UIImage(named: competitor.countryCode)
-            sailLabel.text = competitor.sailId
+            self.competitorNameLabel.text = competitor.name
+            self.competitorFlagImageView.image = UIImage(named: competitor.countryCode)
+            self.competitorSailLabel.text = competitor.sailId
         }
         checkRegattaStatus()
         
@@ -126,7 +114,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
-        loop?.invalidate()
+        timer?.invalidate()
     }
     
     override func didRotateFromInterfaceOrientation(fromInterfaceOrientation: UIInterfaceOrientation) {
@@ -141,59 +129,39 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         
         let now = NSDate()
         
-        isFinished = false
-        
         // reset views
-        lastSyncLabel.hidden = true
-        if DataManager.sharedManager.selectedCheckIn!.lastSyncDate != nil {
-            lastSyncLabel.text = NSLocalizedString("Last sync", comment: "") + " " + dateFormatter.stringFromDate(DataManager.sharedManager.selectedCheckIn!.lastSyncDate!)
-        } else {
-            lastSyncLabel.text = nil
-        }
         startTrackingButton.setTitle(NSLocalizedString("Start Tracking", comment: ""), forState: UIControlState.Normal)
         announcementsLabel.text = NSLocalizedString("Please listen for announcements", comment: "")
         
         if DataManager.sharedManager.selectedCheckIn?.event != nil {
             let event = DataManager.sharedManager.selectedCheckIn!.event!
-
-//            // finished
-//            if now.timeIntervalSinceDate(event.endDate) > 0 {
-//                isFinished = true
-//                regattaStartLabel.text = NSLocalizedString("Thank you for participating!", comment: "")
-//                leaderBoardButtonHeight.constant = ButtonHeight.smallButtonPortrait
-//                daysHeight.constant = 0
-//                hoursHeight.constant = 0
-//                minutesHeight.constant = 0
-//                startTrackingButton.setTitle(NSLocalizedString("Check-Out", comment: ""), forState: UIControlState.Normal)
-//                startTrackingButton.backgroundColor = UIColor(hex: 0xEFAD00)
-//                announcementsLabel.text = " "
-//            }
-//            else
             
             // before race
             if now.timeIntervalSinceDate(event.startDate) < 0 {
-                regattaStartLabel.text = NSLocalizedString("Regatta will start in", comment: "")
-                lastSyncLabel.hidden = false
-                leaderBoardButtonHeight.constant = 0
+                self.regattaStartLabel.text = NSLocalizedString("Regatta will start in", comment: "")
+
                 let delta = floor(now.timeIntervalSinceDate(event.startDate)) * -1
                 let days = floor(delta / secondsInDay)
                 let hours = floor((delta - days * secondsInDay) / secondsInHour)
                 let minutes = floor((delta - days * secondsInDay - hours * secondsInHour) / 60.0)
-                daysLabel.text = String(format: "%.0f", arguments: [days])
-                hoursLabel.text = String(format: "%.0f", arguments: [hours])
-                minutesLabel.text = String(format: "%.0f", arguments: [minutes])
-                loop?.invalidate()
-                loop = NSTimer(timeInterval: 60, target: self, selector: #selector(RegattaViewController.checkRegattaStatus), userInfo: nil, repeats: false)
-                NSRunLoop.currentRunLoop().addTimer(loop!, forMode:NSRunLoopCommonModes)
+                self.countdownDaysLabel.text = String(format: "%.0f", arguments: [days])
+                self.countdownHoursLabel.text = String(format: "%.0f", arguments: [hours])
+                self.countdownMinutesLabel.text = String(format: "%.0f", arguments: [minutes])
+                self.countdownView.hidden = false
+                self.countdownViewHeight.constant = 60
+                timer?.invalidate()
+                timer = NSTimer(timeInterval: 60,
+                                target: self,
+                                selector: #selector(RegattaViewController.checkRegattaStatus),
+                                userInfo: nil,
+                                repeats: false)
+                NSRunLoop.currentRunLoop().addTimer(timer!, forMode:NSRunLoopCommonModes)
             }
                 // during race
             else {
-                regattaStartLabel.text = NSLocalizedString("Regatta in progress", comment: "")
-                daysHeight.constant = 0
-                hoursHeight.constant = 0
-                minutesHeight.constant = 0
-                leaderBoardButtonHeight.constant = ButtonHeight.smallButtonPortrait
-                lastSyncLabel.hidden = false
+                self.regattaStartLabel.text = NSLocalizedString("Regatta in progress", comment: "")
+                self.countdownView.hidden = true
+                self.countdownViewHeight.constant = 0
             }
         }
     }
@@ -280,10 +248,10 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     
     func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage!, editingInfo: [NSObject : AnyObject]!) {
         dismissViewControllerAnimated(true, completion: nil)
-        imageView.image = image
-        yourTeamPhotoButton.hidden = true
-        editTeamPhotoButton.hidden = false
-		retryUploadTeamPhotoButton.hidden = true
+        self.teamImageView.image = image
+        self.teamImageAddButton.hidden = true
+        self.teamImageEditButton.hidden = false
+		self.teamImageRetryButton.hidden = true
         let jpegData = UIImageJPEGRepresentation(image, 0.8)
         DataManager.sharedManager.selectedCheckIn!.userImage =  jpegData
         APIManager.sharedManager.postTeamImage(DataManager.sharedManager.selectedCheckIn!.competitorId,
@@ -305,7 +273,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
 				
 				NSUserDefaults.standardUserDefaults().setBool(true, forKey: self.uploadKey)
 				NSUserDefaults.standardUserDefaults().synchronize()
-				self.retryUploadTeamPhotoButton.hidden = false
+				self.teamImageRetryButton.hidden = false
         })
     }
 		
@@ -353,7 +321,4 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         }
     }
     
-    func navigationController(navigationController: UINavigationController, willShowViewController viewController: UIViewController, animated: Bool) {
-        UIApplication.sharedApplication().statusBarStyle = UIStatusBarStyle.LightContent
-    }
 }

@@ -15,7 +15,7 @@ class HomeViewController: CheckInViewController, UITableViewDataSource, UITableV
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var scanCodeButton: UIButton!
     @IBOutlet weak var noCodeButton: UIButton!
-    @IBOutlet weak var bottomLabel: PaddedLabel!
+    @IBOutlet weak var infoCodeLabel: UILabel!
     
     private var fetchedResultsController: NSFetchedResultsController?
     
@@ -23,7 +23,7 @@ class HomeViewController: CheckInViewController, UITableViewDataSource, UITableV
         super.viewDidLoad()
 		
         self.setupLanguage()
-        self.setupNavigationbar()
+        self.setupNavigationBar()
         self.setupTableViewDataSource()
         
         self.subscribeForNotifications()
@@ -59,10 +59,10 @@ class HomeViewController: CheckInViewController, UITableViewDataSource, UITableV
         self.titleLabel.text = NSLocalizedString("Your Regattas", comment: "")
         self.scanCodeButton.setTitle(NSLocalizedString("Scan Code", comment: ""), forState: .Normal)
         self.noCodeButton.setTitle(NSLocalizedString("No Code", comment: ""), forState: .Normal)
-        self.bottomLabel.text = NSLocalizedString("QR found", comment: "")
+        self.infoCodeLabel.text = NSLocalizedString("QR found", comment: "")
     }
     
-    private func setupNavigationbar() {
+    private func setupNavigationBar() {
         let imageView = UIImageView(image: UIImage(named: "sap_logo"))
         let barButtonItem = UIBarButtonItem(customView: imageView)
         self.navigationItem.leftBarButtonItem = barButtonItem
@@ -71,10 +71,11 @@ class HomeViewController: CheckInViewController, UITableViewDataSource, UITableV
     // MARK: - Notifications
     
     private func subscribeForNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector: #selector(openUrl(_:)),
-                                                         name: AppDelegate.NotificationType.openUrl,
-                                                         object: nil)
+    // FIXME: - How to react?
+//        NSNotificationCenter.defaultCenter().addObserver(self,
+//                                                         selector: #selector(openUrl(_:)),
+//                                                         name: AppDelegate.NotificationType.openUrl,
+//                                                         object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector: #selector(HomeViewController.checkEULA(_:)),
                                                          name: UIApplicationWillEnterForegroundNotification,
@@ -168,6 +169,10 @@ class HomeViewController: CheckInViewController, UITableViewDataSource, UITableV
     }
     
     // MARK: - UITableViewDelegate
+    
+    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        return 74
+    }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         DataManager.sharedManager.selectedCheckIn = (fetchedResultsController!.objectAtIndexPath(indexPath) as! CheckIn)
