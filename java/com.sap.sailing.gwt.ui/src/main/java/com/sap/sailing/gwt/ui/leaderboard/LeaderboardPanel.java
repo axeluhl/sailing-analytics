@@ -59,6 +59,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -97,6 +98,7 @@ import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
@@ -3258,17 +3260,16 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
 
     public String getLiveRacesText() {
         String result = "";
-        List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
+        List<Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
         boolean isMeta = leaderboard.type.isMetaLeaderboard();
         if (!liveRaces.isEmpty()) {
             if (liveRaces.size() == 1) {
-                com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
-                String text = "'" + liveRace.getA().getRaceColumnName() + "'";
+                String text = getLiveRaceText(liveRaces.get(0), isMeta);
                 result = isMeta ? stringMessages.regattaIsLive(text) : stringMessages.raceIsLive(text);
             } else {
                 String names = "";
-                for (com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
-                    names += "'" + liveRace.getA().getRaceColumnName() + "', ";
+                for (Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
+                    names += getLiveRaceText(liveRace, isMeta) + ", ";
                 }
                 // remove last ", "
                 names = names.substring(0, names.length() - 2);
@@ -3276,6 +3277,12 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             }
         }
         return result;
+    }
+    
+    private String getLiveRaceText(Pair<RaceColumnDTO, FleetDTO> liveRace, boolean isMeta) {
+        String raceName = liveRace.getA().getRaceColumnName(), fleetName = liveRace.getB().getName();
+        boolean isDefaultFleet = LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName);
+        return raceName + ((isDefaultFleet || isMeta) ? "" : (" (" + liveRace.getB().getName() + ")")); 
     }
     
     @Override
