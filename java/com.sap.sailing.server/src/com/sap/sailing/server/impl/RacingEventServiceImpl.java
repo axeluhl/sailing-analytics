@@ -1733,6 +1733,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         
         @Override
+        public void raceLogDetached(RaceLog raceLog) {
+            // no action required
+        }
+        
+        @Override
         public void stopTracking(boolean preemptive) {
             // no action required
         }

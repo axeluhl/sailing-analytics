@@ -3390,6 +3390,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public RaceLog detachRaceLog(Serializable identifier) {
         final RaceLog raceLog = this.attachedRaceLogs.remove(identifier);
+        notifyListenersWhenDetachingRaceLog(raceLog);
         updateStartOfRaceCacheFields();
         updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
         return raceLog;
@@ -4010,6 +4011,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private void notifyListenersWhenAttachingRaceLog(RaceLog raceLog) {
         notifyListeners(listener -> listener.raceLogAttached(raceLog));
+    }
+    
+    private void notifyListenersWhenDetachingRaceLog(RaceLog raceLog) {
+        notifyListeners(listener -> listener.raceLogDetached(raceLog));
     }
 
     protected void notifyListenersOnStopTracking(boolean preemptive) {

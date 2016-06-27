@@ -42,6 +42,12 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
 
             updateDenotionState();
         }
+        
+        public void raceLogDetached(RaceLog raceLog) {
+            raceLog.removeListener(raceLogEventVisitor);
+            
+            updateDenotionState();
+        }
 
         /**
          * Stops tracking the races.
