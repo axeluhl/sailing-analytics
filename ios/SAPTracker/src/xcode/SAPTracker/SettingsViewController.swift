@@ -11,6 +11,7 @@ import Foundation
 class SettingsViewController: UITableViewController {
     
     @IBOutlet weak var batterySavingSwitch: UISwitch!
+    @IBOutlet weak var deviceIdentifierLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,6 +21,7 @@ class SettingsViewController: UITableViewController {
 		let imageView = UIImageView(image: UIImage(named: "sap_logo"))
 		let barButtonItem = UIBarButtonItem(customView: imageView)
 		navigationItem.leftBarButtonItem = barButtonItem
+        self.deviceIdentifierLabel.text = Preferences.uuid()
     }
 
     @IBAction func batterySavingChanged(sender: UISwitch) {
