@@ -135,7 +135,7 @@ class CheckInController : NSObject {
         SVProgressHUD.show()
         checkInRequestManager.checkIn(checkInData.dictionaryLeaderboardName(),
                                       competitorID: checkInData!.dictionaryCompetitorId(),
-                                      deviceUUID: DeviceUDIDManager.UDID,
+                                      deviceUUID: Preferences.uuid(),
                                       pushDeviceID: "",
                                       fromMillis: millisSince1970(),
                                       success: { (operation, responseObject) -> Void in self.checkInOnServerSucceed() },

@@ -11,7 +11,6 @@
 		7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F03FD3D19FA44CD00FA1327 /* APIManager.swift */; };
 		7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FC19F7D6700077FF95 /* ScanViewController.swift */; };
 		7F0658FF19F7EE910077FF95 /* CheckInData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* CheckInData.swift */; };
-		7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */; };
 		7F14A10A1A13B9A6001C1ECB /* _abkhazia.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0041A13B9A6001C1ECB /* _abkhazia.png */; };
 		7F14A10B1A13B9A6001C1ECB /* _basque-country.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0051A13B9A6001C1ECB /* _basque-country.png */; };
 		7F14A10C1A13B9A6001C1ECB /* _british-antarctic-territory.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0061A13B9A6001C1ECB /* _british-antarctic-territory.png */; };
@@ -393,7 +392,6 @@
 		7F03FD3F19FA4D7400FA1327 /* bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = "<group>"; };
 		7F0658FC19F7D6700077FF95 /* ScanViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScanViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F0658FE19F7EE910077FF95 /* CheckInData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CheckInData.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceUDIDManager.swift; sourceTree = "<group>"; };
 		7F14A0041A13B9A6001C1ECB /* _abkhazia.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _abkhazia.png; sourceTree = "<group>"; };
 		7F14A0051A13B9A6001C1ECB /* _basque-country.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_basque-country.png"; sourceTree = "<group>"; };
 		7F14A0061A13B9A6001C1ECB /* _british-antarctic-territory.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_british-antarctic-territory.png"; sourceTree = "<group>"; };
@@ -791,7 +789,6 @@
 				7F2C605919F160E400C32D93 /* LocationManager.swift */,
 				7FA6551919F6661900A1B92D /* DataManager.swift */,
 				7F03FD3D19FA44CD00FA1327 /* APIManager.swift */,
-				7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */,
 				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
 				7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */,
 				C852BA961CF2302D0093B0C5 /* CameraController.swift */,
@@ -1836,7 +1833,6 @@
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
 				7F4EEDBA1A6D2BAC0026F711 /* CheckIn.swift in Sources */,
-				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
 				7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */,
 				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
 				C852BAAD1CF757950093B0C5 /* CheckInViewController.swift in Sources */,

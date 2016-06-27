@@ -13,6 +13,7 @@ class Preferences: NSObject {
     struct PreferenceKey {
         static let lastCheckInURLString = "lastCheckInURLString"
         static let acceptedTerms = "acceptedTerms"
+        static let uuid = "udid"
     }
     
     private static let preferences = NSUserDefaults.standardUserDefaults()
@@ -20,23 +21,35 @@ class Preferences: NSObject {
     // MARK: - LastCheckInData
     
     class func setLastCheckInURLString(urlString: String?) {
-        preferences.setObject(urlString, forKey: PreferenceKey.lastCheckInURLString)
-        preferences.synchronize()
+        self.preferences.setObject(urlString, forKey: PreferenceKey.lastCheckInURLString)
+        self.preferences.synchronize()
     }
     
     class func lastCheckInURLString() -> String? {
-        return preferences.stringForKey(PreferenceKey.lastCheckInURLString)
+        return self.preferences.stringForKey(PreferenceKey.lastCheckInURLString)
     }
     
     // MARK: - AcceptedTerms
     
     class func acceptedTerms() -> Bool {
-        return preferences.boolForKey(PreferenceKey.acceptedTerms)
+        return self.preferences.boolForKey(PreferenceKey.acceptedTerms)
     }
     
     class func setAcceptedTerms(value: Bool) {
-        preferences.setBool(value, forKey:PreferenceKey.acceptedTerms)
-        preferences.synchronize()
+        self.preferences.setBool(value, forKey:PreferenceKey.acceptedTerms)
+        self.preferences.synchronize()
+    }
+    
+    // MARK: - UUID
+    
+    private static var UUID: String?
+    class func uuid() -> String {
+        if UUID == nil {
+            UUID = self.preferences.stringForKey(PreferenceKey.uuid) ?? NSUUID().UUIDString.lowercaseString
+            preferences.setObject(UUID, forKey: PreferenceKey.uuid)
+            preferences.synchronize()
+        }
+        return UUID!
     }
     
 }

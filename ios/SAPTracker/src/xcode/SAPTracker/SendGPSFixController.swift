@@ -79,7 +79,7 @@ class SendGPSFixController: NSObject {
     func sendGPSFixes(serverUrl: String, gpsFixes:[GPSFix]) {
         APIManager.sharedManager.initManager(serverUrl)
         if APIManager.sharedManager.networkAvailable {
-            APIManager.sharedManager.postGPSFixes(DeviceUDIDManager.UDID, gpsFixes: gpsFixes,
+            APIManager.sharedManager.postGPSFixes(Preferences.uuid(), gpsFixes: gpsFixes,
                 success: { (operation, competitorResponseObject) -> Void in
                     print("sent GPS fixes")
                     for gpsFix in gpsFixes {

@@ -298,7 +298,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 let toMillis = Int64(now.timeIntervalSince1970 * 1000)
                 APIManager.sharedManager.checkOut(DataManager.sharedManager.selectedCheckIn!.leaderBoardName,
                     competitorId: DataManager.sharedManager.selectedCheckIn!.competitorId,
-                    deviceUuid: DeviceUDIDManager.UDID,
+                    deviceUuid: Preferences.uuid(),
                     toMillis: toMillis,
                     success: { (operation, competitorResponseObject) -> Void in
                     },
