@@ -7,8 +7,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.selenium.core.WebDriverWindow;
-import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
@@ -23,9 +21,6 @@ public class TestLeaderboardConfigSelectionModel extends AbstractSeleniumTest {
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
-        WindowManager manager = this.environment.getWindowManager();
-        //WebDriverWindow adminConsoleWindow = manager.openNewWindow();
-        //adminConsoleWindow.switchToWindow();
 
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
@@ -36,10 +31,6 @@ public class TestLeaderboardConfigSelectionModel extends AbstractSeleniumTest {
     
     @Test
     public void testBehaviorOfRaceSelectionWithTabChange() {
-        //WindowManager manager = this.environment.getWindowManager();
-        //WebDriverWindow adminConsoleWindow = manager.openNewWindow();
-        //adminConsoleWindow.switchToWindow();
-
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARDNAME);
@@ -63,10 +54,6 @@ public class TestLeaderboardConfigSelectionModel extends AbstractSeleniumTest {
 
     @Test
     public void testBehaviorOfRaceSelectionWithLeaderboardChange() {
-        //WindowManager manager = this.environment.getWindowManager();
-        //WebDriverWindow adminConsoleWindow = manager.openNewWindow();
-        //adminConsoleWindow.switchToWindow();
-
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         leaderboardConfiguration.createFlexibleLeaderboard("TEST2");

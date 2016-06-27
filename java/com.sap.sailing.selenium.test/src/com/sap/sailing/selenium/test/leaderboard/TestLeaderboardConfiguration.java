@@ -1,7 +1,6 @@
 package com.sap.sailing.selenium.test.leaderboard;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
@@ -16,10 +15,8 @@ import com.sap.sailing.selenium.core.WebDriverWindow;
 import com.sap.sailing.selenium.core.WindowManager;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO.LeaderboardEntryPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
-import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardRacesTablePO.RaceEntryPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaDetailsCompositePO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
