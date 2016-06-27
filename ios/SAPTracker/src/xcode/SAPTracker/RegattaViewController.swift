@@ -144,9 +144,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 let days = floor(delta / secondsInDay)
                 let hours = floor((delta - days * secondsInDay) / secondsInHour)
                 let minutes = floor((delta - days * secondsInDay - hours * secondsInHour) / 60.0)
-                self.countdownDaysLabel.text = String(format: "%.0f", arguments: [days])
-                self.countdownHoursLabel.text = String(format: "%.0f", arguments: [hours])
-                self.countdownMinutesLabel.text = String(format: "%.0f", arguments: [minutes])
+                self.countdownDaysLabel.text = String(format: "%02d", Int(days))
+                self.countdownHoursLabel.text = String(format: "%02d", Int(hours))
+                self.countdownMinutesLabel.text = String(format: "%02d", Int(minutes))
                 self.countdownView.hidden = false
                 self.countdownViewHeight.constant = 60
                 timer?.invalidate()
