@@ -458,7 +458,8 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void detachRaceLog(Serializable identifier) {
+    public RaceLog detachRaceLog(Serializable identifier) {
+        return null;
     }
 
     @Override

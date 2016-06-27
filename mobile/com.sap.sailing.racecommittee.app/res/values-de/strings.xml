@@ -2,7 +2,7 @@
 <resources>
 
     <string name="running_on_course">(Kurs %s)</string>
-    <string name="course_design_number_waypoints">Kurs hat %s Wegpunkte</string>
+    <string name="course_design_number_waypoints">Kurs hat %d Wegpunkte</string>
     <string name="service_text_no_races">Warte auf Rennen&#8230;</string>
     <string name="service_text_num_races">Aktuell %d Rennen verwaltet.</string>
     <string name="set_time">Start</string>

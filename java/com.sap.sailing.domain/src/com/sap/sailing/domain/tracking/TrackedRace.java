@@ -711,8 +711,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
 
     /**
      * Detaches the race log associated with this {@link TrackedRace}.
+     * 
+     * @return the race log detached or {@code null} if no race log can be found by the {@code identifier}
      */
-    void detachRaceLog(Serializable identifier);
+    RaceLog detachRaceLog(Serializable identifier);
     
     /**
      * Detaches the link {@link RaceExecutionOrderProvider}

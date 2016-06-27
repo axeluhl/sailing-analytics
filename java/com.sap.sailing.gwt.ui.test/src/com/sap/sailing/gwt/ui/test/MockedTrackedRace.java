@@ -577,7 +577,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void detachRaceLog(Serializable identifier) {
+    public RaceLog detachRaceLog(Serializable identifier) {
+        return null;
     }
 
     @Override
