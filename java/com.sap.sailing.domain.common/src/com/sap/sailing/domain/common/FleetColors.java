@@ -15,7 +15,8 @@ public enum FleetColors {
     PURPLE (212, 28, 175, 0),
     NEON_GREEN (118, 255, 33, 0),
     ORANGE (255, 174, 23, 0),
-    WHITE (250, 250, 250, 0);
+    WHITE (250, 250, 250, 0),
+    PINK(255,105,180, 0);
     
     private Color color;
     
