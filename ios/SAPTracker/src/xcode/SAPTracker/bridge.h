@@ -13,7 +13,6 @@
 #import <TSMarkdownParser/TSMarkdownParser.h>
 #import <SVProgressHUD/SVProgressHUD.h>
 #import "UIImageView+AFNetworking.h"
-#import "Appearance.h"
 
 #if DEBUG
 #import "AFNetworkActivityLogger.h"

@@ -31,10 +31,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Setup
         self.setupNavigationBarApperance()
         self.setupPageControlApperance()
-
-        // FIXME: - Still need this?
-        // needed for missing Swift method
-        //Appearance.setAppearance()
         
         return true
     }
@@ -102,4 +98,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
 }
-

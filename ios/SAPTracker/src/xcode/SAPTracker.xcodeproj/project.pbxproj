@@ -292,7 +292,6 @@
 		7F87CAA21A2CCE8B0076C617 /* OpenSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */; };
 		7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */; };
 		7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */; };
-		7F87CAA71A2CD6BA0076C617 /* Appearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F87CAA61A2CD6BA0076C617 /* Appearance.m */; };
 		7F87DDDB1A97339300704AC4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7F87DDDD1A97339300704AC4 /* Localizable.strings */; };
 		7F87DDE01A973C7400704AC4 /* eula-ios.html in Resources */ = {isa = PBXBuildFile; fileRef = 7F87DDE21A973C7400704AC4 /* eula-ios.html */; };
 		7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */; };
@@ -677,8 +676,6 @@
 		7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Light.ttf"; sourceTree = "<group>"; };
 		7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Regular.ttf"; sourceTree = "<group>"; };
 		7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
-		7F87CAA51A2CD6BA0076C617 /* Appearance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appearance.h; sourceTree = "<group>"; };
-		7F87CAA61A2CD6BA0076C617 /* Appearance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appearance.m; sourceTree = "<group>"; };
 		7F87DDDC1A97339300704AC4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		7F87DDDF1A9733B200704AC4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		7F87DDE11A973C7400704AC4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = "Base.lproj/eula-ios.html"; sourceTree = "<group>"; };
@@ -1070,8 +1067,6 @@
 			isa = PBXGroup;
 			children = (
 				7FD9D3021A1236080058FEAD /* Extensions.swift */,
-				7F87CAA51A2CD6BA0076C617 /* Appearance.h */,
-				7F87CAA61A2CD6BA0076C617 /* Appearance.m */,
 				9E95C3D51C723AB30016632B /* Constants.swift */,
 			);
 			name = Helpers;
@@ -1843,7 +1838,6 @@
 				C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
 				7FCDB6651A1636610075D7D9 /* Competitor.swift in Sources */,
-				7F87CAA71A2CD6BA0076C617 /* Appearance.m in Sources */,
 				7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
 				7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */,
