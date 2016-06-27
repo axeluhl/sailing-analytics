@@ -40,7 +40,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
 
             @Override
             public int hashCode(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
-                return t.getA().getName().toString().concat(t.getB().getName().toString()).concat(t.getC().name).hashCode();
+                return t.getA().getName().concat(t.getB().getName()).concat(t.getC().name).hashCode();
             }
         });
         Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> raceNameColumn =
