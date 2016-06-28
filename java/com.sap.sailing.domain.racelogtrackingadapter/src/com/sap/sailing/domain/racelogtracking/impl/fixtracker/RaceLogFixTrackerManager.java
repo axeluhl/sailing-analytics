@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -34,19 +36,23 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
 
     private final Owner owner;
     
+    /**
+     * We maintain our own collection that holds the RaceLogs. The known RaceLogs should by in sync with the ones that
+     * can be obtained from the TrackedRace. When stopping, there could be a concurrency issue that leads to a listener
+     * not being removed. This is prevented by remembering all RaceLogs to wich we attached a listener. So we can be
+     * sure to not produce a memory leak.
+     */
+    private final Set<RaceLog> knownRaceLogs = new HashSet<>();
+    
     private RaceLogFixTracker tracker;
 
     private final RaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
         public void raceLogAttached(RaceLog raceLog) {
-            raceLog.addListener(raceLogEventVisitor);
-
-            updateDenotionState();
+            addRaceLog(raceLog);
         }
         
         public void raceLogDetached(RaceLog raceLog) {
-            raceLog.removeListener(raceLogEventVisitor);
-            
-            updateDenotionState();
+            removeRaceLog(raceLog);
         }
 
         /**
@@ -99,8 +105,10 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
 
         trackedRace.addListener(raceChangeListener);
         
-        for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
-            raceLog.addListener(raceLogEventVisitor);
+        synchronized (knownRaceLogs) {
+            for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
+                addRaceLogUnlocked(raceLog);
+            }
         }
         
         updateDenotionState();
@@ -114,11 +122,37 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         }
     }
     
+    private void addRaceLog(RaceLog raceLog) {
+        synchronized (knownRaceLogs) {
+            addRaceLogUnlocked(raceLog);
+        }
+        updateDenotionState();
+    }
+    
+    private void removeRaceLog(RaceLog raceLog) {
+        synchronized (knownRaceLogs) {
+            removeRaceLogUnlocked(raceLog);
+        }
+        updateDenotionState();
+    }
+    
+    private void addRaceLogUnlocked(RaceLog raceLog) {
+        knownRaceLogs.add(raceLog);
+        raceLog.addListener(raceLogEventVisitor);
+    }
+    
+    private void removeRaceLogUnlocked(RaceLog raceLog) {
+        raceLog.removeListener(raceLogEventVisitor);
+        knownRaceLogs.remove(raceLog);
+    }
+    
     public void stop(boolean preemptive) {
         stopTracker(preemptive);
         trackedRace.removeListener(raceChangeListener);
-        for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
-            raceLog.removeListener(raceLogEventVisitor);
+        synchronized (knownRaceLogs) {
+            for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
+                removeRaceLogUnlocked(raceLog);
+            }
         }
     }
     

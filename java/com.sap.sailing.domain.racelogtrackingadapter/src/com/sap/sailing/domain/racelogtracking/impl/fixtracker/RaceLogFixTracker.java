@@ -79,7 +79,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
     private final SensorFixMapperFactory sensorFixMapperFactory;
     private AtomicBoolean preemptiveStopRequested = new AtomicBoolean(false);
     private AtomicBoolean stopRequested = new AtomicBoolean(false);
-    private final AbstractRaceChangeListener trackingTimesRaceChangeListener = new AbstractRaceChangeListener() {
+    private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
         @Override
         public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
             if ((newStartOfTracking == null
@@ -311,7 +311,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
     public void stop(boolean preemptive) {
         preemptiveStopRequested.set(preemptive);
         stopRequested.set(true);
-        trackedRace.removeListener(trackingTimesRaceChangeListener);
+        trackedRace.removeListener(raceChangeListener);
         synchronized (knownRegattaLogs) {
             knownRegattaLogs.forEach((log) -> log.removeListener(regattaLogEventVisitor));
             knownRegattaLogs.clear();
@@ -328,12 +328,12 @@ public class RaceLogFixTracker implements TrackingDataLoader {
     }
 
     protected void startTracking() {
+        trackedRace.addListener(raceChangeListener);
         final boolean hasRegattaLogs;
         synchronized (knownRegattaLogs) {
             trackedRace.getAttachedRegattaLogs().forEach(this::addRegattaLogUnlocked);
             hasRegattaLogs = !knownRegattaLogs.isEmpty();
         }
-        trackedRace.addListener(trackingTimesRaceChangeListener);
         if (hasRegattaLogs) {
             updateMappingsAndAddListeners();
         }
