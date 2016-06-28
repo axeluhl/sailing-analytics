@@ -197,10 +197,11 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
         case REGATTA_LOADER:
-            String[] projection = new String[] { "events.event_checkin_digest", "events.event_id", "events._id",
-                    "events.event_name", "events.event_server", "competitors.competitor_display_name",
-                    "competitors.competitor_id", "leaderboards.leaderboard_name",
-                    "competitors.competitor_country_code", "competitors.competitor_sail_id" };
+            String[] projection = new String[] { AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event.EVENT_CHECKIN_DIGEST,
+                AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event._ID,
+                AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event.EVENT_NAME,
+                AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event.EVENT_SERVER,
+                AnalyticsContract.PATH_LEADERBOARD + "." + AnalyticsContract.Leaderboard.LEADERBOARD_NAME};
             return new CursorLoader(getActivity(), AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI,
                     projection, null, null, null);
 

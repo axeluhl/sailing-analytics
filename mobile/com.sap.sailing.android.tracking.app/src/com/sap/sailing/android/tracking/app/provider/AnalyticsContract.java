@@ -40,8 +40,8 @@ public class AnalyticsContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     private static final String PATH_COMPETITOR = "competitors";
-    private static final String PATH_EVENT = "events";
-    private static final String PATH_LEADERBOARD = "leaderboards";
+    public static final String PATH_EVENT = "events";
+    public static final String PATH_LEADERBOARD = "leaderboards";
     private static final String PATH_CHECKIN_URI = "checkin_uris";
 
     public static class LeaderboardsEventsJoined {
