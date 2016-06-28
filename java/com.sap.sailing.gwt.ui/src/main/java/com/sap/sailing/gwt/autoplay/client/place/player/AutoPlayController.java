@@ -98,9 +98,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     private void showLeaderboard() {
         if (activeTvView != AutoPlayModes.Leaderboard) {
             playerView.clearContent();
-            
             boolean withFullscreenButton = autoPlayerConfiguration.isFullscreenMode() && isInitialScreen;
-
             LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(leaderboardPerspectiveLifecycleWithAllSettings, 
                     sailingService, asyncActionsExecutor,
                     new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
@@ -112,9 +110,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
             activeTvView = AutoPlayModes.Leaderboard;
             raceboardTimer.pause();
             leaderboardTimer.setPlayMode(PlayModes.Live);
-            
             leaderboardPerspective.addLeaderboardUpdateListener(this);
-            
             isInitialScreen = false;
         }
     }
@@ -131,7 +127,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                             sailingService, mediaService, userService, asyncActionsExecutor,
                             result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, autoPlayerConfiguration.getLeaderboardName(), 
                             /** leaderboardGroupName */ null, /** eventId */ null, errorReporter,
-                            StringMessages.INSTANCE, userAgent, raceTimesInfoProvider);
+                            StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, true);
 
                     playerView.setContent(raceboardPerspective);
 

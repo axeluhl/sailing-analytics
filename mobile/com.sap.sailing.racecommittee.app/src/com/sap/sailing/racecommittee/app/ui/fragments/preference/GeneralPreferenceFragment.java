@@ -19,6 +19,7 @@ import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
@@ -56,6 +57,20 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 builder.setPositiveButton(getString(android.R.string.ok), null);
                 AlertDialog dialog = builder.create();
                 dialog.show();
+                return true;
+            }
+        });
+        addOnPreferenceChangeListener(findPreference(R.string.preference_non_public_events_key), new OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
+                if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    builder.setTitle(getString(R.string.non_public_changed_title));
+                    builder.setMessage(getString(R.string.app_refresh_message));
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                }
                 return true;
             }
         });
@@ -109,11 +124,13 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
-                builder.setTitle(getString(R.string.url_refresh_title));
-                builder.setMessage(getString(R.string.url_refresh_message));
-                builder.setPositiveButton(android.R.string.ok, null);
-                builder.show();
+                if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    builder.setTitle(getString(R.string.url_refresh_title));
+                    builder.setMessage(getString(R.string.app_refresh_message));
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                }
                 return true;
             }
         });

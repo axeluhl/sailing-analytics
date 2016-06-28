@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOvervi
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
-import com.sap.sailing.gwt.home.shared.partials.filter.RegattaByBootCategoryFilter;
+import com.sap.sailing.gwt.home.shared.partials.filter.RegattaByLeaderboardGroupNameFilter;
 import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListPresenter;
 
 public class MultiRegattaViewImpl extends AbstractEventOverview {
@@ -36,10 +36,10 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
         regattaStatusUi = new RegattaStatus(currentPresenter);
         RegattaListPresenter<RegattasAndLiveRacesDTO> regattaListPresenter = 
                 new RegattaListPresenter<RegattasAndLiveRacesDTO>(regattaStatusUi);
-        RegattaByBootCategoryFilter bootCategoryFilter = new RegattaByBootCategoryFilter();
-        regattaStatusUi.setFilterSectionWidget(bootCategoryFilter);
+        RegattaByLeaderboardGroupNameFilter leaderboardGroupNameFilter = new RegattaByLeaderboardGroupNameFilter();
+        regattaStatusUi.setFilterSectionWidget(leaderboardGroupNameFilter);
         MultiRegattaViewImplFilterPresenter filterPresenter = 
-                new MultiRegattaViewImplFilterPresenter(bootCategoryFilter, regattaListPresenter);
+                new MultiRegattaViewImplFilterPresenter(leaderboardGroupNameFilter, regattaListPresenter);
         container.add(regattaStatusUi);
         refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(
                 regattaListPresenter.getRefreshableWidgetWrapper(regattaStatusUi)), 
@@ -55,11 +55,11 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
             this.valueChangeHandler = Arrays.asList(valueChangeHandler);
             super.addHandler(valueChangeHandler);
         }
+        
         @Override
         protected List<FilterValueChangeHandler<RegattaMetadataDTO, String>> getCurrentValueChangeHandlers() {
             return valueChangeHandler;
         }
-        
     }
 
 }

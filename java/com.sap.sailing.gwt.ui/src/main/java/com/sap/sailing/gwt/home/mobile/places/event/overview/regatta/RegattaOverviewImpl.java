@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.places.event.overview.regatta;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -63,8 +65,8 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     @Override
-    protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {
-        QuickfinderPresenter.getForRegattaOverview(quickfinder, currentPresenter, regattaMetadatas);
+    protected void setQuickFinderValues(Quickfinder quickfinder, Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
+        QuickfinderPresenter.getForRegattaOverview(quickfinder, currentPresenter, regattasByLeaderboardGroupName);
     }
     
     @Override

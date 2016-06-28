@@ -2632,7 +2632,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList());
         replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, id,
                 /* officialWebsiteURLAsString */null, /* sailorsInfoWebsiteURLAsString */null,
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
+                /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         return result;
     }
 

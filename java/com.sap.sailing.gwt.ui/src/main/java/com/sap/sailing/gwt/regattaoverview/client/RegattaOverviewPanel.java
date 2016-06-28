@@ -250,7 +250,9 @@ public class RegattaOverviewPanel extends SimplePanel {
                                             competitorSelectionProvider, 
                                             null, leaderboard.name, 
                                             errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
-                                    leaderboardsTabPanel.add(leaderboardPanel, leaderboard.getDisplayName() + " " + stringMessages.leaderboard());
+                                    leaderboardsTabPanel.add(leaderboardPanel,
+                                            (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName())
+                                            + " " + stringMessages.leaderboard());
                                 }
                                 if (!result.isEmpty()) {
                                     leaderboardsTabPanel.setVisible(true);

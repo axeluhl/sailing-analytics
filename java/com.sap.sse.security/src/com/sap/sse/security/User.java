@@ -12,12 +12,12 @@ import java.util.Set;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
-import com.sap.sse.common.Named;
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 
-public class User implements Named, WithID {
+public class User implements NamedWithID {
     private static final long serialVersionUID = 1788215575606546042L;
 
     /**
