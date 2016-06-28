@@ -101,10 +101,14 @@ public class LeaderboardDetailsPanelPO extends PageArea {
 //     */
 //    // TODO: Must be a flexible leaderboard
     public void addRacesToFlexibleLeaderboard(int i) {
+        addRacesToFlexibleLeaderboard(i, "R");
+    }
+    
+    public void addRacesToFlexibleLeaderboard(int i, String s) {
         this.addRacesButton.click();
         WebElement dialog = findElementBySeleniumId(this.driver, "RaceColumnsInLeaderboardDialog");
         RaceColumnsInLeaderboardDialog raceColumnsInLeaderboardDialog = new RaceColumnsInLeaderboardDialog(this.driver, dialog);
-        raceColumnsInLeaderboardDialog.addRaces(2);
+        raceColumnsInLeaderboardDialog.addRaces(i, s);
         //selectRaceColumn("R1", "Default");
     }
 //    
