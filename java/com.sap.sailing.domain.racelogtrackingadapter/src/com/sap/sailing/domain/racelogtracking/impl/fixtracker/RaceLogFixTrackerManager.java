@@ -39,7 +39,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     /**
      * We maintain our own collection that holds the RaceLogs. The known RaceLogs should by in sync with the ones that
      * can be obtained from the TrackedRace. When stopping, there could be a concurrency issue that leads to a listener
-     * not being removed. This is prevented by remembering all RaceLogs to wich we attached a listener. So we can be
+     * not being removed. This is prevented by remembering all RaceLogs to which we attached a listener. So we can be
      * sure to not produce a memory leak.
      */
     private final Set<RaceLog> knownRaceLogs = new HashSet<>();

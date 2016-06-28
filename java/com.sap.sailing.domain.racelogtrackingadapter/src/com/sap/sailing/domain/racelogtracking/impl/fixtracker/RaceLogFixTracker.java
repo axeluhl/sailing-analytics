@@ -70,6 +70,12 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 public class RaceLogFixTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(RaceLogFixTracker.class.getName());
     protected final DynamicTrackedRace trackedRace;
+    /**
+     * We maintain our own collection that holds the RegattaLogs. The known RegattaLogs should by in sync with the ones that
+     * can be obtained from the TrackedRace. When stopping, there could be a concurrency issue that leads to a listener
+     * not being removed. This is prevented by remembering all RegattaLogs to which we attached a listener. So we can be
+     * sure to not produce a memory leak.
+     */
     private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
     private final NamedReentrantReadWriteLock loadingFromFixStoreLock;
     private final SensorFixStore sensorFixStore;
