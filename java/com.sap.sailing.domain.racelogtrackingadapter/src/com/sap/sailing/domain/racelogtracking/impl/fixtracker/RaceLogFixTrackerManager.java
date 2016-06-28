@@ -74,12 +74,12 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     private final RaceLogEventVisitor raceLogEventVisitor = new BaseRaceLogEventVisitor() {
         @Override
         public void visit(RaceLogDenoteForTrackingEvent event) {
-            updateDenotionState();
+            updateDenotationState();
         }
 
         @Override
         public void visit(RaceLogRevokeEvent event) {
-            updateDenotionState();
+            updateDenotationState();
         }
     };
 
@@ -111,14 +111,14 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
             }
         }
         
-        updateDenotionState();
+        updateDenotationState();
     }
 
-    private synchronized void updateDenotionState() {
-        if (getForTracking()) {
-            startTracker();
+    private synchronized void updateDenotationState() {
+        if (isForTracking()) {
+            startTrackerIfNotAlreadyStarted();
         } else {
-            stopTracker(false);
+            stopTrackerIfStillRunning(false);
         }
     }
     
@@ -126,14 +126,14 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         synchronized (knownRaceLogs) {
             addRaceLogUnlocked(raceLog);
         }
-        updateDenotionState();
+        updateDenotationState();
     }
     
     private void removeRaceLog(RaceLog raceLog) {
         synchronized (knownRaceLogs) {
             removeRaceLogUnlocked(raceLog);
         }
-        updateDenotionState();
+        updateDenotationState();
     }
     
     private void addRaceLogUnlocked(RaceLog raceLog) {
@@ -147,7 +147,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     }
     
     public void stop(boolean preemptive) {
-        stopTracker(preemptive);
+        stopTrackerIfStillRunning(preemptive);
         trackedRace.removeListener(raceChangeListener);
         synchronized (knownRaceLogs) {
             for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
@@ -156,14 +156,14 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         }
     }
     
-    private synchronized void startTracker() {
+    private synchronized void startTrackerIfNotAlreadyStarted() {
         if (tracker == null) {
             logger.fine("Starting fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier());
             tracker = new RaceLogFixTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
         }
     }
 
-    private synchronized void stopTracker(boolean preemptive) {
+    private synchronized void stopTrackerIfStillRunning(boolean preemptive) {
         if (tracker != null) {
             logger.fine("Stopping fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier());
             tracker.stop(preemptive);
@@ -171,7 +171,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         }
     }
 
-    boolean getForTracking() {
+    boolean isForTracking() {
         for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
             if (raceLogTrackingState.isForTracking()) {
