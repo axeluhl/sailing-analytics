@@ -36,7 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
@@ -60,6 +60,7 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinManager;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
+import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
@@ -413,19 +414,23 @@ public class RegattaActivity extends AbstractRegattaActivity
     }
 
     @Override
-    public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
+    public void onCheckinDataAvailable(BaseCheckinData checkinData) {
         if (checkinData != null) {
             CheckinData data = (CheckinData) checkinData;
             try {
-                DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
-                DatabaseHelper.getInstance().storeCheckinRow(this, data.getEvent(), data.getCompetitor(), data.getLeaderboard(), data.getCheckinUrl());
-                competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
-                event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
-                leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
-                checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
-                RegattaFragment regattaFragment = new RegattaFragment();
-                regattaFragment.setFragmentWatcher(this);
-                replaceFragment(R.id.content_frame, regattaFragment);
+                if (data instanceof CompetitorCheckinData) {
+                    CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) data;
+                    DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
+                    DatabaseHelper.getInstance().storeCheckinRow(this, competitorCheckinData.getEvent(), competitorCheckinData.getCompetitor(),
+                        competitorCheckinData.getLeaderboard(), competitorCheckinData.getCheckinUrl());
+                    competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
+                    event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+                    leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
+                    checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
+                    RegattaFragment regattaFragment = new RegattaFragment();
+                    regattaFragment.setFragmentWatcher(this);
+                    replaceFragment(R.id.content_frame, regattaFragment);
+                }
             } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                 ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                 displayDatabaseError();

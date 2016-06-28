@@ -22,7 +22,7 @@ import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.util.MarkerUtils;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
@@ -146,7 +146,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
     }
 
     @Override
-    public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
+    public void onCheckinDataAvailable(BaseCheckinData checkinData) {
         if (checkinData != null) {
             CheckinData data = (CheckinData) checkinData;
             try {

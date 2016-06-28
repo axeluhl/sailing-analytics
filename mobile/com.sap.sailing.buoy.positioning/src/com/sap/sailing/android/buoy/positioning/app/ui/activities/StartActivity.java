@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
 import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
@@ -68,7 +68,7 @@ public class StartActivity extends AbstractStartActivity {
     }
 
     @Override
-    public void onCheckinDataAvailable(AbstractCheckinData data) {
+    public void onCheckinDataAvailable(BaseCheckinData data) {
         if (data != null) {
             getHomeFragment().displayUserConfirmationScreen(data);
         }

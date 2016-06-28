@@ -26,7 +26,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.NetworkHelper;
@@ -45,6 +45,7 @@ import com.sap.sailing.android.tracking.app.utils.CheckinManager;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
+import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
 public class HomeFragment extends AbstractHomeFragment implements LoaderCallbacks<Cursor> {
@@ -91,7 +92,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
      *
      * @param deviceMappingData
      */
-    private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {
+    private void checkInWithAPIAndDisplayTrackingActivity(CompetitorCheckinData checkinData) {
         if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombinationAvailable(getActivity(),
                 checkinData.checkinDigest)) {
             try {
@@ -122,23 +123,26 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
      * @param checkinData
      */
     private void performAPICheckin(CheckinData checkinData) {
-        Date date = new Date();
-        StartActivity startActivity = (StartActivity) getActivity();
-        startActivity.showProgressDialog(R.string.please_wait, R.string.checking_in);
-        try {
-            JSONObject requestObject = CheckinHelper.getCheckinJson(checkinData.competitorId, checkinData.deviceUid,
+        if (checkinData instanceof CompetitorCheckinData) {
+            CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) checkinData;
+            Date date = new Date();
+            StartActivity startActivity = (StartActivity) getActivity();
+            startActivity.showProgressDialog(R.string.please_wait, R.string.checking_in);
+            try {
+                JSONObject requestObject = CheckinHelper.getCheckinJson(competitorCheckinData.competitorId, competitorCheckinData.deviceUid,
                     "TODO push device ID!!", date.getTime());
-            HttpJsonPostRequest request = new HttpJsonPostRequest(getActivity(), new URL(checkinData.checkinURL),
+                HttpJsonPostRequest request = new HttpJsonPostRequest(getActivity(), new URL(competitorCheckinData.checkinURL),
                     requestObject.toString());
-            NetworkHelper.getInstance(getActivity())
-                    .executeHttpJsonRequestAsync(request, new CheckinListener(checkinData.checkinDigest),
-                            new CheckinErrorListener(checkinData.checkinDigest));
-        } catch (JSONException e) {
-            ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
-            displayAPIErrorRecommendRetry();
-        } catch (MalformedURLException e) {
-            ExLog.e(getActivity(), TAG, "Failed to perform checkin, MalformedURLException: " + e.getMessage());
-            displayAPIErrorRecommendRetry();
+                NetworkHelper.getInstance(getActivity())
+                    .executeHttpJsonRequestAsync(request, new CheckinListener(competitorCheckinData.checkinDigest),
+                        new CheckinErrorListener(competitorCheckinData.checkinDigest));
+            } catch (JSONException e) {
+                ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
+                displayAPIErrorRecommendRetry();
+            } catch (MalformedURLException e) {
+                ExLog.e(getActivity(), TAG, "Failed to perform checkin, MalformedURLException: " + e.getMessage());
+                displayAPIErrorRecommendRetry();
+            }
         }
     }
 
@@ -155,31 +159,33 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
      * @param checkinData
      */
     @Override
-    public void displayUserConfirmationScreen(final AbstractCheckinData data) {
-        final CheckinData checkinData = (CheckinData) data;
-        String message1 = getString(R.string.confirm_data_hello_name)
+    public void displayUserConfirmationScreen(final BaseCheckinData data) {
+        if (data instanceof CompetitorCheckinData) {
+            CompetitorCheckinData checkinData = (CompetitorCheckinData) data;
+            String message1 = getString(R.string.confirm_data_hello_name)
                 .replace("{full_name}", checkinData.competitorName);
-        String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}",
+            String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}",
                 checkinData.competitorSailId);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(message1 + "\n\n" + message2);
-        builder.setCancelable(true);
-        builder.setPositiveButton(getString(R.string.confirm_data_is_correct), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                clearScannedQRCodeInPrefs();
-                checkInWithAPIAndDisplayTrackingActivity(checkinData);
-            }
-        }).setNegativeButton(R.string.decline_data_is_incorrect, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                clearScannedQRCodeInPrefs();
-                dialog.cancel();
-            }
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage(message1 + "\n\n" + message2);
+            builder.setCancelable(true);
+            builder.setPositiveButton(getString(R.string.confirm_data_is_correct), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    clearScannedQRCodeInPrefs();
+                    checkInWithAPIAndDisplayTrackingActivity((CompetitorCheckinData) data);
+                }
+            }).setNegativeButton(R.string.decline_data_is_incorrect, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    clearScannedQRCodeInPrefs();
+                    dialog.cancel();
+                }
+            });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 
     /**
