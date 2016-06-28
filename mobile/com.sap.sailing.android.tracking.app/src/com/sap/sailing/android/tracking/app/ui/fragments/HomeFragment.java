@@ -273,7 +273,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             // -1, because there's a header row
             Cursor cursor = (Cursor) adapter.getItem(position - 1);
 
-            String checkinDigest = cursor.getString(cursor.getColumnIndex("event_checkin_digest"));
+            String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
             startRegatta(checkinDigest);
         }
     }
