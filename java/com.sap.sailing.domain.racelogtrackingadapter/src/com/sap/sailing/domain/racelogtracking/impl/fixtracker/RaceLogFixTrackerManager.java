@@ -77,6 +77,10 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         }
     };
 
+    /**
+     * A callback that is used to inform when the {@link RaceLogFixTrackerManager} is stopped. This can be used to
+     * cleanup any reference that holds an instance of the {@link RaceLogFixTrackerManager}.
+     */
     public interface Owner {
         void stopped(RaceLogFixTrackerManager tracker);
     }
