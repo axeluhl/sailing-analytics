@@ -3,8 +3,7 @@ package com.sap.sailing.domain.base;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.common.RaceCompetitorIdsAsStringWithMD5Hash;
-import com.sap.sse.common.Named;
-import com.sap.sse.common.WithID;
+import com.sap.sse.common.NamedWithID;
 
 /**
  * Tells the {@link BoatClass boat class} and the {@link Course course} for a single race that is usually part of a
@@ -18,7 +17,7 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface RaceDefinition extends Named, WithID {
+public interface RaceDefinition extends NamedWithID {
     BoatClass getBoatClass();
     
     Course getCourse();
