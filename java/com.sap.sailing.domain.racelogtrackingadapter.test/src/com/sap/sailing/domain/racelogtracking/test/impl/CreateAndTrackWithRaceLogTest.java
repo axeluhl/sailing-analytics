@@ -191,7 +191,7 @@ public class CreateAndTrackWithRaceLogTest {
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
         
-        new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, null);
+        RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, null);
 
         race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
@@ -203,6 +203,7 @@ public class CreateAndTrackWithRaceLogTest {
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(false);
+        raceLogFixTrackerManager.stop(false);
         addFixes3(race, comp1, dev1);
     }
 
@@ -231,7 +232,7 @@ public class CreateAndTrackWithRaceLogTest {
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
         
-        new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, null);
+        RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, null);
 
         race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
@@ -244,6 +245,7 @@ public class CreateAndTrackWithRaceLogTest {
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(/* preemptive */ false);
+        raceLogFixTrackerManager.stop(false);
         addFixes3(race, comp1, dev1);
     }
 }
