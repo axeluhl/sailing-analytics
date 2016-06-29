@@ -36,16 +36,16 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     @Override
     public Double getRideHeight(TimePoint timePoint) {
         BravoFix fixAfter = getFirstFixAtOrAfter(timePoint);
-        if(fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
+        if (fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
             // exact match of timepoint -> no interpolation necessary
             return fixAfter.getRideHeight();
         }
         BravoFix fixBefore = getLastFixAtOrBefore(timePoint);
-        if(fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
+        if (fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
             // exact match of timepoint -> no interpolation necessary
             return fixBefore.getRideHeight();
         }
-        if(fixAfter == null || fixBefore == null) {
+        if (fixAfter == null || fixBefore == null) {
             // the fix is out of the TimeRange where we have fixes
             return null;
         }
@@ -55,8 +55,8 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     
     @Override
     public Double getAverageRideHeight(TimePoint from, TimePoint to) {
+        lockForRead();
         try {
-            lockForRead();
             Spliterator<BravoFix> fixes = getFixes(from, true, to, true).spliterator();
             OptionalDouble average = StreamSupport.stream(fixes, false).mapToDouble(BravoFix::getRideHeight).average();
             if (average.isPresent()) {

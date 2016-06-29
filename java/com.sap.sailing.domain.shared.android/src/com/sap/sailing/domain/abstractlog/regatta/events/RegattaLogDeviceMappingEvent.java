@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.abstractlog.regatta.events;
 
 import com.sap.sailing.domain.abstractlog.Revokable;
-import com.sap.sailing.domain.abstractlog.regatta.EventMappingVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
@@ -44,5 +44,5 @@ public interface RegattaLogDeviceMappingEvent<ItemType extends WithID> extends R
      * 
      * @param visitor
      */
-    void accept(EventMappingVisitor visitor);
+    void accept(MappingEventVisitor visitor);
 }

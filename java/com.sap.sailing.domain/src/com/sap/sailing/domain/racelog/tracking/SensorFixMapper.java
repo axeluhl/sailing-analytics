@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelog.tracking;
 
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.Timed;
@@ -38,5 +39,5 @@ public interface SensorFixMapper<FixT extends Timed, TrackT extends Track<?>, K 
      * @param eventType the type of the RegattaLog device mapping event
      * @return <code>true</code> if this mapper can handle fixes for the event, <code>false</code> otherwise.
      */
-    boolean isResponsibleFor(Class<?> eventType);
+    boolean isResponsibleFor(Class<? extends RegattaLogDeviceMappingEvent<?>> eventType);
 }

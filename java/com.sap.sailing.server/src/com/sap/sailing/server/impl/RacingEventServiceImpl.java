@@ -1709,12 +1709,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         
         @Override
-        public void trackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
+        public void competitorSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
             replicate(new RecordCompetitorSensorFixTrack(getRaceIdentifier(), track));
         }
         
         @Override
-        public void fixAdded(Competitor competitor, String trackName, SensorFix fix) {
+        public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix) {
             replicate(new RecordCompetitorSensorFix(getRaceIdentifier(), competitor, trackName, fix));
         }
 

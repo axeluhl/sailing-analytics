@@ -69,9 +69,9 @@ public interface RaceChangeListener extends CourseListener {
 
     void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus);
     
-    void trackAdded(DynamicSensorFixTrack<Competitor, ?> track);
+    void competitorSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track);
     
-    void fixAdded(Competitor competitor, String trackName, SensorFix fix);
+    void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix);
     
     void regattaLogAttached(RegattaLog regattaLog);
     

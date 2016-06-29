@@ -8,7 +8,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMap
 /**
  * Used to dynamically dispatch calls for {@link RegattaLogDeviceMappingEvent}s depending on the concrete type.
  */
-public interface EventMappingVisitor {
+public interface MappingEventVisitor {
 
     void visit(RegattaLogDeviceMarkMappingEvent event);
 

@@ -3,7 +3,7 @@ package com.sap.sailing.domain.abstractlog.regatta.events.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.regatta.EventMappingVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
@@ -32,7 +32,7 @@ public class RegattaLogDeviceCompetitorMappingEventImpl extends RegattaLogDevice
     }
 
     @Override
-    public void accept(EventMappingVisitor visitor) {
+    public void accept(MappingEventVisitor visitor) {
         visitor.visit(this);
     }
 }

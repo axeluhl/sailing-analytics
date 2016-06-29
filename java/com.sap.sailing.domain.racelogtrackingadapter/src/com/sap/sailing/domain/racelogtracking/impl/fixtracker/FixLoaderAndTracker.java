@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.regatta.EventMappingVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -67,8 +67,8 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * </ul>
  * 
  */
-public class RaceLogFixTracker implements TrackingDataLoader {
-    private static final Logger logger = Logger.getLogger(RaceLogFixTracker.class.getName());
+public class FixLoaderAndTracker implements TrackingDataLoader {
+    private static final Logger logger = Logger.getLogger(FixLoaderAndTracker.class.getName());
     protected final DynamicTrackedRace trackedRace;
     /**
      * We maintain our own collection that holds the RegattaLogs. The known RegattaLogs should by in sync with the ones that
@@ -80,7 +80,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
     private final NamedReentrantReadWriteLock loadingFromFixStoreLock;
     private final SensorFixStore sensorFixStore;
     private final GPSFixStore gpsFixStore;
-    private final RaceLogMappingWrapper<WithID> competitorMappings;
+    private final RegattaLogDeviceMappings<WithID> deviceMappings;
     private final AtomicInteger activeLoaders = new AtomicInteger();
     private final SensorFixMapperFactory sensorFixMapperFactory;
     private AtomicBoolean preemptiveStopRequested = new AtomicBoolean(false);
@@ -148,15 +148,15 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                 return;
             }
             final TimePoint timePoint = fix.getTimePoint();
-            competitorMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), (mapping) -> {
-                mapping.getRegattaLogEvent().accept(new EventMappingVisitor() {
+            deviceMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), (mapping) -> {
+                mapping.getRegattaLogEvent().accept(new MappingEventVisitor() {
                     @Override
                     public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
                         if (preemptiveStopRequested.get()) {
                             return;
                         }
                         SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<Competitor, SensorFix>, Competitor> mapper = sensorFixMapperFactory
-                                .createCompetitorMapper(mapping.getEventType());
+                                .createCompetitorMapper(event.getClass());
                         DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace,
                                 event.getMappedTo());
                         if (track != null && trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
@@ -205,7 +205,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
         }
     };
 
-    public RaceLogFixTracker(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
+    public FixLoaderAndTracker(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
             SensorFixMapperFactory sensorFixMapperFactory) {
         this.sensorFixStore = sensorFixStore;
         this.gpsFixStore = new GPSFixStoreImpl(sensorFixStore);
@@ -213,7 +213,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
         this.trackedRace = trackedRace;
         loadingFromFixStoreLock = new NamedReentrantReadWriteLock(
                 "Loading from SensorFix store lock for tracked race " + trackedRace.getRace().getName(), false);
-        this.competitorMappings = new RaceLogMappingWrapper<WithID>() {
+        this.deviceMappings = new RegattaLogDeviceMappings<WithID>() {
             @Override
             protected Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> calculateMappings() {
                 Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> result = new HashMap<>();
@@ -243,15 +243,15 @@ public class RaceLogFixTracker implements TrackingDataLoader {
         startTracking();
     }
 
-    private void loadFixes(TimeRange timeRangeToLoad, DeviceMappingWithRegattaLogEvent<WithID> mapping) {
+    private void loadFixes(TimeRange timeRangeToLoad, DeviceMappingWithRegattaLogEvent<? extends WithID> mapping) {
         if (preemptiveStopRequested.get()) {
             return;
         }
-        mapping.getRegattaLogEvent().accept(new EventMappingVisitor() {
+        mapping.getRegattaLogEvent().accept(new MappingEventVisitor() {
             @Override
             public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
                 SensorFixMapper<Timed, Track<?>, Competitor> mapper = sensorFixMapperFactory
-                        .createCompetitorMapper(mapping.getEventType());
+                        .createCompetitorMapper(event.getClass());
                 Track<?> track = mapper.getTrack(trackedRace, event.getMappedTo());
                 try {
                     sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(),
@@ -262,33 +262,35 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                 }
             }
 
-            @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
             public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
                 DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(event.getMappedTo());
                 try {
-                    gpsFixStore.loadCompetitorTrack(track, (DeviceMapping) mapping, getStartOfTracking(),
+                    @SuppressWarnings({ "unchecked" })
+                    DeviceMapping<Competitor> competitorMapping = (DeviceMapping<Competitor>) mapping;
+                    gpsFixStore.loadCompetitorTrack(track, competitorMapping, getStartOfTracking(),
                             getEndOfTracking());
                 } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                     logger.log(Level.WARNING, "Could not load competitor track " + mapping.getMappedTo());
                 }
             }
 
-            @SuppressWarnings({ "rawtypes", "unchecked" })
             @Override
             public void visit(RegattaLogDeviceMarkMappingEvent event) {
                 DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());
                 try {
+                    @SuppressWarnings("unchecked")
+                    DeviceMapping<Mark> markMapping = (DeviceMapping<Mark>) mapping;
                     TimePoint from = getStartOfTracking();
                     TimePoint to = getEndOfTracking();
-                    gpsFixStore.loadMarkTrack(track, (DeviceMapping) mapping, from, to);
+                    gpsFixStore.loadMarkTrack(track, markMapping, from, to);
                     if (track.getFirstRawFix() == null) {
                         logger.fine("Loading mark positions from outside of start/end of tracking interval (" + from
                                 + ".." + to + ") because no fixes were found in that interval");
                         // got an empty track for the mark; try again without constraining the mapping interval
                         // by start/end of tracking to at least attempt to get fixes at all in case there were any
                         // within the device mapping interval specified
-                        gpsFixStore.loadMarkTrack(track, (DeviceMapping) mapping, /* startOfTimeWindowToLoad */ null,
+                        gpsFixStore.loadMarkTrack(track, markMapping, /* startOfTimeWindowToLoad */ null,
                                 /* endOfTimeWindowToLoad */ null);
                     }
                 } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
@@ -305,13 +307,12 @@ public class RaceLogFixTracker implements TrackingDataLoader {
 
     protected void updateMappingsAndAddListenersImpl() {
         try {
-            competitorMappings.updateMappings(true);
+            deviceMappings.updateMappings(true);
         } catch (Exception e) {
             logger.warning("Could not load update competitor mappings as RegattaLog couldn't be found");
-            ;
         }
         // add listeners for devices in mappings already present
-        competitorMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
+        deviceMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
     }
 
     public void stop(boolean preemptive) {
@@ -378,7 +379,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
 
     protected void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
         final TimeRangeImpl extendedTimeRange = new TimeRangeImpl(loadFixesFrom, loadFixesTo);
-        competitorMappings.forEachMapping((mapping) -> {
+        deviceMappings.forEachMapping((mapping) -> {
             TimeRange timeRangeToLoad = extendedTimeRange.intersection(mapping.getTimeRange());
             if (timeRangeToLoad != null && !preemptiveStopRequested.get()) {
                 loadFixes(timeRangeToLoad, mapping);
@@ -387,7 +388,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
     }
 
     protected void updateMappingsAndAddListeners() {
-        synchronized (RaceLogFixTracker.this) {
+        synchronized (FixLoaderAndTracker.this) {
             activeLoaders.incrementAndGet();
             setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
         }
@@ -400,17 +401,17 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                         trackedRace.lockForSerializationRead();
                         setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
                         LockUtil.lockForWrite(loadingFromFixStoreLock);
-                        synchronized (RaceLogFixTracker.this) {
-                            RaceLogFixTracker.this.notifyAll();
+                        synchronized (FixLoaderAndTracker.this) {
+                            FixLoaderAndTracker.this.notifyAll();
                         }
                         updateMappingsAndAddListenersImpl();
                     }
                 } finally {
                     LockUtil.unlockAfterWrite(loadingFromFixStoreLock);
-                    synchronized (RaceLogFixTracker.this) {
+                    synchronized (FixLoaderAndTracker.this) {
                         int currentActiveLoaders;
                         currentActiveLoaders = activeLoaders.decrementAndGet();
-                        RaceLogFixTracker.this.notifyAll();
+                        FixLoaderAndTracker.this.notifyAll();
                         if (currentActiveLoaders == 0) {
                             setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
                                     : TrackedRaceStatusEnum.TRACKING, 1.0);

@@ -68,7 +68,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         return (TypeBasedServiceFinder) serviceFinderFactory.createServiceFinder(FixMongoHandler.class);
     }
 
-    public <T extends Timed> T loadGPSFix(DBObject object) throws TransformationException, NoCorrespondingServiceRegisteredException {
+    public <T extends Timed> T loadFix(DBObject object) throws TransformationException, NoCorrespondingServiceRegisteredException {
         String type = (String) object.get(FieldNames.GPSFIX_TYPE.name());
         DBObject fixObject = (DBObject) object.get(FieldNames.GPSFIX.name());
         return this.<T>findService(type).transformBack(fixObject);
@@ -91,7 +91,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         for (DBObject fixObject : result) {
             try {
                 @SuppressWarnings("unchecked")
-                FixT fix = (FixT) loadGPSFix(fixObject);
+                FixT fix = (FixT) loadFix(fixObject);
                 consumer.accept(fix);
             } catch (TransformationException e) {
                 logger.log(Level.WARNING, "Could not read fix from MongoDB: " + fixObject);

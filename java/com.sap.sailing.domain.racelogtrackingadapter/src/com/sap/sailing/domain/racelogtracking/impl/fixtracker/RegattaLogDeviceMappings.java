@@ -26,7 +26,7 @@ import com.sap.sse.common.WithID;
  *
  * @param <ItemT> The type of items the DeviceMappings are mapped to
  */
-public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
+public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
 
     private final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> mappings = new HashMap<>();
     private final Map<DeviceIdentifier, List<DeviceMappingWithRegattaLogEvent<ItemT>>> mappingsByDevice = new HashMap<>();
@@ -37,7 +37,7 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
      * 
      * @return the mappings
      */
-    private synchronized Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> getMappings() {
+    private synchronized Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> getDeviceMappings() {
         return new HashMap<>(mappings);
     }
     
@@ -75,7 +75,7 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
      * @param callback the callback to call for every known mapping
      */
     public void forEachMapping(BiConsumer<ItemT, DeviceMappingWithRegattaLogEvent<ItemT>> callback) {
-        for (Map.Entry<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> entry : getMappings().entrySet()) {
+        for (Map.Entry<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> entry : getDeviceMappings().entrySet()) {
             ItemT item = entry.getKey();
             for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : entry.getValue()) {
                 callback.accept(item, mapping);
@@ -199,6 +199,7 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
 
     /**
      * Called when a {@link DeviceMapping} was changed regarding its mapped time range.
+     * This can occur if an open ended mapping is being closed or a close event gets revoked.
      * 
      * @param oldMapping the old mapping
      * @param newMapping the new mapping

@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.tracking;
 
 /**
- * Specific {@link SensorFix} for bravo devices.
+ * Specific {@link SensorFix} for bravo devices (http://www.bravosystems.es/).
  */
 public interface BravoFix extends SensorFix {
 

@@ -582,11 +582,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     private void notifyListeners(DynamicSensorFixTrack<Competitor, ?> track) {
-        notifyListeners(listener -> listener.trackAdded(track));
+        notifyListeners(listener -> listener.competitorSensorTrackAdded(track));
     }
     
     private void notifyListeners(Competitor competitor, String trackName, SensorFix fix) {
-        notifyListeners(listener -> listener.fixAdded(competitor, trackName, fix));
+        notifyListeners(listener -> listener.competitorSensorFixAdded(competitor, trackName, fix));
     }
 
     /**

@@ -124,12 +124,12 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
     
     @Override
-    public void trackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
+    public void competitorSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
         defaultAction();
     }
     
     @Override
-    public void fixAdded(Competitor competitor, String trackName, SensorFix fix) {
+    public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix) {
         defaultAction();
     }
     

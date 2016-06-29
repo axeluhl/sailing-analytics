@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.BravoFix;
@@ -29,7 +30,7 @@ public class BravoDataFixMapper implements SensorFixMapper<DoubleVectorFix, Dyna
     }
     
     @Override
-    public boolean isResponsibleFor(Class<?> eventType) {
+    public boolean isResponsibleFor(Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
         return RegattaLogDeviceCompetitorBravoMappingEventImpl.class.isAssignableFrom(eventType);
     }
 }

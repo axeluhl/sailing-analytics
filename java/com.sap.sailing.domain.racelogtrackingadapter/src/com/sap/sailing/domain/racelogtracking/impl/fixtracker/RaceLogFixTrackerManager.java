@@ -19,7 +19,7 @@ import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 
 /**
- * This class manages the lifecycle of the {@link RaceLogFixTracker} by listening to
+ * This class manages the lifecycle of the {@link FixLoaderAndTracker} by listening to
  * {@link RaceLogDenoteForTrackingEvent}, race log attached and stop tracking race changes.
  * 
  * Once the race is stopped, it notifies its own {@link Owner} so that all reference to this instance can be cleanly
@@ -44,7 +44,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
      */
     private final Set<RaceLog> knownRaceLogs = new HashSet<>();
     
-    private RaceLogFixTracker tracker;
+    private FixLoaderAndTracker tracker;
 
     private final RaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
         public void raceLogAttached(RaceLog raceLog) {
@@ -159,7 +159,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     private synchronized void startTrackerIfNotAlreadyStarted() {
         if (tracker == null) {
             logger.fine("Starting fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier());
-            tracker = new RaceLogFixTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
+            tracker = new FixLoaderAndTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
         }
     }
 
