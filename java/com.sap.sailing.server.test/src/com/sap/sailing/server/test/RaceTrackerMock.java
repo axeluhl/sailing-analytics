@@ -1,4 +1,4 @@
-package com.sap.sailing.server.testsupport;
+package com.sap.sailing.server.test;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
