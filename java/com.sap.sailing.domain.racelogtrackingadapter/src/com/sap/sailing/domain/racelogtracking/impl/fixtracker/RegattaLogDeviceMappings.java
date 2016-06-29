@@ -10,7 +10,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorSensordataMappingFinder;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -27,9 +38,89 @@ import com.sap.sse.common.WithID;
  * @param <ItemT> The type of items the DeviceMappings are mapped to
  */
 public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
+    private static final Logger logger = Logger.getLogger(RegattaLogDeviceMappings.class.getName());
+    /**
+     * We maintain our own collection that holds the RegattaLogs. The known RegattaLogs should by in sync with the ones that
+     * can be obtained from the TrackedRace. When stopping, there could be a concurrency issue that leads to a listener
+     * not being removed. This is prevented by remembering all RegattaLogs to which we attached a listener. So we can be
+     * sure to not produce a memory leak.
+     */
+    private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
 
     private final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> mappings = new HashMap<>();
     private final Map<DeviceIdentifier, List<DeviceMappingWithRegattaLogEvent<ItemT>>> mappingsByDevice = new HashMap<>();
+    
+    private final RegattaLogEventVisitor regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
+        @Override
+        public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
+            logger.log(Level.FINE, "New mapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
+            updateMappings();
+        }
+
+        @Override
+        public void visit(RegattaLogDeviceMarkMappingEvent event) {
+            logger.log(Level.FINE,
+                    "New DeviceMarkMapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
+            updateMappings();
+        }
+
+        @Override
+        public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
+            logger.log(Level.FINE,
+                    "New DeviceCompetitorMapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
+            updateMappings();
+        }
+
+        @Override
+        public void visit(RegattaLogCloseOpenEndedDeviceMappingEvent event) {
+            logger.log(Level.FINE, "CloseOpenEndedDeviceMapping closed: " + event.getDeviceMappingEventId());
+            updateMappings();
+        }
+
+        @Override
+        public void visit(RegattaLogRevokeEvent event) {
+            logger.log(Level.FINE, "Mapping revoked for: " + event.getRevokedEventId());
+            updateMappings();
+        };
+    };
+    
+    public RegattaLogDeviceMappings(Iterable<RegattaLog> initialRegattaLogs) {
+        final boolean hasRegattaLogs;
+        synchronized (knownRegattaLogs) {
+            initialRegattaLogs.forEach(this::addRegattaLogUnlocked);
+            hasRegattaLogs = !knownRegattaLogs.isEmpty();
+        }
+        if (hasRegattaLogs) {
+            updateMappings();
+        }
+    }
+    
+    public void addRegattaLog(RegattaLog regattaLog) {
+        synchronized (knownRegattaLogs) {
+            addRegattaLogUnlocked(regattaLog);
+        }
+        updateMappings();
+    }
+
+    private void addRegattaLogUnlocked(RegattaLog log) {
+        log.addListener(regattaLogEventVisitor);
+        knownRegattaLogs.add(log);
+    }
+    
+    public void stop() {
+        synchronized (knownRegattaLogs) {
+            knownRegattaLogs.forEach((log) -> log.removeListener(regattaLogEventVisitor));
+            knownRegattaLogs.clear();
+        }
+    }
+    
+    protected void updateMappings() {
+        try {
+            updateMappings(true);
+        } catch (Exception e) {
+            logger.warning("Could not update device mappings");
+        }
+    }
     
     /**
      * Used internally to access {@link #mappings} with a defensive copy to not run into concurrency issues if this is
@@ -115,7 +206,18 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * 
      * @return All currently known DeviceMappings
      */
-    protected abstract Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> calculateMappings();
+    protected Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> calculateMappings() {
+        Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> result = new HashMap<>();
+        forEachRegattaLog(
+                (log) -> result.putAll(new RegattaLogDeviceCompetitorSensordataMappingFinder<ItemT>(log).analyze()));
+        return result;
+    }
+
+    protected void forEachRegattaLog(Consumer<RegattaLog> regattaLogConsumer) {
+        synchronized (knownRegattaLogs) {
+            knownRegattaLogs.forEach(regattaLogConsumer);
+        }
+    }
 
     /**
      * Adjusts the {@link #mappings} map according to the device mappings provided from the {@link #calculateMappings()}
@@ -128,7 +230,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * 
      * @throws DoesNotHaveRegattaLogException
      */
-    public final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered) {
+    private final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered) {
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far
         Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings = calculateMappings();

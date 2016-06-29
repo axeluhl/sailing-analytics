@@ -1,26 +1,16 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
-import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorSensordataMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -70,17 +60,10 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 public class FixLoaderAndTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(FixLoaderAndTracker.class.getName());
     protected final DynamicTrackedRace trackedRace;
-    /**
-     * We maintain our own collection that holds the RegattaLogs. The known RegattaLogs should by in sync with the ones that
-     * can be obtained from the TrackedRace. When stopping, there could be a concurrency issue that leads to a listener
-     * not being removed. This is prevented by remembering all RegattaLogs to which we attached a listener. So we can be
-     * sure to not produce a memory leak.
-     */
-    private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
     private final NamedReentrantReadWriteLock loadingFromFixStoreLock;
     private final SensorFixStore sensorFixStore;
     private final GPSFixStore gpsFixStore;
-    private final RegattaLogDeviceMappings<WithID> deviceMappings;
+    private RegattaLogDeviceMappings<WithID> deviceMappings;
     private final AtomicInteger activeLoaders = new AtomicInteger();
     private final SensorFixMapperFactory sensorFixMapperFactory;
     private AtomicBoolean preemptiveStopRequested = new AtomicBoolean(false);
@@ -102,44 +85,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
 
         public void regattaLogAttached(RegattaLog regattaLog) {
-            synchronized (knownRegattaLogs) {
-                addRegattaLogUnlocked(regattaLog);
-            }
-            updateMappingsAndAddListeners();
+            deviceMappings.addRegattaLog(regattaLog);
         }
-    };
-    private final RegattaLogEventVisitor regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
-        @Override
-        public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
-            logger.log(Level.FINE, "New mapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
-            updateMappingsAndAddListeners();
-        }
-
-        @Override
-        public void visit(RegattaLogDeviceMarkMappingEvent event) {
-            logger.log(Level.FINE,
-                    "New DeviceMarkMapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
-            updateMappingsAndAddListeners();
-        }
-
-        @Override
-        public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
-            logger.log(Level.FINE,
-                    "New DeviceCompetitorMapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
-            updateMappingsAndAddListeners();
-        }
-
-        @Override
-        public void visit(RegattaLogCloseOpenEndedDeviceMappingEvent event) {
-            logger.log(Level.FINE, "CloseOpenEndedDeviceMapping closed: " + event.getDeviceMappingEventId());
-            updateMappingsAndAddListeners();
-        }
-
-        @Override
-        public void visit(RegattaLogRevokeEvent event) {
-            logger.log(Level.FINE, "Mapping revoked for: " + event.getRevokedEventId());
-            updateMappingsAndAddListeners();
-        };
     };
     private final FixReceivedListener<Timed> listener = new FixReceivedListener<Timed>() {
         @Override
@@ -213,33 +160,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         this.trackedRace = trackedRace;
         loadingFromFixStoreLock = new NamedReentrantReadWriteLock(
                 "Loading from SensorFix store lock for tracked race " + trackedRace.getRace().getName(), false);
-        this.deviceMappings = new RegattaLogDeviceMappings<WithID>() {
-            @Override
-            protected Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> calculateMappings() {
-                Map<WithID, List<DeviceMappingWithRegattaLogEvent<WithID>>> result = new HashMap<>();
-                forEachRegattaLog(
-                        (log) -> result.putAll(new RegattaLogDeviceCompetitorSensordataMappingFinder(log).analyze()));
-                return result;
-            }
-
-            @Override
-            protected void mappingRemoved(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
-                // TODO if tracks are always associated to only one device mapping, we could remove tracks here
-                // TODO remove listener from store if there is no mapping left for the DeviceIdentifier
-            }
-
-            @Override
-            protected void mappingAdded(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
-                loadFixes(getTrackingTimeRange().intersection(mapping.getTimeRange()), mapping);
-            }
-
-            @Override
-            protected void mappingChanged(DeviceMappingWithRegattaLogEvent<WithID> oldMapping,
-                    DeviceMappingWithRegattaLogEvent<WithID> newMapping) {
-                // TODO can the new time range be bigger than the old one? In this case we would need to load the
-                // additional time range.
-            }
-        };
+        
         startTracking();
     }
 
@@ -305,24 +226,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 getEndOfTracking() == null ? TimePoint.EndOfTime : getEndOfTracking());
     }
 
-    protected void updateMappingsAndAddListenersImpl() {
-        try {
-            deviceMappings.updateMappings(true);
-        } catch (Exception e) {
-            logger.warning("Could not load update competitor mappings as RegattaLog couldn't be found");
-        }
-        // add listeners for devices in mappings already present
-        deviceMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
-    }
-
     public void stop(boolean preemptive) {
         preemptiveStopRequested.set(preemptive);
         stopRequested.set(true);
         trackedRace.removeListener(raceChangeListener);
-        synchronized (knownRegattaLogs) {
-            knownRegattaLogs.forEach((log) -> log.removeListener(regattaLogEventVisitor));
-            knownRegattaLogs.clear();
-        }
+        deviceMappings.stop();
         synchronized (this) {
             if (activeLoaders.get() == 0) {
                 setStatusAndProgress(TrackedRaceStatusEnum.FINISHED, 1.0);
@@ -336,14 +244,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
     protected void startTracking() {
         trackedRace.addListener(raceChangeListener);
-        final boolean hasRegattaLogs;
-        synchronized (knownRegattaLogs) {
-            trackedRace.getAttachedRegattaLogs().forEach(this::addRegattaLogUnlocked);
-            hasRegattaLogs = !knownRegattaLogs.isEmpty();
-        }
-        if (hasRegattaLogs) {
-            updateMappingsAndAddListeners();
-        }
+        this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs());
     }
 
     private synchronized void waitForLoadingToFinishRunning() {
@@ -366,17 +267,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         return trackedRace.getEndOfTracking();
     }
 
-    private void addRegattaLogUnlocked(RegattaLog log) {
-        log.addListener(regattaLogEventVisitor);
-        knownRegattaLogs.add(log);
-    }
-
-    protected void forEachRegattaLog(Consumer<RegattaLog> regattaLogConsumer) {
-        synchronized (knownRegattaLogs) {
-            knownRegattaLogs.forEach(regattaLogConsumer);
-        }
-    }
-
     protected void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
         final TimeRangeImpl extendedTimeRange = new TimeRangeImpl(loadFixesFrom, loadFixesTo);
         deviceMappings.forEachMapping((mapping) -> {
@@ -387,7 +277,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         });
     }
 
-    protected void updateMappingsAndAddListeners() {
+    private void updateConcurrent(final Runnable updateCallback) {
         synchronized (FixLoaderAndTracker.this) {
             activeLoaders.incrementAndGet();
             setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
@@ -404,7 +294,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         synchronized (FixLoaderAndTracker.this) {
                             FixLoaderAndTracker.this.notifyAll();
                         }
-                        updateMappingsAndAddListenersImpl();
+                        updateCallback.run();
                     }
                 } finally {
                     LockUtil.unlockAfterWrite(loadingFromFixStoreLock);
@@ -435,5 +325,38 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
     private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
         trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(status, progress));
+    }
+    
+    private class FixLoaderDeviceMappings extends RegattaLogDeviceMappings<WithID> {
+        public FixLoaderDeviceMappings(Iterable<RegattaLog> initialRegattaLogs) {
+            super(initialRegattaLogs);
+        }
+        
+        @Override
+        protected void updateMappings() {
+            updateConcurrent(() -> {
+                FixLoaderDeviceMappings.super.updateMappings();
+                // add listeners for devices in mappings already present
+                forEachDevice((device) -> sensorFixStore.addListener(listener, device));
+            });
+        }
+
+        @Override
+        protected void mappingRemoved(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
+            // TODO if tracks are always associated to only one device mapping, we could remove tracks here
+            // TODO remove listener from store if there is no mapping left for the DeviceIdentifier
+        }
+
+        @Override
+        protected void mappingAdded(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
+            loadFixes(getTrackingTimeRange().intersection(mapping.getTimeRange()), mapping);
+        }
+
+        @Override
+        protected void mappingChanged(DeviceMappingWithRegattaLogEvent<WithID> oldMapping,
+                DeviceMappingWithRegattaLogEvent<WithID> newMapping) {
+            // TODO can the new time range be bigger than the old one? In this case we would need to load the
+            // additional time range.
+        }
     }
 }
