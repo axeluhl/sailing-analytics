@@ -678,21 +678,13 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     
     @Override
     protected void leaderboardSelectionChanged() {
-        if (raceColumnTableSelectionModel.getSelectedSet() != null
-                && !raceColumnTableSelectionModel.getSelectedSet().isEmpty()) {
-            // we can be sure that raceColumnTableSelectionModel is single-selection only because
-            // this class's constructor passes "false" to the super-class constructor's multi-selection
-            // constructor parameter
-            raceColumnTableSelectionModel.setSelected(raceColumnTableSelectionModel.getSelectedSet().iterator().next(), false);
-        }
-        
         leaderboardRemoveButton.setEnabled(!leaderboardSelectionModel.getSelectedSet().isEmpty());
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
-                    raceColumnTable.getDataProvider().getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet));
+                    raceColumnTable.getDataProvider().getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet, getSelectedLeaderboard()));
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);
