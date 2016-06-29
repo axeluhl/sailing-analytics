@@ -157,14 +157,6 @@ public class RaceMapSettings extends AbstractSettings {
         return showSimulationOverlay;
     }
 
-//    public void showManeuverType(ManeuverType maneuverType, boolean show) {
-//        if (show) {
-//            maneuverTypesToShow.add(maneuverType);
-//        } else {
-//            maneuverTypesToShow.remove(maneuverType);
-//        }
-//    }
-
     public boolean isShowManeuverType(ManeuverType maneuverType) {
         return maneuverTypesToShow.contains(maneuverType);
     }
