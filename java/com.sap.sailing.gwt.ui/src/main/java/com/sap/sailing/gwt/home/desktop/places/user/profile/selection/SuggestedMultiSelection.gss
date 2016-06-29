@@ -36,14 +36,24 @@
   text-align: right;
 }
 
-.suggestionsSettingsMenuItemLabel, .suggestionsAddFilter, .suggestionsItemDescription {
+.suggestionsAddFilter, .suggestionsItemDescription {
   position: absolute !important;
   left: 0.333333333333333em;
   right: 8.666666666666667em; 
 }
 
-.suggestionsSettingsMenuItemLabel, .suggestionsItemDescription {
-  right: 8.666666666666667em; 
+.suggestionsSettingsMenuItemLabel {
+	padding-right: 8.666666666666667em
+}
+
+.suggestionsRemoveButton ,.suggestionsToggleButton {
+  padding: 0.433333333333333em 1em;
+}
+
+.suggestionsToggleButton {
+  position: absolute;
+  right: 0.333333333333333em;
+  top: 0.333333333333333em;
 }
 
 .suggestionsAddFilter {
@@ -51,7 +61,6 @@
 }
 
 .suggestionsRemoveButton {
-  padding: 0.433333333333333em 1em;
   position: relative; 
 }
 
