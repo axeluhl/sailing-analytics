@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
  * Base class for all {@link RaceTracker}s that must implement listener notifications
  */
 public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
-
     private final RaceTrackerListeners listeners = new RaceTrackerListeners();
 
     /**
@@ -34,13 +33,12 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
     }
 
     @Override
-    public void add(Listener listener) {
-        listeners.addListener(listener);
+    public boolean add(Listener listener) {
+        return listeners.addListener(listener);
     }
 
     @Override
     public void remove(Listener listener) {
         listeners.removeListener(listener);
     }
-
 }

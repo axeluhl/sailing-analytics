@@ -89,8 +89,9 @@ public interface RaceTracker {
      * Register a new RaceTracker.Listener for this race tracker.
      * 
      * @param newListener
+     * @return true if listener has been added
      */
-    void add(RaceTracker.Listener newListener);
+    boolean add(RaceTracker.Listener newListener);
 
     /**
      * Remove listener from racetracker
