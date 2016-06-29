@@ -13,12 +13,12 @@ public class RaceTrackerListeners implements RaceTracker.Listener {
     private final AtomicBoolean isStopped = new AtomicBoolean(false);
     private final AtomicBoolean isStoppedPreemptive = new AtomicBoolean(false);
 
-    public synchronized void addListener(final RaceTracker.Listener listener) {
+    public synchronized boolean addListener(final RaceTracker.Listener listener) {
         if (isStopped.get()) {
-            listener.onTrackerWillStop(isStoppedPreemptive.get());
+            return false;
         } else {
-            // if already stopped, don't bother adding to set of listeners
             registeredListeners.add(listener);
+            return true;
         }
     }
 
