@@ -35,7 +35,7 @@ import com.sap.sse.common.impl.TimeRangeImpl;
  * {@code DeviceMapping}, the only changes being introduced by closing open time ranges in cases where an
  * according {@code CloseOpenEndedDeviceMappingEvent} exists.
  */
-public abstract class RegattaLogDeviceMappingFinder<ItemT extends WithID>
+public class RegattaLogDeviceMappingFinder<ItemT extends WithID>
         extends RegattaLogAnalyzer<Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>>> {
     private static Logger logger = Logger.getLogger(RegattaLogDeviceMappingFinder.class.getName());
     

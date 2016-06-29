@@ -92,7 +92,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCo
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.BaseRegattaLogDeviceMappingFinder;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorSensordataMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.base.Boat;
@@ -5438,7 +5438,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<DeviceMappingDTO> getDeviceMappings(RegattaLog regattaLog)
             throws TransformationException {
         List<DeviceMappingDTO> result = new ArrayList<DeviceMappingDTO>();
-        for (List<? extends DeviceMapping<WithID>> list : new RegattaLogDeviceCompetitorSensordataMappingFinder(
+        for (List<? extends DeviceMapping<WithID>> list : new RegattaLogDeviceMappingFinder<>(
                 regattaLog).analyze().values()) {
             for (DeviceMapping<WithID> mapping : list) {
                 result.add(convertToDeviceMappingDTO(mapping));

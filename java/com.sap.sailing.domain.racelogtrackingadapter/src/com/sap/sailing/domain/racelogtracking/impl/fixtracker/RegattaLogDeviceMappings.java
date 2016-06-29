@@ -21,7 +21,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorSensordataMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -209,7 +209,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     protected Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> calculateMappings() {
         Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> result = new HashMap<>();
         forEachRegattaLog(
-                (log) -> result.putAll(new RegattaLogDeviceCompetitorSensordataMappingFinder<ItemT>(log).analyze()));
+                (log) -> result.putAll(new RegattaLogDeviceMappingFinder<ItemT>(log).analyze()));
         return result;
     }
 
