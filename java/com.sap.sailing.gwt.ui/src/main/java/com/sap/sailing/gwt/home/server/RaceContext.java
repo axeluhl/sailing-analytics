@@ -72,7 +72,11 @@ import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 /**
  * This class aggregates race information by preparing {@link DTO}s for different components representing a race in the
- * UI and providing convenience methods for several race state and other required information.
+ * UI and providing convenience methods for several race state and other required information.<p>
+ * 
+ * An object of this type represents a snapshot of a race for the time point when the object is created. Using the
+ * object at a later point in time will still represent the race at the time when this object was created, including
+ * the race's flag state, live state and view state.
  */
 @GwtIncompatible
 public class RaceContext {
