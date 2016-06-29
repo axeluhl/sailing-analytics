@@ -22,8 +22,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     @UiField(provided = true) AuthorizedContentDecoratorDesktop decoratorUi;
-    @UiField(provided = true) SuggestedMultiSelection<SimpleCompetitorDTO> competitorsIBelongToSelctionUi;
-    @UiField(provided = true) SuggestedMultiSelection<SimpleCompetitorDTO> favouriteCompetitorsSelctionUi;
+//    @UiField(provided = true) SuggestedMultiSelection<SimpleCompetitorDTO> favouriteCompetitorsSelctionUi;
     @UiField(provided = true) SuggestedMultiSelection<BoatClassMasterdata> favouriteBoatClassesSelctionUi;
     
     public UserDetailsView getUserDetailsView() {
@@ -33,23 +32,16 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
     @Override
     public void setPresenter(Presenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
-        competitorsIBelongToSelctionUi = SuggestedMultiSelection.forCompetitors(presenter.getCompetitorDataProvider(),
-                "TODO Competitors I belong to");
-        favouriteCompetitorsSelctionUi = SuggestedMultiSelection.forCompetitors(presenter.getCompetitorDataProvider(),
-                "TODO Favourite competitors");
-        favouriteBoatClassesSelctionUi = SuggestedMultiSelection.forBoatClasses(presenter.getBoatClassDataProvider(),
-                "TODO Favourite boat classes");
+//        favouriteCompetitorsSelctionUi = SuggestedMultiSelection
+//                .forCompetitors(presenter.getFavouriteCompetitorDataProvider(), "TODO Favourite competitors");
+        favouriteBoatClassesSelctionUi = SuggestedMultiSelection
+                .forBoatClasses(presenter.getFavouriteBoatClassesDataProvider(), "TODO Favourite boat classes");
         initWidget(uiBinder.createAndBindUi(this));
     }
     
     @Override
-    public void setCompetitorsIBelongTo(Collection<SimpleCompetitorDTO> selectedItems) {
-        competitorsIBelongToSelctionUi.setSelectedItems(selectedItems);
-    }
-    
-    @Override
     public void setFavouriteCompetitors(Collection<SimpleCompetitorDTO> selectedItems) {
-        favouriteCompetitorsSelctionUi.setSelectedItems(selectedItems);
+//        favouriteCompetitorsSelctionUi.setSelectedItems(selectedItems);
     }
     
     @Override

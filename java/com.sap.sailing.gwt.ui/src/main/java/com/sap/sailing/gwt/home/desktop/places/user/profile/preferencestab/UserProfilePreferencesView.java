@@ -18,14 +18,12 @@ public interface UserProfilePreferencesView extends IsWidget {
     
     NeedsAuthenticationContext getDecorator();
     
-    void setCompetitorsIBelongTo(Collection<SimpleCompetitorDTO> selectedItems);
-    
     void setFavouriteCompetitors(Collection<SimpleCompetitorDTO> selectedItems);
     
     void setFavouriteBoatClasses(Collection<BoatClassMasterdata> selectedItems);
 
     public interface Presenter extends NotLoggedInPresenter, NeedsAuthenticationContext {
-        SuggestedMultiSelectionDataProvider<BoatClassMasterdata> getBoatClassDataProvider();
-        SuggestedMultiSelectionDataProvider<SimpleCompetitorDTO> getCompetitorDataProvider();
+        SuggestedMultiSelectionDataProvider<BoatClassMasterdata> getFavouriteBoatClassesDataProvider();
+//        SuggestedMultiSelectionDataProvider<SimpleCompetitorDTO> getFavouriteCompetitorsDataProvider();
     }
 }

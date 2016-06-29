@@ -9,13 +9,13 @@
     <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">
         <um:content>
             <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
+<!--                 <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}"> -->
+<!--                     <s:SuggestedMultiSelection ui:field="favouriteCompetitorsSelctionUi"/> -->
+<!--                 </div> -->
+<!--                 <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}"> -->
+<!--                     <s:SuggestedMultiSelection ui:field="favouriteBoatClassesSelctionUi"/> -->
+<!--                 </div> -->
                 <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
-                    <s:SuggestedMultiSelection ui:field="competitorsIBelongToSelctionUi"/>
-                </div>
-                <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}">
-                    <s:SuggestedMultiSelection ui:field="favouriteCompetitorsSelctionUi"/>
-                </div>
-                <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}">
                     <s:SuggestedMultiSelection ui:field="favouriteBoatClassesSelctionUi"/>
                 </div>
             </g:HTMLPanel>
