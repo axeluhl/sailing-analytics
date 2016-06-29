@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Utility class that handles listener registration and notification for {@link RaceTracker}. If the underlying
  * {@link RaceTracker} is already stopped, the listener will immediately be notified by
- * {@link RaceTracker.Listener#onTrackerStopped(boolean preemptive)}
+ * {@link RaceTracker.Listener#onTrackerWillStop(boolean preemptive)}
  */
 public class RaceTrackerListeners implements RaceTracker.Listener {
     private final HashSet<RaceTracker.Listener> registeredListeners = new HashSet<>();
@@ -15,7 +15,7 @@ public class RaceTrackerListeners implements RaceTracker.Listener {
 
     public synchronized void addListener(final RaceTracker.Listener listener) {
         if (isStopped.get()) {
-            listener.onTrackerStopped(isStoppedPreemptive.get());
+            listener.onTrackerWillStop(isStoppedPreemptive.get());
         } else {
             // if already stopped, don't bother adding to set of listeners
             registeredListeners.add(listener);
@@ -27,9 +27,9 @@ public class RaceTrackerListeners implements RaceTracker.Listener {
     }
 
     @Override
-    public synchronized void onTrackerStopped(boolean preemptive) {
+    public synchronized void onTrackerWillStop(boolean preemptive) {
         isStopped.set(true);
         isStoppedPreemptive.set(preemptive);
-        registeredListeners.forEach(l -> l.onTrackerStopped(preemptive));
+        registeredListeners.forEach(l -> l.onTrackerWillStop(preemptive));
     }
 }

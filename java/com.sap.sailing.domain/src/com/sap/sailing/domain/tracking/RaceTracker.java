@@ -82,7 +82,7 @@ public interface RaceTracker {
          * 
          * @param preemptive
          */
-        void onTrackerStopped(boolean preemptive);
+        void onTrackerWillStop(boolean preemptive);
     }
 
     /**
