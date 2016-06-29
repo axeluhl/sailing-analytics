@@ -46,6 +46,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanelCompatibleWithRefreshableSelectionModel;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -62,7 +63,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     private FlushableCellTable<RaceDTO> raceTable;
 
-    private ListDataProvider<RaceDTO> raceList;
+    private ListDataProvider<RaceDTO> allRacesList;
+    private ListDataProvider<RaceDTO> displayedRaces;
 
     private Iterable<RaceDTO> allRaces;
 
@@ -75,7 +77,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     private Button btnRefresh;
 
-    private LabeledAbstractFilterablePanel<RaceDTO> filterablePanelRaces;
+    private LabeledAbstractFilterablePanelCompatibleWithRefreshableSelectionModel<RaceDTO> filterablePanelRaces;
 
     protected TrackedRacesSettings settings;
 
@@ -98,7 +100,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     protected void createUI() {
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-        raceList = new ListDataProvider<RaceDTO>();
+        allRacesList = new ListDataProvider<>();
+        displayedRaces = new ListDataProvider<>();
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
         VerticalPanel panel = new VerticalPanel();
@@ -131,11 +134,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                     tableResources.cellTableStyle().cellTableCheckboxSelected(),
                     tableResources.cellTableStyle().cellTableCheckboxDeselected(),
                     tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                    entityIdentityComparator, raceList, raceTable);
+                    entityIdentityComparator, allRacesList, raceTable);
             refreshableSelectionModel = selectionCheckboxColumn.getSelectionModel();
             raceTable.setSelectionModel(refreshableSelectionModel, this.selectionCheckboxColumn.getSelectionManager());
         } else {
-            refreshableSelectionModel = new RefreshableSingleSelectionModel<RaceDTO>(entityIdentityComparator, raceList);
+            refreshableSelectionModel = new RefreshableSingleSelectionModel<RaceDTO>(entityIdentityComparator, allRacesList);
             raceTable.setSelectionModel(refreshableSelectionModel);
         }
         
@@ -144,7 +147,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         raceTable.setVisible(false);
         panel.add(raceTable);
-        raceList.addDataDisplay(raceTable);
+        displayedRaces.addDataDisplay(raceTable);
         raceTable.addColumnSortHandler(columnSortHandler);
         raceTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
@@ -153,7 +156,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 makeControlsReactToSelectionChange(selectedRaces);
             }
         });
-        filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
+        filterablePanelRaces = new LabeledAbstractFilterablePanelCompatibleWithRefreshableSelectionModel<RaceDTO>(
+                lblFilterRaces, allRacesList, displayedRaces, raceTable) {
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -189,7 +193,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     abstract protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel);
 
     private ListHandler<RaceDTO> setupTableColumns(final StringMessages stringMessages) {
-        ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(raceList.getList());
+        ListHandler<RaceDTO> columnSortHandler = new ListHandler<RaceDTO>(displayedRaces.getList());
         TextColumn<RaceDTO> regattaNameColumn = new TextColumn<RaceDTO>() {
             @Override
             public String getValue(RaceDTO raceDTO) {
@@ -423,8 +427,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     public RaceDTO getRaceByIdentifier(RaceIdentifier raceIdentifier) {
         RaceDTO result = null;
-        if (raceList != null) {
-            for (RaceDTO race : raceList.getList()) {
+        if (allRacesList != null) {
+            for (RaceDTO race : allRacesList.getList()) {
                 if (race.getRaceIdentifier().equals(raceIdentifier)) {
                     result = race;
                     break;
@@ -435,8 +439,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     }
 
     public void selectRaceByIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
-        if (raceList != null) {
-            for (RaceDTO race : raceList.getList()) {
+        if (allRacesList != null) {
+            for (RaceDTO race : allRacesList.getList()) {
                 String regattaName = race.getRegattaName();
                 if (regattaName.equals(raceIdentifier.getRegattaName())
                         && race.getName().equals(raceIdentifier.getRaceName())) {
@@ -474,7 +478,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             }
         }
         allRaces = newAllRaces;
-        filterablePanelRaces.updateAll(allRaces);
+        allRacesList.getList().clear();
+        Util.addAll(allRaces, allRacesList.getList());
     }
 
     /**
