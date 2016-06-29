@@ -209,6 +209,4 @@ public interface DynamicTrackedRace extends TrackedRace {
      * @see #getDynamicSensorTrack(Competitor, String)
      */
     void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track);
-
-    void onStopTracking(boolean preemptive);
 }

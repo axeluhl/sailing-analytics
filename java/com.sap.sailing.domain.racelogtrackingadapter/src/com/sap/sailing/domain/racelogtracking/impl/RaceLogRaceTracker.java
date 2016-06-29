@@ -170,9 +170,6 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
             raceLog.add(new RaceLogEndOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, /* passId */ 0));
         }
         
-        // mark passing calculator is automatically stopped, when the race status is set to {@link
-        // TrackedRaceStatusEnum#FINISHED}
-        trackedRace.onStopTracking(preemptive);
         // remove listeners on logs
         for (Entry<AbstractLog<?, ?>, Object> visitor : visitors.entrySet()) {
             visitor.getKey().removeListener(visitor.getValue());

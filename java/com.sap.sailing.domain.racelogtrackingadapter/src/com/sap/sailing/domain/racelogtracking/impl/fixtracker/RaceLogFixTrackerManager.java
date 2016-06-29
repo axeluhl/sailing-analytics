@@ -15,6 +15,7 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 
@@ -54,21 +55,6 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         public void raceLogDetached(RaceLog raceLog) {
             removeRaceLog(raceLog);
         }
-
-        /**
-         * Stops tracking the races.
-         * 
-         * @param preemptive
-         *            if <code>false</code>, the tracker will continue to process data already received but will stop
-         *            receiving new data. If <code>true</code>, the tracker will stop processing data immediately,
-         *            ignoring (dropping) all data already received but not yet processed.
-         */
-        public void stopTracking(boolean preemptive) {
-            logger.fine("Got the signal to stop fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier()
-                    + "; preemptive: " + preemptive);
-            stop(preemptive);
-            owner.stopped(RaceLogFixTrackerManager.this);
-        }
     };
 
     private final RaceLogEventVisitor raceLogEventVisitor = new BaseRaceLogEventVisitor() {
@@ -82,6 +68,26 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
             updateDenotationState();
         }
     };
+    
+    private final RaceTracker raceTracker;
+    private final RaceTracker.Listener raceTrackerListener = new RaceTracker.Listener() {
+        /**
+         * Stops tracking the race.
+         * 
+         * @param preemptive
+         *            if <code>false</code>, the tracker will continue to process data already received but will stop
+         *            receiving new data. If <code>true</code>, the tracker will stop processing data immediately,
+         *            ignoring (dropping) all data already received but not yet processed.
+         */
+        @Override
+        public void onTrackerWillStop(boolean preemptive) {
+            logger.fine("Got the signal to stop fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier()
+            + "; preemptive: " + preemptive);
+            stop(preemptive);
+            owner.stopped(RaceLogFixTrackerManager.this);
+            
+        }
+    };
 
     /**
      * A callback that is used to inform when the {@link RaceLogFixTrackerManager} is stopped. This can be used to
@@ -91,17 +97,21 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         void stopped(RaceLogFixTrackerManager tracker);
     }
 
-    public RaceLogFixTrackerManager(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
+    public RaceLogFixTrackerManager(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore, RaceTracker raceTracker,
             SensorFixMapperFactory sensorFixMapperFactory) {
-        this(trackedRace, sensorFixStore, sensorFixMapperFactory, (tracker) -> {});
+        this(trackedRace, sensorFixStore, raceTracker, sensorFixMapperFactory, (tracker) -> {});
     }
     
-    public RaceLogFixTrackerManager(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
+    public RaceLogFixTrackerManager(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore, RaceTracker raceTracker,
             SensorFixMapperFactory sensorFixMapperFactory, Owner owner) {
         this.trackedRace = trackedRace;
         this.sensorFixStore = sensorFixStore;
+        this.raceTracker = raceTracker;
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.owner = owner;
+        
+        // TODO check if raceTracker is already stopped
+        raceTracker.add(this.raceTrackerListener);
 
         trackedRace.addListener(raceChangeListener);
         
@@ -148,6 +158,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     
     public void stop(boolean preemptive) {
         stopTrackerIfStillRunning(preemptive);
+        raceTracker.remove(this.raceTrackerListener);
         trackedRace.removeListener(raceChangeListener);
         synchronized (knownRaceLogs) {
             for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {

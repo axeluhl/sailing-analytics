@@ -1736,11 +1736,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         public void raceLogDetached(RaceLog raceLog) {
             // no action required
         }
-        
-        @Override
-        public void stopTracking(boolean preemptive) {
-            // no action required
-        }
     }
 
     /**
@@ -3346,5 +3341,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             result = null;
         }
         return result;
+    }
+    
+    @Override
+    public RaceTracker getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
+        Regatta regatta = regattasByName.get(raceIdentifier.getRegattaName());
+        if(regatta != null) {
+            for(RaceTracker raceTracker : raceTrackersByRegatta.get(regatta)) {
+                if(raceTracker.getRaceIdentifiers().contains(raceIdentifier)) {
+                    return raceTracker;
+                }
+            }
+        }
+        return null;
     }
 }

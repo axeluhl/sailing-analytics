@@ -848,10 +848,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void onStopTracking(boolean preemptive) {
-    }
-
-    @Override
     public Iterable<RaceLog> getAttachedRaceLogs() {
         return Collections.emptySet();
     }

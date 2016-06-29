@@ -78,6 +78,4 @@ public interface RaceChangeListener extends CourseListener {
     void raceLogAttached(RaceLog raceLog);
     
     void raceLogDetached(RaceLog raceLog);
-
-    void stopTracking(boolean preemptive);
 }

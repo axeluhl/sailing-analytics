@@ -4017,10 +4017,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         notifyListeners(listener -> listener.raceLogDetached(raceLog));
     }
 
-    protected void notifyListenersOnStopTracking(boolean preemptive) {
-        notifyListeners(listener -> listener.stopTracking(preemptive));
-    }
-
     public void lockForSerializationRead() {
         LockUtil.lockForRead(getSerializationLock());
     }

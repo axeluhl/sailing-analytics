@@ -62,7 +62,7 @@ public class RegattaLogFixTrackerRegattaListener implements TrackedRegattaListen
         // TODO: observe isReplica, it can change!
         if (!isReplica) {
             RegattaLogFixTrackerRaceListener tracker = new RegattaLogFixTrackerRaceListener((DynamicTrackedRegatta) 
-                    trackedRegatta, racingEventServiceTracker.getService().getSensorFixStore(), sensorFixMapperFactory);
+                    trackedRegatta, racingEventServiceTracker, sensorFixMapperFactory);
             this.stopIfNotNull(registeredTrackers.put(regattaId, tracker));
             log.fine("Added sensor data tracker to tracked regatta: " + trackedRegatta.getRegatta().getName());
         } else {

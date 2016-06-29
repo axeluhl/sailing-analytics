@@ -617,4 +617,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ClassLoader getCombinedMasterDataClassLoader();
 
     Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint);
+
+    RaceTracker getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier);
 }

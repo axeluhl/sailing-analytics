@@ -3,14 +3,17 @@ package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.osgi.util.tracker.ServiceTracker;
+
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.server.RacingEventService;
 
 /**
  * An instance of this class is created for every {@link TrackedRegatta} by {@link RegattaLogFixTrackerRegattaListener}.
@@ -25,13 +28,13 @@ public class RegattaLogFixTrackerRaceListener {
     private final Map<RegattaAndRaceIdentifier, RaceLogFixTrackerManager> dataTrackers = new ConcurrentHashMap<>();
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceListener raceListener;
-    private final SensorFixStore sensorFixStore;
+    private final RacingEventService racingEventService;
     private final SensorFixMapperFactory sensorFixMapperFactory;
 
-    public RegattaLogFixTrackerRaceListener(final DynamicTrackedRegatta trackedRegatta, SensorFixStore sensorFixStore,
+    public RegattaLogFixTrackerRaceListener(final DynamicTrackedRegatta trackedRegatta, ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker,
             final SensorFixMapperFactory sensorFixMapperFactory) {
         this.trackedRegatta = trackedRegatta;
-        this.sensorFixStore = sensorFixStore;
+        this.racingEventService = racingEventServiceTracker.getService();
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.raceListener = new RaceListener() {
             @Override
@@ -59,9 +62,12 @@ public class RegattaLogFixTrackerRaceListener {
             if (existingRace != null) {
                 removeRaceLogSensorDataTracker(raceIdentifier);
             }
-            RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) trackedRace,
-                    sensorFixStore, sensorFixMapperFactory, tracker -> trackerStopped(raceIdentifier, tracker));
-            dataTrackers.put(raceIdentifier, trackerManager);
+            RaceTracker raceTracker = racingEventService.getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier);
+            if(raceTracker != null) {
+                RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) trackedRace,
+                        racingEventService.getSensorFixStore(), raceTracker, sensorFixMapperFactory, tracker -> trackerStopped(raceIdentifier, tracker));
+                dataTrackers.put(raceIdentifier, trackerManager);
+            }
         }
     }
 

@@ -313,12 +313,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListenersWindAveragingChanged(oldMillisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageWind);
     }
 
-
-    @Override
-    public void onStopTracking(final boolean preemptive) {
-        notifyListenersOnStopTracking(preemptive);
-    }
-
     @Override
     public void setAndFixDelayToLiveInMillis(long delayToLiveInMillis) {
         if (getDelayToLiveInMillis() != delayToLiveInMillis) {

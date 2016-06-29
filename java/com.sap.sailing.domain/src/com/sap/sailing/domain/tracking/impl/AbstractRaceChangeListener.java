@@ -147,9 +147,4 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     public void raceLogDetached(RaceLog raceLog) {
         defaultAction();
     }
-    
-    @Override
-    public void stopTracking(boolean preemptive) {
-        defaultAction();
-    }
 }
