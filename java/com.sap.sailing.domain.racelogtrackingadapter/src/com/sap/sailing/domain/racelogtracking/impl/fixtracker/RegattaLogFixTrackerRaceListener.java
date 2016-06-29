@@ -62,14 +62,26 @@ public class RegattaLogFixTrackerRaceListener {
             if (existingRace != null) {
                 removeRaceLogSensorDataTracker(raceIdentifier);
             }
-            RaceTracker raceTracker = racingEventService.getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier);
+            final RaceTracker raceTracker = racingEventService.getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier);
             if(raceTracker != null) {
-                RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) trackedRace,
-                        racingEventService.getSensorFixStore(), raceTracker, sensorFixMapperFactory, tracker -> trackerStopped(raceIdentifier, tracker));
-                dataTrackers.put(raceIdentifier, trackerManager);
+                boolean added = raceTracker.add(new RaceTracker.Listener() {
+                    @Override
+                    public void onTrackerWillStop(boolean preemptive) {
+                        raceTracker.remove(this);
+                        removeRaceLogSensorDataTracker(raceIdentifier, preemptive);
+                    }
+                });
+                // if !added, the RaceTracker is already stopped, so we are not allowed to start fix tracking
+                if(added) {
+                    RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) trackedRace,
+                            racingEventService.getSensorFixStore(), sensorFixMapperFactory);
+                    dataTrackers.put(raceIdentifier, trackerManager);
+                }
             }
         }
     }
+    
+    
 
     private void trackerStopped(RegattaAndRaceIdentifier raceIdentifier, RaceLogFixTrackerManager trackerManager) {
         dataTrackers.remove(raceIdentifier, trackerManager);
@@ -87,9 +99,13 @@ public class RegattaLogFixTrackerRaceListener {
     }
 
     private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier) {
+        removeRaceLogSensorDataTracker(raceIdentifier, false);
+    }
+
+    private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier, boolean preemptive) {
         RaceLogFixTrackerManager currentActiveDataTracker = dataTrackers.get(raceIdentifier);
         if (currentActiveDataTracker != null) {
-            currentActiveDataTracker.stop(false);
+            currentActiveDataTracker.stop(preemptive);
             trackerStopped(raceIdentifier, currentActiveDataTracker);
         }
     }

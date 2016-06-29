@@ -56,7 +56,6 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.server.testsupport.RaceTrackerMock;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -192,7 +191,7 @@ public class CreateAndTrackWithRaceLogTest {
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
         
-        new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, new RaceTrackerMock(), null);
+        new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, null);
 
         race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
@@ -232,7 +231,7 @@ public class CreateAndTrackWithRaceLogTest {
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
         
-        new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, new RaceTrackerMock(), null);
+        new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, null);
 
         race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
