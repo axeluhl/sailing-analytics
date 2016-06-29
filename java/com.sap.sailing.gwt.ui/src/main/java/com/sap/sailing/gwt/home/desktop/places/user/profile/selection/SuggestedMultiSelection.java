@@ -6,6 +6,7 @@ import java.util.Collection;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -50,6 +51,13 @@ public final class SuggestedMultiSelection<T> extends Composite {
         });
         initWidget(uiBinder.createAndBindUi(this));
         headerTitleUi.setInnerText(title);
+        noticationToggleUi.toggleButtonUi.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                final boolean enabled = noticationToggleUi.isEnabled();
+                SuggestedMultiSelection.this.dataProvider.setNotifications(enabled);
+            }
+        });
         this.updateUiState();
     }
     
