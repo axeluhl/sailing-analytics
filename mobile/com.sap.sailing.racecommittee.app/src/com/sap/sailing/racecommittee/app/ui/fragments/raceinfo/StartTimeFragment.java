@@ -524,6 +524,7 @@ public class StartTimeFragment extends BaseFragment
 
         mStartSeconds = ViewHelper.get(getView(), R.id.start_time_seconds);
         if (mStartSeconds != null) {
+            ViewHelper.disableSave(mStartSeconds);
             ThemeHelper.setPickerColor(getActivity(), mStartSeconds, ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray), ThemeHelper
                 .getColor(getActivity(), R.attr.sap_light_gray));
             ThemeHelper.setPickerTextSize(getActivity(), mStartSeconds, R.dimen.textSize_14);

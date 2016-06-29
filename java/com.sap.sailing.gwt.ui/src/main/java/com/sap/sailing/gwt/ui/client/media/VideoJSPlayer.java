@@ -14,6 +14,9 @@ import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.media.MimeType;
 
+/**
+ * video.js (http://videojs.com/) wrapper as GWT widget.
+ */
 public class VideoJSPlayer extends Widget {
     private static VideoJSPlayerUiBinder uiBinder = GWT.create(VideoJSPlayerUiBinder.class);
 
