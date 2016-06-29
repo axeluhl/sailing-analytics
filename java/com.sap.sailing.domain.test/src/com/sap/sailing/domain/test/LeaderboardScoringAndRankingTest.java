@@ -2156,6 +2156,9 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         silver.removeAll(gold);
         Collections.shuffle(gold);
         Collections.shuffle(silver);
+        List<Competitor> lastRaceSilver = new ArrayList<>(silver);
+        final Competitor theUntrackedCompetitorInLastRace = lastRaceSilver.get(lastRaceSilver.size()-1);
+        lastRaceSilver.remove(theUntrackedCompetitorInLastRace); // one participant accidentally not tracked; expected to end up between silver and gold
         List<Competitor> medal = new ArrayList<>(gold.subList(0, 2)); // take two gold race participants as medal race participants
         List<Competitor> lastRaceGold = new ArrayList<>(gold);
         lastRaceGold.removeAll(medal); // no medal race participant participates in the last race's gold fleet
@@ -2176,7 +2179,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         RaceColumn lastRaceColumn = series.get(2).getRaceColumnByName("L");
         TrackedRace lGold = new MockedTrackedRaceWithStartTimeAndRanks(now, lastRaceGold);
         lastRaceColumn.setTrackedRace(lastRaceColumn.getFleetByName("Gold"), lGold);
-        TrackedRace lSilver = new MockedTrackedRaceWithStartTimeAndRanks(now, silver);
+        TrackedRace lSilver = new MockedTrackedRaceWithStartTimeAndRanks(now, lastRaceSilver);
         lastRaceColumn.setTrackedRace(lastRaceColumn.getFleetByName("Silver"), lSilver);
         RaceColumn medalColumn = series.get(3).getRaceColumnByName("M");
         TrackedRace mDefault = new MockedTrackedRaceWithStartTimeAndRanks(now, medal);
@@ -2199,6 +2202,18 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         for (final Competitor lastRaceGoldParticipant : lastRaceGold) {
             for (final Competitor silverParticipant : silver) {
                 assertTrue(rankedCompetitors.indexOf(lastRaceGoldParticipant) < rankedCompetitors.indexOf(silverParticipant));
+            }
+        }
+        // assert that theUntrackedCompetitorInLastRace ended up between the last race's silver and gold fleet participants
+        // based on the "extreme fleet" rule:
+        for (final Competitor c : competitors) {
+            if (c != theUntrackedCompetitorInLastRace) {
+                if (lastRaceGold.contains(c) || medal.contains(c)) {
+                    assertTrue(rankedCompetitors.indexOf(c) < rankedCompetitors.indexOf(theUntrackedCompetitorInLastRace));
+                } else {
+                    assertTrue(silver.contains(c));
+                    assertTrue(rankedCompetitors.indexOf(c) > rankedCompetitors.indexOf(theUntrackedCompetitorInLastRace));
+                }
             }
         }
     }
