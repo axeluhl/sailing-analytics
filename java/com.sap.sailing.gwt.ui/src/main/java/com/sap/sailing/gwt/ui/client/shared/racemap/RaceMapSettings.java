@@ -6,6 +6,7 @@ import java.util.Set;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
@@ -13,6 +14,9 @@ public class RaceMapSettings extends AbstractSettings {
     public static final String PARAM_SHOW_MAPCONTROLS = "showMapControls";
     public static final String PARAM_SHOW_COURSE_GEOMETRY = "showCourseGeometry";
     public static final String PARAM_MAP_ORIENTATION_WIND_UP = "windUp";
+    public static final String PARAM_VIEW_SHOW_STREAMLETS = "viewShowStreamlets";
+    public static final String PARAM_VIEW_SHOW_STREAMLET_COLORS = "viewShowStreamletColors";
+    public static final String PARAM_VIEW_SHOW_SIMULATION = "viewShowSimulation";
 
     private final boolean showDouglasPeuckerPoints;
 
@@ -40,7 +44,7 @@ public class RaceMapSettings extends AbstractSettings {
 
     private final boolean showSimulationOverlay;
     
-    private boolean showMapControls;
+    private final boolean showMapControls;
     
     /**
      * If <code>true</code>, all map contents will be transformed to a water-only environment, rotating all directions /
@@ -53,22 +57,13 @@ public class RaceMapSettings extends AbstractSettings {
     private final boolean windUp;
 
     public RaceMapSettings() {
-        this.maneuverTypesToShow = getDefaultManeuvers();
-        this.zoomSettings = new RaceMapZoomSettings();
-        this.helpLinesSettings = new RaceMapHelpLinesSettings();
-        
-        this.showDouglasPeuckerPoints = false;
-        this.showOnlySelectedCompetitors = false;
-        this.transparentHoverlines = false; // as discussed with Stefan on 2015-12-08
-        this.hoverlineStrokeWeight = 15; // as discussed with Stefan on 2015-12-08
-        this.tailLengthInMilliseconds = 100000l;
-        this.buoyZoneRadiusInMeters = 0.0;
-        this.showSelectedCompetitorsInfo = true;
-        this.showWindStreamletColors = false;
-        this.showWindStreamletOverlay = false;
-        this.showSimulationOverlay = false;
-        this.showMapControls = true;
-        this.windUp = false;
+        this(
+                /* showMapControls */ true,
+                new RaceMapHelpLinesSettings(),
+                /* windUp */ false,
+                /* showWindStreamletOverlay */ false,
+                /* showWindStreamletColors */ false,
+                /* showSimulationOverlay */ false);
     }
 
     public RaceMapSettings(RaceMapZoomSettings zoomSettings, RaceMapHelpLinesSettings helpLinesSettings,
@@ -93,9 +88,38 @@ public class RaceMapSettings extends AbstractSettings {
         this.showDouglasPeuckerPoints = showDouglasPeuckerPoints;
     }
 
-    public RaceMapSettings(boolean showMapCcontrol) {
-        this();
-        this.showMapControls = showMapCcontrol;
+    private RaceMapSettings(boolean showMapControls, boolean showCourseGeometry, boolean windUp, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
+        this(showMapControls, new RaceMapHelpLinesSettings(createHelpLineSettings(showCourseGeometry)), windUp, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
+    }
+    
+    private RaceMapSettings(boolean showMapControls, RaceMapHelpLinesSettings helpLineSettings, boolean windUp, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
+        this(
+                new RaceMapZoomSettings(),
+                helpLineSettings,
+                /* transparentHoverlines as discussed with Stefan on 2015-12-08 */ false,
+                /* hoverlineStrokeWeight as discussed with Stefan on 2015-12-08 */ 15,
+                /* tailLengthInMilliseconds */ 100000l,
+                /* windUp */ windUp,
+                /* buoyZoneRadiusInMeters */ 0.0,
+                /* showOnlySelectedCompetitors */ false,
+                /* showSelectedCompetitorsInfo */ true,
+                /* showWindStreamletColors */ showWindStreamletColors,
+                /* showWindStreamletOverlay */ showWindStreamletOverlay,
+                /* showSimulationOverlay */ showSimulationOverlay,
+                /* showMapControls */ showMapControls,
+                /* maneuverTypesToShow */ getDefaultManeuvers(),
+                /* showDouglasPeuckerPoints */ false);
+    }
+    
+    private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
+        final Set<HelpLineTypes> helpLineTypes = new HashSet<>();
+        Util.addAll(new RaceMapHelpLinesSettings().getVisibleHelpLineTypes(), helpLineTypes);
+        if (showCourseGeometry) {
+            helpLineTypes.add(HelpLineTypes.COURSEGEOMETRY);
+        } else {
+            helpLineTypes.remove(HelpLineTypes.COURSEGEOMETRY);
+        }
+        return helpLineTypes;
     }
 
     /**
@@ -197,7 +221,7 @@ public class RaceMapSettings extends AbstractSettings {
         return showMapControls;
     }
 
-    private HashSet<ManeuverType> getDefaultManeuvers() {
+    private static HashSet<ManeuverType> getDefaultManeuvers() {
         HashSet<ManeuverType> types = new HashSet<ManeuverType>();
         types.add(ManeuverType.JIBE);
         types.add(ManeuverType.TACK);
@@ -205,9 +229,17 @@ public class RaceMapSettings extends AbstractSettings {
         return types;
     }
 
-    public static RaceMapSettings readSettingsFromURL() {
-        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_MAPCONTROLS, true /* default */);
-        return new RaceMapSettings(showMapControls);
+    public static RaceMapSettings readSettingsFromURL(boolean defaultForShowMapControls,
+            boolean defaultForShowCourseGeometry, boolean defaultForMapOrientationWindUp,
+            boolean defaultForViewShowStreamlets, boolean defaultForViewShowStreamletColors,
+            boolean defaultForViewShowSimulation) {
+        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_MAPCONTROLS, defaultForShowMapControls /* default */);
+        final boolean showCourseGeometry = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_COURSE_GEOMETRY, defaultForShowCourseGeometry /* default */);
+        final boolean windUp = GwtHttpRequestUtils.getBooleanParameter(PARAM_MAP_ORIENTATION_WIND_UP, defaultForMapOrientationWindUp /* default */);
+        final boolean showWindStreamletOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLETS, defaultForViewShowStreamlets /* default */);
+        final boolean showWindStreamletColors = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLET_COLORS, defaultForViewShowStreamletColors /* default */);
+        final boolean showSimulationOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_SIMULATION, defaultForViewShowSimulation /* default */);
+        return new RaceMapSettings(showMapControls, showCourseGeometry, windUp, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
     }
 
     public Set<ManeuverType> getManeuverTypesToShow() {

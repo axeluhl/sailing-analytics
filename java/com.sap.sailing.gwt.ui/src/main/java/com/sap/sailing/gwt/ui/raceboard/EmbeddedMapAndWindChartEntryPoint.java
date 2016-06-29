@@ -86,8 +86,14 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         }
         
         // read optional parameters
-        final RaceBoardPerspectiveSettings raceboardPerspectiveSettings = RaceBoardPerspectiveSettings.readSettingsFromURL();
-        final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(); 
+        final RaceBoardPerspectiveSettings raceboardPerspectiveSettings = RaceBoardPerspectiveSettings
+                .readSettingsFromURL(/* defaultForViewShowLeaderboard */ true, /* defaultForViewShowWindchart */ true,
+                        /* defaultForViewSimulationEnabled */ false, /* defaultForViewShowCompetitorsChart */ false,
+                        /* defaultForViewCompetitorFilter */ null, /* defaultForCanReplayDuringLiveRaces */ false);
+        final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
+                /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ true,
+                /* defaultForMapOrientationWindUp */ true, /* defaultForViewShowStreamlets */ false,
+                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false);
         final boolean showCompetitors = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_COMPETITORS, false /* default */);
         final boolean play = GwtHttpRequestUtils.getBooleanParameter(PARAM_PLAY, false /* default */);
         final boolean showCourseGeometry = GwtHttpRequestUtils.getBooleanParameter(RaceMapSettings.PARAM_SHOW_COURSE_GEOMETRY, true /* default */);

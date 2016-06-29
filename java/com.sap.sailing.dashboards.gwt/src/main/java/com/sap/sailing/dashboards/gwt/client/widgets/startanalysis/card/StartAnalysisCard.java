@@ -154,8 +154,10 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
         
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
-        RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL();
-        
+        RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
+                /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ false,
+                /* defaultForMapOrientationWindUp */ false, /* defaultForViewShowStreamlets */ false,
+                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false);
         final RaceMapSettings raceMapSettings = new RaceMapSettings(raceMapZoomSettings, getHelpLineSettings(),
                 defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
                 startAnalysisDTO.tailLenghtInMilliseconds, defaultRaceMapSettings.isWindUp(),
