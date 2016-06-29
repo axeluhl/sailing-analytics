@@ -59,8 +59,7 @@ public class RegattaLogFixTrackerRegattaListener implements TrackedRegattaListen
     @Override
     public synchronized void regattaAdded(TrackedRegatta trackedRegatta) {
         final Serializable regattaId = trackedRegatta.getRegatta().getId();
-        // TODO: observe isReplica, it can change!
-        if (!isReplica) {
+        if (!isReplica()) {
             RegattaLogFixTrackerRaceListener tracker = new RegattaLogFixTrackerRaceListener((DynamicTrackedRegatta) 
                     trackedRegatta, racingEventServiceTracker, sensorFixMapperFactory);
             this.stopIfNotNull(registeredTrackers.put(regattaId, tracker));
@@ -95,7 +94,6 @@ public class RegattaLogFixTrackerRegattaListener implements TrackedRegattaListen
     private final ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
     private final Set<OperationWithResultWithIdWrapper<RegattaLogFixTrackerRegattaListener, ?>> operationsSentToMasterForReplication = new HashSet<>();
     private ReplicationMasterDescriptor master;
-    private boolean isReplica = false;
 
     @Override
     public Serializable getId() {
@@ -164,9 +162,6 @@ public class RegattaLogFixTrackerRegattaListener implements TrackedRegattaListen
     @Override
     public synchronized void initiallyFillFromInternal(ObjectInputStream is)
             throws IOException, ClassNotFoundException, InterruptedException {
-        this.isReplica = true;
-        this.registeredTrackers.values().forEach(this::stopIfNotNull);
-        this.registeredTrackers.clear();
     }
 
     @Override
@@ -175,7 +170,11 @@ public class RegattaLogFixTrackerRegattaListener implements TrackedRegattaListen
 
     @Override
     public synchronized void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
-        this.isReplica = false;
+        this.registeredTrackers.values().forEach(this::stopIfNotNull);
+        this.registeredTrackers.clear();
     }
-
+    
+    private boolean isReplica() {
+        return master != null;
+    }
 }
