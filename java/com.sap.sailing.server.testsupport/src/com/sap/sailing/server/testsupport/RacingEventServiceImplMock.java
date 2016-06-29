@@ -1,4 +1,4 @@
-package com.sap.sailing.server.test;
+package com.sap.sailing.server.testsupport;
 
 import java.util.Map;
 import java.util.Set;
@@ -10,7 +10,15 @@ import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 
-public class RacingEventServiceImplMock extends RacingEventServiceImpl {
+/**
+ * Use an empty anonymous inner subclass for instantiation to ensure that you'll have the right classpath for
+ * your bundle in order to carry out de-serializations in the correct context. Example:
+ * {@code new RacingEventServiceImplMock(){}}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public abstract class RacingEventServiceImplMock extends RacingEventServiceImpl {
 
     private DataImportLockWithProgress lock;
 

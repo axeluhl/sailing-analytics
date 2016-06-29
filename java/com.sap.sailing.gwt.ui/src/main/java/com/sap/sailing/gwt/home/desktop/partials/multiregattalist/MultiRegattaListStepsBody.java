@@ -101,7 +101,11 @@ public class MultiRegattaListStepsBody extends UIObject implements RequiresResiz
         String[] tokens = seriesName.split(" ");
         StringBuilder initials = new StringBuilder();
         for (int i = 0; i < tokens.length; i++) {
-            initials.append(tokens[i].charAt(0));
+            if (tokens[i].isEmpty()) { // this may happen, e.g., in case of a FlexibleLeaderboard that does not have a series
+                initials.append('R');
+            } else {
+                initials.append(tokens[i].charAt(0));
+            }
         }
         return initials.toString();
     }

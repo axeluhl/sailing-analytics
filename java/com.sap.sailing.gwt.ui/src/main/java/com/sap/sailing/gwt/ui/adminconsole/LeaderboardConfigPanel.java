@@ -684,7 +684,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
-                    raceColumnTable.getDataProvider().getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet));
+                    raceColumnTable.getDataProvider().getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet, getSelectedLeaderboard()));
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);

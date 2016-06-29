@@ -10,9 +10,8 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.racegroup.FilterableRace;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.impl.Result;
-import com.sap.sse.common.Named;
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.WithID;
 
 /**
  * A managed race's {@link #getName()} is the race column's name.
@@ -20,7 +19,7 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Named, WithID {
+public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, NamedWithID {
 
     /**
      * @return the identifier of the race.
