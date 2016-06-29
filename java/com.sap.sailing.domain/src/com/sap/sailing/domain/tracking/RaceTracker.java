@@ -34,8 +34,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 public interface RaceTracker {
     /**
      * By default, wait one minute for race data; sometimes, a tracking provider's server may be under heavy load and
-     * may serve races one after another. If many races are requested concurrently, this can lead to a queue
-     * of several minutes length.
+     * may serve races one after another. If many races are requested concurrently, this can lead to a queue of several
+     * minutes length.
      */
     static long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 60000;
 
@@ -73,4 +73,30 @@ public interface RaceTracker {
      */
     Object getID();
     
+    /**
+     * Listener interface for race tracker related events
+     */
+    interface Listener {
+        /**
+         * Tracker has stopped event, see {@link RaceTracker#stop(boolean)} method
+         * 
+         * @param preemptive
+         */
+        void onTrackerStopped(boolean preemptive);
+    }
+
+    /**
+     * Register a new RaceTracker.Listener for this race tracker.
+     * 
+     * @param newListener
+     */
+    void add(RaceTracker.Listener newListener);
+
+    /**
+     * Remove listener from racetracker
+     * 
+     * @param newListener
+     * @return the listener registration for listener removal
+     */
+    void remove(RaceTracker.Listener newListener);
 }

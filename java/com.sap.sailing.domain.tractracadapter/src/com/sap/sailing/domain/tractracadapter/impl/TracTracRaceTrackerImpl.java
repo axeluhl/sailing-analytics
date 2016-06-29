@@ -539,7 +539,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
     
     @Override
-    public void stop(boolean stopReceiversPreemtively) throws InterruptedException {
+    protected void onStop(boolean stopReceiversPreemtively) throws InterruptedException {
         if (!stopped) {
             stopped = true;
             raceSubscriber.stop();
@@ -631,7 +631,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                         lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.ERROR, 0.0);
                         updateStatusOfTrackedRaces();
                         return;
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
+                        logger.severe("Exception stopping race tracker: " + e.getMessage());
                         e.printStackTrace();
                     }
                 } else {

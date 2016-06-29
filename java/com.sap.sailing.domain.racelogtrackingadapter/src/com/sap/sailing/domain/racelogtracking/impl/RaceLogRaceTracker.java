@@ -57,10 +57,10 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
+import com.sap.sailing.domain.tracking.AbstractRaceTrackerBaseImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
-import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -80,7 +80,7 @@ import difflib.PatchFailedException;
  * 
  * @author Fredrik Teschke
  */
-public class RaceLogRaceTracker implements RaceTracker {
+public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     
     private static final String LOGGER_AND_LOGAUTHOR_NAME = RaceLogRaceTracker.class.getName();
     private static final Logger logger = Logger.getLogger(LOGGER_AND_LOGAUTHOR_NAME);
@@ -161,7 +161,7 @@ public class RaceLogRaceTracker implements RaceTracker {
     }
 
     @Override
-    public void stop(boolean preemptive) {
+    protected void onStop(boolean preemptive) {
         RaceLog raceLog = params.getRaceLog();
         final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
         if (trackingTimes == null || trackingTimes.getB() == null || trackingTimes.getB().getTimePoint() == null) {
