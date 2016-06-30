@@ -18,7 +18,7 @@ import com.sap.sse.common.settings.value.Value;
  * 
  * <pre>
  * <code>
- * public final class ExampleSettings extends AbstractSettings {
+ * public final class ExampleSettings extends AbstractGenericSerializableSettings {
  *     private transient StringSetting myString;
  *     private transient BooleanSetting myBoolean;
  *     
