@@ -191,7 +191,7 @@ public final class SuggestedMultiSelection<T> extends Composite {
 
                     @Override
                     protected Iterable<String> getMatchingStrings(BoatClassMasterdata value) {
-                        return Arrays.asList(value.getAlternativeNames());
+                        return value.getBoatClassNames();
                     }
                 };
             }
