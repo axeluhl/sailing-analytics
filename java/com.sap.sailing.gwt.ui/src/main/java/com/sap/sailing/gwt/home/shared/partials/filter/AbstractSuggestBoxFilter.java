@@ -36,6 +36,9 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         suggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<Suggestion> event) {
+                @SuppressWarnings("unchecked")
+                C suggestObject = ((SimpleSuggestion) event.getSelectedItem()).suggestObject;
+                AbstractSuggestBoxFilter.this.onSuggestionSelected(suggestObject);
                 AbstractSuggestBoxFilter.super.update();
             }
         });
@@ -46,6 +49,8 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         suggestionObjectList.clear();
         suggestionObjectList.addAll(selectableValues);
     }
+    
+    protected abstract void onSuggestionSelected(C selectedItem);
     
     protected abstract String createSuggestionKeyString(C value);
     
@@ -81,7 +86,8 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
             }
         }
         
-        private void setSuggestions(Request request, Callback callback, Iterable<C> suggestionObjects, Iterable<String> queryTokens) {
+        private void setSuggestions(Request request, Callback callback, Iterable<C> suggestionObjects,
+                Iterable<String> queryTokens) {
             List<Suggestion> suggestions = new ArrayList<>();
             List<String> normalizedQueryTokens = new ArrayList<>();
             for (String token : queryTokens) {
@@ -121,10 +127,13 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         public String getDisplayString() {
             SafeHtmlBuilder builder = new SafeHtmlBuilder();
             appendHighlighted(builder, createSuggestionKeyString(suggestObject));
-            builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_OPEN));
-            builder.append(SafeHtmlUtils.fromSafeConstant(" - "));
-            appendHighlighted(builder, createSuggestionAdditionalDisplayString(suggestObject));
-            builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_CLOSE));
+            String additionalString = createSuggestionAdditionalDisplayString(suggestObject);
+            if(additionalString != null && !additionalString.isEmpty()) {
+                builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_OPEN));
+                builder.append(SafeHtmlUtils.fromSafeConstant(" - "));
+                appendHighlighted(builder, additionalString);
+                builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_CLOSE));
+            }
             return builder.toSafeHtml().asString();
         }
         

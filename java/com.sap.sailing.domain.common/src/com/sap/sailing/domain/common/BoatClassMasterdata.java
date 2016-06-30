@@ -210,6 +210,21 @@ public enum BoatClassMasterdata {
     public boolean hasAdditionalDownwindSail() {
         return hasAdditionalDownwindSail;
     }
+    
+    /**
+     * Gets the list of names for this {@link BoatClassMasterdata} instance, containing its 
+     * {@link #displayName display name} and the {@link #alternativeNames alternative names} (if any).
+     * 
+     * @return the list of names for the boat class
+     */
+    public Iterable<String> getBoatClassNames() {
+        List<String> result = new ArrayList<>(getAlternativeNames().length + 1);
+        result.add(this.getDisplayName());
+        for (String alternativeName : this.getAlternativeNames()) {
+            result.add(alternativeName);
+        }
+        return result;
+    }
 
     public static Iterable<String> getAllBoatClassNames(boolean includeAlternativeNames) {
         final List<String> result = new ArrayList<>();
