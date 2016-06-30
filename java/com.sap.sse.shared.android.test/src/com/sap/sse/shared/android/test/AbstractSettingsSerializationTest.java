@@ -9,21 +9,20 @@ import org.junit.Test;
 
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.common.filter.TextOperator.Operators;
-import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.common.settings.BooleanSetting;
-import com.sap.sse.common.settings.DecimalListSetting;
-import com.sap.sse.common.settings.DecimalSetting;
-import com.sap.sse.common.settings.EnumListSetting;
-import com.sap.sse.common.settings.EnumSetting;
-import com.sap.sse.common.settings.SerializableSettings;
-import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.settings.SettingsList;
-import com.sap.sse.common.settings.StringSetting;
-import com.sap.sse.common.settings.StringToEnumConverter;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.DecimalListSetting;
+import com.sap.sse.common.settings.generic.DecimalSetting;
+import com.sap.sse.common.settings.generic.EnumListSetting;
+import com.sap.sse.common.settings.generic.EnumSetting;
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
+import com.sap.sse.common.settings.generic.SettingsList;
+import com.sap.sse.common.settings.generic.StringSetting;
+import com.sap.sse.common.settings.generic.StringToEnumConverter;
 
 public abstract class AbstractSettingsSerializationTest<SOT> {
 
-    private static class TestOuterSettings extends SerializableSettings {
+    private static class TestOuterSettings extends AbstractGenericSerializableSettings {
         private static final long serialVersionUID = -7379232503773525915L;
         private transient SimpleTestSettings nested;
 
@@ -36,7 +35,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class TestListSettings extends SerializableSettings {
+    private static class TestListSettings extends AbstractGenericSerializableSettings {
         private static final long serialVersionUID = 6919127895749914961L;
         private transient SettingsList<SimpleTestSettings> l;
 
@@ -49,7 +48,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class SimpleTestSettings extends SerializableSettings {
+    private static class SimpleTestSettings extends AbstractGenericSerializableSettings {
         private static final long serialVersionUID = -4134836978411240572L;
         private transient StringSetting string;
         private transient DecimalSetting num;
@@ -62,7 +61,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
             this.num.setValue(num);
         }
 
-        public SimpleTestSettings(String name, AbstractSettings parent) {
+        public SimpleTestSettings(String name, AbstractGenericSerializableSettings parent) {
             super(name, parent);
         }
         
@@ -73,7 +72,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class TestSettings extends SerializableSettings {
+    private static class TestSettings extends AbstractGenericSerializableSettings {
         private static final long serialVersionUID = -611806711715538293L;
         private transient StringSetting humba;
         private transient BooleanSetting bumpa;
@@ -94,7 +93,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class TestEnumListSettings extends SerializableSettings {
+    private static class TestEnumListSettings extends AbstractGenericSerializableSettings {
         private static final long serialVersionUID = 93688955681544920L;
         private transient EnumListSetting<TextOperator.Operators> l;
         
@@ -113,7 +112,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class DuplicateFieldSettings extends SerializableSettings {
+    private static class DuplicateFieldSettings extends AbstractGenericSerializableSettings {
         private static final long serialVersionUID = 4058775568295038177L;
         @SuppressWarnings("unused")
         private transient StringSetting humba;
@@ -127,7 +126,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
     
-    private static class DisallowedKeySettings extends SerializableSettings {
+    private static class DisallowedKeySettings extends AbstractGenericSerializableSettings {
         private static final long serialVersionUID = -2265305217290147424L;
         @SuppressWarnings("unused")
         private transient StringSetting disallowedKey;
@@ -138,20 +137,20 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    protected abstract <T extends Settings> SOT serialize(T settings) throws Exception;
+    protected abstract <T extends GenericSerializableSettings> SOT serialize(T settings) throws Exception;
 
-    protected <T extends Settings> T deserialize(SOT serializedObject, Class<T> settingsClass) throws Exception {
+    protected <T extends GenericSerializableSettings> T deserialize(SOT serializedObject, Class<T> settingsClass) throws Exception {
         T deserializedInstance = settingsClass.newInstance();
 
         return deserialize(serializedObject, deserializedInstance);
     }
     
-    protected <T extends Settings> T deserialize(SOT serializedObject, T settings) throws Exception {
+    protected <T extends GenericSerializableSettings> T deserialize(SOT serializedObject, T settings) throws Exception {
         return null;
     };
 
     @SuppressWarnings("unchecked")
-    private <T extends Settings> T serializeAndDeserialize(T objectToSerialize) {
+    private <T extends GenericSerializableSettings> T serializeAndDeserialize(T objectToSerialize) {
         try {
             SOT serialized = serialize(objectToSerialize);
             return deserialize(serialized, (Class<T>) objectToSerialize.getClass());

@@ -3,7 +3,7 @@ package com.sap.sse.common.settings.value;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.sap.sse.common.settings.ValueConverter;
+import com.sap.sse.common.settings.generic.ValueConverter;
 
 public abstract class ValueCollectionValue<C extends Collection<Value>> implements ValueCollection {
     private static final long serialVersionUID = -5820765644801217519L;

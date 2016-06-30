@@ -1,15 +1,15 @@
 package com.sap.sse.gwt.settings;
 
 import com.google.gwt.http.client.UrlBuilder;
-import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 
 public abstract class AbstractEntryPointWithSettingsLinkFactory {
     
     private static final SettingsToUrlSerializer serializer = new SettingsToUrlSerializer();
 
-    protected static String createEntryPointLink(String baseLink, Settings... settings) {
+    protected static String createEntryPointLink(String baseLink, GenericSerializableSettings... settings) {
         UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters(baseLink);
-        for (Settings setting : settings) {
+        for (GenericSerializableSettings setting : settings) {
             serializer.serializeToUrlBuilder(setting, urlBuilder);
         }
         return urlBuilder.buildString();

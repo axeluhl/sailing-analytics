@@ -7,12 +7,13 @@ import java.util.UUID;
 
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
-import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.common.settings.BooleanSetting;
-import com.sap.sse.common.settings.StringSetSetting;
-import com.sap.sse.common.settings.UUIDSetSetting;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.StringSetSetting;
+import com.sap.sse.common.settings.generic.UUIDSetSetting;
 
-public final class RegattaRaceStatesSettings extends AbstractSettings {
+public final class RegattaRaceStatesSettings extends AbstractGenericSerializableSettings {
+    private static final long serialVersionUID = 7059340304556830062L;
     private UUIDSetSetting visibleCourseAreas;
     private StringSetSetting visibleRegattas;
     private BooleanSetting showOnlyRacesOfSameDay;

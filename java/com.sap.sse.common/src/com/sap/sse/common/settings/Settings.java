@@ -1,6 +1,6 @@
 package com.sap.sse.common.settings;
 
-import java.util.Map;
+import com.sap.sse.common.settings.generic.Setting;
 
 /**
  * A generic format to keep the settings for a <code>Component</code>. Such settings may be initialized with defaults.
@@ -39,15 +39,5 @@ import java.util.Map;
  * @author Axel Uhl (D043530)
  *
  */
-public interface Settings extends Setting {
-    
-    /**
-     * Path separator for serializers that construct flat keys for the hierachical settings structures (e.g. URL).
-     */
-    public static final String PATH_SEPARATOR = ".";
-    
-    /**
-     * Obtains all child settings.
-     */
-    Map<String, Setting> getChildSettings();
+public interface Settings {
 }
