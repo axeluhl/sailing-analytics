@@ -257,37 +257,31 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
 
     @Override
     public RaceMapSettings getResult() {
-        RaceMapSettings result = new RaceMapSettings();
+        Set<ManeuverType> maneuverTypesToShow = new HashSet<ManeuverType>();
         for (Util.Pair<CheckBox, ManeuverType> p : checkboxAndManeuverType) {
-            result.showManeuverType(p.getB(), p.getA().getValue());
-        }
-        RaceMapHelpLinesSettings helpLinesSettings = getHelpLinesSettings();
-        result.setZoomSettings(getZoomSettings());
-        result.setHelpLinesSettings(helpLinesSettings);
-        result.setShowDouglasPeuckerPoints(showDouglasPeuckerPointsCheckBox.getValue());
-        result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
-        result.setShowWindStreamletOverlay(showWindStreamletOverlayCheckbox.getValue());
-        result.setShowWindStreamletColors(showWindStreamletColorsCheckbox.getValue());
-        result.setShowMapControls(initialSettings.isShowMapControls());
-        if (isSimulationEnabled) {
-            result.setShowSimulationOverlay(showSimulationOverlayCheckbox.getValue());
-        } else {
-            result.setShowSimulationOverlay(false);            
-        }
-        result.setWindUp(windUpCheckbox.getValue());
-        result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
-        if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
-            result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l);
-        }
-        if (helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE)) {
-            final Double value = buoyZoneRadiusBox.getValue();
-            if (value != null) {
-                result.setBuoyZoneRadiusInMeters(value);
+            if (p.getA().getValue() == true) {
+                maneuverTypesToShow.add(p.getB());
             }
         }
-        result.setTransparentHoverlines(transparentHoverlines.getValue());
-        result.setHoverlineStrokeWeight(hoverlineStrokeWeight.getValue());
-        return result;
+        RaceMapHelpLinesSettings helpLinesSettings = getHelpLinesSettings();
+        RaceMapZoomSettings zoomSettings = getZoomSettings();
+
+        boolean showSimulationOverlay = isSimulationEnabled ? showSimulationOverlayCheckbox.getValue() : false;
+        long tailLengthInMilliseconds = initialSettings.getTailLengthInMilliseconds(); 
+        if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
+            tailLengthInMilliseconds = tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l;
+        }
+        
+        double buoyZoneRadiusInMeters = initialSettings.getBuoyZoneRadiusInMeters();
+        if (helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE) && buoyZoneRadiusBox.getValue() != null) {
+            buoyZoneRadiusInMeters = buoyZoneRadiusBox.getValue();
+        }
+        
+        return new RaceMapSettings(zoomSettings, helpLinesSettings,
+                transparentHoverlines.getValue(), hoverlineStrokeWeight.getValue(), tailLengthInMilliseconds, windUpCheckbox.getValue(),
+                buoyZoneRadiusInMeters, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
+                showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
+                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue());
     }
     
     private RaceMapZoomSettings getZoomSettings() {
