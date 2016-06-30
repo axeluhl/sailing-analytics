@@ -22,8 +22,8 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     @UiField(provided = true) AuthorizedContentDecoratorDesktop decoratorUi;
-//    @UiField(provided = true) SuggestedMultiSelection<SimpleCompetitorDTO> favouriteCompetitorsSelctionUi;
-    @UiField(provided = true) SuggestedMultiSelection<BoatClassMasterdata> favouriteBoatClassesSelctionUi;
+    @UiField(provided = true) SuggestedMultiSelection<SimpleCompetitorDTO> favoriteCompetitorsSelctionUi;
+    @UiField(provided = true) SuggestedMultiSelection<BoatClassMasterdata> favoriteBoatClassesSelctionUi;
     
     public UserDetailsView getUserDetailsView() {
         return null;
@@ -32,21 +32,21 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
     @Override
     public void setPresenter(Presenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
-//        favouriteCompetitorsSelctionUi = SuggestedMultiSelection
-//                .forCompetitors(presenter.getFavouriteCompetitorDataProvider(), "TODO Favourite competitors");
-        favouriteBoatClassesSelctionUi = SuggestedMultiSelection
-                .forBoatClasses(presenter.getFavouriteBoatClassesDataProvider(), "TODO Favourite boat classes");
+        favoriteCompetitorsSelctionUi = SuggestedMultiSelection
+                .forCompetitors(presenter.getFavoriteCompetitorsDataProvider(), "TODO Favourite competitors");
+        favoriteBoatClassesSelctionUi = SuggestedMultiSelection
+                .forBoatClasses(presenter.getFavoriteBoatClassesDataProvider(), "TODO Favourite boat classes");
         initWidget(uiBinder.createAndBindUi(this));
     }
     
     @Override
     public void setFavouriteCompetitors(Collection<SimpleCompetitorDTO> selectedItems) {
-//        favouriteCompetitorsSelctionUi.setSelectedItems(selectedItems);
+        favoriteCompetitorsSelctionUi.setSelectedItems(selectedItems);
     }
     
     @Override
     public void setFavouriteBoatClasses(Collection<BoatClassMasterdata> selectedItems) {
-        favouriteBoatClassesSelctionUi.setSelectedItems(selectedItems);
+        favoriteBoatClassesSelctionUi.setSelectedItems(selectedItems);
     }
     
     @Override

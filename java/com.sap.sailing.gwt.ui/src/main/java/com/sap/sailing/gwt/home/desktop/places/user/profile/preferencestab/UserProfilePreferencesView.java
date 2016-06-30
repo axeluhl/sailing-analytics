@@ -23,7 +23,7 @@ public interface UserProfilePreferencesView extends IsWidget {
     void setFavouriteBoatClasses(Collection<BoatClassMasterdata> selectedItems);
 
     public interface Presenter extends NotLoggedInPresenter, NeedsAuthenticationContext {
-        SuggestedMultiSelectionDataProvider<BoatClassMasterdata> getFavouriteBoatClassesDataProvider();
-//        SuggestedMultiSelectionDataProvider<SimpleCompetitorDTO> getFavouriteCompetitorsDataProvider();
+        SuggestedMultiSelectionDataProvider<BoatClassMasterdata> getFavoriteBoatClassesDataProvider();
+        SuggestedMultiSelectionDataProvider<SimpleCompetitorDTO> getFavoriteCompetitorsDataProvider();
     }
 }
