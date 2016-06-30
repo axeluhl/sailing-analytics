@@ -4,8 +4,8 @@ package com.sap.sse.common.settings;
 
 public abstract class AbstractSetting implements Setting {
     
-    protected final AbstractSettings settings;
-    protected final String settingName;
+    protected transient final AbstractSettings settings;
+    protected transient final String settingName;
 
     public AbstractSetting(String settingName, AbstractSettings settings) {
         this.settingName = settingName;

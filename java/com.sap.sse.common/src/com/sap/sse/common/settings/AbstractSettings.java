@@ -65,7 +65,7 @@ import com.sap.sse.common.settings.value.Value;
  *
  */
 public abstract class AbstractSettings extends AbstractSetting implements Settings {
-    private transient SettingsValue value;
+    private SettingsValue value;
     private transient Map<String, Setting> childSettings;
 
     /**
