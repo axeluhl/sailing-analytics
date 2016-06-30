@@ -14,10 +14,10 @@ import com.sap.sse.common.settings.generic.UUIDSetSetting;
 
 public final class RegattaRaceStatesSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 7059340304556830062L;
-    private UUIDSetSetting visibleCourseAreas;
-    private StringSetSetting visibleRegattas;
-    private BooleanSetting showOnlyRacesOfSameDay;
-    private BooleanSetting showOnlyCurrentlyRunningRaces;
+    private transient UUIDSetSetting visibleCourseAreas;
+    private transient StringSetSetting visibleRegattas;
+    private transient BooleanSetting showOnlyRacesOfSameDay;
+    private transient BooleanSetting showOnlyCurrentlyRunningRaces;
 
     public RegattaRaceStatesSettings() {
     }
