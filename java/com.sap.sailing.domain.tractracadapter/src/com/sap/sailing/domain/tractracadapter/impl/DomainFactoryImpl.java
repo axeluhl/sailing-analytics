@@ -82,7 +82,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.util.WeakIdentityHashMap;
 import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
