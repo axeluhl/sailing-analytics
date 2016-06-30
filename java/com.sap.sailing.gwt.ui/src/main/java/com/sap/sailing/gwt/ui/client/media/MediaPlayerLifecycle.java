@@ -20,7 +20,7 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerSetti
 
     @Override
     public MediaPlayerSettings createDefaultSettings() {
-        return new MediaPlayerSettings();
+        return MediaPlayerSettings.readSettingsFromURL();
     }
 
     @Override

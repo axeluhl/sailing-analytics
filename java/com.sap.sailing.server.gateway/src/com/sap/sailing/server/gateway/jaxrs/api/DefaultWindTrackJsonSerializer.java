@@ -22,6 +22,20 @@ public class DefaultWindTrackJsonSerializer implements WindTrackJsonSerializer {
     private TimePoint toTime;
     private WindSource windSource;
     
+    /**
+     * -1 means unlimited.
+     */
+    private final int maxNumberOfFixes;
+    
+    public DefaultWindTrackJsonSerializer(int maxNumberOfFixes) {
+        super();
+        this.maxNumberOfFixes = maxNumberOfFixes;
+    }
+    
+    public DefaultWindTrackJsonSerializer() {
+        this(-1);
+    }
+
     public JSONObject serialize(WindTrack windTrack) {
         JSONObject result = new JSONObject();
         JSONArray jsonWindFixes = new JSONArray();
@@ -31,7 +45,8 @@ public class DefaultWindTrackJsonSerializer implements WindTrackJsonSerializer {
         windTrack.lockForRead();
         try {
             Iterator<Wind> windIter = windTrack.getFixesIterator(fromTime, /* inclusive */true, toTime, /* inclusive */ false);
-            while (windIter.hasNext()) {
+            int count = 0;
+            while ((maxNumberOfFixes == -1 || count<maxNumberOfFixes) && windIter.hasNext()) {
                 fixes.add(windIter.next());
             }
         } finally {

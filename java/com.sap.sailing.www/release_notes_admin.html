@@ -32,6 +32,31 @@
 			    accidentally String types with double-quoted values were used have been changed to
 			    numeric types, represented in the JSON documents without double quotes.
 			</li>
+			<li>It is now possible to use overlapping leaderboard groups in an event, such that one
+			    leaderboard can be part of more than one leaderboard group of the event. This comes in
+			    handy if there are different schemes by which the regattas or leaderboards may be grouped
+			    and is particularly useful for large events for filtering the regattas in the event
+			    overview. Please note that in case a leaderboard is part of a leaderboard group with
+			    an overall leaderboard ("series scoring"), the leaderboard group with the overall
+			    leaderboard must be provided as the first of the overlapping leaderboard groups in
+			    the scope of the event.
+			</li>
+			<li>Earlier releases have introduced an issue with leaderboard configuration and with binding
+			    tracked races to their leaderboard slots. When a filter is set for the tracked races list,
+			    changing the leaderboard selection or changing the race column selection such that the
+			    tracked race for a selected race column is not visible due to the filter, the connection
+			    between the race column and the tracked race is removed.<p>
+			    In order to reduce chances for failure, now at least changing the leaderboard selection
+			    will de-select any selected race column, making sure that nothing needs to be selected
+			    in the potentially filtered list of tracked races.<p>
+			    However, trouble remains: changing the tracked races filter while having a race column
+			    with a tracked race connected selected in the table on the left will unlink the race
+			    column's tracked race. As a workaround, you'll have to either de-select the race column
+			    in the left table before changing the filter, e.g., by Ctrl-clicking the race column
+			    selected. Or you remove any filter text for the tracked races list before you change
+			    the selection in the race column table. This will make sure that the race connected
+			    to the race column that you may select next will be available for automatic selection.
+			 </li>
                     </ul>
 
                     <h2 class="articleSubheadline">May 2016</h2>

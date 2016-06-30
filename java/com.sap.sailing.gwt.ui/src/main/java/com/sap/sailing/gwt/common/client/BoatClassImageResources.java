@@ -45,6 +45,9 @@ public interface BoatClassImageResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ALBIN_EXPRESS.png")
     ImageResource AlbinExpressIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ALBIN_BALLAD.png")
+    ImageResource AlbinBalladIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/B_ONE.png")
     ImageResource BOne();

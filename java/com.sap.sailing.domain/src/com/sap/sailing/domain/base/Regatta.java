@@ -12,9 +12,8 @@ import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
-import com.sap.sse.common.Named;
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.WithID;
 
 /**
  * The name shall be unique across all regattas tracked concurrently. In particular, if you want to keep apart regattas
@@ -23,7 +22,7 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Regatta extends Named, WithID, IsRegattaLike, HasRaceColumnsAndRegattaLike {
+public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike {
     ScoringScheme getScoringScheme();
 
     /**
