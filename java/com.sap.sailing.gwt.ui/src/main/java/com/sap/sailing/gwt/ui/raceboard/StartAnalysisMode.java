@@ -1,6 +1,12 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.Date;
+import java.util.Map;
+
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 
 /**
@@ -12,9 +18,19 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
  * @author Axel Uhl (d043530)
  *
  */
-public class StartAnalysisMode implements RaceBoardMode {
+public class StartAnalysisMode extends AbstractRaceBoardMode {
+
     @Override
-    public void applyTo(RaceBoardPanel raceBoardPanel) {
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
+            long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
         // TODO Auto-generated method stub
+        super.raceTimesInfosReceived(raceTimesInfo, clientTimeWhenRequestWasSent, serverTimeDuringRequest,
+                clientTimeWhenResponseWasReceived);
+    }
+
+    @Override
+    public void updatedLeaderboard(LeaderboardDTO leaderboard) {
+        // TODO Auto-generated method stub
+        super.updatedLeaderboard(leaderboard);
     }
 }
