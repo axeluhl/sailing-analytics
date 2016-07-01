@@ -2934,7 +2934,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 break;
             default:
-                throw new UnsupportedOperationException("Theres currently no support for the enum value '" + dataType
+                throw new UnsupportedOperationException("There is currently no support for the enum value '" + dataType
                         + "' in this method.");
             }
             return result;
