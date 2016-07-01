@@ -60,11 +60,15 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         raceName = Window.Location.getParameter(PARAM_RACE_NAME);
         final String modeName = Window.Location.getParameter(PARAM_MODE);
         RaceBoardMode mode;
-        try {
-            mode = RaceBoardModes.valueOf(modeName).getMode();
-        } catch (IllegalArgumentException e) {
-            GWT.log("Couldn't resolve RaceBoard mode "+modeName);
+        if (modeName == null) {
             mode = null;
+        } else {
+            try {
+                mode = RaceBoardModes.valueOf(modeName).getMode();
+            } catch (IllegalArgumentException e) {
+                GWT.log("Couldn't resolve RaceBoard mode " + modeName);
+                mode = null;
+            }
         }
         final RaceBoardMode finalMode = mode;
         String leaderboardNameParamValue = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);

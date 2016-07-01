@@ -439,6 +439,10 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         return raceMap;
     }
     
+    RegattaAndRaceIdentifier getSelectedRaceIdentifier() {
+        return selectedRaceIdentifier;
+    }
+    
     /**
      * Sets the collapsable panel for the leaderboard open or close, if in <code>CASCADE</code> view mode.<br />
      * Displays or hides the leaderboard, if in <code>ONESCREEN</code> view mode.<br /><br />
@@ -495,11 +499,11 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
         if (editMarkPassingPanel != null) {
-        editMarkPassingPanel.setLeaderboard(leaderboard);
+            editMarkPassingPanel.setLeaderboard(leaderboard);
         }
         if (editMarkPositionPanel != null) {
             editMarkPositionPanel.setLeaderboard(leaderboard);
-    }
+        }
     }
 
     @Override
