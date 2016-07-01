@@ -38,6 +38,11 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
     private static final String PARAM_EVENT_ID = "eventId";
     
+    /**
+     * Controls the predefined mode into which to switch or configure the race viewer. 
+     */
+    private static final String PARAM_MODE = "mode";
+    
     private String regattaName;
     private String raceName;
     private String leaderboardName;
@@ -53,6 +58,15 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         // read mandatory parameters
         regattaName = Window.Location.getParameter(PARAM_REGATTA_NAME);
         raceName = Window.Location.getParameter(PARAM_RACE_NAME);
+        final String modeName = Window.Location.getParameter(PARAM_MODE);
+        RaceBoardMode mode;
+        try {
+            mode = RaceBoardModes.valueOf(modeName).getMode();
+        } catch (IllegalArgumentException e) {
+            GWT.log("Couldn't resolve RaceBoard mode "+modeName);
+            mode = null;
+        }
+        final RaceBoardMode finalMode = mode;
         String leaderboardNameParamValue = Window.Location.getParameter(PARAM_LEADERBOARD_NAME);
         String leaderboardGroupNameParamValue = Window.Location.getParameter(PARAM_LEADERBOARD_GROUP_NAME);
         if (leaderboardNameParamValue != null && !leaderboardNameParamValue.isEmpty()) {
@@ -109,8 +123,10 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaName);
                     return;
                 }
-
-                createPerspectivePage(raceboardData, perspectiveSettings, showChartMarkEditMediaButtonsAndVideo);
+                final RaceBoardPanel raceBoardPanel = createPerspectivePage(raceboardData, perspectiveSettings, showChartMarkEditMediaButtonsAndVideo);
+                if (finalMode != null) {
+                    finalMode.applyTo(raceBoardPanel);
+                }
             }
             
             @Override
@@ -129,7 +145,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         vp.add(new Label(message));
     }
 
-    private void createPerspectivePage(RaceboardDataDTO raceboardData, RaceBoardPerspectiveSettings perspectiveSettings,
+    private RaceBoardPanel createPerspectivePage(RaceboardDataDTO raceboardData, RaceBoardPerspectiveSettings perspectiveSettings,
             boolean showChartMarkEditMediaButtonsAndVideo) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
@@ -151,7 +167,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,
                 leaderboardGroupName, eventId, RaceBoardEntryPoint.this, getStringMessages(), userAgent,
                 raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo);
-
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
+        return raceBoardPerspective;
     }  
 }
