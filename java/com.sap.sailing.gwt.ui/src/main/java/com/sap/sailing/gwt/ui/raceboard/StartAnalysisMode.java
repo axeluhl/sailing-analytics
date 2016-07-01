@@ -8,9 +8,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
@@ -40,6 +42,7 @@ public class StartAnalysisMode extends AbstractRaceBoardMode {
     private boolean leaderboardUpdateReveiced;
     private LeaderboardDTO leaderboard;
     private RaceTimesInfoDTO raceTimesInfo;
+    private RaceColumnDTO raceColumn;
 
     @Override
     public void applyTo(RaceBoardPanel raceBoardPanel) {
@@ -69,25 +72,21 @@ public class StartAnalysisMode extends AbstractRaceBoardMode {
     }
 
     private void showCompetitorChartIfAllDataReceived() {
-        if (leaderboardUpdateReveiced && raceTimesInfoReceived && leaderboard != null && leaderboard.competitors != null
+        if (raceColumn != null && leaderboardUpdateReveiced && raceTimesInfoReceived && leaderboard != null
+                && leaderboard.getCompetitorsFromBestToWorst(raceColumn) != null
                 && raceTimesInfo != null && raceTimesInfo.startOfRace != null) {
             final Set<CompetitorDTO> competitorsToSelect = new HashSet<>();
-            for (int i=0; i<3 && i<leaderboard.competitors.size(); i++) {
-                competitorsToSelect.add(leaderboard.competitors.get(i));
+            for (int i=0; i<3 && i<leaderboard.getCompetitorsFromBestToWorst(raceColumn).size(); i++) {
+                competitorsToSelect.add(leaderboard.getCompetitorsFromBestToWorst(raceColumn).get(i));
             }
-//            com.google.gwt.core.client.Scheduler.get().scheduleFinally(new ScheduledCommand() {
-//                @Override
-//                public void execute() {
-                    getRaceBoardPanel().setCompetitorChartVisible(true);
-                    getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(competitorsToSelect);
-                    MultiCompetitorRaceChartSettings newCompetitorChartSettings = new MultiCompetitorRaceChartSettings(
-                            new ChartSettings(/* stepSizeInMillis */ 1000), DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
-                    competitorChart.updateSettings(newCompetitorChartSettings);
-                    getRaceTimePanel().getTimeRangeProvider().setTimeZoom(
-                            new MillisecondsTimePoint(raceTimesInfo.startOfRace).minus(DURATION_BEFORE_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate(),
-                            new MillisecondsTimePoint(raceTimesInfo.startOfRace).plus(DURATION_AFTER_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate());
-//                }
-//            });
+            getRaceBoardPanel().setCompetitorChartVisible(true);
+            getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(competitorsToSelect);
+            MultiCompetitorRaceChartSettings newCompetitorChartSettings = new MultiCompetitorRaceChartSettings(
+                    new ChartSettings(/* stepSizeInMillis */ 1000), DetailType.CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+            competitorChart.updateSettings(newCompetitorChartSettings);
+            getRaceTimePanel().getTimeRangeProvider().setTimeZoom(
+                    new MillisecondsTimePoint(raceTimesInfo.startOfRace).minus(DURATION_BEFORE_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate(),
+                    new MillisecondsTimePoint(raceTimesInfo.startOfRace).plus(DURATION_AFTER_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate());
         }
     }
 
@@ -124,5 +123,10 @@ public class StartAnalysisMode extends AbstractRaceBoardMode {
         this.leaderboard = leaderboard;
         leaderboardUpdateReveiced = true;
         showCompetitorChartIfAllDataReceived();
+    }
+
+    @Override
+    public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
+        this.raceColumn = raceColumn;
     }
 }
