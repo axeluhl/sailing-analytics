@@ -235,7 +235,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             // If the time interval is too long and the step size too small, the number of fixes the query would have to
             // produce may exceed any reasonable limit. Therefore, we limit the number of fixes that such a query may ask
             // for:
-            long stepSize = Math.max(getStepSizeInMillis(), Math.abs(to.getTime()-from.getTime())/SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY);
+            long stepSize = (from==null||to==null)?getStepSizeInMillis() : Math.max(getStepSizeInMillis(), Math.abs(to.getTime()-from.getTime())/SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY);
             GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                     selectedRaceIdentifier, competitorsToLoad, from, to, stepSize, getSelectedDetailType(),
                     leaderboardGroupName, leaderboardName);

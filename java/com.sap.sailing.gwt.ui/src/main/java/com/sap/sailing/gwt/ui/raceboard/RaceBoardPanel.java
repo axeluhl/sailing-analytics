@@ -443,6 +443,10 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         return selectedRaceIdentifier;
     }
     
+    CompetitorSelectionProvider getCompetitorSelectionProvider() {
+        return competitorSelectionProvider;
+    }
+    
     /**
      * Sets the collapsable panel for the leaderboard open or close, if in <code>CASCADE</code> view mode.<br />
      * Displays or hides the leaderboard, if in <code>ONESCREEN</code> view mode.<br /><br />

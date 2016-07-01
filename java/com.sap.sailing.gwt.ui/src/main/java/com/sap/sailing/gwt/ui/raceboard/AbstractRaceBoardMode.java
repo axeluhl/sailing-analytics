@@ -29,9 +29,11 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
     private RegattaAndRaceIdentifier raceIdentifier;
     private RaceTimePanel raceTimePanel;
     private LeaderboardPanel leaderboardPanel;
+    private RaceBoardPanel raceBoardPanel;
     
     @Override
     public void applyTo(RaceBoardPanel raceBoardPanel) {
+        this.raceBoardPanel = raceBoardPanel;
         this.raceTimePanel = raceBoardPanel.getRaceTimePanel();
         this.raceTimePanel.addRaceTimesInfoProviderListener(this);
         this.leaderboardPanel = raceBoardPanel.getLeaderboardPanel();
@@ -54,6 +56,10 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
 
     protected LeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
+    }
+
+    protected RaceBoardPanel getRaceBoardPanel() {
+        return raceBoardPanel;
     }
 
     /**
