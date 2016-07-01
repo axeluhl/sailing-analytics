@@ -2946,7 +2946,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public CompetitorsRaceDataDTO getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
             final long stepSizeInMillis, final DetailType detailType, final String leaderboardGroupName, final String leaderboardName) throws NoWindException {
         final long adjustedStepSizeInMillis = Math.max(stepSizeInMillis, Math.abs(to.getTime()-from.getTime())/SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY);
-
         CompetitorsRaceDataDTO result = null;
         final TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
@@ -2954,6 +2953,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final TimePoint startTime = from == null ? trackedRace.getStartOfTracking() : new MillisecondsTimePoint(from);
             final TimePoint endTime = (to == null || to.after(newestEvent.asDate())) ? newestEvent : new MillisecondsTimePoint(to);
             result = new CompetitorsRaceDataDTO(detailType, startTime==null?null:startTime.asDate(), endTime==null?null:endTime.asDate());
+            final int MAX_CACHE_SIZE = SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY;
             final ConcurrentHashMap<TimePoint, WindLegTypeAndLegBearingCache> cachesByTimePoint = new ConcurrentHashMap<>();
             Map<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>> resultFutures = new HashMap<CompetitorDTO, FutureTask<CompetitorRaceDataDTO>>();
             for (final CompetitorDTO competitorDTO : competitors) {
@@ -2993,6 +2993,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                         WindLegTypeAndLegBearingCache cache = cachesByTimePoint.get(time);
                                         if (cache == null) {
                                             cache = new LeaderboardDTOCalculationReuseCache(time);
+                                            if (cachesByTimePoint.size() >= MAX_CACHE_SIZE) {
+                                                final Iterator<Entry<TimePoint, WindLegTypeAndLegBearingCache>> iterator = cachesByTimePoint.entrySet().iterator();
+                                                while (cachesByTimePoint.size() >= MAX_CACHE_SIZE && iterator.hasNext()) {
+                                                    iterator.next();
+                                                    iterator.remove();
+                                                }
+                                            }
                                             cachesByTimePoint.put(time, cache);
                                         }
                                         Double competitorRaceData = getCompetitorRaceDataEntry(detailType, trackedRace,
