@@ -106,6 +106,10 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         this.listeners.add(listener);
     }
     
+    public void removeRaceTimesInfoProviderListener(RaceTimesInfoProviderListener listener) {
+        this.listeners.remove(listener);
+    }
+    
     @Override
     protected boolean canReplayWhileLiveIsPossible() {
         return this.hasCanReplayDuringLiveRacesPermission;
