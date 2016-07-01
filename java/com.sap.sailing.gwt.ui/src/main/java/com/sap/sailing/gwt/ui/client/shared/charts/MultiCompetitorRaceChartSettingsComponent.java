@@ -61,7 +61,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
         mainPanel.add(chartTypeSelectionListBox);
 
         mainPanel.add(new Label(stringMessages.stepSizeInSeconds()));
-        stepSizeBox = dialog.createDoubleBox(((double) getSettings().getStepSize()) / 1000, 5);
+        stepSizeBox = dialog.createDoubleBox(((double) getSettings().getStepSizeInMillis()) / 1000, 5);
         mainPanel.add(stepSizeBox);
         
         return mainPanel;
