@@ -29,7 +29,7 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
 
     @Override
     public MultiCompetitorRaceChartSettings cloneSettings(MultiCompetitorRaceChartSettings settings) {
-        return new MultiCompetitorRaceChartSettings(new ChartSettings(settings.getStepSize()), settings.getDetailType());
+        return new MultiCompetitorRaceChartSettings(new ChartSettings(settings.getStepSizeInMillis()), settings.getDetailType());
     }
 
     @Override

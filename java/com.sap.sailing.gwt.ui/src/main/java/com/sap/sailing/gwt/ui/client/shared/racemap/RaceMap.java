@@ -410,7 +410,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public RaceMap(RaceMapLifecycle raceMapLifecycle, RaceMapSettings raceMapSettings, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, 
-            boolean isSimulationEnabled, boolean showHeaderPanel) {
+            boolean showHeaderPanel) {
         this.raceMapLifecycle = raceMapLifecycle;
         this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
@@ -419,7 +419,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
-        this.isSimulationEnabled = isSimulationEnabled;
+        this.isSimulationEnabled = true;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();

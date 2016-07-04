@@ -172,7 +172,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
         raceMap = new RaceMap(new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings, sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, 
                 StringMessages.INSTANCE, startAnalysisDTO.regattaAndRaceIdentifier,
-                raceMapResources, /* isSimulationEnabled */ false, /* showHeaderPanel */ true);
+                raceMapResources, /* showHeaderPanel */ true);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.setSize("100%", "100%");
         card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);

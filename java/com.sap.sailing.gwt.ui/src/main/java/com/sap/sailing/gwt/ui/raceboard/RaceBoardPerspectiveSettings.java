@@ -16,7 +16,6 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     private final boolean showCompetitorsChart;
     private final String activeCompetitorsFilterSetName;
     private final boolean canReplayDuringLiveRaces;
-    private final boolean simulationEnabled;
     private final Duration initialDurationAfterRaceStartInReplay;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
@@ -25,7 +24,6 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     public static final String PARAM_VIEW_SHOW_WINDCHART = "viewShowWindChart";
     public static final String PARAM_VIEW_SHOW_COMPETITORSCHART = "viewShowCompetitorsChart";
     public static final String PARAM_VIEW_SHOW_MAPCONTROLS = "viewShowMapControls";
-    public static final String PARAM_VIEW_SIMULATION_ENABLED = "viewSimulationEnabled";
     public static final String PARAM_VIEW_COMPETITOR_FILTER = "viewCompetitorFilter";
     public static final String PARAM_VIEW_CHART_SUPPORT_ENABLED = "viewChartSupportEnabled";
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
@@ -34,18 +32,16 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     public RaceBoardPerspectiveSettings() {
         this(/* activeCompetitorsFilterSetName */null, /* showLeaderboard */true,
         /* showWindChart */false, /* showCompetitorsChart */false, 
-        /* simulationEnabled */true, /* canReplayDuringLiveRaces */false, 
-        /* initialDurationAfterRaceStartInReplay */ null);
+        /* canReplayDuringLiveRaces */false, /* initialDurationAfterRaceStartInReplay */ null);
     }
 
     public RaceBoardPerspectiveSettings(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean simulationEnabled,
-            boolean canReplayDuringLiveRaces, Duration initialDurationAfterRaceStartInReplay) {
+            boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces,
+            Duration initialDurationAfterRaceStartInReplay) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
         this.showCompetitorsChart = showCompetitorsChart;
-        this.simulationEnabled = simulationEnabled;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
         this.initialDurationAfterRaceStartInReplay = initialDurationAfterRaceStartInReplay;
     }
@@ -56,10 +52,6 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
 
     public boolean isShowWindChart() {
         return showWindChart;
-    }
-
-    public boolean isSimulationEnabled() {
-        return simulationEnabled;
     }
 
     public boolean isShowCompetitorsChart() {
@@ -75,21 +67,17 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     }
 
     public static RaceBoardPerspectiveSettings readSettingsFromURL(boolean defaultForViewShowLeaderboard,
-            boolean defaultForViewShowWindchart, boolean defaultForViewSimulationEnabled,
-            boolean defaultForViewShowCompetitorsChart, String defaultForViewCompetitorFilter,
-            boolean defaultForCanReplayDuringLiveRaces) {
+            boolean defaultForViewShowWindchart, boolean defaultForViewShowCompetitorsChart,
+            String defaultForViewCompetitorFilter, boolean defaultForCanReplayDuringLiveRaces) {
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, defaultForViewShowLeaderboard /* default */);
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, defaultForViewShowWindchart /* default */);
-        final boolean simulationEnabled = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SIMULATION_ENABLED, defaultForViewSimulationEnabled /* default */);
         final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_COMPETITORSCHART, defaultForViewShowCompetitorsChart /* default */);
-        String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(PARAM_VIEW_COMPETITOR_FILTER, defaultForViewCompetitorFilter /* default */);
+        final String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(PARAM_VIEW_COMPETITOR_FILTER, defaultForViewCompetitorFilter /* default */);
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(PARAM_CAN_REPLAY_DURING_LIVE_RACES, defaultForCanReplayDuringLiveRaces /* default */);
-        
         final Duration initialDurationAfterRaceStartInReplay = parseDuration(GwtHttpRequestUtils.getStringParameter(
                 PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, null /* default */));
-
         return new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
-                showCompetitorsChart, simulationEnabled, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay);
+                showCompetitorsChart, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay);
     }
 
     public Duration getInitialDurationAfterRaceStartInReplay() {
