@@ -88,8 +88,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         // read optional parameters
         final RaceBoardPerspectiveSettings raceboardPerspectiveSettings = RaceBoardPerspectiveSettings
                 .readSettingsFromURL(/* defaultForViewShowLeaderboard */ true, /* defaultForViewShowWindchart */ true,
-                        /* defaultForViewSimulationEnabled */ false, /* defaultForViewShowCompetitorsChart */ false,
-                        /* defaultForViewCompetitorFilter */ null, /* defaultForCanReplayDuringLiveRaces */ false);
+                        /* defaultForViewShowCompetitorsChart */ false, /* defaultForViewCompetitorFilter */ null,
+                        /* defaultForCanReplayDuringLiveRaces */ false);
         final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
                 /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ true,
                 /* defaultForMapOrientationWindUp */ true, /* defaultForViewShowStreamlets */ false,
@@ -199,7 +199,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         }
         final RaceMap raceMap = new RaceMap(new RaceMapLifecycle(getStringMessages()), raceMapSettings, sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, getStringMessages(), selectedRaceIdentifier, raceMapResources,
-                raceboardPerspectiveSettings.isSimulationEnabled(), /* showHeaderPanel */ false) {
+                /* showHeaderPanel */ false) {
             @Override
             protected void showAdditionalControls(MapWidget map) {
                 backToLivePlayButton.removeFromParent();
