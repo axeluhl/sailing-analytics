@@ -95,8 +95,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         // read perspective settings parameters from URL
         final RaceBoardPerspectiveSettings perspectiveSettings = RaceBoardPerspectiveSettings.readSettingsFromURL(
                 /* defaultForViewShowLeaderboard */ true, /* defaultForViewShowWindchart */ false,
-                /* defaultForViewSimulationEnabled */ false, /* defaultForViewShowCompetitorsChart */ false,
-                /* defaultForViewCompetitorFilter */ null, /* defaultForCanReplayDuringLiveRaces */ false);
+                /* defaultForViewShowCompetitorsChart */ false, /* defaultForViewCompetitorFilter */ null,
+                /* defaultForCanReplayDuringLiveRaces */ false);
         // Determine if the charts, such as the competitor chart or the wind chart, the edit marks
         // panels, such as mark passing and mark position editors and manage media buttons should be shown. 
         // Automatic selection of attached video (if any) also depends on this flag.

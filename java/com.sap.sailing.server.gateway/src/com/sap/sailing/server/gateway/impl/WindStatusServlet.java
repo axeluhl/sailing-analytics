@@ -108,8 +108,8 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
                         igtimiConnections.clear();
                     }
                 }
-                isIgtimiListenerRegistered = registerIgtimiListener();
                 lastIgtimiMessages = new HashMap<String, Deque<IgtimiMessageInfo>>();
+                isIgtimiListenerRegistered = registerIgtimiListener();
                 igtimiRawMessageCount = 0;
             }
         }
