@@ -8,6 +8,7 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
@@ -110,5 +111,10 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     @Override
     public UserManagementServiceAsync getUserManagementService() {
         return clientFactory.getUserManagementService();
+    }
+    
+    @Override
+    public SailingDispatchSystem getDispatch() {
+        return clientFactory.getDispatch();
     }
 }

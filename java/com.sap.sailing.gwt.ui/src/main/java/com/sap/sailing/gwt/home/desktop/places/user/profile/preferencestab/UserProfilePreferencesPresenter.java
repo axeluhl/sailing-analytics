@@ -1,12 +1,16 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.preferencestab;
 
 import java.util.Arrays;
-import java.util.List;
 
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.ProvidesKey;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.CompetitorSuggestionResult;
+import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggestionAction;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractSuggestedMultiSelectionDataProvider;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionDataProvider;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionListDataProvider;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -23,7 +27,6 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
         view.setFavouriteBoatClasses(Arrays.asList(
                 BoatClassMasterdata.KIELZUGVOGEL,
                 BoatClassMasterdata.J22));
-        view.setFavouriteCompetitors(competitorsDummyData);
     }
 
     @Override
@@ -51,19 +54,29 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
     
     @Override
     public SuggestedMultiSelectionDataProvider<SimpleCompetitorDTO> getFavoriteCompetitorsDataProvider() {
-        SuggestedMultiSelectionListDataProvider<SimpleCompetitorDTO> dataProvider =
-                new SuggestedMultiSelectionListDataProvider<>(new ProvidesKey<SimpleCompetitorDTO>() {
+        return new AbstractSuggestedMultiSelectionDataProvider<SimpleCompetitorDTO>(new ProvidesKey<SimpleCompetitorDTO>() {
                     @Override
                     public Object getKey(SimpleCompetitorDTO item) {
                         return item.getSailID();
                     }
-                });
-        dataProvider.setSuggestionItems(competitorsDummyData);
-        return dataProvider;
+                }) {
+
+                @Override
+                protected void getSuggestions(String query, final SuggestionItemsCallback<SimpleCompetitorDTO> callback) {
+                    userProfilePresenter.getDispatch().execute(new GetCompetitorSuggestionAction(query, 20), 
+                        new AsyncCallback<CompetitorSuggestionResult>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Window.alert("Error while loading competitor suggestion");
+                            }
+
+                            @Override
+                            public void onSuccess(CompetitorSuggestionResult result) {
+                                callback.setSuggestionItems(result.getValues());
+                            }
+                        });
+                }
+        };
     }
     
-    private final List<SimpleCompetitorDTO> competitorsDummyData = Arrays.asList(
-            new SimpleCompetitorDTO("John Doe", "GBR001", "gb", null),
-            new SimpleCompetitorDTO("Max Mustermann", "GER001", "de", null),
-            new SimpleCompetitorDTO("Competitor with a long name to test wrapping in favourite list", "USA 1337", "us", null));
 }

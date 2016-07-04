@@ -4,6 +4,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
@@ -27,6 +28,7 @@ public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES ex
         AuthenticationManager getAuthenticationManager();
 
         UserManagementServiceAsync getUserManagementService();
+        SailingDispatchSystem getDispatch();
 
         String getMailVerifiedUrl();
     }
