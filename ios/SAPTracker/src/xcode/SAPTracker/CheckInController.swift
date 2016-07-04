@@ -246,14 +246,12 @@ class CheckInController : NSObject {
     private func eventName() -> String! { return stringFromEvent(forKey: EventKeys.Name) }
     private func eventStartDate() -> Double! { return doubleFromEvent(forKey: EventKeys.StartDate) }
     private func eventEndDate() -> Double! { return doubleFromEvent(forKey: EventKeys.EndDate) }
-    
     private func doubleFromEvent(forKey key: String) -> Double { return doubleFromDictionary(eventDictionary, forKey: key) }
     private func stringFromEvent(forKey key: String) -> String { return stringFromDictionary(eventDictionary, forKey: key) }
     
     // MARK: - Leaderboard
     
     private func leaderboardName() -> String! { return stringFromLeaderboard(forKey: LeaderboardKeys.Name) }
-    
     private func stringFromLeaderboard(forKey key: String) -> String { return stringFromDictionary(leaderboardDictionary, forKey: key) }
     
     // MARK: - Competitor
@@ -264,7 +262,6 @@ class CheckInController : NSObject {
     private func competitorName() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.Name) }
     private func competitorNationality() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.Nationality) }
     private func competitorSailID() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.SailID) }
-
     private func stringFromCompetitor(forKey key: String) -> String { return stringFromDictionary(competitorDictionary, forKey: key) }
     
     // MARK: - Helper

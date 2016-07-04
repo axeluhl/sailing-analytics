@@ -132,6 +132,22 @@ class RequestManager: NSObject {
         manager.POST(urlString, parameters: body, success: success, failure: failure)
     }
     
+    func postCheckOut(leaderboardName: String!,
+                      competitorId: String!,
+                      success:(AFHTTPRequestOperation!, AnyObject!) -> Void,
+                      failure: (AFHTTPRequestOperation!, AnyObject!) -> Void)
+    {
+        // Setup body
+        var body = [String: AnyObject]()
+        body[BodyKeys.CompetitorID] = competitorId
+        body[BodyKeys.DeviceUUID] = Preferences.uuid
+        body[BodyKeys.ToMillis] = millisSince1970()
+        
+        // Post body
+        let urlString = "\(basePathString)/leaderboards/\(leaderboardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/end"
+        manager.POST(urlString, parameters: body, success: success, failure: failure)
+    }
+    
     func postGPSFixes(gpsFixes: [GPSFix]!,
                       success: (AFHTTPRequestOperation!, AnyObject!) -> Void,
                       failure: (AFHTTPRequestOperation!, AnyObject!) -> Void)
@@ -152,22 +168,6 @@ class RequestManager: NSObject {
         
         // Post body
         let urlString = "\(basePathString)/gps_fixes"
-        manager.POST(urlString, parameters: body, success: success, failure: failure)
-    }
-    
-    func postCheckOut(leaderboardName: String!,
-                      competitorId: String!,
-                      success:(AFHTTPRequestOperation!, AnyObject!) -> Void,
-                      failure: (AFHTTPRequestOperation!, AnyObject!) -> Void)
-    {
-        // Setup body
-        var body = [String: AnyObject]()
-        body[BodyKeys.CompetitorID] = competitorId
-        body[BodyKeys.DeviceUUID] = Preferences.uuid
-        body[BodyKeys.ToMillis] = millisSince1970()
-        
-        // Post body
-        let urlString = "\(basePathString)/leaderboards/\(leaderboardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!)/device_mappings/end"
         manager.POST(urlString, parameters: body, success: success, failure: failure)
     }
     
