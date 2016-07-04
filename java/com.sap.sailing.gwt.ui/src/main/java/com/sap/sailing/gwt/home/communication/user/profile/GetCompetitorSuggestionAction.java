@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
@@ -15,6 +16,14 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
+/**
+ * {@link SailingAction} implementation to load competitor data to be shown in a suggestion box depending on the
+ * {@link #GetCompetitorSuggestionAction(String, int) given query string}, where the amount of loaded entries can be
+ * limited.
+ * 
+ * The given query string is matched against the competitor's {@link Competitor#getName() name} and
+ * {@link Boat#getSailID() sail-id} (which is determined from its {@link Competitor#getBoat() boat}, if any).
+ */
 public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSuggestionResult> {
     
     private String query;
@@ -33,6 +42,15 @@ public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSu
     private GetCompetitorSuggestionAction() {
     }
 
+    /**
+     * Creates a {@link GetCompetitorSuggestionAction} instance with the given query string, where the loaded competitor
+     * entries are limited to the provided amount.
+     * 
+     * @param query
+     *            query string to load competitors for
+     * @param limit
+     *            maximum number of competitor entries to be loaded
+     */
     public GetCompetitorSuggestionAction(String query, int limit) {
         this.query = query;
         this.limit = limit;
