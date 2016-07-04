@@ -106,4 +106,6 @@ public interface UserStore extends Named {
      * {@code username} no access token has previously been {@link #setAccessToken(String, String) set}.
      */
     String getAccessToken(String username);
+    
+//    void registerPreferenceConverter(String preferenceKey, PreferenceConverter<?> converter);
 }
