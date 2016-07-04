@@ -6,11 +6,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.view.client.ProvidesKey;
+
 public abstract class AbstractSuggestedMultiSelectionDataProvider<T> 
         implements SuggestedMultiSelectionDataProvider<T> {
     
+    private final ProvidesKey<T> keyProvider;
     private final Map<Object, T> selectedItemsMap = new HashMap<>();
     private boolean notificationsEnabled;
+    
+    protected AbstractSuggestedMultiSelectionDataProvider(ProvidesKey<T> keyProvider) {
+        this.keyProvider = keyProvider;
+    }
+    
+    @Override
+    public final Object getKey(T item) {
+        return keyProvider == null ? item : keyProvider.getKey(item);
+    }
     
     @Override
     public final void addSelection(T item) {

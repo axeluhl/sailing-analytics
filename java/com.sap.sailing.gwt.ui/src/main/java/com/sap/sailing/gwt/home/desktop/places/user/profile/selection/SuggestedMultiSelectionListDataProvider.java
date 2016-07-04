@@ -8,18 +8,12 @@ import com.google.gwt.view.client.ProvidesKey;
 
 public class SuggestedMultiSelectionListDataProvider<T> extends AbstractSuggestedMultiSelectionDataProvider<T> {
     
-    private final ProvidesKey<T> keyProvider;
     private final List<T> suggestionItemsList = new ArrayList<T>();
     
     public SuggestedMultiSelectionListDataProvider(ProvidesKey<T> keyProvider) {
-        this.keyProvider = keyProvider;
+        super(keyProvider);
     }
 
-    @Override
-    public Object getKey(T item) {
-        return keyProvider == null ? item : keyProvider.getKey(item);
-    }
-    
     public void setSuggestionItems(Collection<T> suggestionItems) {
         suggestionItemsList.clear();
         suggestionItemsList.addAll(suggestionItems);
