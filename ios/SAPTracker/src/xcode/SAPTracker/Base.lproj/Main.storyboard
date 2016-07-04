@@ -1512,7 +1512,7 @@ Cg
                                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                                 </userDefinedRuntimeAttributes>
                                                 <connections>
-                                                    <action selector="openEULA:" destination="WMr-pC-C12" eventType="touchUpInside" id="PhA-bf-yMV"/>
+                                                    <action selector="eulaButtonTapped:" destination="WMr-pC-C12" eventType="touchUpInside" id="zYu-4g-apZ"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -1603,7 +1603,7 @@ Cg
                     <navigationItem key="navigationItem" title="About" id="8o6-Yh-CuN">
                         <barButtonItem key="rightBarButtonItem" systemItem="done" id="Bw1-bK-skL">
                             <connections>
-                                <action selector="done:" destination="WMr-pC-C12" id="dtz-fc-tKq"/>
+                                <action selector="doneButtonTapped:" destination="WMr-pC-C12" id="3lp-4Z-r8w"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -1739,7 +1739,7 @@ Cg
                     <navigationItem key="navigationItem" title="Settings" id="SbA-xV-4ro">
                         <barButtonItem key="rightBarButtonItem" systemItem="done" id="Ta8-ro-B8t">
                             <connections>
-                                <action selector="done:" destination="H1Q-9y-gn2" id="ely-kW-9Sw"/>
+                                <action selector="doneButtonTapped:" destination="H1Q-9y-gn2" id="z8A-RW-CAd"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

@@ -52,4 +52,16 @@ class Preferences: NSObject {
         return uuid
     }()
     
+    // MARK: - BatterySaving
+    
+    class var batterySaving: Bool {
+        get {
+            return preferences.boolForKey(PreferenceKey.BatterySaving)
+        }
+        set(value) {
+            preferences.setBool(value, forKey: PreferenceKey.BatterySaving)
+            preferences.synchronize()
+        }
+    }
+    
 }

@@ -2,8 +2,8 @@
 //  SettingsViewController.swift
 //  SAPTracker
 //
-//  Created by computing on 10/11/14.
-//  Copyright (c) 2014 com.sap.sailing. All rights reserved.
+//  Created by Raimund Wege on 04.07.16.
+//  Copyright © 2016 com.sap.sailing. All rights reserved.
 //
 
 import Foundation
@@ -15,20 +15,32 @@ class SettingsViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        batterySavingSwitch.setOn(BatteryManager.sharedManager.batterySavingPreference, animated: true)
-		
-		// add logo to top left
-		let imageView = UIImageView(image: UIImage(named: "sap_logo"))
-		let barButtonItem = UIBarButtonItem(customView: imageView)
-		navigationItem.leftBarButtonItem = barButtonItem
-        self.deviceIdentifierLabel.text = Preferences.uuid
-    }
-
-    @IBAction func batterySavingChanged(sender: UISwitch) {
-        BatteryManager.sharedManager.batterySavingPreference = sender.on
+        setupBatterySavingSwitch()
+        setupDeviceIdentifierLabel()
+        setupNavigationBar()
     }
     
-    @IBAction func done(sender: AnyObject) {
+    // MARK: - Setups
+    
+    private func setupBatterySavingSwitch() {
+        batterySavingSwitch.setOn(Preferences.batterySaving, animated: true)
+    }
+    
+    private func setupDeviceIdentifierLabel() {
+        deviceIdentifierLabel.text = Preferences.uuid
+    }
+    
+    private func setupNavigationBar() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+    }
+    
+    // MARK: - Actions
+
+    @IBAction func batterySavingChanged(sender: UISwitch) {
+        Preferences.batterySaving = sender.on
+    }
+    
+    @IBAction func doneButtonTapped(sender: AnyObject) {
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
