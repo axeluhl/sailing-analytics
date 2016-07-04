@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		066B0DF652B5D2B188D4884B /* libPods-SAPTracker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B1229BB88872CD20C0AE25DE /* libPods-SAPTracker.a */; };
-		7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F03FD3D19FA44CD00FA1327 /* APIManager.swift */; };
 		7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FC19F7D6700077FF95 /* ScanViewController.swift */; };
 		7F0658FF19F7EE910077FF95 /* CheckInData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* CheckInData.swift */; };
 		7F14A10A1A13B9A6001C1ECB /* _abkhazia.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0041A13B9A6001C1ECB /* _abkhazia.png */; };
@@ -390,7 +389,6 @@
 		5329E51BA6042883841739D8 /* Pods-SAPTracker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SAPTracker.release.xcconfig"; path = "Pods/Target Support Files/Pods-SAPTracker/Pods-SAPTracker.release.xcconfig"; sourceTree = "<group>"; };
 		5D42C68EBF1EC67243A7A621 /* Pods-SAPTracker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SAPTracker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SAPTracker/Pods-SAPTracker.debug.xcconfig"; sourceTree = "<group>"; };
 		6010190FF03AFE91478240B4 /* Pods-SAPTrackerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SAPTrackerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SAPTrackerTests/Pods-SAPTrackerTests.debug.xcconfig"; sourceTree = "<group>"; };
-		7F03FD3D19FA44CD00FA1327 /* APIManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = APIManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F03FD3F19FA4D7400FA1327 /* bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = "<group>"; };
 		7F0658FC19F7D6700077FF95 /* ScanViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScanViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F0658FE19F7EE910077FF95 /* CheckInData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CheckInData.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -797,7 +795,6 @@
 			children = (
 				C8739D8A1D22CCDB00A89F3C /* GPSFixes */,
 				C852BAA61CF5E1F40093B0C5 /* CheckIn */,
-				7F03FD3D19FA44CD00FA1327 /* APIManager.swift */,
 				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
 			);
 			name = DataController;
@@ -1859,7 +1856,6 @@
 				C89C5FD01D06CF46002AAAD2 /* ModeTrackingTableViewCell.swift in Sources */,
 				C8739DB71D2539A900A89F3C /* GPSFix+CoreDataProperties.swift in Sources */,
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
-				7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */,
 				7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */,
 				C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */,
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
