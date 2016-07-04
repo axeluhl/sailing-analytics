@@ -1073,15 +1073,6 @@
 			path = flags;
 			sourceTree = "<group>";
 		};
-		7F72C7401A2DEA3300F48EE8 /* Helpers */ = {
-			isa = PBXGroup;
-			children = (
-				7FD9D3021A1236080058FEAD /* Extensions.swift */,
-				9E95C3D51C723AB30016632B /* Constants.swift */,
-			);
-			name = Helpers;
-			sourceTree = "<group>";
-		};
 		7F83F14719F154F000C53328 = {
 			isa = PBXGroup;
 			children = (
@@ -1108,18 +1099,8 @@
 			isa = PBXGroup;
 			children = (
 				7F83F15519F154F000C53328 /* AppDelegate.swift */,
-				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
-				7F83F15919F154F000C53328 /* Main.storyboard */,
-				7F87DDDD1A97339300704AC4 /* Localizable.strings */,
-				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
+				C8739DC71D2A653F00A89F3C /* Classes */,
 				C89C60131D0FF61E002AAAD2 /* Resources */,
-				C89C5FC31D06A269002AAAD2 /* Views */,
-				C852BAA91CF736440093B0C5 /* Preferences */,
-				C8739D8B1D23C01500A89F3C /* Managers */,
-				7F72C7401A2DEA3300F48EE8 /* Helpers */,
-				7F06590119F7FE920077FF95 /* ViewController */,
-				7F06590219F7FEA40077FF95 /* DataController */,
-				7F06590019F7FE750077FF95 /* CoreData */,
 				7F83F15319F154F000C53328 /* Supporting Files */,
 			);
 			path = SAPTracker;
@@ -1128,6 +1109,12 @@
 		7F83F15319F154F000C53328 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
+				7F83F15919F154F000C53328 /* Main.storyboard */,
+				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
+				7F87DDDD1A97339300704AC4 /* Localizable.strings */,
+				7FD9D3021A1236080058FEAD /* Extensions.swift */,
+				9E95C3D51C723AB30016632B /* Constants.swift */,
 				C8603D491C528832002B2F28 /* Acknowledgements.markdown */,
 				7F83F15419F154F000C53328 /* Info.plist */,
 				7F03FD3F19FA4D7400FA1327 /* bridge.h */,
@@ -1204,9 +1191,38 @@
 			isa = PBXGroup;
 			children = (
 				C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */,
-				7F2C605919F160E400C32D93 /* LocationManager.swift */,
 			);
 			name = Managers;
+			sourceTree = "<group>";
+		};
+		C8739DC51D2A64EF00A89F3C /* EULA */ = {
+			isa = PBXGroup;
+			children = (
+				7F87DDE21A973C7400704AC4 /* eula-ios.html */,
+			);
+			name = EULA;
+			sourceTree = "<group>";
+		};
+		C8739DC61D2A650E00A89F3C /* Location */ = {
+			isa = PBXGroup;
+			children = (
+				7F2C605919F160E400C32D93 /* LocationManager.swift */,
+			);
+			name = Location;
+			sourceTree = "<group>";
+		};
+		C8739DC71D2A653F00A89F3C /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				7F06590019F7FE750077FF95 /* CoreData */,
+				7F06590219F7FEA40077FF95 /* DataController */,
+				C8739DC61D2A650E00A89F3C /* Location */,
+				C8739D8B1D23C01500A89F3C /* Managers */,
+				C852BAA91CF736440093B0C5 /* Preferences */,
+				7F06590119F7FE920077FF95 /* ViewController */,
+				C89C5FC31D06A269002AAAD2 /* Views */,
+			);
+			name = Classes;
 			sourceTree = "<group>";
 		};
 		C89C5FC31D06A269002AAAD2 /* Views */ = {
@@ -1263,7 +1279,7 @@
 		C89C60131D0FF61E002AAAD2 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				7F87DDE21A973C7400704AC4 /* eula-ios.html */,
+				C8739DC51D2A64EF00A89F3C /* EULA */,
 				7F14A0031A13B9A6001C1ECB /* Flags */,
 				C89C60141D0FF63C002AAAD2 /* Fonts */,
 			);
