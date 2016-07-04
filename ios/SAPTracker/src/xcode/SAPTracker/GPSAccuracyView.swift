@@ -53,12 +53,12 @@ class GPSAccuracyView : UIView {
     
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(newLocation(_:)),
-                                                         name:LocationManager.NotificationType.newLocation,
+                                                         selector:#selector(locationManagerUpdated(_:)),
+                                                         name:LocationManager.NotificationType.LocationManagerUpdated,
                                                          object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector:#selector(locationManagerFailed(_:)),
-                                                         name:LocationManager.NotificationType.locationManagerFailed,
+                                                         name:LocationManager.NotificationType.LocationManagerFailed,
                                                          object: nil)
     }
     
@@ -66,13 +66,16 @@ class GPSAccuracyView : UIView {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func newLocation(notification: NSNotification) {
-        let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as! Double
-        drawBar(horizontalAccuracy)
+    func locationManagerUpdated(notification: NSNotification) {
+        dispatch_async(dispatch_get_main_queue(), {
+            self.drawBar(notification.userInfo![LocationManager.UserInfo.HorizontalAccuracy] as! Double)
+        })
     }
     
     func locationManagerFailed(notification: NSNotification) {
-        drawBar(-1.0)
+        dispatch_async(dispatch_get_main_queue(), {
+            self.drawBar(-1.0)
+        })
     }
     
     // MARK: - Draw

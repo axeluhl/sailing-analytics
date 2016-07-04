@@ -15,34 +15,34 @@ class GPSAccuracyTrackingTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        self.setupGPSAccuracyLabel()
-        self.subscribeForNotifications()
+        setupGPSAccuracyLabel()
+        subscribeForNotifications()
     }
     
     deinit {
-        self.unsubscribeFromNotifications()
+        unsubscribeFromNotifications()
     }
     
     // MARK: - Setups
     
     private func setupGPSAccuracyLabel() {
-        self.gpsAccuracyLabel.text = NSLocalizedString("No GPS", comment: "")
+        gpsAccuracyLabel.text = NSLocalizedString("No GPS", comment: "")
     }
     
     private func setupGPSAccuracyLabel(horizontalAccuracy: Double!) {
-        self.gpsAccuracyLabel.text = "~ " + String(format: "%.0f", horizontalAccuracy) + " m"
+        gpsAccuracyLabel.text = "~ " + String(format: "%.0f", horizontalAccuracy) + " m"
     }
     
     // MARK: - Notifications
     
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(newLocation),
-                                                         name:LocationManager.NotificationType.newLocation,
+                                                         selector:#selector(locationManagerUpdated(_:)),
+                                                         name:LocationManager.NotificationType.LocationManagerUpdated,
                                                          object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(locationManagerFailed),
-                                                         name:LocationManager.NotificationType.locationManagerFailed,
+                                                         selector:#selector(locationManagerFailed(_:)),
+                                                         name:LocationManager.NotificationType.LocationManagerFailed,
                                                          object: nil)
     }
     
@@ -50,10 +50,9 @@ class GPSAccuracyTrackingTableViewCell: UITableViewCell {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func newLocation(notification: NSNotification) {
+    func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
-            let horizontalAccuracy = notification.userInfo!["horizontalAccuracy"] as! Double
-            self.setupGPSAccuracyLabel(horizontalAccuracy)
+            self.setupGPSAccuracyLabel(notification.userInfo![LocationManager.UserInfo.HorizontalAccuracy] as! Double)
         })
     }
     

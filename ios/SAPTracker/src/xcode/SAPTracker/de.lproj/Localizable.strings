@@ -29,6 +29,7 @@
 "Couldn't load about view" = "Fenster konnte nicht geladen werden.";
 /* RegattaViewController */
 "Camera" = "Kamera";
+"Replace Team Photo" = "Team Foto ersetzen";
 "Photo Library" = "Fotos";
 "Last sync" = "Letzter Update";
 "Start Tracking" = "Tracking starten";

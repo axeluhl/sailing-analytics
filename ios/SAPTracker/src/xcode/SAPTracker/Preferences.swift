@@ -11,45 +11,45 @@ import UIKit
 class Preferences: NSObject {
 
     struct PreferenceKey {
-        static let lastCheckInURLString = "lastCheckInURLString"
-        static let acceptedTerms = "acceptedTerms"
-        static let uuid = "udid"
+        static let BatterySaving = "BatterySaving"
+        static let LastCheckInURLString = "lastCheckInURLString"
+        static let AcceptedTerms = "acceptedTerms"
+        static let UUID = "udid"
     }
     
     private static let preferences = NSUserDefaults.standardUserDefaults()
     
     // MARK: - LastCheckInData
     
-    class func setLastCheckInURLString(urlString: String?) {
-        self.preferences.setObject(urlString, forKey: PreferenceKey.lastCheckInURLString)
-        self.preferences.synchronize()
-    }
-    
-    class func lastCheckInURLString() -> String? {
-        return self.preferences.stringForKey(PreferenceKey.lastCheckInURLString)
+    class var lastCheckInURLString: String? {
+        get {
+            return preferences.stringForKey(PreferenceKey.LastCheckInURLString)
+        }
+        set(value) {
+            preferences.setObject(value, forKey: PreferenceKey.LastCheckInURLString)
+            preferences.synchronize()
+        }
     }
     
     // MARK: - AcceptedTerms
     
-    class func acceptedTerms() -> Bool {
-        return self.preferences.boolForKey(PreferenceKey.acceptedTerms)
-    }
-    
-    class func setAcceptedTerms(value: Bool) {
-        self.preferences.setBool(value, forKey:PreferenceKey.acceptedTerms)
-        self.preferences.synchronize()
+    class var acceptedTerms: Bool {
+        get {
+            return preferences.boolForKey(PreferenceKey.AcceptedTerms)
+        }
+        set(value) {
+            preferences.setBool(value, forKey:PreferenceKey.AcceptedTerms)
+            preferences.synchronize()
+        }
     }
     
     // MARK: - UUID
-    
-    private static var UUID: String?
-    class func uuid() -> String {
-        if UUID == nil {
-            UUID = self.preferences.stringForKey(PreferenceKey.uuid) ?? NSUUID().UUIDString.lowercaseString
-            preferences.setObject(UUID, forKey: PreferenceKey.uuid)
-            preferences.synchronize()
-        }
-        return UUID!
-    }
+
+    static private(set) var uuid: String? = {
+        let uuid = preferences.stringForKey(PreferenceKey.UUID) ?? NSUUID().UUIDString.lowercaseString
+        preferences.setObject(uuid, forKey: PreferenceKey.UUID)
+        preferences.synchronize()
+        return uuid
+    }()
     
 }

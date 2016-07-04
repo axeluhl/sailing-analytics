@@ -34,12 +34,12 @@ class StatusTrackingTableViewCell: UITableViewCell {
     
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(newLocation),
-                                                         name:LocationManager.NotificationType.newLocation,
+                                                         selector:#selector(locationManagerUpdated(_:)),
+                                                         name:LocationManager.NotificationType.LocationManagerUpdated,
                                                          object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(locationManagerFailed),
-                                                         name:LocationManager.NotificationType.locationManagerFailed,
+                                                         selector:#selector(locationManagerFailed(_:)),
+                                                         name:LocationManager.NotificationType.LocationManagerFailed,
                                                          object: nil)
     }
     
@@ -47,7 +47,7 @@ class StatusTrackingTableViewCell: UITableViewCell {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func newLocation(notification: NSNotification) {
+    func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             self.setupStatusLabel(true)
         })

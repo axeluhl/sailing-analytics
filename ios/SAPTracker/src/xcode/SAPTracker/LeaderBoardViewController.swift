@@ -10,15 +10,16 @@ import Foundation
 
 class LeaderBoardViewController: UIViewController, UIWebViewDelegate, UIAlertViewDelegate {
     
+    weak var checkIn: CheckIn?
+    
     @IBOutlet weak var webView: UIWebView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let serverUrl = DataManager.sharedManager.selectedCheckIn!.serverUrl
-        let eventId = DataManager.sharedManager.selectedCheckIn!.eventId
-        let leaderBoardName = DataManager.sharedManager.selectedCheckIn!.leaderBoardName.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
-        let url = "\(serverUrl)/gwt/Leaderboard.html?name=\(leaderBoardName)&showRaceDetails=false&embedded=true&hideToolbar=true"
+        let serverUrl = self.checkIn?.serverURL
+        let leaderboardName = self.checkIn?.leaderboardName?.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
+        let url = "\(serverUrl)/gwt/Leaderboard.html?name=\(leaderboardName)&showRaceDetails=false&embedded=true&hideToolbar=true"
         webView!.loadRequest(NSURLRequest(URL: NSURL(string: url)!))
     }
     

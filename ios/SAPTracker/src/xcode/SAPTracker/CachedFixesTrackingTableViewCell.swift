@@ -10,6 +10,8 @@ import UIKit
 
 class CachedFixesTrackingTableViewCell: UITableViewCell {
 
+    var checkIn: CheckIn?
+    
     @IBOutlet weak var cachedFixesLabel: UILabel!
     
     override func awakeFromNib() {
@@ -25,15 +27,15 @@ class CachedFixesTrackingTableViewCell: UITableViewCell {
     // MARK: - Setups
     
     private func setupCachedFixesLabel() {
-        self.cachedFixesLabel.text = String(format: "%d", DataManager.sharedManager.countCachedFixes())
+        self.cachedFixesLabel.text = String(format: "%d", checkIn?.gpsFixes?.count ?? 0)
     }
     
     // MARK: - Notifications
     
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(newLocation),
-                                                         name:LocationManager.NotificationType.newLocation,
+                                                         selector:#selector(locationManagerUpdated(_:)),
+                                                         name:LocationManager.NotificationType.LocationManagerUpdated,
                                                          object: nil)
     }
     
@@ -41,7 +43,7 @@ class CachedFixesTrackingTableViewCell: UITableViewCell {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func newLocation(notification: NSNotification) {
+    func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             self.setupCachedFixesLabel()
         })

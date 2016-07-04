@@ -16,7 +16,7 @@ class CourseViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.setupCourseLabel()
+        self.setupCourseLabel(-1.0)
         self.subscribeForNotifications()
     }
 
@@ -26,16 +26,16 @@ class CourseViewController: UIViewController {
     
     // MARK: - Setups
     
-    private func setupCourseLabel() {
-        self.courseLabel.text = defaultCourseText
+    private func setupCourseLabel(course: Double) {
+        self.courseLabel.text = course < 0 ? defaultCourseText : String(format: "%.0f °", course)
     }
     
     // MARK: - Notifications
     
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(newLocation),
-                                                         name:LocationManager.NotificationType.newLocation,
+                                                         selector:#selector(locationManagerUpdated(_:)),
+                                                         name:LocationManager.NotificationType.LocationManagerUpdated,
                                                          object: nil)
     }
     
@@ -43,9 +43,10 @@ class CourseViewController: UIViewController {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func newLocation(notification: NSNotification) {
-        let course = notification.userInfo!["course"] as! Double
-        self.courseLabel.text = course < 0 ? defaultCourseText : String(format: "%.0f °", course)
+    func locationManagerUpdated(notification: NSNotification) {
+        dispatch_async(dispatch_get_main_queue(), {
+            self.setupCourseLabel(notification.userInfo![LocationManager.UserInfo.Course] as! Double)
+        })
     }
     
 }

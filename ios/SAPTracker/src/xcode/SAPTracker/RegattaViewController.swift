@@ -10,27 +10,19 @@ import Foundation
 import CoreLocation
 import Darwin
 
-class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate {
+class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     
-    enum ActionSheet: Int {
-        case Menu
+    private struct TeamImageKeys {
+        static let TeamImageURL = "teamImageUri"
     }
     
-    enum AlertView: Int {
-        case CheckOut, Image, UploadFailed
-    }
-	
-	struct RegattaViewUserDefaults {
-		static let UploadDidFail = "UploadDidFail"
-	}
-	    
     var sourceTypes = [UIImagePickerControllerSourceType]()
     var sourceTypeNames = [String]()
     
     @IBOutlet weak var teamImageView: UIImageView!
     @IBOutlet weak var teamImageAddButton: UIButton!
     @IBOutlet weak var teamImageEditButton: UIButton!
-	@IBOutlet weak var teamImageRetryButton: UIButton!
+    @IBOutlet weak var teamImageRetryButton: UIButton!
     @IBOutlet weak var competitorNameLabel: UILabel!
     @IBOutlet weak var competitorFlagImageView: UIImageView!
     @IBOutlet weak var competitorSailLabel: UILabel!
@@ -45,54 +37,46 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var startTrackingButton: UIButton!
     @IBOutlet weak var announcementsLabel: UILabel!
     
-    let secondsInDay: Double = 60 * 60 * 24
-    let secondsInHour: Double = 60 * 60
-    var timer: NSTimer?
-	
-	var uploadKey: String {
-		return RegattaViewUserDefaults.UploadDidFail + "_" + DataManager.sharedManager.selectedCheckIn!.competitorId
-	}
+    var checkIn: CheckIn!
+    var requestManager: RequestManager!
+    
+    var countdownTimer: NSTimer?
     
     override func viewDidLoad() {
-        
-        // set values
-        navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
-
-        self.eventButton.setTitle(NSLocalizedString("Show Event", comment: ""), forState: UIControlState.Normal)
-		
-		self.teamImageRetryButton.hidden = !NSUserDefaults.standardUserDefaults().boolForKey(uploadKey)
-        
-        // Set regatta image, either load it from server or load from core data
-        if DataManager.sharedManager.selectedCheckIn?.userImage != nil {
-            self.teamImageView.image = UIImage(data:  DataManager.sharedManager.selectedCheckIn!.userImage!)
-            self.teamImageAddButton.hidden = true
-        } else if DataManager.sharedManager.selectedCheckIn?.imageUrl != nil {
-            let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl!)
-            let urlRequest = NSURLRequest(URL: imageUrl!)
-            self.teamImageView.setImageWithURLRequest(urlRequest,
-                                                      placeholderImage: nil,
-                                                      success: { (request:NSURLRequest!,response:NSHTTPURLResponse!, image:UIImage!) -> Void in
-                    self.teamImageView.image = image
-                    self.teamImageAddButton.hidden = true
-                },
-                failure: { (request:NSURLRequest!,response:NSHTTPURLResponse!, error:NSError!) -> Void in
-                    self.teamImageEditButton.hidden = true
-					self.teamImageAddButton.hidden = !self.teamImageRetryButton.hidden
-                }
-            )
-        } else {
-            self.teamImageEditButton.hidden = true
-			self.teamImageAddButton.hidden = !self.teamImageRetryButton.hidden
-        }
-        if (DataManager.sharedManager.selectedCheckIn?.competitor != nil) {
-            let competitor = DataManager.sharedManager.selectedCheckIn!.competitor!
-            self.competitorNameLabel.text = competitor.name
-            self.competitorFlagImageView.image = UIImage(named: competitor.countryCode)
-            self.competitorSailLabel.text = competitor.sailId
-        }
-        checkRegattaStatus()
-        
-        // get image sources
+        super.viewDidLoad()
+        requestManager = RequestManager(baseURLString: checkIn!.serverURL)
+        setupButtons()
+        setupCompetitor()
+        setupCountdownTimer()
+        setupImageSourceTypes()
+        setupTeamImage()
+    }
+    
+    // MARK: - Setups
+    
+    private func setupButtons() {
+        eventButton.setBackgroundImage(Images.BlueHighlighted, forState: .Highlighted)
+        leaderboardButton.setBackgroundImage(Images.BlueHighlighted, forState: .Highlighted)
+        startTrackingButton.setBackgroundImage(Images.GreenHighlighted, forState: .Highlighted)
+    }
+    
+    private func setupCompetitor() {
+        competitorNameLabel.text = checkIn?.competitor?.name ?? ""
+        competitorFlagImageView.image = UIImage(named: checkIn?.competitor?.countryCode ?? "")
+        competitorSailLabel.text = checkIn?.competitor?.sailID ?? ""
+    }
+    
+    private func setupCountdownTimer() {
+        countdownTimer?.invalidate()
+        countdownTimer = NSTimer.scheduledTimerWithTimeInterval(60,
+                                                                target: self,
+                                                                selector: #selector(RegattaViewController.refreshCountdown),
+                                                                userInfo: nil,
+                                                                repeats: true)
+        refreshCountdown()
+    }
+    
+    private func setupImageSourceTypes() {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
             sourceTypes.append(UIImagePickerControllerSourceType.Camera)
             sourceTypeNames.append(NSLocalizedString("Camera", comment: ""))
@@ -101,124 +85,136 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             sourceTypes.append(UIImagePickerControllerSourceType.PhotoLibrary)
             sourceTypeNames.append(NSLocalizedString("Photo Library", comment: ""))
         }
-        
-        // point to events API server
-        APIManager.sharedManager.initManager(DataManager.sharedManager.selectedCheckIn!.serverUrl)
-        
-        super.viewDidLoad()
     }
     
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
-    }
-    
-    override func viewWillDisappear(animated: Bool) {
-        super.viewWillDisappear(animated)
-        timer?.invalidate()
-    }
-    
-    override func didRotateFromInterfaceOrientation(fromInterfaceOrientation: UIInterfaceOrientation) {
-        checkRegattaStatus()
-    }
-    
-    // MARK: -
-    func checkRegattaStatus() {
-        if DataManager.sharedManager.selectedCheckIn == nil {
-            return
-        }
-        
-        let now = NSDate()
-        
-        // reset views
-        startTrackingButton.setTitle(NSLocalizedString("Start Tracking", comment: ""), forState: UIControlState.Normal)
-        announcementsLabel.text = NSLocalizedString("Please listen for announcements", comment: "")
-        
-        if DataManager.sharedManager.selectedCheckIn?.event != nil {
-            let event = DataManager.sharedManager.selectedCheckIn!.event!
-            
-            // before race
-            if now.timeIntervalSinceDate(event.startDate) < 0 {
-                self.regattaStartLabel.text = NSLocalizedString("Regatta will start in", comment: "")
-
-                let delta = floor(now.timeIntervalSinceDate(event.startDate)) * -1
-                let days = floor(delta / secondsInDay)
-                let hours = floor((delta - days * secondsInDay) / secondsInHour)
-                let minutes = floor((delta - days * secondsInDay - hours * secondsInHour) / 60.0)
-                self.countdownDaysLabel.text = String(format: "%02d", Int(days))
-                self.countdownHoursLabel.text = String(format: "%02d", Int(hours))
-                self.countdownMinutesLabel.text = String(format: "%02d", Int(minutes))
-                self.countdownView.hidden = false
-                self.countdownViewHeight.constant = 60
-                timer?.invalidate()
-                timer = NSTimer(timeInterval: 60,
-                                target: self,
-                                selector: #selector(RegattaViewController.checkRegattaStatus),
-                                userInfo: nil,
-                                repeats: false)
-                NSRunLoop.currentRunLoop().addTimer(timer!, forMode:NSRunLoopCommonModes)
-            }
-                // during race
-            else {
-                self.regattaStartLabel.text = NSLocalizedString("Regatta in progress", comment: "")
-                self.countdownView.hidden = true
-                self.countdownViewHeight.constant = 0
-            }
+    private func setupTeamImage() {
+        if checkIn.teamImageData != nil {
+            setupTeamImageWithImageData(checkIn.teamImageData)
+        } else if checkIn.teamImageURL != nil {
+            setupTeamImageWithURL(checkIn.teamImageURL)
+        } else {
+            setupTeamImageFinished()
         }
     }
     
-    @IBAction func showEvent(sender: UIButton) {
-        let serverUrl = DataManager.sharedManager.selectedCheckIn!.serverUrl
-        let eventId = DataManager.sharedManager.selectedCheckIn!.eventId
-
-        let url = "\(serverUrl)/gwt/Home.html?navigationTab=Regattas#EventPlace:eventId=\(eventId)"
-        UIApplication.sharedApplication().openURL(NSURL(string: url)!)
+    private func setupTeamImageWithImageData(data: NSData!) {
+        teamImageView.image = UIImage(data: data)
+        setupTeamImageFinished()
+    }
+    
+    private func setupTeamImageWithURL(urlString: String!) {
+        if let url = NSURL(string: urlString) {
+            teamImageView.setImageWithURLRequest(NSURLRequest(URL: url),
+                                                 placeholderImage: nil,
+                                                 success: { (request, response, image) in self.setupTeamImageWithURLSuccess(image) },
+                                                 failure: { (request, response, error) in self.setupTeamImageWithURLFailure() })
+        } else {
+            setupTeamImageFinished()
+        }
+    }
+    
+    private func setupTeamImageWithURLSuccess(image: UIImage) {
+        teamImageView.image = image
+        checkIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
+        checkIn.teamImageRetry = false
+        DataManager.sharedManager.saveContext()
+        setupTeamImageFinished()
     }
 
-
-    // MARK: - Menu
+    private func setupTeamImageWithURLFailure() {
+        setupTeamImageFinished()
+    }
+    
+    private func setupTeamImageFinished() {
+        if checkIn.teamImageData != nil {
+            teamImageAddButton.hidden = true
+            teamImageEditButton.hidden = checkIn.teamImageRetry
+            teamImageRetryButton.hidden = !teamImageEditButton.hidden
+        } else {
+            teamImageAddButton.hidden = false
+            teamImageEditButton.hidden = true
+            teamImageRetryButton.hidden = true
+        }
+    }
+    
+    // MARK: - Refresh
+    
+    func refreshCountdown() {
+        if let event = checkIn.event {
+            if event.startDate - NSDate().timeIntervalSince1970 > 0 {
+                regattaStartLabel.text = NSLocalizedString("Regatta will start in", comment: "")
+                let duration = event.startDate - NSDate().timeIntervalSince1970
+                let days = Int(duration / (60 * 60 * 24))
+                let hours = Int(duration / (60 * 60)) - (days * 24)
+                let minutes = Int(duration / 60) - (days * 24 * 60) - (hours * 60)
+                countdownDaysLabel.text = String(format: "%02d", days)
+                countdownHoursLabel.text = String(format: "%02d", hours)
+                countdownMinutesLabel.text = String(format: "%02d", minutes)
+                countdownView.hidden = false
+                countdownViewHeight.constant = 60
+            } else {
+                regattaStartLabel.text = NSLocalizedString("Regatta in progress", comment: "")
+                countdownView.hidden = true
+                countdownViewHeight.constant = 0
+            }
+        }
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func teamImageAddButtonTapped(sender: AnyObject) {
+        showImageAlertController()
+    }
+    
+    @IBAction func teamImageEditButtonTapped(sender: AnyObject) {
+        showImageAlertController()
+    }
+    
+    @IBAction func teamImageRetryButtonTapped(sender: AnyObject) {
+        postTeamImageData(checkIn.teamImageData)
+    }
+    
+    @IBAction func eventButtonTapped(sender: UIButton) {
+        let serverURL = checkIn.serverURL!
+        let eventID = checkIn.eventID!
+        let urlString = "\(serverURL)/gwt/Home.html?navigationTab=Regattas#EventPlace:eventId=\(eventID)"
+        let url = NSURL(string: urlString)!
+        UIApplication.sharedApplication().openURL(url)
+    }
     
     @IBAction func showMenuActionSheet(sender: AnyObject) {
-        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: "Check-Out", "Settings", "Edit Photo", "Cancel")
-        actionSheet.tag = ActionSheet.Menu.rawValue
-        actionSheet.cancelButtonIndex = 3
-        actionSheet.showInView(self.view)
-    }
-    
-    // MARK: - UIActionSheetDelegate
-    
-    func actionSheet(actionSheet: UIActionSheet, clickedButtonAtIndex buttonIndex: Int) {
-        if actionSheet.tag == ActionSheet.Menu.rawValue {
-            switch buttonIndex{
-            case 0:
-                showCheckOutAlertView()
-            case 1:
-				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
-					self.performSegueWithIdentifier("Settings", sender: actionSheet)
-				}
-                break
-            case 2:
-                showImageAlertView(actionSheet)
-                break
-            default:
-                break
-            }
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
+        let checkOutTitle = NSLocalizedString("Check-Out", comment: "")
+        let checkOutAction = UIAlertAction(title: checkOutTitle, style: .Default) { (action) in
+            self.showCheckOutAlertController()
         }
+        let settingsTitle = NSLocalizedString("Settings", comment: "")
+        let settingsAction = UIAlertAction(title: settingsTitle, style: .Default) { (action) in
+            self.performSegueWithIdentifier("Settings", sender: self)
+        }
+        let editPhotoTitle = NSLocalizedString("Replace Team Photo", comment: "")
+        let editPhotoAction = UIAlertAction(title: editPhotoTitle, style: .Default) { (action) in
+            self.showImageAlertController()
+        }
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+        alertController.addAction(checkOutAction)
+        alertController.addAction(settingsAction)
+        alertController.addAction(editPhotoAction)
+        alertController.addAction(cancelAction)
+        presentViewController(alertController, animated: true, completion: nil)
     }
-    
-    // MARK: - Start tracking
     
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
         do {
             try LocationManager.sharedManager.startTracking()
             performSegueWithIdentifier("Tracking", sender: sender)
-        } catch let error as LocationManager.TrackingError {
-            let title = error.description
-            let cancelButtonTitle = NSLocalizedString("Cancel", comment: "")
-            let alertView = UIAlertView(title: title,
-                                        message: nil,
-                                        delegate: nil,
-                                        cancelButtonTitle: cancelButtonTitle)
-            alertView.show()
+        } catch let error as LocationManager.LocationManagerError {
+            let alertController = UIAlertController(title: error.description, message: nil, preferredStyle: .Alert)
+            let cancelTitle = NSLocalizedString("Cancel", comment: "")
+            let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+            alertController.addAction(cancelAction)
+            presentViewController(alertController, animated: true, completion: nil)
         } catch {
             print("Unknown error")
         }
@@ -226,16 +222,68 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     
     // MARK: - Image picker
     
-    @IBAction func showImageAlertView(sender: AnyObject) {
+    func showImageAlertController() {
         if sourceTypes.count == 1 {
             imagePicker(sourceTypes[0])
         }
         if sourceTypes.count == 2 {
-            let alertView = UIAlertView(title: NSLocalizedString("Select a photo for your team", comment: ""), message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: sourceTypeNames[0], sourceTypeNames[1])
-            alertView.tag = AlertView.Image.rawValue;
-            alertView.show()
+            let alertTitle = NSLocalizedString("Select a photo for your team", comment: "")
+            let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
+            let sourceType1Action = UIAlertAction(title: sourceTypeNames[0], style: .Default) { (action) in
+                self.imagePicker(self.sourceTypes[0])
+            }
+            let sourceType2Action = UIAlertAction(title: sourceTypeNames[1], style: .Default) { (action) in
+                self.imagePicker(self.sourceTypes[1])
+            }
+            let cancelTitle = NSLocalizedString("Cancel", comment: "")
+            let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+            alertController.addAction(sourceType1Action)
+            alertController.addAction(sourceType2Action)
+            alertController.addAction(cancelAction)
+            presentViewController(alertController, animated: true, completion: nil)
         }
     }
+    
+    // MARK: - Check-out
+    
+    func showCheckOutAlertController() {
+        let alertTitle = NSLocalizedString("Check-out of Regatta?", comment: "")
+        let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
+        let okTitle = NSLocalizedString("OK", comment: "")
+        let okAction = UIAlertAction(title: okTitle, style: .Default) { (action) in self.preformCheckOut() }
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+        alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
+        presentViewController(alertController, animated: true, completion: nil)
+    }
+    
+    func preformCheckOut() {
+        requestManager.postCheckOut(checkIn.leaderboardName,
+                                    competitorId: checkIn.competitorID,
+                                    success: { (operation, responseObject) in },
+                                    failure: { (operation, error) in
+        })
+        DataManager.sharedManager.deleteCheckIn(self.checkIn!)
+        DataManager.sharedManager.saveContext()
+        navigationController!.popViewControllerAnimated(true)
+    }
+    
+    // MARK: - Segue
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier == "Tracking") {
+            let nc = segue.destinationViewController as! UINavigationController
+            let vc = nc.viewControllers[0] as! TrackingViewController
+            vc.checkIn = checkIn
+        }
+    }
+    
+}
+
+// MARK: - UIImagePickerControllerDelegate
+
+extension RegattaViewController: UIImagePickerControllerDelegate {
     
     func imagePicker(sourceType: UIImagePickerControllerSourceType) {
         let imagePickerController = UIImagePickerController()
@@ -248,77 +296,51 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     
     func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage!, editingInfo: [NSObject : AnyObject]!) {
         dismissViewControllerAnimated(true, completion: nil)
-        self.teamImageView.image = image
-        self.teamImageAddButton.hidden = true
-        self.teamImageEditButton.hidden = false
-		self.teamImageRetryButton.hidden = true
-        let jpegData = UIImageJPEGRepresentation(image, 0.8)
-        DataManager.sharedManager.selectedCheckIn!.userImage =  jpegData
-        APIManager.sharedManager.postTeamImage(DataManager.sharedManager.selectedCheckIn!.competitorId,
-            imageData: jpegData,
-            success: { (responseObject) -> Void in
-                // http://wiki.sapsailing.com/wiki/tracking-app/api-v1#Competitor-Information-%28in-general%29
-                // "Additional Notes: Competitor profile image left out for now."
-                let responseDictionary = responseObject as![String: AnyObject]
-                let imageUrl = (responseDictionary["teamImageUri"]) as! String;
-                DataManager.sharedManager.selectedCheckIn!.imageUrl = imageUrl;
-				
-				NSUserDefaults.standardUserDefaults().setBool(false, forKey: self.uploadKey)
-				NSUserDefaults.standardUserDefaults().synchronize()
-            },
-            failure: { (error) -> Void in
-                let alertView = UIAlertView(title: NSLocalizedString("Failed to upload image", comment: ""), message: error.localizedDescription, delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
-                alertView.tag = AlertView.UploadFailed.rawValue;
-				alertView.show()
-				
-				NSUserDefaults.standardUserDefaults().setBool(true, forKey: self.uploadKey)
-				NSUserDefaults.standardUserDefaults().synchronize()
-				self.teamImageRetryButton.hidden = false
-        })
-    }
-		
-    // MARK: - Check-out
-    func showCheckOutAlertView() {
-        let alertView = UIAlertView(title: NSLocalizedString("Check-out of Regatta?", comment: ""), message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: NSLocalizedString("OK", comment: ""))
-        alertView.tag = AlertView.CheckOut.rawValue;
-        alertView.show()
+        teamImageView.image = image
+        teamImageAddButton.hidden = true
+        teamImageEditButton.hidden = false
+        teamImageRetryButton.hidden = true
+        checkIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
+        DataManager.sharedManager.saveContext()
+        postTeamImageData(checkIn.teamImageData)
     }
     
-    // MARK: - UIAlertViewDelegate
+    private func postTeamImageData(imageData: NSData!) {
+        requestManager.postTeamImageData(imageData,
+                                         competitorId: checkIn.competitorID,
+                                         success: { (responseObject) in self.postTeamImageSuccess(responseObject) },
+                                         failure: { (error) in self.postTeamImageFailure(error) })
+    }
     
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-        switch alertView.tag {
-            // Check-out
-        case AlertView.CheckOut.rawValue:
-            switch buttonIndex {
-            case alertView.cancelButtonIndex:
-                break
-            default:
-                let now = NSDate()
-                let toMillis = Int64(now.timeIntervalSince1970 * 1000)
-                APIManager.sharedManager.checkOut(DataManager.sharedManager.selectedCheckIn!.leaderBoardName,
-                    competitorId: DataManager.sharedManager.selectedCheckIn!.competitorId,
-                    deviceUuid: Preferences.uuid(),
-                    toMillis: toMillis,
-                    success: { (operation, competitorResponseObject) -> Void in
-                    },
-                    failure: { (operation, error) -> Void in
-                    }
-                )
-                DataManager.sharedManager.deleteCheckIn(DataManager.sharedManager.selectedCheckIn!)
-                DataManager.sharedManager.saveContext()
-                self.navigationController!.popViewControllerAnimated(true)
-                break
-            }
-            break
-        case AlertView.Image.rawValue:
-            if buttonIndex != alertView.cancelButtonIndex {
-                imagePicker(sourceTypes[buttonIndex - 1])
-            }
-            break
-        default:
-            break
-        }
+    private func postTeamImageSuccess(responseObject: AnyObject) {
+        
+        // Save image URL and upload success
+        let teamImageDictionary = responseObject as! [String: AnyObject]
+        let teamImageURL = (teamImageDictionary[TeamImageKeys.TeamImageURL]) as! String
+        checkIn.teamImageURL = teamImageURL
+        checkIn.teamImageRetry = false
+        DataManager.sharedManager.saveContext()
+        
+        // Setup team image
+        setupTeamImage()
+    }
+    
+    private func postTeamImageFailure(error: AnyObject) {
+        
+        // Save image upload failure
+        checkIn.teamImageRetry = true
+        DataManager.sharedManager.saveContext()
+        
+        // Show alert
+        let alertTitle = NSLocalizedString("Failed to upload image", comment: "")
+        let alertController = UIAlertController(title: alertTitle, message: error.localizedDescription, preferredStyle: .Alert)
+        let okTitle = NSLocalizedString("OK", comment: "")
+        let okAction = UIAlertAction(title: okTitle, style: .Default, handler: nil)
+        alertController.addAction(okAction)
+        presentViewController(alertController, animated: true, completion: nil)
+        
+        // Setup team image
+        setupTeamImage()
     }
     
 }

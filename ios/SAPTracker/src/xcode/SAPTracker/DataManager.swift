@@ -11,8 +11,6 @@ import CoreData
 
 public class DataManager: NSObject {
     
-    var selectedCheckIn: CheckIn?
-    
     public class var sharedManager: DataManager {
         struct Singleton {
             static let sharedManager = DataManager()
@@ -20,53 +18,20 @@ public class DataManager: NSObject {
         return Singleton.sharedManager
     }
     
-    override init() {
-        super.init()
-        
-        print(managedObjectContext!)
-        
-        // store new locations to database
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(DataManager.newLocation(_:)), name: LocationManager.NotificationType.newLocation, object: nil)
-        
-        // save context when done tracking
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(DataManager.trackingStopped(_:)), name: LocationManager.NotificationType.trackingStopped, object: nil)
-    }
+    // MARK: - Fetch
     
-    deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
-    }
-    
-    // MARK: - notification callbacks
-    
-    /* New location detected, store to database if location is valid. */
-    func newLocation(notification: NSNotification) {
-        if notification == NSNull() {
-            return
-        }
-        var dict = notification.userInfo!;
-        if dict["isValid"] as! Bool {
-            let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!) as! GPSFix
-            gpsFix.initWithDictionary(dict)
-            if selectedCheckIn == nil {
-                abort();
-            }
-            gpsFix.checkIn = selectedCheckIn!
-            saveContext()
-        }
-    }
-    
-    /* Tracking stopped, save data to disk. */
-    func trackingStopped(notification: NSNotification) {
-        saveContext()
-    }
-    
-    // MARK: - public database access
-    func getCheckIn(eventId: String, leaderBoardName: String, competitorId: String)->CheckIn? {
+    func fetchCheckIn(eventID: String,
+                      leaderboardName: String,
+                      competitorID: String) -> CheckIn?
+    {
         let fetchRequest = NSFetchRequest()
-        fetchRequest.entity = NSEntityDescription.entityForName("CheckIn", inManagedObjectContext: self.managedObjectContext!)
-        fetchRequest.predicate = NSPredicate(format: "eventId = %@ AND leaderBoardName = %@ AND competitorId = %@", eventId, leaderBoardName, competitorId)
+        fetchRequest.entity = NSEntityDescription.entityForName("CheckIn", inManagedObjectContext: managedObjectContext!)
+        fetchRequest.predicate = NSPredicate(format: "eventID = %@ AND leaderboardName = %@ AND competitorID = %@",
+                                             eventID,
+                                             leaderboardName,
+                                             competitorID)
         do {
-            let results = try self.managedObjectContext!.executeFetchRequest(fetchRequest)
+            let results = try managedObjectContext!.executeFetchRequest(fetchRequest)
             if results.count == 0 {
                 return nil
             } else {
@@ -77,65 +42,70 @@ public class DataManager: NSObject {
         }
         return nil
     }
+
+    func checkInFetchedResultsController() -> NSFetchedResultsController {
+        let fetchRequest = NSFetchRequest(entityName: "CheckIn")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "leaderboardName", ascending: true)]
+        return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext!, sectionNameKeyPath: nil, cacheName: nil)
+    }
     
-    func newCheckIn()->CheckIn {
-        return NSEntityDescription.insertNewObjectForEntityForName("CheckIn", inManagedObjectContext: self.managedObjectContext!) as! CheckIn
+    // MARK: - Insert
+    
+    func newCheckIn() -> CheckIn {
+        return NSEntityDescription.insertNewObjectForEntityForName("CheckIn", inManagedObjectContext: managedObjectContext!) as! CheckIn
     }
     
     func newEvent(checkIn: CheckIn) -> Event {
-        let event = NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: self.managedObjectContext!) as! Event
+        let event = NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: managedObjectContext!) as! Event
         event.checkIn = checkIn
         return event
     }
     
-    func newLeaderBoard(checkIn: CheckIn) -> LeaderBoard {
-        let leaderBoard = NSEntityDescription.insertNewObjectForEntityForName("LeaderBoard", inManagedObjectContext: self.managedObjectContext!) as! LeaderBoard
+    func newLeaderBoard(checkIn: CheckIn) -> Leaderboard {
+        let leaderBoard = NSEntityDescription.insertNewObjectForEntityForName("Leaderboard", inManagedObjectContext: managedObjectContext!) as! Leaderboard
         leaderBoard.checkIn = checkIn
         return leaderBoard
     }
     
     func newCompetitor(checkIn: CheckIn) -> Competitor {
-        let competitor = NSEntityDescription.insertNewObjectForEntityForName("Competitor", inManagedObjectContext: self.managedObjectContext!) as! Competitor
+        let competitor = NSEntityDescription.insertNewObjectForEntityForName("Competitor", inManagedObjectContext: managedObjectContext!) as! Competitor
         competitor.checkIn = checkIn
         return competitor
     }
     
-    /* Get latest locations. Limited by the max number of objects that can be sent. */
-    func latestLocations() -> [GPSFix] {
-        let fetchRequest = NSFetchRequest()
-        fetchRequest.entity = NSEntityDescription.entityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "timestamp", ascending: false)]
-        fetchRequest.fetchLimit = APIManager.Constants.maxSendGPSFix
-        var results: [AnyObject]? = nil
-        do {
-            try results = self.managedObjectContext!.executeFetchRequest(fetchRequest)
-        } catch {
-            print(error)
+    func newGPSFix(checkIn: CheckIn) -> GPSFix {
+        let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: managedObjectContext!) as! GPSFix
+        gpsFix.checkIn = checkIn
+        return gpsFix
+    }
+    
+    // MARK: - Delete
+    
+    func deleteCheckIn(checkIn: CheckIn) {
+        managedObjectContext!.deleteObject(checkIn)
+    }
+    
+    func deleteGPSFixes(gpsFixes: [GPSFix]) {
+        gpsFixes.forEach { (gpsFix) in deleteGPSFix(gpsFix) }
+    }
+    
+    func deleteGPSFix(gpsFix: GPSFix) {
+        managedObjectContext!.deleteObject(gpsFix)
+    }
+    
+    // MARK: - Save
+    
+    func saveContext () {
+        if let moc = managedObjectContext {
+            if (moc.hasChanges) {
+                do {
+                    try moc.save()
+                } catch {
+                    print(error)
+                    abort()
+                }
+            }
         }
-        return results as! [GPSFix]
-    }
-    
-    func countCachedFixes() -> Int {
-        let request = NSFetchRequest()
-        request.entity = NSEntityDescription.entityForName("GPSFix", inManagedObjectContext: self.managedObjectContext!)
-        request.includesSubentities = false
-        var error: NSError? = nil
-        let count = self.managedObjectContext!.countForFetchRequest(request, error:&error)
-        if(count == NSNotFound) {
-            //Handle error
-        }
-        return count
-    }
-    
-    /* Get all check ins. */
-    func checkInFetchedResultsController()->NSFetchedResultsController {
-        let fetchRequest = NSFetchRequest(entityName: "CheckIn")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "leaderBoardName", ascending: true)]
-        return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.managedObjectContext!, sectionNameKeyPath: nil, cacheName: nil)
-    }
-    
-    public func deleteCheckIn(checkIn: CheckIn) {
-        self.managedObjectContext!.deleteObject(checkIn)
     }
     
     // MARK: - Core Data stack
@@ -214,20 +184,5 @@ public class DataManager: NSObject {
         managedObjectContext.persistentStoreCoordinator = coordinator
         return managedObjectContext
     }()
-    
-    // MARK: - Core Data Saving support
-    
-    func saveContext () {
-        if let moc = self.managedObjectContext {
-            if (moc.hasChanges) {
-                do {
-                    try moc.save()
-                } catch {
-                    print(error)
-                    abort()
-                }
-            }
-        }
-    }
     
 }

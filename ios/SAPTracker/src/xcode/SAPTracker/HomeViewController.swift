@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class HomeViewController: CheckInViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate {
+class HomeViewController: UIViewController {
     
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
@@ -21,21 +21,12 @@ class HomeViewController: CheckInViewController, UITableViewDataSource, UITableV
     
     override func viewDidLoad() {
         super.viewDidLoad()
-		
-        self.setupLanguage()
-        self.setupNavigationBar()
-        self.setupTableViewDataSource()
-        
-        self.subscribeForNotifications()
-        
+        setupButtons()
+        setupLanguage()
+        setupNavigationBar()
+        setupTableViewDataSource()
+        subscribeForNotifications()
         checkEULA(NSNotification.init(name: "", object: nil))
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        // FIXME: - this is a bad implementation of core data
-        DataManager.sharedManager.selectedCheckIn = nil;
     }
 
     deinit {
@@ -43,6 +34,23 @@ class HomeViewController: CheckInViewController, UITableViewDataSource, UITableV
     }
 
     // MARK: - Setups
+    
+    private func setupButtons() {
+        scanCodeButton.setBackgroundImage(Images.BlueHighlighted, forState: .Highlighted)
+        noCodeButton.setBackgroundImage(Images.GrayHighlighted, forState: .Highlighted)
+    }
+    
+    private func setupLanguage() {
+        navigationItem.title = NSLocalizedString("Header", comment: "")
+        titleLabel.text = NSLocalizedString("Your Regattas", comment: "")
+        scanCodeButton.setTitle(NSLocalizedString("Scan Code", comment: ""), forState: .Normal)
+        noCodeButton.setTitle(NSLocalizedString("No Code", comment: ""), forState: .Normal)
+        infoCodeLabel.text = NSLocalizedString("QR found", comment: "")
+    }
+    
+    private func setupNavigationBar() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+    }
     
     private func setupTableViewDataSource() {
         fetchedResultsController = DataManager.sharedManager.checkInFetchedResultsController()
@@ -54,28 +62,9 @@ class HomeViewController: CheckInViewController, UITableViewDataSource, UITableV
         }
     }
     
-    private func setupLanguage() {
-        self.navigationItem.title = NSLocalizedString("Header", comment: "")
-        self.titleLabel.text = NSLocalizedString("Your Regattas", comment: "")
-        self.scanCodeButton.setTitle(NSLocalizedString("Scan Code", comment: ""), forState: .Normal)
-        self.noCodeButton.setTitle(NSLocalizedString("No Code", comment: ""), forState: .Normal)
-        self.infoCodeLabel.text = NSLocalizedString("QR found", comment: "")
-    }
-    
-    private func setupNavigationBar() {
-        let imageView = UIImageView(image: UIImage(named: "sap_logo"))
-        let barButtonItem = UIBarButtonItem(customView: imageView)
-        self.navigationItem.leftBarButtonItem = barButtonItem
-    }
-    
     // MARK: - Notifications
     
     private func subscribeForNotifications() {
-    // FIXME: - How to react?
-//        NSNotificationCenter.defaultCenter().addObserver(self,
-//                                                         selector: #selector(openUrl(_:)),
-//                                                         name: AppDelegate.NotificationType.openUrl,
-//                                                         object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector: #selector(HomeViewController.checkEULA(_:)),
                                                          name: UIApplicationWillEnterForegroundNotification,
@@ -87,110 +76,33 @@ class HomeViewController: CheckInViewController, UITableViewDataSource, UITableV
     }
     
     func checkEULA(notification: NSNotification) {
-        if !Preferences.acceptedTerms() {
+        if !Preferences.acceptedTerms {
             let alertTitle = NSLocalizedString("EULA_title", comment: "")
             let alertMessage = NSLocalizedString("EULA_content", comment: "")
-            let alertController = UIAlertController(title: alertTitle,
-                                                    message: alertMessage,
-                                                    preferredStyle: .Alert)
+            let alertController = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .Alert)
             let viewTitle = NSLocalizedString("EULA_view", comment: "")
-            let viewAction = UIAlertAction(title: viewTitle,
-                                           style: .Cancel,
-                                           handler: { action in UIApplication.sharedApplication().openURL(URLs.EULA)
+            let viewAction = UIAlertAction(title: viewTitle, style: .Cancel, handler: { action in
+                UIApplication.sharedApplication().openURL(URLs.EULA)
             })
             let confirmTitle = NSLocalizedString("EULA_confirm", comment: "")
-            let confirmAction = UIAlertAction(title: confirmTitle,
-                                              style: .Default,
-                                              handler: { action in Preferences.setAcceptedTerms(true)
+            let confirmAction = UIAlertAction(title: confirmTitle, style: .Default, handler: { action in
+                Preferences.acceptedTerms = true
             })
             alertController.addAction(viewAction)
             alertController.addAction(confirmAction)
             self.presentViewController(alertController, animated: true, completion: nil)
         }
     }
-
-    func openUrl(notification: NSNotification) {
-        // TODO: implement CheckInController call
-        //let url = notification.userInfo!["url"] as! String
-        //checkInController!.startCheckIn(url)
-    }
-	
-//	func _DEBUG_OPEN_URL() {
-//		let url = "http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/tracking/checkin?event_id=71c7b531-fb1b-441c-b2fa-f4e9ff672d60&leaderboard_name=Ubigatta&competitor_id=9df7b4f6-611b-4be0-b028-c7b1bdd434c2"
-//		let url2 = "http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/tracking/checkin?event_id=71c7b531-fb1b-441c-b2fa-f4e9ff672d60&leaderboard_name=Ubigatta&competitor_id=a5a00800-daf8-0131-89e6-60a44ce903c3"
-//		checkInController!.startCheckIn(url2)
-//	}
-    
-    // MARK: - UITableViewDataSource
-    
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fetchedResultsController!.sections![section].numberOfObjects
-    }
-    
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as UITableViewCell!
-        self.configureCell(cell, atIndexPath: indexPath)
-        return cell
-    }
-    
-    func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
-        let checkIn = fetchedResultsController!.objectAtIndexPath(indexPath) as! CheckIn
-        cell.textLabel?.text = checkIn.leaderBoardName
-    }
-    
-    // MARK: - NSFetchedResultsControllerDelegate
-    
-    func controllerWillChangeContent(controller: NSFetchedResultsController) {
-        tableView.beginUpdates()
-    }
-    
-    func controller(controller: NSFetchedResultsController, didChangeObject object: AnyObject,  atIndexPath indexPath: NSIndexPath?,
-        forChangeType type: NSFetchedResultsChangeType,
-        newIndexPath: NSIndexPath?) {
-            switch type {
-            case .Insert:
-                tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
-            case .Update:
-                let cell = tableView.cellForRowAtIndexPath(indexPath!)
-                if cell != nil {
-                    configureCell(cell!, atIndexPath: indexPath!)
-                    tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
-                }
-            case .Move:
-                tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
-                tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
-            case .Delete:
-                tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
-            }
-    }
-    
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        tableView.endUpdates()
-    }
-    
-    // MARK: - UITableViewDelegate
-    
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return 74
-    }
-    
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        DataManager.sharedManager.selectedCheckIn = (fetchedResultsController!.objectAtIndexPath(indexPath) as! CheckIn)
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        performSegueWithIdentifier("Regatta", sender: tableView)
-    }
     
     // MARK: - Actions
     
     @IBAction func optionButtonTap(sender: AnyObject) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
-        
         // FIXME: - what does this code?
         //        if let popoverController = actionSheet.popoverPresentationController,
         //            let barButtonItem = sender as? UIBarButtonItem {
         //            popoverController.barButtonItem = barButtonItem
         //        }
-        
         // FIXME: - should be a simpler solution than dispatch with magic numbers
         let settingsAction = UIAlertAction(title: NSLocalizedString("Settings", comment: ""), style: .Default) { (action) -> Void in
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
@@ -210,55 +122,105 @@ class HomeViewController: CheckInViewController, UITableViewDataSource, UITableV
     }
     
     @IBAction func scanButtonTap(sender: AnyObject) {
-		
-        // Check if a camera is available
-        if !UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
+            performSegueWithIdentifier("Scan", sender: sender)
+        } else {
             let alertTitle = NSLocalizedString("No camera available.", comment: "")
-            let alertController = UIAlertController(title: alertTitle,
-                                                    message: nil,
-                                                    preferredStyle: .Alert)
+            let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
             let cancelTitle = NSLocalizedString("Cancel", comment: "")
             let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
             alertController.addAction(cancelAction)
-            self.presentViewController(alertController, animated: true, completion: nil)
+            presentViewController(alertController, animated: true, completion: nil)
             return
         }
-        
-// FIXME: - is this necessary for iOS >= 8.0
-//        if (!CameraController.deviceCanReadQRCodes()) {
-//            let alertView = UIAlertView(title: NSLocalizedString("Cannot read QR codes with this device.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
-//            alertView.tag = AlertView.NoCameraAvailable.rawValue;
-//            alertView.show()
-//            return
-//        }
-        
-        performSegueWithIdentifier("Scan", sender: sender)
     }
     
     @IBAction func noCodeButtonTap(sender: AnyObject) {
         let alertTitle = NSLocalizedString("In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either.", comment: "")
-        let alertController = UIAlertController(title: alertTitle,
-                                                message: nil,
-                                                preferredStyle: .Alert)
+        let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
         let cancelTitle = NSLocalizedString("Cancel", comment: "")
         let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
         alertController.addAction(cancelAction)
-        self.presentViewController(alertController, animated: true, completion: nil)
+        presentViewController(alertController, animated: true, completion: nil)
     }
     
-    // MARK: - CheckInControllerDelegate
+    // MARK: - Segues
     
-    func displayCheckInAlert(alertController: UIAlertController, checkInController: CheckInController) {
-        self.presentViewController(alertController, animated: true, completion: nil)
-    }
-
-    func checkInSucceed(checkInController: CheckInController) {
-        
-    }
-    
-    func checkInFailed(checkInController: CheckInController) {
-        
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.destinationViewController.isKindOfClass(RegattaViewController)) {
+            let regattaVC = segue.destinationViewController as! RegattaViewController
+            let indexPath = self.tableView.indexPathForSelectedRow
+            regattaVC.checkIn = self.fetchedResultsController?.objectAtIndexPath(indexPath!) as? CheckIn
+            self.tableView.deselectRowAtIndexPath(indexPath!, animated: true)
+        }
     }
     
 }
 
+// MARK: - UITableViewDataSource
+
+extension HomeViewController: UITableViewDataSource {
+
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return fetchedResultsController!.sections![section].numberOfObjects
+    }
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as UITableViewCell!
+        self.configureCell(cell, atIndexPath: indexPath)
+        return cell
+    }
+    
+    func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
+        let checkIn = fetchedResultsController!.objectAtIndexPath(indexPath) as! CheckIn
+        cell.textLabel?.text = checkIn.leaderboardName
+    }
+
+}
+
+// MARK: - UITableViewDelegate
+
+extension HomeViewController: UITableViewDelegate {
+
+    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        return 74
+    }
+
+}
+
+// MARK: - NSFetchedResultsControllerDelegate
+
+extension HomeViewController: NSFetchedResultsControllerDelegate {
+    
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        tableView.beginUpdates()
+    }
+    
+    func controller(controller: NSFetchedResultsController,
+                    didChangeObject object: AnyObject,
+                                    atIndexPath indexPath: NSIndexPath?,
+                                                forChangeType type: NSFetchedResultsChangeType,
+                                                              newIndexPath: NSIndexPath?)
+    {
+        switch type {
+        case .Insert:
+            tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+        case .Update:
+            let cell = tableView.cellForRowAtIndexPath(indexPath!)
+            if cell != nil {
+                configureCell(cell!, atIndexPath: indexPath!)
+                tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+            }
+        case .Move:
+            tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+            tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
+        case .Delete:
+            tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+        }
+    }
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        tableView.endUpdates()
+    }
+    
+}

@@ -81,44 +81,6 @@ public class APIManager: NSObject {
     
     // MARK: - REST API
     
-    /* Get event */
-    public func getEvent(eventId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = baseUrlString + "/events/\(eventId)"
-        manager!.GET(urlString, parameters: nil, success: success, failure: failure)
-    }
-    
-    /* Get leader board */
-    public func getLeaderBoard(leaderBoardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = baseUrlString + "/leaderboards/\(leaderBoardName.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!)"
-        manager!.GET(urlString, parameters: nil, success: success, failure: failure)
-    }
-    
-    /* Get competitor */
-    public func getCompetitor(competitorId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = baseUrlString + "/competitors/\(competitorId)"
-        manager!.GET(urlString, parameters: nil, success: success, failure: failure)
-    }
-
-    /* Get team */
-    public func getTeam(competitorId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = baseUrlString + "/competitors/\(competitorId)/team"
-        manager!.GET(urlString, parameters: nil, success: success, failure: failure)
-    }
-
-    /* Get team image URI */
-    public func getTeamImageURI(competitorId: String!, result: (imageURI: String?) -> Void) {
-        getTeam(competitorId, success: { (operation, teamResponseObject) -> Void in
-            if let team = teamResponseObject as? [String: AnyObject], let imageURI = team["imageUri"] as? String {
-                result(imageURI: imageURI)
-            } else {
-                result(imageURI: nil)
-            }
-            }, failure: { (operation, error) -> Void in
-                // No image & that's ok
-                result(imageURI: nil)
-        })
-    }
-    
     /* Map a device to competitor. */
     public func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushDeviceId: String!, fromMillis: Int64!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
         
@@ -147,24 +109,7 @@ public class APIManager: NSObject {
         manager!.POST(urlString, parameters: body, success: success, failure: failure)
     }
     
-    /* Send GPS location to server. Delete row from cache. */
-    public func postGPSFixes(deviceUuid: String!, gpsFixes: [GPSFix]!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        if gpsFixes.count == 0 {
-            return
-        }
-        
-        let urlString = baseUrlString + "/gps_fixes"
-        
-        var body = [String: AnyObject]()
-        body["deviceUuid"] = deviceUuid
-        var array: [[String: AnyObject]] = []
-        for gpsFix in gpsFixes {
-            array.append(gpsFix.dictionary())
-        }
-        body["fixes"] = array
-        
-        manager!.POST(urlString, parameters: body, success: success, failure: failure)
-    }
+
     
     
     /* Send GPS location to server. Delete row from cache. */

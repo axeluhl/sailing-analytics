@@ -10,122 +10,141 @@ import Foundation
 import UIKit
 import AVFoundation
 
-protocol CheckInControllerDelegate {
-    func checkInDidStart(checkInController: CheckInController)
-    func checkInDidEnd(checkInController: CheckInController, withSuccess succeed: Bool)
+@objc protocol CheckInControllerDelegate {
+    
     func showCheckInAlert(checkInController: CheckInController, alertController: UIAlertController)
+
+    optional func checkInDidStart(checkInController: CheckInController)
+    optional func checkInDidEnd(checkInController: CheckInController, withSuccess succeed: Bool)
+
 }
 
 class CheckInController : NSObject {
     
+    private struct EventKeys {
+        static let EndDate = "endDate"
+        static let ID = "id"
+        static let ImageURLs = "imageURLs"
+        static let Name = "name"
+        static let StartDate = "startDate"
+    }
+    
+    private struct CompetitorKeys {
+        static let BoatClassName = "boatClassName"
+        static let CountryCode = "countryCode"
+        static let ID = "id"
+        static let Name = "name"
+        static let Nationality = "nationality"
+        static let SailID = "sailID"
+    }
+    
+    private struct LeaderboardKeys {
+        static let Name = "name"
+    }
+    
     private let checkInData: CheckInData!
     private let delegate: CheckInControllerDelegate!
-    private let checkInRequestManager: CheckInRequestManager!
+    private let requestManager: RequestManager!
     
-    // TODO: - own core data context
+    // Responses
+    private var eventDictionary: [String: AnyObject]?
+    private var leaderboardDictionary: [String: AnyObject]?
+    private var competitorDictionary: [String: AnyObject]?
+    private var teamImageURL: String?
     
     init(checkInData: CheckInData, delegate: CheckInControllerDelegate) {
         self.checkInData = checkInData
         self.delegate = delegate
-        self.checkInRequestManager = CheckInRequestManager(checkInData: checkInData)
+        requestManager = RequestManager(baseURLString: checkInData.serverURL)
         super.init()
     }
     
     // MARK: - Start check-in
     
     func startCheckIn() {
-        self.delegate.checkInDidStart(self)
-        self.checkInRequestManager.getEvent(checkInData.eventID,
-                                            success: { (operation, responseObject) -> Void in self.eventSucceed(responseObject) },
-                                            failure: { (operation, error) -> Void in self.eventFailed(error) })
+        checkInDidStart()
+        requestManager.getEvent(checkInData.eventID,
+                                success: { (operation, responseObject) -> Void in self.eventSucceed(responseObject) },
+                                failure: { (operation, error) -> Void in self.eventFailed(error) })
     }
     
     // MARK: - Event
     
     private func eventSucceed(eventResponseObject: AnyObject) {
-        self.checkInData.eventDictionary = eventResponseObject as? [String: AnyObject]
-        self.checkInRequestManager.getLeaderboard(checkInData.leaderboardName,
-                                                  success: { (operation, responseObject) -> Void in self.leaderboardSucceed(responseObject) },
-                                                  failure: { (operation, error) -> Void in self.leaderboardFailed(error) })
+        eventDictionary = eventResponseObject as? [String: AnyObject]
+        requestManager.getLeaderboard(checkInData.leaderboardName,
+                                      success: { (operation, responseObject) -> Void in self.leaderboardSucceed(responseObject) },
+                                      failure: { (operation, error) -> Void in self.leaderboardFailed(error) })
     }
     
     private func eventFailed(error: AnyObject) {
-        let alertTitle = String(format: NSLocalizedString("Couldn't get event %@", comment: ""), self.checkInData.eventID)
-        let alertController = UIAlertController(title: alertTitle,
-                                                message: error.localizedDescription,
-                                                preferredStyle: .Alert)
+        let alertTitle = String(format: NSLocalizedString("Couldn't get event %@", comment: ""), checkInData.eventID)
+        let alertController = UIAlertController(title: alertTitle, message: error.localizedDescription, preferredStyle: .Alert)
         let cancelTitle = NSLocalizedString("Cancel", comment: "")
         let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
             self.checkInDidEnd(withSuccess: false)
         }
         alertController.addAction(cancelAction)
-        self.showCheckInAlert(alertController)
+        showCheckInAlert(alertController)
     }
     
     // MARK: - Leaderboard
     
     private func leaderboardSucceed(leaderboardResponseObject: AnyObject) {
-        self.checkInData.leaderboardDictionary = leaderboardResponseObject as? [String: AnyObject]
-        self.checkInRequestManager.getCompetitor(checkInData.competitorID,
-                                                 success: { (operation, responseObject) in self.competitorSucceed(responseObject) },
-                                                 failure: { (operation, error) in self.competitorFailed(error) })
+        leaderboardDictionary = leaderboardResponseObject as? [String: AnyObject]
+        requestManager.getCompetitor(checkInData.competitorID,
+                                     success: { (operation, responseObject) in self.competitorSucceed(responseObject) },
+                                     failure: { (operation, error) in self.competitorFailed(error) })
     }
     
     private func leaderboardFailed(error: AnyObject) {
         let alertTitle = String(format: NSLocalizedString("Couldn't get leader board %@", comment: ""), checkInData.leaderboardName)
-        let alertController = UIAlertController(title: alertTitle,
-                                                message: error.localizedDescription,
-                                                preferredStyle: .Alert)
+        let alertController = UIAlertController(title: alertTitle, message: error.localizedDescription, preferredStyle: .Alert)
         let cancelTitle = NSLocalizedString("Cancel", comment: "")
         let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
             self.checkInDidEnd(withSuccess: false)
         }
         alertController.addAction(cancelAction)
-        self.showCheckInAlert(alertController)
+        showCheckInAlert(alertController)
     }
     
     // MARK: - Competitor
     
     private func competitorSucceed(competitorResponseObject: AnyObject) {
-        self.checkInData.competitorDictionary = competitorResponseObject as? [String: AnyObject]
-        self.checkInRequestManager.getTeamImageURI(checkInData.dictionaryCompetitorId(),
-                                                   result: { (imageURI) in self.teamImageURIResult(imageURI) })
+        competitorDictionary = competitorResponseObject as? [String: AnyObject]
+        requestManager.getTeamImageURL(competitorID(), result: { (imageURL) in self.teamImageURLResult(imageURL) })
     }
     
     private func competitorFailed(error: AnyObject) {
         let alertTitle = String(format: NSLocalizedString("Couldn't get competitor %@", comment: ""), checkInData.competitorID)
-        let alertController = UIAlertController(title: alertTitle,
-                                                message: error.localizedDescription,
-                                                preferredStyle: .Alert)
+        let alertController = UIAlertController(title: alertTitle, message: error.localizedDescription, preferredStyle: .Alert)
         let cancelTitle = NSLocalizedString("Cancel", comment: "")
         let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
             self.checkInDidEnd(withSuccess: false)
         }
         alertController.addAction(cancelAction)
-        self.showCheckInAlert(alertController)
+        showCheckInAlert(alertController)
     }
     
     // MARK: - Team
     
-    private func teamImageURIResult(teamImageURI: String?) {
-        self.checkInData.teamImageURI = teamImageURI
+    private func teamImageURLResult(imageURL: String?) {
+        teamImageURL = imageURL
         let alertTitle = String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""),
-                                self.checkInData.dictionaryCompetitorName(),
-                                self.checkInData.dictionaryLeaderboardName(),
-                                self.checkInData.dictionaryCompetitorSailId())
-        let alertController = UIAlertController(title: alertTitle,
-                                                message: nil,
-                                                preferredStyle: .Alert)
-        let cancelTitle = NSLocalizedString("Cancel", comment: "")
-        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
-            self.checkInDidEnd(withSuccess: false)
-        }
-        alertController.addAction(cancelAction)
+                                competitorName(),
+                                leaderboardName(),
+                                competitorSailID())
+        let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
         let okTitle = NSLocalizedString("OK", comment: "")
         let okAction = UIAlertAction(title: okTitle, style: .Default) { (action) in
             self.checkInOnServer()
         }
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
+            self.checkInDidEnd(withSuccess: false)
+        }
         alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
         self.showCheckInAlert(alertController)
     }
     
@@ -133,21 +152,18 @@ class CheckInController : NSObject {
     
     private func checkInOnServer() {
         SVProgressHUD.show()
-        checkInRequestManager.checkIn(checkInData.dictionaryLeaderboardName(),
-                                      competitorID: checkInData!.dictionaryCompetitorId(),
-                                      deviceUUID: Preferences.uuid(),
-                                      pushDeviceID: "",
-                                      fromMillis: millisSince1970(),
-                                      success: { (operation, responseObject) -> Void in self.checkInOnServerSucceed() },
-                                      failure: { (operation, error) -> Void in self.checkInOnServerFailed(error) })
+        requestManager.postCheckIn(leaderboardName(),
+                                   competitorID: competitorID(),
+                                   success: { (operation, responseObject) -> Void in self.checkInOnServerSucceed() },
+                                   failure: { (operation, error) -> Void in self.checkInOnServerFailed(error) })
     }
     
     private func checkInOnServerSucceed() {
         
         // Check database if check-in already exist
-        if let checkIn = DataManager.sharedManager.getCheckIn(checkInData.eventID,
-                                                              leaderBoardName: checkInData.leaderboardName,
-                                                              competitorId: checkInData.competitorID) {
+        if let checkIn = DataManager.sharedManager.fetchCheckIn(checkInData.eventID,
+                                                                leaderboardName: checkInData.leaderboardName,
+                                                                competitorID: checkInData.competitorID) {
             // Delete old check-in
             DataManager.sharedManager.deleteCheckIn(checkIn)
             DataManager.sharedManager.saveContext()
@@ -155,31 +171,44 @@ class CheckInController : NSObject {
         
         // Create new check-in
         let checkIn = DataManager.sharedManager.newCheckIn()
-        checkIn.serverUrl = checkInData!.serverURL
-        checkIn.eventId = checkInData.eventID
-        checkIn.leaderBoardName = checkInData!.leaderboardName
-        checkIn.competitorId = checkInData!.competitorID
-        checkIn.lastSyncDate = NSDate()
-        checkIn.imageUrl = checkInData!.teamImageURI
+        checkIn.competitorID = checkInData!.competitorID
+        checkIn.eventID = checkInData.eventID
+        checkIn.lastSyncDate = NSDate().timeIntervalSince1970
+        checkIn.leaderboardName = checkInData!.leaderboardName
+        checkIn.serverURL = checkInData!.serverURL
+        checkIn.teamImageURL = teamImageURL
+        checkIn.teamImageRetry = false
         
-        // Create core data objects for event, leaderboard and competitor
+        // Create new event
         let event = DataManager.sharedManager.newEvent(checkIn)
-        event.initWithDictionary(checkInData!.eventDictionary!)
-        let leaderBoard = DataManager.sharedManager.newLeaderBoard(checkIn)
-        leaderBoard.initWithDictionary(checkInData!.leaderboardDictionary!)
+        event.endDate = (eventEndDate() / 1000)
+        event.eventID = eventID()
+        event.name = eventName()
+        event.startDate = (eventStartDate() / 1000)
+
+        // Create new leaderboard
+        let leaderboard = DataManager.sharedManager.newLeaderBoard(checkIn)
+        leaderboard.name = leaderboardName()
+        
+        // Create new competitor
         let competitor = DataManager.sharedManager.newCompetitor(checkIn)
-        competitor.initWithDictionary(checkInData!.competitorDictionary!)
+        competitor.boatClassName = competitorBoatClassName()
+        competitor.competitorID = competitorID()
+        competitor.countryCode = competitorCountryCode()
+        competitor.name = competitorName()
+        competitor.nationality = competitorNationality()
+        competitor.sailID = competitorSailID()
+        
+        // Save objects
         DataManager.sharedManager.saveContext()
         
-        // Check-in complete
+        // Check-in completed
         self.checkInDidEnd(withSuccess: true)
     }
     
     private func checkInOnServerFailed(error: AnyObject) {
         let alertTitle = String(format:NSLocalizedString("Couldn't check-in to %@", comment: ""), checkInData!.leaderboardName)
-        let alertController = UIAlertController(title: alertTitle,
-                                                message: error.localizedDescription,
-                                                preferredStyle: .Alert)
+        let alertController = UIAlertController(title: alertTitle, message: error.localizedDescription, preferredStyle: .Alert)
         let cancelTitle = NSLocalizedString("Cancel", comment: "")
         let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
             self.checkInDidEnd(withSuccess: false)
@@ -191,28 +220,69 @@ class CheckInController : NSObject {
     // MARK: - Controller
     
     private func checkInDidStart() {
-        SVProgressHUD.show()
-        self.delegate.checkInDidStart(self)
+        dispatch_async(dispatch_get_main_queue(), {
+            SVProgressHUD.show()
+            self.delegate.checkInDidStart?(self)
+        })
     }
     
     private func checkInDidEnd(withSuccess succeed: Bool) {
-        SVProgressHUD.popActivity()
-        self.delegate.checkInDidEnd(self, withSuccess: succeed)
+        dispatch_async(dispatch_get_main_queue(), {
+            SVProgressHUD.popActivity()
+            self.delegate.checkInDidEnd?(self, withSuccess: succeed)
+        })
     }
     
     private func showCheckInAlert(alertController: UIAlertController) {
-        SVProgressHUD.popActivity()
-        self.delegate.showCheckInAlert(self, alertController: alertController)
+        dispatch_async(dispatch_get_main_queue(), {
+            SVProgressHUD.popActivity()
+            self.delegate.showCheckInAlert(self, alertController: alertController)
+        })
     }
     
-    private func checkInAlertDismissed() {
-        SVProgressHUD.show()
-    }
+    // MARK: - Event
+    
+    private func eventID() -> String! { return stringFromEvent(forKey: EventKeys.ID) }
+    private func eventName() -> String! { return stringFromEvent(forKey: EventKeys.Name) }
+    private func eventStartDate() -> Double! { return doubleFromEvent(forKey: EventKeys.StartDate) }
+    private func eventEndDate() -> Double! { return doubleFromEvent(forKey: EventKeys.EndDate) }
+    
+    private func doubleFromEvent(forKey key: String) -> Double { return doubleFromDictionary(eventDictionary, forKey: key) }
+    private func stringFromEvent(forKey key: String) -> String { return stringFromDictionary(eventDictionary, forKey: key) }
+    
+    // MARK: - Leaderboard
+    
+    private func leaderboardName() -> String! { return stringFromLeaderboard(forKey: LeaderboardKeys.Name) }
+    
+    private func stringFromLeaderboard(forKey key: String) -> String { return stringFromDictionary(leaderboardDictionary, forKey: key) }
+    
+    // MARK: - Competitor
+    
+    private func competitorBoatClassName() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.BoatClassName) }
+    private func competitorCountryCode() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.CountryCode) }
+    private func competitorID() -> String { return stringFromCompetitor(forKey: CompetitorKeys.ID) }
+    private func competitorName() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.Name) }
+    private func competitorNationality() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.Nationality) }
+    private func competitorSailID() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.SailID) }
+
+    private func stringFromCompetitor(forKey key: String) -> String { return stringFromDictionary(competitorDictionary, forKey: key) }
     
     // MARK: - Helper
     
-    private func millisSince1970() -> Int64 {
-        return Int64(NSDate().timeIntervalSince1970 * 1000)
+    private func doubleFromDictionary(dictionary: [String: AnyObject]?, forKey key: String!) -> Double {
+        if let value = dictionary?[key] as? Double {
+            return value
+        } else {
+            return 0.0
+        }
+    }
+    
+    private func stringFromDictionary(dictionary: [String: AnyObject]?, forKey key: String!) -> String {
+        if let value = dictionary?[key] as? String {
+            return value
+        } else {
+            return ""
+        }
     }
 
 }

@@ -8,8 +8,61 @@
 
 import Foundation
 
-class TrackingViewController : UIViewController, UITableViewDataSource, UITableViewDelegate {
+class TrackingViewController : UIViewController {
     
+    var checkIn: CheckIn?
+    
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
+    @IBOutlet weak var stopTrackingButton: UIButton!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupButtons()
+        setupNavigationBarTitle()
+    }
+	
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+        tableViewHeight.constant = tableView.contentSize.height
+    }
+    
+    // MARK: - Setups
+    
+    private func setupButtons() {
+        stopTrackingButton.setBackgroundImage(Images.RedHighlighted, forState: .Highlighted)
+    }
+    
+    private func setupNavigationBarTitle() {
+        navigationItem.title = checkIn?.leaderboardName
+    }
+    
+	// MARK: - Actions
+	
+	@IBAction func stopTrackingButtonTapped(sender: AnyObject) {
+		let alertTitle = NSLocalizedString("Stop tracking?", comment: "")
+		let alertController = UIAlertController(title: alertTitle, message: "", preferredStyle: .Alert)
+        let stopTitle = NSLocalizedString("Stop", comment: "")
+		let stopAction = UIAlertAction(title: stopTitle, style: .Default) { action in
+			LocationManager.sharedManager.stopTracking()
+            
+			// SendGPSFixController.sharedManager.checkIn = nil
+            
+			self.dismissViewControllerAnimated(true, completion: nil)
+		}
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+        alertController.addAction(stopAction)
+        alertController.addAction(cancelAction)
+		presentViewController(alertController, animated: true, completion: nil)
+	}
+
+}
+
+// MARK: - UITableViewDataSourceDelegate
+    
+extension TrackingViewController: UITableViewDataSource {
+
     struct CellIdentifier {
         static let StatusCell = "StatusCell"
         static let ModeCell = "ModeCell"
@@ -17,64 +70,31 @@ class TrackingViewController : UIViewController, UITableViewDataSource, UITableV
         static let GPSAccuracyCell = "GPSAccuracyCell"
     }
     
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
-    
-    let rows = [
+    @nonobjc static let Rows = [
         CellIdentifier.StatusCell,
         CellIdentifier.ModeCell,
         CellIdentifier.ChachedFixesCell,
         CellIdentifier.GPSAccuracyCell
     ]
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        self.setupNavigationBarTitle()
-    }
-	
-    override func updateViewConstraints() {
-        super.updateViewConstraints()
-        self.tableViewHeight.constant = tableView.contentSize.height
-    }
-    
-    // MARK: - Setups
-    
-    private func setupNavigationBarTitle() {
-        navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
-    }
-    
-	// MARK: - Actions
-	
-	/* Stop tracking, go back to regattas view */
-	@IBAction func stopTrackingButtonTapped(sender: AnyObject) {
-		let alertTitle = NSLocalizedString("Stop tracking?", comment: "")
-		let alertController = UIAlertController(title: alertTitle,
-		                                        message: "",
-		                                        preferredStyle: .Alert)
-        let cancelTitle = NSLocalizedString("Cancel", comment: "")
-		let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
-        let stopTitle = NSLocalizedString("Stop", comment: "")
-		let stopAction = UIAlertAction(title: stopTitle, style: .Default) { action in
-			LocationManager.sharedManager.stopTracking()
-			SendGPSFixController.sharedManager.checkIn = nil
-			self.dismissViewControllerAnimated(true, completion: nil)
-		}
-        alertController.addAction(cancelAction)
-		alertController.addAction(stopAction)
-		presentViewController(alertController, animated: true, completion: nil)
-	}
-
-    // MARK: - UITableViewDataSourceDelegate
-    
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return rows.count
-    }
-
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        return tableView.dequeueReusableCellWithIdentifier(rows[indexPath.row]) ?? UITableViewCell()
+        return TrackingViewController.Rows.count
     }
     
-    // MARK: - UITableViewDelegate
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier(TrackingViewController.Rows[indexPath.row]) ?? UITableViewCell()
+        if (cell.isKindOfClass(CachedFixesTrackingTableViewCell)) {
+            let cachedFixesCell = cell as! CachedFixesTrackingTableViewCell
+            cachedFixesCell.checkIn = checkIn
+        }
+        return cell
+    }
+    
+}
+
+// MARK: - UITableViewDelegate
+
+extension TrackingViewController: UITableViewDelegate {
     
     func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return 52

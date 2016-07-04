@@ -1,5 +1,5 @@
 //
-//  CheckIn.swift
+//  Leaderboard.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 30.06.16.
@@ -9,8 +9,8 @@
 import Foundation
 import CoreData
 
-@objc(CheckIn)
-class CheckIn: NSManagedObject {
+@objc(Leaderboard)
+class Leaderboard: NSManagedObject {
 
 // Insert code here to add functionality to your managed object subclass
 

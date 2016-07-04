@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         DataManager.sharedManager
         
         // Start timer in case GPS fixes need to be sent
-        SendGPSFixController.sharedManager.timer()
+//        SendGPSFixController.sharedManager.timer()
         
         // Setup
         self.setupNavigationBarApperance()
@@ -36,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
-        Preferences.setLastCheckInURLString(self.urlStringForDeeplink(url))
+        Preferences.lastCheckInURLString = urlStringForDeeplink(url)
         return true
     }
 

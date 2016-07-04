@@ -21,7 +21,7 @@ class SettingsViewController: UITableViewController {
 		let imageView = UIImageView(image: UIImage(named: "sap_logo"))
 		let barButtonItem = UIBarButtonItem(customView: imageView)
 		navigationItem.leftBarButtonItem = barButtonItem
-        self.deviceIdentifierLabel.text = Preferences.uuid()
+        self.deviceIdentifierLabel.text = Preferences.uuid
     }
 
     @IBAction func batterySavingChanged(sender: UISwitch) {

@@ -1,5 +1,5 @@
 //
-//  LocationController.swift
+//  LocationManager.swift
 //  SAPTracker
 //
 //  Created by computing on 17/10/14.
@@ -9,36 +9,28 @@
 import Foundation
 import CoreLocation
 
-class LocationManager: NSObject, CLLocationManagerDelegate {
+class LocationManager: NSObject {
     
     struct NotificationType {
-        static let locationServicesDisabled = "locationServicesDisabled"
-        static let trackingStarted = "trackingStarted"
-        static let trackingStopped = "trackingStopped"
-        static let newLocation = "newLocation"
-        static let locationManagerFailed = "locationManagerFailed"
+        static let LocationManagerStarted = "LocationManagerStarted"
+        static let LocationManagerStopped = "LocationManagerStopped"
+        static let LocationManagerUpdated = "LocationManagerUpdated"
+        static let LocationManagerFailed = "LocationManagerFailed"
     }
     
-    struct UserInfo {
-        static let timestamp = "timestamp"
-        static let latitude = "latitude"
-        static let longitude = "longitude"
-        static let speed = "speed"
-        static let course = "course"
-        static let horizontalAccuracy = "horizontalAccuracy"
-        static let isValid = "isValid"
-    }
-    
-    enum TrackingError: ErrorType {
+    enum LocationManagerError: ErrorType {
         case LocationServicesDisabled
         case LocationServicesDenied
         var description: String {
             switch self {
-            case TrackingError.LocationServicesDenied: return NSLocalizedString("Please enable location services for this app.", comment: "")
-            case TrackingError.LocationServicesDisabled: return NSLocalizedString("Please enable location services.", comment: "")
+            case LocationManagerError.LocationServicesDenied: return NSLocalizedString("Please enable location services for this app.", comment: "")
+            case LocationManagerError.LocationServicesDisabled: return NSLocalizedString("Please enable location services.", comment: "")
             }
         }
     }
+    
+    private let locationManager: CLLocationManager!
+    private (set) var isTracking: Bool = false
     
     class var sharedManager: LocationManager {
         struct Singleton {
@@ -47,84 +39,106 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         return Singleton.sharedManager
     }
     
-    private var coreLocationManager: CLLocationManager = CLLocationManager()
-    
-    var isTracking: Bool = false
-    
     override init() {
+        locationManager = CLLocationManager()
         super.init()
-        coreLocationManager.delegate = self
+        setupLocationManager()
     }
+    
+    // MARK: - Setups
+    
+    private func setupLocationManager() {
+        locationManager.pausesLocationUpdatesAutomatically = false;
+        if #available(iOS 9, *) {
+            locationManager.allowsBackgroundLocationUpdates = true;
+        }
+        locationManager.delegate = self
+    }
+    
+    // MARK: - Methods
     
     func startTracking() throws {
         guard CLLocationManager.locationServicesEnabled() else {
-            throw TrackingError.LocationServicesDisabled
+            throw LocationManagerError.LocationServicesDisabled
         }
         guard CLLocationManager.authorizationStatus() != CLAuthorizationStatus.Denied else {
-            throw TrackingError.LocationServicesDenied
-        }
-        
-        // Allow the app to use the GPS sensor while in background
-        coreLocationManager.requestAlwaysAuthorization()
-        coreLocationManager.pausesLocationUpdatesAutomatically = false;
-        if #available(iOS 9, *) {
-            coreLocationManager.allowsBackgroundLocationUpdates = true;
+            throw LocationManagerError.LocationServicesDenied
         }
 
+        // Ask user to always track location
+        locationManager.requestAlwaysAuthorization()
+        
         // Start location updates
-        coreLocationManager.startUpdatingLocation()
-        coreLocationManager.startUpdatingHeading()
-        coreLocationManager.delegate = self
+        locationManager.startUpdatingLocation()
+        locationManager.startUpdatingHeading()
         isTracking = true;
-        let notification = NSNotification(name: NotificationType.trackingStarted, object: self)
+        
+        // Send notification
+        let notification = NSNotification(name: NotificationType.LocationManagerStarted, object: self)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
     func stopTracking() {
-        coreLocationManager.stopUpdatingLocation()
-        coreLocationManager.stopUpdatingHeading()
+        
+        // Stop location updates
+        locationManager.stopUpdatingLocation()
+        locationManager.stopUpdatingHeading()
         isTracking = false;
-        let notification = NSNotification(name: NotificationType.trackingStopped, object: self)
+        
+        // Send notification
+        let notification = NSNotification(name: NotificationType.LocationManagerStopped, object: self)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
+}
+
+// MARK: - CLLocationManagerDelegate
+
+extension LocationManager: CLLocationManagerDelegate {
+    
+    struct UserInfo {
+        static let Error = "error"
+        static let Course = "course"
+        static let HorizontalAccuracy = "horizontalAccuracy"
+        static let IsValid = "isValid"
+        static let Latitude = "latitude"
+        static let Longitude = "longitude"
+        static let Speed = "speed"
+        static let Timestamp = "timestamp"
+    }
+    
+    struct LocationValidation {
+        static let requiredAccuracy: CLLocationAccuracy = 10
+        static let maxElapsedTime: NSTimeInterval = 10
+    }
+    
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let location = locations.last
-        let notification = NSNotification(name: NotificationType.newLocation, object: self, userInfo:LocationManager.dictionaryForLocation(location!))
+        let notification = NSNotification(name: NotificationType.LocationManagerUpdated, object: self, userInfo:dictionaryForLocation(locations.last!))
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
 
     func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
-        let notification = NSNotification(name: NotificationType.locationManagerFailed, object: self, userInfo: ["error": error])
+        let notification = NSNotification(name: NotificationType.LocationManagerFailed, object: self, userInfo: [UserInfo.Error: error])
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
-
-    // MARK: -
-    /* Create dictionary for location. */
-    class func dictionaryForLocation(location: CLLocation) -> [String: AnyObject] {
+    
+    // MARK: - Helper
+    
+    private func dictionaryForLocation(location: CLLocation) -> [String: AnyObject] {
         return [
-            "timestamp": location.timestamp.timeIntervalSince1970,
-            "latitude" : location.coordinate.latitude,
-            "longitude": location.coordinate.longitude,
-            "speed": location.speed,
-            "course": location.course,
-            "horizontalAccuracy": location.horizontalAccuracy,
-            "isValid": isLocationValid(location)
+            UserInfo.Timestamp: location.timestamp.timeIntervalSince1970,
+            UserInfo.Latitude : location.coordinate.latitude,
+            UserInfo.Longitude: location.coordinate.longitude,
+            UserInfo.Speed: location.speed,
+            UserInfo.Course: location.course,
+            UserInfo.HorizontalAccuracy: location.horizontalAccuracy,
+            UserInfo.IsValid: isLocationValid(location)
         ]
     }
     
-    static let REQ_ACCURACY : CLLocationAccuracy = 10
-    static let REQ_TIME : NSTimeInterval = 10
-    class func isLocationValid(location: CLLocation) -> Bool {
-        let accuracy = location.horizontalAccuracy
-        let time = location.timestamp
-        let elapsed = time.timeIntervalSinceDate(NSDate())
-        if elapsed > REQ_TIME {
-            return false
-        }
-        if accuracy < 0 || accuracy > REQ_ACCURACY {
-            return false
-        }
+    private func isLocationValid(location: CLLocation) -> Bool {
+        guard location.horizontalAccuracy >= 0 && location.horizontalAccuracy <= LocationValidation.requiredAccuracy else { return false }
+        guard location.timestamp.timeIntervalSinceDate(NSDate()) <= LocationValidation.maxElapsedTime else { return false }
         return true;
     }
     
