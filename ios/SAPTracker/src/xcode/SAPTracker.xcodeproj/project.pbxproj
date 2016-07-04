@@ -299,7 +299,7 @@
 		7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */; };
 		7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* RegattaViewController.swift */; };
 		7FA2220B1A25E55400FD364B /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
-		7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551919F6661900A1B92D /* DataManager.swift */; };
+		7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551919F6661900A1B92D /* CoreDataManager.swift */; };
 		7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FAFA7941A126B5700D230F1 /* AboutViewController.swift */; };
 		7FC5232D19F6AEE800BBFDCC /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */; };
 		7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD9D3021A1236080058FEAD /* Extensions.swift */; };
@@ -687,7 +687,7 @@
 		7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderBoardViewController.swift; sourceTree = "<group>"; };
 		7F99DE3B1A126554009B3619 /* RegattaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaViewController.swift; sourceTree = "<group>"; };
-		7FA6551919F6661900A1B92D /* DataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		7FA6551919F6661900A1B92D /* CoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CoreDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7FAFA7941A126B5700D230F1 /* AboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		7FAFB0B51A603C3E0054D457 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -760,9 +760,10 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		7F06590019F7FE750077FF95 /* Model */ = {
+		7F06590019F7FE750077FF95 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
+				7FA6551919F6661900A1B92D /* CoreDataManager.swift */,
 				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
 				C8739DA51D2539A900A89F3C /* CheckIn+CoreDataProperties.swift */,
 				C8739DA61D2539A900A89F3C /* CheckIn.swift */,
@@ -775,7 +776,7 @@
 				C8739DB91D25409700A89F3C /* Leaderboard+CoreDataProperties.swift */,
 				C8739DBA1D25409700A89F3C /* Leaderboard.swift */,
 			);
-			name = Model;
+			name = CoreData;
 			sourceTree = "<group>";
 		};
 		7F06590119F7FE920077FF95 /* ViewController */ = {
@@ -1118,7 +1119,7 @@
 				7F72C7401A2DEA3300F48EE8 /* Helpers */,
 				7F06590119F7FE920077FF95 /* ViewController */,
 				7F06590219F7FEA40077FF95 /* DataController */,
-				7F06590019F7FE750077FF95 /* Model */,
+				7F06590019F7FE750077FF95 /* CoreData */,
 				7F83F15319F154F000C53328 /* Supporting Files */,
 			);
 			path = SAPTracker;
@@ -1203,7 +1204,6 @@
 			isa = PBXGroup;
 			children = (
 				C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */,
-				7FA6551919F6661900A1B92D /* DataManager.swift */,
 				7F2C605919F160E400C32D93 /* LocationManager.swift */,
 			);
 			name = Managers;
@@ -1844,7 +1844,7 @@
 				C8739DB71D2539A900A89F3C /* GPSFix+CoreDataProperties.swift in Sources */,
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
 				7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */,
-				7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */,
+				7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */,
 				C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */,
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
 				C8739D8E1D23D53C00A89F3C /* SendGPSFixesController.swift in Sources */,

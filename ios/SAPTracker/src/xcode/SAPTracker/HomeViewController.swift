@@ -53,7 +53,7 @@ class HomeViewController: UIViewController {
     }
     
     private func setupTableViewDataSource() {
-        fetchedResultsController = DataManager.sharedManager.checkInFetchedResultsController()
+        fetchedResultsController = CoreDataManager.sharedManager.checkInFetchedResultsController()
         fetchedResultsController!.delegate = self
         do {
             try fetchedResultsController!.performFetch()

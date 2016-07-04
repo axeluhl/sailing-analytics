@@ -117,7 +117,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         teamImageView.image = image
         checkIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
         checkIn.teamImageRetry = false
-        DataManager.sharedManager.saveContext()
+        CoreDataManager.sharedManager.saveContext()
         setupTeamImageFinished()
     }
 
@@ -264,8 +264,8 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
                                     success: { (operation, responseObject) in },
                                     failure: { (operation, error) in
         })
-        DataManager.sharedManager.deleteCheckIn(self.checkIn!)
-        DataManager.sharedManager.saveContext()
+        CoreDataManager.sharedManager.deleteCheckIn(self.checkIn!)
+        CoreDataManager.sharedManager.saveContext()
         navigationController!.popViewControllerAnimated(true)
     }
     
@@ -301,7 +301,7 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         teamImageEditButton.hidden = false
         teamImageRetryButton.hidden = true
         checkIn.teamImageData = UIImageJPEGRepresentation(image, 0.8)
-        DataManager.sharedManager.saveContext()
+        CoreDataManager.sharedManager.saveContext()
         postTeamImageData(checkIn.teamImageData)
     }
     
@@ -319,7 +319,7 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         let teamImageURL = (teamImageDictionary[TeamImageKeys.TeamImageURL]) as! String
         checkIn.teamImageURL = teamImageURL
         checkIn.teamImageRetry = false
-        DataManager.sharedManager.saveContext()
+        CoreDataManager.sharedManager.saveContext()
         
         // Setup team image
         setupTeamImage()
@@ -329,7 +329,7 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         
         // Save image upload failure
         checkIn.teamImageRetry = true
-        DataManager.sharedManager.saveContext()
+        CoreDataManager.sharedManager.saveContext()
         
         // Show alert
         let alertTitle = NSLocalizedString("Failed to upload image", comment: "")

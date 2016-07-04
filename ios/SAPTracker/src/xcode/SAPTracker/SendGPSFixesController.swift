@@ -47,13 +47,13 @@ class SendGPSFixesController: NSObject {
         dispatch_async(dispatch_get_main_queue(), {
             if let userInfo = notification.userInfo {
                 if userInfo[LocationManager.UserInfo.IsValid] as? Bool ?? false {
-                    let gpsFix = DataManager.sharedManager.newGPSFix(self.checkIn)
+                    let gpsFix = CoreDataManager.sharedManager.newGPSFix(self.checkIn)
                     gpsFix.course = userInfo[LocationManager.UserInfo.Course] as! Double
                     gpsFix.latitude = userInfo[LocationManager.UserInfo.Latitude] as! Double
                     gpsFix.longitude = userInfo[LocationManager.UserInfo.Longitude] as! Double
                     gpsFix.speed = userInfo[LocationManager.UserInfo.Speed] as! Double
                     gpsFix.timestamp = round(userInfo[LocationManager.UserInfo.Timestamp] as! Double * 1000)
-                    DataManager.sharedManager.saveContext()
+                    CoreDataManager.sharedManager.saveContext()
                 }
             }
         })
@@ -92,8 +92,8 @@ class SendGPSFixesController: NSObject {
         print(NSThread.isMainThread)
         dispatch_async(dispatch_get_main_queue(), {
             self.log("sending \(gpsFixes.count) GPS fixes was successful")
-            DataManager.sharedManager.deleteGPSFixes(gpsFixes)
-            DataManager.sharedManager.saveContext()
+            CoreDataManager.sharedManager.deleteGPSFixes(gpsFixes)
+            CoreDataManager.sharedManager.saveContext()
             self.sendGPSFixesFinished()
         })
     }

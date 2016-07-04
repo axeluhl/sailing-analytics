@@ -1,5 +1,5 @@
 //
-//  DataManager.swift
+//  CoreDataManager.swift
 //  SAPTracker
 //
 //  Created by computing on 21/10/14.
@@ -9,11 +9,11 @@
 import Foundation
 import CoreData
 
-public class DataManager: NSObject {
+public class CoreDataManager: NSObject {
     
-    public class var sharedManager: DataManager {
+    public class var sharedManager: CoreDataManager {
         struct Singleton {
-            static let sharedManager = DataManager()
+            static let sharedManager = CoreDataManager()
         }
         return Singleton.sharedManager
     }

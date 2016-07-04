@@ -161,16 +161,16 @@ class CheckInController : NSObject {
     private func checkInOnServerSucceed() {
         
         // Check database if check-in already exist
-        if let checkIn = DataManager.sharedManager.fetchCheckIn(checkInData.eventID,
-                                                                leaderboardName: checkInData.leaderboardName,
-                                                                competitorID: checkInData.competitorID) {
+        if let checkIn = CoreDataManager.sharedManager.fetchCheckIn(checkInData.eventID,
+                                                                    leaderboardName: checkInData.leaderboardName,
+                                                                    competitorID: checkInData.competitorID) {
             // Delete old check-in
-            DataManager.sharedManager.deleteCheckIn(checkIn)
-            DataManager.sharedManager.saveContext()
+            CoreDataManager.sharedManager.deleteCheckIn(checkIn)
+            CoreDataManager.sharedManager.saveContext()
         }
         
         // Create new check-in
-        let checkIn = DataManager.sharedManager.newCheckIn()
+        let checkIn = CoreDataManager.sharedManager.newCheckIn()
         checkIn.competitorID = checkInData!.competitorID
         checkIn.eventID = checkInData.eventID
         checkIn.lastSyncDate = NSDate().timeIntervalSince1970
@@ -180,18 +180,18 @@ class CheckInController : NSObject {
         checkIn.teamImageRetry = false
         
         // Create new event
-        let event = DataManager.sharedManager.newEvent(checkIn)
+        let event = CoreDataManager.sharedManager.newEvent(checkIn)
         event.endDate = (eventEndDate() / 1000)
         event.eventID = eventID()
         event.name = eventName()
         event.startDate = (eventStartDate() / 1000)
 
         // Create new leaderboard
-        let leaderboard = DataManager.sharedManager.newLeaderBoard(checkIn)
+        let leaderboard = CoreDataManager.sharedManager.newLeaderBoard(checkIn)
         leaderboard.name = leaderboardName()
         
         // Create new competitor
-        let competitor = DataManager.sharedManager.newCompetitor(checkIn)
+        let competitor = CoreDataManager.sharedManager.newCompetitor(checkIn)
         competitor.boatClassName = competitorBoatClassName()
         competitor.competitorID = competitorID()
         competitor.countryCode = competitorCountryCode()
@@ -200,7 +200,7 @@ class CheckInController : NSObject {
         competitor.sailID = competitorSailID()
         
         // Save objects
-        DataManager.sharedManager.saveContext()
+        CoreDataManager.sharedManager.saveContext()
         
         // Check-in completed
         self.checkInDidEnd(withSuccess: true)
