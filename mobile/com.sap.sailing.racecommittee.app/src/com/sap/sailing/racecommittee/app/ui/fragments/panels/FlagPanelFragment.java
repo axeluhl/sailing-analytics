@@ -302,7 +302,7 @@ public class FlagPanelFragment extends BasePanelFragment {
                     break;
 
                 case FINISHING:
-                    mBlueLastText.setText(TimeUtils.formatDurationSince(now.minus(getRaceState().getFinishingTime().asMillis()).asMillis()));
+                    mBlueLastText.setText(TimeUtils.formatTimeAgo(getActivity(), now.minus(getRaceState().getFinishingTime().asMillis()).asMillis()));
                     changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
                     break;
 

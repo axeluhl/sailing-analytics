@@ -176,7 +176,7 @@ public class TimePanelFragment extends BasePanelFragment {
         if (mFirstVesselDuration != null && mFirstVesselDuration.getVisibility() == View.VISIBLE) {
             if (!getRaceState().getFinishingTime().equals(mLastFinishingTime)) {
                 mLastFinishingTime = getRaceState().getFinishingTime();
-                String raceDuration = TimeUtils.formatTime(mLastFinishingTime.minus(getRaceState().getStartTime().asMillis()));
+                String raceDuration = TimeUtils.formatTimeAgo(getActivity(), mLastFinishingTime.minus(getRaceState().getStartTime().asMillis()).asMillis());
                 mFirstVesselDuration.setText(raceDuration);
             }
         }
