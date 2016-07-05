@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout
-    android:id="@+id/race_content_header"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/race_content_header"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/sap_gray">
@@ -15,22 +14,22 @@
         android:gravity="center"
         android:textColor="?attr/white"
         android:textSize="@dimen/textSize_40"
-        tools:text="@string/time"/>
+        tools:text="@string/time" />
 
     <ImageView
         android:id="@+id/time_marker"
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
-        android:src="?attr/marker"/>
+        android:src="?attr/marker" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/time_marker"
         android:layout_centerHorizontal="true"
-        android:baselineAligned="false"
-        android:layout_marginBottom="@dimen/side_padding">
+        android:layout_marginBottom="@dimen/side_padding"
+        android:baselineAligned="false">
 
 
         <RelativeLayout
@@ -44,9 +43,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:textAppearance="?attr/textSmall"
                 android:layout_toRightOf="@+id/linked_locked_area"
-                tools:text="@string/time_start"/>
+                android:textAppearance="?attr/textSmall"
+                tools:text="@string/time_start" />
 
             <LinearLayout
                 android:id="@+id/linked_locked_area"
@@ -62,7 +61,7 @@
                     android:layout_height="wrap_content"
                     android:src="?attr/lock_outline"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible" />
 
                 <ImageView
                     android:id="@+id/linked_race"
@@ -71,31 +70,35 @@
                     android:layout_gravity="center_vertical"
                     android:src="?attr/link_24dp"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible" />
             </LinearLayout>
         </RelativeLayout>
 
-        <RelativeLayout
+        <TextView
+            android:id="@+id/current_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/start_time_container"
             android:layout_marginLeft="@dimen/side_padding"
-            android:layout_centerVertical="true">
+            android:layout_toRightOf="@+id/start_time_container"
+            android:drawableLeft="?attr/access_time_24dp"
+            android:drawablePadding="6dp"
+            android:textAppearance="?attr/textSmall"
+            android:visibility="invisible"
+            tools:text="@string/time"
+            tools:visibility="visible" />
 
-            <TextView
-                android:id="@+id/current_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_centerVertical="true"
-                android:drawableLeft="?attr/access_time_24dp"
-                android:drawablePadding="6dp"
-                android:gravity="center"
-                android:textAppearance="?attr/textSmall"
-                android:visibility="invisible"
-                tools:text="@string/time"
-                tools:visibility="visible"/>
-        </RelativeLayout>
+        <TextView
+            android:id="@+id/first_vessel_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/side_padding"
+            android:layout_toRightOf="@id/current_time"
+            android:drawableLeft="?attr/flag_24dp"
+            android:drawablePadding="6dp"
+            android:textAppearance="?attr/textSmall"
+            android:visibility="gone"
+            tools:text="0h 23m 14s"
+            tools:visibility="visible" />
 
     </RelativeLayout>
 </com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout>
