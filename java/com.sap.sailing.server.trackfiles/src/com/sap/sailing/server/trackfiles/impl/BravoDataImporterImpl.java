@@ -108,7 +108,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
         String epochColValue = contentTokens[2];
         if (epochColValue != null && epochColValue.length() > 0) {
             epochColValue = epochColValue.substring(0, epochColValue.indexOf("."));
-            long epoch = Long.valueOf(epochColValue);
+            long epoch = Long.parseLong(epochColValue);
             fixTp = new MillisecondsTimePoint(epoch);
         } else {
             String jjLDATE = contentTokens[0].substring(0, 9);
@@ -129,7 +129,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
         for (int columnIndexInFix = 0; columnIndexInFix < fixData.length; columnIndexInFix++) {
             String columnName = metadata.getColumns().get(columnIndexInFix);
             Integer columnIndexInFile = colIndices.get(columnName);
-            fixData[columnIndexInFix] = Double.valueOf(contentTokens[columnIndexInFile]);
+            fixData[columnIndexInFix] = Double.parseDouble(contentTokens[columnIndexInFile]);
         }
         return new DoubleVectorFixImpl(fixTp, fixData);
     }

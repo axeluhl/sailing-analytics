@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.persistence.racelog.tracking.impl;
 
+import static com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl.storeDeviceId;
+import static com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl.storeTimeRange;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,6 +66,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         }
         fixesCollection = mongoOF.getGPSFixCollection();
         metadataCollection = mongoOF.getGPSFixMetadataCollection();
+
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -81,7 +85,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     @Override
     public <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
             TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        Object dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
+        Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
         final QueryBuilder queryBuilder = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId)
                 .and(FieldNames.TIME_AS_MILLIS.name());
         if (inclusive) {
@@ -116,7 +120,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             return;
         }
         try {
-            final Object dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
+            final Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
             final int nrOfTotalFixes = Util.size(fixes);
             final ArrayList<DBObject> dbFixes = new ArrayList<>(nrOfTotalFixes);
             TimePoint newFrom = null;
@@ -138,20 +142,21 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                 }
             }
             fixesCollection.insert(dbFixes);
-            final long oldNumFixes = getNumberOfFixes(device);
-            final DBObject newMetadata = new BasicDBObject();
-            newMetadata.put(FieldNames.DEVICE_ID.name(),
-                    MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device));
-            newMetadata.put(FieldNames.NUM_FIXES.name(), oldNumFixes + nrOfTotalFixes);
+            final BasicDBObject updateOperation = new BasicDBObject();
+            final BasicDBObject newMetadata = new BasicDBObject();
+            newMetadata.put(FieldNames.DEVICE_ID.name(), dbDeviceId);
 
             TimeRange oldTimeRange = getTimeRangeCoveredByFixes(device);
             TimeRangeImpl fixesTimeRange = new TimeRangeImpl(newFrom, newTo);
-
             TimeRange newTimeRange = oldTimeRange == null ? fixesTimeRange : oldTimeRange.union(fixesTimeRange);
 
-            MongoObjectFactoryImpl.storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
-            metadataCollection.update(getDeviceQuery(device), newMetadata, /* create if not existent */ true,
+            storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
+            updateOperation.append("$set", newMetadata);
+            updateOperation.append("$inc", new BasicDBObject(FieldNames.NUM_FIXES.name(), nrOfTotalFixes));
+            metadataCollection.update(getDeviceQuery(device), updateOperation, /* create if not existent */ true,
                     /* update multiple */ false);
+            
+
         } catch (TransformationException e) {
             logger.log(Level.WARNING, "Could not store fix in MongoDB");
             e.printStackTrace();
@@ -188,7 +193,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     private DBObject getDeviceQuery(DeviceIdentifier device)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
-        Object dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
+        Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
         DBObject query = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId).get();
         return query;
     }

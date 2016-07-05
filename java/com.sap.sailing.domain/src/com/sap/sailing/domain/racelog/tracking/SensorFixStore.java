@@ -29,13 +29,23 @@ public interface SensorFixStore {
     TransformationException;
 
     /**
-     * Saves a fix for the given device and informs all registered listeners about the new fix.
+     * Saves a single fix for the given device and informs all registered listeners about the new fix.
      * 
-     * @param device the device to store the fix for. Must not be <code>null</code>.
-     * @param fix The fix to store. Must not be <code>null</code>.
+     * @param device
+     *            the device to store the fix for. Must not be <code>null</code>.
+     * @param fix
+     *            The fix to store. Must not be <code>null</code>.
      */
     <FixT extends Timed> void storeFix(DeviceIdentifier device, FixT fix);
 
+    /**
+     * Saves a batch of fixes for the given device and informs all registered listeners about the new fix.
+     * 
+     * @param device
+     *            the device to store the fix for. Must not be <code>null</code>.
+     * @param fix
+     *            The fix to store. Must not be <code>null</code>.
+     */
     <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
 
     /**

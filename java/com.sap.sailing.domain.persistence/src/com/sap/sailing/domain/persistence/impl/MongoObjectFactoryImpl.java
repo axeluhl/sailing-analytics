@@ -170,9 +170,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeTimePoint(timePoint, result, field.name());
     }
     
-    public static void storeTimeRange(TimeRange timeRange, DBObject result, FieldNames field) {
+    public static void storeTimeRange(TimeRange timeRange, BasicDBObject result, FieldNames field) {
         if (timeRange != null) {
-            DBObject timeRangeObj = new BasicDBObject();
+            BasicDBObject timeRangeObj = new BasicDBObject();
             storeTimePoint(timeRange.from(), timeRangeObj, FieldNames.FROM_MILLIS);
             storeTimePoint(timeRange.to(), timeRangeObj, FieldNames.TO_MILLIS);
             result.put(field.name(), timeRangeObj);
