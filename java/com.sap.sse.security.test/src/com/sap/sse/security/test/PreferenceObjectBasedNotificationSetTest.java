@@ -36,6 +36,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     private String otherPrefKey = "otherPrefKey";
     private HashSet<String> values1 = values(A, B);
     private HashSet<String> values2 = values(B, C);
+    private HashSet<String> allValues = values(A, B, C);
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
@@ -95,6 +96,41 @@ public class PreferenceObjectBasedNotificationSetTest {
         Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values()));
         Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values(user1)));
         Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values(user1)));
+    }
+    
+    @Test
+    public void preferenceUpdateDoesntInfluenceOtherUserTest() {
+        store.registerPreferenceConverter(prefKey, prefConverter);
+        store.setPreferenceObject(user1, prefKey, values1);
+        store.setPreferenceObject(user2, prefKey, allValues);
+        PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
+        store.setPreferenceObject(user1, prefKey, values2);
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values(user2)));
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values(user1, user2)));
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values(user1, user2)));
+    }
+    
+    @Test
+    public void preferenceUnsetDoesntInfluenceOtherUserTest() {
+        store.registerPreferenceConverter(prefKey, prefConverter);
+        store.setPreferenceObject(user1, prefKey, values1);
+        store.setPreferenceObject(user2, prefKey, values2);
+        PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
+        store.unsetPreference(user1, prefKey);
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values(user2)));
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values(user2)));
+    }
+    
+    @Test
+    public void preferenceUnsetTest() {
+        store.registerPreferenceConverter(prefKey, prefConverter);
+        PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
+        store.setPreferenceObject(user1, prefKey, values1);
+        store.unsetPreference(user1, prefKey);
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
     }
     
     @Test

@@ -88,6 +88,22 @@ public class UserPreferenceObjectAndConverterTest {
         Assert.assertEquals(serializedPref1, store.getPreference(user1, prefKey1));
         Assert.assertEquals(pref1, store.getPreferenceObject(user1, prefKey1));
     }
+    
+    @Test
+    public void unsetPreferenceTest() {
+        store.registerPreferenceConverter(prefKey1, prefConverter);
+        store.setPreferenceObject(user1, prefKey1, pref1);
+        store.unsetPreference(user1, prefKey1);
+        Assert.assertEquals(null, store.getPreferenceObject(user1, prefKey1));
+    }
+    
+    @Test
+    public void setPreferenceObjectToNullTest() {
+        store.registerPreferenceConverter(prefKey1, prefConverter);
+        store.setPreferenceObject(user1, prefKey1, pref1);
+        store.setPreferenceObject(user1, prefKey1, null);
+        Assert.assertEquals(null, store.getPreferenceObject(user1, prefKey1));
+    }
 
     public static class SimplePreferenceForSerialization implements Serializable {
         private static final long serialVersionUID = -580569932709860895L;
