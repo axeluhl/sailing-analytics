@@ -383,7 +383,7 @@
     <string name="race_summary_individual_recalls">Individual Recalls</string>
     <string name="race_summary_time" translatable="false">%s min</string>
     <string name="record_voice">Record Voice</string>
-    <string name="finishing_started">First in finish at %1$s (%2$s)</string>
+    <string name="finishing_started">First in finish at %1$s</string>
     <string name="finishing_started_since">(since %s)</string>
     <string name="finishing_done">Down now</string>
 
