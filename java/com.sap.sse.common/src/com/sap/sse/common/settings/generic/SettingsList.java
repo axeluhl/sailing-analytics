@@ -86,6 +86,12 @@ public class SettingsList<T extends AbstractGenericSerializableSettings> extends
             }
         }
     }
+    
+    public void addValue(T value) {
+        ValueCollectionValue<List<Value>> valueObject = ensureValue();
+        this.values.add(value);
+        valueObject.addValue(value.getInnerValueObject());
+    }
 
     @Override
     public int hashCode() {
