@@ -2,8 +2,8 @@
 //  GPSAccuracyView.swift
 //  SAPTracker
 //
-//  Created by computing on 11/12/14.
-//  Copyright (c) 2014 com.sap.sailing. All rights reserved.
+//  Created by Raimund Wege on 05.07.16.
+//  Copyright © 2016 com.sap.sailing. All rights reserved.
 //
 
 import UIKit
@@ -29,24 +29,28 @@ class GPSAccuracyView : UIView {
     }
     
     private func initialize() {
-        self.setupBarView()
-        self.setupBackroundColor()
-        self.subscribeForNotifications()
+        setups()
+        subscribeForNotifications()
     }
     
     deinit {
-        self.unsubscribeFromNotifications()
+        unsubscribeFromNotifications()
     }
     
     // MARK: - Setups
     
+    private func setups() {
+        setupBarView()
+        setupBackroundColor()
+    }
+    
     private func setupBarView() {
-        addSubview(self.barView)
-        self.barView.frame = self.bounds    
+        addSubview(barView)
+        barView.frame = bounds
     }
 
     private func setupBackroundColor() {
-        self.backgroundColor = UIColor.grayColor()
+        backgroundColor = UIColor.grayColor()
     }
     
     // MARK: - Notifications
