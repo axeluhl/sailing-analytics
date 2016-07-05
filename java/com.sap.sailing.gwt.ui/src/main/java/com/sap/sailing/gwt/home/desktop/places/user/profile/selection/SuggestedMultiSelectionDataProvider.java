@@ -14,7 +14,7 @@ public interface SuggestedMultiSelectionDataProvider<T> extends ProvidesKey<T> {
     
     void setNotifications(boolean enabled);
     
-    void getSuggestionItems(String query, final SuggestionItemsCallback<T> callback);
+    void getSuggestionItems(Iterable<String> queryTokens, int limit, final SuggestionItemsCallback<T> callback);
     
     interface SuggestionItemsCallback<T> {
         void setSuggestionItems(Collection<T> suggestionItems);

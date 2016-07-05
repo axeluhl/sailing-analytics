@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
@@ -14,14 +13,16 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.SuggestOracle.Callback;
+import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionDataProvider.SuggestionItemsCallback;
+import com.sap.sailing.gwt.home.shared.partials.filter.AbstractAsyncSuggestBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractFilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSuggestBoxFilter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.filter.Filter;
 
 public final class SuggestedMultiSelection<T> extends Composite {
 
@@ -98,8 +99,8 @@ public final class SuggestedMultiSelection<T> extends Composite {
         removeAllButtonUi.setEnabled(itemContainerUi.getWidgetCount() > 0);
     }
     
-    private static abstract class AbstractSuggestedMultiSelectionFilter<T> extends AbstractSuggestBoxFilter<T, T> {
-        protected final SuggestedMultiSelectionDataProvider<T> dataProvider;
+    private static abstract class AbstractSuggestedMultiSelectionFilter<T> extends AbstractAsyncSuggestBoxFilter<T, T> {
+        private final SuggestedMultiSelectionDataProvider<T> dataProvider;
         private final SelectionCallback<T> selectionCallback;
 
         protected AbstractSuggestedMultiSelectionFilter(SuggestedMultiSelectionDataProvider<T> dataProvider,
@@ -107,6 +108,17 @@ public final class SuggestedMultiSelection<T> extends Composite {
             super(placeholderText);
             this.dataProvider = dataProvider;
             this.selectionCallback = selectionCallback;
+        }
+        
+        @Override
+        protected void getSuggestions(final Request request, final Callback callback,
+                final Iterable<String> queryTokens) {
+            dataProvider.getSuggestionItems(queryTokens, request.getLimit(), new SuggestionItemsCallback<T>() {
+                @Override
+                public void setSuggestionItems(Collection<T> suggestionItems) {
+                    setSuggestions(request, callback, suggestionItems, queryTokens);
+                }
+            });
         }
         
         @Override
@@ -118,20 +130,6 @@ public final class SuggestedMultiSelection<T> extends Composite {
         protected final void onSuggestionSelected(T selectedItem) {
             AbstractSuggestedMultiSelectionFilter.this.clear();
             selectionCallback.onSuggestionSelected(selectedItem);
-        }
-        
-        @Override
-        protected final Filter<T> getFilter(String searchString) {
-            dataProvider.getSuggestionItems(searchString, new SuggestionItemsCallback<T>() {
-                @Override
-                public void setSuggestionItems(Collection<T> suggestionItems) {
-                    AbstractSuggestedMultiSelectionFilter.this.setSelectableValues(suggestionItems);
-                }
-            });
-            return new Filter<T>() {
-                @Override public boolean matches(T object) { return true; }
-                @Override public String getName() { return "alwaysMatchingFilter"; }
-            };
         }
     }
     
@@ -161,11 +159,6 @@ public final class SuggestedMultiSelection<T> extends Composite {
                     protected String createSuggestionAdditionalDisplayString(SimpleCompetitorDTO value) {
                         return value.getName();
                     }
-                    
-                    @Override
-                    protected Iterable<String> getMatchingStrings(SimpleCompetitorDTO value) {
-                        return Arrays.asList(value.getSailID(), value.getName());
-                    }
                 };
             }
         }, headerTitle);
@@ -187,11 +180,6 @@ public final class SuggestedMultiSelection<T> extends Composite {
                     @Override
                     protected String createSuggestionAdditionalDisplayString(BoatClassMasterdata value) {
                         return null;
-                    }
-
-                    @Override
-                    protected Iterable<String> getMatchingStrings(BoatClassMasterdata value) {
-                        return value.getBoatClassNames();
                     }
                 };
             }

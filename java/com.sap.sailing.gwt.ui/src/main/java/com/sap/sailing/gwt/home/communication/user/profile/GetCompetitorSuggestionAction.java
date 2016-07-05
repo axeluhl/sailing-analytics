@@ -3,8 +3,6 @@ package com.sap.sailing.gwt.home.communication.user.profile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Boat;
@@ -18,7 +16,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
  * {@link SailingAction} implementation to load competitor data to be shown in a suggestion box depending on the
- * {@link #GetCompetitorSuggestionAction(String, int) given query string}, where the amount of loaded entries can be
+ * {@link #GetCompetitorSuggestionAction(String, int) given query tokens}, where the amount of loaded entries can be
  * limited.
  * 
  * The given query string is matched against the competitor's {@link Competitor#getName() name} and
@@ -26,7 +24,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  */
 public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSuggestionResult> {
     
-    private String query;
+    private ArrayList<String> queryTokens;
     private int limit;
     
     @GwtIncompatible
@@ -46,13 +44,13 @@ public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSu
      * Creates a {@link GetCompetitorSuggestionAction} instance with the given query string, where the loaded competitor
      * entries are limited to the provided amount.
      * 
-     * @param query
-     *            query string to load competitors for
+     * @param queryTokens
+     *            query tokens to load competitors for
      * @param limit
      *            maximum number of competitor entries to be loaded
      */
-    public GetCompetitorSuggestionAction(String query, int limit) {
-        this.query = query;
+    public GetCompetitorSuggestionAction(Iterable<String> queryTokens, int limit) {
+        this.queryTokens = (ArrayList<String>) Util.addAll(queryTokens, new ArrayList<String>());
         this.limit = limit;
     }
 
@@ -67,8 +65,7 @@ public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSu
     @GwtIncompatible
     private Iterable<Competitor> getFilteredCompetitors(SailingDispatchContext ctx) {
         Iterable<? extends Competitor> allCompetitors = ctx.getRacingEventService().getCompetitorStore().getCompetitors();
-        Set<String> normalizedQuery = Collections.singleton(query.trim());
-        return competitorFilter.applyFilter(normalizedQuery, Util.addAll(allCompetitors, new ArrayList<Competitor>())); 
+        return competitorFilter.applyFilter(queryTokens, Util.addAll(allCompetitors, new ArrayList<Competitor>())); 
     }
     
     @GwtIncompatible
