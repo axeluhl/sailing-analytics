@@ -620,6 +620,40 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{leaderboardName}/marks/{markId}")
+    public Response getMark(@PathParam("leaderboardName") String leaderboardName,
+            @PathParam("markId") String markId) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+
+        if (!(leaderboard instanceof HasRegattaLike)) {
+            return Response.status(Status.NOT_FOUND)
+                    .entity("Leaderboard with name '" + leaderboardName + "'does not contain a RegattaLog'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        Mark mark = null;
+        for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            for (final Mark availableMark : raceColumn.getAvailableMarks()) {
+                mark = availableMark;
+                break;
+            }
+        }
+        if (mark == null) {
+            return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + StringEscapeUtils.escapeHtml(markId) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        }
+        final TimePoint now = MillisecondsTimePoint.now();
+        Position lastKnownPosition = getService().getMarkPosition(mark, (LeaderboardThatHasRegattaLike) leaderboard, now);
+        final JSONObject result = markWithPositionSerializer.serialize(new Pair<>(mark, lastKnownPosition));
+        return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+
     private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
     private final MarkJsonSerializerWithPosition markWithPositionSerializer = new MarkJsonSerializerWithPosition(
             markSerializer, new FlatGPSFixJsonSerializer());

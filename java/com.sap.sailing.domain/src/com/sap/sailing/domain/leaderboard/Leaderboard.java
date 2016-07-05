@@ -116,6 +116,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     Iterable<Competitor> getSuppressedCompetitors();
     
     /**
+     * Tells whether {@code competitor} is among those {@link #getSuppressedCompetitors() suppressed}
+     */
+    boolean isSuppressed(Competitor competitor);
+
+    /**
      * Can be used to exclude competitor from regular views of this leaderboard as well as from the scoring process.
      * As a result of suppressing a competitor, it will no longer result from calls to {@link #getCompetitors} nor to
      * {@link #getCompetitorsFromBestToWorst(TimePoint)} nor {@link #getCompetitorsFromBestToWorst(RaceColumn, TimePoint)}.
@@ -526,4 +531,5 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
             InterruptedException, ExecutionException;
 
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
+
 }
