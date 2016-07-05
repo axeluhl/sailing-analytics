@@ -47,7 +47,8 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T>
     }
     
     @Override
-    public final void getSuggestionItems(String query, final SuggestionItemsCallback<T> callback) {
+    public final void getSuggestionItems(Iterable<String> queryTokens, int limit,
+            final SuggestionItemsCallback<T> callback) {
         final SuggestionItemsCallback<T> internalCallback = new SuggestionItemsCallback<T>() {
             @Override
             public void setSuggestionItems(Collection<T> suggestionItems) {
@@ -61,10 +62,11 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T>
                 callback.setSuggestionItems(filteredSuggestionItems);
             }
         };
-        this.getSuggestions(query, internalCallback);
+        this.getSuggestions(queryTokens, limit, internalCallback);
     }
-    
-    protected abstract void getSuggestions(String query, SuggestionItemsCallback<T> callback);
+
+    protected abstract void getSuggestions(Iterable<String> queryTokens, int limit,
+            SuggestionItemsCallback<T> callback);
     
     public boolean isNotificationsEnabled() {
         return notificationsEnabled;

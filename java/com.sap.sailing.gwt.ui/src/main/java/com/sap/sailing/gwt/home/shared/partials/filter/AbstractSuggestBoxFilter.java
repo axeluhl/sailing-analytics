@@ -14,21 +14,16 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.SuggestBox.SuggestionCallback;
 import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Callback;
+import com.google.gwt.user.client.ui.SuggestOracle.Request;
+import com.google.gwt.user.client.ui.SuggestOracle.Response;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.filter.AbstractListFilter;
 
 public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFilter<T, C> {
 
     private final ContainsSuggestOracle suggestOracle = new ContainsSuggestOracle();
-    private final List<C> suggestionObjectList = new ArrayList<>();
-    protected final AbstractListFilter<C> suggestionMatchingFilter = new AbstractListFilter<C>() {
-        @Override
-        public Iterable<String> getStrings(C value) {
-            return getMatchingStrings(value);
-        }
-    };
     
     protected AbstractSuggestBoxFilter(String placeholderText) {
         final SuggestBox suggestBox = new SuggestBox(suggestOracle, new TextBox(), new CustomSuggestionDisplay());
@@ -44,11 +39,26 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         });
     }
     
-    @Override
-    public void setSelectableValues(Collection<C> selectableValues) {
-        suggestionObjectList.clear();
-        suggestionObjectList.addAll(selectableValues);
+    protected final void setSuggestions(Request request, Callback callback, Iterable<C> suggestionObjects,
+            Iterable<String> queryTokens) {
+        List<Suggestion> suggestions = new ArrayList<>();
+        List<String> normalizedQueryTokens = new ArrayList<>();
+        for (String token : queryTokens) {
+            normalizedQueryTokens.add(token.toLowerCase());
+        }
+        int count = 0;
+        for (C match : suggestionObjects) {
+            suggestions.add(new SimpleSuggestion(match, normalizedQueryTokens));
+            if (++count >= request.getLimit()) {
+                break;
+            }
+        }
+        Response response = new Response(suggestions);
+        response.setMoreSuggestionsCount(Util.size(suggestionObjects) - count);
+        callback.onSuggestionsReady(request, response);
     }
+    
+    protected abstract void getSuggestions(Request request, Callback callback, Iterable<String> queryTokens);
     
     protected abstract void onSuggestionSelected(C selectedItem);
     
@@ -71,7 +81,7 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         
         @Override
         public void requestDefaultSuggestions(Request request, Callback callback) {
-            setSuggestions(request, callback, suggestionObjectList, Collections.<String>emptyList());
+            getSuggestions(request, callback, Collections.<String>emptyList());
         }
         
         @Override
@@ -81,33 +91,13 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
                 requestDefaultSuggestions(request, callback);
             } else {
                 Iterable<String> queryTokens = Collections.singleton(normalizedQuery);
-                Iterable<C> filteredList = suggestionMatchingFilter.applyFilter(queryTokens, suggestionObjectList);
-                setSuggestions(request, callback, filteredList, queryTokens);
+                getSuggestions(request, callback, queryTokens);
             }
-        }
-        
-        private void setSuggestions(Request request, Callback callback, Iterable<C> suggestionObjects,
-                Iterable<String> queryTokens) {
-            List<Suggestion> suggestions = new ArrayList<>();
-            List<String> normalizedQueryTokens = new ArrayList<>();
-            for (String token : queryTokens) {
-                normalizedQueryTokens.add(token.toLowerCase());
-            }
-            int count = 0;
-            for (C match : suggestionObjects) {
-                suggestions.add(new SimpleSuggestion(match, normalizedQueryTokens));
-                if (++count >= request.getLimit()) {
-                    break;
-                }
-            }
-            Response response = new Response(suggestions);
-            response.setMoreSuggestionsCount(Util.size(suggestionObjects) - count);
-            callback.onSuggestionsReady(request, response);
         }
         
         @Override
         public boolean isDisplayStringHTML() {
-          return true;
+            return true;
         }
     }
     
