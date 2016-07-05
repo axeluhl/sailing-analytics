@@ -13,8 +13,8 @@ class ScanViewController: UIViewController {
     
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var targetImageView: UIImageView!
-    
-    private var checkInController: CheckInController?
+
+    private let checkInController = CheckInController()
     
     private var session: AVCaptureSession!
     private var output: AVCaptureMetadataOutput!
@@ -22,36 +22,41 @@ class ScanViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.setupSession()
+        setupCheckInController()
+        setupSession()
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        self.startScanning()
+        startScanning()
     }
     
     // MARK: - Setups
     
+    private func setupCheckInController() {
+        checkInController.delegate = self
+    }
+    
     private func setupSession() {
-        self.session = AVCaptureSession()
-        self.output = AVCaptureMetadataOutput()
+        session = AVCaptureSession()
+        output = AVCaptureMetadataOutput()
         do {
             let device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
             let input = try AVCaptureDeviceInput(device: device);
-            self.output.setMetadataObjectsDelegate(self, queue: dispatch_get_main_queue())
-            self.session.canSetSessionPreset(AVCaptureSessionPresetHigh)
+            output.setMetadataObjectsDelegate(self, queue: dispatch_get_main_queue())
+            session.canSetSessionPreset(AVCaptureSessionPresetHigh)
             if session.canAddInput(input) {
                 session.addInput(input)
             }
             if session.canAddOutput(output) {
                 session.addOutput(output)
             }
-            self.output.metadataObjectTypes = [AVMetadataObjectTypeQRCode]
-            self.previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
-            self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
-            self.previewLayer.frame = previewView.bounds
-            self.previewLayer.position = CGPointMake(CGRectGetMidX(previewView.bounds), CGRectGetMidY(previewView.bounds))
-            self.previewView.layer.addSublayer(previewLayer)
+            output.metadataObjectTypes = [AVMetadataObjectTypeQRCode]
+            previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
+            previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
+            previewLayer.frame = previewView.bounds
+            previewLayer.position = CGPointMake(CGRectGetMidX(previewView.bounds), CGRectGetMidY(previewView.bounds))
+            previewView.layer.addSublayer(previewLayer)
         } catch {
             print(error)
         }
@@ -75,14 +80,14 @@ class ScanViewController: UIViewController {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
             self.session.startRunning()
         })
-        self.targetImageView.image = UIImage(named: "scan_white")
+        targetImageView.image = UIImage(named: "scan_white")
     }
     
     private func stopScanning() {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
             self.session.stopRunning()
         })
-        self.targetImageView.image = UIImage(named: "scan_green")
+        targetImageView.image = UIImage(named: "scan_green")
     }
     
 }
@@ -97,9 +102,9 @@ extension ScanViewController: CheckInControllerDelegate {
     
     func checkInDidEnd(checkInController: CheckInController, withSuccess succeed: Bool) {
         if succeed {
-            self.navigationController?.popViewControllerAnimated(true)
+            navigationController?.popViewControllerAnimated(true)
         } else {
-            self.startScanning()
+            startScanning()
         }
     }
     
@@ -116,9 +121,8 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
         if metadataObjects.count > 0 {
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
             if let checkInData = CheckInData(urlString: metadataObject.stringValue) {
-                self.stopScanning()
-                checkInController = CheckInController(checkInData: checkInData, delegate: self)
-                checkInController!.startCheckIn()
+                stopScanning()
+                checkInController.startCheckIn(checkInData)
             } else {
                 let alertTitle = NSLocalizedString("Incorrect QR Code", comment: "")
                 let alertController = UIAlertController(title: alertTitle, message: "", preferredStyle: .Alert)

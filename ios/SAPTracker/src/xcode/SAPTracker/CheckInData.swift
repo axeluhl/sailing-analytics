@@ -16,17 +16,16 @@ public class CheckInData: NSObject {
         static let CompetitorID = "competitor_id"
     }
     
-    public let serverURL: String!
-    public let eventID: String!
-    public let leaderboardName: String!
-    public let competitorID: String!
+    public let serverURL: String
+    public let eventID: String
+    public let leaderboardName: String
+    public let competitorID: String
 
-    init?(serverURL: String!,
-          eventID: String!,
-          leaderboardName: String!,
-          competitorID: String!)
+    init(serverURL: String = "",
+         eventID: String = "",
+         leaderboardName: String = "",
+         competitorID: String = "")
     {
-        guard serverURL != nil && eventID != nil && leaderboardName != nil && competitorID != nil else { return nil }
         self.serverURL = serverURL
         self.eventID = eventID
         self.leaderboardName = leaderboardName
@@ -34,19 +33,21 @@ public class CheckInData: NSObject {
         super.init()
     }
     
-    convenience init?(url: NSURL!) {
-        guard url != nil && url.host != nil && url.query != nil else { return nil }
+    convenience init?(url: NSURL) {
+        guard let host = url.host else { return nil }
         guard let components = NSURLComponents(string: url.absoluteString) else { return nil }
+        
+        // Set server URL
+        let serverURL = url.scheme + "://" + host + (url.port != nil ? ":" + url.port!.stringValue : "")
         
         // In query component replace '+' occurrences with '%20' as a workaround for bug 3664
         components.percentEncodedQuery = components.percentEncodedQuery?.stringByReplacingOccurrencesOfString("+", withString: "%20")
         let queryItems = components.queryItems
         
-        // Set server URL and check-in items
-        let serverURL = url.scheme + "://" + url.host! + (url.port == nil ? "" : ":" + url.port!.stringValue)
-        let eventID = CheckInData.queryItemValue(queryItems, itemName: CheckInData.ItemNames.EventID)
-        let leaderboardName = CheckInData.queryItemValue(queryItems, itemName: CheckInData.ItemNames.LeaderboardName)
-        let competitorID = CheckInData.queryItemValue(queryItems, itemName: CheckInData.ItemNames.CompetitorID)
+        // Get check-in items
+        guard let eventID = CheckInData.queryItemValue(queryItems, itemName: CheckInData.ItemNames.EventID) else { return nil }
+        guard let leaderboardName = CheckInData.queryItemValue(queryItems, itemName: CheckInData.ItemNames.LeaderboardName) else { return nil }
+        guard let competitorID = CheckInData.queryItemValue(queryItems, itemName: CheckInData.ItemNames.CompetitorID) else { return nil }
         
         // Init with values
         self.init(serverURL: serverURL,
@@ -55,8 +56,10 @@ public class CheckInData: NSObject {
                   competitorID: competitorID)
     }
     
-    convenience init?(urlString: String!) {
+    convenience init?(urlString: String) {
         guard let url = NSURL(string: urlString) else { return nil }
+        
+        // Init with URL
         self.init(url: url)
     }    
     

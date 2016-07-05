@@ -190,6 +190,9 @@
                                         <accessibility key="accessibilityConfiguration" label="You can find your QR code on your registration confirmation"/>
                                         <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="14"/>
                                         <nil key="highlightedColor"/>
+                                        <variation key="heightClass=compact" misplaced="YES">
+                                            <rect key="frame" x="20" y="200" width="260" height="16.5"/>
+                                        </variation>
                                     </label>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -384,6 +387,9 @@
                                                 <rect key="frame" x="526" y="8" width="54" height="22"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="highlightedColor"/>
+                                                <variation key="heightClass=compact" misplaced="YES">
+                                                    <rect key="frame" x="224.5" y="9.5" width="55.5" height="19"/>
+                                                </variation>
                                             </label>
                                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="DE.png" translatesAutoresizingMaskIntoConstraints="NO" id="szG-Mg-huO">
                                                 <rect key="frame" x="494" y="7" width="24" height="24"/>
@@ -391,11 +397,17 @@
                                                     <constraint firstAttribute="width" constant="24" id="Ina-uK-atY"/>
                                                     <constraint firstAttribute="height" constant="24" id="TVX-WF-dOi"/>
                                                 </constraints>
+                                                <variation key="heightClass=compact" misplaced="YES">
+                                                    <rect key="frame" x="192.5" y="7" width="24" height="24"/>
+                                                </variation>
                                             </imageView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Max Mustermann" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="oJS-dM-2B6" userLabel="Name Label">
                                                 <rect key="frame" x="20" y="8" width="142" height="22"/>
                                                 <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="16"/>
                                                 <nil key="highlightedColor"/>
+                                                <variation key="heightClass=compact" misplaced="YES">
+                                                    <rect key="frame" x="20" y="9.5" width="125.5" height="19"/>
+                                                </variation>
                                             </label>
                                         </subviews>
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.59999999999999998" colorSpace="calibratedRGB"/>
@@ -468,6 +480,9 @@
                                                         <color key="value" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                     </userDefinedRuntimeAttribute>
                                                 </userDefinedRuntimeAttributes>
+                                                <variation key="heightClass=compact" misplaced="YES">
+                                                    <rect key="frame" x="50" y="133.5" width="200" height="33"/>
+                                                </variation>
                                                 <connections>
                                                     <action selector="teamImageAddButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="cs9-h3-kj2"/>
                                                 </connections>
@@ -533,12 +548,18 @@
                                                         <rect key="frame" x="8" y="0.0" width="59" height="29"/>
                                                         <fontDescription key="fontDescription" name="OpenSans-Semibold" family="Open Sans" pointSize="21"/>
                                                         <nil key="highlightedColor"/>
+                                                        <variation key="heightClass=compact" misplaced="YES">
+                                                            <rect key="frame" x="8" y="0.0" width="55.5" height="24.5"/>
+                                                        </variation>
                                                     </label>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Days" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l8F-Sg-cUb" userLabel="Days Description Label">
                                                         <rect key="frame" x="8" y="28" width="59" height="22"/>
                                                         <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                         <nil key="highlightedColor"/>
+                                                        <variation key="heightClass=compact" misplaced="YES">
+                                                            <rect key="frame" x="8" y="31" width="55.5" height="19"/>
+                                                        </variation>
                                                     </label>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="joW-cG-ai8" userLabel="Separator View">
                                                         <rect key="frame" x="75" y="10" width="1" height="30"/>
@@ -547,6 +568,9 @@
                                                             <constraint firstAttribute="height" constant="30" id="Jj2-tX-SU9"/>
                                                             <constraint firstAttribute="width" constant="1" id="sJJ-vK-Ocb"/>
                                                         </constraints>
+                                                        <variation key="heightClass=compact" misplaced="YES">
+                                                            <rect key="frame" x="71.5" y="10" width="1" height="30"/>
+                                                        </variation>
                                                     </view>
                                                 </subviews>
                                                 <constraints>
@@ -559,6 +583,9 @@
                                                     <constraint firstItem="sGD-0U-P4b" firstAttribute="top" secondItem="pjH-rV-MGI" secondAttribute="top" id="row-df-nQb"/>
                                                     <constraint firstAttribute="bottom" secondItem="l8F-Sg-cUb" secondAttribute="bottom" id="zUW-Uk-XQr"/>
                                                 </constraints>
+                                                <variation key="heightClass=compact" misplaced="YES">
+                                                    <rect key="frame" x="0.0" y="0.0" width="73" height="50"/>
+                                                </variation>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5is-0I-Kv3" userLabel="Hours View">
                                                 <rect key="frame" x="76" y="0.0" width="76.5" height="50"/>
@@ -567,12 +594,18 @@
                                                         <rect key="frame" x="8" y="0.0" width="60.5" height="29"/>
                                                         <fontDescription key="fontDescription" name="OpenSans-Semibold" family="Open Sans" pointSize="21"/>
                                                         <nil key="highlightedColor"/>
+                                                        <variation key="heightClass=compact" misplaced="YES">
+                                                            <rect key="frame" x="8" y="0.0" width="57" height="24.5"/>
+                                                        </variation>
                                                     </label>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Hours" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c2J-Uj-KEg" userLabel="Hours Description Label">
                                                         <rect key="frame" x="8" y="28" width="60.5" height="22"/>
                                                         <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                         <nil key="highlightedColor"/>
+                                                        <variation key="heightClass=compact" misplaced="YES">
+                                                            <rect key="frame" x="8" y="31" width="57" height="19"/>
+                                                        </variation>
                                                     </label>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JBv-xm-KUq" userLabel="Separator View">
                                                         <rect key="frame" x="75" y="10" width="1" height="30"/>
@@ -581,6 +614,9 @@
                                                             <constraint firstAttribute="width" constant="1" id="Gck-dw-et7"/>
                                                             <constraint firstAttribute="height" constant="30" id="gVK-VO-Bq4"/>
                                                         </constraints>
+                                                        <variation key="heightClass=compact" misplaced="YES">
+                                                            <rect key="frame" x="71.5" y="10" width="1" height="30"/>
+                                                        </variation>
                                                     </view>
                                                 </subviews>
                                                 <constraints>
@@ -593,6 +629,9 @@
                                                     <constraint firstItem="gaG-Iv-Xyq" firstAttribute="top" secondItem="5is-0I-Kv3" secondAttribute="top" id="ryA-23-kxC"/>
                                                     <constraint firstAttribute="trailing" secondItem="JBv-xm-KUq" secondAttribute="trailing" id="z4K-rX-taw"/>
                                                 </constraints>
+                                                <variation key="heightClass=compact" misplaced="YES">
+                                                    <rect key="frame" x="72.5" y="0.0" width="73" height="50"/>
+                                                </variation>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tvc-eS-Us6" userLabel="Minutes View">
                                                 <rect key="frame" x="152" y="0.0" width="76.5" height="50"/>
@@ -601,12 +640,18 @@
                                                         <rect key="frame" x="8" y="0.0" width="60.5" height="29"/>
                                                         <fontDescription key="fontDescription" name="OpenSans-Semibold" family="Open Sans" pointSize="21"/>
                                                         <nil key="highlightedColor"/>
+                                                        <variation key="heightClass=compact" misplaced="YES">
+                                                            <rect key="frame" x="8" y="0.0" width="57" height="24.5"/>
+                                                        </variation>
                                                     </label>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Minutes" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EES-a9-qxv" userLabel="Minutes Description Label">
                                                         <rect key="frame" x="8" y="28" width="60.5" height="22"/>
                                                         <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                         <nil key="highlightedColor"/>
+                                                        <variation key="heightClass=compact" misplaced="YES">
+                                                            <rect key="frame" x="8" y="31" width="57" height="19"/>
+                                                        </variation>
                                                     </label>
                                                 </subviews>
                                                 <constraints>
@@ -617,6 +662,9 @@
                                                     <constraint firstAttribute="bottom" secondItem="EES-a9-qxv" secondAttribute="bottom" id="jdu-Od-J49"/>
                                                     <constraint firstItem="Txm-uf-MP4" firstAttribute="top" secondItem="tvc-eS-Us6" secondAttribute="top" id="vpc-a8-Iuw"/>
                                                 </constraints>
+                                                <variation key="heightClass=compact" misplaced="YES">
+                                                    <rect key="frame" x="145" y="0.0" width="73" height="50"/>
+                                                </variation>
                                             </view>
                                         </subviews>
                                         <constraints>
@@ -642,6 +690,9 @@
                                             <constraint firstAttribute="bottom" secondItem="5is-0I-Kv3" secondAttribute="bottom" id="ngY-tF-5EI"/>
                                             <constraint firstItem="tvc-eS-Us6" firstAttribute="top" secondItem="6rV-hv-c3D" secondAttribute="top" id="wUO-8b-mHS"/>
                                         </constraints>
+                                        <variation key="heightClass=compact" misplaced="YES">
+                                            <rect key="frame" x="41.5" y="38" width="218.5" height="50"/>
+                                        </variation>
                                     </view>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Lzv-E6-gsr">
                                         <rect key="frame" x="20" y="96" width="276" height="48"/>
@@ -948,6 +999,9 @@
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="20" y="16" width="49" height="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                                         <rect key="frame" x="20" y="35.5" width="49" height="20"/>
                                                     </variation>
@@ -956,6 +1010,9 @@
                                                     <rect key="frame" x="444" y="14" width="136" height="24"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="448" y="16" width="132" height="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                                         <rect key="frame" x="648" y="35.5" width="132" height="20"/>
                                                     </variation>
@@ -985,6 +1042,9 @@
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="20" y="16" width="44" height="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                                         <rect key="frame" x="20" y="96" width="44" height="20"/>
                                                     </variation>
@@ -993,6 +1053,9 @@
                                                     <rect key="frame" x="527.5" y="14" width="52.5" height="23.5"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="231" y="16" width="49" height="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                                         <rect key="frame" x="731" y="96" width="49" height="20"/>
                                                     </variation>
@@ -1022,6 +1085,9 @@
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="20" y="16" width="104" height="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                                         <rect key="frame" x="20" y="64" width="104" height="24"/>
                                                     </variation>
@@ -1030,6 +1096,9 @@
                                                     <rect key="frame" x="570" y="14" width="10" height="24"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="270" y="16" width="10" height="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                                         <rect key="frame" x="770" y="64" width="10" height="24"/>
                                                     </variation>
@@ -1059,6 +1128,9 @@
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="20" y="16" width="111" height="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                                         <rect key="frame" x="20" y="8" width="111" height="20"/>
                                                     </variation>
@@ -1068,6 +1140,9 @@
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="501" y="16" width="59" height="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                                         <rect key="frame" x="705" y="8" width="59" height="20"/>
                                                     </variation>
@@ -1179,6 +1254,9 @@
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=compact" misplaced="YES">
+                                    <rect key="frame" x="20" y="8" width="106" height="20"/>
+                                </variation>
                                 <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                     <rect key="frame" x="20" y="0.0" width="106" height="24"/>
                                 </variation>
@@ -1188,6 +1266,9 @@
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=compact" misplaced="YES">
+                                    <rect key="frame" x="20" y="117" width="560" height="84"/>
+                                </variation>
                                 <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                     <rect key="frame" x="20" y="358" width="760" height="84"/>
                                 </variation>
@@ -1228,12 +1309,18 @@
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=compact" misplaced="YES">
+                                    <rect key="frame" x="20" y="8" width="49.5" height="20"/>
+                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.0 kn" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l5u-i3-029">
                                 <rect key="frame" x="203" y="210" width="195.5" height="98.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=compact" misplaced="YES">
+                                    <rect key="frame" x="202" y="117" width="197.5" height="84"/>
+                                </variation>
                                 <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                     <rect key="frame" x="301.5" y="358" width="197.5" height="84"/>
                                 </variation>
@@ -1271,6 +1358,9 @@
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=compact" misplaced="YES">
+                                    <rect key="frame" x="20" y="8" width="38.5" height="20"/>
+                                </variation>
                                 <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                     <rect key="frame" x="20" y="0.0" width="38.5" height="20"/>
                                 </variation>
@@ -1280,6 +1370,9 @@
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=compact" misplaced="YES">
+                                    <rect key="frame" x="256" y="117" width="89" height="84"/>
+                                </variation>
                                 <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                     <rect key="frame" x="355.5" y="358" width="89" height="84"/>
                                 </variation>
@@ -1532,12 +1625,18 @@ Cg
                                         <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="13"/>
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
+                                        <variation key="heightClass=compact" misplaced="YES">
+                                            <rect key="frame" x="20" y="256" width="43" height="15.5"/>
+                                        </variation>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1.0.0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Jsi-LA-7jU">
                                         <rect key="frame" x="20" y="202" width="30" height="18"/>
                                         <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="13"/>
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
+                                        <variation key="heightClass=compact" misplaced="YES">
+                                            <rect key="frame" x="20" y="279.5" width="29" height="15.5"/>
+                                        </variation>
                                     </label>
                                 </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -1582,21 +1681,21 @@ Cg
                         </constraints>
                         <variation key="default">
                             <mask key="constraints">
-                                <exclude reference="HxP-XV-1as"/>
                                 <exclude reference="Htc-F9-k7d"/>
                                 <exclude reference="i64-7l-JjE"/>
                                 <exclude reference="rI9-vl-bNT"/>
+                                <exclude reference="HxP-XV-1as"/>
                             </mask>
                         </variation>
                         <variation key="heightClass=compact">
                             <mask key="constraints">
                                 <exclude reference="YBh-Y6-NK3"/>
-                                <include reference="HxP-XV-1as"/>
                                 <exclude reference="08e-KJ-Dpa"/>
                                 <exclude reference="Bht-kB-G6p"/>
                                 <include reference="Htc-F9-k7d"/>
                                 <include reference="i64-7l-JjE"/>
                                 <include reference="rI9-vl-bNT"/>
+                                <include reference="HxP-XV-1as"/>
                             </mask>
                         </variation>
                     </view>
@@ -1681,6 +1780,9 @@ Cg
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="14" y="12" width="111.5" height="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                                         <rect key="frame" x="15" y="10" width="111.5" height="24"/>
                                                     </variation>
@@ -1710,6 +1812,9 @@ Cg
                                                     <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="14" y="2" width="127" height="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
                                                         <rect key="frame" x="15" y="10" width="111.5" height="24"/>
                                                     </variation>
@@ -1719,6 +1824,9 @@ Cg
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="13"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact" misplaced="YES">
+                                                        <rect key="frame" x="14" y="26" width="32" height="15.5"/>
+                                                    </variation>
                                                 </label>
                                             </subviews>
                                             <constraints>
@@ -1791,7 +1899,7 @@ Cg
         <!--Leader Board-->
         <scene sceneID="BcW-Cr-BGq">
             <objects>
-                <viewController id="86Y-sl-Zhj" customClass="LeaderBoardViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="86Y-sl-Zhj" customClass="LeaderboardViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="Dlt-1X-fN2"/>
                         <viewControllerLayoutGuide type="bottom" id="Ehu-33-1iX"/>
@@ -1825,7 +1933,7 @@ Cg
                     <navigationItem key="navigationItem" title="Leader Board" id="8qz-J9-1KL">
                         <barButtonItem key="rightBarButtonItem" systemItem="done" id="NSL-iA-JLn">
                             <connections>
-                                <action selector="done:" destination="86Y-sl-Zhj" id="BdJ-Hv-zJb"/>
+                                <action selector="doneButtonTapped:" destination="86Y-sl-Zhj" id="Xm9-iN-s5q"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -1868,8 +1976,8 @@ Cg
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="QMa-LQ-D8c"/>
-        <segue reference="HaH-Jc-FNR"/>
+        <segue reference="tzB-PL-31j"/>
+        <segue reference="Irs-ey-Uhs"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="calibratedRGB"/>
 </document>

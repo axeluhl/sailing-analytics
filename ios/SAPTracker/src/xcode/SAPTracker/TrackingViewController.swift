@@ -10,7 +10,7 @@ import Foundation
 
 class TrackingViewController : UIViewController {
     
-    var checkIn: CheckIn?
+    var regatta: Regatta?
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
@@ -18,8 +18,7 @@ class TrackingViewController : UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupButtons()
-        setupNavigationBarTitle()
+        setups()
     }
 	
     override func updateViewConstraints() {
@@ -29,12 +28,17 @@ class TrackingViewController : UIViewController {
     
     // MARK: - Setups
     
+    private func setups() {
+        setupButtons()
+        setupNavigationBar()    
+    }
+    
     private func setupButtons() {
         stopTrackingButton.setBackgroundImage(Images.RedHighlighted, forState: .Highlighted)
     }
     
-    private func setupNavigationBarTitle() {
-        navigationItem.title = checkIn?.leaderboardName
+    private func setupNavigationBar() {
+        navigationItem.title = regatta?.leaderboard.name
     }
     
 	// MARK: - Actions
@@ -85,7 +89,7 @@ extension TrackingViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCellWithIdentifier(TrackingViewController.Rows[indexPath.row]) ?? UITableViewCell()
         if (cell.isKindOfClass(CachedFixesTrackingTableViewCell)) {
             let cachedFixesCell = cell as! CachedFixesTrackingTableViewCell
-            cachedFixesCell.checkIn = checkIn
+            cachedFixesCell.regatta = regatta
         }
         return cell
     }

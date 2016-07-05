@@ -15,14 +15,14 @@ class SendGPSFixesController: NSObject {
         static let BatterySaving: NSTimeInterval = 30
     }
     
-    private let checkIn: CheckIn!
+    private let regatta: Regatta!
     private let requestManager: RequestManager!
 
     private var isRunning: Bool = false
     
-    init(checkIn: CheckIn) {
-        self.checkIn = checkIn
-        requestManager = RequestManager(baseURLString: checkIn.serverURL)
+    init(regatta: Regatta) {
+        self.regatta = regatta
+        requestManager = RequestManager(baseURLString: regatta.serverURL)
         super.init()
     }
     
@@ -47,7 +47,7 @@ class SendGPSFixesController: NSObject {
         dispatch_async(dispatch_get_main_queue(), {
             if let userInfo = notification.userInfo {
                 if userInfo[LocationManager.UserInfo.IsValid] as? Bool ?? false {
-                    let gpsFix = CoreDataManager.sharedManager.newGPSFix(self.checkIn)
+                    let gpsFix = CoreDataManager.sharedManager.newGPSFix(self.regatta)
                     gpsFix.course = userInfo[LocationManager.UserInfo.Course] as! Double
                     gpsFix.latitude = userInfo[LocationManager.UserInfo.Latitude] as! Double
                     gpsFix.longitude = userInfo[LocationManager.UserInfo.Longitude] as! Double
@@ -72,10 +72,8 @@ class SendGPSFixesController: NSObject {
     
     func sendGPSFixes() {
         var gpsFixes = [GPSFix]()
-        if checkIn.gpsFixes != nil {
-            checkIn.gpsFixes!.forEach { (gpsFix) in
-                gpsFixes.append(gpsFix as! GPSFix)
-            }
+        if regatta.gpsFixes != nil {
+            regatta.gpsFixes!.forEach { (gpsFix) in gpsFixes.append(gpsFix as! GPSFix) }
         }
         if gpsFixes.count > 0 {
             log("\(gpsFixes.count) GPS fixes will be sent")

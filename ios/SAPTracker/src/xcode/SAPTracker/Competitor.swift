@@ -2,7 +2,7 @@
 //  Competitor.swift
 //  SAPTracker
 //
-//  Created by Raimund Wege on 30.06.16.
+//  Created by Raimund Wege on 04.07.16.
 //  Copyright © 2016 com.sap.sailing. All rights reserved.
 //
 

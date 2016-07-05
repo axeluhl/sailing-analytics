@@ -2,7 +2,7 @@
 //  GPSFix+CoreDataProperties.swift
 //  SAPTracker
 //
-//  Created by Raimund Wege on 01.07.16.
+//  Created by Raimund Wege on 04.07.16.
 //  Copyright © 2016 com.sap.sailing. All rights reserved.
 //
 //  Choose "Create NSManagedObject Subclass…" from the Core Data editor menu
@@ -19,6 +19,6 @@ extension GPSFix {
     @NSManaged var longitude: Double
     @NSManaged var speed: Double
     @NSManaged var timestamp: Double
-    @NSManaged var checkIn: CheckIn?
+    @NSManaged var regatta: Regatta
 
 }

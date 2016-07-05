@@ -17,23 +17,30 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var noCodeButton: UIButton!
     @IBOutlet weak var infoCodeLabel: UILabel!
     
-    private var fetchedResultsController: NSFetchedResultsController?
-    
     override func viewDidLoad() {
         super.viewDidLoad()
+        setups()
+    }
+
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        reviews()
+        subscribeForNewCheckInURLNotifications()
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        unsubscribeFromNewCheckInURLNotifications()
+    }
+    
+    // MARK: - Setups
+    
+    private func setups() {
         setupButtons()
         setupLanguage()
         setupNavigationBar()
         setupTableViewDataSource()
-        subscribeForNotifications()
-        checkEULA(NSNotification.init(name: "", object: nil))
     }
-
-    deinit {
-        self.unsubscribeForNotifications()
-    }
-
-    // MARK: - Setups
     
     private func setupButtons() {
         scanCodeButton.setBackgroundImage(Images.BlueHighlighted, forState: .Highlighted)
@@ -53,45 +60,66 @@ class HomeViewController: UIViewController {
     }
     
     private func setupTableViewDataSource() {
-        fetchedResultsController = CoreDataManager.sharedManager.checkInFetchedResultsController()
-        fetchedResultsController!.delegate = self
         do {
-            try fetchedResultsController!.performFetch()
+            try fetchedResultsController.performFetch()
         } catch {
             print(error)
         }
     }
     
+    // MARK: - Reviews
+    
+    func reviews() {
+        if !Preferences.termsAccepted {
+            reviewEULA()
+        } else {
+            reviewNewCheckIn()
+        }
+    }
+    
+    func reviewEULA() {
+        let alertTitle = NSLocalizedString("EULA_title", comment: "")
+        let alertMessage = NSLocalizedString("EULA_content", comment: "")
+        let alertController = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .Alert)
+        let viewTitle = NSLocalizedString("EULA_view", comment: "")
+        let viewAction = UIAlertAction(title: viewTitle, style: .Cancel, handler: { action in
+            UIApplication.sharedApplication().openURL(URLs.EULA)
+            self.reviewEULA() // Reopen alert
+        })
+        let confirmTitle = NSLocalizedString("EULA_confirm", comment: "")
+        let confirmAction = UIAlertAction(title: confirmTitle, style: .Default, handler: { action in
+            Preferences.termsAccepted = true
+            self.reviewNewCheckIn()
+        })
+        alertController.addAction(viewAction)
+        alertController.addAction(confirmAction)
+        presentViewController(alertController, animated: true, completion: nil)
+    }
+    
+    func reviewNewCheckIn() {
+        guard Preferences.termsAccepted else { return }
+        guard let urlString = Preferences.newCheckInURL else { return }
+        guard let checkInData = CheckInData(urlString: urlString) else { return }
+        checkInController.startCheckIn(checkInData)
+    }
+    
     // MARK: - Notifications
     
-    private func subscribeForNotifications() {
+    private func subscribeForNewCheckInURLNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector: #selector(HomeViewController.checkEULA(_:)),
-                                                         name: UIApplicationWillEnterForegroundNotification,
+                                                         selector: #selector(HomeViewController.newCheckInURLNotification(_:)),
+                                                         name: Preferences.NotificationType.NewCheckInURLChanged,
                                                          object: nil)
     }
     
-    private func unsubscribeForNotifications() {
+    private func unsubscribeFromNewCheckInURLNotifications() {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func checkEULA(notification: NSNotification) {
-        if !Preferences.acceptedTerms {
-            let alertTitle = NSLocalizedString("EULA_title", comment: "")
-            let alertMessage = NSLocalizedString("EULA_content", comment: "")
-            let alertController = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .Alert)
-            let viewTitle = NSLocalizedString("EULA_view", comment: "")
-            let viewAction = UIAlertAction(title: viewTitle, style: .Cancel, handler: { action in
-                UIApplication.sharedApplication().openURL(URLs.EULA)
-            })
-            let confirmTitle = NSLocalizedString("EULA_confirm", comment: "")
-            let confirmAction = UIAlertAction(title: confirmTitle, style: .Default, handler: { action in
-                Preferences.acceptedTerms = true
-            })
-            alertController.addAction(viewAction)
-            alertController.addAction(confirmAction)
-            self.presentViewController(alertController, animated: true, completion: nil)
-        }
+    func newCheckInURLNotification(notification: NSNotification) {
+        dispatch_async(dispatch_get_main_queue(), {
+            self.reviewNewCheckIn()
+        })
     }
     
     // MARK: - Actions
@@ -148,12 +176,27 @@ class HomeViewController: UIViewController {
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.destinationViewController.isKindOfClass(RegattaViewController)) {
-            let regattaVC = segue.destinationViewController as! RegattaViewController
-            let indexPath = self.tableView.indexPathForSelectedRow
-            regattaVC.checkIn = self.fetchedResultsController?.objectAtIndexPath(indexPath!) as? CheckIn
-            self.tableView.deselectRowAtIndexPath(indexPath!, animated: true)
+            guard let regattaVC = segue.destinationViewController as? RegattaViewController else { return }
+            guard let indexPath = tableView.indexPathForSelectedRow else { return }
+            guard let regatta = fetchedResultsController.objectAtIndexPath(indexPath) as? Regatta else { return }
+            regattaVC.regatta = regatta
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
         }
     }
+    
+    // MARK: - Properties
+    
+    lazy var checkInController: CheckInController = {
+        let checkInController = CheckInController()
+        checkInController.delegate = self
+        return checkInController
+    }()
+    
+    lazy var fetchedResultsController: NSFetchedResultsController = {
+        let fetchedResultsController = CoreDataManager.sharedManager.regattaFetchedResultsController()
+        fetchedResultsController.delegate = self
+        return fetchedResultsController
+    }()
     
 }
 
@@ -162,18 +205,18 @@ class HomeViewController: UIViewController {
 extension HomeViewController: UITableViewDataSource {
 
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fetchedResultsController!.sections![section].numberOfObjects
+        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as UITableViewCell!
+        let cell = tableView.dequeueReusableCellWithIdentifier("Regatta") ?? UITableViewCell()
         self.configureCell(cell, atIndexPath: indexPath)
         return cell
     }
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
-        let checkIn = fetchedResultsController!.objectAtIndexPath(indexPath) as! CheckIn
-        cell.textLabel?.text = checkIn.leaderboardName
+        guard let regatta = fetchedResultsController.objectAtIndexPath(indexPath) as? Regatta else { return }
+        cell.textLabel?.text = regatta.leaderboard.name
     }
 
 }
@@ -223,4 +266,18 @@ extension HomeViewController: NSFetchedResultsControllerDelegate {
         tableView.endUpdates()
     }
     
+}
+
+// MARK: - CheckInControllerDelegate
+
+extension HomeViewController: CheckInControllerDelegate {
+
+    func showCheckInAlert(checkInController: CheckInController, alertController: UIAlertController) {
+        presentViewController(alertController, animated: true, completion: nil)
+    }
+    
+    func checkInDidEnd(checkInController: CheckInController, withSuccess succeed: Bool) {
+        Preferences.newCheckInURL = nil
+    }
+
 }

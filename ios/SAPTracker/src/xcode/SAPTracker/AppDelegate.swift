@@ -36,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
-        Preferences.lastCheckInURLString = urlStringForDeeplink(url)
+        Preferences.newCheckInURL = urlStringForDeeplink(url)
         return true
     }
 
@@ -68,11 +68,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     private func setupNavigationBarApperance() {
         let tintColor = UIColor(hex: 0x009de0)
+        let font = UIFont(name: "OpenSans-Bold", size: CGFloat(17.0)) ?? UIFont.systemFontOfSize(17.0)
         UINavigationBar.appearance().tintColor = tintColor
-        UINavigationBar.appearance().titleTextAttributes =
-            [NSForegroundColorAttributeName: tintColor,
-             NSFontAttributeName: UIFont(name: "OpenSans-Bold", size: CGFloat(17.0))!
-        ]
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: tintColor, NSFontAttributeName: font]
     }
     
     private func setupPageControlApperance() {
@@ -89,6 +87,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // FIXME: - Two prefixes are not allowed 
         // Deeplink needs another structure (if possible) because of allowed characters in URL
         // https:// -> http//
+        
         urlString = urlString.hasPrefix(appPrefix) ? urlString.substringFromIndex(appPrefix.endIndex) : urlString
         let httpPrefix : String = "http//"
         urlString = urlString.hasPrefix(httpPrefix) ? "http://" + urlString.substringFromIndex(httpPrefix.endIndex) : urlString

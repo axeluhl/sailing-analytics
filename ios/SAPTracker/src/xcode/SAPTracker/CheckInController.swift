@@ -42,30 +42,39 @@ class CheckInController : NSObject {
         static let Name = "name"
     }
     
-    private let checkInData: CheckInData!
-    private let delegate: CheckInControllerDelegate!
-    private let requestManager: RequestManager!
+    var delegate: CheckInControllerDelegate?
     
+    private var checkInData = CheckInData()
+    private var requestManager = RequestManager()
+
     // Responses
     private var eventDictionary: [String: AnyObject]?
     private var leaderboardDictionary: [String: AnyObject]?
     private var competitorDictionary: [String: AnyObject]?
     private var teamImageURL: String?
     
-    init(checkInData: CheckInData, delegate: CheckInControllerDelegate) {
+    // MARK: - Initialize
+    
+    private func initialize(checkInData: CheckInData) {
         self.checkInData = checkInData
-        self.delegate = delegate
+        setupRequestManager()
+    }
+    
+    // MARK: - Setups
+    
+    private func setupRequestManager() {
         requestManager = RequestManager(baseURLString: checkInData.serverURL)
-        super.init()
     }
     
     // MARK: - Start check-in
     
-    func startCheckIn() {
+    func startCheckIn(checkInData: CheckInData) {
+        initialize(checkInData)
         checkInDidStart()
         requestManager.getEvent(checkInData.eventID,
                                 success: { (operation, responseObject) -> Void in self.eventSucceed(responseObject) },
-                                failure: { (operation, error) -> Void in self.eventFailed(error) })
+                                failure: { (operation, error) -> Void in self.eventFailed(error) }
+        )
     }
     
     // MARK: - Event
@@ -74,7 +83,8 @@ class CheckInController : NSObject {
         eventDictionary = eventResponseObject as? [String: AnyObject]
         requestManager.getLeaderboard(checkInData.leaderboardName,
                                       success: { (operation, responseObject) -> Void in self.leaderboardSucceed(responseObject) },
-                                      failure: { (operation, error) -> Void in self.leaderboardFailed(error) })
+                                      failure: { (operation, error) -> Void in self.leaderboardFailed(error) }
+        )
     }
     
     private func eventFailed(error: AnyObject) {
@@ -94,7 +104,8 @@ class CheckInController : NSObject {
         leaderboardDictionary = leaderboardResponseObject as? [String: AnyObject]
         requestManager.getCompetitor(checkInData.competitorID,
                                      success: { (operation, responseObject) in self.competitorSucceed(responseObject) },
-                                     failure: { (operation, error) in self.competitorFailed(error) })
+                                     failure: { (operation, error) in self.competitorFailed(error) }
+        )
     }
     
     private func leaderboardFailed(error: AnyObject) {
@@ -112,7 +123,7 @@ class CheckInController : NSObject {
     
     private func competitorSucceed(competitorResponseObject: AnyObject) {
         competitorDictionary = competitorResponseObject as? [String: AnyObject]
-        requestManager.getTeamImageURL(competitorID(), result: { (imageURL) in self.teamImageURLResult(imageURL) })
+        requestManager.getTeamImageURL(competitorID, result: { (imageURL) in self.teamImageURLResult(imageURL) })
     }
     
     private func competitorFailed(error: AnyObject) {
@@ -131,9 +142,9 @@ class CheckInController : NSObject {
     private func teamImageURLResult(imageURL: String?) {
         teamImageURL = imageURL
         let alertTitle = String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""),
-                                competitorName(),
-                                leaderboardName(),
-                                competitorSailID())
+                                competitorName,
+                                leaderboardName,
+                                competitorSailID)
         let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
         let okTitle = NSLocalizedString("OK", comment: "")
         let okAction = UIAlertAction(title: okTitle, style: .Default) { (action) in
@@ -145,76 +156,67 @@ class CheckInController : NSObject {
         }
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
-        self.showCheckInAlert(alertController)
+        showCheckInAlert(alertController)
     }
     
     // MARK: - Check-in on server
     
     private func checkInOnServer() {
         SVProgressHUD.show()
-        requestManager.postCheckIn(leaderboardName(),
-                                   competitorID: competitorID(),
+        requestManager.postCheckIn(leaderboardName,
+                                   competitorID: competitorID,
                                    success: { (operation, responseObject) -> Void in self.checkInOnServerSucceed() },
-                                   failure: { (operation, error) -> Void in self.checkInOnServerFailed(error) })
+                                   failure: { (operation, error) -> Void in self.checkInOnServerFailed(error) }
+        )
     }
     
     private func checkInOnServerSucceed() {
         
-        // Check database if check-in already exist
-        if let checkIn = CoreDataManager.sharedManager.fetchCheckIn(checkInData.eventID,
-                                                                    leaderboardName: checkInData.leaderboardName,
-                                                                    competitorID: checkInData.competitorID) {
-            // Delete old check-in
-            CoreDataManager.sharedManager.deleteCheckIn(checkIn)
-            CoreDataManager.sharedManager.saveContext()
-        }
+        // Regatta
+        let regatta = CoreDataManager.sharedManager.fetchRegatta(checkInData.eventID,
+                                                                 leaderboardName: checkInData.leaderboardName,
+                                                                 competitorID: checkInData.competitorID
+        ) ?? CoreDataManager.sharedManager.newRegatta()
+        regatta.serverURL = checkInData.serverURL
+        regatta.teamImageURL = teamImageURL
+        regatta.teamImageRetry = false        
         
-        // Create new check-in
-        let checkIn = CoreDataManager.sharedManager.newCheckIn()
-        checkIn.competitorID = checkInData!.competitorID
-        checkIn.eventID = checkInData.eventID
-        checkIn.lastSyncDate = NSDate().timeIntervalSince1970
-        checkIn.leaderboardName = checkInData!.leaderboardName
-        checkIn.serverURL = checkInData!.serverURL
-        checkIn.teamImageURL = teamImageURL
-        checkIn.teamImageRetry = false
+        // Event
+        let event = regatta.event ?? CoreDataManager.sharedManager.newEvent(regatta)
+        event.endDate = (eventEndDate / 1000)
+        event.eventID = eventID
+        event.name = eventName
+        event.startDate = (eventStartDate / 1000)
         
-        // Create new event
-        let event = CoreDataManager.sharedManager.newEvent(checkIn)
-        event.endDate = (eventEndDate() / 1000)
-        event.eventID = eventID()
-        event.name = eventName()
-        event.startDate = (eventStartDate() / 1000)
-
-        // Create new leaderboard
-        let leaderboard = CoreDataManager.sharedManager.newLeaderBoard(checkIn)
-        leaderboard.name = leaderboardName()
+        // Leaderboard
+        let leaderboard = regatta.leaderboard ?? CoreDataManager.sharedManager.newLeaderboard(regatta)
+        leaderboard.name = leaderboardName
         
-        // Create new competitor
-        let competitor = CoreDataManager.sharedManager.newCompetitor(checkIn)
-        competitor.boatClassName = competitorBoatClassName()
-        competitor.competitorID = competitorID()
-        competitor.countryCode = competitorCountryCode()
-        competitor.name = competitorName()
-        competitor.nationality = competitorNationality()
-        competitor.sailID = competitorSailID()
+        // Competitor
+        let competitor = regatta.competitor ?? CoreDataManager.sharedManager.newCompetitor(regatta)
+        competitor.boatClassName = competitorBoatClassName
+        competitor.competitorID = competitorID
+        competitor.countryCode = competitorCountryCode
+        competitor.name = competitorName
+        competitor.nationality = competitorNationality
+        competitor.sailID = competitorSailID
         
-        // Save objects
+        // Save
         CoreDataManager.sharedManager.saveContext()
         
         // Check-in completed
-        self.checkInDidEnd(withSuccess: true)
+        checkInDidEnd(withSuccess: true)
     }
     
     private func checkInOnServerFailed(error: AnyObject) {
-        let alertTitle = String(format:NSLocalizedString("Couldn't check-in to %@", comment: ""), checkInData!.leaderboardName)
+        let alertTitle = String(format:NSLocalizedString("Couldn't check-in to %@", comment: ""), checkInData.leaderboardName)
         let alertController = UIAlertController(title: alertTitle, message: error.localizedDescription, preferredStyle: .Alert)
         let cancelTitle = NSLocalizedString("Cancel", comment: "")
         let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
             self.checkInDidEnd(withSuccess: false)
         }
         alertController.addAction(cancelAction)
-        self.showCheckInAlert(alertController)
+        showCheckInAlert(alertController)
     }
     
     // MARK: - Controller
@@ -222,51 +224,52 @@ class CheckInController : NSObject {
     private func checkInDidStart() {
         dispatch_async(dispatch_get_main_queue(), {
             SVProgressHUD.show()
-            self.delegate.checkInDidStart?(self)
+            self.delegate?.checkInDidStart?(self)
         })
     }
     
     private func checkInDidEnd(withSuccess succeed: Bool) {
         dispatch_async(dispatch_get_main_queue(), {
             SVProgressHUD.popActivity()
-            self.delegate.checkInDidEnd?(self, withSuccess: succeed)
+            self.delegate?.checkInDidEnd?(self, withSuccess: succeed)
         })
     }
     
     private func showCheckInAlert(alertController: UIAlertController) {
         dispatch_async(dispatch_get_main_queue(), {
             SVProgressHUD.popActivity()
-            self.delegate.showCheckInAlert(self, alertController: alertController)
+            self.delegate?.showCheckInAlert(self, alertController: alertController)
         })
     }
     
     // MARK: - Event
     
-    private func eventID() -> String! { return stringFromEvent(forKey: EventKeys.ID) }
-    private func eventName() -> String! { return stringFromEvent(forKey: EventKeys.Name) }
-    private func eventStartDate() -> Double! { return doubleFromEvent(forKey: EventKeys.StartDate) }
-    private func eventEndDate() -> Double! { return doubleFromEvent(forKey: EventKeys.EndDate) }
-    private func doubleFromEvent(forKey key: String) -> Double { return doubleFromDictionary(eventDictionary, forKey: key) }
-    private func stringFromEvent(forKey key: String) -> String { return stringFromDictionary(eventDictionary, forKey: key) }
+    var eventID: String { get { return stringFromEvent(forKey: EventKeys.ID) } }
+    var eventName: String { get { return stringFromEvent(forKey: EventKeys.Name) } }
+    var eventStartDate: Double { get { return doubleFromEvent(forKey: EventKeys.StartDate) } }
+    var eventEndDate: Double { get { return doubleFromEvent(forKey: EventKeys.EndDate) } }
     
     // MARK: - Leaderboard
     
-    private func leaderboardName() -> String! { return stringFromLeaderboard(forKey: LeaderboardKeys.Name) }
-    private func stringFromLeaderboard(forKey key: String) -> String { return stringFromDictionary(leaderboardDictionary, forKey: key) }
+    var leaderboardName: String { get { return stringFromLeaderboard(forKey: LeaderboardKeys.Name) } }
     
     // MARK: - Competitor
     
-    private func competitorBoatClassName() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.BoatClassName) }
-    private func competitorCountryCode() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.CountryCode) }
-    private func competitorID() -> String { return stringFromCompetitor(forKey: CompetitorKeys.ID) }
-    private func competitorName() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.Name) }
-    private func competitorNationality() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.Nationality) }
-    private func competitorSailID() -> String! { return stringFromCompetitor(forKey: CompetitorKeys.SailID) }
-    private func stringFromCompetitor(forKey key: String) -> String { return stringFromDictionary(competitorDictionary, forKey: key) }
+    var competitorBoatClassName: String { get { return stringFromCompetitor(forKey: CompetitorKeys.BoatClassName) } }
+    var competitorCountryCode: String { get { return stringFromCompetitor(forKey: CompetitorKeys.CountryCode) } }
+    var competitorID: String { get { return stringFromCompetitor(forKey: CompetitorKeys.ID) } }
+    var competitorName: String { get { return stringFromCompetitor(forKey: CompetitorKeys.Name) } }
+    var competitorNationality: String { get { return stringFromCompetitor(forKey: CompetitorKeys.Nationality) } }
+    var competitorSailID: String { get { return stringFromCompetitor(forKey: CompetitorKeys.SailID) } }
     
     // MARK: - Helper
+
+    private func doubleFromEvent(forKey key: String) -> Double { return doubleFromDictionary(eventDictionary, forKey: key) }
+    private func stringFromEvent(forKey key: String) -> String { return stringFromDictionary(eventDictionary, forKey: key) }
+    private func stringFromLeaderboard(forKey key: String) -> String { return stringFromDictionary(leaderboardDictionary, forKey: key) }
+    private func stringFromCompetitor(forKey key: String) -> String { return stringFromDictionary(competitorDictionary, forKey: key) }
     
-    private func doubleFromDictionary(dictionary: [String: AnyObject]?, forKey key: String!) -> Double {
+    private func doubleFromDictionary(dictionary: [String: AnyObject]?, forKey key: String) -> Double {
         if let value = dictionary?[key] as? Double {
             return value
         } else {
@@ -274,7 +277,7 @@ class CheckInController : NSObject {
         }
     }
     
-    private func stringFromDictionary(dictionary: [String: AnyObject]?, forKey key: String!) -> String {
+    private func stringFromDictionary(dictionary: [String: AnyObject]?, forKey key: String) -> String {
         if let value = dictionary?[key] as? String {
             return value
         } else {

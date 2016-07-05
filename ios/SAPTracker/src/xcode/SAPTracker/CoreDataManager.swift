@@ -20,13 +20,13 @@ public class CoreDataManager: NSObject {
     
     // MARK: - Fetch
     
-    func fetchCheckIn(eventID: String,
+    func fetchRegatta(eventID: String,
                       leaderboardName: String,
-                      competitorID: String) -> CheckIn?
+                      competitorID: String) -> Regatta?
     {
         let fetchRequest = NSFetchRequest()
-        fetchRequest.entity = NSEntityDescription.entityForName("CheckIn", inManagedObjectContext: managedObjectContext!)
-        fetchRequest.predicate = NSPredicate(format: "eventID = %@ AND leaderboardName = %@ AND competitorID = %@",
+        fetchRequest.entity = NSEntityDescription.entityForName("Regatta", inManagedObjectContext: managedObjectContext!)
+        fetchRequest.predicate = NSPredicate(format: "event.eventID = %@ AND leaderboard.name = %@ AND competitor.competitorID = %@",
                                              eventID,
                                              leaderboardName,
                                              competitorID)
@@ -35,7 +35,7 @@ public class CoreDataManager: NSObject {
             if results.count == 0 {
                 return nil
             } else {
-                return results[0] as? CheckIn
+                return results[0] as? Regatta
             }
         } catch {
             print(error)
@@ -43,46 +43,46 @@ public class CoreDataManager: NSObject {
         return nil
     }
 
-    func checkInFetchedResultsController() -> NSFetchedResultsController {
-        let fetchRequest = NSFetchRequest(entityName: "CheckIn")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "leaderboardName", ascending: true)]
+    func regattaFetchedResultsController() -> NSFetchedResultsController {
+        let fetchRequest = NSFetchRequest(entityName: "Regatta")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "leaderboard.name", ascending: true)]
         return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext!, sectionNameKeyPath: nil, cacheName: nil)
     }
     
     // MARK: - Insert
     
-    func newCheckIn() -> CheckIn {
-        return NSEntityDescription.insertNewObjectForEntityForName("CheckIn", inManagedObjectContext: managedObjectContext!) as! CheckIn
+    func newRegatta() -> Regatta {
+        return NSEntityDescription.insertNewObjectForEntityForName("Regatta", inManagedObjectContext: managedObjectContext!) as! Regatta
     }
     
-    func newEvent(checkIn: CheckIn) -> Event {
+    func newEvent(regatta: Regatta) -> Event {
         let event = NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: managedObjectContext!) as! Event
-        event.checkIn = checkIn
+        event.regatta = regatta
         return event
     }
     
-    func newLeaderBoard(checkIn: CheckIn) -> Leaderboard {
-        let leaderBoard = NSEntityDescription.insertNewObjectForEntityForName("Leaderboard", inManagedObjectContext: managedObjectContext!) as! Leaderboard
-        leaderBoard.checkIn = checkIn
-        return leaderBoard
+    func newLeaderboard(regatta: Regatta) -> Leaderboard {
+        let leaderboard = NSEntityDescription.insertNewObjectForEntityForName("Leaderboard", inManagedObjectContext: managedObjectContext!) as! Leaderboard
+        leaderboard.regatta = regatta
+        return leaderboard
     }
     
-    func newCompetitor(checkIn: CheckIn) -> Competitor {
+    func newCompetitor(regatta: Regatta) -> Competitor {
         let competitor = NSEntityDescription.insertNewObjectForEntityForName("Competitor", inManagedObjectContext: managedObjectContext!) as! Competitor
-        competitor.checkIn = checkIn
+        competitor.regatta = regatta
         return competitor
     }
     
-    func newGPSFix(checkIn: CheckIn) -> GPSFix {
+    func newGPSFix(regatta: Regatta) -> GPSFix {
         let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: managedObjectContext!) as! GPSFix
-        gpsFix.checkIn = checkIn
+        gpsFix.regatta = regatta
         return gpsFix
     }
     
     // MARK: - Delete
     
-    func deleteCheckIn(checkIn: CheckIn) {
-        managedObjectContext!.deleteObject(checkIn)
+    func deleteRegatta(regatta: Regatta) {
+        managedObjectContext!.deleteObject(regatta)
     }
     
     func deleteGPSFixes(gpsFixes: [GPSFix]) {

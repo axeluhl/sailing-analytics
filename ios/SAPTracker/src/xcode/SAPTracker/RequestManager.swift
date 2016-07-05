@@ -36,11 +36,11 @@ class RequestManager: NSObject {
         static let IOS = "iOS"
     }
     
-    let baseURLString: String!
-    let manager: AFHTTPRequestOperationManager!
-    let sessionManager: AFURLSessionManager!
+    let baseURLString: String
+    let manager: AFHTTPRequestOperationManager
+    let sessionManager: AFURLSessionManager
     
-    init(baseURLString: String!) {
+    init(baseURLString: String = "") {
         self.baseURLString = baseURLString
         manager = AFHTTPRequestOperationManager(baseURL: NSURL(string: baseURLString))
         manager.requestSerializer = AFJSONRequestSerializer() as AFHTTPRequestSerializer
@@ -54,7 +54,8 @@ class RequestManager: NSObject {
     
     func getEvent(eventID: String!,
                   success: (AFHTTPRequestOperation!, AnyObject!) -> Void,
-                  failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+                  failure: (AFHTTPRequestOperation!, AnyObject!) -> Void)
+    {
         let encodedEventID = eventID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
         let urlString = "\(basePathString)/events/\(encodedEventID)"
         manager.GET(urlString, parameters: nil, success: success, failure: failure)

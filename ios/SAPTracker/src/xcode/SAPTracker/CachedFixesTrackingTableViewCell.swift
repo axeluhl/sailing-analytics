@@ -10,7 +10,7 @@ import UIKit
 
 class CachedFixesTrackingTableViewCell: UITableViewCell {
 
-    var checkIn: CheckIn?
+    var regatta: Regatta?
     
     @IBOutlet weak var cachedFixesLabel: UILabel!
     
@@ -27,7 +27,7 @@ class CachedFixesTrackingTableViewCell: UITableViewCell {
     // MARK: - Setups
     
     private func setupCachedFixesLabel() {
-        self.cachedFixesLabel.text = String(format: "%d", checkIn?.gpsFixes?.count ?? 0)
+        self.cachedFixesLabel.text = String(format: "%d", regatta?.gpsFixes?.count ?? 0)
     }
     
     // MARK: - Notifications

@@ -10,35 +10,43 @@ import UIKit
 
 class Preferences: NSObject {
 
+    struct NotificationType {
+        static let NewCheckInURLChanged = "NewCheckInURLStringChanged"
+    }
+    
     struct PreferenceKey {
         static let BatterySaving = "BatterySaving"
-        static let LastCheckInURLString = "lastCheckInURLString"
-        static let AcceptedTerms = "acceptedTerms"
+        static let NewCheckInURL = "NewCheckInURL"
+        static let TermsAccepted = "TermsAccepted"
         static let UUID = "udid"
     }
     
     private static let preferences = NSUserDefaults.standardUserDefaults()
     
-    // MARK: - LastCheckInData
+    // MARK: - NewCheckInURL
     
-    class var lastCheckInURLString: String? {
+    class var newCheckInURL: String? {
         get {
-            return preferences.stringForKey(PreferenceKey.LastCheckInURLString)
+            return preferences.stringForKey(PreferenceKey.NewCheckInURL)
         }
         set(value) {
-            preferences.setObject(value, forKey: PreferenceKey.LastCheckInURLString)
+            preferences.setObject(value, forKey: PreferenceKey.NewCheckInURL)
             preferences.synchronize()
+
+            // Send notification
+            let notification = NSNotification(name: NotificationType.NewCheckInURLChanged, object: self)
+            NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
         }
     }
     
-    // MARK: - AcceptedTerms
+    // MARK: - TermsAccepted
     
-    class var acceptedTerms: Bool {
+    class var termsAccepted: Bool {
         get {
-            return preferences.boolForKey(PreferenceKey.AcceptedTerms)
+            return preferences.boolForKey(PreferenceKey.TermsAccepted)
         }
         set(value) {
-            preferences.setBool(value, forKey:PreferenceKey.AcceptedTerms)
+            preferences.setBool(value, forKey:PreferenceKey.TermsAccepted)
             preferences.synchronize()
         }
     }

@@ -295,7 +295,7 @@
 		7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */; };
 		7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D421A373D4400C34B88 /* CourseViewController.swift */; };
 		7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */; };
-		7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */; };
+		7F950A911A35E967003C8C5C /* LeaderboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */; };
 		7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* RegattaViewController.swift */; };
 		7FA2220B1A25E55400FD364B /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
 		7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551919F6661900A1B92D /* CoreDataManager.swift */; };
@@ -312,16 +312,16 @@
 		C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAAA1CF736680093B0C5 /* Preferences.swift */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
 		C8739D8E1D23D53C00A89F3C /* SendGPSFixesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739D8D1D23D53C00A89F3C /* SendGPSFixesController.swift */; };
-		C8739DAF1D2539A900A89F3C /* CheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DA51D2539A900A89F3C /* CheckIn+CoreDataProperties.swift */; };
-		C8739DB01D2539A900A89F3C /* CheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DA61D2539A900A89F3C /* CheckIn.swift */; };
-		C8739DB31D2539A900A89F3C /* Event+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DA91D2539A900A89F3C /* Event+CoreDataProperties.swift */; };
-		C8739DB41D2539A900A89F3C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DAA1D2539A900A89F3C /* Event.swift */; };
-		C8739DB51D2539A900A89F3C /* Competitor+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DAB1D2539A900A89F3C /* Competitor+CoreDataProperties.swift */; };
-		C8739DB61D2539A900A89F3C /* Competitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DAC1D2539A900A89F3C /* Competitor.swift */; };
-		C8739DB71D2539A900A89F3C /* GPSFix+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DAD1D2539A900A89F3C /* GPSFix+CoreDataProperties.swift */; };
-		C8739DB81D2539A900A89F3C /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DAE1D2539A900A89F3C /* GPSFix.swift */; };
-		C8739DBB1D25409700A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DB91D25409700A89F3C /* Leaderboard+CoreDataProperties.swift */; };
-		C8739DBC1D25409700A89F3C /* Leaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DBA1D25409700A89F3C /* Leaderboard.swift */; };
+		C8739E041D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */; };
+		C8739E051D2AA2A500A89F3C /* Regatta.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFB1D2AA2A500A89F3C /* Regatta.swift */; };
+		C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */; };
+		C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */; };
+		C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */; };
+		C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */; };
+		C8739E0A1D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */; };
+		C8739E0B1D2AA2A500A89F3C /* Competitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E011D2AA2A500A89F3C /* Competitor.swift */; };
+		C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */; };
+		C8739E0D1D2AA2A500A89F3C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E031D2AA2A500A89F3C /* Event.swift */; };
 		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
 		C89C5FCA1D06CECD002AAAD2 /* StatusTrackingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* StatusTrackingTableViewCell.swift */; };
 		C89C5FCC1D06CF0C002AAAD2 /* GPSAccuracyTrackingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* GPSAccuracyTrackingTableViewCell.swift */; };
@@ -683,7 +683,7 @@
 		7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeedViewController.swift; sourceTree = "<group>"; };
 		7F8B8D421A373D4400C34B88 /* CourseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseViewController.swift; sourceTree = "<group>"; };
 		7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
-		7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderBoardViewController.swift; sourceTree = "<group>"; };
+		7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderboardViewController.swift; sourceTree = "<group>"; };
 		7F99DE3B1A126554009B3619 /* RegattaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaViewController.swift; sourceTree = "<group>"; };
 		7FA6551919F6661900A1B92D /* CoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CoreDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7FAFA7941A126B5700D230F1 /* AboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
@@ -702,16 +702,16 @@
 		C8739D891D21276B00A89F3C /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Main.strings; sourceTree = "<group>"; };
 		C8739D8D1D23D53C00A89F3C /* SendGPSFixesController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendGPSFixesController.swift; sourceTree = "<group>"; };
 		C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 2.xcdatamodel"; sourceTree = "<group>"; };
-		C8739DA51D2539A900A89F3C /* CheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C8739DA61D2539A900A89F3C /* CheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckIn.swift; sourceTree = "<group>"; };
-		C8739DA91D2539A900A89F3C /* Event+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Event+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C8739DAA1D2539A900A89F3C /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
-		C8739DAB1D2539A900A89F3C /* Competitor+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Competitor+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C8739DAC1D2539A900A89F3C /* Competitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Competitor.swift; sourceTree = "<group>"; };
-		C8739DAD1D2539A900A89F3C /* GPSFix+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GPSFix+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C8739DAE1D2539A900A89F3C /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
-		C8739DB91D25409700A89F3C /* Leaderboard+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Leaderboard+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C8739DBA1D25409700A89F3C /* Leaderboard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Leaderboard.swift; sourceTree = "<group>"; };
+		C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Regatta+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C8739DFB1D2AA2A500A89F3C /* Regatta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regatta.swift; sourceTree = "<group>"; };
+		C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GPSFix+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
+		C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Leaderboard+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Leaderboard.swift; sourceTree = "<group>"; };
+		C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Competitor+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C8739E011D2AA2A500A89F3C /* Competitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Competitor.swift; sourceTree = "<group>"; };
+		C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Event+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C8739E031D2AA2A500A89F3C /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		C89C5FC91D06CECD002AAAD2 /* StatusTrackingTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusTrackingTableViewCell.swift; sourceTree = "<group>"; };
 		C89C5FCB1D06CF0C002AAAD2 /* GPSAccuracyTrackingTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSAccuracyTrackingTableViewCell.swift; sourceTree = "<group>"; };
@@ -763,16 +763,16 @@
 			children = (
 				7FA6551919F6661900A1B92D /* CoreDataManager.swift */,
 				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
-				C8739DA51D2539A900A89F3C /* CheckIn+CoreDataProperties.swift */,
-				C8739DA61D2539A900A89F3C /* CheckIn.swift */,
-				C8739DA91D2539A900A89F3C /* Event+CoreDataProperties.swift */,
-				C8739DAA1D2539A900A89F3C /* Event.swift */,
-				C8739DAB1D2539A900A89F3C /* Competitor+CoreDataProperties.swift */,
-				C8739DAC1D2539A900A89F3C /* Competitor.swift */,
-				C8739DAD1D2539A900A89F3C /* GPSFix+CoreDataProperties.swift */,
-				C8739DAE1D2539A900A89F3C /* GPSFix.swift */,
-				C8739DB91D25409700A89F3C /* Leaderboard+CoreDataProperties.swift */,
-				C8739DBA1D25409700A89F3C /* Leaderboard.swift */,
+				C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */,
+				C8739DFB1D2AA2A500A89F3C /* Regatta.swift */,
+				C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */,
+				C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */,
+				C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */,
+				C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */,
+				C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */,
+				C8739E011D2AA2A500A89F3C /* Competitor.swift */,
+				C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */,
+				C8739E031D2AA2A500A89F3C /* Event.swift */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -1267,7 +1267,7 @@
 			isa = PBXGroup;
 			children = (
 				7F99DE3B1A126554009B3619 /* RegattaViewController.swift */,
-				7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */,
+				7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */,
 				C89C5FC61D06CE62002AAAD2 /* Tracking */,
 			);
 			name = Regatta;
@@ -1845,16 +1845,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C8739DB61D2539A900A89F3C /* Competitor.swift in Sources */,
 				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
+				C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */,
 				7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */,
-				C8739DAF1D2539A900A89F3C /* CheckIn+CoreDataProperties.swift in Sources */,
 				7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */,
-				C8739DB81D2539A900A89F3C /* GPSFix.swift in Sources */,
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,
+				C8739E0A1D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift in Sources */,
+				C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */,
+				C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
 				C89C5FD01D06CF46002AAAD2 /* ModeTrackingTableViewCell.swift in Sources */,
-				C8739DB71D2539A900A89F3C /* GPSFix+CoreDataProperties.swift in Sources */,
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
 				7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */,
 				C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */,
@@ -1863,26 +1863,26 @@
 				7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				C89C5FCC1D06CF0C002AAAD2 /* GPSAccuracyTrackingTableViewCell.swift in Sources */,
+				C8739E041D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift in Sources */,
 				C89C5FCA1D06CECD002AAAD2 /* StatusTrackingTableViewCell.swift in Sources */,
+				C8739E051D2AA2A500A89F3C /* Regatta.swift in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
+				C8739E0D1D2AA2A500A89F3C /* Event.swift in Sources */,
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
-				C8739DB51D2539A900A89F3C /* Competitor+CoreDataProperties.swift in Sources */,
-				C8739DBB1D25409700A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */,
 				9E95C3D61C723AB30016632B /* Constants.swift in Sources */,
-				C8739DB41D2539A900A89F3C /* Event.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
+				C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */,
 				C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */,
-				C8739DBC1D25409700A89F3C /* Leaderboard.swift in Sources */,
-				C8739DB01D2539A900A89F3C /* CheckIn.swift in Sources */,
 				C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */,
-				C8739DB31D2539A900A89F3C /* Event+CoreDataProperties.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
+				C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */,
 				7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
-				7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */,
+				7F950A911A35E967003C8C5C /* LeaderboardViewController.swift in Sources */,
 				C89C5FCE1D06CF26002AAAD2 /* CachedFixesTrackingTableViewCell.swift in Sources */,
+				C8739E0B1D2AA2A500A89F3C /* Competitor.swift in Sources */,
 				7F0658FF19F7EE910077FF95 /* CheckInData.swift in Sources */,
 				7F193A911A39E54600D71773 /* GPSAccuracyView.swift in Sources */,
 			);
