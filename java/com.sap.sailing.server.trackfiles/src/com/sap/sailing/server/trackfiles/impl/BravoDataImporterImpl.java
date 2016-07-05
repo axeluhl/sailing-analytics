@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
+import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
@@ -42,10 +44,10 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private final static DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss.SSSSSS");
     private final BravoSensorDataMetadata metadata = BravoSensorDataMetadata.INSTANCE;
     private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
+    private static final int BATCH_SIZE = 5000;
 
     public void importFixes(InputStream inputStream, Callback callback, String sourceName)
             throws FormatNotSupportedException, IOException {
-
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
                 UUID.randomUUID(), sourceName, sourceName + "_Imu", MillisecondsTimePoint.now());
         try {
@@ -74,8 +76,18 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
                 }
                 LOG.fine("Validate and parse header columns");
                 final Map<String, Integer> colIndices = validateAndParseHeader(headerLine);
-                LOG.fine("Parse data");
-                buffer.lines().forEach(line -> callback.addFix(parseLine(line, colIndices), trackIdentifier));
+                LOG.fine("Parse and store data in batches of " + BATCH_SIZE + " items");
+                final ArrayList<DoubleVectorFix> collectedFixes = new ArrayList<>(BATCH_SIZE);
+                buffer.lines().forEach(line -> {
+                    collectedFixes.add(parseLine(line, colIndices));
+                    if (collectedFixes.size() == BATCH_SIZE) {
+                        callback.addFixes(collectedFixes, trackIdentifier);
+                        collectedFixes.clear();
+                    }
+                });
+                if (!collectedFixes.isEmpty()) {
+                    callback.addFixes(collectedFixes, trackIdentifier);
+                }
                 buffer.close();
             }
         } catch (Exception e) {
@@ -145,7 +157,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     public String getType() {
         return "BRAVO";
     }
-    
+
     @Override
     public RegattaLogDeviceCompetitorSensorDataMappingEvent createEvent(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable id, Competitor mappedTo, DeviceIdentifier device,

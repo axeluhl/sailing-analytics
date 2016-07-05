@@ -36,6 +36,8 @@ public interface SensorFixStore {
      */
     <FixT extends Timed> void storeFix(DeviceIdentifier device, FixT fix);
 
+    <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
+
     /**
      * Listeners are notified, whenever a {@link GPSFix} submitted by the {@code device}
      * is stored through the {@link #storeFix(DeviceIdentifier, GPSFix)} method.

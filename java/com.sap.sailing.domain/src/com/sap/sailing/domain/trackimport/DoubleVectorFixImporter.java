@@ -19,7 +19,7 @@ import com.sap.sse.common.TimePoint;
 public interface DoubleVectorFixImporter {    
 
     interface Callback {
-        void addFix(DoubleVectorFix fix, TrackFileImportDeviceIdentifier device);
+        void addFixes(Iterable<DoubleVectorFix> fix, TrackFileImportDeviceIdentifier device);
     }
 
     /**

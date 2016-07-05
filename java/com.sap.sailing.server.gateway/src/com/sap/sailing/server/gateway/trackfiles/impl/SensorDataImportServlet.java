@@ -40,9 +40,9 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     private static final Logger logger = Logger.getLogger(SensorDataImportServlet.class.getName());
     private static final int READ_BUFFER_SIZE = 1024 * 1024 * 1024;
 
-    public void storeFix(DoubleVectorFix fix, DeviceIdentifier deviceIdentifier) {
+    public void storeFixes(Iterable<DoubleVectorFix> fixes, DeviceIdentifier deviceIdentifier) {
         try {
-            getService().getSensorFixStore().storeFix(deviceIdentifier, fix);
+            getService().getSensorFixStore().storeFixes(deviceIdentifier, fixes);
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
         }
@@ -93,20 +93,22 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
             try {
                 importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
                     @Override
-                    public void addFix(DoubleVectorFix fix, TrackFileImportDeviceIdentifier device) {
+                    public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
                         deviceIds.add(device);
-                        storeFix(fix, device);
+                        storeFixes(fixes, device);
                         TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
-                        if (earliestFixSoFarFromCurrentDevice == null
-                                || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
-                            earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                            from.put(device, earliestFixSoFarFromCurrentDevice);
-                        }
                         TimePoint latestFixSoFarFromCurrentDevice = to.get(device);
-                        if (latestFixSoFarFromCurrentDevice == null
-                                || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
-                            latestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                            to.put(device, latestFixSoFarFromCurrentDevice);
+                        for (DoubleVectorFix fix : fixes) {
+                            if (earliestFixSoFarFromCurrentDevice == null
+                                    || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
+                                earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
+                                from.put(device, earliestFixSoFarFromCurrentDevice);
+                            }
+                            if (latestFixSoFarFromCurrentDevice == null
+                                    || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
+                                latestFixSoFarFromCurrentDevice = fix.getTimePoint();
+                                to.put(device, latestFixSoFarFromCurrentDevice);
+                            }
                         }
                     }
                 }, requestedImporterName);

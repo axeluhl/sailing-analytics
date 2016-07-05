@@ -40,4 +40,7 @@ public enum EmptySensorFixStore implements SensorFixStore {
     public <FixT extends Timed> void storeFix(DeviceIdentifier device, FixT fix) {
     }
 
+    @Override
+    public <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes) {
+    }
 }

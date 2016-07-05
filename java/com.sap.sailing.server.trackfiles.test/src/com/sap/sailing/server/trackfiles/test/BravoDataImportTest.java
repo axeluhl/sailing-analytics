@@ -9,6 +9,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
@@ -47,9 +48,11 @@ public class BravoDataImportTest {
     }
     
     private void testImport(ImportData importData) throws FormatNotSupportedException, IOException {
-        bravoDataImporter.importFixes(importData.getInputStream(), (fix, device) -> {
-            callbackCallCount++;
-            sumRideHeight += new BravoFixImpl(fix).getRideHeight();
+        bravoDataImporter.importFixes(importData.getInputStream(), (fixes, device) -> {
+            for (DoubleVectorFix fix : fixes) {
+                callbackCallCount++;
+                sumRideHeight += new BravoFixImpl(fix).getRideHeight();
+            }
         }, "source");
         Assert.assertEquals(importData.expectedFixesCount, callbackCallCount);
         Assert.assertEquals(importData.expectedAverageRideHeight, 
