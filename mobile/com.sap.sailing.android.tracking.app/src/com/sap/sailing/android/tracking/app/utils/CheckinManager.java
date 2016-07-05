@@ -22,6 +22,7 @@ import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
+import com.sap.sailing.android.shared.util.JsonHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
@@ -35,11 +36,13 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
@@ -99,10 +102,14 @@ public class CheckinManager {
                 competitorUrlData.competitorId = uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
                 competitorUrlData.competitorUrl = competitorUrlData.hostWithPort + prefs.getServerCompetitorPath(competitorUrlData.competitorId);
                 urlData = competitorUrlData;
-            } else {
-                // TODO alternatively consider a mark_id
+            } else if (parameterNames.contains(DeviceMappingConstants.URL_MARK_ID_AS_STRING)) {
                 MarkUrlData markUrlData = new MarkUrlData(server, port);
+                markUrlData.setMarkId(uri.getQueryParameter(DeviceMappingConstants.URL_MARK_ID_AS_STRING));
+                markUrlData.setMarkUrl(markUrlData.hostWithPort + prefs.getServerMarkPath(leaderboardNameFromQR, markUrlData.getMarkId()));
                 urlData = markUrlData;
+            } else {
+                ExLog.e(activity, TAG, "Neither mark nor competitor checkin");
+                exception = new Exception();
             }
             urlData.uriStr = uri.toString();
             urlData.checkinURLStr = urlData.hostWithPort + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
@@ -193,16 +200,25 @@ public class CheckinManager {
                 }
                 if (urlData instanceof CompetitorUrlData) {
                     CompetitorUrlData competitorUrlData = (CompetitorUrlData) urlData;
-                    HttpGetRequest getCompetitorRequest;
                     try {
-                        getCompetitorRequest = new HttpGetRequest(new URL(competitorUrlData.competitorUrl), activity);
+                        HttpGetRequest getCompetitorRequest = new HttpGetRequest(new URL(competitorUrlData.competitorUrl), activity);
                         getCompetitorFromServer(getCompetitorRequest, competitorUrlData);
 
                     } catch (MalformedURLException e2) {
                         ExLog.e(activity, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e2.getMessage());
                         handleApiError();
                     }
+                } else if (urlData instanceof MarkUrlData) {
+                    MarkUrlData markUrlData = (MarkUrlData) urlData;
+                    try {
+                        HttpGetRequest getMarkRequest = new HttpGetRequest(new URL(markUrlData.getMarkUrl()), activity);
+                        getMarkFromServer(getMarkRequest, markUrlData);
+                    } catch (MalformedURLException exception) {
+                        ExLog.e(activity, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + exception.getMessage());
+                        handleApiError();
+                    }
                 }
+
             }
         }, new NetworkHelper.NetworkHelperFailureListener() {
 
@@ -243,12 +259,44 @@ public class CheckinManager {
             });
     }
 
+    private void getMarkFromServer(HttpGetRequest getMarkRequest, final MarkUrlData urlData) {
+        NetworkHelper.getInstance(activity)
+            .executeHttpJsonRequestAsync(getMarkRequest, new NetworkHelper.NetworkHelperSuccessListener() {
+                @Override
+                public void performAction(JSONObject response) {
+                    try {
+                        org.json.simple.JSONObject simpleMark;
+                        simpleMark = JsonHelper.convertToSimple(response);
+                        MarkDeserializer markDeserializer = new MarkDeserializer(new SharedDomainFactoryImpl(null));
+                        Mark mark = markDeserializer.deserialize(simpleMark);
+                        urlData.setMark(mark);
+                    } catch (ParseException|JsonDeserializationException e) {
+                        ExLog.e(activity, TAG, "Failed to deserialize mark");
+                        if (activity != null) {
+                            activity.dismissProgressDialog();
+                            displayAPIErrorRecommendRetry();
+                        }
+                        return;
+                    }
+                    saveCheckinDataAndNotifyListeners(urlData);
+                }
+            }, new NetworkHelper.NetworkHelperFailureListener() {
+                @Override
+                public void performAction(NetworkHelper.NetworkHelperError e) {
+                    ExLog.e(activity, TAG, "Failed to get mark from server: " + e.getMessage());
+                    if (activity != null) {
+                        activity.dismissProgressDialog();
+                        displayAPIErrorRecommendRetry();
+                    }
+                }
+            });
+    }
+
     private void saveCheckinDataAndNotifyListeners(UrlData urlData) {
         CheckinData data;
         if (urlData instanceof CompetitorUrlData) {
             CompetitorUrlData competitorUrlData = (CompetitorUrlData) urlData;
-            CompetitorCheckinData competitorCheckinData = new CompetitorCheckinData(competitorUrlData);
-            data = competitorCheckinData;
+            data = new CompetitorCheckinData(competitorUrlData);
         } else {
             MarkUrlData markUrlData = (MarkUrlData) urlData;
             data = new MarkCheckinData(markUrlData);
