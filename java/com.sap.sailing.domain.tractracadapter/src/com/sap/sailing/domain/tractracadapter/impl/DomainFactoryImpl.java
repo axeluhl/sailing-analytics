@@ -77,9 +77,9 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.util.WeakIdentityHashMap;
 import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
@@ -577,7 +577,7 @@ public class DomainFactoryImpl implements DomainFactory {
             Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
             if (existingCompetitor != null && competitorBoatInfo != null) {
                 Boat boatOfCompetitor = new BoatImpl(competitorBoatInfo.getA(), defaultBoatClass, 
-                        competitorBoatInfo.getB(), new RGBColor(competitorBoatInfo.getC()));
+                        competitorBoatInfo.getB(), AbstractColor.getCssColor(competitorBoatInfo.getC()));
                 competitorBoatInfos.put(existingCompetitor, boatOfCompetitor);
             }
         }

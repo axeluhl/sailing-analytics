@@ -1162,6 +1162,16 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
     
     @Override
+    public boolean isSuppressed(Competitor competitor) {
+        LockUtil.lockForRead(suppressedCompetitorsLock);
+        try {
+            return suppressedCompetitors.contains(competitor);
+        } finally {
+            LockUtil.unlockAfterRead(suppressedCompetitorsLock);
+        }
+    }
+    
+    @Override
     public void setSuppressed(Competitor competitor, boolean suppressed) {
         LockUtil.lockForWrite(suppressedCompetitorsLock);
         try {

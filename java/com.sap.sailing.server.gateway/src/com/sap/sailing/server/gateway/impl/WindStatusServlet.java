@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -39,6 +41,7 @@ import com.sap.sse.common.Util;
  *
  */
 public abstract class WindStatusServlet extends SailingServerHttpServlet implements IgtimiWindListener, BulkFixReceiver {
+    private static final Logger logger = Logger.getLogger(WindStatusServlet.class.getName());
     private static final long serialVersionUID = -6791613843435003810L;
     
     protected static final String PARAM_RELOAD_WIND_RECEIVER="reloadWindReceiver";
@@ -108,8 +111,8 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
                         igtimiConnections.clear();
                     }
                 }
-                isIgtimiListenerRegistered = registerIgtimiListener();
                 lastIgtimiMessages = new HashMap<String, Deque<IgtimiMessageInfo>>();
+                isIgtimiListenerRegistered = registerIgtimiListener();
                 igtimiRawMessageCount = 0;
             }
         }
@@ -244,7 +247,7 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
             try {
                 igtimiConnection.stop();
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.log(Level.WARNING, "Exception trying to stop Igtimi connection "+igtimiConnection, e);
             }
         }
         igtimiConnections.clear();
