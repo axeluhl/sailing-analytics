@@ -123,6 +123,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             final Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
             final int nrOfTotalFixes = Util.size(fixes);
             final ArrayList<DBObject> dbFixes = new ArrayList<>(nrOfTotalFixes);
+
             TimePoint newFrom = null;
             TimePoint newTo = null;
             for (FixT fix : fixes) {
@@ -147,8 +148,11 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             newMetadata.put(FieldNames.DEVICE_ID.name(), dbDeviceId);
 
             TimeRange oldTimeRange = getTimeRangeCoveredByFixes(device);
-            TimeRangeImpl fixesTimeRange = new TimeRangeImpl(newFrom, newTo);
-            TimeRange newTimeRange = oldTimeRange == null ? fixesTimeRange : oldTimeRange.union(fixesTimeRange);
+            if (oldTimeRange != null) {
+                newFrom = oldTimeRange.from().before(newFrom) ? oldTimeRange.from() : newFrom;
+                newTo = oldTimeRange.to().after(newTo) ? oldTimeRange.to() : newTo;
+            }
+            final TimeRange newTimeRange = new TimeRangeImpl(newFrom, newTo);
 
             storeTimeRange(newTimeRange, newMetadata, FieldNames.TIMERANGE);
             updateOperation.append("$set", newMetadata);
