@@ -21,6 +21,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.preferences.NotificationPreferences;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
@@ -141,8 +142,8 @@ public class Activator implements BundleActivator {
     }
 
     protected void registerPreferenceConvertersForUserStore(UserStore userStore) {
-        // TODO implement for favorite settings
-        // userStore.registerPreferenceConverter("TODO", new GenericJSONPreferenceConverter(null));
+        userStore.registerPreferenceConverter(NotificationPreferences.PREF_NAME,
+                new GenericJSONPreferenceConverter<NotificationPreferences>(NotificationPreferences::new));
     }
 
     public void stop(BundleContext context) throws Exception {
