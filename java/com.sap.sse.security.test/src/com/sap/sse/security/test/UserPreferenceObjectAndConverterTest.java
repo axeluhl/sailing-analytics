@@ -1,0 +1,172 @@
+package com.sap.sse.security.test;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.UnknownHostException;
+import java.util.Base64;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.mongodb.DB;
+import com.mongodb.MongoException;
+import com.sap.sse.mongodb.MongoDBConfiguration;
+import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.PreferenceConverter;
+import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
+import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
+
+import junit.framework.Assert;
+
+public class UserPreferenceObjectAndConverterTest {
+    
+    private UserStoreImpl store;
+    
+    private String user1 = "me";
+    private String user2 = "somebody_else";
+    
+    private JavaIoSerializablePreferenceConverter<SimplePreferenceForSerialization> prefConverter = new JavaIoSerializablePreferenceConverter<>();
+    private String prefKey1 = "prefKey1";
+    private SimplePreferenceForSerialization pref1 = new SimplePreferenceForSerialization("test12345", false, 432.567);
+    private String serializedPref1 = prefConverter.toString(pref1);
+    private String prefKey2 = "prefKey2";
+    private SimplePreferenceForSerialization pref2 = new SimplePreferenceForSerialization("some sailing value", true, 9.87654321);
+    private String serializedPref2 = prefConverter.toString(pref2);
+
+    @Before
+    public void setUp() throws UnknownHostException, MongoException {
+        final MongoDBConfiguration dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
+        final MongoDBService service = dbConfiguration.getService();
+        DB db = service.getDB();
+        db.getCollection(CollectionNames.USERS.name()).drop();
+        db.getCollection(CollectionNames.SETTINGS.name()).drop();
+        db.getCollection(CollectionNames.PREFERENCES.name()).drop();
+        db.getCollection(CollectionNames.PREFERENCES.name()).drop();
+        store = new UserStoreImpl();
+    }
+
+    @Test
+    public void noConverterSetTest() {
+        store.setPreference(user1, prefKey1, serializedPref1);
+        Assert.assertNull(store.getPreferenceObject(user1, prefKey1));
+    }
+    
+    @Test
+    public void converterAlreadyRegisteredWhenSettingPreferenceTest() {
+        store.registerPreferenceConverter(prefKey1, prefConverter);
+        store.setPreference(user1, prefKey1, serializedPref1);
+        Assert.assertEquals(pref1, store.getPreferenceObject(user1, prefKey1));
+    }
+    
+    @Test
+    public void converterSetWhenPreferenceAlreadyRegisteredTest() {
+        store.setPreference(user1, prefKey1, serializedPref1);
+        store.registerPreferenceConverter(prefKey1, prefConverter);
+        Assert.assertEquals(pref1, store.getPreferenceObject(user1, prefKey1));
+    }
+    
+    @Test
+    public void preferencesForTwoUsersTest() {
+        store.setPreference(user1, prefKey1, serializedPref1);
+        store.setPreference(user2, prefKey1, serializedPref2);
+        store.registerPreferenceConverter(prefKey1, prefConverter);
+        Assert.assertEquals(pref1, store.getPreferenceObject(user1, prefKey1));
+        Assert.assertEquals(pref2, store.getPreferenceObject(user2, prefKey1));
+    }
+    
+    @Test
+    public void twoPreferencesForOneUserTest() {
+        store.setPreference(user1, prefKey1, serializedPref1);
+        store.setPreference(user1, prefKey2, serializedPref2);
+        store.registerPreferenceConverter(prefKey1, prefConverter);
+        store.registerPreferenceConverter(prefKey2, prefConverter);
+        Assert.assertEquals(pref1, store.getPreferenceObject(user1, prefKey1));
+        Assert.assertEquals(pref2, store.getPreferenceObject(user1, prefKey2));
+    }
+    
+    @Test
+    public void setPreferenceObjectTest() {
+        store.registerPreferenceConverter(prefKey1, prefConverter);
+        store.setPreferenceObject(user1, prefKey1, pref1);
+        Assert.assertEquals(serializedPref1, store.getPreference(user1, prefKey1));
+        Assert.assertEquals(pref1, store.getPreferenceObject(user1, prefKey1));
+    }
+
+    public static class SimplePreferenceForSerialization implements Serializable {
+        private static final long serialVersionUID = -580569932709860895L;
+
+        private String someString;
+        private boolean someBoolean;
+        private double soumeDouble;
+
+        public SimplePreferenceForSerialization(String someString, boolean someBoolean, double soumeDouble) {
+            super();
+            this.someString = someString;
+            this.someBoolean = someBoolean;
+            this.soumeDouble = soumeDouble;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (someBoolean ? 1231 : 1237);
+            result = prime * result + ((someString == null) ? 0 : someString.hashCode());
+            long temp;
+            temp = Double.doubleToLongBits(soumeDouble);
+            result = prime * result + (int) (temp ^ (temp >>> 32));
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            SimplePreferenceForSerialization other = (SimplePreferenceForSerialization) obj;
+            if (someBoolean != other.someBoolean)
+                return false;
+            if (someString == null) {
+                if (other.someString != null)
+                    return false;
+            } else if (!someString.equals(other.someString))
+                return false;
+            if (Double.doubleToLongBits(soumeDouble) != Double.doubleToLongBits(other.soumeDouble))
+                return false;
+            return true;
+        }
+    }
+    
+    
+    public static class JavaIoSerializablePreferenceConverter<T> implements PreferenceConverter<T> {
+        @Override
+        public String toString(T preference) {
+            try {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(stream);
+                oos.writeObject(preference);
+                oos.flush();
+                return Base64.getEncoder().encodeToString(stream.toByteArray());
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public T toPreference(String stringPreference) {
+            try {
+                return (T) new ObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(stringPreference))).readObject();
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        }
+    }
+}
