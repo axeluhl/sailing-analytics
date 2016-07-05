@@ -42,7 +42,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> {
 
     protected abstract Collection<T> calculateObjectsToNotify(PrefT preference);
 
-    private Iterable<String> getUsersToNotifyFor(T object) {
+    public Iterable<String> getUsersnamesToNotifyFor(T object) {
         // TODO use read lock
         synchronized (notifications) {
             return new HashSet<>(Util.get(notifications, object, Collections.emptySet()));
@@ -53,7 +53,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> {
      * The given consumer will be called for every user that needs to be notified about the given object.
      */
     public void forUsersMappedTo(T object, Consumer<User> consumer) {
-        for (String username : getUsersToNotifyFor(object)) {
+        for (String username : getUsersnamesToNotifyFor(object)) {
             // User objects can change silently. So we just keep the usernames and get the associated user objects on
             // the fly.
             User user = store.getUserByName(username);
