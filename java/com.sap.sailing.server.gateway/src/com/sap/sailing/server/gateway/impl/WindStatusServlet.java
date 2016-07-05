@@ -132,13 +132,10 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
                     LiveDataConnection newIgtimiConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
                     newIgtimiConnection.addListener(igtimiWindReceiver);
                     newIgtimiConnection.addListener(this);
-                    
-                    IgtimiConnectionInfo newIgtimiConnectionInfo = new IgtimiConnectionInfo();
-                    newIgtimiConnectionInfo.remoteAddress = newIgtimiConnection.getRemoteAddress();
-                    newIgtimiConnectionInfo.accountName = account.getUser().getEmail();
-                    Util.addAll(igtimiConnection.getWindDevices(), newIgtimiConnectionInfo.deviceIDs);
+                    IgtimiConnectionInfo newIgtimiConnectionInfo = new IgtimiConnectionInfo(
+                            newIgtimiConnection.getRemoteAddress(), account.getUser().getEmail(),
+                            igtimiConnection.getWindDevices());
                     igtimiConnections.put(newIgtimiConnection, newIgtimiConnectionInfo);
-                    
                     result = true;
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "Exception trying to stop Igtimi connection "+igtimiConnection, e);
@@ -178,9 +175,30 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
     }
 
     protected class IgtimiConnectionInfo {
-        InetSocketAddress remoteAddress;
-        String accountName;
-        List<String> deviceIDs = new ArrayList<>();
+        private final InetSocketAddress remoteAddress;
+        private final String accountName;
+        private final Iterable<String> deviceIDs;
+        
+        public IgtimiConnectionInfo(InetSocketAddress remoteAddress, String accountName, Iterable<String> deviceIDs) {
+            super();
+            this.remoteAddress = remoteAddress;
+            this.accountName = accountName;
+            final List<String> deviceIDsList = new ArrayList<>();
+            this.deviceIDs = deviceIDsList;
+            Util.addAll(deviceIDs, deviceIDsList);
+        }
+
+        public InetSocketAddress getRemoteAddress() {
+            return remoteAddress;
+        }
+
+        public String getAccountName() {
+            return accountName;
+        }
+
+        public Iterable<String> getDeviceIDs() {
+            return deviceIDs;
+        }
     }
 
     protected class ExpeditionMessageInfo {
