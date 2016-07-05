@@ -105,7 +105,7 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
                                     
                                 }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                logger.log(Level.WARNING, "Exception trying to stop Igtimi connection "+igtimiConnection, e);
                             }
                         }
                         igtimiConnections.clear();
@@ -141,7 +141,7 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
                     
                     result = true;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.log(Level.WARNING, "Exception trying to stop Igtimi connection "+igtimiConnection, e);
                 }
             }
         }
