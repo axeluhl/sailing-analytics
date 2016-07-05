@@ -1,7 +1,11 @@
 package com.sap.sse.security.userstore.mongodb;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,7 +16,9 @@ import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.security.PreferenceConverter;
+import com.sap.sse.security.PreferenceObjectListener;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
@@ -62,6 +68,8 @@ public class UserStoreImpl implements UserStore {
      */
     private final ConcurrentHashMap<String, Map<String, Object>> preferenceObjects;
     
+    private transient Map<String, Set<PreferenceObjectListener<? extends Object>>> listeners;
+    
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
@@ -81,6 +89,7 @@ public class UserStoreImpl implements UserStore {
         preferences = new ConcurrentHashMap<>();
         preferenceConverters = new ConcurrentHashMap<>();
         preferenceObjects = new ConcurrentHashMap<>();
+        listeners = new HashMap<>();
         this.mongoObjectFactory = mongoObjectFactory;
         if (domainObjectFactory != null) {
             for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
@@ -116,6 +125,15 @@ public class UserStoreImpl implements UserStore {
                 }
             }
         }
+    }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        listeners = new HashMap<>();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
     }
 
     @Override
@@ -538,13 +556,15 @@ public class UserStoreImpl implements UserStore {
                 }
             }
         }
-        userMap.put(key, convertedObject);
+        Object oldPreference = userMap.put(key, convertedObject);
+        notifyListenersOnPreferenceObjectChange(username, key, oldPreference, convertedObject);
     }
 
     private void unsetPreferenceObject(String username, String key) {
         Map<String, Object> userObjectMap = preferenceObjects.get(username);
         if (userObjectMap != null) {
-            userObjectMap.remove(key);
+            Object oldPreference = userObjectMap.remove(key);
+            notifyListenersOnPreferenceObjectChange(username, key, oldPreference, null);
         }
     }
 
@@ -581,6 +601,47 @@ public class UserStoreImpl implements UserStore {
                 logger.log(Level.SEVERE, "Error while converting preference for key " + key + " from Object \""
                         + preferenceObject + "\"", t);
             }
+        }
+    }
+
+    private void notifyListenersOnPreferenceObjectChange(String username, String key, Object oldPreference,
+            Object newPreference) {
+        synchronized (listeners) {
+            for (PreferenceObjectListener<? extends Object> listener : Util.get(listeners, key,
+                    Collections.<PreferenceObjectListener<? extends Object>> emptySet())) {
+                @SuppressWarnings("unchecked")
+                PreferenceObjectListener<Object> listenerToFire = (PreferenceObjectListener<Object>) listener;
+                listenerToFire.preferenceObjectChanged(username, key, oldPreference, newPreference);
+            }
+        }
+    }
+
+    @Override
+    public void addPreferenceObjectListener(String key, PreferenceObjectListener<? extends Object> listener,
+            boolean fireForAlreadyExistingPreferences) {
+        synchronized (listeners) {
+            Util.addToValueSet(listeners, key, listener);
+            if (fireForAlreadyExistingPreferences) {
+                final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+                for (String username : usersToProcess) {
+                    Map<String, Object> userMap = preferenceObjects.get(username);
+                    if (userMap != null) {
+                        Object preferenceObject = userMap.get(key);
+                        if (preferenceObject != null) {
+                            @SuppressWarnings("unchecked")
+                            PreferenceObjectListener<Object> listenerToFire = (PreferenceObjectListener<Object>) listener;
+                            listenerToFire.preferenceObjectChanged(username, key, null, preferenceObject);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void removePreferenceObjectListener(PreferenceObjectListener<?> listener) {
+        synchronized (listeners) {
+            Util.removeFromAllValueSets(listeners, listener);
         }
     }
 }

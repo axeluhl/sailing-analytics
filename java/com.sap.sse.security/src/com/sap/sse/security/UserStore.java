@@ -130,4 +130,8 @@ public interface UserStore extends Named {
      * {@code username} no access token has previously been {@link #setAccessToken(String, String) set}.
      */
     String getAccessToken(String username);
+    
+    void addPreferenceObjectListener(String key, PreferenceObjectListener<?> listener, boolean fireForAlreadyExistingPreferences);
+    
+    void removePreferenceObjectListener(PreferenceObjectListener<?> listener);
 }
