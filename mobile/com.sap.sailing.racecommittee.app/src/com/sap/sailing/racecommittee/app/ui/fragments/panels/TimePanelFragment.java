@@ -38,7 +38,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TimePanelFragment extends BasePanelFragment {
 
-    public final static String TOGGLED = "toggled";
+    private final static String TOGGLED = "toggled";
 
     private RaceStateChangedListener mStateListener;
     private IntentReceiver mReceiver;
@@ -49,8 +49,11 @@ public class TimePanelFragment extends BasePanelFragment {
     private TextView mCurrentTime;
     private TextView mHeaderTime;
     private TextView mTimeStart;
+    private TextView mFirstVesselDuration;
     private ImageView mLinkIcon;
     private Boolean mLinkedRace = null;
+
+    private TimePoint mLastFinishingTime = null;
 
     public TimePanelFragment() {
         mReceiver = new IntentReceiver();
@@ -82,6 +85,7 @@ public class TimePanelFragment extends BasePanelFragment {
         mHeaderTime = ViewHelper.get(layout, R.id.timer_text);
         mTimeStart = ViewHelper.get(layout, R.id.time_start);
         mLinkIcon = ViewHelper.get(layout, R.id.linked_race);
+        mFirstVesselDuration = ViewHelper.get(layout, R.id.first_vessel_duration);
 
         if (getArguments().getBoolean(TOGGLED, false)) {
             toggleMarker(layout, R.id.time_marker);
@@ -168,6 +172,14 @@ public class TimePanelFragment extends BasePanelFragment {
         if (mLinkedRace != null && mLinkIcon != null) {
             mLinkIcon.setVisibility(mLinkedRace ? View.VISIBLE : View.GONE);
         }
+
+        if (mFirstVesselDuration != null && mFirstVesselDuration.getVisibility() == View.VISIBLE) {
+            if (!getRaceState().getFinishingTime().equals(mLastFinishingTime)) {
+                mLastFinishingTime = getRaceState().getFinishingTime();
+                String raceDuration = TimeUtils.formatTime(mLastFinishingTime.minus(getRaceState().getStartTime().asMillis()));
+                mFirstVesselDuration.setText(raceDuration);
+            }
+        }
     }
 
     private void uncheckMarker(View view) {
@@ -183,34 +195,42 @@ public class TimePanelFragment extends BasePanelFragment {
         switch (getRace().getStatus()) {
             case UNSCHEDULED:
                 changeVisibility(mTimeLock, null, View.GONE);
+                changeVisibility(mFirstVesselDuration, null, View.GONE);
                 break;
 
             case PRESCHEDULED:
                 changeVisibility(mTimeLock, null, View.GONE);
+                changeVisibility(mFirstVesselDuration, null, View.GONE);
                 break;
 
             case SCHEDULED:
                 changeVisibility(mTimeLock, null, View.GONE);
+                changeVisibility(mFirstVesselDuration, null, View.GONE);
                 break;
 
             case STARTPHASE:
                 changeVisibility(mTimeLock, null, View.GONE);
+                changeVisibility(mFirstVesselDuration, null, View.GONE);
                 break;
 
             case RUNNING:
                 changeVisibility(mTimeLock, null, View.VISIBLE);
+                changeVisibility(mFirstVesselDuration, null, View.GONE);
                 break;
 
             case FINISHING:
                 changeVisibility(mTimeLock, null, View.VISIBLE);
+                changeVisibility(mFirstVesselDuration, null, View.VISIBLE);
                 break;
 
             case FINISHED:
                 changeVisibility(mTimeLock, null, View.VISIBLE);
+                changeVisibility(mFirstVesselDuration, null, View.VISIBLE);
                 break;
 
             default:
                 changeVisibility(mTimeLock, null, View.VISIBLE);
+                changeVisibility(mFirstVesselDuration, null, View.GONE);
                 break;
         }
     }
