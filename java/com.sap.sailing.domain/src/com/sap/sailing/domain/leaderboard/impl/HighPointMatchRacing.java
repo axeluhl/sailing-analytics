@@ -26,7 +26,7 @@ public class HighPointMatchRacing extends HighPoint {
     @Override
     public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, int rank,
             Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
-        return rank == 1 ? 1.0 : 0.0;
+        return rank == 0 ? null : rank == 1 ? 1.0 : 0.0;
     }
 
 }
