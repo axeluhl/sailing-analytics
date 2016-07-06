@@ -426,7 +426,7 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="R1D-LZ-1ic" userLabel="Button View">
                                         <rect key="frame" x="0.0" y="0.0" width="600" height="204.5"/>
                                         <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gjq-vj-gAR">
+                                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gjq-vj-gAR">
                                                 <rect key="frame" x="170" y="86" width="260" height="33"/>
                                                 <color key="backgroundColor" white="1" alpha="0.5" colorSpace="calibratedWhite"/>
                                                 <constraints>
@@ -455,7 +455,7 @@
                                                     <action selector="teamImageRetryButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="wm1-xI-tcA"/>
                                                 </connections>
                                             </button>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CDA-ep-bjo">
+                                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CDA-ep-bjo">
                                                 <rect key="frame" x="200" y="86.5" width="200" height="33"/>
                                                 <color key="backgroundColor" white="1" alpha="0.5" colorSpace="calibratedWhite"/>
                                                 <constraints>
@@ -736,7 +736,7 @@
                                             <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="12"/>
                                         </variation>
                                         <connections>
-                                            <segue destination="Njg-ZD-Ycd" kind="presentation" id="TcU-oJ-gdb"/>
+                                            <segue destination="Njg-ZD-Ycd" kind="presentation" identifier="Leaderboard" id="TcU-oJ-gdb"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mj9-m1-nYY">

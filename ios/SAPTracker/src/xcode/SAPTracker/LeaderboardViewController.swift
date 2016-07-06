@@ -10,7 +10,7 @@ import Foundation
 
 class LeaderboardViewController: UIViewController {
     
-    weak var regatta: Regatta?
+    var regatta: Regatta!
     
     @IBOutlet weak var webView: UIWebView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
@@ -23,7 +23,7 @@ class LeaderboardViewController: UIViewController {
     // MARK: - Setups
     
     private func setupWebView() {
-        guard let url = regatta?.leaderboardURL() else { return }
+        guard let url = regatta.leaderboardURL() else { return }
         webView.loadRequest(NSURLRequest(URL: url))
     }
     

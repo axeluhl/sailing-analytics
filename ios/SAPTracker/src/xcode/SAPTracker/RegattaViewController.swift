@@ -271,6 +271,10 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
             let trackingNC = segue.destinationViewController as! UINavigationController
             let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
             trackingVC.regatta = regatta
+        } else if (segue.identifier == "Leaderboard") {
+            let leaderboardNC = segue.destinationViewController as! UINavigationController
+            let leaderboardVC = leaderboardNC.viewControllers[0] as! LeaderboardViewController
+            leaderboardVC.regatta = regatta
         }
     }
     
