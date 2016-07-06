@@ -288,22 +288,22 @@ public class WebSocketConnectionManager implements LiveDataConnection {
         if (currentSocket != null) {
             currentSocket.close();
         }
-        if (client != null) {
-            client.stop();
-            client.destroy();
-        }
-        client = new WebSocketClient(new SslContextFactory()) {
-            @Override
-            public void destroy() {
-                super.destroy();
-                ShutdownThread.deregister(this); // this will make sure that after destroy() no reference is being held to this client
-            }
-        };
         IOException lastException = null;
         for (URI uri : connectionFactory.getWebsocketServers()) {
             try {
                 if (uri.getScheme().equals("ws") || uri.getScheme().equals("wss")) {
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
+                    if (client != null) {
+                        client.stop();
+                        client.destroy();
+                    }
+                    client = new WebSocketClient(new SslContextFactory()) {
+                        @Override
+                        public void destroy() {
+                            super.destroy();
+                            ShutdownThread.deregister(this); // this will make sure that after destroy() no reference is being held to this client
+                        }
+                    };
                     client.start();
                     currentSocket = new WebSocket();
                     igtimiServerTimepoint = null;
