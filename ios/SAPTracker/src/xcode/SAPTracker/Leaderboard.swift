@@ -12,6 +12,10 @@ import CoreData
 @objc(Leaderboard)
 class Leaderboard: NSManagedObject {
 
+    func updateWithLeaderboardData(leaderboardData: LeaderboardData) {
+        name = leaderboardData.name
+    }
+    
     func nameWithQueryAllowedCharacters() -> String? {
         return name.stringByAddingPercentEncodingWithAllowedCharacters(.URLQueryAllowedCharacterSet())
     }

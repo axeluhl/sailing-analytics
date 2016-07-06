@@ -10,7 +10,8 @@ import Foundation
 
 class TrackingViewController : UIViewController {
     
-    var regatta: Regatta?
+    var regatta: Regatta!
+    var regattaController: RegattaController!
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!

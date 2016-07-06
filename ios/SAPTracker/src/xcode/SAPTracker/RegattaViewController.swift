@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import CoreLocation
-import Darwin
 
 class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     
@@ -51,6 +49,9 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         setupNavigationBar()
         setupImageSourceTypes()
         setupTeamImage()
+        
+        // Test
+        regattaController.update()
     }
     
     // MARK: - Setups
@@ -73,7 +74,8 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
                                                                 target: self,
                                                                 selector: #selector(RegattaViewController.refreshCountdown),
                                                                 userInfo: nil,
-                                                                repeats: true)
+                                                                repeats: true
+        )
         refreshCountdown()
     }
     
@@ -185,6 +187,9 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     
     @IBAction func showMenuActionSheet(sender: AnyObject) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
+        if let popoverController = alertController.popoverPresentationController {
+            popoverController.barButtonItem = sender as? UIBarButtonItem
+        }
         let checkOutTitle = NSLocalizedString("Check-Out", comment: "")
         let checkOutAction = UIAlertAction(title: checkOutTitle, style: .Default) { (action) in
             self.showCheckOutAlertController()
@@ -207,21 +212,35 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
-        do {
-            try LocationManager.sharedManager.startTracking()
+        if regattaController.startTracking() {
             performSegueWithIdentifier("Tracking", sender: sender)
-        } catch let error as LocationManager.LocationManagerError {
-            let alertController = UIAlertController(title: error.description, message: nil, preferredStyle: .Alert)
-            let cancelTitle = NSLocalizedString("Cancel", comment: "")
-            let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
-            alertController.addAction(cancelAction)
-            presentViewController(alertController, animated: true, completion: nil)
-        } catch {
-            print("Unknown error")
         }
     }
     
-    // MARK: - Image picker
+    // MARK: - Alerts
+    
+    private func showCheckOutAlertController() {
+        let alertTitle = NSLocalizedString("Check-out of Regatta?", comment: "")
+        let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
+        let okTitle = NSLocalizedString("OK", comment: "")
+        let okAction = UIAlertAction(title: okTitle, style: .Default) { (action) in self.preformCheckOut() }
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+        alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
+        presentViewController(alertController, animated: true, completion: nil)
+    }
+    
+    private func preformCheckOut() {
+        requestManager.postCheckOut(regatta.leaderboard.name,
+                                    competitorId: regatta.competitor.competitorID,
+                                    success: { (operation, responseObject) in },
+                                    failure: { (operation, error) in
+        })
+        CoreDataManager.sharedManager.deleteRegatta(regatta)
+        CoreDataManager.sharedManager.saveContext()
+        navigationController!.popViewControllerAnimated(true)
+    }
     
     func showImageAlertController() {
         if sourceTypes.count == 1 {
@@ -245,40 +264,21 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         }
     }
     
-    // MARK: - Check-out
-    
-    func showCheckOutAlertController() {
-        let alertTitle = NSLocalizedString("Check-out of Regatta?", comment: "")
-        let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
-        let okTitle = NSLocalizedString("OK", comment: "")
-        let okAction = UIAlertAction(title: okTitle, style: .Default) { (action) in self.preformCheckOut() }
-        let cancelTitle = NSLocalizedString("Cancel", comment: "")
-        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
-        alertController.addAction(okAction)
-        alertController.addAction(cancelAction)
-        presentViewController(alertController, animated: true, completion: nil)
-    }
-    
-    func preformCheckOut() {
-        requestManager.postCheckOut(regatta.leaderboard.name,
-                                    competitorId: regatta.competitor.competitorID,
-                                    success: { (operation, responseObject) in },
-                                    failure: { (operation, error) in
-        })
-        CoreDataManager.sharedManager.deleteRegatta(regatta!)
-        CoreDataManager.sharedManager.saveContext()
-        navigationController!.popViewControllerAnimated(true)
-    }
-    
     // MARK: - Segue
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "Tracking") {
-            let nc = segue.destinationViewController as! UINavigationController
-            let vc = nc.viewControllers[0] as! TrackingViewController
-            vc.regatta = regatta
+            let trackingNC = segue.destinationViewController as! UINavigationController
+            let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
+            trackingVC.regatta = regatta
         }
     }
+    
+    // MARK: - Properties
+    
+    lazy var regattaController: RegattaController = {
+        return RegattaController(regatta: self.regatta)
+    }()
     
 }
 
@@ -342,6 +342,16 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         
         // Setup team image
         setupTeamImage()
+    }
+    
+}
+
+// MARK: - RegattaControllerDelegate
+
+extension RegattaViewController: RegattaControllerDelegate {
+    
+    func showRegattaAlert(regattaController: RegattaController, alertController: UIAlertController) {
+        presentViewController(alertController, animated: true, completion: nil)
     }
     
 }

@@ -14,48 +14,39 @@ class ModeTrackingTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        self.setupModeLabel()
-//        self.subscribeForNotifications()
+        self.setupModeLabel(RegattaController.Mode.Offline)
+        self.subscribeForNotifications()
     }
     
     deinit {
-//        self.unsubscribeFromNotifications()
+        self.unsubscribeFromNotifications()
     }
     
     // MARK: - Setups
     
-    private func setupModeLabel() {
-        // FIXME: - network availability
-        //if (APIManager.sharedManager.networkAvailable) {
-            if !BatteryManager.sharedManager.batterySaving {
-                modeLabel.text = NSLocalizedString("Online", comment: "")
-            } else {
-                modeLabel.text = NSLocalizedString("Battery Saving", comment: "")
-            }
-        //} else {
-        //    modeLabel.text = NSLocalizedString("Offline", comment: "")
-        //}
-        // FIXME: - Show "API Error" in red in case of response errors
+    private func setupModeLabel(mode: RegattaController.Mode) {
+        modeLabel.text = mode.description
     }
     
     // MARK: - Notifications
 
-// FIXME: - Network availability
-//    private func subscribeForNotifications() {
-//        NSNotificationCenter.defaultCenter().addObserver(self,
-//                                                         selector:#selector(networkAvailabilityChanged),
-//                                                         name:APIManager.NotificationType.networkAvailabilityChanged,
-//                                                         object: nil)
-//    }
-//    
-//    private func unsubscribeFromNotifications() {
-//        NSNotificationCenter.defaultCenter().removeObserver(self)
-//    }
-//    
-//    func networkAvailabilityChanged(notification: NSNotification) {
-//        dispatch_async(dispatch_get_main_queue(), {
-//            self.setupModeLabel()
-//        })
-//    }
+    private func subscribeForNotifications() {
+        NSNotificationCenter.defaultCenter().addObserver(self,
+                                                         selector:#selector(regattaControllerModeChanged),
+                                                         name:RegattaController.NotificationType.ModeChanged,
+                                                         object: nil
+        )
+    }
+    
+    private func unsubscribeFromNotifications() {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    
+    func regattaControllerModeChanged(notification: NSNotification) {
+        dispatch_async(dispatch_get_main_queue(), {
+            guard let mode = notification.userInfo?[RegattaController.UserInfo.Mode] as? RegattaController.Mode else { return }
+            self.setupModeLabel(mode)
+        })
+    }
     
 }

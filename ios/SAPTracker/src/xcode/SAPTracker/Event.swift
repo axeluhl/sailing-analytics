@@ -12,6 +12,11 @@ import CoreData
 @objc(Event)
 class Event: NSManagedObject {
 
-// Insert code here to add functionality to your managed object subclass
-
+    func updateWithEventData(eventData: EventData) {
+        endDate = eventData.endDate
+        eventID = eventData.eventID
+        name = eventData.name
+        startDate = eventData.startDate
+    }
+    
 }

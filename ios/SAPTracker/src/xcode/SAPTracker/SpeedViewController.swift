@@ -40,8 +40,14 @@ class SpeedViewController: UIViewController {
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector:#selector(locationManagerUpdated(_:)),
-                                                         name:LocationManager.NotificationType.LocationManagerUpdated,
-                                                         object: nil)
+                                                         name:LocationManager.NotificationType.Updated,
+                                                         object: nil
+        )
+        NSNotificationCenter.defaultCenter().addObserver(self,
+                                                         selector:#selector(locationManagerFailed(_:)),
+                                                         name:LocationManager.NotificationType.Failed,
+                                                         object: nil
+        )
     }
     
     private func unsubscribeFromNotifications() {
@@ -50,8 +56,15 @@ class SpeedViewController: UIViewController {
     
     func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
-            self.setupSpeedLabel(notification.userInfo![LocationManager.UserInfo.Speed] as! Double)
+            guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
+            self.setupSpeedLabel(locationData.location.speed)
         })
     }
 
+    func locationManagerFailed(notification: NSNotification) {
+        dispatch_async(dispatch_get_main_queue(), {
+            self.setupSpeedLabel(-1.0)
+        })
+    }
+    
 }

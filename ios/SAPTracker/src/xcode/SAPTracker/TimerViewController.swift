@@ -33,7 +33,8 @@ class TimerViewController: UIViewController {
                             target: self,
                             selector: #selector(tick),
                             userInfo: nil,
-                            repeats: true)
+                            repeats: true
+        )
         NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)    
     }
     

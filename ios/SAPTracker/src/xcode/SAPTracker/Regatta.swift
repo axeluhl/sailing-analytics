@@ -12,6 +12,12 @@ import CoreData
 @objc(Regatta)
 class Regatta: NSManagedObject {
 
+    func updateWirhRegattaData(regattaData: RegattaData) {
+        serverURL = regattaData.serverURL
+        teamImageURL = regattaData.teamImageURL
+        teamImageRetry = false
+    }
+    
     func eventURL() -> NSURL? {
         return NSURL(string: "\(serverURL)/gwt/Home.html?navigationTab=Regattas#EventPlace:eventId=\(event.eventID)")
     }

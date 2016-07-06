@@ -12,6 +12,13 @@ import CoreData
 @objc(Competitor)
 class Competitor: NSManagedObject {
 
-// Insert code here to add functionality to your managed object subclass
-
+    func updateWithCompetitorData(competitorData: CompetitorData) {
+        boatClassName = competitorData.boatClassName
+        competitorID = competitorData.competitorID
+        countryCode = competitorData.countryCode
+        name = competitorData.name
+        nationality = competitorData.nationality
+        sailID = competitorData.sailID
+    }
+    
 }

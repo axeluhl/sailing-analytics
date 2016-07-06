@@ -12,10 +12,15 @@ import CoreLocation
 class LocationManager: NSObject {
     
     struct NotificationType {
-        static let LocationManagerStarted = "LocationManagerStarted"
-        static let LocationManagerStopped = "LocationManagerStopped"
-        static let LocationManagerUpdated = "LocationManagerUpdated"
-        static let LocationManagerFailed = "LocationManagerFailed"
+        static let Started = "LocationManager.Started"
+        static let Stopped = "LocationManager.Stopped"
+        static let Updated = "LocationManager.Updated"
+        static let Failed = "LocationManager.Failed"
+    }
+    
+    struct UserInfo {
+        static let Error = "NSError"
+        static let LocationData = "LocationData"
     }
     
     enum LocationManagerError: ErrorType {
@@ -23,8 +28,8 @@ class LocationManager: NSObject {
         case LocationServicesDenied
         var description: String {
             switch self {
-            case LocationManagerError.LocationServicesDenied: return NSLocalizedString("Please enable location services for this app.", comment: "")
-            case LocationManagerError.LocationServicesDisabled: return NSLocalizedString("Please enable location services.", comment: "")
+            case .LocationServicesDenied: return NSLocalizedString("Please enable location services for this app.", comment: "")
+            case .LocationServicesDisabled: return NSLocalizedString("Please enable location services.", comment: "")
             }
         }
     }
@@ -74,7 +79,7 @@ class LocationManager: NSObject {
         isTracking = true;
         
         // Send notification
-        let notification = NSNotification(name: NotificationType.LocationManagerStarted, object: self)
+        let notification = NSNotification(name: NotificationType.Started, object: self)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
@@ -86,7 +91,7 @@ class LocationManager: NSObject {
         isTracking = false;
         
         // Send notification
-        let notification = NSNotification(name: NotificationType.LocationManagerStopped, object: self)
+        let notification = NSNotification(name: NotificationType.Stopped, object: self)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
@@ -95,51 +100,19 @@ class LocationManager: NSObject {
 // MARK: - CLLocationManagerDelegate
 
 extension LocationManager: CLLocationManagerDelegate {
-    
-    struct UserInfo {
-        static let Error = "error"
-        static let Course = "course"
-        static let HorizontalAccuracy = "horizontalAccuracy"
-        static let IsValid = "isValid"
-        static let Latitude = "latitude"
-        static let Longitude = "longitude"
-        static let Speed = "speed"
-        static let Timestamp = "timestamp"
-    }
-    
-    struct LocationValidation {
-        static let requiredAccuracy: CLLocationAccuracy = 10
-        static let maxElapsedTime: NSTimeInterval = 10
-    }
-    
+        
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let notification = NSNotification(name: NotificationType.LocationManagerUpdated, object: self, userInfo:dictionaryForLocation(locations.last!))
+        guard let location = locations.last else { return }
+        let locationData = LocationData(location: location)
+        let userInfo = [UserInfo.LocationData: locationData]
+        let notification = NSNotification(name: NotificationType.Updated, object: self, userInfo: userInfo)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
 
     func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
-        let notification = NSNotification(name: NotificationType.LocationManagerFailed, object: self, userInfo: [UserInfo.Error: error])
+        let userInfo = [UserInfo.Error: error]
+        let notification = NSNotification(name: NotificationType.Failed, object: self, userInfo: userInfo)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
-    }
-    
-    // MARK: - Helper
-    
-    private func dictionaryForLocation(location: CLLocation) -> [String: AnyObject] {
-        return [
-            UserInfo.Timestamp: location.timestamp.timeIntervalSince1970,
-            UserInfo.Latitude : location.coordinate.latitude,
-            UserInfo.Longitude: location.coordinate.longitude,
-            UserInfo.Speed: location.speed,
-            UserInfo.Course: location.course,
-            UserInfo.HorizontalAccuracy: location.horizontalAccuracy,
-            UserInfo.IsValid: isLocationValid(location)
-        ]
-    }
-    
-    private func isLocationValid(location: CLLocation) -> Bool {
-        guard location.horizontalAccuracy >= 0 && location.horizontalAccuracy <= LocationValidation.requiredAccuracy else { return false }
-        guard location.timestamp.timeIntervalSinceDate(NSDate()) <= LocationValidation.maxElapsedTime else { return false }
-        return true;
     }
     
 }

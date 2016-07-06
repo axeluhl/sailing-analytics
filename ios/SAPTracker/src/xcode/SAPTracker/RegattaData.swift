@@ -1,5 +1,5 @@
 //
-//  CheckInData.swift
+//  RegattaData.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 25.05.16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class CheckInData: NSObject {
+public class RegattaData: NSObject {
     
     private struct ItemNames {
         static let EventID = "event_id"
@@ -16,20 +16,41 @@ public class CheckInData: NSObject {
         static let CompetitorID = "competitor_id"
     }
     
-    public let serverURL: String
-    public let eventID: String
-    public let leaderboardName: String
-    public let competitorID: String
+    let serverURL: String
+    let eventID: String
+    let leaderboardName: String
+    let competitorID: String
 
-    init(serverURL: String = "",
-         eventID: String = "",
-         leaderboardName: String = "",
-         competitorID: String = "")
+    var eventData = EventData()
+    var leaderboardData = LeaderboardData()
+    var competitorData = CompetitorData()
+    var teamImageURL: String?
+    
+    override init() {
+        serverURL = ""
+        eventID = ""
+        leaderboardName = ""
+        competitorID = ""
+        super.init()
+    }
+    
+    init(serverURL: String,
+         eventID: String,
+         leaderboardName: String,
+         competitorID: String)
     {
         self.serverURL = serverURL
         self.eventID = eventID
         self.leaderboardName = leaderboardName
         self.competitorID = competitorID
+        super.init()
+    }
+    
+    init(regatta: Regatta) {
+        serverURL = regatta.serverURL
+        eventID = regatta.event.eventID
+        competitorID = regatta.competitor.competitorID
+        leaderboardName = regatta.leaderboard.name
         super.init()
     }
     
@@ -45,9 +66,9 @@ public class CheckInData: NSObject {
         let queryItems = components.queryItems
         
         // Get check-in items
-        guard let eventID = CheckInData.queryItemValue(queryItems, itemName: CheckInData.ItemNames.EventID) else { return nil }
-        guard let leaderboardName = CheckInData.queryItemValue(queryItems, itemName: CheckInData.ItemNames.LeaderboardName) else { return nil }
-        guard let competitorID = CheckInData.queryItemValue(queryItems, itemName: CheckInData.ItemNames.CompetitorID) else { return nil }
+        guard let eventID = RegattaData.queryItemValue(queryItems, itemName: ItemNames.EventID) else { return nil }
+        guard let leaderboardName = RegattaData.queryItemValue(queryItems, itemName: ItemNames.LeaderboardName) else { return nil }
+        guard let competitorID = RegattaData.queryItemValue(queryItems, itemName: ItemNames.CompetitorID) else { return nil }
         
         // Init with values
         self.init(serverURL: serverURL,
@@ -63,9 +84,20 @@ public class CheckInData: NSObject {
         self.init(url: url)
     }    
     
+    // Properties
+    
+    var welcomeString: String {
+        get {
+            return String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""),
+                          competitorData.name,
+                          leaderboardData.name,
+                          competitorData.sailID)
+        }
+    }
+    
     // MARK: - Helper
     
-    private class func queryItemValue(queryItems: [NSURLQueryItem]?, itemName: String) -> String? {
+    class private func queryItemValue(queryItems: [NSURLQueryItem]?, itemName: String) -> String? {
         return queryItems?.filter({(item) -> Bool in item.name == itemName}).first?.value
     }
     

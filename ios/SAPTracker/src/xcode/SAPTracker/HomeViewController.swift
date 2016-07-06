@@ -84,7 +84,7 @@ class HomeViewController: UIViewController {
         let viewTitle = NSLocalizedString("EULA_view", comment: "")
         let viewAction = UIAlertAction(title: viewTitle, style: .Cancel, handler: { action in
             UIApplication.sharedApplication().openURL(URLs.EULA)
-            self.reviewEULA() // Reopen alert
+            self.reviewEULA() // Reopen alert again until user confirms
         })
         let confirmTitle = NSLocalizedString("EULA_confirm", comment: "")
         let confirmAction = UIAlertAction(title: confirmTitle, style: .Default, handler: { action in
@@ -99,8 +99,8 @@ class HomeViewController: UIViewController {
     func reviewNewCheckIn() {
         guard Preferences.termsAccepted else { return }
         guard let urlString = Preferences.newCheckInURL else { return }
-        guard let checkInData = CheckInData(urlString: urlString) else { return }
-        checkInController.startCheckIn(checkInData)
+        guard let regattaData = RegattaData(urlString: urlString) else { return }
+        checkInController.checkIn(regattaData)
     }
     
     // MARK: - Notifications
@@ -126,21 +126,14 @@ class HomeViewController: UIViewController {
     
     @IBAction func optionButtonTap(sender: AnyObject) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
-        // FIXME: - what does this code?
-        //        if let popoverController = actionSheet.popoverPresentationController,
-        //            let barButtonItem = sender as? UIBarButtonItem {
-        //            popoverController.barButtonItem = barButtonItem
-        //        }
-        // FIXME: - should be a simpler solution than dispatch with magic numbers
+        if let popoverController = alertController.popoverPresentationController {
+            popoverController.barButtonItem = sender as? UIBarButtonItem
+        }
         let settingsAction = UIAlertAction(title: NSLocalizedString("Settings", comment: ""), style: .Default) { (action) -> Void in
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
-                self.performSegueWithIdentifier("SettingsFromHome", sender: alertController)
-            }
+            self.performSegueWithIdentifier("SettingsFromHome", sender: alertController)
         }
         let aboutAction = UIAlertAction(title: NSLocalizedString("About", comment: ""), style: .Default) { (action) -> Void in
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
-                self.performSegueWithIdentifier("AboutFromHome", sender: alertController)
-            }
+            self.performSegueWithIdentifier("AboutFromHome", sender: alertController)
         }
         let cancelAction = UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .Cancel, handler: nil)
         alertController.addAction(settingsAction)
@@ -159,7 +152,6 @@ class HomeViewController: UIViewController {
             let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
             alertController.addAction(cancelAction)
             presentViewController(alertController, animated: true, completion: nil)
-            return
         }
     }
     

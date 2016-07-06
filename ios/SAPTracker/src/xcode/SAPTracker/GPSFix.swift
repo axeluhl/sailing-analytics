@@ -12,6 +12,12 @@ import CoreData
 @objc(GPSFix)
 class GPSFix: NSManagedObject {
 
-// Insert code here to add functionality to your managed object subclass
-
+    func updateWithLocationData(locationData: LocationData) {
+        course = locationData.location.course
+        latitude = locationData.location.coordinate.latitude
+        longitude = locationData.location.coordinate.longitude
+        speed = locationData.location.speed
+        timestamp = round(locationData.location.timestamp.timeIntervalSince1970 * 1000)
+    }
+    
 }

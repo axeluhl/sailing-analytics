@@ -35,8 +35,9 @@ class CachedFixesTrackingTableViewCell: UITableViewCell {
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector:#selector(locationManagerUpdated(_:)),
-                                                         name:LocationManager.NotificationType.LocationManagerUpdated,
-                                                         object: nil)
+                                                         name:LocationManager.NotificationType.Updated,
+                                                         object: nil
+        )
     }
     
     private func unsubscribeFromNotifications() {

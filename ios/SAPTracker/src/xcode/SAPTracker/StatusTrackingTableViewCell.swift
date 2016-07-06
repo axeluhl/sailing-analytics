@@ -35,12 +35,14 @@ class StatusTrackingTableViewCell: UITableViewCell {
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector:#selector(locationManagerUpdated(_:)),
-                                                         name:LocationManager.NotificationType.LocationManagerUpdated,
-                                                         object: nil)
+                                                         name:LocationManager.NotificationType.Updated,
+                                                         object: nil
+        )
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector:#selector(locationManagerFailed(_:)),
-                                                         name:LocationManager.NotificationType.LocationManagerFailed,
-                                                         object: nil)
+                                                         name:LocationManager.NotificationType.Failed,
+                                                         object: nil
+        )
     }
     
     private func unsubscribeFromNotifications() {

@@ -10,7 +10,7 @@
 import UIKit
 
 class RequestManager: NSObject {
-
+    
     private let basePathString = "/sailingserver/api/v1"
     
     private enum BodyKeys {
@@ -50,37 +50,142 @@ class RequestManager: NSObject {
         super.init()
     }
     
+    // MARK: - Regatta
+    
+    func getRegattaData(regattaData: RegattaData,
+                        success: (RegattaData) -> Void,
+                        failure: (String, NSError) -> Void)
+    {
+        getEventData(regattaData, success: success, failure: failure)
+    }
+    
+    func getEventData(regattaData: RegattaData,
+                      success: (RegattaData) -> Void,
+                      failure: (String, NSError) -> Void)
+    {
+        getEvent(regattaData.eventID,
+                 success: { (data) in self.getEventDataSuccess(data, regattaData: regattaData, success: success, failure: failure) },
+                 failure: { (title, error) in failure(title, error) }
+        )
+    }
+    
+    func getEventDataSuccess(eventData: EventData,
+                             regattaData: RegattaData,
+                             success: (RegattaData) -> Void,
+                             failure: (String, NSError) -> Void)
+    {
+        regattaData.eventData = eventData
+        getLeaderboardData(regattaData, success: success, failure: failure)
+    }
+    
+    func getLeaderboardData(regattaData: RegattaData,
+                            success: (RegattaData) -> Void,
+                            failure: (String, NSError) -> Void)
+    {
+        getLeaderboard(regattaData.leaderboardName,
+                       success: { (data) in self.getLeaderboardDataSuccess(data, regattaData: regattaData, success: success, failure: failure) },
+                       failure: { (title, error) in failure(title, error) }
+        )
+    }
+    
+    func getLeaderboardDataSuccess(leaderboardData: LeaderboardData,
+                                   regattaData: RegattaData,
+                                   success: (RegattaData) -> Void,
+                                   failure: (String, NSError) -> Void)
+    {
+        regattaData.leaderboardData = leaderboardData
+        getCompetitorData(regattaData, success: success, failure: failure)
+    }
+    
+    func getCompetitorData(regattaData: RegattaData,
+                           success: (RegattaData) -> Void,
+                           failure: (String, NSError) -> Void)
+    {
+        getCompetitor(regattaData.competitorID,
+                      success: { (data) in self.getCompetitorDataSuccess(data, regattaData: regattaData, success: success, failure: failure) },
+                      failure: { (title, error) in failure(title, error) }
+        )
+    }
+    
+    func getCompetitorDataSuccess(competitorData: CompetitorData,
+                                  regattaData: RegattaData,
+                                  success: (RegattaData) -> Void,
+                                  failure: (String, NSError) -> Void)
+    {
+        regattaData.competitorData = competitorData
+        getTeamImageURL(regattaData.competitorID, result: { (imageURL) in
+            regattaData.teamImageURL = imageURL
+            success(regattaData)
+        })
+    }
+    
     // MARK: - Event
     
-    func getEvent(eventID: String!,
-                  success: (AFHTTPRequestOperation!, AnyObject!) -> Void,
-                  failure: (AFHTTPRequestOperation!, AnyObject!) -> Void)
+    func getEvent(eventID: String,
+                  success: (EventData) -> Void,
+                  failure: (String, NSError) -> Void)
     {
-        let encodedEventID = eventID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
+        let encodedEventID = eventID.stringByAddingPercentEncodingWithAllowedCharacters(.URLPathAllowedCharacterSet()) ?? ""
         let urlString = "\(basePathString)/events/\(encodedEventID)"
-        manager.GET(urlString, parameters: nil, success: success, failure: failure)
+        manager.GET(urlString,
+                    parameters: nil,
+                    success: { (requestOperation, responseObject) in self.getEventSuccess(responseObject, success: success) },
+                    failure: { (requestOperation, error) in self.getEventFailure(eventID, error: error, failure: failure) }
+        )
+    }
+    
+    func getEventSuccess(responseObject: AnyObject, success: (EventData) -> Void) {
+        success(EventData(dictionary: responseObject as? [String: AnyObject]))
+    }
+    
+    func getEventFailure(eventID: String, error: NSError, failure: (String, NSError) -> Void) -> Void {
+        failure(String(format: NSLocalizedString("Couldn't get event %@", comment: ""), eventID), error)
     }
     
     // MARK: - Leaderboard
     
-    func getLeaderboard(leaderboardName: String!,
-                        success: (AFHTTPRequestOperation!, AnyObject!) -> Void,
-                        failure: (AFHTTPRequestOperation!, AnyObject!) -> Void)
+    func getLeaderboard(leaderboardName: String,
+                        success: (LeaderboardData) -> Void,
+                        failure: (String, NSError) -> Void)
     {
-        let encodedLeaderboardName = leaderboardName.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
+        let encodedLeaderboardName = leaderboardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLPathAllowedCharacterSet()) ?? ""
         let urlString = "\(basePathString)/leaderboards/\(encodedLeaderboardName)"
-        manager.GET(urlString, parameters: nil, success: success, failure: failure)
+        manager.GET(urlString,
+                    parameters: nil,
+                    success: { (requestOperation, responseObject) in self.getLeaderboardSuccess(responseObject, success: success) },
+                    failure: { (requestOperation, error) in self.getLeaderboardFailure(leaderboardName, error: error, failure: failure) }
+        )
+    }
+    
+    func getLeaderboardSuccess(responseObject: AnyObject, success: (LeaderboardData) -> Void) {
+        success(LeaderboardData(dictionary: responseObject as? [String: AnyObject]))
+    }
+    
+    func getLeaderboardFailure(leaderboardName: String, error: NSError, failure: (String, NSError) -> Void) {
+        failure(String(format: NSLocalizedString("Couldn't get leader board %@", comment: ""), leaderboardName), error)
     }
     
     // MARK: - Competitor
     
-    func getCompetitor(competitorID: String!,
-                       success: (AFHTTPRequestOperation!, AnyObject!) -> Void,
-                       failure: (AFHTTPRequestOperation!, AnyObject!) -> Void)
+    func getCompetitor(competitorID: String,
+                       success: (CompetitorData) -> Void,
+                       failure: (String, NSError) -> Void)
     {
         let encodedCompetitorID = competitorID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
         let urlString = "\(basePathString)/competitors/\(encodedCompetitorID)"
-        manager.GET(urlString, parameters: nil, success: success, failure: failure)
+        manager.GET(urlString,
+                    parameters: nil,
+                    success: { (requestOperation, responseObject) in self.getCompetitorSuccess(responseObject, success: success) },
+                    failure: { (requestOperation, error) in self.getCompetitorFailure(competitorID, error: error, failure: failure) }
+        )
+    }
+    
+    func getCompetitorSuccess(responseObject: AnyObject, success: (CompetitorData) -> Void) {
+        success(CompetitorData(dictionary: responseObject as? [String: AnyObject]))
+    }
+    
+    func getCompetitorFailure(competitorID: String, error: NSError, failure: (String, NSError) -> Void) {
+        failure(String(format: NSLocalizedString("Couldn't get competitor %@", comment: ""), competitorID), error)
     }
     
     // MARK: - Team

@@ -14,15 +14,12 @@ class ScanViewController: UIViewController {
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var targetImageView: UIImageView!
 
-    private let checkInController = CheckInController()
-    
     private var session: AVCaptureSession!
     private var output: AVCaptureMetadataOutput!
     private var previewLayer: AVCaptureVideoPreviewLayer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupCheckInController()
         setupSession()
     }
     
@@ -31,11 +28,19 @@ class ScanViewController: UIViewController {
         startScanning()
     }
     
-    // MARK: - Setups
-    
-    private func setupCheckInController() {
-        checkInController.delegate = self
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        layoutPreviewLayer()
     }
+    
+    // MARK: - Layouts
+    
+    private func layoutPreviewLayer() {
+        previewLayer.frame = previewView.bounds
+        previewLayer.position = CGPointMake(CGRectGetMidX(previewView.bounds), CGRectGetMidY(previewView.bounds))
+    }
+    
+    // MARK: - Setups
     
     private func setupSession() {
         session = AVCaptureSession()
@@ -54,6 +59,7 @@ class ScanViewController: UIViewController {
             output.metadataObjectTypes = [AVMetadataObjectTypeQRCode]
             previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
             previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
+            previewLayer.connection.videoOrientation = videoOrientation(forInterfaceOrientation: UIApplication.sharedApplication().statusBarOrientation)
             previewLayer.frame = previewView.bounds
             previewLayer.position = CGPointMake(CGRectGetMidX(previewView.bounds), CGRectGetMidY(previewView.bounds))
             previewView.layer.addSublayer(previewLayer)
@@ -65,13 +71,7 @@ class ScanViewController: UIViewController {
     // MARK: - UIViewControllerDelegate
     
     override func willRotateToInterfaceOrientation(toInterfaceOrientation: UIInterfaceOrientation, duration: NSTimeInterval) {
-        if UIDevice.currentDevice().orientation == UIDeviceOrientation.LandscapeLeft {
-            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.LandscapeRight
-        } else if UIDevice.currentDevice().orientation == UIDeviceOrientation.LandscapeRight {
-            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.LandscapeLeft
-        } else {
-            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.Portrait
-        }
+        previewLayer.connection.videoOrientation = videoOrientation(forInterfaceOrientation: toInterfaceOrientation)
     }
     
     // MARK: - Scanning
@@ -88,6 +88,26 @@ class ScanViewController: UIViewController {
             self.session.stopRunning()
         })
         targetImageView.image = UIImage(named: "scan_green")
+    }
+    
+    // MARK: - Properties
+    
+    lazy var checkInController: CheckInController = {
+        let checkInController = CheckInController()
+        checkInController.delegate = self
+        return checkInController
+    }()
+    
+    // MARK: - Helper
+    
+    private func videoOrientation(forInterfaceOrientation orientation: UIInterfaceOrientation) -> AVCaptureVideoOrientation {
+        switch orientation {
+        case .LandscapeLeft: return .LandscapeLeft
+        case .LandscapeRight: return .LandscapeRight
+        case .Portrait: return .Portrait
+        case .PortraitUpsideDown: return .PortraitUpsideDown
+        case .Unknown: return .Portrait
+        }
     }
     
 }
@@ -120,9 +140,9 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
     {
         if metadataObjects.count > 0 {
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
-            if let checkInData = CheckInData(urlString: metadataObject.stringValue) {
+            if let regattaData = RegattaData(urlString: metadataObject.stringValue) {
                 stopScanning()
-                checkInController.startCheckIn(checkInData)
+                checkInController.checkIn(regattaData)
             } else {
                 let alertTitle = NSLocalizedString("Incorrect QR Code", comment: "")
                 let alertController = UIAlertController(title: alertTitle, message: "", preferredStyle: .Alert)

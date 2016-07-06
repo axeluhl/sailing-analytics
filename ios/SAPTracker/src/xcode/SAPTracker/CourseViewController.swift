@@ -35,7 +35,11 @@ class CourseViewController: UIViewController {
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector:#selector(locationManagerUpdated(_:)),
-                                                         name:LocationManager.NotificationType.LocationManagerUpdated,
+                                                         name:LocationManager.NotificationType.Updated,
+                                                         object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self,
+                                                         selector:#selector(locationManagerFailed(_:)),
+                                                         name:LocationManager.NotificationType.Failed,
                                                          object: nil)
     }
     
@@ -45,7 +49,14 @@ class CourseViewController: UIViewController {
     
     func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
-            self.setupCourseLabel(notification.userInfo![LocationManager.UserInfo.Course] as! Double)
+            guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
+            self.setupCourseLabel(locationData.location.course)
+        })
+    }
+    
+    func locationManagerFailed(notification: NSNotification) {
+        dispatch_async(dispatch_get_main_queue(), {
+            self.setupCourseLabel(-1.0)
         })
     }
     
