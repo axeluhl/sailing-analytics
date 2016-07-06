@@ -28,22 +28,26 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T>
     public final void addSelection(T item) {
         Object key = getKey(item);
         selectedItemsMap.put(key, item);
+        persist();
     }
     
     @Override
     public final void removeSelection(T item) {
         Object key = getKey(item);
         selectedItemsMap.remove(key);
+        persist();
     }
     
     @Override
     public final void clearSelection() {
         selectedItemsMap.clear();
+        persist();
     }
     
     @Override
     public final void setNotifications(boolean enabled) {
         notificationsEnabled = enabled;
+        persist();
     }
     
     @Override
@@ -72,8 +76,8 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T>
         return notificationsEnabled;
     }
     
-    public Collection<T> getSelectedItems() {
-        return new ArrayList<>(selectedItemsMap.values());
+    private void persist() {
+        persist(new ArrayList<>(selectedItemsMap.values()));
     }
     
 }

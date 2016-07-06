@@ -2,22 +2,22 @@ package com.sap.sailing.gwt.home.communication.user.profile;
 
 import java.util.Collection;
 
-import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
 
 /**
  * {@link SortedSetResult} extension for suggested competitor search. This result contains a set of
- * {@link SimpleCompetitorDTO competitor}s representing the suggestions, as well as information if there are more
+ * {@link SimpleCompetitorWithIdDTO competitor}s representing the suggestions, as well as information if there are more
  * suggestions possible.
  */
-public class CompetitorSuggestionResult extends SortedSetResult<SimpleCompetitorDTO> {
+public class CompetitorSuggestionResult extends SortedSetResult<SimpleCompetitorWithIdDTO> {
 
     private int moreSuggestionsCount;
     
     protected CompetitorSuggestionResult() {
     }
     
-    public CompetitorSuggestionResult(Collection<SimpleCompetitorDTO> values, int moreSuggestionsCount) {
+    public CompetitorSuggestionResult(Collection<SimpleCompetitorWithIdDTO> values, int moreSuggestionsCount) {
         super(values);
         this.moreSuggestionsCount = moreSuggestionsCount;
     }

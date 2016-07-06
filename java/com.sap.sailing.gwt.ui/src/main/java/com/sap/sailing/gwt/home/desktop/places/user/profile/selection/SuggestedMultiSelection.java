@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.SuggestOracle.Callback;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
-import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionDataProvider.SuggestionItemsCallback;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractAsyncSuggestBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractFilterWidget;
@@ -122,11 +122,6 @@ public final class SuggestedMultiSelection<T> extends Composite {
         }
         
         @Override
-        protected final String createSuggestionKeyString(T value) {
-            return String.valueOf(dataProvider.getKey(value));
-        }
-        
-        @Override
         protected final void onSuggestionSelected(T selectedItem) {
             AbstractSuggestedMultiSelectionFilter.this.clear();
             selectionCallback.onSuggestionSelected(selectedItem);
@@ -142,21 +137,26 @@ public final class SuggestedMultiSelection<T> extends Composite {
         AbstractSuggestBoxFilter<T, T> getSuggestBoxFilter(SelectionCallback<T> selectionCallback);
     }
     
-    public static SuggestedMultiSelection<SimpleCompetitorDTO> forCompetitors(
-            final SuggestedMultiSelectionDataProvider<SimpleCompetitorDTO> dataProvider, String headerTitle) {
-        return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<SimpleCompetitorDTO>() {
+    public static SuggestedMultiSelection<SimpleCompetitorWithIdDTO> forCompetitors(
+            final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO> dataProvider, String headerTitle) {
+        return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<SimpleCompetitorWithIdDTO>() {
             @Override
-            public IsWidget getItemDescriptionWidget(SimpleCompetitorDTO item) {
+            public IsWidget getItemDescriptionWidget(SimpleCompetitorWithIdDTO item) {
                 return new SuggestedMultiSelectionCompetitorItemDescription(item);
             }
             
             @Override
-            public AbstractSuggestBoxFilter<SimpleCompetitorDTO, SimpleCompetitorDTO> getSuggestBoxFilter(
-                    SelectionCallback<SimpleCompetitorDTO> selectionCallback) {
-                return new AbstractSuggestedMultiSelectionFilter<SimpleCompetitorDTO>(dataProvider, selectionCallback,
+            public AbstractSuggestBoxFilter<SimpleCompetitorWithIdDTO, SimpleCompetitorWithIdDTO> getSuggestBoxFilter(
+                    SelectionCallback<SimpleCompetitorWithIdDTO> selectionCallback) {
+                return new AbstractSuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider, selectionCallback,
                         StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor())) {
                     @Override
-                    protected String createSuggestionAdditionalDisplayString(SimpleCompetitorDTO value) {
+                    protected String createSuggestionKeyString(SimpleCompetitorWithIdDTO value) {
+                        return value.getSailID();
+                    }
+                    
+                    @Override
+                    protected String createSuggestionAdditionalDisplayString(SimpleCompetitorWithIdDTO value) {
                         return value.getName();
                     }
                 };
@@ -177,6 +177,11 @@ public final class SuggestedMultiSelection<T> extends Composite {
                     SelectionCallback<BoatClassMasterdata> selectionCallback) {
                 return new AbstractSuggestedMultiSelectionFilter<BoatClassMasterdata>(dataProvider, selectionCallback,
                         StringMessages.INSTANCE.add(StringMessages.INSTANCE.boatClass())) {
+                    @Override
+                    protected String createSuggestionKeyString(BoatClassMasterdata value) {
+                        return value.getDisplayName();
+                    }
+                    
                     @Override
                     protected String createSuggestionAdditionalDisplayString(BoatClassMasterdata value) {
                         return null;

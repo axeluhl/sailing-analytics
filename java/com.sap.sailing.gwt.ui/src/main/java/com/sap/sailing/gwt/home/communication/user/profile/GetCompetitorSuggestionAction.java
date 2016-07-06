@@ -9,7 +9,7 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
-import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
@@ -58,7 +58,7 @@ public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSu
     @GwtIncompatible
     public CompetitorSuggestionResult execute(SailingDispatchContext ctx) throws DispatchException {
         Iterable<Competitor> filteredCompetitors = getFilteredCompetitors(ctx);
-        Collection<SimpleCompetitorDTO> result = convertToSimpleCompetitorDTOs(filteredCompetitors);
+        Collection<SimpleCompetitorWithIdDTO> result = convertToSimpleCompetitorDTOs(filteredCompetitors);
         return new CompetitorSuggestionResult(result, Math.max(0, Util.size(filteredCompetitors) - limit));
     }
     
@@ -69,11 +69,12 @@ public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSu
     }
     
     @GwtIncompatible
-    private Collection<SimpleCompetitorDTO> convertToSimpleCompetitorDTOs(Iterable<Competitor> filteredCompetitors) {
-        Collection<SimpleCompetitorDTO> result = new ArrayList<>();
+    private Collection<SimpleCompetitorWithIdDTO> convertToSimpleCompetitorDTOs(
+            Iterable<Competitor> filteredCompetitors) {
+        Collection<SimpleCompetitorWithIdDTO> result = new ArrayList<>();
         int count = 0;
         for (Competitor competitor : filteredCompetitors) {
-            result.add(new SimpleCompetitorDTO(competitor));
+            result.add(new SimpleCompetitorWithIdDTO(competitor));
             if(++count >= limit) break;
         }
         return result;

@@ -1,34 +1,88 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.preferencestab;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.ProvidesKey;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
-import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.domain.common.preferences.BoatClassNotificationPreference;
+import com.sap.sailing.domain.common.preferences.BoatClassNotificationPreferences;
+import com.sap.sailing.domain.common.preferences.CompetitorNotificationPreference;
+import com.sap.sailing.domain.common.preferences.CompetitorNotificationPreferences;
+import com.sap.sailing.domain.common.preferences.NotificationPreferences;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.CompetitorSuggestionResult;
 import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggestionAction;
+import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorsAction;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractSuggestedMultiSelectionDataProvider;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionDataProvider;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
+import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class UserProfilePreferencesPresenter implements UserProfilePreferencesView.Presenter {
 
     private final UserProfilePreferencesView view;
     private final UserProfileView.Presenter userProfilePresenter;
+    private NotificationPreferences notificationPreferences;
 
     public UserProfilePreferencesPresenter(UserProfilePreferencesView view, UserProfileView.Presenter userProfilePresenter) {
         this.view = view;
         this.userProfilePresenter = userProfilePresenter;
         view.setPresenter(this);
-        view.setFavouriteBoatClasses(Arrays.asList(
-                BoatClassMasterdata.KIELZUGVOGEL,
-                BoatClassMasterdata.J22));
+    }
+    
+    @Override
+    public void start() {
+        userProfilePresenter.getClientFactory().getUserService().getPreference(NotificationPreferences.PREF_NAME, 
+                new NotificationPreferences(), new AsyncCallback<NotificationPreferences>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        userProfilePresenter.getClientFactory().createErrorView(
+                                "Error while loading notification preferences!", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(NotificationPreferences result) {
+                        notificationPreferences = result;
+                        setFavoriteCompetitors(result.getCompetitorPreferences());
+                        setFavoriteBoatClasses(result.getBoatClassPreferences());
+                    }
+                });
+    }
+    
+    private void setFavoriteCompetitors(CompetitorNotificationPreferences preferences) {
+        List<String> favoriteCompetitorIds = new ArrayList<>();
+        for (CompetitorNotificationPreference pref : preferences.getCompetitors()) {
+            favoriteCompetitorIds.add(pref.getCompetitorId());
+        }
+        userProfilePresenter.getClientFactory().getDispatch().execute(new GetCompetitorsAction(favoriteCompetitorIds),
+                new AsyncCallback<SortedSetResult<SimpleCompetitorWithIdDTO>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        userProfilePresenter.getClientFactory()
+                                .createErrorView("Error while loading notification preferences!", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(SortedSetResult<SimpleCompetitorWithIdDTO> result) {
+                        view.setFavouriteCompetitors(result.getValues());
+                    }
+                });
+    }
+    
+    private void setFavoriteBoatClasses(BoatClassNotificationPreferences preferences) {
+        List<BoatClassMasterdata> favoriteBoatClasses = new ArrayList<>();
+        for (BoatClassNotificationPreference pref : preferences.getBoatClasses()) {
+            favoriteBoatClasses.add(pref.getBoatClass());
+        }
+        view.setFavouriteBoatClasses(favoriteBoatClasses);
     }
 
     @Override
@@ -47,7 +101,7 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
     }
     
     @Override
-    public SuggestedMultiSelectionDataProvider<SimpleCompetitorDTO> getFavoriteCompetitorsDataProvider() {
+    public SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO> getFavoriteCompetitorsDataProvider() {
         return new CompetitorSuggestedMultiSelectionDataProvider();
     }
     
@@ -68,28 +122,41 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
                 }
             });
         }
+        
         @Override
         protected void getSuggestions(Iterable<String> queryTokens, int limit,
                 SuggestionItemsCallback<BoatClassMasterdata> callback) {
             List<BoatClassMasterdata> boatClasses = Arrays.asList(BoatClassMasterdata.values());
             callback.setSuggestionItems(Util.asList(filter.applyFilter(queryTokens, boatClasses)));
         }
+        
+        @Override
+        public void persist(Collection<BoatClassMasterdata> selectedItems) {
+            List<BoatClassNotificationPreference> preferences = new ArrayList<>();
+            for (BoatClassMasterdata boatClass : selectedItems) {
+                preferences.add(new BoatClassNotificationPreference(boatClass, 
+                        isNotificationsEnabled(), isNotificationsEnabled()));
+            }
+            notificationPreferences.getBoatClassPreferences().setBoatClasses(preferences);
+            userProfilePresenter.getClientFactory().getUserService().setPreference(
+                    NotificationPreferences.PREF_NAME, notificationPreferences);
+        }
     }
     
     private class CompetitorSuggestedMultiSelectionDataProvider
-            extends AbstractSuggestedMultiSelectionDataProvider<SimpleCompetitorDTO> {
+            extends AbstractSuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO> {
         private CompetitorSuggestedMultiSelectionDataProvider() {
-            super(new ProvidesKey<SimpleCompetitorDTO>() {
+            super(new ProvidesKey<SimpleCompetitorWithIdDTO>() {
                 @Override
-                public Object getKey(SimpleCompetitorDTO item) {
-                    return item.getSailID();
+                public Object getKey(SimpleCompetitorWithIdDTO item) {
+                    return item.getIdAsString();
                 }
             });
         }
         
         @Override
         protected void getSuggestions(Iterable<String> queryTokens, int limit,
-                final SuggestionItemsCallback<SimpleCompetitorDTO> callback) {
+                final SuggestionItemsCallback<SimpleCompetitorWithIdDTO> callback) {
             userProfilePresenter.getClientFactory().getDispatch().execute(
                     new GetCompetitorSuggestionAction(queryTokens, limit),
                     new AsyncCallback<CompetitorSuggestionResult>() {
@@ -103,6 +170,17 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
                             callback.setSuggestionItems(result.getValues());
                         }
                     });
+        }
+        
+        @Override
+        public void persist(Collection<SimpleCompetitorWithIdDTO> selectedItems) {
+            List<CompetitorNotificationPreference> preferences = new ArrayList<>();
+            for (SimpleCompetitorWithIdDTO competitor : selectedItems) {
+                preferences.add(new CompetitorNotificationPreference(competitor.getIdAsString(), isNotificationsEnabled()));
+            }
+            notificationPreferences.getCompetitorPreferences().setCompetitors(preferences);
+            userProfilePresenter.getClientFactory().getUserService().setPreference(
+                    NotificationPreferences.PREF_NAME, notificationPreferences);
         }
     }
 }
