@@ -8,8 +8,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 class SuggestedMultiSelectionNotificationToggle extends Composite implements HasEnabled {
 
@@ -19,12 +21,13 @@ class SuggestedMultiSelectionNotificationToggle extends Composite implements Has
     }
     
     @UiField SharedResources res;
+    @UiField Label labelUi;
     @UiField Button toggleButtonUi;
     private boolean enabled = false;
     
-    SuggestedMultiSelectionNotificationToggle() {
+    SuggestedMultiSelectionNotificationToggle(String label) {
         initWidget(uiBinder.createAndBindUi(this));
-        this.updateUiState(); // TODO remove
+        labelUi.setText(label);
     }
     
     @UiHandler("toggleButtonUi")
@@ -45,7 +48,7 @@ class SuggestedMultiSelectionNotificationToggle extends Composite implements Has
     
     private void updateUiState() {
         toggleButtonUi.setStyleName(res.mainCss().buttonred(), !enabled);
-        toggleButtonUi.setText(enabled ? "!Enabled!" : "!Disabled!");
+        toggleButtonUi.setText(enabled ? StringMessages.INSTANCE.enabled() : StringMessages.INSTANCE.disabled());
     }
     
 }

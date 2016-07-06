@@ -3,8 +3,9 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
 import java.util.Collection;
 
 import com.google.gwt.view.client.ProvidesKey;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionDataProvider.Display;
 
-public interface SuggestedMultiSelectionDataProvider<T> extends ProvidesKey<T> {
+public interface SuggestedMultiSelectionDataProvider<T, D extends Display<T>> extends ProvidesKey<T> {
     
     void addSelection(T item);
     
@@ -12,14 +13,19 @@ public interface SuggestedMultiSelectionDataProvider<T> extends ProvidesKey<T> {
     
     void clearSelection();
     
-    void setNotifications(boolean enabled);
-    
     void getSuggestionItems(Iterable<String> queryTokens, int limit, final SuggestionItemsCallback<T> callback);
     
-    void persist(Collection<T> selectedItems);
+    void setDisplay(D display);
+    
+    void persist();
+    
+    void initSelectedItems(Collection<T> selectedItems);
     
     interface SuggestionItemsCallback<T> {
         void setSuggestionItems(Collection<T> suggestionItems);
     }
 
+    interface Display<T> {
+        void setSelectedItems(Collection<T> selectedItems);
+    }
 }

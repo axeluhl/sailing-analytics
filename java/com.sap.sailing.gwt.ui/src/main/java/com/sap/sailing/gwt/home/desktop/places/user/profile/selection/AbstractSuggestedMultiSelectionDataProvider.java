@@ -7,16 +7,22 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.view.client.ProvidesKey;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionDataProvider.Display;
 
-public abstract class AbstractSuggestedMultiSelectionDataProvider<T> 
-        implements SuggestedMultiSelectionDataProvider<T> {
+public abstract class AbstractSuggestedMultiSelectionDataProvider<T, D extends Display<T>> 
+        implements SuggestedMultiSelectionDataProvider<T, D> {
     
     private final ProvidesKey<T> keyProvider;
     private final Map<Object, T> selectedItemsMap = new HashMap<>();
-    private boolean notificationsEnabled;
+    protected D display;
     
     protected AbstractSuggestedMultiSelectionDataProvider(ProvidesKey<T> keyProvider) {
         this.keyProvider = keyProvider;
+    }
+    
+    @Override
+    public void setDisplay(D display) {
+        this.display = display;
     }
     
     @Override
@@ -45,9 +51,11 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T>
     }
     
     @Override
-    public final void setNotifications(boolean enabled) {
-        notificationsEnabled = enabled;
-        persist();
+    public final void initSelectedItems(Collection<T> selectedItems) {
+        for (T item : selectedItems) {
+            selectedItemsMap.put(getKey(item), item);
+        }
+        if (display != null) display.setSelectedItems(selectedItems);
     }
     
     @Override
@@ -68,16 +76,15 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T>
         };
         this.getSuggestions(queryTokens, limit, internalCallback);
     }
+    
+    @Override
+    public void persist() {
+        this.persist(new ArrayList<>(selectedItemsMap.values()));
+    }
 
     protected abstract void getSuggestions(Iterable<String> queryTokens, int limit,
             SuggestionItemsCallback<T> callback);
     
-    public boolean isNotificationsEnabled() {
-        return notificationsEnabled;
-    }
-    
-    private void persist() {
-        persist(new ArrayList<>(selectedItemsMap.values()));
-    }
+    protected abstract void persist(Collection<T> selectedItem);
     
 }

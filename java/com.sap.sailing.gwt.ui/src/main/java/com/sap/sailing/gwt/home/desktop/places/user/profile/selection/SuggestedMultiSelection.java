@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.home.shared.partials.filter.AbstractFilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSuggestBoxFilter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
-public final class SuggestedMultiSelection<T> extends Composite {
+public final class SuggestedMultiSelection<T> extends Composite implements SuggestedMultiSelectionDataProvider.Display<T> {
 
     private static SuggestedMultiSelectionUiBinder uiBinder = GWT.create(SuggestedMultiSelectionUiBinder.class);
 
@@ -32,14 +32,14 @@ public final class SuggestedMultiSelection<T> extends Composite {
     }
     
     @UiField SpanElement headerTitleUi;
-    @UiField SuggestedMultiSelectionNotificationToggle noticationToggleUi;
+    @UiField FlowPanel notificationToggleContainerUi;
     @UiField(provided = true) AbstractFilterWidget<T, T> suggestionWidgetUi;
     @UiField Button removeAllButtonUi;
     @UiField FlowPanel itemContainerUi;
-    private final SuggestedMultiSelectionDataProvider<T> dataProvider;
+    private final SuggestedMultiSelectionDataProvider<T, ?> dataProvider;
     private final WidgetProvider<T> widgetProvider;
 
-    private SuggestedMultiSelection(SuggestedMultiSelectionDataProvider<T> dataProvider,
+    private SuggestedMultiSelection(SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
             WidgetProvider<T> widgetProvider, String title) {
         SuggestedMultiSelectionResources.INSTANCE.css().ensureInjected();
         this.dataProvider = dataProvider;
@@ -47,19 +47,28 @@ public final class SuggestedMultiSelection<T> extends Composite {
         this.suggestionWidgetUi = widgetProvider.getSuggestBoxFilter(new SelectionCallback<T>() {
             @Override
             public void onSuggestionSelected(T selectedItem) {
+                SuggestedMultiSelection.this.dataProvider.addSelection(selectedItem);
                 SuggestedMultiSelection.this.addSelectedItem(selectedItem);
             }
         });
         initWidget(uiBinder.createAndBindUi(this));
         headerTitleUi.setInnerText(title);
-        noticationToggleUi.toggleButtonUi.addClickHandler(new ClickHandler() {
+        this.updateUiState();
+    }
+    
+    public SuggestedMultiSelectionNotificationToggle addNotificationToggle(final NotificationCallback callback,
+            String label) {
+        final SuggestedMultiSelectionNotificationToggle notification =
+                new SuggestedMultiSelectionNotificationToggle(label);
+        notification.toggleButtonUi.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                final boolean enabled = noticationToggleUi.isEnabled();
-                SuggestedMultiSelection.this.dataProvider.setNotifications(enabled);
+                final boolean enabled = notification.isEnabled();
+                callback.onNotificationToggled(enabled);
             }
         });
-        this.updateUiState();
+        notificationToggleContainerUi.add(notification);
+        return notification;
     }
     
     @UiHandler("removeAllButtonUi")
@@ -69,8 +78,8 @@ public final class SuggestedMultiSelection<T> extends Composite {
         this.updateUiState();
     }
     
+    @Override
     public void setSelectedItems(Collection<T> selectedItemsToSet) {
-        dataProvider.clearSelection();
         itemContainerUi.clear();
         for (final T item : selectedItemsToSet) {
             this.addSelectedItem(item);
@@ -78,7 +87,6 @@ public final class SuggestedMultiSelection<T> extends Composite {
     }
     
     private void addSelectedItem(final T selectedItem) {
-        dataProvider.addSelection(selectedItem);
         itemContainerUi.add(new SuggestedMultiSelectionItem() {
             @Override
             protected IsWidget getItemDescriptionWidget() {
@@ -100,10 +108,10 @@ public final class SuggestedMultiSelection<T> extends Composite {
     }
     
     private static abstract class AbstractSuggestedMultiSelectionFilter<T> extends AbstractAsyncSuggestBoxFilter<T, T> {
-        private final SuggestedMultiSelectionDataProvider<T> dataProvider;
+        private final SuggestedMultiSelectionDataProvider<T, ?> dataProvider;
         private final SelectionCallback<T> selectionCallback;
 
-        protected AbstractSuggestedMultiSelectionFilter(SuggestedMultiSelectionDataProvider<T> dataProvider,
+        protected AbstractSuggestedMultiSelectionFilter(SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
                 SelectionCallback<T> selectionCallback, String placeholderText) {
             super(placeholderText);
             this.dataProvider = dataProvider;
@@ -128,6 +136,10 @@ public final class SuggestedMultiSelection<T> extends Composite {
         }
     }
     
+    public interface NotificationCallback {
+        void onNotificationToggled(boolean enabled);
+    }
+    
     private interface SelectionCallback<T> {
         void onSuggestionSelected(T selectedItem);
     }
@@ -138,23 +150,23 @@ public final class SuggestedMultiSelection<T> extends Composite {
     }
     
     public static SuggestedMultiSelection<SimpleCompetitorWithIdDTO> forCompetitors(
-            final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO> dataProvider, String headerTitle) {
+            final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, ?> dataProvider, String headerTitle) {
         return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<SimpleCompetitorWithIdDTO>() {
             @Override
             public IsWidget getItemDescriptionWidget(SimpleCompetitorWithIdDTO item) {
                 return new SuggestedMultiSelectionCompetitorItemDescription(item);
             }
-            
+
             @Override
             public AbstractSuggestBoxFilter<SimpleCompetitorWithIdDTO, SimpleCompetitorWithIdDTO> getSuggestBoxFilter(
                     SelectionCallback<SimpleCompetitorWithIdDTO> selectionCallback) {
-                return new AbstractSuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider, selectionCallback,
-                        StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor())) {
+                return new AbstractSuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider,
+                        selectionCallback, StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor())) {
                     @Override
                     protected String createSuggestionKeyString(SimpleCompetitorWithIdDTO value) {
                         return value.getSailID();
                     }
-                    
+
                     @Override
                     protected String createSuggestionAdditionalDisplayString(SimpleCompetitorWithIdDTO value) {
                         return value.getName();
@@ -165,13 +177,13 @@ public final class SuggestedMultiSelection<T> extends Composite {
     }
     
     public static SuggestedMultiSelection<BoatClassMasterdata> forBoatClasses(
-            final SuggestedMultiSelectionDataProvider<BoatClassMasterdata> dataProvider, String headerTitle) {
+            final SuggestedMultiSelectionDataProvider<BoatClassMasterdata, ?> dataProvider, String headerTitle) {
         return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<BoatClassMasterdata>() {
             @Override
             public IsWidget getItemDescriptionWidget(BoatClassMasterdata item) {
                 return new SuggestedMultiSelectionBoatClassItemDescription(item);
             }
-            
+
             @Override
             public AbstractSuggestBoxFilter<BoatClassMasterdata, BoatClassMasterdata> getSuggestBoxFilter(
                     SelectionCallback<BoatClassMasterdata> selectionCallback) {
@@ -181,7 +193,7 @@ public final class SuggestedMultiSelection<T> extends Composite {
                     protected String createSuggestionKeyString(BoatClassMasterdata value) {
                         return value.getDisplayName();
                     }
-                    
+
                     @Override
                     protected String createSuggestionAdditionalDisplayString(BoatClassMasterdata value) {
                         return null;
