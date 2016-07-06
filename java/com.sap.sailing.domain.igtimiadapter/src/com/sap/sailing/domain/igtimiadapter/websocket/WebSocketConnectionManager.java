@@ -9,7 +9,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,10 +55,16 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     private int messageCount;
     
     /**
-     * What the last call to {@link WebSocketClient#connect(Object, URI)} returned. Can be used to
-     * {@link Session#close() close} the session or {@link Session#disconnect() disconnect} from it.
+     * Tells if currently a call to {@link #reconnect()} is already running; if so, another call can be
+     * ignored at that time
      */
-    private Future<Session> sessionFuture;
+    private boolean isReconnecting;
+    
+    /**
+     * When reconnecting and a session is closed, waits for the socket to receive the {@link #onWebSocketClose(int, String)} event.
+     * When received, this flag is set under the monitor of this object and {@link #notifyAll()} is called.
+     */
+    private boolean onCloseReceivedWhileReconnecting;
     
     private static final int LOG_EVERY_SO_MANY_MESSAGES = 100;
     
@@ -101,10 +106,12 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     }
     
     public void stop() throws Exception {
+        logger.info("Stopping connection mananager "+this);
         targetState = TargetState.CLOSED;
         timer.cancel();
-        if (sessionFuture.isDone()) {
-            sessionFuture.get().disconnect();
+        final Session session = getSession();
+        if (session != null) {
+            session.disconnect();
         }
         client.stop();
     }
@@ -184,19 +191,24 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
 
     @Override
     public void onWebSocketClose(int statusCode, String reason) {
-        if (targetState == TargetState.OPEN) {
-            try {
+        final boolean wasReconnecting;
+        synchronized (this) {
+            wasReconnecting = isReconnecting;
+            if (isReconnecting) {
+                onCloseReceivedWhileReconnecting = true;
+                this.notifyAll();
+            }
+        }
+        // only try to re-connect automatically if this connection close was not caused by
+        // the explicit session close in reconnect(); or else we'll end up in a close/reconnect cycle
+        if (!wasReconnecting) {
+            super.onWebSocketClose(statusCode, reason);
+            if (targetState == TargetState.OPEN) {
                 try {
-                    if (sessionFuture.isDone()) {
-                        sessionFuture.get().disconnect();
-                    }
+                    reconnect();
                 } catch (Exception e) {
-                    logger.info("Trying to disconnect client's session produced "+e.getMessage()+" in connection manager "+this+
-                            ". Continuing with reconnect.");
+                    logger.log(Level.SEVERE, "Couldn't reconnect to Igtimi web socket in " + this, e);
                 }
-                reconnect();
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Couldn't reconnect to Igtimi web socket in "+this, e);
             }
         }
     }
@@ -218,9 +230,6 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
                 try {
                     if (!receivedServerHeartbeatInInterval) {
                         logger.info("Didn't receive server heartbeat in interval for "+WebSocketConnectionManager.this+". Reconnecting...");
-                        if (sessionFuture.isDone()) {
-                            sessionFuture.get().disconnect();
-                        }
                         reconnect();
                     } else {
                         receivedServerHeartbeatInInterval = false;
@@ -248,31 +257,53 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         }, /* delay */ 0, /* send ping message every other minute; has to be at least every five minutes, so this should be safe */ 120000l);
     }
 
-    private void reconnect() throws Exception {
-        IOException lastException = null;
-        for (URI uri : connectionFactory.getWebsocketServers()) {
+    private synchronized void reconnect() throws Exception {
+        if (!isReconnecting) { // one reconnection attempt at a time is good enough
+            isReconnecting = true;
             try {
-                if (uri.getScheme().equals("ws") || uri.getScheme().equals("wss")) {
-                    logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
-                    if (!client.isRunning() && !client.isStarted() && !client.isStarting()) {
-                        client.start();
-                    }
-                    sessionFuture = client.connect(this, uri, request);
-                    if (waitForConnection(CONNECTION_TIMEOUT_IN_MILLIS)) {
-                        logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
-                        lastException = null;
-                        break; // successfully connected
+                final Session session = getSession();
+                if (session != null) {
+                    try {
+                        session.close();
+                        // wait for the onClose callback
+                        final long startedToWaitAt = System.currentTimeMillis();
+                        final long TIMEOUT = 10000l; // wait for 10s
+                        while (!onCloseReceivedWhileReconnecting && System.currentTimeMillis()-startedToWaitAt < TIMEOUT) {
+                            wait(TIMEOUT);
+                        }
+                        onCloseReceivedWhileReconnecting = false;
+                    } catch (Exception e) {
+                        logger.info("Couldn't close WebSocket session "+session+": "+e.getMessage());
                     }
                 }
-            } catch (IOException e) {
-                logger.log(Level.SEVERE, "Couldn't connect to "+uri+" for "+this, e);
-                lastException = e;
+                IOException lastException = null;
+                for (URI uri : connectionFactory.getWebsocketServers()) {
+                    try {
+                        if (uri.getScheme().equals("ws") || uri.getScheme().equals("wss")) {
+                            logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
+                            if (!client.isRunning() && !client.isStarted() && !client.isStarting()) {
+                                client.start();
+                            }
+                            client.connect(this, uri, request);
+                            if (waitForConnection(CONNECTION_TIMEOUT_IN_MILLIS)) {
+                                logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
+                                lastException = null;
+                                break; // successfully connected
+                            }
+                        }
+                    } catch (IOException e) {
+                        logger.log(Level.SEVERE, "Couldn't connect to "+uri+" for "+this, e);
+                        lastException = e;
+                    }
+                }
+                targetState = TargetState.OPEN;
+                if (lastException != null) {
+                    throw lastException;
+                }
+            } finally {
+                isReconnecting = false;
             }
         }
-        targetState = TargetState.OPEN;
-        if (lastException != null) {
-            throw lastException;
-        }        
     }
 
     @Override

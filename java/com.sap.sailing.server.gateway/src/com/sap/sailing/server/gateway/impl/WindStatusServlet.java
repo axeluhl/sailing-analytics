@@ -248,13 +248,15 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
     @Override
     public void windDataReceived(Wind wind, String deviceSerialNumber) {
         Deque<IgtimiMessageInfo> messagesPerDevice = lastIgtimiMessages.get(deviceSerialNumber);
-        if(messagesPerDevice == null) {
+        if (messagesPerDevice == null) {
             messagesPerDevice = new ArrayDeque<IgtimiMessageInfo>(NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW);
             lastIgtimiMessages.put(deviceSerialNumber, messagesPerDevice);
         }
-        messagesPerDevice.addFirst(new IgtimiMessageInfo(wind));
-        if(messagesPerDevice.size() > NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
-            messagesPerDevice.pollLast();
+        synchronized (messagesPerDevice) {
+            messagesPerDevice.addFirst(new IgtimiMessageInfo(wind));
+            if (messagesPerDevice.size() > NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
+                messagesPerDevice.pollLast();
+            }
         }
     }
     
