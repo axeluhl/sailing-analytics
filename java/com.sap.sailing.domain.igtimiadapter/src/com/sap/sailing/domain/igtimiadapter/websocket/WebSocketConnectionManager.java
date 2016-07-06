@@ -9,6 +9,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,6 +55,12 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
      */
     private int messageCount;
     
+    /**
+     * What the last call to {@link WebSocketClient#connect(Object, URI)} returned. Can be used to
+     * {@link Session#close() close} the session or {@link Session#disconnect() disconnect} from it.
+     */
+    private Future<Session> sessionFuture;
+    
     private static final int LOG_EVERY_SO_MANY_MESSAGES = 100;
     
     private static final long CONNECTION_TIMEOUT_IN_MILLIS = 5000;
@@ -96,6 +103,9 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     public void stop() throws Exception {
         targetState = TargetState.CLOSED;
         timer.cancel();
+        if (sessionFuture.isDone()) {
+            sessionFuture.get().disconnect();
+        }
         client.stop();
     }
 
@@ -176,6 +186,14 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     public void onWebSocketClose(int statusCode, String reason) {
         if (targetState == TargetState.OPEN) {
             try {
+                try {
+                    if (sessionFuture.isDone()) {
+                        sessionFuture.get().disconnect();
+                    }
+                } catch (Exception e) {
+                    logger.info("Trying to disconnect client's session produced "+e.getMessage()+" in connection manager "+this+
+                            ". Continuing with reconnect.");
+                }
                 reconnect();
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Couldn't reconnect to Igtimi web socket in "+this, e);
@@ -200,7 +218,9 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
                 try {
                     if (!receivedServerHeartbeatInInterval) {
                         logger.info("Didn't receive server heartbeat in interval for "+WebSocketConnectionManager.this+". Reconnecting...");
-                        client.stop();
+                        if (sessionFuture.isDone()) {
+                            sessionFuture.get().disconnect();
+                        }
                         reconnect();
                     } else {
                         receivedServerHeartbeatInInterval = false;
@@ -234,8 +254,10 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
             try {
                 if (uri.getScheme().equals("ws") || uri.getScheme().equals("wss")) {
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
-                    client.start();
-                    client.connect(this, uri, request);
+                    if (!client.isRunning() && !client.isStarted() && !client.isStarting()) {
+                        client.start();
+                    }
+                    sessionFuture = client.connect(this, uri, request);
                     if (waitForConnection(CONNECTION_TIMEOUT_IN_MILLIS)) {
                         logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
                         lastException = null;
@@ -247,6 +269,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
                 lastException = e;
             }
         }
+        targetState = TargetState.OPEN;
         if (lastException != null) {
             throw lastException;
         }        
