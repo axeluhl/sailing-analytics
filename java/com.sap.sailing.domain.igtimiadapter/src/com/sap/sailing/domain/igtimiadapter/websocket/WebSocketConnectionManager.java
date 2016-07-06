@@ -288,15 +288,15 @@ public class WebSocketConnectionManager implements LiveDataConnection {
         if (currentSocket != null) {
             currentSocket.close();
         }
+        if (client != null) {
+            client.stop();
+            client.destroy();
+        }
         IOException lastException = null;
         for (URI uri : connectionFactory.getWebsocketServers()) {
             try {
                 if (uri.getScheme().equals("ws") || uri.getScheme().equals("wss")) {
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
-                    if (client != null) {
-                        client.stop();
-                        client.destroy();
-                    }
                     client = new WebSocketClient(new SslContextFactory()) {
                         @Override
                         public void destroy() {
@@ -313,6 +313,10 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                         lastException = null;
                         break; // successfully connected
                     }
+                    // connection not successful; stop and destroy the client
+                    client.stop();
+                    client.destroy();
+                    client = null;
                 }
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Couldn't connect to "+uri+" for "+this, e);
