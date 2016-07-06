@@ -16,12 +16,12 @@ public class GenericJSONPreferenceConverter<PREF extends GenericSerializableSett
     }
 
     @Override
-    public String toString(PREF preference) {
+    public String toPreferenceString(PREF preference) {
         return serializer.serializeToString(preference);
     }
 
     @Override
-    public PREF toPreference(String stringPreference) {
+    public PREF toPreferenceObject(String stringPreference) {
         return serializer.deserialize(emptyInstanceFactory.get(), stringPreference);
     }
 

@@ -11,7 +11,7 @@ import com.sap.sse.security.PreferenceConverter;
 
 public class JavaIoSerializablePreferenceConverter<T> implements PreferenceConverter<T> {
     @Override
-    public String toString(T preference) {
+    public String toPreferenceString(T preference) {
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(stream);
@@ -25,7 +25,7 @@ public class JavaIoSerializablePreferenceConverter<T> implements PreferenceConve
 
     @SuppressWarnings("unchecked")
     @Override
-    public T toPreference(String stringPreference) {
+    public T toPreferenceObject(String stringPreference) {
         try {
             return (T) new ObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(stringPreference)))
                     .readObject();

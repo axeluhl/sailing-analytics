@@ -7,7 +7,7 @@ package com.sap.sse.security;
  * @param <PREF> The type of preference object, this converter handles.
  */
 public interface PreferenceConverter<PREF> {
-    String toString(PREF preference);
+    String toPreferenceString(PREF preference);
 
-    PREF toPreference(String stringPreference);
+    PREF toPreferenceObject(String stringPreference);
 }
