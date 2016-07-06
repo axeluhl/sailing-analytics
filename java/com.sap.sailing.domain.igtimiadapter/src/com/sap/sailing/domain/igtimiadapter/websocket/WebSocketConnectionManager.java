@@ -298,6 +298,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
                     client.start();
                     currentSocket = new WebSocket();
+                    igtimiServerTimepoint = null;
                     client.connect(currentSocket, uri, new ClientUpgradeRequest());
                     if (waitForConnection(CONNECTION_TIMEOUT_IN_MILLIS)) {
                         logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
