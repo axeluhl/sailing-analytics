@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.sap.sailing.resultimport.CompetitorEntry;
 import com.sap.sailing.resultimport.CompetitorRow;
@@ -49,6 +51,7 @@ public class CsvParserImpl implements CsvParser {
 
     @Override
     public RegattaResults parseResults() throws Exception {
+        final Pattern totalRankPattern = Pattern.compile("([0-9]+)((st)|(nd)|(rd)|(th))?");
         final List<CompetitorRow> competitorRows = new ArrayList<>();
 
         // Sample line for a couple of races
@@ -78,14 +81,14 @@ public class CsvParserImpl implements CsvParser {
                         }
                     }
                 } else {
-                    try {
-                        // check for valid race row
-                        Integer.parseInt(firstEntry);
-
+                    // check for valid race row; SailWave supports two ways of representing the rank: either as
+                    // 1st, 2nd, 3rd, 4th, ... or as 1, 2, 3, 4, ... We try to handle both:
+                    final Matcher totalRankMatcher = totalRankPattern.matcher(firstEntry);
+                    if (totalRankMatcher.matches()) {
                         String[] splittedRow = line.split(SEPARATOR);
                         String sailID = splittedRow[1] + " " + splittedRow[2];
 
-                        Integer totalRank = Integer.parseInt(splittedRow[0]);
+                        Integer totalRank = Integer.parseInt(totalRankMatcher.group(1));
                         List<String> names = new ArrayList<String>();
                         List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded = new ArrayList<>();
 
@@ -132,8 +135,6 @@ public class CsvParserImpl implements CsvParser {
                         CompetitorRow competitorRow = new CompetitorRowImpl(totalRank, sailID, names, null, null,
                                 rankAndMaxPointsReasonAndPointsAndDiscarded);
                         competitorRows.add(competitorRow);
-                    } catch (NumberFormatException e) {
-                        // ignore lines with no rank at the beginning
                     }
                 }
             } else {
