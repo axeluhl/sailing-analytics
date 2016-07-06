@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.preferencestab;
 import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -24,6 +25,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
     @UiField(provided = true) AuthorizedContentDecoratorDesktop decoratorUi;
     @UiField(provided = true) SuggestedMultiSelection<SimpleCompetitorWithIdDTO> favoriteCompetitorsSelctionUi;
     @UiField(provided = true) SuggestedMultiSelection<BoatClassMasterdata> favoriteBoatClassesSelctionUi;
+    @UiField DivElement notificationsTextUi;
     
     public UserDetailsView getUserDetailsView() {
         return null;
@@ -37,6 +39,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
         favoriteBoatClassesSelctionUi = SuggestedMultiSelection
                 .forBoatClasses(presenter.getFavoriteBoatClassesDataProvider(), "TODO Favourite boat classes");
         initWidget(uiBinder.createAndBindUi(this));
+        // TODO hide notificationsTextUi if the user's mail address is already verified
     }
     
     @Override
