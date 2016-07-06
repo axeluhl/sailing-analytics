@@ -1611,4 +1611,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showCompetitorCharts();
     String showWindChart();
     String userNotificationsOnlyIfMailAddressIsVerified();
+    String enabled();
+    String disabled();
 }
