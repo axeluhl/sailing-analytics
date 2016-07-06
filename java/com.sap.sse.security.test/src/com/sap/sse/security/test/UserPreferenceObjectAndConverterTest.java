@@ -25,10 +25,10 @@ public class UserPreferenceObjectAndConverterTest {
     private JavaIoSerializablePreferenceConverter<SimplePreferenceForSerialization> prefConverter = new JavaIoSerializablePreferenceConverter<>();
     private String prefKey1 = "prefKey1";
     private SimplePreferenceForSerialization pref1 = new SimplePreferenceForSerialization("test12345", false, 432.567);
-    private String serializedPref1 = prefConverter.toString(pref1);
+    private String serializedPref1 = prefConverter.toPreferenceString(pref1);
     private String prefKey2 = "prefKey2";
     private SimplePreferenceForSerialization pref2 = new SimplePreferenceForSerialization("some sailing value", true, 9.87654321);
-    private String serializedPref2 = prefConverter.toString(pref2);
+    private String serializedPref2 = prefConverter.toPreferenceString(pref2);
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {

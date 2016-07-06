@@ -535,7 +535,7 @@ public class UserStoreImpl implements UserStore {
         final String preferenceString = getPreference(username, key);
         if (preferenceString != null) {
             try {
-                final Object convertedObject = preferenceConverter.toPreference(preferenceString);
+                final Object convertedObject = preferenceConverter.toPreferenceObject(preferenceString);
                 setPreferenceObjectInternal(username, key, convertedObject);
             } catch (Throwable t) {
                 logger.log(Level.SEVERE, "Error while converting preference for key " + key + " from String \""
@@ -594,7 +594,7 @@ public class UserStoreImpl implements UserStore {
             unsetPreference(username, key);
         } else {
             try {
-                String stringPreference = preferenceConverter.toString(preferenceObject);
+                String stringPreference = preferenceConverter.toPreferenceString(preferenceObject);
                 setPreferenceInternal(username, key, stringPreference);
                 setPreferenceObjectInternal(username, key, preferenceObject);
             } catch (Throwable t) {
