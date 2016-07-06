@@ -52,6 +52,8 @@ public class SettingsToJsonSerializerGWT extends AbstractSettingsToJsonSerialize
             return JSONNull.getInstance();
         } else if (value instanceof JSONArray) {
             return (JSONArray) value;
+        } else if (value instanceof JSONObject) {
+            return (JSONObject) value;
         } else if (value instanceof String) {
             return new JSONString((String) value);
         } else if (value instanceof Number) {
