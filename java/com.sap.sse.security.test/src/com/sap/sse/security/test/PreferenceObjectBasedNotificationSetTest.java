@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +15,9 @@ import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
+import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
@@ -30,6 +33,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     private String user1 = "me";
     private String user2 = "somebody_else";
+    private String mail = "anonymous@sapsailing.com";
     
     private JavaIoSerializablePreferenceConverter<HashSet<String>> prefConverter = new JavaIoSerializablePreferenceConverter<>();
     private String prefKey = "prefKey";
@@ -153,7 +157,66 @@ public class PreferenceObjectBasedNotificationSetTest {
         Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
     }
     
+    @Test
+    public void noUserMappingTest() {
+        store.registerPreferenceConverter(prefKey, prefConverter);
+        store.setPreferenceObject(user1, prefKey, values1);
+        PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
+        
+        UserConsumerMock mock = new UserConsumerMock();
+        notificationSet.forUsersMappedTo(A, mock);
+        Assert.assertEquals(0, mock.calls.size());
+    }
+    
+    @Test
+    public void userMappingTest() throws UserManagementException {
+        store.createUser(user1, mail);
+        store.registerPreferenceConverter(prefKey, prefConverter);
+        store.setPreferenceObject(user1, prefKey, values1);
+        PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
+        
+        UserConsumerMock mock = new UserConsumerMock();
+        
+        notificationSet.forUsersMappedTo(A, mock);
+        Assert.assertTrue(Util.equals(users(store.getUserByName(user1)), mock.calls));
+    }
+    
+    @Test
+    public void userMappingWithTwoUsersTest() throws UserManagementException {
+        store.createUser(user1, mail);
+        store.createUser(user2, mail);
+        store.registerPreferenceConverter(prefKey, prefConverter);
+        store.setPreferenceObject(user1, prefKey, values1);
+        store.setPreferenceObject(user2, prefKey, values2);
+        PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
+        
+        UserConsumerMock mock = new UserConsumerMock();
+        notificationSet.forUsersMappedTo(A, mock);
+        Assert.assertTrue(Util.equals(users(store.getUserByName(user1)), mock.calls));
+        
+        mock = new UserConsumerMock();
+        notificationSet.forUsersMappedTo(B, mock);
+        Assert.assertTrue(Util.equals(users(store.getUserByName(user1), store.getUserByName(user2)), mock.calls));
+    }
+    
+    @Test
+    public void userMappingWithOneExistingAndOneUnknownUserTest() throws UserManagementException {
+        store.createUser(user1, mail);
+        store.registerPreferenceConverter(prefKey, prefConverter);
+        store.setPreferenceObject(user1, prefKey, values1);
+        store.setPreferenceObject(user2, prefKey, values2);
+        PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
+        
+        UserConsumerMock mock = new UserConsumerMock();
+        notificationSet.forUsersMappedTo(B, mock);
+        Assert.assertTrue(Util.equals(users(store.getUserByName(user1)), mock.calls));
+    }
+    
     private static HashSet<String> values(String... values) {
+        return new HashSet<>(Arrays.asList(values));
+    }
+    
+    private static HashSet<User> users(User... values) {
         return new HashSet<>(Arrays.asList(values));
     }
     
@@ -167,6 +230,17 @@ public class PreferenceObjectBasedNotificationSetTest {
         protected Collection<String> calculateObjectsToNotify(HashSet<String> preference) {
             return preference;
         }
-        
+    }
+    
+    private static class UserConsumerMock implements Consumer<User> {
+        HashSet<User> calls = new HashSet<>();
+
+        @Override
+        public void accept(User user) {
+            if(user == null) {
+                throw new IllegalArgumentException("User is null");
+            }
+            calls.add(user);
+        }
     }
 }
