@@ -90,18 +90,19 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
         @Override
         protected void getSuggestions(Iterable<String> queryTokens, int limit,
                 final SuggestionItemsCallback<SimpleCompetitorDTO> callback) {
-            userProfilePresenter.getDispatch().execute(new GetCompetitorSuggestionAction(queryTokens, limit), 
-                new AsyncCallback<CompetitorSuggestionResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert("Error while loading competitor suggestion");
-                    }
+            userProfilePresenter.getClientFactory().getDispatch().execute(
+                    new GetCompetitorSuggestionAction(queryTokens, limit),
+                    new AsyncCallback<CompetitorSuggestionResult>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert("Error while loading competitor suggestion");
+                        }
 
-                    @Override
-                    public void onSuccess(CompetitorSuggestionResult result) {
-                        callback.setSuggestionItems(result.getValues());
-                    }
-                });
+                        @Override
+                        public void onSuccess(CompetitorSuggestionResult result) {
+                            callback.setSuggestionItems(result.getValues());
+                        }
+                    });
         }
     }
 }
