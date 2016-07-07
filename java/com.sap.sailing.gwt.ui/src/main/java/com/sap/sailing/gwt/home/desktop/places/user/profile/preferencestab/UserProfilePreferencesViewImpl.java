@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedM
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 public class UserProfilePreferencesViewImpl extends Composite implements UserProfilePreferencesView {
@@ -51,13 +52,13 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
         private final HasEnabled notifyAboutResultsUi;
         
         private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider) {
-            selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, "TODO Favourite competitors");
+            selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.favouriteCompetitors());
             notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
                 public void onNotificationToggled(boolean enabled) {
                     dataProvider.setNotifyAboutResults(enabled);
                 }
-            }, "TODO Email notification about new results");
+            }, StringMessages.INSTANCE.notificationAboutNewResults());
             dataProvider.addDisplay(this);
         }
         
@@ -78,19 +79,19 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
         private final HasEnabled notifyAboutResultsUi;
         
         private BoatClassDisplayImpl(final SuggestedMultiSelectionBoatClassDataProvider dataProvider) {
-            selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, "TODO Favourite boat classes");
+            selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, StringMessages.INSTANCE.favouriteBoatClasses());
             notifyAboutUpcomingRacesUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
                 public void onNotificationToggled(boolean enabled) {
                     dataProvider.setNotifyAboutUpcomingRaces(enabled);
                 }
-            }, "TODO Email notification about upcoming races");
+            }, StringMessages.INSTANCE.notificationAboutUpcomingRaces());
             notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
                 public void onNotificationToggled(boolean enabled) {
                     dataProvider.setNotifyAboutResults(enabled);
                 }
-            }, "TODO Email notification about new results");
+            }, StringMessages.INSTANCE.notificationAboutNewResults());
             dataProvider.addDisplay(this);
         }
         

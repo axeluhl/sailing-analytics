@@ -1614,4 +1614,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String enabled();
     String disabled();
     String favouritesAndNotifications();
+    String favouriteCompetitors();
+    String favouriteBoatClasses();
+    String notificationAboutNewResults();
+    String notificationAboutUpcomingRaces();
 }
