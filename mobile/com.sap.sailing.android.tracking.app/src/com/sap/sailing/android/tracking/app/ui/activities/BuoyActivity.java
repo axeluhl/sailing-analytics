@@ -30,10 +30,10 @@ public class BuoyActivity extends AbstractBaseActivity {
 
     private static String TAG = BuoyActivity.class.getName();
 
-    public EventInfo event;
-    public MarkInfo mark;
-    public LeaderboardInfo leaderboard;
-    public CheckinUrlInfo checkinUrl;
+    private EventInfo event;
+    private MarkInfo mark;
+    private LeaderboardInfo leaderboard;
+    private CheckinUrlInfo checkinUrl;
     private String checkinDigest;
 
     private AppPreferences prefs;
@@ -109,7 +109,13 @@ public class BuoyActivity extends AbstractBaseActivity {
         }
     }
 
-    public void startTrackingActivity(String checkinDigest) {
+    private void startTrackingActivity(String checkinDigest) {
+        Intent intent = new Intent(this, TrackingActivity.class);
+        intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
+        startActivity(intent);
+    }
+
+    public void startTrackingActivity() {
         Intent intent = new Intent(this, TrackingActivity.class);
         intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
         startActivity(intent);
