@@ -19,6 +19,7 @@ import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 /**
  * Shows the state of wind receivers regardless of them being attached to a race. 
@@ -50,10 +51,10 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
             out.println("<h4>Igtimi accounts used</h4>");
             for (Map.Entry<LiveDataConnection, IgtimiConnectionInfo> entry: igtimiConnections.entrySet()) {
                 IgtimiConnectionInfo igtimiConnectionInfo = entry.getValue();
-                int deviceCount = igtimiConnectionInfo.deviceIDs.size();
-                out.println("<b>Account " + igtimiConnectionInfo.accountName + "</b><br/>");
-                out.println(deviceCount + " devices " + igtimiConnectionInfo.deviceIDs.toString() + "<br/>");
-                out.println("Connection used is " + igtimiConnectionInfo.remoteAddress.toString() + "<br/><br/>");
+                int deviceCount = Util.size(igtimiConnectionInfo.getDeviceIDs());
+                out.println("<b>Account " + igtimiConnectionInfo.getAccountName() + "</b><br/>");
+                out.println(deviceCount + " devices " + igtimiConnectionInfo.getDeviceIDs().toString() + "<br/>");
+                out.println("Connection used is " + igtimiConnectionInfo.getRemoteAddress().toString() + "<br/><br/>");
             }
             out.println("<br/>");
         }
