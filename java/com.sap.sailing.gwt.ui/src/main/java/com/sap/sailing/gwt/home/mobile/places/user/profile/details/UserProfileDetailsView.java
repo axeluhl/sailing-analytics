@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.user.profile;
+package com.sap.sailing.gwt.home.mobile.places.user.profile.details;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;

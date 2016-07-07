@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.user.profile;
+package com.sap.sailing.gwt.home.mobile.places.user.profile.details;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

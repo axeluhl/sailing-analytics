@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.places.user.profile;
+package com.sap.sailing.gwt.home.mobile.places.user.profile.details;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
