@@ -90,16 +90,19 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
      * Perform a checkin request and launch RegattaAcitivity afterwards
      */
     private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {
+        if (checkinData instanceof CompetitorCheckinData) {
+            storeCompetitorCheckinData((CompetitorCheckinData) checkinData);
+        } else if (checkinData instanceof MarkCheckinData) {
+            storeMarkCheckinData((MarkCheckinData) checkinData);
+        }
+        performAPICheckin(checkinData);
+    }
+
+    private void storeCompetitorCheckinData(CompetitorCheckinData checkinData) {
         if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombinationAvailable(getActivity(), checkinData.checkinDigest)) {
             try {
-                if (checkinData instanceof CompetitorCheckinData) {
-                    CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) checkinData;
-                    DatabaseHelper.getInstance()
-                        .storeCompetitorCheckinRow(getActivity(), competitorCheckinData.getEvent(), competitorCheckinData.getCompetitor(),
-                            competitorCheckinData.getLeaderboard(), competitorCheckinData.getCheckinUrl());
-                } else if (checkinData instanceof MarkCheckinData) {
-                    // TODO: handle database for Mark
-                }
+                DatabaseHelper.getInstance().storeCompetitorCheckinRow(getActivity(), checkinData.getEvent(), checkinData.getCompetitor(), checkinData
+                    .getLeaderboard(), checkinData.getCheckinUrl());
                 adapter.notifyDataSetChanged();
             } catch (GeneralDatabaseHelperException e) {
                 ExLog.e(getActivity(), TAG, "Batch insert failed: " + e.getMessage());
@@ -114,7 +117,27 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             ExLog.w(getActivity(), TAG, "Combination of eventId, leaderboardName and competitorId already exists!");
             Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG).show();
         }
-        performAPICheckin(checkinData);
+    }
+
+    private void storeMarkCheckinData(MarkCheckinData checkinData) {
+        if (DatabaseHelper.getInstance().eventLeaderboardMarkCombinationAvailable(getActivity(), checkinData.checkinDigest)) {
+            try {
+                DatabaseHelper.getInstance().storeMarkCheckinRow(getActivity(), checkinData.getEvent(), checkinData.getMark(), checkinData
+                    .getLeaderboard(), checkinData.getCheckinUrl());
+                adapter.notifyDataSetChanged();
+            } catch (GeneralDatabaseHelperException e) {
+                ExLog.e(getActivity(), TAG, "Batch insert failed: " + e.getMessage());
+                ((StartActivity) getActivity()).displayDatabaseError();
+                return;
+            }
+
+            if (BuildConfig.DEBUG) {
+                ExLog.i(getActivity(), TAG, "Batch-insert of checkinData completed.");
+            }
+        } else {
+            ExLog.w(getActivity(), TAG, "Combination of eventId, leaderboardName and markID already exists!");
+            Toast.makeText(getActivity(), getString(R.string.info_already_checked_in_this_qr_code), Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
@@ -136,7 +159,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             } else if (checkinData instanceof MarkCheckinData) {
                 MarkCheckinData markCheckinData = (MarkCheckinData) checkinData;
                 requestObject = CheckinHelper
-                    .getMarkCheckinJson(markCheckinData.getMark().getId().toString(), markCheckinData.deviceUid, "TODO push device ID!!", date.getTime());
+                    .getMarkCheckinJson(markCheckinData.getMark().getId().toString(), markCheckinData.deviceUid, "TODO push device ID!!", date
+                        .getTime());
             }
             HttpJsonPostRequest request = new HttpJsonPostRequest(getActivity(), new URL(checkinData.checkinURL), requestObject.toString());
             NetworkHelper.getInstance(getActivity())
