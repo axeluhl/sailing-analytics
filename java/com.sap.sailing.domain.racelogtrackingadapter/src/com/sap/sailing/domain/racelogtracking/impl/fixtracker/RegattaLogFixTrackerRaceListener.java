@@ -63,7 +63,7 @@ public class RegattaLogFixTrackerRaceListener {
                 removeRaceLogSensorDataTracker(raceIdentifier);
             }
             final RaceTracker raceTracker = racingEventService.getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier);
-            if(raceTracker != null) {
+            if (raceTracker != null) {
                 boolean added = raceTracker.add(new RaceTracker.Listener() {
                     @Override
                     public void onTrackerWillStop(boolean preemptive) {

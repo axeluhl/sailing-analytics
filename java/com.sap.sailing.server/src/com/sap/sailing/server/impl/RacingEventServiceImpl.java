@@ -3346,9 +3346,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public RaceTracker getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
         Regatta regatta = regattasByName.get(raceIdentifier.getRegattaName());
-        if(regatta != null) {
-            for(RaceTracker raceTracker : raceTrackersByRegatta.get(regatta)) {
-                if(raceTracker.getRaceIdentifiers().contains(raceIdentifier)) {
+        if (regatta != null) {
+            for (RaceTracker raceTracker : raceTrackersByRegatta.get(regatta)) {
+                if (raceTracker.getRaceIdentifiers().contains(raceIdentifier)) {
                     return raceTracker;
                 }
             }
