@@ -46,6 +46,7 @@ public class AnalyticsProvider extends ContentProvider {
     private static final int CHECKIN_URI_ID = 501;
 
     private static final int EVENT_LEADERBOARD_COMPETITOR_JOINED = 600;
+    private static final int EVENT_LEADERBOARD_MARK_JOINED = 601;
 
     private static final int EVENT_GPS_FIXES_JOINED = 700;
 
@@ -74,6 +75,7 @@ public class AnalyticsProvider extends ContentProvider {
         matcher.addURI(authority, "messages/#", MESSAGE_ID);
 
         matcher.addURI(authority, "event_leaderboard_competitor_joined", EVENT_LEADERBOARD_COMPETITOR_JOINED);
+        matcher.addURI(authority, "event_leaderboard_mark_joined", EVENT_LEADERBOARD_MARK_JOINED);
 
         matcher.addURI(authority, "event_gps_fix_joined", EVENT_GPS_FIXES_JOINED);
 
@@ -112,6 +114,11 @@ public class AnalyticsProvider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)) {
 
+            case EVENT_LEADERBOARD_MARK_JOINED:
+                SQLiteQueryBuilder mqb = new SQLiteQueryBuilder();
+                mqb.setTables(Tables.EVENTS_JOIN_LEADERBOARDS_JOIN_MARKS);
+                cursor = mqb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+                return cursor;
             case EVENT_LEADERBOARD_COMPETITOR_JOINED:
                 SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
                 qb.setTables(Tables.EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS);

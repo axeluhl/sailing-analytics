@@ -177,7 +177,7 @@ public class DatabaseHelper {
 
         return checkinUrlInfo;
     }
-    
+
     public MarkInfo getMarkInfo(Context context, String checkinDigest) {
         MarkInfo markInfo = new MarkInfo();
         markInfo.checkinDigest = checkinDigest;
@@ -318,6 +318,29 @@ public class DatabaseHelper {
             + "AND " + AnalyticsDatabase.Tables.COMPETITORS + "." + Competitor.COMPETITOR_CHECKIN_DIGEST + " = ? "
             + "AND " + AnalyticsDatabase.Tables.EVENTS + "." + Event.EVENT_CHECKIN_DIGEST + " = ?";
         Cursor cursor = cr.query(AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI, null, sel, new String[] { checkinDigest,
+            checkinDigest, checkinDigest }, null);
+        int count = 0;
+        if (cursor != null) {
+            count = cursor.getCount();
+            cursor.close();
+        }
+        return count == 0;
+    }
+
+    /**
+     * Return true if the combination of event, leaderboard and mark does not exist in the DB. (based on the
+     * digest of the checkin- url obtained from the QR-code.)
+     *
+     * @param checkinDigest
+     *            SHA-256 digest of QR-code string
+     * @return combination available or not
+     */
+    public boolean eventLeaderboardMarkCombinationAvailable(Context context, String checkinDigest) {
+        ContentResolver cr = context.getContentResolver();
+        String sel = AnalyticsDatabase.Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ? "
+            + "AND " + AnalyticsDatabase.Tables.MARKS + "." + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ? "
+            + "AND " + AnalyticsDatabase.Tables.EVENTS + "." + Event.EVENT_CHECKIN_DIGEST + " = ?";
+        Cursor cursor = cr.query(AnalyticsContract.EventLeaderboardMarkJoined.CONTENT_URI, null, sel, new String[] { checkinDigest,
             checkinDigest, checkinDigest }, null);
         int count = 0;
         if (cursor != null) {

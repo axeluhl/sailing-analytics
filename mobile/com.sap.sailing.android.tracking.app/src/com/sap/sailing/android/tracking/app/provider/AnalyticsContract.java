@@ -62,6 +62,11 @@ public class AnalyticsContract {
                 .appendPath("event_leaderboard_competitor_joined").build();
     }
 
+    public static class EventLeaderboardMarkJoined {
+        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+            .appendPath("event_leaderboard_mark_joined").build();
+    }
+
     public static class Competitor implements CompetitorColumns, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_COMPETITOR).build();
 
