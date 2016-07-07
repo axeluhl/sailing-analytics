@@ -31,9 +31,9 @@ public class AnalyticsContract {
     }
 
     interface markColums {
-        String MARK_ID = "mark.id";
-        String MARKNAME = "mark.name";
-        String MARK_CHECKIN_DIGEST = "mark.checkin_digest";
+        String MARK_ID = "Mark.id";
+        String MARK_NAME = "Mark.name";
+        String MARK_CHECKIN_DIGEST = "Mark.checkin_digest";
     }
 
     interface CheckinColumns {
@@ -142,12 +142,12 @@ public class AnalyticsContract {
         }
     }
 
-    public static class mark implements markColums, BaseColumns {
+    public static class Mark implements markColums, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MARK).build();
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
-            + "/vnd.sap_sailing_analytics.mark";
+            + "/vnd.sap_sailing_analytics.Mark";
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
-            + "/vnd.sap_sailing_analytics.mark";
+            + "/vnd.sap_sailing_analytics.Mark";
         public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
 
         public static Uri buildMarkUri(String leaderboardId) {

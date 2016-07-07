@@ -24,9 +24,9 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     private static final int CUR_DATABASE_VERSION = VER_2016_RELEASE_1;
 
     private static final String createMarkTable = "CREATE TABLE " + Tables.MARKS + " (" +BaseColumns._ID
-        + " INTEGER PRIMARY KEY AUTOINCREMENT, " + AnalyticsContract.mark.MARK_ID + " TEXT, "
-        + AnalyticsContract.mark.MARKNAME + " TEXT, "
-        + AnalyticsContract.mark.MARK_CHECKIN_DIGEST + " TEXT );" ;
+        + " INTEGER PRIMARY KEY AUTOINCREMENT, " + AnalyticsContract.Mark.MARK_ID + " TEXT, "
+        + AnalyticsContract.Mark.MARK_NAME + " TEXT, "
+        + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " TEXT );" ;
 
     private final Context mContext;
 

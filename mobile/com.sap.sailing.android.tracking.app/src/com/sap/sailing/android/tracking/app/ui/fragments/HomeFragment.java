@@ -95,10 +95,10 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                 if (checkinData instanceof CompetitorCheckinData) {
                     CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) checkinData;
                     DatabaseHelper.getInstance()
-                        .storeCheckinRow(getActivity(), competitorCheckinData.getEvent(), competitorCheckinData.getCompetitor(),
+                        .storeCompetitorCheckinRow(getActivity(), competitorCheckinData.getEvent(), competitorCheckinData.getCompetitor(),
                             competitorCheckinData.getLeaderboard(), competitorCheckinData.getCheckinUrl());
                 } else if (checkinData instanceof MarkCheckinData) {
-                    // TODO: handle database for mark
+                    // TODO: handle database for Mark
                 }
                 adapter.notifyDataSetChanged();
             } catch (GeneralDatabaseHelperException e) {

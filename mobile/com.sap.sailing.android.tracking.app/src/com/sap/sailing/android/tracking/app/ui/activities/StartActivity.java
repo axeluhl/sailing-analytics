@@ -55,6 +55,7 @@ public class StartActivity extends AbstractStartActivity {
 
         if (prefs.getTrackerIsTracking()) {
             String checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
+            // TODO: Type in preferences write / read
             startRegatta(checkinDigest);
         }
     }
@@ -66,6 +67,7 @@ public class StartActivity extends AbstractStartActivity {
     }
 
     private void startRegatta(String checkinDigest) {
+        // TODO: Check which activity to be called
         Intent intent = new Intent(this, RegattaActivity.class);
         intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
         startActivity(intent);
@@ -118,7 +120,7 @@ public class StartActivity extends AbstractStartActivity {
                 try {
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinData.getCheckinUrl().checkinDigest);
                     DatabaseHelper.getInstance()
-                        .storeCheckinRow(this, checkinData.getEvent(), competitorCheckinData.getCompetitor(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                        .storeCompetitorCheckinRow(this, checkinData.getEvent(), competitorCheckinData.getCompetitor(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
                 } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                     ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                     displayDatabaseError();

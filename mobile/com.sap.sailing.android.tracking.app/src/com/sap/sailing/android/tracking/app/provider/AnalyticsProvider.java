@@ -163,9 +163,9 @@ public class AnalyticsProvider extends ContentProvider {
             case CHECKIN_URI_ID:
                 return Checkin.CONTENT_ITEM_TYPE;
             case MARK:
-                return AnalyticsContract.mark.CONTENT_TYPE;
+                return AnalyticsContract.Mark.CONTENT_TYPE;
             case MARK_ID:
-                return AnalyticsContract.mark.CONTENT_ITEM_TYPE;
+                return AnalyticsContract.Mark.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -204,7 +204,7 @@ public class AnalyticsProvider extends ContentProvider {
             case MARK:
                 long markUriID = db.insertOrThrow(Tables.MARKS, null, values);
                 notifyChange(uri);
-                return AnalyticsContract.mark.buildMarkUri(String.valueOf(markUriID));
+                return AnalyticsContract.Mark.buildMarkUri(String.valueOf(markUriID));
 
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -302,7 +302,7 @@ public class AnalyticsProvider extends ContentProvider {
             case MARK:
                 return builder.table(Tables.MARKS);
             case MARK_ID:
-                final String mark_id = AnalyticsContract.mark.getMarkId(uri);
+                final String mark_id = AnalyticsContract.Mark.getMarkId(uri);
                 return builder.table(Tables.MARKS).where(BaseColumns._ID + " = ?", mark_id);
 
             default:
