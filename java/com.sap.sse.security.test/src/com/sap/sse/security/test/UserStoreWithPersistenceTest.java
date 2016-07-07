@@ -55,6 +55,22 @@ public class UserStoreWithPersistenceTest {
         assertNotNull(store.getUserByEmail(email));
     }
 
+    /**
+     * There was a {@link NullPointerException} thrown if calling getUserByEmail for an email address for which there
+     * wasn't an associated user.
+     */
+    @Test
+    public void testDeleteUser() throws UserManagementException {
+        store.createUser(username, email);
+        store.deleteUser(username);
+        assertNull(store.getUserByName(username));
+        assertNull(store.getUserByEmail(email));
+
+        newStore();
+        assertNull(store.getUserByName(username));
+        assertNull(store.getUserByEmail(email));
+    }
+
     @Test
     public void testSetPreferences() throws UserManagementException {
         store.createUser(username, email);
