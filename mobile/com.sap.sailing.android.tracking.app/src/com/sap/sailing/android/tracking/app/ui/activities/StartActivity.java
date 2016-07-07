@@ -21,6 +21,7 @@ import com.sap.sailing.android.tracking.app.utils.CheckinManager;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
+import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
 public class StartActivity extends AbstractStartActivity {
@@ -121,6 +122,16 @@ public class StartActivity extends AbstractStartActivity {
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinData.getCheckinUrl().checkinDigest);
                     DatabaseHelper.getInstance()
                         .storeCompetitorCheckinRow(this, checkinData.getEvent(), competitorCheckinData.getCompetitor(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
+                    ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
+                    displayDatabaseError();
+                }
+            } else if (checkinData instanceof MarkCheckinData) {
+                MarkCheckinData markCheckinData = (MarkCheckinData) checkinData;
+                try {
+                    DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinData.getCheckinUrl().checkinDigest);
+                    DatabaseHelper.getInstance()
+                        .storeMarkCheckinRow(this, checkinData.getEvent(), markCheckinData.getMark(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
                 } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                     ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                     displayDatabaseError();
