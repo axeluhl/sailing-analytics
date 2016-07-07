@@ -13,7 +13,10 @@ import java.util.logging.Logger;
 import com.sap.sse.common.Util;
 
 /**
- * Holds an optimized association of who to notify about specific objects.
+ * Holds an optimized association of who to notify about specific objects. On preference changes for the given key in
+ * the given {@link UserStore}, the associations are being updated to make the model always reflect the current state of
+ * the associations. This makes it possible to search for associations for a specific object without the need of a model
+ * update on the fly.
  *
  * @param <PrefT>
  *            The type of preference object on which the calculation of the objects to notify is based on.
