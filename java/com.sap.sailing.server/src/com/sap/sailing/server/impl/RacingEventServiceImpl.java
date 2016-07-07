@@ -3358,10 +3358,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             LockUtil.lockForRead(raceTrackersByRegattaLock);
             try {
                 Set<RaceTracker> raceTrackersForRegatta = raceTrackersByRegatta.get(regatta);
-                for (RaceTracker raceTracker : raceTrackersForRegatta) {
-                    if (raceTracker.getRaceIdentifiers().contains(raceIdentifier)) {
-                        callback.accept(raceTracker);
-                        return;
+                if(raceTrackersForRegatta != null) {
+                    for (RaceTracker raceTracker : raceTrackersForRegatta) {
+                        if (raceTracker.getRaceIdentifiers().contains(raceIdentifier)) {
+                            callback.accept(raceTracker);
+                            return;
+                        }
                     }
                 }
                 Util.addToValueSet(getRaceTrackerCallbacks(), raceIdentifier, callback);
