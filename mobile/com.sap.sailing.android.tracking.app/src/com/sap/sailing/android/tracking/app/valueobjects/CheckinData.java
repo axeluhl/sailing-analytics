@@ -24,7 +24,7 @@ public abstract class CheckinData extends BaseCheckinData {
     private boolean update;
 
     public CheckinData(UrlData data) {
-        leaderboardName = data.leaderboardName;
+        leaderboardName = data.leaderboardName.replace("%20", " ");
         deviceUid = data.deviceUuid.getStringRepresentation();
         eventId = data.eventId;
         eventName = data.eventName;
