@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
 
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.CompetitorSuggestedMultiSelectionDataProvider.Display;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider.Display;
 
-public interface CompetitorSuggestedMultiSelectionDataProvider
+public interface SuggestedMultiSelectionCompetitorDataProvider
         extends SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, Display> {
     
     boolean isNotifyAboutResults();

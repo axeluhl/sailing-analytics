@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.BoatClassSuggestedMultiSelectionDataProvider.Display;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider.Display;
 
-public interface BoatClassSuggestedMultiSelectionDataProvider
+public interface SuggestedMultiSelectionBoatClassDataProvider
         extends SuggestedMultiSelectionDataProvider<BoatClassMasterdata, Display> {
     
     boolean isNotifyAboutUpcomingRaces();

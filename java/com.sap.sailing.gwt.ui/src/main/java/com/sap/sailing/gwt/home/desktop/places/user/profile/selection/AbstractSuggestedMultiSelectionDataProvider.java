@@ -3,8 +3,10 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.view.client.ProvidesKey;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionDataProvider.Display;
@@ -14,15 +16,15 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T, D extends D
     
     private final ProvidesKey<T> keyProvider;
     private final Map<Object, T> selectedItemsMap = new HashMap<>();
-    protected D display;
+    protected Set<D> displays = new HashSet<>();
     
     protected AbstractSuggestedMultiSelectionDataProvider(ProvidesKey<T> keyProvider) {
         this.keyProvider = keyProvider;
     }
     
     @Override
-    public void setDisplay(D display) {
-        this.display = display;
+    public void addDisplay(D display) {
+        this.displays.add(display);
     }
     
     @Override
@@ -55,7 +57,9 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T, D extends D
         for (T item : selectedItems) {
             selectedItemsMap.put(getKey(item), item);
         }
-        if (display != null) display.setSelectedItems(selectedItems);
+        for (D display : displays) {
+            display.setSelectedItems(selectedItems);
+        }
     }
     
     @Override

@@ -8,9 +8,9 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 
-public abstract class AbstractBoatClassSuggestedMultiSelectionDataProvider extends
-        AbstractSuggestedMultiSelectionDataProvider<BoatClassMasterdata, BoatClassSuggestedMultiSelectionDataProvider.Display>
-        implements BoatClassSuggestedMultiSelectionDataProvider {
+public abstract class AbstractSuggestedMultiSelectionBoatClassDataProvider extends
+        AbstractSuggestedMultiSelectionDataProvider<BoatClassMasterdata, SuggestedMultiSelectionBoatClassDataProvider.Display>
+        implements SuggestedMultiSelectionBoatClassDataProvider {
 
     private boolean notifyAboutUpcomingRaces;
     private boolean notifyAboutResults;
@@ -22,7 +22,7 @@ public abstract class AbstractBoatClassSuggestedMultiSelectionDataProvider exten
         }
     };
     
-    protected AbstractBoatClassSuggestedMultiSelectionDataProvider() {
+    protected AbstractSuggestedMultiSelectionBoatClassDataProvider() {
         super(new ProvidesKey<BoatClassMasterdata>() {
             @Override
             public Object getKey(BoatClassMasterdata item) {
@@ -42,7 +42,7 @@ public abstract class AbstractBoatClassSuggestedMultiSelectionDataProvider exten
     public void initNotifications(boolean notifyAboutUpcomingRaces, boolean notifyAboutResults) {
         this.notifyAboutUpcomingRaces = notifyAboutUpcomingRaces;
         this.notifyAboutResults = notifyAboutResults;
-        if (display != null) {
+        for (SuggestedMultiSelectionBoatClassDataProvider.Display display : displays) {
             display.setNotifyAboutUpcomingRaces(notifyAboutUpcomingRaces);
             display.setNotifyAboutResults(notifyAboutResults);
         }

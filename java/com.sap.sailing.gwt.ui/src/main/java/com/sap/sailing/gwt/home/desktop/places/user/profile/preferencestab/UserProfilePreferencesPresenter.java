@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
@@ -18,22 +17,23 @@ import com.sap.sailing.gwt.home.communication.user.profile.CompetitorSuggestionR
 import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggestionAction;
 import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorsAction;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractBoatClassSuggestedMultiSelectionDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractCompetitorSuggestedMultiSelectionDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.BoatClassSuggestedMultiSelectionDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.CompetitorSuggestedMultiSelectionDataProvider;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractSuggestedMultiSelectionBoatClassDataProvider;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.client.UserService;
 
 public class UserProfilePreferencesPresenter implements UserProfilePreferencesView.Presenter {
 
     private final UserProfilePreferencesView view;
     private final UserProfileView.Presenter userProfilePresenter;
     private NotificationPreferences notificationPreferences;
-    private final CompetitorSuggestedMultiSelectionDataProvider competitorDataProvider =
-            new CompetitorSuggestedMultiSelectionDataProviderImpl();
-    private final BoatClassSuggestedMultiSelectionDataProvider boatClassDataProvider =
-            new BoatClassSuggestedMultiSelectionDataProviderImpl();
+    private final SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider =
+            new SuggestedMultiSelectionCompetitorDataProviderImpl();
+    private final SuggestedMultiSelectionBoatClassDataProvider boatClassDataProvider =
+            new SuggestedMultiSelectionBoatClassDataProviderImpl();
             
     public UserProfilePreferencesPresenter(final UserProfilePreferencesView view,
             final UserProfileView.Presenter userProfilePresenter) {
@@ -96,6 +96,11 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
         boatClassDataProvider.initNotifications(initialNotifyAboutUpcomingRaces, initialNotifyAboutResults);
     }
     
+    private void persistNotificationPreferences() {
+        UserService userService = userProfilePresenter.getClientFactory().getUserService();
+        userService.setPreference(NotificationPreferences.PREF_NAME, notificationPreferences);
+    }
+    
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
         view.getDecorator().setAuthenticationContext(authenticationContext);
@@ -107,33 +112,31 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
     }
     
     @Override
-    public BoatClassSuggestedMultiSelectionDataProvider getFavoriteBoatClassesDataProvider() {
+    public SuggestedMultiSelectionBoatClassDataProvider getFavoriteBoatClassesDataProvider() {
         return boatClassDataProvider;
     }
     
     @Override
-    public CompetitorSuggestedMultiSelectionDataProvider getFavoriteCompetitorsDataProvider() {
+    public SuggestedMultiSelectionCompetitorDataProvider getFavoriteCompetitorsDataProvider() {
         return competitorDataProvider;
     }
     
-    private class BoatClassSuggestedMultiSelectionDataProviderImpl
-            extends AbstractBoatClassSuggestedMultiSelectionDataProvider {
+    private class SuggestedMultiSelectionBoatClassDataProviderImpl
+            extends AbstractSuggestedMultiSelectionBoatClassDataProvider {
         @Override
         public void persist(Collection<BoatClassMasterdata> selectedItems) {
-            GWT.debugger();
             List<BoatClassNotificationPreference> preferences = new ArrayList<>();
             for (BoatClassMasterdata boatClass : selectedItems) {
                 preferences.add(new BoatClassNotificationPreference(boatClass, 
                         isNotifyAboutUpcomingRaces(), isNotifyAboutResults()));
             }
             notificationPreferences.getBoatClassPreferences().setBoatClasses(preferences);
-            userProfilePresenter.getClientFactory().getUserService().setPreference(
-                    NotificationPreferences.PREF_NAME, notificationPreferences);
+            UserProfilePreferencesPresenter.this.persistNotificationPreferences();
         }
     }
     
-    private class CompetitorSuggestedMultiSelectionDataProviderImpl
-            extends AbstractCompetitorSuggestedMultiSelectionDataProvider {
+    private class SuggestedMultiSelectionCompetitorDataProviderImpl
+            extends AbstractSuggestedMultiSelectionCompetitorDataProvider {
         
         @Override
         protected void getSuggestions(Iterable<String> queryTokens, int limit,
@@ -155,14 +158,13 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
         
         @Override
         public void persist(Collection<SimpleCompetitorWithIdDTO> selectedItems) {
-            GWT.debugger();
             List<CompetitorNotificationPreference> preferences = new ArrayList<>();
             for (SimpleCompetitorWithIdDTO competitor : selectedItems) {
-                preferences.add(new CompetitorNotificationPreference(competitor.getIdAsString(), isNotifyAboutResults()));
+                preferences.add(new CompetitorNotificationPreference(
+                        competitor.getIdAsString(), isNotifyAboutResults()));
             }
             notificationPreferences.getCompetitorPreferences().setCompetitors(preferences);
-            userProfilePresenter.getClientFactory().getUserService().setPreference(
-                    NotificationPreferences.PREF_NAME, notificationPreferences);
+            UserProfilePreferencesPresenter.this.persistNotificationPreferences();
         }
     }
 }

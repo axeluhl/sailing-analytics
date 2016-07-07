@@ -11,10 +11,10 @@ import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.BoatClassSuggestedMultiSelectionDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.CompetitorSuggestedMultiSelectionDataProvider;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelection;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelection.NotificationCallback;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
@@ -46,11 +46,11 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
         return decoratorUi;
     }
         
-    private class CompetitorDisplayImpl implements CompetitorSuggestedMultiSelectionDataProvider.Display {
+    private class CompetitorDisplayImpl implements SuggestedMultiSelectionCompetitorDataProvider.Display {
         private final SuggestedMultiSelection<SimpleCompetitorWithIdDTO> selectionUi;
         private final HasEnabled notifyAboutResultsUi;
         
-        private CompetitorDisplayImpl(final CompetitorSuggestedMultiSelectionDataProvider dataProvider) {
+        private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider) {
             selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, "TODO Favourite competitors");
             notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
@@ -58,7 +58,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
                     dataProvider.setNotifyAboutResults(enabled);
                 }
             }, "TODO Email notification about new results");
-            dataProvider.setDisplay(this);
+            dataProvider.addDisplay(this);
         }
         
         @Override
@@ -72,12 +72,12 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
         }
     }
     
-    private class BoatClassDisplayImpl implements BoatClassSuggestedMultiSelectionDataProvider.Display {
+    private class BoatClassDisplayImpl implements SuggestedMultiSelectionBoatClassDataProvider.Display {
         private final SuggestedMultiSelection<BoatClassMasterdata> selectionUi;
         private final HasEnabled notifyAboutUpcomingRacesUi;
         private final HasEnabled notifyAboutResultsUi;
         
-        private BoatClassDisplayImpl(final BoatClassSuggestedMultiSelectionDataProvider dataProvider) {
+        private BoatClassDisplayImpl(final SuggestedMultiSelectionBoatClassDataProvider dataProvider) {
             selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, "TODO Favourite boat classes");
             notifyAboutUpcomingRacesUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
@@ -91,7 +91,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
                     dataProvider.setNotifyAboutResults(enabled);
                 }
             }, "TODO Email notification about new results");
-            dataProvider.setDisplay(this);
+            dataProvider.addDisplay(this);
         }
         
         @Override
