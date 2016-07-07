@@ -8,7 +8,7 @@ import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 
-public class CheckinData extends BaseCheckinData {
+public abstract class CheckinData extends BaseCheckinData {
     // public String gcmId;
     private String leaderboardName;
     private String eventId;
@@ -71,8 +71,11 @@ public class CheckinData extends BaseCheckinData {
         CheckinUrlInfo checkinUrlInfo = new CheckinUrlInfo();
         checkinUrlInfo.urlString = uriString;
         checkinUrlInfo.checkinDigest = checkinDigest;
+        checkinUrlInfo.type = getCheckinType();
         return checkinUrlInfo;
     }
+
+    public abstract int getCheckinType();
 
     public boolean isUpdate() {
         return update;

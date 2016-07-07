@@ -1,5 +1,7 @@
 package com.sap.sailing.android.tracking.app.valueobjects;
 
+import com.sap.sailing.android.shared.data.CheckinUrlInfo;
+
 public class CompetitorCheckinData extends CheckinData {
 
 
@@ -29,5 +31,10 @@ public class CompetitorCheckinData extends CheckinData {
         competitor.countryCode = competitorCountryCode;
         competitor.checkinDigest = checkinDigest;
         return competitor;
+    }
+
+    @Override
+    public int getCheckinType() {
+        return CheckinUrlInfo.TYPE_COMPETITOR;
     }
 }
