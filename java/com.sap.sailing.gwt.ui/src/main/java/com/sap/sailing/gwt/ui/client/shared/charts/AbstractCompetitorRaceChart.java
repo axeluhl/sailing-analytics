@@ -49,6 +49,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
+import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
@@ -88,7 +89,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private final boolean allowTimeAdjust;
     private final String leaderboardGroupName;
     private final String leaderboardName;
-    private long stepSize = DEFAULT_STEPSIZE;
+    private long stepSizeInMillis = DEFAULT_STEPSIZE;
     private final Map<CompetitorDTO, Series> dataSeriesByCompetitor;
     private final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor;
     private Long timeOfEarliestRequestInMillis;
@@ -231,9 +232,12 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             for (CompetitorDTO competitorDTO : competitors) {
                 competitorsToLoad.add(competitorDTO);
             }
-
+            // If the time interval is too long and the step size too small, the number of fixes the query would have to
+            // produce may exceed any reasonable limit. Therefore, we limit the number of fixes that such a query may ask
+            // for:
+            long stepSize = Math.max(getStepSizeInMillis(), Math.abs(to.getTime()-from.getTime())/SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY);
             GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
-                    selectedRaceIdentifier, competitorsToLoad, from, to, getStepSize(), getSelectedDetailType(),
+                    selectedRaceIdentifier, competitorsToLoad, from, to, stepSize, getSelectedDetailType(),
                     leaderboardGroupName, leaderboardName);
             asyncActionsExecutor.execute(getCompetitorsRaceDataAction, LOAD_COMPETITOR_CHART_DATA_CATEGORY,
                     new AsyncCallback<CompetitorsRaceDataDTO>() {
@@ -452,7 +456,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     public ChartSettings getAbstractSettings() {
-        return new ChartSettings(getStepSize());
+        return new ChartSettings(getStepSizeInMillis());
     }
 
     /**
@@ -464,8 +468,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      */
     protected boolean updateSettingsOnly(ChartSettings newSettings) {
         boolean settingsChanged = false;
-        if (getStepSize() != newSettings.getStepSize()) {
-            setStepSize(newSettings.getStepSize());
+        if (getStepSizeInMillis() != newSettings.getStepSizeInMillis()) {
+            setStepSizeInMillis(newSettings.getStepSizeInMillis());
             settingsChanged = true;
         }
         return settingsChanged;
@@ -475,12 +479,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         return stringMessages;
     }
 
-    protected long getStepSize() {
-        return stepSize;
+    /**
+     * The chart step size in milliseconds
+     */
+    protected long getStepSizeInMillis() {
+        return stepSizeInMillis;
     }
 
-    protected void setStepSize(long stepSize) {
-        this.stepSize = stepSize;
+    protected void setStepSizeInMillis(long stepSizeInMillis) {
+        this.stepSizeInMillis = stepSizeInMillis;
     }
 
     protected DetailType getSelectedDetailType() {
