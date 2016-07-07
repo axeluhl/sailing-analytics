@@ -42,6 +42,9 @@ public class UserStoreTest {
         assertEquals(username, newUserStore.getUserByAccessToken(accessToken).getName());
     }
     
+    /**
+     * There was a bug that caused the preferences not to be removed when a user was deleted.
+     */
     @Test
     public void testDeleteUserWithPreference() throws UserManagementException {
         userStore.unsetPreference(username, prefKey);

@@ -21,16 +21,16 @@ public class UserPreferenceObjectAndConverterTest {
     private UserStoreImpl store;
 
     private final String email = "anonymous@sapsailing.com";
-    private String user1 = "me";
-    private String user2 = "somebody_else";
+    private static final String user1 = "me";
+    private static final String user2 = "somebody_else";
     
-    private JavaIoSerializablePreferenceConverter<SimplePreferenceForSerialization> prefConverter = new JavaIoSerializablePreferenceConverter<>();
-    private String prefKey1 = "prefKey1";
-    private SimplePreferenceForSerialization pref1 = new SimplePreferenceForSerialization("test12345", false, 432.567);
-    private String serializedPref1 = prefConverter.toPreferenceString(pref1);
-    private String prefKey2 = "prefKey2";
-    private SimplePreferenceForSerialization pref2 = new SimplePreferenceForSerialization("some sailing value", true, 9.87654321);
-    private String serializedPref2 = prefConverter.toPreferenceString(pref2);
+    private static final JavaIoSerializablePreferenceConverter<SimplePreferenceForSerialization> prefConverter = new JavaIoSerializablePreferenceConverter<>();
+    private static final String prefKey1 = "prefKey1";
+    private static final SimplePreferenceForSerialization pref1 = new SimplePreferenceForSerialization("test12345", false, 432.567);
+    private static final String serializedPref1 = prefConverter.toPreferenceString(pref1);
+    private static final String prefKey2 = "prefKey2";
+    private static final SimplePreferenceForSerialization pref2 = new SimplePreferenceForSerialization("some sailing value", true, 9.87654321);
+    private static final String serializedPref2 = prefConverter.toPreferenceString(pref2);
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
@@ -96,7 +96,7 @@ public class UserPreferenceObjectAndConverterTest {
         store.registerPreferenceConverter(prefKey1, prefConverter);
         store.setPreferenceObject(user1, prefKey1, pref1);
         store.unsetPreference(user1, prefKey1);
-        Assert.assertEquals(null, store.getPreferenceObject(user1, prefKey1));
+        Assert.assertNull(store.getPreferenceObject(user1, prefKey1));
     }
     
     @Test
@@ -104,7 +104,7 @@ public class UserPreferenceObjectAndConverterTest {
         store.registerPreferenceConverter(prefKey1, prefConverter);
         store.setPreferenceObject(user1, prefKey1, pref1);
         store.setPreferenceObject(user1, prefKey1, null);
-        Assert.assertEquals(null, store.getPreferenceObject(user1, prefKey1));
+        Assert.assertNull(store.getPreferenceObject(user1, prefKey1));
     }
     
     /**

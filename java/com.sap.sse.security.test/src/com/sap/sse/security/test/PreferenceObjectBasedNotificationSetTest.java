@@ -31,16 +31,16 @@ public class PreferenceObjectBasedNotificationSetTest {
 
     private UserStoreImpl store;
     
-    private String user1 = "me";
-    private String user2 = "somebody_else";
-    private String mail = "anonymous@sapsailing.com";
+    private static final String user1 = "me";
+    private static final String user2 = "somebody_else";
+    private static final String mail = "anonymous@sapsailing.com";
     
-    private JavaIoSerializablePreferenceConverter<HashSet<String>> prefConverter = new JavaIoSerializablePreferenceConverter<>();
-    private String prefKey = "prefKey";
-    private String otherPrefKey = "otherPrefKey";
-    private HashSet<String> values1 = values(A, B);
-    private HashSet<String> values2 = values(B, C);
-    private HashSet<String> allValues = values(A, B, C);
+    private static final JavaIoSerializablePreferenceConverter<HashSet<String>> prefConverter = new JavaIoSerializablePreferenceConverter<>();
+    private static final String prefKey = "prefKey";
+    private static final String otherPrefKey = "otherPrefKey";
+    private static final HashSet<String> values1 = values(A, B);
+    private static final HashSet<String> values2 = values(B, C);
+    private static final HashSet<String> allValues = values(A, B, C);
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
