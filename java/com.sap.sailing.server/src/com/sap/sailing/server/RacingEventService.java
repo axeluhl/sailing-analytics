@@ -619,5 +619,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint);
 
+    /**
+     * Gets the {@link RaceTracker} associated with a given {@link RegattaAndRaceIdentifier}. If the {@link RaceTracker}
+     * isn't available yet, the given callback will be informed asynchronously on registration of the RaceTracker in
+     * question.
+     */
     void getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier, Consumer<RaceTracker> callback);
 }
