@@ -10,6 +10,7 @@ import com.mongodb.DB;
 import com.mongodb.MongoException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
@@ -18,7 +19,8 @@ import junit.framework.Assert;
 public class UserPreferenceObjectAndConverterTest {
     
     private UserStoreImpl store;
-    
+
+    private final String email = "anonymous@sapsailing.com";
     private String user1 = "me";
     private String user2 = "somebody_else";
     
@@ -103,6 +105,18 @@ public class UserPreferenceObjectAndConverterTest {
         store.setPreferenceObject(user1, prefKey1, pref1);
         store.setPreferenceObject(user1, prefKey1, null);
         Assert.assertEquals(null, store.getPreferenceObject(user1, prefKey1));
+    }
+    
+    /**
+     * There was a bug that caused the preferences not to be removed when a user was deleted.
+     */
+    @Test
+    public void deleteUserWithPreferenceObjectTest() throws UserManagementException {
+        store.createUser(user1, email);
+        store.registerPreferenceConverter(prefKey1, prefConverter);
+        store.setPreferenceObject(user1, prefKey1, pref1);
+        store.deleteUser(user1);
+        Assert.assertNull(store.getPreferenceObject(user1, prefKey1));
     }
 
     public static class SimplePreferenceForSerialization implements Serializable {

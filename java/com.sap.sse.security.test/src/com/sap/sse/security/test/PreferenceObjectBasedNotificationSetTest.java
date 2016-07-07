@@ -212,6 +212,21 @@ public class PreferenceObjectBasedNotificationSetTest {
         Assert.assertTrue(Util.equals(users(store.getUserByName(user1)), mock.calls));
     }
     
+    /**
+     * There was a bug that caused the preferences not to be removed when a user was deleted.
+     */
+    @Test
+    public void deleteUserWithMappingTest() throws UserManagementException {
+        store.createUser(user1, mail);
+        store.registerPreferenceConverter(prefKey, prefConverter);
+        store.setPreferenceObject(user1, prefKey, values1);
+        PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
+        store.deleteUser(user1);
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
+    }
+    
     private static HashSet<String> values(String... values) {
         return new HashSet<>(Arrays.asList(values));
     }

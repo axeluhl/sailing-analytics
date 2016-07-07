@@ -13,6 +13,7 @@ import com.mongodb.DB;
 import com.mongodb.MongoException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
@@ -85,6 +86,19 @@ public class UserStoreWithPersistenceTest {
         store.createUser(username, email);
         store.setPreference(username, prefKey, prefValue);
         store.unsetPreference(username, prefKey);
+        assertNull(store.getPreference(username, prefKey));
+        newStore();
+        assertNull(store.getPreference(username, prefKey));
+    }
+
+    /**
+     * There was a bug that caused the preferences not to be removed when a user was deleted.
+     */
+    @Test
+    public void testDeleteUserWithPreferences() throws UserManagementException {
+        store.createUser(username, email);
+        store.setPreference(username, prefKey, prefValue);
+        store.deleteUser(username);
         assertNull(store.getPreference(username, prefKey));
         newStore();
         assertNull(store.getPreference(username, prefKey));
