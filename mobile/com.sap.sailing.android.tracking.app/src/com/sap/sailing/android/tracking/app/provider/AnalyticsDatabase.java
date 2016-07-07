@@ -12,7 +12,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardColumns;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CheckinUriColumns;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CheckinColumns;
 
 public class AnalyticsDatabase extends SQLiteOpenHelper {
 
@@ -24,9 +24,9 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     private static final int CUR_DATABASE_VERSION = VER_2016_RELEASE_1;
 
     private static final String createMarkTable = "CREATE TABLE " + Tables.MARKS + " (" +BaseColumns._ID
-        + " INTEGER PRIMARY KEY AUTOINCREMENT, " + AnalyticsContract.Mark.MARK_ID + " TEXT, "
-        + AnalyticsContract.Mark.MARKNAME + " TEXT, "
-        + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " TEXT );" ;
+        + " INTEGER PRIMARY KEY AUTOINCREMENT, " + AnalyticsContract.mark.MARK_ID + " TEXT, "
+        + AnalyticsContract.mark.MARKNAME + " TEXT, "
+        + AnalyticsContract.mark.MARK_CHECKIN_DIGEST + " TEXT );" ;
 
     private final Context mContext;
 
@@ -60,8 +60,9 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + LeaderboardColumns.LEADERBOARD_NAME + " TEXT );");
 
         db.execSQL("CREATE TABLE " + Tables.CHECKIN_URIS + " (" + BaseColumns._ID
-                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CheckinUriColumns.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, "
-                + CheckinUriColumns.CHECKIN_URI_VALUE + " TEXT );");
+                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CheckinColumns.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, "
+                + CheckinColumns.CHECKIN_URI_VALUE + " TEXT, "
+                + CheckinColumns.CHECKIN_TYPE + " INTEGER );");
 
         db.execSQL("CREATE TABLE " + Tables.COMPETITORS + " (" + BaseColumns._ID
                 + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CompetitorColumns.COMPETITOR_ID + " TEXT, "
@@ -84,6 +85,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         ExLog.i(mContext, TAG, "onUpgrade() from " + oldVersion + " to " + newVersion);
         if (oldVersion == 1 && newVersion == 2) {
             db.execSQL(createMarkTable);
+            db.execSQL("ALTER TABLE " + Tables.CHECKIN_URIS + "ADD COLUMN " + AnalyticsContract.Checkin.CHECKIN_TYPE + " INTEGER DEFAULT 0");
         }
     }
 

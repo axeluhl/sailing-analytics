@@ -1,5 +1,8 @@
 package com.sap.sailing.android.tracking.app.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -9,22 +12,19 @@ import android.database.Cursor;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
 
+import com.sap.sailing.android.shared.data.CheckinUrlInfo;
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Checkin;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventLeaderboardCompetitorJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CheckinUri;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
-import com.sap.sailing.android.shared.data.CheckinUrlInfo;
-import com.sap.sailing.android.shared.data.LeaderboardInfo;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DatabaseHelper {
 
@@ -43,11 +43,11 @@ public class DatabaseHelper {
     public List<String> getCheckinUrls(Context context) {
         List<String> checkinUrls = new ArrayList<>();
         ContentResolver cr = context.getContentResolver();
-        Cursor cursor = cr.query(CheckinUri.CONTENT_URI, null, null, null, null);
+        Cursor cursor = cr.query(Checkin.CONTENT_URI, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                String checkinUrl = cursor.getString(cursor.getColumnIndex(CheckinUri.CHECKIN_URI_VALUE));
+                String checkinUrl = cursor.getString(cursor.getColumnIndex(Checkin.CHECKIN_URI_VALUE));
                 if (!checkinUrls.contains(checkinUrl)) {
                     checkinUrls.add(checkinUrl);
                 }
@@ -161,12 +161,13 @@ public class DatabaseHelper {
         CheckinUrlInfo checkinUrlInfo = new CheckinUrlInfo();
         checkinUrlInfo.checkinDigest = checkinDigest;
 
-        Cursor uc = context.getContentResolver().query(CheckinUri.CONTENT_URI, null,
-                CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
+        Cursor uc = context.getContentResolver().query(Checkin.CONTENT_URI, null,
+                Checkin.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (uc != null) {
             if (uc.moveToFirst()) {
                 checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndex(BaseColumns._ID));
-                checkinUrlInfo.urlString = uc.getString(uc.getColumnIndex(CheckinUri.CHECKIN_URI_VALUE));
+                checkinUrlInfo.urlString = uc.getString(uc.getColumnIndex(Checkin.CHECKIN_URI_VALUE));
+                checkinUrlInfo.type = uc.getInt(uc.getColumnIndex(Checkin.CHECKIN_TYPE));
             }
 
             uc.close();
@@ -175,13 +176,15 @@ public class DatabaseHelper {
         return checkinUrlInfo;
     }
 
+    // TODO: Get Mark
+
     public void deleteRegattaFromDatabase(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();
 
         int d1 = cr.delete(Event.CONTENT_URI, Event.EVENT_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
         int d2 = cr.delete(Competitor.CONTENT_URI, Competitor.COMPETITOR_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
         int d3 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
-        int d4 = cr.delete(CheckinUri.CONTENT_URI, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
+        int d4 = cr.delete(Checkin.CONTENT_URI, Checkin.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
 
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Checkout, number of events deleted: " + d1);
@@ -245,10 +248,11 @@ public class DatabaseHelper {
 
         ContentValues ccuv = new ContentValues();
 
-        ccuv.put(CheckinUri.CHECKIN_URI_VALUE, checkinURL.urlString);
-        ccuv.put(CheckinUri.CHECKIN_URI_CHECKIN_DIGEST, checkinURL.checkinDigest);
+        ccuv.put(Checkin.CHECKIN_URI_VALUE, checkinURL.urlString);
+        ccuv.put(Checkin.CHECKIN_URI_CHECKIN_DIGEST, checkinURL.checkinDigest);
+        ccuv.put(Checkin.CHECKIN_TYPE, checkinURL.type);
 
-        opList.add(ContentProviderOperation.newInsert(CheckinUri.CONTENT_URI).withValues(ccuv).build());
+        opList.add(ContentProviderOperation.newInsert(Checkin.CONTENT_URI).withValues(ccuv).build());
 
         try {
             cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
@@ -258,6 +262,8 @@ public class DatabaseHelper {
             throw new GeneralDatabaseHelperException(e.getMessage());
         }
     }
+
+    // TODO: Store mark
 
     /**
      * Return true if the combination of event, leaderboard and competitor does not exist in the DB. (based on the

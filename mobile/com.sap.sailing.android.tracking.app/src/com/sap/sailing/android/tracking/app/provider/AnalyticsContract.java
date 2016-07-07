@@ -30,15 +30,16 @@ public class AnalyticsContract {
         String EVENT_CHECKIN_DIGEST = "event_checkin_digest";
     }
 
-    interface MarkColums {
+    interface markColums {
         String MARK_ID = "mark.id";
         String MARKNAME = "mark.name";
         String MARK_CHECKIN_DIGEST = "mark.checkin_digest";
     }
 
-    interface CheckinUriColumns {
+    interface CheckinColumns {
         String CHECKIN_URI_VALUE = "uri_value";
         String CHECKIN_URI_CHECKIN_DIGEST = "uri_checkin_digest";
+        String CHECKIN_TYPE = "checkin_type";
     }
 
     public static final String CONTENT_AUTHORITY = "com.sap.sailing.android.tracking.app.provider.db";
@@ -123,7 +124,7 @@ public class AnalyticsContract {
         }
     }
 
-    public static class CheckinUri implements CheckinUriColumns, BaseColumns {
+    public static class Checkin implements CheckinColumns, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHECKIN_URI).build();
 
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
@@ -141,7 +142,7 @@ public class AnalyticsContract {
         }
     }
 
-    public static class Mark implements MarkColums, BaseColumns {
+    public static class mark implements markColums, BaseColumns {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MARK).build();
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
             + "/vnd.sap_sailing_analytics.mark";

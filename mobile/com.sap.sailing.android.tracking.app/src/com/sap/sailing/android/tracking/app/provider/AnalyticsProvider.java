@@ -15,7 +15,7 @@ import android.provider.BaseColumns;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.SelectionBuilder;
 import com.sap.sailing.android.tracking.app.BuildConfig;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CheckinUri;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Checkin;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
@@ -159,13 +159,13 @@ public class AnalyticsProvider extends ContentProvider {
             case LEADERBOARD_ID:
                 return Leaderboard.CONTENT_ITEM_TYPE;
             case CHECKIN_URI:
-                return CheckinUri.CONTENT_TYPE;
+                return Checkin.CONTENT_TYPE;
             case CHECKIN_URI_ID:
-                return CheckinUri.CONTENT_ITEM_TYPE;
+                return Checkin.CONTENT_ITEM_TYPE;
             case MARK:
-                return AnalyticsContract.Mark.CONTENT_TYPE;
+                return AnalyticsContract.mark.CONTENT_TYPE;
             case MARK_ID:
-                return AnalyticsContract.Mark.CONTENT_ITEM_TYPE;
+                return AnalyticsContract.mark.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -199,12 +199,12 @@ public class AnalyticsProvider extends ContentProvider {
             case CHECKIN_URI:
                 long checkinUriID = db.insertOrThrow(Tables.CHECKIN_URIS, null, values);
                 notifyChange(uri);
-                return CheckinUri.builCheckInUri(String.valueOf(checkinUriID));
+                return Checkin.builCheckInUri(String.valueOf(checkinUriID));
 
             case MARK:
                 long markUriID = db.insertOrThrow(Tables.MARKS, null, values);
                 notifyChange(uri);
-                return AnalyticsContract.Mark.buildMarkUri(String.valueOf(markUriID));
+                return AnalyticsContract.mark.buildMarkUri(String.valueOf(markUriID));
 
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -297,12 +297,12 @@ public class AnalyticsProvider extends ContentProvider {
             case CHECKIN_URI:
                 return builder.table(Tables.CHECKIN_URIS);
             case CHECKIN_URI_ID:
-                final String checkinUriId = AnalyticsContract.CheckinUri.getCheckinUriId(uri);
+                final String checkinUriId = Checkin.getCheckinUriId(uri);
                 return builder.table(Tables.CHECKIN_URIS).where(BaseColumns._ID + " = ?", checkinUriId);
             case MARK:
                 return builder.table(Tables.MARKS);
             case MARK_ID:
-                final String mark_id = AnalyticsContract.Mark.getMarkId(uri);
+                final String mark_id = AnalyticsContract.mark.getMarkId(uri);
                 return builder.table(Tables.MARKS).where(BaseColumns._ID + " = ?", mark_id);
 
             default:
