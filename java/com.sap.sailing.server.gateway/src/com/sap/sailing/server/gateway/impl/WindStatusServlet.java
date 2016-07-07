@@ -105,7 +105,7 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
                                     
                                 }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                logger.log(Level.WARNING, "Exception trying to stop Igtimi connection "+igtimiConnection, e);
                             }
                         }
                         igtimiConnections.clear();
@@ -132,16 +132,13 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
                     LiveDataConnection newIgtimiConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
                     newIgtimiConnection.addListener(igtimiWindReceiver);
                     newIgtimiConnection.addListener(this);
-                    
-                    IgtimiConnectionInfo newIgtimiConnectionInfo = new IgtimiConnectionInfo();
-                    newIgtimiConnectionInfo.remoteAddress = newIgtimiConnection.getRemoteAddress();
-                    newIgtimiConnectionInfo.accountName = account.getUser().getEmail();
-                    Util.addAll(igtimiConnection.getWindDevices(), newIgtimiConnectionInfo.deviceIDs);
+                    IgtimiConnectionInfo newIgtimiConnectionInfo = new IgtimiConnectionInfo(
+                            newIgtimiConnection, account.getUser().getEmail(),
+                            igtimiConnection.getWindDevices());
                     igtimiConnections.put(newIgtimiConnection, newIgtimiConnectionInfo);
-                    
                     result = true;
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.log(Level.WARNING, "Exception trying to stop Igtimi connection "+igtimiConnection, e);
                 }
             }
         }
@@ -178,9 +175,30 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
     }
 
     protected class IgtimiConnectionInfo {
-        InetSocketAddress remoteAddress;
-        String accountName;
-        List<String> deviceIDs = new ArrayList<>();
+        private final LiveDataConnection igtimiLiveConnection;
+        private final String accountName;
+        private final Iterable<String> deviceIDs;
+        
+        public IgtimiConnectionInfo(LiveDataConnection newIgtimiConnection, String accountName, Iterable<String> deviceIDs) {
+            super();
+            this.igtimiLiveConnection = newIgtimiConnection;
+            this.accountName = accountName;
+            final List<String> deviceIDsList = new ArrayList<>();
+            this.deviceIDs = deviceIDsList;
+            Util.addAll(deviceIDs, deviceIDsList);
+        }
+
+        public InetSocketAddress getRemoteAddress() {
+            return igtimiLiveConnection.getRemoteAddress();
+        }
+
+        public String getAccountName() {
+            return accountName;
+        }
+
+        public Iterable<String> getDeviceIDs() {
+            return deviceIDs;
+        }
     }
 
     protected class ExpeditionMessageInfo {
@@ -230,13 +248,15 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
     @Override
     public void windDataReceived(Wind wind, String deviceSerialNumber) {
         Deque<IgtimiMessageInfo> messagesPerDevice = lastIgtimiMessages.get(deviceSerialNumber);
-        if(messagesPerDevice == null) {
+        if (messagesPerDevice == null) {
             messagesPerDevice = new ArrayDeque<IgtimiMessageInfo>(NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW);
             lastIgtimiMessages.put(deviceSerialNumber, messagesPerDevice);
         }
-        messagesPerDevice.addFirst(new IgtimiMessageInfo(wind));
-        if(messagesPerDevice.size() > NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
-            messagesPerDevice.pollLast();
+        synchronized (messagesPerDevice) {
+            messagesPerDevice.addFirst(new IgtimiMessageInfo(wind));
+            if (messagesPerDevice.size() > NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
+                messagesPerDevice.pollLast();
+            }
         }
     }
     
