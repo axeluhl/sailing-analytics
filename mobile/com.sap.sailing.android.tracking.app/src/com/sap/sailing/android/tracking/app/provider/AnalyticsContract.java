@@ -31,9 +31,9 @@ public class AnalyticsContract {
     }
 
     interface markColums {
-        String MARK_ID = "Mark.id";
-        String MARK_NAME = "Mark.name";
-        String MARK_CHECKIN_DIGEST = "Mark.checkin_digest";
+        String MARK_ID = "mark_id";
+        String MARK_NAME = "mark_name";
+        String MARK_CHECKIN_DIGEST = "mark_checkin_digest";
     }
 
     interface CheckinColumns {
@@ -49,7 +49,7 @@ public class AnalyticsContract {
     private static final String PATH_COMPETITOR = "competitors";
     public static final String PATH_EVENT = "events";
     public static final String PATH_LEADERBOARD = "leaderboards";
-    private static final String PATH_CHECKIN_URI = "checkin_uris";
+    public static final String PATH_CHECKIN = "checkin_uris";
     private static final String PATH_MARK = "marks";
 
     public static class LeaderboardsEventsJoined {
@@ -130,7 +130,7 @@ public class AnalyticsContract {
     }
 
     public static class Checkin implements CheckinColumns, BaseColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHECKIN_URI).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHECKIN).build();
 
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
                 + "/vnd.sap_sailing_analytics.uri";

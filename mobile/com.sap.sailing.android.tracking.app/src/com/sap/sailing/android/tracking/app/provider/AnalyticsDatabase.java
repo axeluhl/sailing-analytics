@@ -23,7 +23,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     private static final int VER_2016_RELEASE_1 = 2;
     private static final int CUR_DATABASE_VERSION = VER_2016_RELEASE_1;
 
-    private static final String createMarkTable = "CREATE TABLE " + Tables.MARKS + " (" +BaseColumns._ID
+    private static final String createMarkTable = "CREATE TABLE " + Tables.MARKS + " (" + BaseColumns._ID
         + " INTEGER PRIMARY KEY AUTOINCREMENT, " + AnalyticsContract.Mark.MARK_ID + " TEXT, "
         + AnalyticsContract.Mark.MARK_NAME + " TEXT, "
         + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " TEXT );" ;
@@ -48,9 +48,11 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.COMPETITORS + "."
                 + Competitor.COMPETITOR_CHECKIN_DIGEST + ") ";
 
-        String LEADERBOARDS_JOIN_EVENTS = "events LEFT JOIN leaderboards ON " + Tables.EVENTS + "."
-                + Event.EVENT_CHECKIN_DIGEST + " = " + Tables.LEADERBOARDS + "."
-                + Leaderboard.LEADERBOARD_CHECKIN_DIGEST;
+        String LEADERBOARDS_JOIN_EVENTS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
+            + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
+            + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.CHECKIN_URIS + " ON ("
+            + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.CHECKIN_URIS + "."
+            + AnalyticsContract.Checkin.CHECKIN_URI_CHECKIN_DIGEST + ") ";
     }
 
     public AnalyticsDatabase(Context context) {
@@ -90,7 +92,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         ExLog.i(mContext, TAG, "onUpgrade() from " + oldVersion + " to " + newVersion);
         if (oldVersion == 1 && newVersion == 2) {
             db.execSQL(createMarkTable);
-            db.execSQL("ALTER TABLE " + Tables.CHECKIN_URIS + "ADD COLUMN " + AnalyticsContract.Checkin.CHECKIN_TYPE + " INTEGER DEFAULT 0");
+            db.execSQL("ALTER TABLE " + Tables.CHECKIN_URIS + " ADD COLUMN " + AnalyticsContract.Checkin.CHECKIN_TYPE + " INTEGER DEFAULT 0");
         }
     }
 

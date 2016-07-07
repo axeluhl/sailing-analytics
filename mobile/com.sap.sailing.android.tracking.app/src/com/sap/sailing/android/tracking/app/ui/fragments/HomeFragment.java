@@ -235,8 +235,9 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                     AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event._ID,
                     AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event.EVENT_NAME,
                     AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event.EVENT_SERVER,
-                    AnalyticsContract.PATH_LEADERBOARD + "." + AnalyticsContract.Leaderboard.LEADERBOARD_NAME };
-                return new CursorLoader(getActivity(), AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI, projection, null, null, null);
+                    AnalyticsContract.PATH_LEADERBOARD + "." + AnalyticsContract.Leaderboard.LEADERBOARD_NAME,
+                    AnalyticsContract.PATH_CHECKIN + "." + AnalyticsContract.Checkin.CHECKIN_TYPE};
+                return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsEventsJoined.CONTENT_URI, projection, null, null, null);
 
             default:
                 return null;
