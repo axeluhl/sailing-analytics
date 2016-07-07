@@ -35,6 +35,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -301,6 +302,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * {@link #unlockRaceTrackersById(Object, NamedReentrantReadWriteLock)}).
      */
     private final ConcurrentHashMap<Object, NamedReentrantReadWriteLock> raceTrackersByIDLocks;
+
+    private transient ConcurrentHashMap<RegattaAndRaceIdentifier, Set<Consumer<RaceTracker>>> raceTrackerCallbacks;
 
     /**
      * Leaderboards managed by this racing event service
@@ -578,6 +581,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         false);
         raceTrackersByID = new ConcurrentHashMap<>();
         raceTrackersByIDLocks = new ConcurrentHashMap<>();
+        raceTrackerCallbacks = new ConcurrentHashMap<>();
         leaderboardGroupsByName = new ConcurrentHashMap<>();
         leaderboardGroupsByID = new ConcurrentHashMap<>();
         leaderboardGroupsByNameLock = new NamedReentrantReadWriteLock("leaderboardGroupsByName for " + this, /* fair */
@@ -1379,6 +1383,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         raceTrackersByRegatta.put(tracker.getRegatta(), trackers);
                     }
                     trackers.add(tracker);
+                    notifyListenersForNewRaceTracker(tracker);
                 } finally {
                     LockUtil.unlockAfterWrite(raceTrackersByRegattaLock);
                 }
@@ -3342,17 +3347,53 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         return result;
     }
-    
+
     @Override
-    public RaceTracker getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
+    public void getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier,
+            Consumer<RaceTracker> callback) {
+        LockUtil.lockForRead(regattasByNameLock);
         Regatta regatta = regattasByName.get(raceIdentifier.getRegattaName());
+        LockUtil.unlockAfterRead(regattasByNameLock);
         if (regatta != null) {
-            for (RaceTracker raceTracker : raceTrackersByRegatta.get(regatta)) {
-                if (raceTracker.getRaceIdentifiers().contains(raceIdentifier)) {
-                    return raceTracker;
+            LockUtil.lockForRead(raceTrackersByRegattaLock);
+            try {
+                Set<RaceTracker> raceTrackersForRegatta = raceTrackersByRegatta.get(regatta);
+                for (RaceTracker raceTracker : raceTrackersForRegatta) {
+                    if (raceTracker.getRaceIdentifiers().contains(raceIdentifier)) {
+                        callback.accept(raceTracker);
+                        return;
+                    }
+                }
+                Util.addToValueSet(getRaceTrackerCallbacks(), raceIdentifier, callback);
+            } finally {
+                LockUtil.unlockAfterRead(raceTrackersByRegattaLock);
+            }
+        }
+    }
+
+    private ConcurrentHashMap<RegattaAndRaceIdentifier, Set<Consumer<RaceTracker>>> getRaceTrackerCallbacks() {
+        if (raceTrackerCallbacks == null) {
+            synchronized (this) {
+                if (raceTrackerCallbacks == null) {
+                    raceTrackerCallbacks = new ConcurrentHashMap<>();
                 }
             }
         }
-        return null;
+        return raceTrackerCallbacks;
+    }
+
+    private void notifyListenersForNewRaceTracker(RaceTracker tracker) {
+        LockUtil.lockForRead(raceTrackersByRegattaLock);
+        try {
+            tracker.getRaceIdentifiers().forEach((raceIdentifier) -> {
+                Set<Consumer<RaceTracker>> callbacks = getRaceTrackerCallbacks().remove(raceIdentifier);
+                if (callbacks != null) {
+                    callbacks.forEach((callback) -> callback.accept(tracker));
+                }
+            });
+        } finally {
+            LockUtil.unlockAfterRead(raceTrackersByRegattaLock);
+        }
+
     }
 }

@@ -62,22 +62,27 @@ public class RegattaLogFixTrackerRaceListener {
             if (existingRace != null) {
                 removeRaceLogSensorDataTracker(raceIdentifier);
             }
-            final RaceTracker raceTracker = racingEventService.getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier);
-            if (raceTracker != null) {
-                boolean added = raceTracker.add(new RaceTracker.Listener() {
-                    @Override
-                    public void onTrackerWillStop(boolean preemptive) {
-                        raceTracker.remove(this);
-                        removeRaceLogSensorDataTracker(raceIdentifier, preemptive);
+            racingEventService.getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier, (raceTracker) -> {
+                if (raceTracker != null) {
+                    boolean added = raceTracker.add(new RaceTracker.Listener() {
+                        @Override
+                        public void onTrackerWillStop(boolean preemptive) {
+                            raceTracker.remove(this);
+                            removeRaceLogSensorDataTracker(raceIdentifier, preemptive);
+                        }
+                    });
+                    // if !added, the RaceTracker is already stopped, so we are not allowed to start fix tracking
+                    if (added) {
+                        RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager(
+                                (DynamicTrackedRace) trackedRace, racingEventService.getSensorFixStore(),
+                                sensorFixMapperFactory);
+                        RaceLogFixTrackerManager oldInstance = dataTrackers.put(raceIdentifier, trackerManager);
+                        if (oldInstance != null) {
+                            oldInstance.stop(true);
+                        }
                     }
-                });
-                // if !added, the RaceTracker is already stopped, so we are not allowed to start fix tracking
-                if(added) {
-                    RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) trackedRace,
-                            racingEventService.getSensorFixStore(), sensorFixMapperFactory);
-                    dataTrackers.put(raceIdentifier, trackerManager);
                 }
-            }
+            });
         }
     }
     
