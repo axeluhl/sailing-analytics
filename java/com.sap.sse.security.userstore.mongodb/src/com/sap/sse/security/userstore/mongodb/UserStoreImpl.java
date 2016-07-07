@@ -401,6 +401,7 @@ public class UserStoreImpl implements UserStore {
             mongoObjectFactory.deleteUser(users.get(name));
         }
         removeFromUsersByEmail(users.remove(name));
+        removeAllPreferencesForUser(name);
     }
 
     @Override
@@ -499,6 +500,25 @@ public class UserStoreImpl implements UserStore {
         return result;
     }
 
+    private void removeAllPreferencesForUser(String username) {
+        // TODO should we keep the preferences anonymized (e.g. use a UUID as username) to enable better statistics?
+        synchronized (preferences) {
+            preferences.remove(username);
+        }
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storePreferences(username, Collections.<String, String>emptyMap());
+        }
+        Map<String, Object> preferenceObjectsToRemove;
+        synchronized (preferenceObjects) {
+            preferenceObjectsToRemove = preferenceObjects.remove(username);
+        }
+        if(preferenceObjectsToRemove != null) {
+            for(Map.Entry<String, Object> entry: preferenceObjectsToRemove.entrySet()) {
+                notifyListenersOnPreferenceObjectChange(username, entry.getKey(), entry.getValue(), null);
+            }
+        }
+    }
+
     @Override
     public Map<String, Object> getAllSettings() {
         return settings;
@@ -564,7 +584,9 @@ public class UserStoreImpl implements UserStore {
         Map<String, Object> userObjectMap = preferenceObjects.get(username);
         if (userObjectMap != null) {
             Object oldPreference = userObjectMap.remove(key);
-            notifyListenersOnPreferenceObjectChange(username, key, oldPreference, null);
+            if(oldPreference != null) {
+                notifyListenersOnPreferenceObjectChange(username, key, oldPreference, null);
+            }
         }
     }
 
