@@ -85,14 +85,17 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     @Override
     public <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
             TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        final TimePoint loadFixesFrom = from == null ? TimePoint.BeginningOfTime : from;
+        final TimePoint loadFixesTo = to == null ? TimePoint.EndOfTime : to;
+        
         Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
         final QueryBuilder queryBuilder = QueryBuilder.start(FieldNames.DEVICE_ID.name()).is(dbDeviceId)
                 .and(FieldNames.TIME_AS_MILLIS.name());
         if (inclusive) {
-            queryBuilder.greaterThanEquals(from.asMillis()).and(FieldNames.TIME_AS_MILLIS.name())
-                    .lessThanEquals(to.asMillis());
+            queryBuilder.greaterThanEquals(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name())
+                    .lessThanEquals(loadFixesTo.asMillis());
         } else {
-            queryBuilder.greaterThan(from.asMillis()).and(FieldNames.TIME_AS_MILLIS.name()).lessThan(to.asMillis());
+            queryBuilder.greaterThan(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name()).lessThan(loadFixesTo.asMillis());
         }
         DBObject query = queryBuilder.get();
         DBCursor result = fixesCollection.find(query);
