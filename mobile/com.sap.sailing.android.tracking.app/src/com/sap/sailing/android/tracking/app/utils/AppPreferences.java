@@ -69,7 +69,7 @@ public class AppPreferences extends BaseAppPreferences {
 
     public String getServerMarkPath(String leaderboardName, String markId) {
         String path = context.getString(R.string.preferece_server_mark_path);
-        return path.replace("{leaderboard_name}", leaderboardName).replace("{markId}", markId);
+        return path.replace("{leaderboardName}", leaderboardName).replace("{markId}", markId);
     }
 
     public int getGPSFixInterval() {

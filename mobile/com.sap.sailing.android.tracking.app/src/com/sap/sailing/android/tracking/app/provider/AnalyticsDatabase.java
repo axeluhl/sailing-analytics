@@ -39,7 +39,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         String MARKS = "marks";
         String EVENTS_JOIN_LEADERBOARDS_JOIN_MARKS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
             + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
-            + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.COMPETITORS + " ON ("
+            + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.MARKS + " ON ("
             + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.MARKS + "."
             + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + ") ";
         String EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS

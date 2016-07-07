@@ -39,6 +39,7 @@ import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.adapter.RegattaAdapter;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
+import com.sap.sailing.android.tracking.app.ui.activities.BuoyActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
@@ -170,7 +171,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             }
             HttpJsonPostRequest request = new HttpJsonPostRequest(getActivity(), new URL(checkinData.checkinURL), requestObject.toString());
             NetworkHelper.getInstance(getActivity())
-                .executeHttpJsonRequestAsync(request, new CheckinListener(checkinData.checkinDigest), new CheckinErrorListener(checkinData.checkinDigest));
+                .executeHttpJsonRequestAsync(request, new CheckinListener(checkinData.checkinDigest, checkinData.getCheckinType()), new CheckinErrorListener(checkinData.checkinDigest));
         } catch (JSONException|NullPointerException e) {
             ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
             displayAPIErrorRecommendRetry();
@@ -227,8 +228,13 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
      *
      * @param checkinDigest
      */
-    private void startRegatta(String checkinDigest) {
-        Intent intent = new Intent(getActivity(), RegattaActivity.class);
+    private void startRegatta(String checkinDigest, int type) {
+        Intent intent = new Intent();
+        if (type == CheckinUrlInfo.TYPE_COMPETITOR) {
+            intent.setClass(getActivity(), RegattaActivity.class);
+        } else if (type == CheckinUrlInfo.TYPE_MARK) {
+            intent.setClass(getActivity(), BuoyActivity.class);
+        }
         intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
         getActivity().startActivity(intent);
     }
@@ -343,7 +349,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             Cursor cursor = (Cursor) adapter.getItem(position - 1);
 
             String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
-            startRegatta(checkinDigest);
+            int type = cursor.getInt(cursor.getColumnIndex(AnalyticsContract.Checkin.CHECKIN_TYPE));
+            startRegatta(checkinDigest, type);
         }
     }
 
@@ -363,17 +370,18 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     private class CheckinListener implements NetworkHelperSuccessListener {
 
         public String checkinDigest;
+        public int type;
 
-        public CheckinListener(String checkinDigest) {
+        public CheckinListener(String checkinDigest, int type) {
             this.checkinDigest = checkinDigest;
+            this.type = type;
         }
 
         @Override
         public void performAction(JSONObject response) {
             StartActivity startActivity = (StartActivity) getActivity();
             startActivity.dismissProgressDialog();
-            // TODO: Start MarkActivity
-            startRegatta(checkinDigest);
+            startRegatta(checkinDigest, type);
         }
     }
 
