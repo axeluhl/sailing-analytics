@@ -41,4 +41,10 @@ public class UserStoreTest {
         assertEquals(prefValue, newUserStore.getPreference(username, prefKey));
         assertEquals(username, newUserStore.getUserByAccessToken(accessToken).getName());
     }
+    
+    @Test
+    public void testDeleteUserWithPreference() throws UserManagementException {
+        userStore.unsetPreference(username, prefKey);
+        assertNull(prefValue, userStore.getPreference(username, prefKey));
+    }
 }
