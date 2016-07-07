@@ -27,6 +27,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.BaseCheckinData;
+import com.sap.sailing.android.shared.data.CheckinUrlInfo;
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.NetworkHelper;
@@ -42,11 +44,15 @@ import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinHelper;
 import com.sap.sailing.android.tracking.app.utils.CheckinManager;
+import com.sap.sailing.android.tracking.app.utils.CheckoutHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
+import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
+import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
 public class HomeFragment extends AbstractHomeFragment implements LoaderCallbacks<Cursor> {
@@ -272,6 +278,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         // -1, because there's a header row
         Cursor cursor = (Cursor) adapter.getItem(position - 1);
         final String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
+        final int type = cursor.getInt(cursor.getColumnIndex(AnalyticsContract.Checkin.CHECKIN_TYPE));
         DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.Base_Theme_AppCompat_Dialog_Alert);
         builder.setMessage(getString(R.string.confirm_delete_checkin));
@@ -280,7 +287,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                deleteRegatta(checkinDigest);
+                deleteRegatta(checkinDigest, type);
             }
         });
         builder.show();
@@ -288,10 +295,38 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         return true;
     }
 
-    private void deleteRegatta(String checkinDigest) {
-        DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
-        adapter.swapCursor(null);
-        adapter.notifyDataSetInvalidated();
+    private void deleteRegatta(final String checkinDigest, final int type) {
+        NetworkHelperSuccessListener successListener = new NetworkHelperSuccessListener() {
+            @Override
+            public void performAction(JSONObject response) {
+                StartActivity startActivity = (StartActivity) getActivity();
+                startActivity.dismissProgressDialog();
+                DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
+                adapter.swapCursor(null);
+                adapter.notifyDataSetInvalidated();
+            }
+        };
+        NetworkHelperFailureListener failureListener = new NetworkHelperFailureListener() {
+            @Override
+            public void performAction(NetworkHelperError e) {
+                StartActivity startActivity = (StartActivity) getActivity();
+                startActivity.dismissProgressDialog();
+                startActivity.showErrorPopup(R.string.error,
+                    R.string.error_could_not_complete_operation_on_server_try_again);
+            }
+        };
+        CheckoutHelper checkoutHelper = new CheckoutHelper();
+        LeaderboardInfo leaderboardInfo = DatabaseHelper.getInstance().getLeaderboard(getActivity(), checkinDigest);
+        EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
+        if (type == CheckinUrlInfo.TYPE_COMPETITOR) {
+            CompetitorInfo competitorInfo = DatabaseHelper.getInstance().getCompetitor(getActivity(), checkinDigest);
+            checkoutHelper.checkoutCompetitor((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server, competitorInfo.id,
+                successListener, failureListener);
+        } else if (type == CheckinUrlInfo.TYPE_MARK) {
+            MarkInfo markInfo = DatabaseHelper.getInstance().getMarkInfo(getActivity(), checkinDigest);
+            checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server, markInfo.markId,
+                successListener, failureListener);
+        }
     }
 
     private class ItemClickListener implements OnItemClickListener {
