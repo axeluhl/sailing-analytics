@@ -25,6 +25,8 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboa
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
+import com.sap.sailing.domain.base.Mark;
 
 public class DatabaseHelper {
 
@@ -175,8 +177,22 @@ public class DatabaseHelper {
 
         return checkinUrlInfo;
     }
+    
+    public MarkInfo getMarkInfo(Context context, String checkinDigest) {
+        MarkInfo markInfo = new MarkInfo();
+        markInfo.checkinDigest = checkinDigest;
+        Cursor markCursor = context.getContentResolver().query(AnalyticsContract.Mark.CONTENT_URI, null,
+            AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
+        if (markCursor != null) {
+            if (markCursor.moveToFirst()) {
+                markInfo.markId = markCursor.getString(markCursor.getColumnIndex(AnalyticsContract.Mark.MARK_ID));
+                markInfo.markName = markCursor.getString(markCursor.getColumnIndex(AnalyticsContract.Mark.MARK_NAME));
+            }
 
-    // TODO: Get Mark
+            markCursor.close();
+        }
+        return markInfo;
+    }
 
     public void deleteRegattaFromDatabase(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();
@@ -185,12 +201,14 @@ public class DatabaseHelper {
         int d2 = cr.delete(Competitor.CONTENT_URI, Competitor.COMPETITOR_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
         int d3 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
         int d4 = cr.delete(Checkin.CONTENT_URI, Checkin.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
+        int d5 = cr.delete(AnalyticsContract.Mark.CONTENT_URI, AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
 
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Checkout, number of events deleted: " + d1);
             ExLog.i(context, TAG, "Checkout, number of competitors deleted: " + d2);
-            ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d3);
+            ExLog.i(context, TAG, "Checkout, number of leaderboards deleted: " + d3);
             ExLog.i(context, TAG, "Checkout, number of checkinurls deleted: " + d4);
+            ExLog.i(context, TAG, "Checkout, number of marks deleted: " + d5);
         }
     }
 
@@ -204,32 +222,11 @@ public class DatabaseHelper {
      * @return success or failure
      * @throws GeneralDatabaseHelperException
      */
-    public void storeCheckinRow(Context context, EventInfo event, CompetitorInfo competitor,
+    public void storeCompetitorCheckinRow(Context context, EventInfo event, CompetitorInfo competitor,
             LeaderboardInfo leaderboard, CheckinUrlInfo checkinURL) throws GeneralDatabaseHelperException {
 
-        // inserting leaderboard first
-
-        ContentResolver cr = context.getContentResolver();
-
-        ContentValues clv = new ContentValues();
-        clv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
-        clv.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
-        cr.insert(Leaderboard.CONTENT_URI, clv);
-
-        // now insert event
-
+        ContentResolver contentResolver = context.getContentResolver();
         ArrayList<ContentProviderOperation> opList = new ArrayList<>();
-
-        ContentValues cev = new ContentValues();
-        cev.put(Event.EVENT_ID, event.id);
-        cev.put(Event.EVENT_NAME, event.name);
-        cev.put(Event.EVENT_DATE_START, event.startMillis);
-        cev.put(Event.EVENT_DATE_END, event.endMillis);
-        cev.put(Event.EVENT_SERVER, event.server);
-        cev.put(Event.EVENT_IMAGE_URL, event.imageUrl);
-        cev.put(Event.EVENT_CHECKIN_DIGEST, event.checkinDigest);
-
-        opList.add(ContentProviderOperation.newInsert(Event.CONTENT_URI).withValues(cev).build());
 
         // competitor
 
@@ -243,6 +240,58 @@ public class DatabaseHelper {
         ccv.put(Competitor.COMPETITOR_CHECKIN_DIGEST, competitor.checkinDigest);
 
         opList.add(ContentProviderOperation.newInsert(Competitor.CONTENT_URI).withValues(ccv).build());
+        storeBasicInformation(leaderboard, event, checkinURL, opList, contentResolver);
+
+        try {
+            contentResolver.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
+        } catch (RemoteException| OperationApplicationException e) {
+            throw new GeneralDatabaseHelperException(e.getMessage());
+        }
+    }
+
+    public void storeMarkCheckinRow(Context context, EventInfo event, Mark mark,
+        LeaderboardInfo leaderboard, CheckinUrlInfo checkinURL) throws GeneralDatabaseHelperException {
+
+        // Store Mark information
+        ContentResolver contentResolver = context.getContentResolver();
+        ArrayList<ContentProviderOperation> opList = new ArrayList<>();
+        ContentValues markValues = new ContentValues();
+        markValues.put(AnalyticsContract.Mark.MARK_ID, mark.getId().toString());
+        markValues.put(AnalyticsContract.Mark.MARK_NAME, mark.getName());
+        markValues.put(AnalyticsContract.Mark.MARK_CHECKIN_DIGEST, checkinURL.checkinDigest);
+        opList.add(ContentProviderOperation.newInsert(AnalyticsContract.Mark.CONTENT_URI).withValues(markValues).build());
+
+        storeBasicInformation(leaderboard, event, checkinURL, opList, contentResolver);
+
+        try {
+            contentResolver.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
+        } catch (RemoteException| OperationApplicationException e) {
+            throw new GeneralDatabaseHelperException(e.getMessage());
+        }
+    }
+
+    private void storeBasicInformation(LeaderboardInfo leaderboard, EventInfo event, CheckinUrlInfo checkinURL,
+        ArrayList<ContentProviderOperation> opList, ContentResolver contentResolver) {
+
+        // inserting leaderboard first
+
+        ContentValues clv = new ContentValues();
+        clv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
+        clv.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
+        contentResolver.insert(Leaderboard.CONTENT_URI, clv);
+
+        // now insert event
+
+        ContentValues cev = new ContentValues();
+        cev.put(Event.EVENT_ID, event.id);
+        cev.put(Event.EVENT_NAME, event.name);
+        cev.put(Event.EVENT_DATE_START, event.startMillis);
+        cev.put(Event.EVENT_DATE_END, event.endMillis);
+        cev.put(Event.EVENT_SERVER, event.server);
+        cev.put(Event.EVENT_IMAGE_URL, event.imageUrl);
+        cev.put(Event.EVENT_CHECKIN_DIGEST, event.checkinDigest);
+
+        opList.add(ContentProviderOperation.newInsert(Event.CONTENT_URI).withValues(cev).build());
 
         // checkin url
 
@@ -253,17 +302,7 @@ public class DatabaseHelper {
         ccuv.put(Checkin.CHECKIN_TYPE, checkinURL.type);
 
         opList.add(ContentProviderOperation.newInsert(Checkin.CONTENT_URI).withValues(ccuv).build());
-
-        try {
-            cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
-        } catch (RemoteException e) {
-            throw new GeneralDatabaseHelperException(e.getMessage());
-        } catch (OperationApplicationException e) {
-            throw new GeneralDatabaseHelperException(e.getMessage());
-        }
     }
-
-    // TODO: Store mark
 
     /**
      * Return true if the combination of event, leaderboard and competitor does not exist in the DB. (based on the
