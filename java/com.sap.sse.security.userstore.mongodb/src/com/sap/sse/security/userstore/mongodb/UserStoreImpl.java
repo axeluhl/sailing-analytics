@@ -320,7 +320,7 @@ public class UserStoreImpl implements UserStore {
             result = null;
         } else {
             Set<User> set = usersByEmail.get(email);
-            if (set.isEmpty()) {
+            if (set == null || set.isEmpty()) {
                 result = null;
             } else {
                 result = set.iterator().next();
