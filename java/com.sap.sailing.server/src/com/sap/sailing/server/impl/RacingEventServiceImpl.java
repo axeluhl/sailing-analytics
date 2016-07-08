@@ -303,6 +303,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final ConcurrentHashMap<Object, NamedReentrantReadWriteLock> raceTrackersByIDLocks;
 
+    /**
+     * Using {@link #getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier, Consumer)}, one can request a
+     * {@link RaceTracker} for a specific race. It can be that the requested {@link RaceTracker} isn't registered in
+     * {@link #raceTrackersByRegatta}. To not need a Thread to wait for the RaceTracker to get available, a callback
+     * will be registered that fires on registration of the RaceTracker. If the {@link RaceTracker} will not be
+     * registered, the callback only leads to a minor leak.
+     */
     private volatile transient ConcurrentHashMap<RegattaAndRaceIdentifier, Set<Consumer<RaceTracker>>> raceTrackerCallbacks;
 
     /**
