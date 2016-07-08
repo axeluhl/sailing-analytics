@@ -668,6 +668,78 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(finish.asMillis()-earlier.asMillis(), totalTimeSailedC0_AfterRace3.asMillis());
     }
 
+    /**
+     * See bug 3755
+     */
+    @Test
+    public void testSuppressionAffectsInRaceRankForLowPoint() {
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint earlier = now.minus(1000000);
+        TimePoint later = now.plus(1000000); // first race from "earlier" to "now", second from "now" to "later", third from "later" to "finish"
+        TimePoint finish = later.plus(1000000);
+        Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
+        Competitor[] f1 = new Competitor[] { c[0], c[1], c[2] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */3, new String[] { "Default" },
+                /* medal */ false, /* medal */ 0, "testTotalTimeNotCountedForRacesStartedLaterThanTimePointReqeusted",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        @SuppressWarnings("unchecked")
+        Map<Competitor, TimePoint>[] lastMarkPassingTimesForCompetitors = (Map<Competitor, TimePoint>[]) new HashMap<?, ?>[3];
+        lastMarkPassingTimesForCompetitors[0] = new HashMap<>();
+        lastMarkPassingTimesForCompetitors[0].put(c[0], now);
+        lastMarkPassingTimesForCompetitors[0].put(c[1], now);
+        lastMarkPassingTimesForCompetitors[0].put(c[2], now);
+        lastMarkPassingTimesForCompetitors[1] = new HashMap<>();
+        lastMarkPassingTimesForCompetitors[1].put(c[0], later);
+        lastMarkPassingTimesForCompetitors[1].put(c[1], later);
+        lastMarkPassingTimesForCompetitors[1].put(c[2], later);
+        lastMarkPassingTimesForCompetitors[2] = new HashMap<>();
+        lastMarkPassingTimesForCompetitors[2].put(c[0], finish);
+        lastMarkPassingTimesForCompetitors[2].put(c[1], finish);
+        lastMarkPassingTimesForCompetitors[2].put(c[2], finish);
+        createAndAttachTrackedRacesWithStartTimeAndLastMarkPassingTimes(series.get(1), "Default",
+                new Competitor[][] { f1 }, new TimePoint[] { earlier, now, later }, lastMarkPassingTimesForCompetitors);
+        leaderboard.setSuppressed(c[1], true);
+        assertEquals(1.0, leaderboard.getTotalPoints(c[0], leaderboard.getRaceColumns().iterator().next(), later), 0.000001);
+        assertEquals(2.0, leaderboard.getTotalPoints(c[2], leaderboard.getRaceColumns().iterator().next(), later), 0.000001);
+    }
+
+    /**
+     * See bug 3755
+     */
+    @Test
+    public void testSuppressionAffectsInRaceRankForHighPoint() {
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint earlier = now.minus(1000000);
+        TimePoint later = now.plus(1000000); // first race from "earlier" to "now", second from "now" to "later", third from "later" to "finish"
+        TimePoint finish = later.plus(1000000);
+        Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);
+        Competitor[] f1 = new Competitor[] { c[0], c[1], c[2] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */3, new String[] { "Default" },
+                /* medal */ false, /* medal */ 0, "testTotalTimeNotCountedForRacesStartedLaterThanTimePointReqeusted",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        @SuppressWarnings("unchecked")
+        Map<Competitor, TimePoint>[] lastMarkPassingTimesForCompetitors = (Map<Competitor, TimePoint>[]) new HashMap<?, ?>[3];
+        lastMarkPassingTimesForCompetitors[0] = new HashMap<>();
+        lastMarkPassingTimesForCompetitors[0].put(c[0], now);
+        lastMarkPassingTimesForCompetitors[0].put(c[1], now);
+        lastMarkPassingTimesForCompetitors[0].put(c[2], now);
+        lastMarkPassingTimesForCompetitors[1] = new HashMap<>();
+        lastMarkPassingTimesForCompetitors[1].put(c[0], later);
+        lastMarkPassingTimesForCompetitors[1].put(c[1], later);
+        lastMarkPassingTimesForCompetitors[1].put(c[2], later);
+        lastMarkPassingTimesForCompetitors[2] = new HashMap<>();
+        lastMarkPassingTimesForCompetitors[2].put(c[0], finish);
+        lastMarkPassingTimesForCompetitors[2].put(c[1], finish);
+        lastMarkPassingTimesForCompetitors[2].put(c[2], finish);
+        createAndAttachTrackedRacesWithStartTimeAndLastMarkPassingTimes(series.get(1), "Default",
+                new Competitor[][] { f1 }, new TimePoint[] { earlier, now, later }, lastMarkPassingTimesForCompetitors);
+        leaderboard.setSuppressed(c[1], true);
+        assertEquals(10.0, leaderboard.getTotalPoints(c[0], leaderboard.getRaceColumns().iterator().next(), later), 0.000001);
+        assertEquals( 9.0, leaderboard.getTotalPoints(c[2], leaderboard.getRaceColumns().iterator().next(), later), 0.000001);
+    }
+
     @Test
     public void testTieBreakWithTwoVersusOneWins() throws NoWindException {
         Competitor[] c = createCompetitors(3).toArray(new Competitor[0]);

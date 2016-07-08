@@ -208,7 +208,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
 
         raceMap = new RaceMap(raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
-                getPerspectiveSettings().isSimulationEnabled(), /* showHeaderPanel */ true) {
+                /* showHeaderPanel */ true) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override

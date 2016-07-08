@@ -646,7 +646,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public ScoreCorrectionProviderDTO getScoreCorrectionsOfProvider(String providerName) throws Exception {
         ScoreCorrectionProviderDTO result = null;
         for (ScoreCorrectionProvider scoreCorrectionProvider : getAllScoreCorrectionProviders()) {
-            if(scoreCorrectionProvider.getName().equals(providerName)) {
+            if (scoreCorrectionProvider.getName().equals(providerName)) {
                 result = convertScoreCorrectionProviderDTO(scoreCorrectionProvider);
                 break;
             }
@@ -5325,13 +5325,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void pingMark(String leaderboardName,
-            MarkDTO markDTO, Position positionDTO) throws DoesNotHaveRegattaLogException {
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        Mark mark = convertToMark(markDTO, true);
-        TimePoint time = MillisecondsTimePoint.now();
-        Position position = positionDTO;
-        GPSFix fix = new GPSFixImpl(position, time);
-        
+            MarkDTO markDTO, TimePoint timePoint, Position positionDTO) throws DoesNotHaveRegattaLogException {
+        final RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        final Mark mark = convertToMark(markDTO, true);
+        final TimePoint time = timePoint == null ? MillisecondsTimePoint.now() : timePoint;
+        final Position position = positionDTO;
+        final GPSFix fix = new GPSFixImpl(position, time);
         getRaceLogTrackingAdapter().pingMark(regattaLog, mark, fix, getService());
     }
     
@@ -5500,25 +5499,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private void closeOpenEndedDeviceMapping(RegattaLog regattaLog, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException, UnableToCloseDeviceMappingException {
         boolean successfullyClosed = false;
+        List<RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents = null;
         regattaLog.lockForRead();
         try {
             RegattaLogEvent event = regattaLog.getEventById(mappingDTO.originalRaceLogEventIds.get(0));
-
             if (event != null) {
                 successfullyClosed = true;
                 DeviceMapping<?> mapping = convertToDeviceMapping(mappingDTO);
-                List<RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents =
-                        new RegattaLogOpenEndedDeviceMappingCloser(regattaLog, mapping, getService().getServerAuthor(),
+                closingEvents = new RegattaLogOpenEndedDeviceMappingCloser(regattaLog, mapping, getService().getServerAuthor(),
                                 new MillisecondsTimePoint(closingTimePoint)).analyze();
-                for (RegattaLogEvent closingEvent : closingEvents) {
-                    regattaLog.add(closingEvent);            
-                }
             }
         } finally {
             regattaLog.unlockAfterRead();
         }
-
-        if (!successfullyClosed){
+        // important: read lock must be release before write lock is obtained in add(...); see bug 3774
+        if (successfullyClosed) {
+            for (RegattaLogEvent closingEvent : closingEvents) {
+                regattaLog.add(closingEvent);
+            }
+        } else {
             throw new UnableToCloseDeviceMappingException();
         }
     }
