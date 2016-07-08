@@ -133,7 +133,7 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
                     newIgtimiConnection.addListener(igtimiWindReceiver);
                     newIgtimiConnection.addListener(this);
                     IgtimiConnectionInfo newIgtimiConnectionInfo = new IgtimiConnectionInfo(
-                            newIgtimiConnection.getRemoteAddress(), account.getUser().getEmail(),
+                            newIgtimiConnection, account.getUser().getEmail(),
                             igtimiConnection.getWindDevices());
                     igtimiConnections.put(newIgtimiConnection, newIgtimiConnectionInfo);
                     result = true;
@@ -175,13 +175,13 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
     }
 
     protected class IgtimiConnectionInfo {
-        private final InetSocketAddress remoteAddress;
+        private final LiveDataConnection igtimiLiveConnection;
         private final String accountName;
         private final Iterable<String> deviceIDs;
         
-        public IgtimiConnectionInfo(InetSocketAddress remoteAddress, String accountName, Iterable<String> deviceIDs) {
+        public IgtimiConnectionInfo(LiveDataConnection newIgtimiConnection, String accountName, Iterable<String> deviceIDs) {
             super();
-            this.remoteAddress = remoteAddress;
+            this.igtimiLiveConnection = newIgtimiConnection;
             this.accountName = accountName;
             final List<String> deviceIDsList = new ArrayList<>();
             this.deviceIDs = deviceIDsList;
@@ -189,7 +189,7 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
         }
 
         public InetSocketAddress getRemoteAddress() {
-            return remoteAddress;
+            return igtimiLiveConnection.getRemoteAddress();
         }
 
         public String getAccountName() {
@@ -248,13 +248,15 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
     @Override
     public void windDataReceived(Wind wind, String deviceSerialNumber) {
         Deque<IgtimiMessageInfo> messagesPerDevice = lastIgtimiMessages.get(deviceSerialNumber);
-        if(messagesPerDevice == null) {
+        if (messagesPerDevice == null) {
             messagesPerDevice = new ArrayDeque<IgtimiMessageInfo>(NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW);
             lastIgtimiMessages.put(deviceSerialNumber, messagesPerDevice);
         }
-        messagesPerDevice.addFirst(new IgtimiMessageInfo(wind));
-        if(messagesPerDevice.size() > NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
-            messagesPerDevice.pollLast();
+        synchronized (messagesPerDevice) {
+            messagesPerDevice.addFirst(new IgtimiMessageInfo(wind));
+            if (messagesPerDevice.size() > NUMBER_OF_MESSAGES_PER_DEVICE_TO_SHOW) {
+                messagesPerDevice.pollLast();
+            }
         }
     }
     
