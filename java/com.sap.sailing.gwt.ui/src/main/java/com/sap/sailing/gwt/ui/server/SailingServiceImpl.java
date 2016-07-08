@@ -5499,25 +5499,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private void closeOpenEndedDeviceMapping(RegattaLog regattaLog, DeviceMappingDTO mappingDTO, Date closingTimePoint) throws TransformationException, UnableToCloseDeviceMappingException {
         boolean successfullyClosed = false;
+        List<RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents = null;
         regattaLog.lockForRead();
         try {
             RegattaLogEvent event = regattaLog.getEventById(mappingDTO.originalRaceLogEventIds.get(0));
-
             if (event != null) {
                 successfullyClosed = true;
                 DeviceMapping<?> mapping = convertToDeviceMapping(mappingDTO);
-                List<RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents =
-                        new RegattaLogOpenEndedDeviceMappingCloser(regattaLog, mapping, getService().getServerAuthor(),
+                closingEvents = new RegattaLogOpenEndedDeviceMappingCloser(regattaLog, mapping, getService().getServerAuthor(),
                                 new MillisecondsTimePoint(closingTimePoint)).analyze();
-                for (RegattaLogEvent closingEvent : closingEvents) {
-                    regattaLog.add(closingEvent);            
-                }
             }
         } finally {
             regattaLog.unlockAfterRead();
         }
-
-        if (!successfullyClosed){
+        // important: read lock must be release before write lock is obtained in add(...); see bug 3774
+        if (successfullyClosed) {
+            for (RegattaLogEvent closingEvent : closingEvents) {
+                regattaLog.add(closingEvent);
+            }
+        } else {
             throw new UnableToCloseDeviceMappingException();
         }
     }
