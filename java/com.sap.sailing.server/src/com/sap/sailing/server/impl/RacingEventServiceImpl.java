@@ -303,7 +303,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final ConcurrentHashMap<Object, NamedReentrantReadWriteLock> raceTrackersByIDLocks;
 
-    private transient ConcurrentHashMap<RegattaAndRaceIdentifier, Set<Consumer<RaceTracker>>> raceTrackerCallbacks;
+    private volatile transient ConcurrentHashMap<RegattaAndRaceIdentifier, Set<Consumer<RaceTracker>>> raceTrackerCallbacks;
 
     /**
      * Leaderboards managed by this racing event service
