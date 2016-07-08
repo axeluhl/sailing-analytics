@@ -5338,13 +5338,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void pingMark(String leaderboardName,
-            MarkDTO markDTO, Position positionDTO) throws DoesNotHaveRegattaLogException {
-        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        Mark mark = convertToMark(markDTO, true);
-        TimePoint time = MillisecondsTimePoint.now();
-        Position position = positionDTO;
-        GPSFix fix = new GPSFixImpl(position, time);
-        
+            MarkDTO markDTO, TimePoint timePoint, Position positionDTO) throws DoesNotHaveRegattaLogException {
+        final RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        final Mark mark = convertToMark(markDTO, true);
+        final TimePoint time = timePoint == null ? MillisecondsTimePoint.now() : timePoint;
+        final Position position = positionDTO;
+        final GPSFix fix = new GPSFixImpl(position, time);
         getRaceLogTrackingAdapter().pingMark(regattaLog, mark, fix, getService());
     }
     

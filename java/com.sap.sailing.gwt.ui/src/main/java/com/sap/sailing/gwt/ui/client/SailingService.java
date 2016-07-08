@@ -95,6 +95,7 @@ import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -490,10 +491,15 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
     
     /**
-     * Adds a fix to the {@link GPSFixStore}, and creates a mapping with a virtual device for exactly the current timepoint.
-     * @throws DoesNotHaveRegattaLogException 
+     * Adds a fix to the {@link GPSFixStore}, and creates a mapping with a virtual device for exactly the current
+     * timepoint.
+     * 
+     * @param timePoint
+     *            the time point for the fix; if {@code null}, the current time is used
+     * 
+     * @throws DoesNotHaveRegattaLogException
      */
-    void pingMark(String leaderboardName, MarkDTO mark, Position position) throws DoesNotHaveRegattaLogException;
+    void pingMark(String leaderboardName, MarkDTO mark, TimePoint timePoint, Position position) throws DoesNotHaveRegattaLogException;
     
     List<String> getDeserializableDeviceIdentifierTypes();
     

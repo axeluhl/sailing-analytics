@@ -640,8 +640,10 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         Mark mark = null;
         for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (final Mark availableMark : raceColumn.getAvailableMarks()) {
-                mark = availableMark;
-                break;
+                if (availableMark.getId().toString().equals(markId)) {
+                    mark = availableMark;
+                    break;
+                }
             }
         }
         if (mark == null) {
