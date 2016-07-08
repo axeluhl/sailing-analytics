@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
@@ -101,10 +102,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
 
         if (getSupportActionBar() != null) {
-            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this, checkinDigest);
+            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+            LeaderboardInfo leaderboardInfo = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setTitle(eventInfo.leaderboardName);
+            getSupportActionBar().setTitle(leaderboardInfo.name);
             getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
             ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
