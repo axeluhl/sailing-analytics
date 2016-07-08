@@ -471,11 +471,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         if (visible) {
-            // Workaround for a highcharts bug: 
-            // Set a chart title, overwrite the title, switch chart to invisible and visible again -> the old title
-            // appears
-            String titleFromDetailTypes = chartTitleFromDetailTypes();
-            chart.setTitle(new ChartTitle().setText(titleFromDetailTypes), null);
+            // Workaround for a highcharts bug: Set a chart title, overwrite the title, 
+            // switch chart to invisible and visible again -> the old title appears
+            chart.setTitle(hasSecondYAxis() ? null : new ChartTitle().setText(chartTitleFromDetailTypes()), null);
         }
     }
 
@@ -598,34 +596,21 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             final String unitY1 = hasSecondYAxis() ? DetailTypeFormatter.getUnit(getSelectedSecondDetailType()) : null;
             final String labelY1 = hasSecondYAxis() ? (unitY1.isEmpty() ? "" : "[" + unitY1 + "]") : null;
 
-            chart.setTitle(new ChartTitle().setText(""), null);
-            if (!compactChart) {
-                chart.setTitle(new ChartTitle().setText(chartTitleFromDetailTypes()), null);
-                if (hasSecondYAxis()) {
-                    chart.getYAxis(0).setAxisTitleText(
-                            DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
-                    chart.getYAxis(1).setOpposite(true)
-                            .setAxisTitleText(DetailTypeFormatter.format(selectedSecondDetailType) + " " + labelY1);
-                } else {
-                    chart.getYAxis(0).setAxisTitleText(
-                            DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
-                    chart.getYAxis(1).setAxisTitleText("");
-                }
+            chart.setTitle(hasSecondYAxis() ? null : new ChartTitle().setText(chartTitleFromDetailTypes()), null);
+            if (hasSecondYAxis()) {
+                chart.getYAxis(0).setAxisTitleText(
+                        DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
+                chart.getYAxis(1).setAxisTitleText(
+                        DetailTypeFormatter.format(selectedSecondDetailType) + " " + labelY1);
             } else {
-                if (hasSecondYAxis()) {
-                    chart.getYAxis(0).setAxisTitleText(
-                            DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
-                    chart.getYAxis(1).setAxisTitleText(
-                            DetailTypeFormatter.format(selectedSecondDetailType) + " " + labelY1);
-                } else {
-                    chart.getYAxis(0).setAxisTitleText(labelY0);
-
-                }
+                chart.getYAxis(0).setAxisTitleText(labelY0);
             }
+            
             if (hasSecondYAxis()) {
                 chart.getYAxis(0).setReversed(isY0AxisReversed()).setOpposite(false)
                         .setGridLineWidth(1)
                         .setMinorGridLineWidth(0).setMinorGridLineColor("transparent");
+                
                 chart.getYAxis(1).setReversed(isY1AxisReversed()).setOpposite(true)
                         .setGridLineWidth(1)
                         .setGridLineDashStyle(DashStyle.LONG_DASH)
