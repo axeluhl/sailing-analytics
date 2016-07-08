@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.BaseChart;
@@ -32,7 +33,6 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -117,7 +117,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             boolean allowTimeAdjust,
             String leaderboardGroupName, String leaderboardName) {
         super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
-        GWT.debugger();
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;
@@ -657,9 +656,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                         }
                         ttb.append("</b><br/>").append(dateFormat.format(new Date(toolTipData.getXAsLong())))
                                 .append(": ");
-                        if (hasSecondYAxis()) {
-                            ttb.append(numberFormatY0.format(toolTipData.getYAsDouble(0))).append(" ").append(unitY0).append(", ");
-                            ttb.append(numberFormatY1.format(toolTipData.getYAsDouble(1))).append(" ").append(unitY1);
+                        if (isSecondYAxis(toolTipData.getSeriesId())) {
+                            ttb.append(numberFormatY1.format(toolTipData.getYAsDouble())).append(" ").append(unitY1);
                         } else {
                             ttb.append(numberFormatY0.format(toolTipData.getYAsDouble())).append(" ").append(unitY0);
                         }
@@ -669,6 +667,16 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             }));
         }
         return hasDetailTypeChanged;
+    }
+    
+    private boolean isSecondYAxis(String seriesId) {
+        Series series = chart.getSeries(seriesId);
+        for (Entry<Pair<CompetitorDTO, DetailType>, Series> entry : dataSeriesForDetailTypeAndCompetitor.entrySet()) {
+            if (entry.getValue().equals(series)) {
+                return entry.getKey().getB().equals(selectedSecondDetailType);
+            }
+        }
+        return false;
     }
     
     private boolean hasSecondYAxis() {
