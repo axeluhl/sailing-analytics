@@ -20,7 +20,6 @@ public class MarkUrlData extends UrlData {
         this.markId = markId;
     }
 
-
     public String getMarkUrl() {
         return markUrl;
     }
