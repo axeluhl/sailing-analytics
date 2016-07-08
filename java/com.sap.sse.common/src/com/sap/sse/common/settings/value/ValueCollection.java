@@ -1,6 +1,6 @@
 package com.sap.sse.common.settings.value;
 
-import com.sap.sse.common.settings.ValueConverter;
+import com.sap.sse.common.settings.generic.ValueConverter;
 
 public interface ValueCollection extends Value {
     <T> Iterable<T> getValues(ValueConverter<T> converter);

@@ -21,6 +21,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.preferences.NotificationPreferences;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
@@ -34,7 +35,9 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
 
@@ -108,6 +111,9 @@ public class Activator implements BundleActivator {
         // legacy type name; some DBs may still contain fixes marked with this old package name:
         properties.put(TypeBasedServiceFinder.TYPE, "com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl");
         registrations.add(context.registerService(GPSFixMongoHandler.class, gpsFixMovingMongoHandler, properties));
+        
+        registerPreferenceConvertersWhenUserStoreIsAvailable(context);
+        
         // Add an MBean for the service to the JMX bean server:
         RacingEventServiceMXBean mbean = new RacingEventServiceMXBeanImpl(racingEventService);
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -116,7 +122,30 @@ public class Activator implements BundleActivator {
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
                 Charset.defaultCharset());
     }
-    
+
+    private void registerPreferenceConvertersWhenUserStoreIsAvailable(BundleContext bundleContext) {
+        ServiceTracker<UserStore, UserStore> userStoreTracker = ServiceTrackerFactory.createAndOpen(bundleContext,
+                UserStore.class);
+        new Thread("ServiceTracker waiting for UserStore service") {
+            @Override
+            public void run() {
+                try {
+                    logger.info("Waiting for UserStore service...");
+                    UserStore userStore = userStoreTracker.waitForService(0);
+                    logger.info("Obtained UserStore service " + userStore);
+                    registerPreferenceConvertersForUserStore(userStore);
+                } catch (InterruptedException e) {
+                    logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
+                }
+            }
+        }.start();
+    }
+
+    protected void registerPreferenceConvertersForUserStore(UserStore userStore) {
+        userStore.registerPreferenceConverter(NotificationPreferences.PREF_NAME,
+                new GenericJSONPreferenceConverter<NotificationPreferences>(NotificationPreferences::new));
+    }
+
     public void stop(BundleContext context) throws Exception {
         masterDataImportClassLoaderServiceTracker.close();
         if (extenderBundleTracker != null) {

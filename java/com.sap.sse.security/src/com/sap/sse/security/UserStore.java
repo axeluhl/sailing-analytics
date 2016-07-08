@@ -53,6 +53,30 @@ public interface UserStore extends Named {
     void unsetPreference(String username, String key);
 
     String getPreference(String username, String key);
+    
+    /**
+     * Registers a converter objects for a preference key that is used to convert preference Strings to Objects. This
+     * makes it possible to access deserialized settings without the need to do the deserialization over and over again.
+     * 
+     * @param key the key to associate the converter with
+     * @param converter the converter to use for (de)serialization
+     */
+    void registerPreferenceConverter(String key, PreferenceConverter<?> converter);
+    
+    /**
+     * Gets a preference object. Always returns null if there is no converter associated with the given key -> see
+     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     */
+    <T> T getPreferenceObject(String username, String key);
+    
+    /**
+     * Sets a preference as Object. This converts the given Object to a preference String using a
+     * {@link PreferenceConverter} that was registered through
+     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     * 
+     * @throws IllegalArgumentException if there is no {@link PreferenceConverter} registered with the given key.
+     */
+    <T> void setPreferenceObject(String username, String key, Object preferenceObject) throws IllegalArgumentException;
 
     /**
      * Sets a value for a key if that key was previously added to this store using {@link #addSetting(String, Class)}.
@@ -106,4 +130,8 @@ public interface UserStore extends Named {
      * {@code username} no access token has previously been {@link #setAccessToken(String, String) set}.
      */
     String getAccessToken(String username);
+    
+    void addPreferenceObjectListener(String key, PreferenceObjectListener<?> listener, boolean fireForAlreadyExistingPreferences);
+    
+    void removePreferenceObjectListener(PreferenceObjectListener<?> listener);
 }

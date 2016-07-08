@@ -1,16 +1,24 @@
 package com.sap.sse.security.userstore.mongodb;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
 
+import com.sap.sse.common.Util;
+import com.sap.sse.security.PreferenceConverter;
+import com.sap.sse.security.PreferenceObjectListener;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
@@ -49,6 +57,20 @@ public class UserStoreImpl implements UserStore {
     private final ConcurrentHashMap<String, Map<String, String>> preferences;
     
     /**
+     * Converter objects to map preference Strings to Objects.
+     * The keys must match the keys of the preferences. 
+     */
+    private final ConcurrentHashMap<String, PreferenceConverter<?>> preferenceConverters;
+    
+    /**
+     * This is another view of the String preferences mapped by {@link #preferenceConverters} to Objects.
+     * Keys are the usernames, values are the key/value pairs representing the user's preferences.
+     */
+    private final ConcurrentHashMap<String, Map<String, Object>> preferenceObjects;
+    
+    private transient Map<String, Set<PreferenceObjectListener<? extends Object>>> listeners;
+    
+    /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
     private final transient MongoObjectFactory mongoObjectFactory;
@@ -65,6 +87,9 @@ public class UserStoreImpl implements UserStore {
         settingTypes = new ConcurrentHashMap<>();
         usersByAccessToken = new ConcurrentHashMap<>();
         preferences = new ConcurrentHashMap<>();
+        preferenceConverters = new ConcurrentHashMap<>();
+        preferenceObjects = new ConcurrentHashMap<>();
+        listeners = new HashMap<>();
         this.mongoObjectFactory = mongoObjectFactory;
         if (domainObjectFactory != null) {
             for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
@@ -101,10 +126,21 @@ public class UserStoreImpl implements UserStore {
             }
         }
     }
+    
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        listeners = new HashMap<>();
+    }
+    
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
 
     @Override
     public void clear() {
         preferences.clear();
+        preferenceConverters.clear();
+        preferenceObjects.clear();
         emailForUsername.clear();
         settings.clear();
         settingTypes.clear();
@@ -284,7 +320,7 @@ public class UserStoreImpl implements UserStore {
             result = null;
         } else {
             Set<User> set = usersByEmail.get(email);
-            if (set.isEmpty()) {
+            if (set == null || set.isEmpty()) {
                 result = null;
             } else {
                 result = set.iterator().next();
@@ -365,6 +401,7 @@ public class UserStoreImpl implements UserStore {
             mongoObjectFactory.deleteUser(users.get(name));
         }
         removeFromUsersByEmail(users.remove(name));
+        removeAllPreferencesForUser(name);
     }
 
     @Override
@@ -405,6 +442,11 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void setPreference(String username, String key, String value) {
+        setPreferenceInternal(username, key, value);
+        loadPreferenceIfConverterIsAvailable(username, key);
+    }
+
+    private void setPreferenceInternal(String username, String key, String value) {
         Map<String, String> userMap = preferences.get(username);
         if (userMap == null) {
             synchronized (preferences) {
@@ -431,6 +473,7 @@ public class UserStoreImpl implements UserStore {
                 mongoObjectFactory.storePreferences(username, userMap);
             }
         }
+        unsetPreferenceObject(username, key);
     }
 
     @Override
@@ -457,6 +500,25 @@ public class UserStoreImpl implements UserStore {
         return result;
     }
 
+    private void removeAllPreferencesForUser(String username) {
+        // TODO should we keep the preferences anonymized (e.g. use a UUID as username) to enable better statistics?
+        synchronized (preferences) {
+            preferences.remove(username);
+        }
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storePreferences(username, Collections.<String, String>emptyMap());
+        }
+        Map<String, Object> preferenceObjectsToRemove;
+        synchronized (preferenceObjects) {
+            preferenceObjectsToRemove = preferenceObjects.remove(username);
+        }
+        if(preferenceObjectsToRemove != null) {
+            for(Map.Entry<String, Object> entry: preferenceObjectsToRemove.entrySet()) {
+                notifyListenersOnPreferenceObjectChange(username, entry.getKey(), entry.getValue(), null);
+            }
+        }
+    }
+
     @Override
     public Map<String, Object> getAllSettings() {
         return settings;
@@ -465,5 +527,143 @@ public class UserStoreImpl implements UserStore {
     @Override
     public Map<String, Class<?>> getAllSettingTypes() {
         return settingTypes;
+    }
+    
+    @Override
+    public void registerPreferenceConverter(String preferenceKey, PreferenceConverter<?> converter) {
+        PreferenceConverter<?> alreadyAssociatedConverter = preferenceConverters.putIfAbsent(preferenceKey, converter);
+        
+        if(alreadyAssociatedConverter == null) {
+            final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+            for (String user : usersToProcess) {
+                loadPreferenceWithConverter(user, preferenceKey, converter);
+            }
+        } else {
+            logger.log(Level.SEVERE, "PreferenceConverter " + alreadyAssociatedConverter + " for key " + preferenceKey
+                    + " is already registered. Converter " + converter + " will not be registered");
+        }
+    }
+
+    private void loadPreferenceIfConverterIsAvailable(String username, String key) {
+        PreferenceConverter<?> preferenceConverter = preferenceConverters.get(key);
+        if (preferenceConverter != null) {
+            loadPreferenceWithConverter(username, key, preferenceConverter);
+        }
+    }
+
+    private void loadPreferenceWithConverter(String username, String key, PreferenceConverter<?> preferenceConverter) {
+        final String preferenceString = getPreference(username, key);
+        if (preferenceString != null) {
+            try {
+                final Object convertedObject = preferenceConverter.toPreferenceObject(preferenceString);
+                setPreferenceObjectInternal(username, key, convertedObject);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "Error while converting preference for key " + key + " from String \""
+                        + preferenceString + "\"", t);
+            }
+        }
+    }
+
+    private void setPreferenceObjectInternal(String username, String key, final Object convertedObject) {
+        Map<String, Object> userMap = preferenceObjects.get(username);
+        if (userMap == null) {
+            synchronized (preferenceObjects) {
+                // only synchronize when necessary
+                userMap = preferenceObjects.get(username);
+                if (userMap == null) {
+                    userMap = new ConcurrentHashMap<>();
+                    preferenceObjects.put(username, userMap);
+                }
+            }
+        }
+        Object oldPreference = userMap.put(key, convertedObject);
+        notifyListenersOnPreferenceObjectChange(username, key, oldPreference, convertedObject);
+    }
+
+    private void unsetPreferenceObject(String username, String key) {
+        Map<String, Object> userObjectMap = preferenceObjects.get(username);
+        if (userObjectMap != null) {
+            Object oldPreference = userObjectMap.remove(key);
+            if(oldPreference != null) {
+                notifyListenersOnPreferenceObjectChange(username, key, oldPreference, null);
+            }
+        }
+    }
+
+    @Override
+    public <T> T getPreferenceObject(String username, String key) {
+        final Object result;
+        Map<String, Object> userMap = preferenceObjects.get(username);
+        if (userMap != null) {
+            result = userMap.get(key);
+        } else {
+            result = null;
+        }
+        @SuppressWarnings("unchecked")
+        T resultT = (T) result;
+        return resultT;
+    }
+    
+    @Override
+    public <T> void setPreferenceObject(String username, String key, Object preferenceObject)
+            throws IllegalArgumentException {
+        @SuppressWarnings("unchecked")
+        PreferenceConverter<Object> preferenceConverter = (PreferenceConverter<Object>) preferenceConverters.get(key);
+        if (preferenceConverter == null) {
+            throw new IllegalArgumentException("Setting preference for key "+key+" but there is no converter associated!");
+        }
+        if(preferenceObject == null) {
+            unsetPreference(username, key);
+        } else {
+            try {
+                String stringPreference = preferenceConverter.toPreferenceString(preferenceObject);
+                setPreferenceInternal(username, key, stringPreference);
+                setPreferenceObjectInternal(username, key, preferenceObject);
+            } catch (Throwable t) {
+                logger.log(Level.SEVERE, "Error while converting preference for key " + key + " from Object \""
+                        + preferenceObject + "\"", t);
+            }
+        }
+    }
+
+    private void notifyListenersOnPreferenceObjectChange(String username, String key, Object oldPreference,
+            Object newPreference) {
+        synchronized (listeners) {
+            for (PreferenceObjectListener<? extends Object> listener : Util.get(listeners, key,
+                    Collections.<PreferenceObjectListener<? extends Object>> emptySet())) {
+                @SuppressWarnings("unchecked")
+                PreferenceObjectListener<Object> listenerToFire = (PreferenceObjectListener<Object>) listener;
+                listenerToFire.preferenceObjectChanged(username, key, oldPreference, newPreference);
+            }
+        }
+    }
+
+    @Override
+    public void addPreferenceObjectListener(String key, PreferenceObjectListener<? extends Object> listener,
+            boolean fireForAlreadyExistingPreferences) {
+        synchronized (listeners) {
+            Util.addToValueSet(listeners, key, listener);
+            if (fireForAlreadyExistingPreferences) {
+                final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+                for (String username : usersToProcess) {
+                    Map<String, Object> userMap = preferenceObjects.get(username);
+                    if (userMap != null) {
+                        Object preferenceObject = userMap.get(key);
+                        if (preferenceObject != null) {
+                            @SuppressWarnings("unchecked")
+                            PreferenceObjectListener<Object> listenerToFire = (PreferenceObjectListener<Object>) listener;
+                            listenerToFire.preferenceObjectChanged(username, key, null, preferenceObject);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void removePreferenceObjectListener(PreferenceObjectListener<?> listener) {
+        synchronized (listeners) {
+            Util.removeFromAllValueSets(listeners, listener);
+        }
     }
 }

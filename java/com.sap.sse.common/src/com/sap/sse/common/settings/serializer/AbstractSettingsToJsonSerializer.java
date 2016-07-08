@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sse.common.settings.CollectionSetting;
-import com.sap.sse.common.settings.Setting;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.settings.SettingsListSetting;
-import com.sap.sse.common.settings.ValueCollectionSetting;
-import com.sap.sse.common.settings.ValueConverter;
-import com.sap.sse.common.settings.ValueSetting;
+import com.sap.sse.common.settings.generic.CollectionSetting;
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
+import com.sap.sse.common.settings.generic.Setting;
+import com.sap.sse.common.settings.generic.SettingsListSetting;
+import com.sap.sse.common.settings.generic.ValueCollectionSetting;
+import com.sap.sse.common.settings.generic.ValueConverter;
+import com.sap.sse.common.settings.generic.ValueSetting;
 
 /**
  * Base class for {@link Settings} serializers that produce JSON objects using some generic object model. This base
@@ -36,7 +37,7 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
 
     protected abstract Iterable<Object> fromJsonArray(ARRAY jsonArray);
 
-    public OBJECT serialize(Settings settings) {
+    public OBJECT serialize(GenericSerializableSettings settings) {
         final OBJECT jsonObject = newOBJECT();
         for (Map.Entry<String, Setting> entry : settings.getChildSettings().entrySet()) {
             Setting setting = entry.getValue();
@@ -52,8 +53,8 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
             return serializeValueSetting((ValueSetting<?>) setting);
         } else if (setting instanceof CollectionSetting) {
             return serializeListSetting((CollectionSetting<?>) setting);
-        } else if (setting instanceof Settings) {
-            return serialize((Settings) setting);
+        } else if (setting instanceof GenericSerializableSettings) {
+            return serialize((GenericSerializableSettings) setting);
         } else {
             throw new IllegalStateException("Unknown Setting type");
         }
@@ -73,7 +74,7 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
             }
         } else if (listSetting instanceof SettingsListSetting) {
             SettingsListSetting<?> settingsListSetting = (SettingsListSetting<?>) listSetting;
-            for (Settings value : settingsListSetting.getValues()) {
+            for (GenericSerializableSettings value : settingsListSetting.getValues()) {
                 jsonValues.add(serialize(value));
             }
         } else {
@@ -82,7 +83,7 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
         return ToJsonArray(jsonValues);
     }
 
-    public <T extends Settings> T deserialize(T settings, OBJECT json) {
+    public <T extends GenericSerializableSettings> T deserialize(T settings, OBJECT json) {
         if (json != null) {
             for (Map.Entry<String, Setting> entry : settings.getChildSettings().entrySet()) {
                 Setting setting = entry.getValue();
@@ -100,15 +101,15 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
             deserializeValueSetting(jsonValue, (ValueSetting<?>) setting);
         } else if (setting instanceof CollectionSetting) {
             deserializeListSetting(jsonValue, (CollectionSetting<?>) setting);
-        } else if (setting instanceof Settings) {
-            deserializeObject((Settings) setting, jsonValue);
+        } else if (setting instanceof GenericSerializableSettings) {
+            deserializeObject((GenericSerializableSettings) setting, jsonValue);
         } else {
             throw new IllegalStateException("Unknown Setting type");
         }
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Settings> T deserializeObject(T setting, Object jsonValue) {
+    private <T extends GenericSerializableSettings> T deserializeObject(T setting, Object jsonValue) {
         return deserialize(setting, (OBJECT) jsonValue);
     }
 
@@ -134,7 +135,7 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
         }
     }
 
-    private <T extends Settings> void deserializeSettingsListSetting(ARRAY jsonArray, SettingsListSetting<T> settingsListSetting) {
+    private <T extends GenericSerializableSettings> void deserializeSettingsListSetting(ARRAY jsonArray, SettingsListSetting<T> settingsListSetting) {
         List<T> values = new ArrayList<>();
         for (Object value : fromJsonArray(jsonArray)) {
             values.add(deserializeObject(settingsListSetting.getSettingsFactory().newInstance(), value));

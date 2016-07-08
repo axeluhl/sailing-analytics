@@ -9,29 +9,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.sap.sse.common.settings.HasValueSetting;
-import com.sap.sse.common.settings.Setting;
-import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.settings.SettingsListSetting;
-import com.sap.sse.common.settings.ValueConverter;
-import com.sap.sse.common.settings.ValueCollectionSetting;
-import com.sap.sse.common.settings.ValueSetting;
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
+import com.sap.sse.common.settings.generic.HasValueSetting;
+import com.sap.sse.common.settings.generic.Setting;
+import com.sap.sse.common.settings.generic.SettingsListSetting;
+import com.sap.sse.common.settings.generic.ValueCollectionSetting;
+import com.sap.sse.common.settings.generic.ValueConverter;
+import com.sap.sse.common.settings.generic.ValueSetting;
 
 /**
- * {@link Settings} serializer that constructs flattened String keys with associated String values from the hierarchical
- * {@link Settings} structures. This is necessary for cases where hierarchical structures aren't mappable (e.g. URL
+ * {@link GenericSerializableSettings} serializer that constructs flattened String keys with associated String values from the hierarchical
+ * {@link GenericSerializableSettings} structures. This is necessary for cases where hierarchical structures aren't mappable (e.g. URL
  * serialization).
  *
  */
 public class SettingsToStringMapSerializer {
 
-    public Map<String, Iterable<String>> serialize(Settings settings) {
+    public Map<String, Iterable<String>> serialize(GenericSerializableSettings settings) {
         final Map<String, Iterable<String>> result = new HashMap<>();
         serialize("", settings, result);
         return result;
     }
 
-    private void serialize(String prefix, Settings settings, Map<String, Iterable<String>> serialized) {
+    private void serialize(String prefix, GenericSerializableSettings settings, Map<String, Iterable<String>> serialized) {
         for (Map.Entry<String, Setting> entry : settings.getChildSettings().entrySet()) {
             final Setting setting = entry.getValue();
             if (!setting.isDefaultValue()) {
@@ -47,9 +47,9 @@ public class SettingsToStringMapSerializer {
         } else if (setting instanceof ValueCollectionSetting) {
             serialized.put(key, serializeValueListSetting(key, (ValueCollectionSetting<?>) setting));
         } else {
-            String prefix = key + Settings.PATH_SEPARATOR;
-            if (setting instanceof Settings) {
-                serialize(prefix, (Settings) setting, serialized);
+            String prefix = key + GenericSerializableSettings.PATH_SEPARATOR;
+            if (setting instanceof GenericSerializableSettings) {
+                serialize(prefix, (GenericSerializableSettings) setting, serialized);
             } else if (setting instanceof SettingsListSetting) {
                 serializeSettingsListSetting(prefix, (SettingsListSetting<?>) setting, serialized);
             } else {
@@ -58,11 +58,11 @@ public class SettingsToStringMapSerializer {
         }
     }
 
-    private <T extends Settings> void serializeSettingsListSetting(String prefix, SettingsListSetting<T> setting,
+    private <T extends GenericSerializableSettings> void serializeSettingsListSetting(String prefix, SettingsListSetting<T> setting,
             Map<String, Iterable<String>> serialized) {
         int index = 0;
         for (T childSettings : setting.getValues()) {
-            String nestedPrefix = prefix + index + Settings.PATH_SEPARATOR;
+            String nestedPrefix = prefix + index + GenericSerializableSettings.PATH_SEPARATOR;
             serialize(nestedPrefix, childSettings, serialized);
             index++;
         }
@@ -81,7 +81,7 @@ public class SettingsToStringMapSerializer {
         return result;
     }
 
-    public <T extends Settings> T deserialize(T settings, Map<String, Iterable<String>> values) {
+    public <T extends GenericSerializableSettings> T deserialize(T settings, Map<String, Iterable<String>> values) {
         Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
         for (Map.Entry<String, Setting> entry : settings.getChildSettings().entrySet()) {
             final String key = entry.getKey();
@@ -107,8 +107,8 @@ public class SettingsToStringMapSerializer {
         } else {
             final Map<String, Iterable<String>> innerValues = mappedInnerValues.get(key);
             if (innerValues != null) {
-                if (setting instanceof Settings) {
-                    deserialize((Settings) setting, innerValues);
+                if (setting instanceof GenericSerializableSettings) {
+                    deserialize((GenericSerializableSettings) setting, innerValues);
                 } else if (setting instanceof SettingsListSetting) {
                     deserializeSettingsListSetting((SettingsListSetting<?>) setting, innerValues);
                 } else {
@@ -136,7 +136,7 @@ public class SettingsToStringMapSerializer {
         valueSetting.setValues(deserializedValues);
     }
 
-    private <T extends Settings> void deserializeSettingsListSetting(SettingsListSetting<T> valueSetting,
+    private <T extends GenericSerializableSettings> void deserializeSettingsListSetting(SettingsListSetting<T> valueSetting,
             Map<String, Iterable<String>> values) {
         Map<String, Map<String, Iterable<String>>> mappedNestedListValues = mapNestedWithIndexOrder(values);
         List<T> deserializedValues = new ArrayList<>();
@@ -156,7 +156,7 @@ public class SettingsToStringMapSerializer {
         Map<String, Map<String, Iterable<String>>> result = new HashMap<>();
         for (Map.Entry<String, Iterable<String>> entry : values.entrySet()) {
             String key = entry.getKey();
-            int separatorIndex = key.indexOf(Settings.PATH_SEPARATOR);
+            int separatorIndex = key.indexOf(GenericSerializableSettings.PATH_SEPARATOR);
             if (separatorIndex > 0) {
                 String group = key.substring(0, separatorIndex);
                 String nestedKey = key.substring(separatorIndex + 1);

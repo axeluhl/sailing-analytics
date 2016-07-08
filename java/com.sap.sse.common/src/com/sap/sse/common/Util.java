@@ -364,6 +364,19 @@ public class Util {
         }
         map.get(key).add(value);
     }
+    
+    public static <K, V> void removeFromAllValueSets(Map<K, Set<V>> map, V value) {
+        for (Set<V> set : map.values()) {
+            set.remove(value);
+        }
+    }
+    
+    public static <K, V> void removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
+        final Set<V> valuesPerKey = map.get(key);
+        if(valuesPerKey != null) {
+            valuesPerKey.remove(value);
+        }
+    }
 
     public static String join(String separator, String... strings) {
         return joinStrings(separator, Arrays.asList(strings));
