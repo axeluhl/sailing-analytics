@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -25,6 +26,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
@@ -73,7 +75,15 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         }
         
         // read perspective settings parameters from URL
-        final RaceBoardPerspectiveSettings perspectiveSettings = RaceBoardPerspectiveSettings.readSettingsFromURL();
+        final RaceBoardPerspectiveSettings perspectiveSettings = RaceBoardPerspectiveSettings.readSettingsFromURL(
+                /* defaultForViewShowLeaderboard */ true, /* defaultForViewShowWindchart */ false,
+                /* defaultForViewShowCompetitorsChart */ false, /* defaultForViewCompetitorFilter */ null,
+                /* defaultForCanReplayDuringLiveRaces */ false);
+        // Determine if the charts, such as the competitor chart or the wind chart, the edit marks
+        // panels, such as mark passing and mark position editors and manage media buttons should be shown. 
+        // Automatic selection of attached video (if any) also depends on this flag.
+        // The decision is made once during initial page load based on the device type (mobile or not).
+        final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
         
         sailingService.getRaceboardData(regattaName, raceName, leaderboardName, leaderboardGroupName, eventId, new AsyncCallback<RaceboardDataDTO>() {
             @Override
@@ -100,7 +110,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     return;
                 }
 
-                createPerspectivePage(raceboardData, perspectiveSettings);
+                createPerspectivePage(raceboardData, perspectiveSettings, showChartMarkEditMediaButtonsAndVideo);
             }
             
             @Override
@@ -119,7 +129,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         vp.add(new Label(message));
     }
 
-    private void createPerspectivePage(RaceboardDataDTO raceboardData, RaceBoardPerspectiveSettings perspectiveSettings) {
+    private void createPerspectivePage(RaceboardDataDTO raceboardData, RaceBoardPerspectiveSettings perspectiveSettings,
+            boolean showChartMarkEditMediaButtonsAndVideo) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
         Timer timer = new Timer(PlayModes.Replay, 1000l);
@@ -128,13 +139,18 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
   
         RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE);
+        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> defaultSettings = raceboardPerspectiveLifecycle.createDefaultSettings();
+        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveCompositeSettings = 
+                new PerspectiveCompositeSettings<>(perspectiveSettings, defaultSettings.getSettingsPerComponentId());
+        
         PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle,
-                raceboardPerspectiveLifecycle.createDefaultSettings());
+                perspectiveCompositeSettings);
 
-        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(
-                raceboardPerspectiveLifecyclesAndSettings, sailingService, mediaService, getUserService(),
-                asyncActionsExecutor,  raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,
-                leaderboardGroupName, eventId, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider);
+        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(raceboardPerspectiveLifecyclesAndSettings,
+                sailingService, mediaService, getUserService(), asyncActionsExecutor,
+                raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,
+                leaderboardGroupName, eventId, RaceBoardEntryPoint.this, getStringMessages(), userAgent,
+                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo);
 
         RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
     }  

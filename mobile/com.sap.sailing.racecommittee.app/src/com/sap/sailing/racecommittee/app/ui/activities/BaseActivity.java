@@ -39,7 +39,7 @@ public class BaseActivity extends SendingServiceAwareActivity {
         AppUtils.lockOrientation(this);
         ThemeHelper.setTheme(this);
 
-        preferences = AppPreferences.on(getApplicationContext());
+        preferences = AppPreferences.on(this);
     }
 
     @Override
@@ -108,6 +108,9 @@ public class BaseActivity extends SendingServiceAwareActivity {
     }
 
     public AppPreferences getPreferences() {
+        if (preferences == null) {
+            preferences = AppPreferences.on(this);
+        }
         return preferences;
     }
 

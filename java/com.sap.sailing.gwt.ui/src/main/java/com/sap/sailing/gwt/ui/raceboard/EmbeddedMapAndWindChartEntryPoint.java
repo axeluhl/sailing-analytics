@@ -63,8 +63,6 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     private static final String PARAM_FLEET_NAME = "fleetName";
     private static final String PARAM_SHOW_COMPETITORS = "showCompetitors";
     private static final String PARAM_PLAY = "play";
-    private static final String PARAM_SHOW_COURSE_GEOMETRY = "showCourseGeometry";
-    private static final String PARAM_MAP_ORIENTATION_WIND_UP = "windUp";
     
     private String regattaLikeName;
     private String raceColumnName;
@@ -88,12 +86,36 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         }
         
         // read optional parameters
-        final RaceBoardPerspectiveSettings raceboardPerspectiveSettings = RaceBoardPerspectiveSettings.readSettingsFromURL();
-        final RaceMapSettings raceMapSettings = RaceMapSettings.readSettingsFromURL(); 
+        final RaceBoardPerspectiveSettings raceboardPerspectiveSettings = RaceBoardPerspectiveSettings
+                .readSettingsFromURL(/* defaultForViewShowLeaderboard */ true, /* defaultForViewShowWindchart */ true,
+                        /* defaultForViewShowCompetitorsChart */ false, /* defaultForViewCompetitorFilter */ null,
+                        /* defaultForCanReplayDuringLiveRaces */ false);
+        final RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL(
+                /* defaultForShowMapControls */ true, /* defaultForShowCourseGeometry */ true,
+                /* defaultForMapOrientationWindUp */ true, /* defaultForViewShowStreamlets */ false,
+                /* defaultForViewShowStreamletColors */ false, /* defaultForViewShowSimulation */ false);
         final boolean showCompetitors = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_COMPETITORS, false /* default */);
         final boolean play = GwtHttpRequestUtils.getBooleanParameter(PARAM_PLAY, false /* default */);
-        final boolean showCourseGeometry = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_COURSE_GEOMETRY, true /* default */);
-        final boolean windUp = GwtHttpRequestUtils.getBooleanParameter(PARAM_MAP_ORIENTATION_WIND_UP, true /* default */);
+        final boolean showCourseGeometry = GwtHttpRequestUtils.getBooleanParameter(RaceMapSettings.PARAM_SHOW_COURSE_GEOMETRY, true /* default */);
+        final boolean windUp = GwtHttpRequestUtils.getBooleanParameter(RaceMapSettings.PARAM_MAP_ORIENTATION_WIND_UP, true /* default */);
+        
+        RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false);
+        Set<HelpLineTypes> helpLineTypes = new HashSet<>();
+        Util.addAll(defaultRaceMapSettings.getHelpLinesSettings().getVisibleHelpLineTypes(), helpLineTypes);
+        if (showCourseGeometry) {
+            helpLineTypes.add(HelpLineTypes.COURSEGEOMETRY);
+        }
+        RaceMapHelpLinesSettings raceMapHelpLinesSettings = new RaceMapHelpLinesSettings(helpLineTypes);
+
+        final RaceMapSettings raceMapSettings = new RaceMapSettings(raceMapZoomSettings, raceMapHelpLinesSettings,
+                defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
+                defaultRaceMapSettings.getTailLengthInMilliseconds(), windUp,
+                defaultRaceMapSettings.getBuoyZoneRadiusInMeters(), defaultRaceMapSettings.isShowOnlySelectedCompetitors(),
+                defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
+                defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
+                defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
+                defaultRaceMapSettings.isShowDouglasPeuckerPoints());
+        
         sailingService.getRaceIdentifier(regattaLikeName, raceColumnName, fleetName, new AsyncCallback<RegattaAndRaceIdentifier>() {
             @Override
             public void onSuccess(final RegattaAndRaceIdentifier selectedRaceIdentifier) {
@@ -104,7 +126,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                         @Override
                         public void onSuccess(Map<CompetitorDTO, BoatDTO> result) {
                             createEmbeddedMap(selectedRaceIdentifier, result, raceboardPerspectiveSettings, raceMapSettings, 
-                                              showCompetitors, play, showCourseGeometry, windUp);
+                                              showCompetitors, play);
                         }
                         
                         @Override
@@ -133,7 +155,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
 
     private void createEmbeddedMap(final RegattaAndRaceIdentifier selectedRaceIdentifier, Map<CompetitorDTO, BoatDTO> competitorBoats,
             final RaceBoardPerspectiveSettings raceboardPerspectiveSettings, final RaceMapSettings raceMapSettings, 
-            final boolean showCompetitors, final boolean play, final boolean showCourseGeometry, final boolean windUp) {
+            final boolean showCompetitors, final boolean play) {
         final StringBuilder title = new StringBuilder(regattaLikeName);
         title.append('/');
         title.append(raceColumnName);
@@ -177,23 +199,13 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         }
         final RaceMap raceMap = new RaceMap(new RaceMapLifecycle(getStringMessages()), raceMapSettings, sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, getStringMessages(), selectedRaceIdentifier, raceMapResources,
-                raceboardPerspectiveSettings.isSimulationEnabled(), /* showHeaderPanel */ false) {
+                /* showHeaderPanel */ false) {
             @Override
             protected void showAdditionalControls(MapWidget map) {
                 backToLivePlayButton.removeFromParent();
                 map.setControls(ControlPosition.RIGHT_BOTTOM, backToLivePlayButton);
             }
         };
-        final RaceMapSettings mapSettings = new RaceMapSettings(raceMap.getSettings());
-        mapSettings.setZoomSettings(new RaceMapZoomSettings(Arrays.asList(ZoomTypes.BUOYS), /* zoom to selection */ false));
-        if (showCourseGeometry) {
-            Set<HelpLineTypes> helpLineTypes = new HashSet<>();
-            Util.addAll(mapSettings.getHelpLinesSettings().getVisibleHelpLineTypes(), helpLineTypes);
-            helpLineTypes.add(HelpLineTypes.COURSEGEOMETRY);
-            mapSettings.setHelpLinesSettings(new RaceMapHelpLinesSettings(helpLineTypes));
-        }
-        mapSettings.setWindUp(windUp);
-        raceMap.updateSettings(mapSettings);
         final WindChart windChart;
         if (raceboardPerspectiveSettings.isShowWindChart()) {
             windChart = new WindChart(new WindChartLifecycle(getStringMessages()), sailingService, selectedRaceIdentifier, timer,

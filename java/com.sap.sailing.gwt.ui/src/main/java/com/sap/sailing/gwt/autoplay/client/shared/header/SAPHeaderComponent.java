@@ -23,7 +23,7 @@ public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComp
         sapHeader.setHeaderTitle(settings.getTitle());
         initWidget(sapHeader);
         
-        if(startInAutoScreenMode) {
+        if (startInAutoScreenMode) {
             Scheduler.get().scheduleFixedPeriod(new RepeatingCommand() {
                 public boolean execute () {
                     FullscreenUtil.requestFullscreen();

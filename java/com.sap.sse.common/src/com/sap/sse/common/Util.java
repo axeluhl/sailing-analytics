@@ -2,6 +2,7 @@ package com.sap.sse.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -364,7 +365,11 @@ public class Util {
         map.get(key).add(value);
     }
 
-    public static String join(String separator, String...strings) {
+    public static String join(String separator, String... strings) {
+        return joinStrings(separator, Arrays.asList(strings));
+    }
+
+    public static String joinStrings(String separator, Iterable<String> strings) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for (String string : strings) {

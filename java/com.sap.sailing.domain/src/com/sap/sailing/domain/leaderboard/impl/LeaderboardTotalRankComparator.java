@@ -113,6 +113,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         // the competitor scored in this or any subsequent columns
         boolean needToResetO1ScoreUponNextValidResult = false;
         boolean needToResetO2ScoreUponNextValidResult = false;
+        int defaultFleetBasedComparisonResult = 0; // relevant if no authoritative fleet-based comparison result was determined; based on extreme fleet vs. no fleet comparison
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
             needToResetO1ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
             needToResetO2ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
@@ -173,12 +174,19 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     preemptiveColumnResult = compareByMedalRaceParticipation(o1Score, o2Score);
                 }
                 if (preemptiveColumnResult == 0 && raceColumn.isTotalOrderDefinedByFleet()) {
-                    preemptiveColumnResult = compareByFleet(raceColumn, o1, o2);
+                    final FleetComparisonResult compareByFleetResult = compareByFleet(raceColumn, o1, o2);
+                    preemptiveColumnResult = compareByFleetResult.getAuthoritativeFleetComparisonResult();
+                    if (defaultFleetBasedComparisonResult == 0) {
+                        defaultFleetBasedComparisonResult = compareByFleetResult.getDefaultFleetComparisonResultBasedOnUnknownFleetAssignment();
+                    }
                 }
                 if (preemptiveColumnResult != 0) {
                     return preemptiveColumnResult;
                 }
             }
+        }
+        if (defaultFleetBasedComparisonResult != 0) {
+            return defaultFleetBasedComparisonResult;
         }
         // now count the races in which they scored; if they scored in a different number of races, prefer the
         // competitor who scored more often; otherwise, prefer the competitor who has a better score sum; if score sums are equal,
@@ -220,27 +228,63 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         }
     }
 
-    private int compareByFleet(RaceColumn raceColumn, Competitor o1, Competitor o2) {
+    private static class FleetComparisonResult {
+        /**
+         * Is non-{@code 0} if the two competitors have been identified as having raced in different fleets in
+         * {@code raceColumn} with those fleets having different {@link Fleet#getOrdering() orderings}.
+         * Evaluation of further comparison criteria is not necessary in this case.
+         */
+        private final int authoritativeFleetComparisonResult;
+        
+        /**
+         * When for one of the two competitors compared the fleet in which she raced in a race column
+         * could not be determined and the other competitor can be identified as having competed in the
+         * best or in the worst fleet in that column, a default comparison result is derived from this
+         * such that the competitor with the unknown fleet assignment would be considered worse than
+         * a participant of the best, and better than a participant of the worst fleet.<p>
+         * 
+         * This result only has relevance if no non-{@code 0} authoritative result can be acquired across
+         * all columns of the leaderboard.
+         */
+        private final int defaultFleetComparisonResultBasedOnUnknownFleetAssignment;
+
+        public FleetComparisonResult(int authoritativeFleetComparisonResult,
+                int defaultFleetComparisonResultBasedOnUnknownFleetAssignment) {
+            super();
+            this.authoritativeFleetComparisonResult = authoritativeFleetComparisonResult;
+            this.defaultFleetComparisonResultBasedOnUnknownFleetAssignment = defaultFleetComparisonResultBasedOnUnknownFleetAssignment;
+        }
+
+        public int getAuthoritativeFleetComparisonResult() {
+            return authoritativeFleetComparisonResult;
+        }
+
+        public int getDefaultFleetComparisonResultBasedOnUnknownFleetAssignment() {
+            return defaultFleetComparisonResultBasedOnUnknownFleetAssignment;
+        }
+    }
+    
+    private FleetComparisonResult compareByFleet(RaceColumn raceColumn, Competitor o1, Competitor o2) {
         Fleet o1f = raceColumn.getFleetOfCompetitor(o1);
         Fleet o2f = raceColumn.getFleetOfCompetitor(o2);
         // if the fleet for both was identified because both were tracked in this column, then if the fleets
         // don't compare equal, return the fleet comparison as result immediately. Example: o1 competed in Gold fleet,
         // o2 in Silver fleet; Gold compares better to Silver, so o1 is compared better to o2.
-        int result = 0;
+        final FleetComparisonResult result;
         if (o1f != null) {
             if (o2f != null) {
-                if (o1f.compareTo(o2f) != 0) {
-                    result = o1f.compareTo(o2f);
-                }
+                result = new FleetComparisonResult(o1f.compareTo(o2f), 0);
             } else {
                 // check if o1's fleet is best or worst in column; in that case, o1's membership in this fleet and the fact
                 // that o2 is not part of that fleet determines the result
-                result = extremeFleetComparison(raceColumn, o1f);
+                result = new FleetComparisonResult(0, extremeFleetComparison(raceColumn, o1f));
             }
         } else if (o2f != null) {
-            // check if o1's fleet is best or worst in column; in that case, o1's membership in this fleet and the fact
-            // that o2 is not part of that fleet determines the result
-            result = -extremeFleetComparison(raceColumn, o2f);
+            // check if o2's fleet is best or worst in column; in that case, o2's membership in this fleet and the fact
+            // that o1 is not part of that fleet determines the result
+            result = new FleetComparisonResult(0, -extremeFleetComparison(raceColumn, o2f));
+        } else {
+            result = new FleetComparisonResult(0, 0);
         }
         return result;
     }

@@ -62,6 +62,8 @@ public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
             }
         } else if (!item.isEnabled()) {
             mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_white_10));
+        } else {
+            mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
         }
 
         if (!TextUtils.isEmpty(item.getSubtext())) {
