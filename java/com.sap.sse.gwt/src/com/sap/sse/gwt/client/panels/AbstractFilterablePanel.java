@@ -1,8 +1,6 @@
 package com.sap.sse.gwt.client.panels;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -15,6 +13,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 /**
  * This Panel contains a text box. Text entered into the text box filters the {@link CellTable} passed to
@@ -35,7 +37,7 @@ import com.sap.sse.common.filter.AbstractListFilter;
  * 
  */
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
-    protected List<T> all;
+    protected ListDataProvider<T> all;
     protected final AbstractCellTable<T> display;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
@@ -55,6 +57,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      */
     public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
         setSpacing(5);
+        this.all = new ListDataProvider<>();
         this.display = display;
         this.filtered = filtered;
         this.textBox = new TextBox();
@@ -71,10 +74,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     }
     
     private void setAll(Iterable<T> all) {
-        this.all = new ArrayList<T>();
+        this.all.getList().clear();
         if (all != null) {
             for (T t : all) {
-                this.all.add(t);
+                this.all.getList().add(t);
             }
         }
     }
@@ -102,7 +105,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * Adds an object and applies the search filter.
      */
     public void add(T object) {
-        all.add(object);
+        all.getList().add(object);
         filter();
     }
 
@@ -110,7 +113,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * Adds an object at a certain position and applies the search filter.
      */
     public void add(int index, T object) {
-        all.add(index, object);
+        all.getList().add(index, object);
         filter();
     }
     
@@ -118,19 +121,19 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * Returns the index of the first occurrence of the specified element in this list, or -1 if this list does not contain the element.
      */
     public int indexOf(T object) {
-        return all.indexOf(object);
+        return all.getList().indexOf(object);
     }
     
     /**
      * Removes an object and applies the search filter.
      */
     public void remove(T object) {
-        all.remove(object);
+        all.getList().remove(object);
         filter();
     }
     
     public void addAll(Iterable<T> objects) {
-        Util.addAll(objects, all);
+        Util.addAll(objects, all.getList());
         filter();
     }
     
@@ -140,18 +143,19 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * <code>removeAll(all)</code> with <code>all</code> being a copy of what you get when calling {@link #getAll()}.
      */
     public void removeAll() {
-        all.clear();
+        all.getList().clear();
         filter();
     }
     
     public void removeAll(Iterable<T> objects) {
-        Util.removeAll(objects, all);
+        Util.removeAll(objects, all.getList());
         filter();
     }
     
     public void filter() {
         filtered.getList().clear();
-        Util.addAll(filterer.applyFilter(Arrays.asList(getTextBox().getText().split(" ")), all), filtered.getList());
+        Util.addAll(filterer.applyFilter(Arrays.asList(getTextBox().getText().split(" ")), all.getList()),
+                filtered.getList());
         filtered.refresh();
         sort();
     }
@@ -165,6 +169,31 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     }
     
     public Iterable<T> getAll() {
+        return all.getList();
+    }
+    
+    /**
+     * Registers a {@link RefreshableSelectionModel} on the all data structure. So the selection can be maintained when
+     * the {@link CellTable} is filtered.
+     * 
+     * @param comp
+     *            {@link EntityIdentityComparator Comperator} to create the {@link RefreshableSelectionModel selection
+     *            model}
+     * @param multiselection
+     *            set <code>true</code> when the {@link RefreshableSelectionModel selection model} should be a
+     *            {@link RefreshableMultiSelectionModel}. When it´s set <code>false</code> the
+     *            {@link RefreshableSelectionModel selection model} will be a {@link RefreshableSingleSelectionModel}.
+     */
+    public RefreshableSelectionModel<T> registerSelectionModelOnAllElements(EntityIdentityComparator<T> comp,
+            boolean multiselection) {
+        if (multiselection) {
+            return new RefreshableMultiSelectionModel<>(comp, all);
+        } else {
+            return new RefreshableSingleSelectionModel<>(comp, all);
+        }
+    }
+
+    public ListDataProvider<T> getListDataProvider() {
         return all;
     }
 }
