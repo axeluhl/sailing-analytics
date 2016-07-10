@@ -64,11 +64,9 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         remoteServersPanel.setContentWidget(remoteServersContentPanel);
         
         serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
-        CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createRemoteServersTable();
-        serverDataProvider.addDataDisplay(remoteServersTable);
-
         filteredServerTablePanel = new LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO>(
-                new Label(stringMessages.filterBy() + ":"), Collections.<RemoteSailingServerReferenceDTO>emptyList(), remoteServersTable, serverDataProvider) {
+                new Label(stringMessages.filterBy() + ":"), Collections.<RemoteSailingServerReferenceDTO> emptyList(),
+                new CellTable<RemoteSailingServerReferenceDTO>(), serverDataProvider) {
             @Override
             public List<String> getSearchableStrings(RemoteSailingServerReferenceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -82,6 +80,9 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                 return strings;
             }
         };
+        CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createRemoteServersTable();
+        filteredServerTablePanel.setTable(remoteServersTable);
+        serverDataProvider.addDataDisplay(remoteServersTable);
 
         remoteServersContentPanel.add(filteredServerTablePanel);
         remoteServersContentPanel.add(remoteServersTable);
@@ -173,7 +174,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                     public int hashCode(RemoteSailingServerReferenceDTO t) {
                         return t.getUrl().hashCode();
                     }
-                }, serverDataProvider);
+                }, filteredServerTablePanel.getListDataProvider());
         serverTable.setSelectionModel(refreshableServerSelectionModel);
 
         return serverTable;

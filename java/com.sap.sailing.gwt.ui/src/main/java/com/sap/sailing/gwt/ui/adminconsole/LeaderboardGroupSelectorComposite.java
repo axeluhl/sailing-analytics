@@ -36,6 +36,8 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class LeaderboardGroupSelectorComposite extends Composite implements HasValueChangeHandlers<Iterable<LeaderboardGroupDTO>> {
@@ -47,7 +49,7 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
     
     private LabeledAbstractFilterablePanel<LeaderboardGroupDTO> availableLeaderboardGroupsFilterablePanel;
     private CellTable<LeaderboardGroupDTO> availableLeaderboardGroupsTable;
-    private MultiSelectionModel<LeaderboardGroupDTO> availableLeaderboardGroupsSelectionModel;
+    private RefreshableMultiSelectionModel<LeaderboardGroupDTO> availableLeaderboardGroupsSelectionModel;
     private ListDataProvider<LeaderboardGroupDTO> availableLeaderboardGroupsProvider;
 
     private List<LeaderboardGroupDTO> availableLeaderboardGroups;
@@ -136,14 +138,6 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
     private Widget createAvailableLeaderboardGroupsPanel() {
         availableLeaderboardGroupsTable = new BaseCelltable<LeaderboardGroupDTO>(10000000, tableRes);
         CaptionPanel result = new CaptionPanel(stringMessages.availableLeaderboardGroups());
-        availableLeaderboardGroupsSelectionModel = new MultiSelectionModel<>();
-        availableLeaderboardGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                addToEventButton.setEnabled(!availableLeaderboardGroupsSelectionModel.getSelectedSet().isEmpty());
-            }
-        });
-        availableLeaderboardGroupsTable.setSelectionModel(availableLeaderboardGroupsSelectionModel);
         availableLeaderboardGroupsProvider = new ListDataProvider<>();
         availableLeaderboardGroupsProvider.setList(availableLeaderboardGroups);
         availableLeaderboardGroupsProvider.addDataDisplay(availableLeaderboardGroupsTable);
@@ -157,6 +151,26 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
                 return result;
             }
         };
+        availableLeaderboardGroupsSelectionModel = new RefreshableMultiSelectionModel<>(
+                new EntityIdentityComparator<LeaderboardGroupDTO>() {
+
+                    @Override
+                    public boolean representSameEntity(LeaderboardGroupDTO dto1, LeaderboardGroupDTO dto2) {
+                        return dto1.getName().equals(dto2.getName());
+                    }
+
+                    @Override
+                    public int hashCode(LeaderboardGroupDTO t) {
+                        return t.getName().hashCode();
+                    }
+                }, availableLeaderboardGroupsFilterablePanel.getListDataProvider());
+        availableLeaderboardGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                addToEventButton.setEnabled(!availableLeaderboardGroupsSelectionModel.getSelectedSet().isEmpty());
+            }
+        });
+        availableLeaderboardGroupsTable.setSelectionModel(availableLeaderboardGroupsSelectionModel);
         VerticalPanel vp = new VerticalPanel();
         vp.add(availableLeaderboardGroupsFilterablePanel);
         vp.add(availableLeaderboardGroupsTable);

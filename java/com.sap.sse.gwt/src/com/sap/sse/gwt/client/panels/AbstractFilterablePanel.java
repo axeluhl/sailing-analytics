@@ -38,7 +38,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
  */
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected ListDataProvider<T> all;
-    protected final AbstractCellTable<T> display;
+    protected AbstractCellTable<T> display;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
     
@@ -195,5 +195,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
 
     public ListDataProvider<T> getListDataProvider() {
         return all;
+    }
+    
+    public void setTable(AbstractCellTable<T> table) {
+        display = table;
     }
 }

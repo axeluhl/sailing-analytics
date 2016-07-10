@@ -264,27 +264,6 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
         raceTable.setWidth("300px");
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
-        raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingRaceRecordDTO>(
-                new EntityIdentityComparator<SwissTimingRaceRecordDTO>() {
-                    @Override
-                    public boolean representSameEntity(SwissTimingRaceRecordDTO dto1, SwissTimingRaceRecordDTO dto2) {
-                        return dto1.raceId.equals(dto2.raceId);
-                    }
-                    @Override
-                    public int hashCode(SwissTimingRaceRecordDTO t) {
-                        return t.raceId.hashCode();
-                    }
-                }, raceList) {
-        });
-
-        trackableRacesPanel.add(raceTable);
-        raceList.addDataDisplay(raceTable);
-        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), regattaNameColumn, seriesNameColumn,
-        		raceNameColumn, raceStartTimeColumn, raceIdColumn, boatClassColumn, genderColumn, raceStatusColumn);
-        raceTable.addColumnSortHandler(columnSortHandler);
-        
-        trackedRacesPanel.add(trackedRacesListComposite);
-        
         filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO>(lblFilterEvents,
                 availableSwissTimingRaces, raceTable, raceList) {
             @Override
@@ -302,6 +281,26 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 return strings;
             }
         };
+        raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingRaceRecordDTO>(
+                new EntityIdentityComparator<SwissTimingRaceRecordDTO>() {
+                    @Override
+                    public boolean representSameEntity(SwissTimingRaceRecordDTO dto1, SwissTimingRaceRecordDTO dto2) {
+                        return dto1.raceId.equals(dto2.raceId);
+                    }
+                    @Override
+                    public int hashCode(SwissTimingRaceRecordDTO t) {
+                        return t.raceId.hashCode();
+                    }
+                }, filterablePanelEvents.getListDataProvider()) {
+        });
+
+        trackableRacesPanel.add(raceTable);
+        raceList.addDataDisplay(raceTable);
+        Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), regattaNameColumn, seriesNameColumn,
+        		raceNameColumn, raceStartTimeColumn, raceIdColumn, boatClassColumn, genderColumn, raceStatusColumn);
+        raceTable.addColumnSortHandler(columnSortHandler);
+        
+        trackedRacesPanel.add(trackedRacesListComposite);
         filterPanel.add(filterablePanelEvents);
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
         trackableRacesPanel.add(racesButtonPanel);
