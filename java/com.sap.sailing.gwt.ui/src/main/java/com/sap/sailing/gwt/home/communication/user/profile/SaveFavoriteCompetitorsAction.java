@@ -33,8 +33,8 @@ public class SaveFavoriteCompetitorsAction implements SailingAction<VoidResult> 
     public VoidResult execute(SailingDispatchContext ctx) throws DispatchException {
         CompetitorNotificationPreferences prefs = new CompetitorNotificationPreferences(ctx.getRacingEventService());
         List<CompetitorNotificationPreference> competitorPreferences = new ArrayList<>();
+        CompetitorStore competitorStore = ctx.getRacingEventService().getCompetitorStore();
         for (SimpleCompetitorWithIdDTO competitorDTO : favorites.getSelectedCompetitors()) {
-            CompetitorStore competitorStore = ctx.getRacingEventService().getCompetitorStore();
             Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(competitorDTO.getIdAsString());
             competitorPreferences.add(new CompetitorNotificationPreference(competitorStore, competitor,
                     favorites.isNotifyAboutResults()));

@@ -33,8 +33,8 @@ public class SaveFavoriteBoatClassesAction implements SailingAction<VoidResult> 
     public VoidResult execute(SailingDispatchContext ctx) throws DispatchException {
         BoatClassNotificationPreferences prefs = new BoatClassNotificationPreferences(ctx.getRacingEventService());
         List<BoatClassNotificationPreference> boatClassPreferences = new ArrayList<>();
+        DomainFactory domainFactory = ctx.getRacingEventService().getBaseDomainFactory();
         for (BoatClassDTO boatClassDTO : favorites.getSelectedBoatClasses()) {
-            DomainFactory domainFactory = ctx.getRacingEventService().getBaseDomainFactory();
             BoatClass boatClass = domainFactory.getOrCreateBoatClass(boatClassDTO.getName());
             boatClassPreferences.add(new BoatClassNotificationPreference(domainFactory, boatClass, 
                     favorites.isNotifyAboutUpcomingRaces(), favorites.isNotifyAboutResults()));
