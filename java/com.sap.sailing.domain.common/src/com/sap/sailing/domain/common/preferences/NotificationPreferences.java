@@ -6,9 +6,9 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
  * Preferences for Sailing users that define for which Objects a user wants to receive specific notifications.
  * This currently includes:
  * <ul>
- *   <li>Results for a favourite Competitor</li>
- *   <li>Results for a favourite BoatClass</li>
- *   <li>Upcoming races for a favourite BoatClass</li>
+ *   <li>Results for a favorite Competitor</li>
+ *   <li>Results for a favorite BoatClass</li>
+ *   <li>Upcoming races for a favorite BoatClass</li>
  * </ul>
  */
 public class NotificationPreferences extends AbstractGenericSerializableSettings {

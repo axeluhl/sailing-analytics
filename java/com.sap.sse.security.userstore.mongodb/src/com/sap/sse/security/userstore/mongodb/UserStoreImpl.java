@@ -68,7 +68,7 @@ public class UserStoreImpl implements UserStore {
      */
     private final ConcurrentHashMap<String, Map<String, Object>> preferenceObjects;
     
-    private transient Map<String, Set<PreferenceObjectListener<? extends Object>>> listeners;
+    private transient Map<String, Set<PreferenceObjectListener<?>>> listeners;
     
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
@@ -532,8 +532,8 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void registerPreferenceConverter(String preferenceKey, PreferenceConverter<?> converter) {
         PreferenceConverter<?> alreadyAssociatedConverter = preferenceConverters.putIfAbsent(preferenceKey, converter);
-        
-        if(alreadyAssociatedConverter == null) {
+
+        if (alreadyAssociatedConverter == null) {
             final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
             for (String user : usersToProcess) {
                 loadPreferenceWithConverter(user, preferenceKey, converter);
@@ -605,7 +605,7 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public <T> void setPreferenceObject(String username, String key, Object preferenceObject)
+    public void setPreferenceObject(String username, String key, Object preferenceObject)
             throws IllegalArgumentException {
         @SuppressWarnings("unchecked")
         PreferenceConverter<Object> preferenceConverter = (PreferenceConverter<Object>) preferenceConverters.get(key);

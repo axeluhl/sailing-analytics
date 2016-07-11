@@ -76,7 +76,7 @@ public interface UserStore extends Named {
      * 
      * @throws IllegalArgumentException if there is no {@link PreferenceConverter} registered with the given key.
      */
-    <T> void setPreferenceObject(String username, String key, Object preferenceObject) throws IllegalArgumentException;
+    void setPreferenceObject(String username, String key, Object preferenceObject) throws IllegalArgumentException;
 
     /**
      * Sets a value for a key if that key was previously added to this store using {@link #addSetting(String, Class)}.
