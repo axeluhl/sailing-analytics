@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.common.Stoppable;
 import com.sap.sse.common.Util;
 
 /**
@@ -38,7 +39,7 @@ import com.sap.sse.common.Util;
  * @param <T>
  *            The type of object for which the users to notify is managed.
  */
-public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> {
+public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements Stoppable {
     private static final Logger logger = Logger.getLogger(PreferenceObjectBasedNotificationSet.class.getName());
 
     private final UserStore store;
@@ -54,6 +55,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> {
         store.addPreferenceObjectListener(key, listener, true);
     }
 
+    @Override
     public void stop() {
         store.removePreferenceObjectListener(listener);
     }

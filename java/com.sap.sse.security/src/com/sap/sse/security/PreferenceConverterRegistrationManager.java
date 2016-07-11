@@ -8,6 +8,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.sap.sse.common.Stoppable;
+
 /**
  * Automatically registers/removes {@link PreferenceConverter} instances found in the OSGi service registry on the given
  * {@link UserStore}.
@@ -15,7 +17,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * {@link PreferenceConverter} found are required to have a property with the key
  * {@link PreferenceConverter#KEY_PARAMETER_NAME} defining the preference key the converter should be registered with.
  */
-public class PreferenceConverterRegistrationManager {
+public class PreferenceConverterRegistrationManager implements Stoppable {
     private static final Logger logger = Logger.getLogger(PreferenceConverterRegistrationManager.class.getName());
 
     private final BundleContext context;
@@ -36,6 +38,7 @@ public class PreferenceConverterRegistrationManager {
                 (Class) PreferenceConverter.class, new Cutomizer());
     }
 
+    @Override
     public void stop() {
         tracker.close();
     }
