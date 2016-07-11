@@ -13,10 +13,25 @@ import java.util.logging.Logger;
 import com.sap.sse.common.Util;
 
 /**
- * Holds an optimized association of who to notify about specific objects. On preference changes for the given key in
- * the given {@link UserStore}, the associations are being updated to make the model always reflect the current state of
- * the associations. This makes it possible to search for associations for a specific object without the need of a model
- * update on the fly.
+ * <p>
+ * Preferences available in the {@link UserStore} are held by the user as key. The preferences are stored as complex
+ * objects that are being serialized to String to be saved in the DB. For convenience, the {@link UserStore} allows to
+ * register {@link PreferenceConverter}s to also hold a deserialized version of the preferences in memory to speed up
+ * the access without the need of a deserialization on demand.
+ * </p>
+ * 
+ * <p>
+ * When coming from the notification perspective, we have a domain object (e.g. competitor) and would like to know the
+ * users to notify about this domain object. To calculate this Set of users we would need to loop over the specific
+ * notification preferences for all users.
+ * </p>
+ * 
+ * <p>
+ * To speed up this part, the PreferenceObjectBasedNotificationSet holds an optimized association of who to notify about
+ * specific objects. On preference changes for the given key in the given {@link UserStore}, the associations are being
+ * updated to make the model always reflect the current state of the associations. Due to this the calculation of the
+ * users to notify is a simple lookup.
+ * </p>
  *
  * @param <PrefT>
  *            The type of preference object on which the calculation of the objects to notify is based on.
