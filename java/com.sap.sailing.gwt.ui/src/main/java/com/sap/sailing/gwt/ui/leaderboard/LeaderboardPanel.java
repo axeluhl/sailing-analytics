@@ -2564,7 +2564,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
      * @return all competitors for which the {@link #getLeaderboard() leaderboard} has an entry whose
      *         {@link LeaderboardEntryDTO#race} equals <code>race</code>
      */
-    private Iterable<CompetitorDTO> getCompetitors(RaceIdentifier race) {
+    public Iterable<CompetitorDTO> getCompetitors(RaceIdentifier race) {
         Set<CompetitorDTO> result = new HashSet<CompetitorDTO>();
         for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
             if (raceColumn.hasTrackedRace(race)) {

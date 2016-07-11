@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -16,6 +18,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -96,6 +99,9 @@ public class WinningLanesMode extends AbstractRaceBoardMode {
                     existingSettings.isShowCompetitorSailIdColumn(),
                     existingSettings.isShowCompetitorFullNameColumn());
             getLeaderboardPanel().updateSettings(newSettings);
+            final int howManyCompetitorsToSelect = getHowManyCompetitorsToSelect(getLeaderboardPanel().getCompetitors(getRaceIdentifier()));
+            final Iterable<CompetitorDTO> topCompetitorsInRaceToSelect = leaderboard.getCompetitorsFromBestToWorst(raceColumn.getName()).subList(0, howManyCompetitorsToSelect);
+            getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(topCompetitorsInRaceToSelect);
             final RaceMapSettings existingMapSettings = getRaceBoardPanel().getMap().getSettings();
             final RaceMapSettings newMapSettings = new RaceMapSettings(existingMapSettings.getZoomSettings(),
                     existingMapSettings.getHelpLinesSettings(),
@@ -104,7 +110,7 @@ public class WinningLanesMode extends AbstractRaceBoardMode {
                     tailLength.asMillis(),
                     existingMapSettings.isWindUp(),
                     existingMapSettings.getBuoyZoneRadiusInMeters(),
-                    existingMapSettings.isShowOnlySelectedCompetitors(),
+                    /* existingMapSettings.isShowOnlySelectedCompetitors() */ true, // show the top n competitors and their tails quickly
                     existingMapSettings.isShowSelectedCompetitorsInfo(),
                     existingMapSettings.isShowWindStreamletColors(),
                     existingMapSettings.isShowWindStreamletOverlay(),
@@ -113,9 +119,6 @@ public class WinningLanesMode extends AbstractRaceBoardMode {
                     existingMapSettings.getManeuverTypesToShow(),
                     existingMapSettings.isShowDouglasPeuckerPoints());
             getRaceBoardPanel().getMap().updateSettings(newMapSettings);
-            final int howManyCompetitorsToSelect = getHowManyCompetitorsToSelect(leaderboard.competitors);
-            final Iterable<CompetitorDTO> topCompetitorsInRaceToSelect = leaderboard.getCompetitorsFromBestToWorst(raceColumn.getName()).subList(0, howManyCompetitorsToSelect);
-            getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(topCompetitorsInRaceToSelect);
         }
     }
 
@@ -124,8 +127,8 @@ public class WinningLanesMode extends AbstractRaceBoardMode {
      * view. The number is determined to be at least one tenth of the number of competitors, but at least one if there are
      * one or more competitors.
      */
-    private int getHowManyCompetitorsToSelect(List<CompetitorDTO> competitors) {
-        return competitors.isEmpty() ? 0 : Math.max(competitors.size()/10, 1);
+    private int getHowManyCompetitorsToSelect(Iterable<CompetitorDTO> competitors) {
+        return Util.isEmpty(competitors) ? 0 : Math.max(Util.size(competitors)/10, 1);
     }
 
     @Override
