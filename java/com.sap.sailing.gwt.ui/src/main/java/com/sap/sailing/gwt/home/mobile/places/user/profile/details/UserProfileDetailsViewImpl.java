@@ -1,32 +1,17 @@
 package com.sap.sailing.gwt.home.mobile.places.user.profile.details;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorMobile;
-import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sailing.gwt.home.mobile.places.user.profile.AbstractUserProfileView;
 import com.sap.sse.security.ui.userprofile.mobile.userdetails.UserDetails;
-import com.sap.sse.security.ui.userprofile.mobile.userheader.UserHeader;
 import com.sap.sse.security.ui.userprofile.shared.userdetails.UserDetailsView;
 
-public class UserProfileDetailsViewImpl extends Composite implements UserProfileDetailsView {
-    private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
+public class UserProfileDetailsViewImpl extends AbstractUserProfileView implements UserProfileDetailsView {
 
-    interface MyUiBinder extends UiBinder<Widget, UserProfileDetailsViewImpl> {
-    }
-
-    @UiField(provided = true) final UserHeader userHeaderUi;
-    @UiField(provided = true) final AuthorizedContentDecoratorMobile decoratorUi;
-    @UiField(provided = true) final UserDetails userDetailsUi;
+    private final UserDetails userDetailsUi = new UserDetails(SharedResources.INSTANCE);
     
-    public UserProfileDetailsViewImpl(Presenter presenter) {
-        userHeaderUi = new UserHeader(SharedResources.INSTANCE);
-        decoratorUi = new AuthorizedContentDecoratorMobile(presenter);
-        userDetailsUi = new UserDetails(SharedResources.INSTANCE);
-        initWidget(uiBinder.createAndBindUi(this));
+    public UserProfileDetailsViewImpl(UserProfileDetailsView.Presenter presenter) {
+        super(presenter);
+        setViewContent(userDetailsUi);
     }
     
     @Override
@@ -34,9 +19,4 @@ public class UserProfileDetailsViewImpl extends Composite implements UserProfile
         return userDetailsUi;
     }
     
-    @Override
-    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
-        userHeaderUi.setAuthenticationContext(authenticationContext);
-        decoratorUi.setAuthenticationContext(authenticationContext);
-    }
 }
