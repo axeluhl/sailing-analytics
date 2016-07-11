@@ -31,7 +31,8 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
-import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoGPSFixStoreImpl;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
+import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
@@ -64,7 +65,7 @@ public class StoreGPSFixTrackTest extends AbstractMongoDBTest {
     	Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService(), factory);
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE, factory);
-        GPSFixStore store = new MongoGPSFixStoreImpl(mongoObjectFactory, domainObjectFactory, factory);
+        GPSFixStore store = new GPSFixStoreImpl(new MongoSensorFixStoreImpl(mongoObjectFactory, domainObjectFactory, factory));
         
         TimePoint time0 = new MillisecondsTimePoint(0);
         TimePoint time1 = new MillisecondsTimePoint(1);

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDMongoHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonHandler;
@@ -26,7 +26,7 @@ public class MockSmartphoneUuidServiceFinderFactory implements TypeBasedServiceF
     public MockSmartphoneUuidServiceFinderFactory() {
         serviceFinders.put(DeviceIdentifierMongoHandler.class, new MockServiceFinder<>(new SmartphoneUUIDMongoHandler()));
         serviceFinders.put(DeviceIdentifierJsonHandler.class, new MockServiceFinder<>(new SmartphoneUUIDJsonHandler()));
-        serviceFinders.put(GPSFixMongoHandler.class, new MockGPSFixMongoServiceFinder());
+        serviceFinders.put(FixMongoHandler.class, new MockGPSFixMongoServiceFinder());
         serviceFinders.put(GPSFixJsonHandler.class, new MockServiceFinder<>(new MockGPSFixJsonHandler()));
     }
 

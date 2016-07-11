@@ -27,8 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -109,11 +107,12 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -121,12 +120,13 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.spi.MasterDataResource;
-import com.sap.sailing.server.impl.MediaMasterDataExportTest;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
+import com.sap.sailing.server.testsupport.RacingEventServiceImplMock;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
@@ -134,6 +134,8 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
+
+import junit.framework.Assert;
 
 public class MasterDataImportTest {
 
@@ -286,7 +288,7 @@ public class MasterDataImportTest {
         regatta.getRegattaLog().add(mappingEvent);
         GPSFix gpsFix = new GPSFixMovingImpl(new DegreePosition(54.333, 10.133), logTimePoint2,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90)));
-        sourceService.getGPSFixStore().storeFix(deviceIdentifier, gpsFix);
+        sourceService.getSensorFixStore().storeFix(deviceIdentifier, gpsFix);
 
         // Set score correction
         double scoreCorrection = 12.0;
@@ -324,7 +326,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID), serviceFinderFactory);
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID), serviceFinderFactory){};
             domainFactory = destService.getBaseDomainFactory();
             DB db = destService.getMongoObjectFactory().getDatabase();
             db.setWriteConcern(WriteConcern.SAFE);
@@ -425,10 +427,10 @@ public class MasterDataImportTest {
         Assert.assertEquals(competitor.getId(), registerEventOnTarget.getCompetitor().getId());
 
         // Check for import of racelogtracking fix
-        Assert.assertTrue(destService.getGPSFixStore().getNumberOfFixes(deviceIdentifier) == 1);
+        Assert.assertTrue(destService.getSensorFixStore().getNumberOfFixes(deviceIdentifier) == 1);
 
         // Check for persisting of race log events:
-        RacingEventService dest2 = new RacingEventServiceImplMock();
+        RacingEventService dest2 = new RacingEventServiceImplMock(){};
         Leaderboard lb2 = dest2.getLeaderboardByName(TEST_LEADERBOARD_NAME);
         RaceColumn raceColumn2 = lb2.getRaceColumns().iterator().next();
         RaceLog raceLog2 = raceColumn2.getRaceLog(raceColumn2.getFleetByName(fleet1OnTarget.getName()));
@@ -545,7 +547,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
@@ -692,7 +694,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
@@ -771,7 +773,7 @@ public class MasterDataImportTest {
         RacingEventService sourceService = new RacingEventServiceImpl(
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, sourceDomainFactory),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE),
-                MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+                MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE);
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
@@ -875,7 +877,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
@@ -1045,7 +1047,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             // Create existing data on target
             venueNameNotToOverride = "doNotOverride";
@@ -1243,7 +1245,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             // Create existing data on target
             String venueNameToOverride = "Override";
@@ -1408,7 +1410,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
@@ -1542,7 +1544,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
@@ -1680,7 +1682,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
@@ -1709,7 +1711,7 @@ public class MasterDataImportTest {
         Assert.assertEquals(regattaOnTarget, map.get("dummy2"));
 
         // Check if persistent regatta for race id has been persisted
-        RacingEventServiceImplMock destService2 = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+        RacingEventServiceImplMock destService2 = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
         ConcurrentHashMap<String, Regatta> map2 = destService2.getPersistentRegattasForRaceIDs();
         Regatta regattaOnTarget2 = destService2.getRegattaByName(TEST_LEADERBOARD_NAME);
         Assert.assertEquals(regattaOnTarget2, map2.get("dummy"));
@@ -1742,7 +1744,7 @@ public class MasterDataImportTest {
         sourceService.mediaTrackAdded(trackOnSource);
 
         Collection<String> raceColumnNames = Arrays.asList(raceName1, raceName2, raceName3, raceName4, raceName5);
-        Regatta regatta = MediaMasterDataExportTest.createTestRegatta(regattaName1, raceColumnNames);
+        Regatta regatta = TrackBasedTest.createTestRegatta(regattaName1, raceColumnNames);
         sourceService.addRegattaWithoutReplication(regatta);
         int[] discardThresholds = new int[0];
         RegattaLeaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
@@ -1752,7 +1754,7 @@ public class MasterDataImportTest {
                 new RegattaNameAndRaceName(regattaName1, raceName3),
                 new RegattaNameAndRaceName(regattaName2, raceName4),
                 new RegattaNameAndRaceName(regattaName2, raceName5));
-        MediaMasterDataExportTest.assignRacesToRegattaLeaderboardColumns(leaderboard, raceIdentifiers);
+        TrackBasedTest.assignRacesToRegattaLeaderboardColumns(leaderboard, raceIdentifiers);
         boolean displayGroupsInReverseOrder = false;
         int[] overallLeaderboardDiscardThresholds = new int[0];
         UUID leaderboardGropuUuid = UUID.randomUUID();
@@ -1779,7 +1781,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
@@ -1789,17 +1791,15 @@ public class MasterDataImportTest {
             os.close();
             inputStream.close();
         }
-
-        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
-                .getResult();
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID).getResult();
 
         // ---Asserts---
 
         Assert.assertNotNull(creationCount);
 
-        Collection<MediaTrack> targetTracks = destService.getAllMediaTracks();
+        Iterable<MediaTrack> targetTracks = destService.getAllMediaTracks();
 
-        Assert.assertEquals(1, targetTracks.size());
+        Assert.assertEquals(1, Util.size(targetTracks));
 
         MediaTrack trackOnTarget = targetTracks.iterator().next();
 
@@ -1907,7 +1907,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
@@ -1979,7 +1979,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
@@ -2020,7 +2020,7 @@ public class MasterDataImportTest {
         Assert.assertEquals(factor, metaColumn.getFactor());
 
         // Verify that overall leaderboard data has been persisted
-        RacingEventService persistenceVerifier = new RacingEventServiceImplMock();
+        RacingEventService persistenceVerifier = new RacingEventServiceImplMock(){};
         LeaderboardGroup lg = persistenceVerifier.getLeaderboardGroupByName(TEST_GROUP_NAME);
         Assert.assertNotNull(lg);
         overallLeaderboard = (LeaderboardGroupMetaLeaderboard) lg.getOverallLeaderboard();
@@ -2166,7 +2166,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID));
+            destService = new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)){};
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
@@ -2247,7 +2247,7 @@ public class MasterDataImportTest {
                 .getFirstFixAtOrAfter(logTimePoint2)).getWindFix());
 
         // Check for persisting of race log events:
-        RacingEventService dest2 = new RacingEventServiceImplMock();
+        RacingEventService dest2 = new RacingEventServiceImplMock(){};
         Leaderboard lb2 = dest2.getLeaderboardByName(flexLeaderboardName);
         RaceColumn raceColumn2 = lb2.getRaceColumns().iterator().next();
         RaceLog raceLog2 = raceColumn2.getRaceLog(raceColumn2.getFleets().iterator().next());

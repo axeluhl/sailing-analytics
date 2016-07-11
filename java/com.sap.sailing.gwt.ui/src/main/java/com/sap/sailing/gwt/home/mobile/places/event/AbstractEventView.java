@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -84,8 +86,8 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         return currentPresenter.isMultiRegattaEvent();
     }
     
-    protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {
-        QuickfinderPresenter.getForRegattaLeaderboards(quickfinder, currentPresenter, regattaMetadatas);
+    protected void setQuickFinderValues(Quickfinder quickfinder, Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
+        QuickfinderPresenter.getForRegattaLeaderboards(quickfinder, currentPresenter, regattasByLeaderboardGroupName);
     }
     
     protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
@@ -101,12 +103,12 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         mobileSection.addHeader(header);
         container.add(mobileSection);
     }
-
-    @Override
-    public final void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas) {
-        setQuickFinderValues(layout.quickFinderUi, regattaMetadatas);
-    }
     
+    @Override
+    public void setQuickFinderValues(Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
+        setQuickFinderValues(layout.quickFinderUi, regattasByLeaderboardGroupName);
+    }
+
     @Override
     public final void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries) {
         setQuickFinderValues(layout.quickFinderUi, seriesName, eventsOfSeries);

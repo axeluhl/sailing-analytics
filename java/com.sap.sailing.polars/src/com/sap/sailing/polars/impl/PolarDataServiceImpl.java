@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -64,7 +65,7 @@ public class PolarDataServiceImpl implements PolarDataService,
 
     private PolarDataMiner polarDataMiner;
 
-    private final ConcurrentHashMap<OperationExecutionListener<PolarDataServiceImpl>, OperationExecutionListener<PolarDataServiceImpl>> operationExecutionListeners;
+    private final ConcurrentMap<OperationExecutionListener<PolarDataServiceImpl>, OperationExecutionListener<PolarDataServiceImpl>> operationExecutionListeners;
 
     /**
      * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not

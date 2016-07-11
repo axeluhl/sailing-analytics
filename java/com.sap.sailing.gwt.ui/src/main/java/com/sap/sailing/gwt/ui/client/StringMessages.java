@@ -90,6 +90,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String leaderboardSettings();
     @Override
     String settings();
+    String page();
     String linkedRaces();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();
@@ -134,7 +135,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String declinationCheckbox();
     String raceStartTrackingColumn();
     String pauseAutomaticRefresh();
+    String autoZoom();
+    String zoomFactor();
     String autoRefresh();
+    String autoPlayMedia();
     String delayInSeconds();
     String delayBetweenAutoAdvances();
     String delayMustBeNonNegative();
@@ -415,6 +419,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeWinnerGetsFive();
     String scoringSchemeWinnerGetsSix();
     String scoringSchemeWinnerGetsEight();
+    String scoringSchemeHighPointMatchRacing();
+    String scoringSchemeHighPointMatchRacingDescription();
     String scoringSchemeWinnerGetsEightAndInterpolation();
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
@@ -1204,6 +1210,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editSeries();
     String pleaseSelectAtLeastOneRegatta();
     String pleaseSelectAnEvent();
+    String selectALeaderboard();
+    String autoplayConfiguration();
+    String startAutoplay();
+    String autoplaySettings();
+    String startBrowserFullscreen();
+    String switchToLiveRaceAutomatically();
+    String timeBeforeRaceStart();
     String showXYDiagram();
     String xyDiagram();
     String boatSpeed();
@@ -1537,6 +1550,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String fixSuccessfullyRemoved();
     String dragToChangePosition();
     String moveFix();
+    String raceViewer();
+    
+    
+    String mapControls();
     String manage2SailEvent();
     String noEventsYet();
     String selectResultImportProvider();
@@ -1551,6 +1568,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windFixes();
     String twoXMark();
     String pagerStateInfo(int start , int end, int size, @Select boolean exact);
+    String currentRideHeightInMeters();
+    String currentRideHeightInMetersTooltip();
+    String currentOrAverageRideHeightInMeters();
+    String currentOrAverageRideHeightInMetersTooltip();
+    String pleaseCreateAtLeastOneMappingForCompetitor();
+    String importAdditionalSensorData();
     String strategySimulatorTitle();
     String controlSettings();
     String windDisplay();
@@ -1587,4 +1610,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String simulationLegendAlgorithmTimedOutText();
     String simulationLegendMixedLegText();
     String noTracksFound();
+    String noRacesAvailable();
+    String loadingRegattasAndRaces();
+    String selectFromRacesWithOverlappingTimeRange();
+    String finishTime(String timeAsString);
+    String showCompetitorCharts();
+    String showWindChart();
 }

@@ -21,10 +21,10 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.LoadApi;
 import com.google.gwt.maps.client.LoadApi.LoadLibrary;
 import com.google.gwt.maps.client.MapOptions;
@@ -329,7 +329,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private RaceMapImageManager raceMapImageManager; 
 
-    private final RaceMapSettings settings;
+    private RaceMapSettings settings;
+    private final RaceMapLifecycle raceMapLifecycle;
     
     private final StringMessages stringMessages;
     
@@ -371,9 +372,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
-    private final boolean showViewStreamlets;
-    private final boolean showViewStreamletColors;
-    private final boolean showViewSimulation;
+    
+    private final boolean isSimulationEnabled;
     
     private static final String GET_POLAR_CATEGORY = "getPolar";
     
@@ -393,8 +393,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private boolean requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown;
     
-    private final boolean showMapControls;
-
     /**
      * Tells whether currently an auto-zoom is in progress; this is used particularly to keep the smooth CSS boat transitions
      * active while auto-zooming whereas stopping them seems the better option for manual zooms.
@@ -409,18 +407,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
     
-    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public RaceMap(RaceMapLifecycle raceMapLifecycle, RaceMapSettings raceMapSettings, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
-            boolean showMapControls, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation,
-            RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel) {
+            RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, 
+            boolean showHeaderPanel) {
+        this.raceMapLifecycle = raceMapLifecycle;
         this.setSize("100%", "100%");
-        this.showMapControls = showMapControls;
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
+        this.isSimulationEnabled = true;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -435,21 +434,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.competitorSelection = competitorSelection;
         this.raceCompetitorSet = new RaceCompetitorSet(competitorSelection);
         competitorSelection.addCompetitorSelectionChangeListener(this);
-        settings = new RaceMapSettings();
+        settings = raceMapSettings;
         coordinateSystem = new DelegateCoordinateSystem(new IdentityCoordinateSystem());
         fixesAndTails = new FixesAndTails(coordinateSystem);
         updateCoordinateSystemFromSettings();
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
-        this.showViewStreamlets = showViewStreamlets;
-        this.showViewStreamletColors = showViewStreamletColors;
-        this.showViewSimulation = showViewSimulation;
         this.hasPolar = false;
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
-        initializeData(showMapControls, showHeaderPanel);
+        initializeData(settings.isShowMapControls(), showHeaderPanel);
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
@@ -489,7 +485,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     coordinateSystem.setCoordinateSystem(new RotateAndTranslateCoordinateSystem(centerOfCourse,
                             lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
                     if (map != null) {
-                        mapOptions = getMapOptions(showMapControls, /* wind-up */ true);
+                        mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ true);
                     } else {
                         mapOptions = null;
                     }
@@ -506,7 +502,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         } else {
             if (map != null) {
-                mapOptions = getMapOptions(showMapControls, /* wind-up */ false);
+                mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ false);
             } else {
                 mapOptions = null;
             }
@@ -561,7 +557,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
                           // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
                           final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                          settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                          RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors());
+                          settings = new RaceMapSettings(settings, clearedZoomSettings);
                       }
                       // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed out too far
                   }
@@ -573,7 +570,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       autoZoomIn = false;
                       autoZoomOut = false;
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                      settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                      RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors());
+                      settings = new RaceMapSettings(settings, clearedZoomSettings);
                   }
               });
               map.addIdleHandler(new IdleMapHandler() {
@@ -620,18 +618,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               streamletOverlay = new WindStreamletsRaceboardOverlay(getMap(), /* zIndex */ 0,
                       timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
               streamletOverlay.addToMap();
-              if (showViewStreamlets) {
-                  streamletOverlay.setColors(showViewStreamletColors);
+              if (settings.isShowWindStreamletOverlay()) {
+                  streamletOverlay.setColors(settings.isShowWindStreamletColors());
                   streamletOverlay.setVisible(true);
               }
 
-              if (showViewSimulation) {
+              if (isSimulationEnabled) {
             	  // determine availability of polar diagram
             	  setHasPolar();
                   // initialize simulation canvas
                   simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor, coordinateSystem);
                   simulationOverlay.addToMap();
-                  simulationOverlay.setVisible(false);
+                  showSimulationOverlay(settings.isShowSimulationOverlay());
               }
               if (showHeaderPanel) {
                   createHeaderPanel(map);
@@ -654,7 +652,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     protected void showAdditionalControls(MapWidget map) {
     }
-    
+
     private void setHasPolar() {
         GetPolarAction getPolar = new GetPolarAction(sailingService, raceIdentifier);
         asyncActionsExecutor.execute(getPolar, GET_POLAR_CATEGORY,
@@ -947,7 +945,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         quickRanks = raceMapDataDTO.quickRanks;
                         competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber =
                                 raceMapDataDTO.competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
-                        if (showViewSimulation && settings.isShowSimulationOverlay()) {
+                        if (isSimulationEnabled && settings.isShowSimulationOverlay()) {
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
                         	simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
@@ -1803,7 +1801,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     || !BoundsUtil.contains((currentMapBounds = map.getBounds()), newBounds)
                     || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
-                Iterable<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
+                Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
                 autoZoomLatLngBounds = newBounds;
                 int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
@@ -1825,7 +1823,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 } else {
                     map.panTo(autoZoomLatLngBounds.getCenter());
                 }
-                settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
+                RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings, settings.getZoomSettings().isZoomToSelectedCompetitors());
+                settings = new RaceMapSettings(settings, restoredZoomSettings);
                 setAutoZoomInProgress(false);
             }
         }
@@ -2047,7 +2046,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(markDTO.position.getLatDeg(), markDTO.position.getLngDeg())));
         return vPanel;
     }
-    
+
     public Widget getInfoWindowContent(ManeuverDTO maneuver) {
         SpeedWithBearingDTO before = maneuver.speedWithBearingBefore;
         SpeedWithBearingDTO after = maneuver.speedWithBearingAfter;
@@ -2245,18 +2244,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver) {
-        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
+                        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
         Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndDirectionIndicatingColor
                 .get(new Pair<ManeuverType, ManeuverColor>(maneuver.type, ManeuverColor.getManeuverColor(maneuver)));
-        MarkerOptions options = MarkerOptions.newInstance();
-        options.setIcon(maneuverMarker.getIcon_MarkerImage());
-        Marker marker = Marker.newInstance(options);
-        marker.setPosition(latLng);
+                        MarkerOptions options = MarkerOptions.newInstance();
+                        options.setIcon(maneuverMarker.getIcon_MarkerImage());
+                        Marker marker = Marker.newInstance(options);
+                        marker.setPosition(latLng);
         marker.setTitle(ManeuverTypeFormatter.format(maneuver.type, stringMessages));
         marker.addClickHandler(new ManeuverMarkerClickedListener(this, maneuver));
-        maneuverMarkers.add(marker);
-        marker.setMap(map);
-    }
+                        maneuverMarkers.add(marker);
+                        marker.setMap(map);
+                    }
 
     /**
      * @param date
@@ -2428,7 +2427,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.map();
+        return raceMapLifecycle.getLocalizedShortName();
     }
 
     @Override
@@ -2438,22 +2437,23 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public boolean hasSettings() {
-        return true;
+        return raceMapLifecycle.hasSettings();
     }
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent() {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.showViewSimulation && this.hasPolar);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.isSimulationEnabled && this.hasPolar);
     }
 
     @Override
     public void updateSettings(RaceMapSettings newSettings) {
         boolean maneuverTypeSelectionChanged = false;
-        boolean requiredRedraw = false;
+        boolean requiresRedraw = false;
+        boolean requiresUpdateCoordinateSystem = false;
+        
         for (ManeuverType maneuverType : ManeuverType.values()) {
             if (newSettings.isShowManeuverType(maneuverType) != settings.isShowManeuverType(maneuverType)) {
                 maneuverTypeSelectionChanged = true;
-                settings.showManeuverType(maneuverType, newSettings.isShowManeuverType(maneuverType));
             }
         }
         if (maneuverTypeSelectionChanged) {
@@ -2464,74 +2464,64 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         if (newSettings.isShowDouglasPeuckerPoints() != settings.isShowDouglasPeuckerPoints()) {
             if (!(timer.getPlayState() == PlayStates.Playing) && lastDouglasPeuckerResult != null && newSettings.isShowDouglasPeuckerPoints()) {
-                settings.setShowDouglasPeuckerPoints(true);
                 removeAllMarkDouglasPeuckerpoints();
                 showMarkDouglasPeuckerPoints(lastDouglasPeuckerResult);
             } else if (!newSettings.isShowDouglasPeuckerPoints()) {
-                settings.setShowDouglasPeuckerPoints(false);
                 removeAllMarkDouglasPeuckerpoints();
             }
         }
         if (newSettings.getTailLengthInMilliseconds() != settings.getTailLengthInMilliseconds()) {
-            settings.setTailLengthInMilliseconds(newSettings.getTailLengthInMilliseconds());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.getBuoyZoneRadiusInMeters() != settings.getBuoyZoneRadiusInMeters()) {
-            settings.setBuoyZoneRadiusInMeters(newSettings.getBuoyZoneRadiusInMeters());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.isShowOnlySelectedCompetitors() != settings.isShowOnlySelectedCompetitors()) {
-            settings.setShowOnlySelectedCompetitors(newSettings.isShowOnlySelectedCompetitors());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.isShowSelectedCompetitorsInfo() != settings.isShowSelectedCompetitorsInfo()) {
-            settings.setShowSelectedCompetitorsInfo(newSettings.isShowSelectedCompetitorsInfo());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (!newSettings.getZoomSettings().equals(settings.getZoomSettings())) {
-            settings.setZoomSettings(newSettings.getZoomSettings());                    
-            if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
+            if (!newSettings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
                 removeTransitions();
-                zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(this));
+                zoomMapToNewBounds(newSettings.getZoomSettings().getNewBounds(this));
             }
         }
         if (!newSettings.getHelpLinesSettings().equals(settings.getHelpLinesSettings())) {
-            settings.setHelpLinesSettings(newSettings.getHelpLinesSettings());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
-            settings.setShowWindStreamletOverlay(newSettings.isShowWindStreamletOverlay());
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
         }
         if (newSettings.isShowWindStreamletColors() != settings.isShowWindStreamletColors()) {
-            settings.setShowWindStreamletColors(newSettings.isShowWindStreamletColors());
             streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
         }
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
-            settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
-            simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
-            if (newSettings.isShowSimulationOverlay()) {
-                simulationOverlay.updateLeg(Math.max(lastLegNumber,1), true, -1 /* ensure ui-update */);
-            }
+            showSimulationOverlay(newSettings.isShowSimulationOverlay());
         }
         if (newSettings.isWindUp() != settings.isWindUp()) {
-            settings.setWindUp(newSettings.isWindUp());
+            requiresUpdateCoordinateSystem = true;
+            requiresRedraw = true;
+        }
+        this.settings = newSettings;
+        
+        if (requiresUpdateCoordinateSystem) {
             updateCoordinateSystemFromSettings();
-            requiredRedraw = true;
         }
-        if (newSettings.getTransparentHoverlines() != settings.getTransparentHoverlines()) {
-            settings.setTransparentHoverlines(newSettings.getTransparentHoverlines());
-        }
-        if (newSettings.getHoverlineStrokeWeight() != settings.getHoverlineStrokeWeight()) {
-            settings.setHoverlineStrokeWeight(newSettings.getHoverlineStrokeWeight());
-        }
-        if (requiredRedraw) {
+        if (requiresRedraw) {
             redraw();
         }
     }
-    
-    public static class BoatsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
 
+    private void showSimulationOverlay(boolean visible) {
+        simulationOverlay.setVisible(visible);
+        if (visible) {
+            simulationOverlay.updateLeg(Math.max(lastLegNumber,1), true, -1 /* ensure ui-update */);
+        }
+    }
+
+    public static class BoatsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
             LatLngBounds newBounds = null;
@@ -2891,4 +2881,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     InfoWindow getLastInfoWindow() {
         return lastInfoWindow;
     }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
+
 }

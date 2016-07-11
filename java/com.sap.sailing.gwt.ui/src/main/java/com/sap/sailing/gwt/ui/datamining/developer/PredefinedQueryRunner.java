@@ -20,16 +20,14 @@ import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
-import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 
-public class PredefinedQueryRunner implements Component<SerializableSettings> {
+public class PredefinedQueryRunner extends ComponentWithoutSettings {
 
     private final DataMiningSession session;
     private final StringMessages stringMessages;
@@ -173,22 +171,7 @@ public class PredefinedQueryRunner implements Component<SerializableSettings> {
     }
 
     @Override
-    public boolean hasSettings() {
-        return false;
-    }
-
-    @Override
-    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
-        return null;
-    }
-
-    @Override
-    public void updateSettings(SerializableSettings newSettings) {
-    }
-
-    @Override
     public String getDependentCssClassName() {
         return "predefinedQueryRunner";
     }
-
 }

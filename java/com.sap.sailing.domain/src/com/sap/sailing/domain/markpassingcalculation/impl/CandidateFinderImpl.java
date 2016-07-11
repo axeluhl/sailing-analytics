@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -371,7 +372,7 @@ public class CandidateFinderImpl implements CandidateFinder {
      * second} element has those that have been removed.
      */
     private Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> invalidateAfterCourseChange(int zeroBasedIndexOfWaypointChanged) {
-        ConcurrentHashMap<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new ConcurrentHashMap<>();
+        ConcurrentMap<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new ConcurrentHashMap<>();
         Course course = race.getRace().getCourse();
         for (Competitor c : race.getRace().getCompetitors()) {
             distanceCache.get(c).clear();
