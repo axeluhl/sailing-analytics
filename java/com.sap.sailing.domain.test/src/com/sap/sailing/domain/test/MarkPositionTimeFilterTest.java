@@ -3,8 +3,8 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
@@ -38,6 +38,7 @@ public class MarkPositionTimeFilterTest {
         track = new DynamicGPSFixTrackImpl<Mark>(m, /* millisecondsOverWhichToAverage */ 5000);
         when(trackedRace.getOrCreateTrack(m)).thenReturn(track);
         doCallRealMethod().when(trackedRace).recordFix(same(m), (GPSFixMoving) anyObject(), anyBoolean());
+        doCallRealMethod().when(trackedRace).isWithinStartAndEndOfTracking(anyObject());
     }
     
     @Test

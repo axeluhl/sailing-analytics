@@ -25,10 +25,26 @@
 
                     <h2 class="articleSubheadline">July 2016</h2>
                     <ul class="bulletList">
+                        <li>According to some change in a tracked races lifecycle, fix-tracking no longer depends
+                            on tracking races via racelog event but is bound to denotation only. So fix-tracking
+                            via smartphone apps or uploading tracking files can also be used in combination with
+                            e.g. TracTrac.
+                        </li>
+                        <li>Because fix-tracking is now more flexible (see above), it is no longer restricted to
+                            GPS-fixes. 
+                        </li>
+                        <li>It is now possible to track fixes from Bravo foiling sensor devices, currently used in
+                            Extreme Sailing Series events only. This kind of data can be uploaded via a new dialog
+                            within the AdminConsole (Connectors > Smartphone Tracking)  
+                        </li>
 			<li>When a competitor is suppressed in a leaderboard, now the other competitors ranking
 			    worse will be "promoted" by one rank per better suppressed competitor. This way, live
 			    ranks will be correct if, e.g., a "Flexible Leaderboard" is used for a separate scoring
 			    scheme for only a subset of the competitor.
+			</li>
+			<li>When entering a fixed position for a mark in the "Smartphone Tracking" environment it is
+			    now possible to enter a time stamp for the fix. This way it is also possible to adjust
+			    a mark's position to a fixed lat/lng for some time point in the past.
 			</li>
                     </ul>
 			

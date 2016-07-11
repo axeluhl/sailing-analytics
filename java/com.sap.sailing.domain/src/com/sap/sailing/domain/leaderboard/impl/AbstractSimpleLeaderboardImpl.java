@@ -795,7 +795,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
     }
-
+    
     @Override
     public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
         getRaceColumnListeners().notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
@@ -1724,9 +1724,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             Double speedOverGroundInKnots;
             if (trackedLeg.hasFinishedLeg(timePoint))  {
                 speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
+                result.currentRideHeightInMeters = trackedLeg.getAverageRideHeight(timePoint);
             } else {
                 final SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(timePoint);
                 speedOverGroundInKnots = speedOverGround == null ? null : speedOverGround.getKnots();
+                result.currentRideHeightInMeters = trackedLeg.getRideHeight(timePoint);
             }
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);

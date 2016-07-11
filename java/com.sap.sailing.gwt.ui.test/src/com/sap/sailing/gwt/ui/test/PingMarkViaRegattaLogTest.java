@@ -48,6 +48,6 @@ public class PingMarkViaRegattaLogTest {
         MarkDTO mark = new MarkDTO("mark", "mark");
         Position position = new DegreePosition(30, 40);
         
-        sailingService.pingMark(leaderboard.getName(), mark, position);
+        sailingService.pingMark(leaderboard.getName(), mark, /* time point for fix */ null, position);
     }
 }

@@ -53,8 +53,6 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -524,7 +522,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 // add to existing regatta only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
-                    trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, EmptyGPSFixStore.INSTANCE,
+                    trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
                             raceLogResolver);
                     logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
@@ -562,11 +560,11 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race,
-            Iterable<Sideline> sidelines, WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
+            Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
         return trackedRegatta.createTrackedRace(race, sidelines,
-                windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver);
     }
@@ -655,27 +653,28 @@ public class DomainFactoryImpl implements DomainFactory {
     public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername,
+            RegattaLogStore regattaLogStore, WindStore windStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws MalformedURLException, FileNotFoundException,
             URISyntaxException, CreateModelException, SubscriberInitializationException {
         return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
                 endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
-                gpsFixStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver);
+                tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry,
+                raceLogResolver);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername,
+            RegattaLogStore regattaLogStore, WindStore windStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
             SubscriberInitializationException {
         return new TracTracRaceTrackerImpl(regatta, this, paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
-                regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
+                regattaLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus,
                 raceVisibility, trackedRegattaRegistry, raceLogResolver);
     }
 
