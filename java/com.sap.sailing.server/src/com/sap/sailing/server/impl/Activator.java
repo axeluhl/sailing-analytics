@@ -38,9 +38,8 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.util.ClearStateTestSupport;
-import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
 
@@ -123,7 +122,7 @@ public class Activator implements BundleActivator {
                 racingEventService.getDomainObjectFactory()), properties));
 
         
-        registerPreferenceConvertersWhenUserStoreIsAvailable(context);
+        registerPreferenceConvertersForUserStore(context);
         
         // Add an MBean for the service to the JMX bean server:
         RacingEventServiceMXBean mbean = new RacingEventServiceMXBeanImpl(racingEventService);
@@ -134,29 +133,16 @@ public class Activator implements BundleActivator {
                 Charset.defaultCharset());
     }
 
-    private void registerPreferenceConvertersWhenUserStoreIsAvailable(BundleContext bundleContext) {
-        ServiceTracker<UserStore, UserStore> userStoreTracker = ServiceTrackerFactory.createAndOpen(bundleContext,
-                UserStore.class);
-        new Thread("ServiceTracker waiting for UserStore service") {
-            @Override
-            public void run() {
-                try {
-                    logger.info("Waiting for UserStore service...");
-                    UserStore userStore = userStoreTracker.waitForService(0);
-                    logger.info("Obtained UserStore service " + userStore);
-                    registerPreferenceConvertersForUserStore(userStore);
-                } catch (InterruptedException e) {
-                    logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
-                }
-            }
-        }.start();
-    }
-
-    protected void registerPreferenceConvertersForUserStore(UserStore userStore) {
-        userStore.registerPreferenceConverter(CompetitorNotificationPreferences.PREF_NAME,
-                new GenericJSONPreferenceConverter<>(() -> new CompetitorNotificationPreferences(racingEventService)));
-        userStore.registerPreferenceConverter(BoatClassNotificationPreferences.PREF_NAME,
-                new GenericJSONPreferenceConverter<>(() -> new BoatClassNotificationPreferences(racingEventService)));
+    protected void registerPreferenceConvertersForUserStore(BundleContext context) {
+        Dictionary<String, String> properties = new Hashtable<String, String>();
+        properties.put(PreferenceConverter.KEY_PARAMETER_NAME, CompetitorNotificationPreferences.PREF_NAME);
+        registrations.add(context.registerService(PreferenceConverter.class,
+                new GenericJSONPreferenceConverter<>(() -> new CompetitorNotificationPreferences(racingEventService)),
+                properties));
+        properties.put(PreferenceConverter.KEY_PARAMETER_NAME, BoatClassNotificationPreferences.PREF_NAME);
+        registrations.add(context.registerService(PreferenceConverter.class,
+                new GenericJSONPreferenceConverter<>(() -> new BoatClassNotificationPreferences(racingEventService)),
+                properties));
     }
 
     public void stop(BundleContext context) throws Exception {
