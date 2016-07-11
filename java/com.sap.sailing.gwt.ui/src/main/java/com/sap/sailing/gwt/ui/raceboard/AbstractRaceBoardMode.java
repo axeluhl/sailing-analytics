@@ -73,6 +73,9 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         raceTimePanel.removeRaceTimesInfoProviderListener(this);
     }
 
+    /**
+     * Stops listening for leaderboard updates
+     */
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         leaderboardPanel.removeLeaderboardUpdateListener(this);

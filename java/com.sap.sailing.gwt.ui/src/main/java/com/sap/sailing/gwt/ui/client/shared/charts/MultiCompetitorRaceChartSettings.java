@@ -6,6 +6,10 @@ public class MultiCompetitorRaceChartSettings extends ChartSettings {
     private final DetailType firstDetailType;
     private final DetailType secondDetailType;
 
+    /**
+     * @param firstDetailType must not be {@code null}
+     * @param secondDetailType may be {@code null} if only one detail is to be displayed per competitor in the chart
+     */
     public MultiCompetitorRaceChartSettings(ChartSettings settings, DetailType firstDetailType,
             DetailType secondDetailType) {
         super(settings);

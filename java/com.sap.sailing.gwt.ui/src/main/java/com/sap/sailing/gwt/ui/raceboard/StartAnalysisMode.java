@@ -82,7 +82,8 @@ public class StartAnalysisMode extends AbstractRaceBoardMode {
             getRaceBoardPanel().setCompetitorChartVisible(true);
             getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(competitorsToSelect);
             MultiCompetitorRaceChartSettings newCompetitorChartSettings = new MultiCompetitorRaceChartSettings(
-                    new ChartSettings(/* stepSizeInMillis */ 1000), DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
+                    new ChartSettings(/* stepSizeInMillis */ 1000), DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                    /* no second series */ null);
             competitorChart.updateSettings(newCompetitorChartSettings);
             getRaceTimePanel().getTimeRangeProvider().setTimeZoom(
                     new MillisecondsTimePoint(raceTimesInfo.startOfRace).minus(DURATION_BEFORE_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate(),
