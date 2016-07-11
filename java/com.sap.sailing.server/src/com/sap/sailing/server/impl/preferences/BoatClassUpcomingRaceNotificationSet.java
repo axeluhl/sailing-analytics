@@ -1,6 +1,6 @@
 package com.sap.sailing.server.impl.preferences;
 
-import com.sap.sailing.domain.common.preferences.BoatClassNotificationPreference;
+import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreference;
 import com.sap.sse.security.UserStore;
 
 public class BoatClassUpcomingRaceNotificationSet extends AbstractBoatClassNotificationSet {

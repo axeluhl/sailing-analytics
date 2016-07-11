@@ -21,7 +21,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.preferences.NotificationPreferences;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
@@ -31,6 +30,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
+import com.sap.sailing.server.impl.preferences.model.NotificationPreferences;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
@@ -143,7 +143,8 @@ public class Activator implements BundleActivator {
 
     protected void registerPreferenceConvertersForUserStore(UserStore userStore) {
         userStore.registerPreferenceConverter(NotificationPreferences.PREF_NAME,
-                new GenericJSONPreferenceConverter<NotificationPreferences>(NotificationPreferences::new));
+                new GenericJSONPreferenceConverter<NotificationPreferences>(
+                        () -> new NotificationPreferences(racingEventService)));
     }
 
     public void stop(BundleContext context) throws Exception {
