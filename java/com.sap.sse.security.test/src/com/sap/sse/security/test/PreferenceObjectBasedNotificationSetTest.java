@@ -227,6 +227,18 @@ public class PreferenceObjectBasedNotificationSetTest {
         Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
     }
     
+    @Test
+    public void removePreferenceConverterTest() throws UserManagementException {
+        store.createUser(user1, mail);
+        store.registerPreferenceConverter(prefKey, prefConverter);
+        store.setPreferenceObject(user1, prefKey, values1);
+        PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
+        store.removePreferenceConverter(prefKey);
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(A), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(B), values()));
+        Assert.assertTrue(Util.equals(notificationSet.getUsersnamesToNotifyFor(C), values()));
+    }
+    
     private static HashSet<String> values(String... values) {
         return new HashSet<>(Arrays.asList(values));
     }

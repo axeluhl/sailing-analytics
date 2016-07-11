@@ -118,6 +118,15 @@ public class UserPreferenceObjectAndConverterTest {
         store.deleteUser(user1);
         Assert.assertNull(store.getPreferenceObject(user1, prefKey1));
     }
+    
+    @Test
+    public void removeConverterTest() throws UserManagementException {
+        store.createUser(user1, email);
+        store.registerPreferenceConverter(prefKey1, prefConverter);
+        store.setPreference(user1, prefKey1, serializedPref1);
+        store.removePreferenceConverter(prefKey1);
+        Assert.assertNull(store.getPreferenceObject(user1, prefKey1));
+    }
 
     public static class SimplePreferenceForSerialization implements Serializable {
         private static final long serialVersionUID = -580569932709860895L;
