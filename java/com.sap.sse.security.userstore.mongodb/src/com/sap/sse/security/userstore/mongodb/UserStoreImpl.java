@@ -443,7 +443,7 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void setPreference(String username, String key, String value) {
         setPreferenceInternal(username, key, value);
-        loadPreferenceIfConverterIsAvailable(username, key);
+        updatePreferenceObjectIfConverterIsAvailable(username, key);
     }
 
     private void setPreferenceInternal(String username, String key, String value) {
@@ -536,7 +536,7 @@ public class UserStoreImpl implements UserStore {
         if (alreadyAssociatedConverter == null) {
             final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
             for (String user : usersToProcess) {
-                loadPreferenceWithConverter(user, preferenceKey, converter);
+                updatePreferenceObjectWithConverter(user, preferenceKey, converter);
             }
         } else {
             logger.log(Level.SEVERE, "PreferenceConverter " + alreadyAssociatedConverter + " for key " + preferenceKey
@@ -559,14 +559,14 @@ public class UserStoreImpl implements UserStore {
         
     }
 
-    private void loadPreferenceIfConverterIsAvailable(String username, String key) {
+    private void updatePreferenceObjectIfConverterIsAvailable(String username, String key) {
         PreferenceConverter<?> preferenceConverter = preferenceConverters.get(key);
         if (preferenceConverter != null) {
-            loadPreferenceWithConverter(username, key, preferenceConverter);
+            updatePreferenceObjectWithConverter(username, key, preferenceConverter);
         }
     }
 
-    private void loadPreferenceWithConverter(String username, String key, PreferenceConverter<?> preferenceConverter) {
+    private void updatePreferenceObjectWithConverter(String username, String key, PreferenceConverter<?> preferenceConverter) {
         final String preferenceString = getPreference(username, key);
         if (preferenceString != null) {
             try {
