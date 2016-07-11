@@ -7,6 +7,8 @@ package com.sap.sse.security;
  * @param <PREF> The type of preference object, this converter handles.
  */
 public interface PreferenceConverter<PREF> {
+    public final String KEY_PARAMETER_NAME = "key";
+    
     String toPreferenceString(PREF preference);
 
     PREF toPreferenceObject(String stringPreference);

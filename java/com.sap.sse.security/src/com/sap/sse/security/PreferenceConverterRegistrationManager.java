@@ -1,0 +1,77 @@
+package com.sap.sse.security;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+/**
+ * Automatically registers/removes {@link PreferenceConverter} instances found in the OSGi service registry on the given
+ * {@link UserStore}.
+ *
+ * {@link PreferenceConverter} found are required to have a property with the key
+ * {@link PreferenceConverter#KEY_PARAMETER_NAME} defining the preference key the converter should be registered with.
+ */
+public class PreferenceConverterRegistrationManager {
+    private static final Logger logger = Logger.getLogger(PreferenceConverterRegistrationManager.class.getName());
+
+    private final BundleContext context;
+    private final UserStore userStore;
+
+    private final ServiceTracker<PreferenceConverter<?>, PreferenceConverter<?>> tracker;
+
+    public PreferenceConverterRegistrationManager(BundleContext bundleContext, UserStore userStore) {
+        this.context = bundleContext;
+        this.userStore = userStore;
+        tracker = createTracker(bundleContext);
+        tracker.open();
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private ServiceTracker<PreferenceConverter<?>, PreferenceConverter<?>> createTracker(BundleContext bundleContext) {
+        return new ServiceTracker<PreferenceConverter<?>, PreferenceConverter<?>>(bundleContext,
+                (Class) PreferenceConverter.class, new Cutomizer());
+    }
+
+    public void stop() {
+        tracker.close();
+    }
+
+    private class Cutomizer implements ServiceTrackerCustomizer<PreferenceConverter<?>, PreferenceConverter<?>> {
+
+        @Override
+        public PreferenceConverter<?> addingService(ServiceReference<PreferenceConverter<?>> reference) {
+            String preferenceKey = (String) reference.getProperty(PreferenceConverter.KEY_PARAMETER_NAME);
+            PreferenceConverter<?> converter = context.getService(reference);
+            if (preferenceKey == null) {
+                logger.log(Level.SEVERE,
+                        "Found PreferenceConverter \"" + converter + "\" in OSGi registry without property "
+                                + PreferenceConverter.KEY_PARAMETER_NAME + " defining the preference key");
+            } else {
+                logger.log(Level.FINE, "Registering PreferenceConverter \"" + converter
+                        + "\" found as OSGi service with key \"" + preferenceKey + "\"");
+                userStore.registerPreferenceConverter(preferenceKey, converter);
+            }
+            return converter;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<PreferenceConverter<?>> reference,
+                PreferenceConverter<?> service) {
+            // Should we do anything here?
+        }
+
+        @Override
+        public void removedService(ServiceReference<PreferenceConverter<?>> reference, PreferenceConverter<?> service) {
+            String preferenceKey = (String) reference.getProperty(PreferenceConverter.KEY_PARAMETER_NAME);
+            if (preferenceKey != null) {
+                logger.log(Level.FINE,
+                        "Removing PreferenceConverter \"" + service + "\" with key \"" + preferenceKey + "\"");
+                userStore.removePreferenceConverter(preferenceKey);
+            }
+        }
+    }
+}

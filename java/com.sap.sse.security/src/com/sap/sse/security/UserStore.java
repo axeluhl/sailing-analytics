@@ -55,14 +55,38 @@ public interface UserStore extends Named {
     String getPreference(String username, String key);
     
     /**
+     * <p>
+     * In an OSGi environment, this shouldn't be called manually, but instead automatically managed by setting a
+     * {@link PreferenceConverterRegistrationManager} up. {@link PreferenceConverter}s should be registered in the OSGi
+     * service registry with {@link PreferenceConverter#KEY_PARAMETER_NAME} containing the associated preference key
+     * added as property of the service registration.
+     * </p>
+     * 
+     * <p>
      * Registers a converter objects for a preference key that is used to convert preference Strings to Objects. This
      * makes it possible to access deserialized settings without the need to do the deserialization over and over again.
+     * </p>
      * 
-     * @param key the key to associate the converter with
-     * @param converter the converter to use for (de)serialization
+     * @param key
+     *            the key to associate the converter with
+     * @param converter
+     *            the converter to use for (de)serialization
      */
     void registerPreferenceConverter(String key, PreferenceConverter<?> converter);
     
+    /**
+     * <p>
+     * In an OSGi environment, this shouldn't be called manually, but instead automatically managed by setting a
+     * {@link PreferenceConverterRegistrationManager} up.
+     * </p>
+     * 
+     * <p>
+     * Removes a registered {@link PreferenceConverter}  with the given key.
+     * </p>
+     * 
+     * @param key
+     *            the key of the {@link PreferenceConverter} to remove
+     */
     void removePreferenceConverter(String key);
     
     /**

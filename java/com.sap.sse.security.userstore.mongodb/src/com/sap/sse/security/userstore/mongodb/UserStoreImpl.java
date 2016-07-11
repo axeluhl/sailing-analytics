@@ -591,8 +591,12 @@ public class UserStoreImpl implements UserStore {
                 }
             }
         }
-        Object oldPreference = userMap.put(key, convertedObject);
-        notifyListenersOnPreferenceObjectChange(username, key, oldPreference, convertedObject);
+        // if the new preference object is simply null, we remove the entry instead of putting null
+        Object oldPreference = convertedObject == null ? userMap.remove(key) : userMap.put(key, convertedObject);
+        if(oldPreference != null || convertedObject != null) {
+            // preference hasn't changed if it was null and is now null
+            notifyListenersOnPreferenceObjectChange(username, key, oldPreference, convertedObject);
+        }
     }
 
     private void unsetPreferenceObject(String username, String key) {
