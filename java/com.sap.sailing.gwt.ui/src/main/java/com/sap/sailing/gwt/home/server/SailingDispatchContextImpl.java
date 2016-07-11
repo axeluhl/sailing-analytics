@@ -80,7 +80,7 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     @Override
     public <T> T getPreferenceForCurrentUser(String preferenceKey) {
         User currentUser = securityService.getCurrentUser();
-        if(currentUser != null) {
+        if (currentUser != null) {
             return userStore.getPreferenceObject(currentUser.getName(), preferenceKey);
         }
         return null;
@@ -89,7 +89,7 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     @Override
     public void setPreferenceForCurrentUser(String preferenceKey, Object preference) {
         User currentUser = securityService.getCurrentUser();
-        if(currentUser != null) {
+        if (currentUser != null) {
             userStore.setPreferenceObject(currentUser.getName(), preferenceKey, preference);
         }
     }
