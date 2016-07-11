@@ -543,6 +543,21 @@ public class UserStoreImpl implements UserStore {
                     + " is already registered. Converter " + converter + " will not be registered");
         }
     }
+    
+    @Override
+    public void removePreferenceConverter(String preferenceKey) {
+        PreferenceConverter<?> preferenceConverterToRemove = preferenceConverters.remove(preferenceKey);
+        if (preferenceConverterToRemove != null) {
+            final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+            for (String username : usersToProcess) {
+                unsetPreferenceObject(username, preferenceKey);
+            }
+        } else {
+            logger.log(Level.WARNING, "PreferenceConverter for key " + preferenceKey
+                    + " should be removed but wasn't registered");
+        }
+        
+    }
 
     private void loadPreferenceIfConverterIsAvailable(String username, String key) {
         PreferenceConverter<?> preferenceConverter = preferenceConverters.get(key);

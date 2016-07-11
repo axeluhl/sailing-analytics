@@ -63,6 +63,8 @@ public interface UserStore extends Named {
      */
     void registerPreferenceConverter(String key, PreferenceConverter<?> converter);
     
+    void removePreferenceConverter(String key);
+    
     /**
      * Gets a preference object. Always returns null if there is no converter associated with the given key -> see
      * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
