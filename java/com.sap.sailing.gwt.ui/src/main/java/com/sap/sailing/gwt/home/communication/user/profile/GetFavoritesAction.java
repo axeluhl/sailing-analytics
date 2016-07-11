@@ -25,28 +25,34 @@ public class GetFavoritesAction implements SailingAction<FavoritesResult> {
         return new FavoritesResult(getFavoriteBoatClasses(ctx), getFavoriteCompetitors(ctx));
     }
 
+    @GwtIncompatible
     private FavoriteBoatClassesDTO getFavoriteBoatClasses(SailingDispatchContext ctx) {
         BoatClassNotificationPreferences preferences = ctx
                 .getPreferenceForCurrentUser(BoatClassNotificationPreferences.PREF_NAME);
         TreeSet<BoatClassDTO> selected = new TreeSet<>();
         boolean notifyAboutUpcomingRaces = false, notifyAboutResults = false;
-        for (BoatClassNotificationPreference pref : preferences.getBoatClasses()) {
-            String name = pref.getBoatClass().getName(), displayName = pref.getBoatClass().getDisplayName();
-            selected.add(new BoatClassDTO(name, displayName, pref.getBoatClass().getHullLength().getMeters()));
-            notifyAboutUpcomingRaces |= pref.isNotifyAboutUpcomingRaces();
-            notifyAboutResults |= pref.isNotifyAboutResults();
+        if (preferences != null) {
+            for (BoatClassNotificationPreference pref : preferences.getBoatClasses()) {
+                String name = pref.getBoatClass().getName(), displayName = pref.getBoatClass().getDisplayName();
+                selected.add(new BoatClassDTO(name, displayName, pref.getBoatClass().getHullLength().getMeters()));
+                notifyAboutUpcomingRaces |= pref.isNotifyAboutUpcomingRaces();
+                notifyAboutResults |= pref.isNotifyAboutResults();
+            }
         }
         return new FavoriteBoatClassesDTO(selected, notifyAboutUpcomingRaces, notifyAboutResults);
     }
     
+    @GwtIncompatible
     private FavoriteCompetitorsDTO getFavoriteCompetitors(SailingDispatchContext ctx) {
         CompetitorNotificationPreferences preferences = ctx
                 .getPreferenceForCurrentUser(CompetitorNotificationPreferences.PREF_NAME);
         TreeSet<SimpleCompetitorWithIdDTO> selected = new TreeSet<>();
         boolean notifyAboutResults = false;
-        for (CompetitorNotificationPreference pref : preferences.getCompetitors()) {
-            selected.add(new SimpleCompetitorWithIdDTO(pref.getCompetitor()));
-            notifyAboutResults |= pref.isNotifyAboutResults();
+        if (preferences != null) {
+            for (CompetitorNotificationPreference pref : preferences.getCompetitors()) {
+                selected.add(new SimpleCompetitorWithIdDTO(pref.getCompetitor()));
+                notifyAboutResults |= pref.isNotifyAboutResults();
+            }
         }
         return new FavoriteCompetitorsDTO(selected, notifyAboutResults);
     }
