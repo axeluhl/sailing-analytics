@@ -1568,6 +1568,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windFixes();
     String twoXMark();
     String pagerStateInfo(int start , int end, int size, @Select boolean exact);
+    String currentRideHeightInMeters();
+    String currentRideHeightInMetersTooltip();
+    String currentOrAverageRideHeightInMeters();
+    String currentOrAverageRideHeightInMetersTooltip();
+    String pleaseCreateAtLeastOneMappingForCompetitor();
+    String importAdditionalSensorData();
     String strategySimulatorTitle();
     String controlSettings();
     String windDisplay();

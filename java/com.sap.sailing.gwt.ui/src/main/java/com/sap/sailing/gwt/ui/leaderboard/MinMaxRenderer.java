@@ -3,6 +3,9 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.Comparator;
 
 import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 
@@ -14,6 +17,17 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
  * 
  */
 public class MinMaxRenderer {
+    
+    protected interface Templates extends SafeHtmlTemplates {
+        @Template("<div title=\"{2}\" class=\"{1}\" style=\"background-size:{3}% 25px;\">{0}</div>")
+        SafeHtml render(String value, String cssClass, String title, int percentage);
+    }
+    
+    protected static final String BACKGROUND_BAR_STYLE_BAD = "minMaxBackgroundBarBad";
+    protected static final String BACKGROUND_BAR_STYLE_OK = "minMaxBackgroundBar";
+    protected static final String BACKGROUND_BAR_STYLE_GOOD = "minMaxBackgroundBarGood";
+    protected static final Templates TEMPLATES = GWT.create(Templates.class); 
+
     private final HasStringAndDoubleValue valueProvider;
     private final Comparator<LeaderboardRowDTO> comparator;
     private Double minimumValue;
@@ -39,15 +53,15 @@ public class MinMaxRenderer {
      * @param title
      *            tool tip title to display; if <code>null</code>, no tool tip will be rendered
      */
-    public void render(Context context, LeaderboardRowDTO row, String title, SafeHtmlBuilder sb) {
-        int percent = getPercentage(row);
+    public final void render(Context context, LeaderboardRowDTO row, String title, SafeHtmlBuilder sb) {
         String stringValue = valueProvider.getStringValueToRender(row);
-        stringValue = stringValue == null ? "" : stringValue;
-        sb.appendHtmlConstant("<div " + (title == null ? "" : "title=\"" + title + "\" ")
-        		+ "class=\"minMaxBackgroundBar\" "
-                + "style=\"background-size: " + percent + "% 25px; \">").appendEscaped(stringValue).appendHtmlConstant("</div>");
+        this.render(row, stringValue == null ? "" : stringValue, title == null ? "" : title, sb);
     }
-
+    
+    protected void render(LeaderboardRowDTO row, String nullSafeValue, String nullSafeTitle, SafeHtmlBuilder sb) {
+        sb.append(TEMPLATES.render(nullSafeValue, BACKGROUND_BAR_STYLE_OK, nullSafeTitle, getPercentage(row)));
+    }
+    
     /**
      * Gets the percentage of a {@link LeaderboardRowDTO}. If no minimum or maximum value was set by calling
      * {@link MinMaxRenderer#updateMinMax(DisplayedLeaderboardRowsProvider)} before zero is returned.

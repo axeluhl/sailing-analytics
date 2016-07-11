@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -61,7 +62,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -303,7 +304,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 
-    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, GPSFixStore gpsFixStore,
+    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator);
 
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
@@ -531,8 +532,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     PolarDataService getPolarDataService();
 
     SimulationService getSimulationService();
-
-    GPSFixStore getGPSFixStore();
+    
+    SensorFixStore getSensorFixStore();
     
     RaceTracker getRaceTrackerById(Object id);
     
@@ -617,4 +618,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ClassLoader getCombinedMasterDataClassLoader();
 
     Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint);
+
+    /**
+     * Gets the {@link RaceTracker} associated with a given {@link RegattaAndRaceIdentifier}. If the {@link RaceTracker}
+     * isn't available yet, the given callback will be informed asynchronously on registration of the RaceTracker in
+     * question.
+     */
+    void getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier, Consumer<RaceTracker> callback);
 }
