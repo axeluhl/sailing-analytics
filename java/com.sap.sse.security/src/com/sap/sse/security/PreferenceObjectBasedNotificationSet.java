@@ -83,12 +83,20 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
 
     @Override
     public void stop() {
-        if(tracker != null) {
+        if (tracker != null) {
             tracker.close();
         }
-        if(store!= null) {
+        removeStore();
+    }
+
+    private void removeStore() {
+        if (store != null) {
             store.removePreferenceObjectListener(listener);
             store = null;
+        }
+        // TODO use write lock
+        synchronized (notifications) {
+            notifications.clear();
         }
     }
 
@@ -160,14 +168,13 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
 
         @Override
         public void modifiedService(ServiceReference<UserStore> reference, UserStore service) {
-            // Should we do anything here?
+            // Should we do anything here? the preference key could have changed, but does this make any sense?
         }
 
         @Override
         public void removedService(ServiceReference<UserStore> reference, UserStore service) {
-            if(PreferenceObjectBasedNotificationSet.this.store == service) {
-                service.removePreferenceObjectListener(listener);
-                PreferenceObjectBasedNotificationSet.this.store = null;
+            if (PreferenceObjectBasedNotificationSet.this.store == service) {
+                removeStore();
             }
         }
     }
