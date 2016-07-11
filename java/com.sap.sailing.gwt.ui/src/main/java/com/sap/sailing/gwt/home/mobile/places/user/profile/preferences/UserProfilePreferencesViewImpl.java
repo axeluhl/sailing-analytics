@@ -6,48 +6,35 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelection;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelection.NotificationCallback;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider;
-import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorMobile;
+import com.sap.sailing.gwt.home.mobile.places.user.profile.AbstractUserProfileView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
-import com.sap.sse.security.ui.userprofile.mobile.userheader.UserHeader;
 
-public class UserProfilePreferencesViewImpl extends Composite implements UserProfilePreferencesView {
+public class UserProfilePreferencesViewImpl extends AbstractUserProfileView implements UserProfilePreferencesView {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
     interface MyUiBinder extends UiBinder<Widget, UserProfilePreferencesViewImpl> {
     }
 
     private final StringMessages i18n = StringMessages.INSTANCE;
-    @UiField(provided = true) final UserHeader userHeaderUi;
-    @UiField(provided = true) final AuthorizedContentDecoratorMobile decoratorUi;
     @UiField(provided = true) SuggestedMultiSelection<SimpleCompetitorWithIdDTO> favoriteCompetitorsSelctionUi;
     @UiField(provided = true) SuggestedMultiSelection<BoatClassDTO> favoriteBoatClassesSelctionUi;
     @UiField DivElement notificationsTextUi;
     
-    public UserProfilePreferencesViewImpl(Presenter presenter) {
-        userHeaderUi = new UserHeader(SharedResources.INSTANCE);
-        decoratorUi = new AuthorizedContentDecoratorMobile(presenter);
+    public UserProfilePreferencesViewImpl(UserProfilePreferencesView.Presenter presenter) {
+        super(presenter);
         favoriteCompetitorsSelctionUi = new CompetitorDisplayImpl(
                 presenter.getFavoriteCompetitorsDataProvider()).selectionUi;
         favoriteBoatClassesSelctionUi = new BoatClassDisplayImpl(
                 presenter.getFavoriteBoatClassesDataProvider()).selectionUi;
-        initWidget(uiBinder.createAndBindUi(this));
-    }
-    
-    @Override
-    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
-        userHeaderUi.setAuthenticationContext(authenticationContext);
-        decoratorUi.setAuthenticationContext(authenticationContext);
+        setViewContent(uiBinder.createAndBindUi(this));
     }
     
     private class CompetitorDisplayImpl implements SuggestedMultiSelectionCompetitorDataProvider.Display {
