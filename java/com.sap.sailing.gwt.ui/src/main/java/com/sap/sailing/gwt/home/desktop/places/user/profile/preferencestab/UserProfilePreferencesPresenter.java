@@ -36,21 +36,24 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
     }
     
     @Override
-    public void start() {
-        userProfilePresenter.getClientFactory().getDispatch().execute(new GetFavoritesAction(),
-                new AsyncCallback<FavoritesResult>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        userProfilePresenter.getClientFactory()
-                                .createErrorView("Error while loading notification preferences!", caught);
-                    }
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        view.getDecorator().setAuthenticationContext(authenticationContext);
+        if (authenticationContext.isLoggedIn()) {
+            userProfilePresenter.getClientFactory().getDispatch().execute(new GetFavoritesAction(),
+                    new AsyncCallback<FavoritesResult>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            userProfilePresenter.getClientFactory()
+                                    .createErrorView("Error while loading notification preferences!", caught);
+                        }
 
-                    @Override
-                    public void onSuccess(FavoritesResult result) {
-                        initFavoriteCompetitors(result.getFavoriteCompetitors());
-                        initFavoriteBoatClasses(result.getFavoriteBoatClasses());
-                    }
-                });
+                        @Override
+                        public void onSuccess(FavoritesResult result) {
+                            initFavoriteCompetitors(result.getFavoriteCompetitors());
+                            initFavoriteBoatClasses(result.getFavoriteBoatClasses());
+                        }
+                    });
+        }
     }
     
     private void initFavoriteCompetitors(FavoriteCompetitorsDTO favoriteCompetitors) {
@@ -62,11 +65,6 @@ public class UserProfilePreferencesPresenter implements UserProfilePreferencesVi
         boatClassDataProvider.initNotifications(favoriteBoatClasses.isNotifyAboutUpcomingRaces(),
                 favoriteBoatClasses.isNotifyAboutResults());
         boatClassDataProvider.initSelectedItems(favoriteBoatClasses.getSelectedBoatClasses());
-    }
-    
-    @Override
-    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
-        view.getDecorator().setAuthenticationContext(authenticationContext);
     }
     
     @Override

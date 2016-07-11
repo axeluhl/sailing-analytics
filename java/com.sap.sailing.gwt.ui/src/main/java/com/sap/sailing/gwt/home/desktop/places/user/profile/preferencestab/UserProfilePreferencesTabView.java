@@ -26,7 +26,6 @@ public class UserProfilePreferencesTabView extends Composite implements UserProf
     @Override
     public void start(UserProfilePreferencesPlace myPlace, AcceptsOneWidget contentArea) {
         contentArea.setWidget(view);
-        currentPresenter.start();
     }
     
     @Override

@@ -15,6 +15,5 @@ public interface UserProfilePreferencesView extends IsWidget {
     public interface Presenter extends NotLoggedInPresenter, NeedsAuthenticationContext {
         SuggestedMultiSelectionBoatClassDataProvider getFavoriteBoatClassesDataProvider();
         SuggestedMultiSelectionCompetitorDataProvider getFavoriteCompetitorsDataProvider();
-        void start();
     }
 }
