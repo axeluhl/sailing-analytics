@@ -22,9 +22,10 @@ import com.sap.sailing.gwt.ui.polarmining.PolarBackendResultsPresenter;
 import com.sap.sailing.gwt.ui.polarmining.PolarResultsPresenter;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
+public class TabbedResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
     
     private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
     
@@ -162,6 +163,12 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
 
     @Override
     public void updateSettings(Settings newSettings) {
+        // no-op
+    }
+
+    @Override
+    public Settings getSettings() {
+        return null;
     }
 
     @Override
@@ -195,5 +202,4 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
         }
         
     }
-
 }

@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -103,7 +104,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private UserStore store;
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
-    private final ConcurrentHashMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
+    private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
     /**
      * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not currently

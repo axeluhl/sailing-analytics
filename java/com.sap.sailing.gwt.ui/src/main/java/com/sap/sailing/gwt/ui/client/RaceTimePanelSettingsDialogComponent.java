@@ -9,8 +9,8 @@ public class RaceTimePanelSettingsDialogComponent extends TimePanelSettingsDialo
 
     @Override
     public RaceTimePanelSettings getResult() {
-        RaceTimePanelSettings result = new RaceTimePanelSettings();
-        result.setRefreshInterval(refreshIntervalBox.getValue() == null ? -1 : (long) (refreshIntervalBox.getValue() * 1000));
+        long refreshInternal = refreshIntervalBox.getValue() == null ? -1 : (long) (refreshIntervalBox.getValue() * 1000);
+        RaceTimePanelSettings result = new RaceTimePanelSettings(refreshInternal);
         return result;
     }
 }

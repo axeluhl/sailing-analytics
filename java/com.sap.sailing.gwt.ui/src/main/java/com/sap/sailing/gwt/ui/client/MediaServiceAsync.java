@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.Collection;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
@@ -9,12 +7,12 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 public interface MediaServiceAsync {
 
     void getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
-            AsyncCallback<Collection<MediaTrack>> callback);
+            AsyncCallback<Iterable<MediaTrack>> callback);
     
     void getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier,
-            AsyncCallback<Collection<MediaTrack>> callback);
+            AsyncCallback<Iterable<MediaTrack>> callback);
 
-    void getAllMediaTracks(AsyncCallback<Collection<MediaTrack>> asyncCallback);
+    void getAllMediaTracks(AsyncCallback<Iterable<MediaTrack>> asyncCallback);
 
     void addMediaTrack(MediaTrack mediaTrack, AsyncCallback<String> asyncCallback);
 

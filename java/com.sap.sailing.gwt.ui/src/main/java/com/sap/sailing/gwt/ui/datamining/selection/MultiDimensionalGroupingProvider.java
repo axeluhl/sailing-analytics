@@ -252,11 +252,22 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
     }
 
     @Override
-    public void updateSettings(SerializableSettings newSettings) { }
+    public void updateSettings(SerializableSettings newSettings) {
+        // no-op
+    }
     
     @Override
     public String getDependentCssClassName() {
         return "multiDimensionalGroupingProvider";
     }
 
+    @Override
+    public SerializableSettings getSettings() {
+        return null;
+    }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
 }

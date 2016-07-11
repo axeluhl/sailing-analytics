@@ -28,6 +28,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeWinnerGetsSix();
         case HIGH_POINT_WINNER_GETS_EIGHT:
             return stringMessages.scoringSchemeWinnerGetsEight();
+        case HIGH_POINT_MATCH_RACING:
+            return stringMessages.scoringSchemeHighPointMatchRacing();
         case HIGH_POINT_WINNER_GETS_EIGHT_AND_INTERPOLATION:
             return stringMessages.scoringSchemeWinnerGetsEightAndInterpolation();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
@@ -56,6 +58,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
         case LOW_POINT_LEAGUE_OVERALL:
             return stringMessages.scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
+        case HIGH_POINT_MATCH_RACING:
+            return stringMessages.scoringSchemeHighPointMatchRacingDescription();
         default:
             return format(scoringSchemeType, stringMessages);
         }

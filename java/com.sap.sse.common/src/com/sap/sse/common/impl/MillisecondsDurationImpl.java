@@ -60,7 +60,7 @@ public class MillisecondsDurationImpl implements Duration {
 
     @Override
     public double asHours() {
-        return asMillis() / Duration.ONE_HOUR.asMillis();
+        return ((double) asMillis()) / (double) Duration.ONE_HOUR.asMillis();
     }
 
     @Override
@@ -115,6 +115,11 @@ public class MillisecondsDurationImpl implements Duration {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public Duration mod(Duration d) {
+        return new MillisecondsDurationImpl(asMillis() % d.asMillis());
     }
 
 }

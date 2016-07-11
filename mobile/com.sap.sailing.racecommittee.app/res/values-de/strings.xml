@@ -2,7 +2,7 @@
 <resources>
 
     <string name="running_on_course">(Kurs %s)</string>
-    <string name="course_design_number_waypoints">Kurs hat %s Wegpunkte</string>
+    <string name="course_design_number_waypoints">Kurs hat %d Wegpunkte</string>
     <string name="service_text_no_races">Warte auf Rennen&#8230;</string>
     <string name="service_text_num_races">Aktuell %d Rennen verwaltet.</string>
     <string name="set_time">Start</string>
@@ -78,13 +78,14 @@
     <string name="pick_a_rounding_direction">Wenderichtung auswählen</string>
     <string name="select_penalty_reason">Strafe auswählen</string>
 
-    <string-array name="rounding_directions">
-        <item>Backbord</item>
-        <item>Steuerbord</item>
-        <item>Gate</item>
-        <item>Linie</item>
-        <item>Ablauf</item>
-    </string-array>
+    <string name="passing_instruction_none">Leer</string>
+    <string name="passing_instruction_port">Backbord</string>
+    <string name="passing_instruction_starboard">Steuerbord</string>
+    <string name="passing_instruction_single_unknown">Einzel, unbekannt</string>
+    <string name="passing_instruction_gate">Gate</string>
+    <string name="passing_instruction_line">Linie</string>
+    <string name="passing_instruction_offset">Ablauf</string>
+    <string name="passing_instruction_fixed_bearing">Feste Peilung</string>
 
     <string name="publish">Veröffentlichen</string>
     <string name="unpublish">Zurücknehmen</string>
@@ -400,7 +401,7 @@
     <string name="use_previous_course_dialog_message">Soll das bisherige Kursdesign verwendet werden?</string>
     <string name="please_enter_valid_number">Bitte geben Sie eine gültige Zahl ein.</string>
     <string name="please_enter_valid_pathfinder">Bitte tragen Sie einen gültigen Pathfinder ein.</string>
-    <string name="error_scanning_qr">Fehler beim Scannen des QRCodes (%s)</string>
+    <string name="error_scanning_qr">Fehler beim Scannen des QRCodes (%i)</string>
     <string name="error_scanning_qr_malformed">Ungültige Url</string>
     <string name="marks_w_placeholder">Kursmarkierungen: %s</string>
     <string name="error_no_course_to_copy">Kein Kurs zum Kopieren vorhanden</string>
@@ -415,7 +416,7 @@
     <string name="theme_changed_title">Darstellungsmodus ändern</string>
     <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
     <string name="url_refresh_title">Die Server URL wurde geändert</string>
-    <string name="url_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
+    <string name="app_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
     <string name="until_xray_removed">XRAY wird eingeholt in %s</string>
     <string name="send_photos">Fotos senden</string>
     <string name="error_wrong_degree_value_title">Fehler</string>
@@ -511,5 +512,7 @@
     <string name="abort_dismiss">Verwerfen</string>
     <string name="set_column_factor">Setze Faktor</string>
     <string name="set_factor_error">Beim Setzen des Faktors ist ein Fehler aufgetreten: %s</string>
+    <string name="sync_to_minute">Sync zur Minute</string>
+    <string name="non_public_changed_title">Nicht öffentliche Events</string>
 
 </resources>

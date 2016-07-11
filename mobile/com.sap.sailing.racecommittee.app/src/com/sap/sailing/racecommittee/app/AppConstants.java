@@ -13,6 +13,7 @@ public class AppConstants {
     public final static String EXTRAS_RACE_STATE_EVENT = "raceStateEvent";
     public final static String FLAG_KEY = "raceFlag";
     public final static String EXTRAS_WIND_FIX = "windfix";
+    public final static String EXTRA_FORCE_REFRESH = "forceRefresh";
 
     public final static String AUTHOR_TYPE_OFFICER_START = "Race Officer on Start Vessel";
     public final static String AUTHOR_TYPE_OFFICER_FINISH = "Race Officer on Finish Vessel";

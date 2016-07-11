@@ -6,13 +6,13 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
-import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -62,7 +62,7 @@ import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -304,7 +304,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void updateStoredLeaderboardGroup(LeaderboardGroup leaderboardGroup);
 
-    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore, GPSFixStore gpsFixStore,
+    DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator);
 
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
@@ -417,7 +417,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Calling mediaTrackAdded for every entry in the specified collection. 
      * @param mediaTracks
      */
-    void mediaTracksAdded(Collection<MediaTrack> mediaTracks);
+    void mediaTracksAdded(Iterable<MediaTrack> mediaTracks);
     
     void mediaTrackTitleChanged(MediaTrack mediaTrack);
 
@@ -439,13 +439,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param override If true, track properties (title, url, start time, duration, not mime type!) will be 
      * overwritten with the values from the track to be imported.
      */
-    void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
+    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, boolean override);
     
-    Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
     
-    Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
-    Collection<MediaTrack> getAllMediaTracks();
+    Iterable<MediaTrack> getAllMediaTracks();
 
     void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
@@ -532,8 +532,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     PolarDataService getPolarDataService();
 
     SimulationService getSimulationService();
-
-    GPSFixStore getGPSFixStore();
+    
+    SensorFixStore getSensorFixStore();
     
     RaceTracker getRaceTrackerById(Object id);
     
@@ -618,4 +618,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ClassLoader getCombinedMasterDataClassLoader();
 
     Iterable<Competitor> getCompetitorInOrderOfWindwardDistanceTraveledFarthestFirst(TrackedRace trackedRace, TimePoint timePoint);
+
+    /**
+     * Gets the {@link RaceTracker} associated with a given {@link RegattaAndRaceIdentifier}. If the {@link RaceTracker}
+     * isn't available yet, the given callback will be informed asynchronously on registration of the RaceTracker in
+     * question.
+     */
+    void getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier, Consumer<RaceTracker> callback);
 }

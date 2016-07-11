@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -14,6 +15,11 @@ import com.sap.sailing.selenium.pages.gwt.TextAreaPO;
 import com.sap.sailing.selenium.pages.gwt.TextBoxPO;
 
 public class EventCreateDialogPO extends DataEntryDialogPO {
+
+    private static final String LEADERBOARD_GROUPS_TAB_ID = "LeaderboardGroupsTab";
+    private static final String COURSE_AREAS_TAB_ID = "CourseAreasTab";
+    private static final String IMAGES_TAB_ID = "ImagesTab";
+    private static final String VIDEOS_TAB_ID = "VideosTab";
 
     @FindBy(how = BySeleniumId.class, using = "NameTextBox")
     private WebElement nameTextBox;
@@ -33,6 +39,9 @@ public class EventCreateDialogPO extends DataEntryDialogPO {
     @FindBy(how = BySeleniumId.class, using = "IsPublicCheckBox")
     private WebElement isPublicCheckBox;
     
+    @FindBy(how = BySeleniumId.class, using = "EventDialogTabs")
+    private WebElement eventDialogTabPanel;
+    
     EventCreateDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
@@ -45,5 +54,30 @@ public class EventCreateDialogPO extends DataEntryDialogPO {
         BetterDateTimeBoxPO.create(driver, endDateTimeBox).setDate(end);
         CheckBoxPO.create(driver, isPublicCheckBox).setSelected(isPublic);
     }
+    
+    void addLeaderboardGroup(WebElement leaderboardGroupsTab, String leaderboardGroupName) {
+        // assumes that the Leaderboard groups tab is already active
+        new Select(findElementBySeleniumId(leaderboardGroupsTab, "SelectionListBox")).selectByVisibleText(leaderboardGroupName);
+        findElementBySeleniumId(leaderboardGroupsTab, "AddButton").click();
+    }
+    
+    WebElement goToTab(String tabName, String id) {
+        return goToTab(eventDialogTabPanel, tabName, id, /* isVertical */ false);
+    }
+    
+    WebElement goToLeaderboardGroupsTab() {
+        return goToTab("Leaderboard groups", LEADERBOARD_GROUPS_TAB_ID);
+    }
 
+    WebElement goToCourseAreasTab() {
+        return goToTab("Course areas", COURSE_AREAS_TAB_ID);
+    }
+
+    WebElement goToImagesTab() {
+        return goToTab("Images", IMAGES_TAB_ID);
+    }
+
+    WebElement goToVideosTab() {
+        return goToTab("Videos", VIDEOS_TAB_ID);
+    }
 }
