@@ -10,6 +10,11 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
 import com.sap.sse.common.Stoppable;
 import com.sap.sse.common.Util;
 
@@ -42,7 +47,7 @@ import com.sap.sse.common.Util;
 public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements Stoppable {
     private static final Logger logger = Logger.getLogger(PreferenceObjectBasedNotificationSet.class.getName());
 
-    private final UserStore store;
+    private UserStore store;
     private final PreferenceObjectListener<PrefT> listener = new PreferenceObjectListenerImpl();
 
     /**
@@ -50,14 +55,41 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
      */
     private final Map<T, Set<String>> notifications = new HashMap<>();
 
+    private final BundleContext context;
+
+    private final String key;
+
+    private final ServiceTracker<UserStore, UserStore> tracker;
+
+    /**
+     * Constructor used to automatically track {@link UserStore} as OSGi service.
+     */
+    public PreferenceObjectBasedNotificationSet(String key, BundleContext context) {
+        this.key = key;
+        this.context = context;
+        tracker = new ServiceTracker<UserStore, UserStore>(context, UserStore.class, new Cutomizer());
+    }
+
+    /**
+     * Constructor used to work with a given {@link UserStore}.
+     */
     public PreferenceObjectBasedNotificationSet(String key, UserStore store) {
+        this.key = key;
         this.store = store;
+        context = null;
+        tracker = null;
         store.addPreferenceObjectListener(key, listener, true);
     }
 
     @Override
     public void stop() {
-        store.removePreferenceObjectListener(listener);
+        if(tracker != null) {
+            tracker.close();
+        }
+        if(store!= null) {
+            store.removePreferenceObjectListener(listener);
+            store = null;
+        }
     }
 
     protected abstract Collection<T> calculateObjectsToNotify(PrefT preference);
@@ -107,6 +139,35 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
                 for (T objectToAdd : objectsToAdd) {
                     Util.addToValueSet(notifications, objectToAdd, username);
                 }
+            }
+        }
+    }
+
+    private class Cutomizer implements ServiceTrackerCustomizer<UserStore, UserStore> {
+        @Override
+        public UserStore addingService(ServiceReference<UserStore> reference) {
+            UserStore store = context.getService(reference);
+            if (PreferenceObjectBasedNotificationSet.this.store != null
+                    && PreferenceObjectBasedNotificationSet.this.store != store) {
+                logger.severe("Multiple " + UserStore.class.getSimpleName()
+                        + " instances found. Only one instance is handled.");
+            } else {
+                PreferenceObjectBasedNotificationSet.this.store = store;
+                store.addPreferenceObjectListener(key, listener, true);
+            }
+            return store;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<UserStore> reference, UserStore service) {
+            // Should we do anything here?
+        }
+
+        @Override
+        public void removedService(ServiceReference<UserStore> reference, UserStore service) {
+            if(PreferenceObjectBasedNotificationSet.this.store == service) {
+                service.removePreferenceObjectListener(listener);
+                PreferenceObjectBasedNotificationSet.this.store = null;
             }
         }
     }
