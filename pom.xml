@@ -99,12 +99,12 @@
               <url>http://download.eclipse.org/releases/luna/</url>
           </repository>
 -->
-  <!--        
+<!-- 
           <repository>
               <id>sap-nexus</id>
               <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
           </repository>
-  --> 
+--> 
 <!-- This profile should not be present when building with MiOS
           <repository>
               <id>sailing-server-maven</id>
