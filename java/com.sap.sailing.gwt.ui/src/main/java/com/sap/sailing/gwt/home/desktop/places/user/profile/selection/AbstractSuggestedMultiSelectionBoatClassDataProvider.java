@@ -1,15 +1,18 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.view.client.ProvidesKey;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
-import com.sap.sse.common.Util;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.FavoriteBoatClassesDTO;
 import com.sap.sse.common.filter.AbstractListFilter;
 
 public abstract class AbstractSuggestedMultiSelectionBoatClassDataProvider extends
-        AbstractSuggestedMultiSelectionDataProvider<BoatClassMasterdata, SuggestedMultiSelectionBoatClassDataProvider.Display>
+        AbstractSuggestedMultiSelectionDataProvider<BoatClassDTO, SuggestedMultiSelectionBoatClassDataProvider.Display>
         implements SuggestedMultiSelectionBoatClassDataProvider {
 
     private boolean notifyAboutUpcomingRaces;
@@ -23,19 +26,23 @@ public abstract class AbstractSuggestedMultiSelectionBoatClassDataProvider exten
     };
     
     protected AbstractSuggestedMultiSelectionBoatClassDataProvider() {
-        super(new ProvidesKey<BoatClassMasterdata>() {
+        super(new ProvidesKey<BoatClassDTO>() {
             @Override
-            public Object getKey(BoatClassMasterdata item) {
-                return item.getDisplayName();
+            public Object getKey(BoatClassDTO item) {
+                return item.getName();
             }
         });
     }
     
     @Override
     protected void getSuggestions(Iterable<String> queryTokens, int limit,
-            SuggestionItemsCallback<BoatClassMasterdata> callback) {
+            SuggestionItemsCallback<BoatClassDTO> callback) {
         List<BoatClassMasterdata> boatClasses = Arrays.asList(BoatClassMasterdata.values());
-        callback.setSuggestionItems(Util.asList(filter.applyFilter(queryTokens, boatClasses)));
+        List<BoatClassDTO> suggestionItems = new ArrayList<>();
+        for (BoatClassMasterdata bcm : filter.applyFilter(queryTokens, boatClasses)) {
+            suggestionItems.add(new BoatClassDTO(bcm.getDisplayName(), bcm.getHullLength().getMeters()));
+        }
+        callback.setSuggestionItems(suggestionItems);
     }
     
     @Override
@@ -49,19 +56,9 @@ public abstract class AbstractSuggestedMultiSelectionBoatClassDataProvider exten
     }
     
     @Override
-    public boolean isNotifyAboutUpcomingRaces() {
-        return notifyAboutUpcomingRaces;
-    }
-    
-    @Override
     public void setNotifyAboutUpcomingRaces(boolean notifyAboutUpcomingRaces) {
         this.notifyAboutUpcomingRaces = notifyAboutUpcomingRaces;
         this.persist();
-    }
-    
-    @Override
-    public boolean isNotifyAboutResults() {
-        return notifyAboutResults;
     }
     
     @Override
@@ -69,5 +66,12 @@ public abstract class AbstractSuggestedMultiSelectionBoatClassDataProvider exten
         this.notifyAboutResults = notifyAboutResults;
         this.persist();
     }
+    
+    @Override
+    protected final void persist(Collection<BoatClassDTO> selectedItem) {
+        this.persist(new FavoriteBoatClassesDTO(selectedItem, notifyAboutUpcomingRaces, notifyAboutResults));
+    }
+    
+    protected abstract void persist(FavoriteBoatClassesDTO favorites);
     
 }

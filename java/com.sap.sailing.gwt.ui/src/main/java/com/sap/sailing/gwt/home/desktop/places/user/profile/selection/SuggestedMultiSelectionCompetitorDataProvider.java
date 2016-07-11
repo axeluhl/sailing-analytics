@@ -6,8 +6,6 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedM
 public interface SuggestedMultiSelectionCompetitorDataProvider
         extends SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, Display> {
     
-    boolean isNotifyAboutResults();
-    
     void setNotifyAboutResults(boolean notifyAboutResults);
     
     void initNotifications(boolean notifyAboutResults);

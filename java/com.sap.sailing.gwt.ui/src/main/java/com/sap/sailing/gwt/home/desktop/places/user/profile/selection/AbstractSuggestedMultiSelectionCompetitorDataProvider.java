@@ -1,7 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
 
+import java.util.Collection;
+
 import com.google.gwt.view.client.ProvidesKey;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.FavoriteCompetitorsDTO;
 
 public abstract class AbstractSuggestedMultiSelectionCompetitorDataProvider extends
         AbstractSuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, SuggestedMultiSelectionCompetitorDataProvider.Display>
@@ -33,8 +36,10 @@ public abstract class AbstractSuggestedMultiSelectionCompetitorDataProvider exte
     }
     
     @Override
-    public boolean isNotifyAboutResults() {
-        return notifyAboutResults;
+    protected final void persist(Collection<SimpleCompetitorWithIdDTO> selectedItem) {
+        this.persist(new FavoriteCompetitorsDTO(selectedItem, notifyAboutResults));
     }
+    
+    protected abstract void persist(FavoriteCompetitorsDTO favorites);
 
 }

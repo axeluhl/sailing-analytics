@@ -7,7 +7,7 @@ import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 
 class SuggestedMultiSelectionBoatClassItemDescription extends Widget {
@@ -20,11 +20,11 @@ class SuggestedMultiSelectionBoatClassItemDescription extends Widget {
     @UiField DivElement imageUi;
     @UiField SpanElement nameUi;
     
-    SuggestedMultiSelectionBoatClassItemDescription(BoatClassMasterdata boatClass) {
+    SuggestedMultiSelectionBoatClassItemDescription(BoatClassDTO boatClass) {
         setElement(uiBinder.createAndBindUi(this));
         imageUi.getStyle().setBackgroundImage("url('" + BoatClassImageResolver.getBoatClassIconResource(
-                boatClass.getDisplayName()).getSafeUri().asString() + "')");
-        nameUi.setInnerText(boatClass.getDisplayName());
+                boatClass.getName()).getSafeUri().asString() + "')");
+        nameUi.setInnerText(boatClass.getName());
     }
     
 }

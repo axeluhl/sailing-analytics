@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SuggestOracle.Callback;
 import com.google.gwt.user.client.ui.SuggestOracle.Request;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionDataProvider.SuggestionItemsCallback;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractAsyncSuggestBoxFilter;
@@ -176,26 +176,26 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
         }, headerTitle);
     }
     
-    public static SuggestedMultiSelection<BoatClassMasterdata> forBoatClasses(
-            final SuggestedMultiSelectionDataProvider<BoatClassMasterdata, ?> dataProvider, String headerTitle) {
-        return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<BoatClassMasterdata>() {
+    public static SuggestedMultiSelection<BoatClassDTO> forBoatClasses(
+            final SuggestedMultiSelectionDataProvider<BoatClassDTO, ?> dataProvider, String headerTitle) {
+        return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<BoatClassDTO>() {
             @Override
-            public IsWidget getItemDescriptionWidget(BoatClassMasterdata item) {
+            public IsWidget getItemDescriptionWidget(BoatClassDTO item) {
                 return new SuggestedMultiSelectionBoatClassItemDescription(item);
             }
 
             @Override
-            public AbstractSuggestBoxFilter<BoatClassMasterdata, BoatClassMasterdata> getSuggestBoxFilter(
-                    SelectionCallback<BoatClassMasterdata> selectionCallback) {
-                return new AbstractSuggestedMultiSelectionFilter<BoatClassMasterdata>(dataProvider, selectionCallback,
+            public AbstractSuggestBoxFilter<BoatClassDTO, BoatClassDTO> getSuggestBoxFilter(
+                    SelectionCallback<BoatClassDTO> selectionCallback) {
+                return new AbstractSuggestedMultiSelectionFilter<BoatClassDTO>(dataProvider, selectionCallback,
                         StringMessages.INSTANCE.add(StringMessages.INSTANCE.boatClass())) {
                     @Override
-                    protected String createSuggestionKeyString(BoatClassMasterdata value) {
-                        return value.getDisplayName();
+                    protected String createSuggestionKeyString(BoatClassDTO value) {
+                        return value.getName();
                     }
 
                     @Override
-                    protected String createSuggestionAdditionalDisplayString(BoatClassMasterdata value) {
+                    protected String createSuggestionAdditionalDisplayString(BoatClassDTO value) {
                         return null;
                     }
                 };

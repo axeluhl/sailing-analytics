@@ -23,7 +23,7 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T, D extends D
     }
     
     @Override
-    public void addDisplay(D display) {
+    public final void addDisplay(D display) {
         this.displays.add(display);
     }
     
@@ -82,7 +82,7 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T, D extends D
     }
     
     @Override
-    public void persist() {
+    public final void persist() {
         this.persist(new ArrayList<>(selectedItemsMap.values()));
     }
 

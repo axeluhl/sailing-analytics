@@ -9,7 +9,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelection;
@@ -31,7 +31,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
     @UiField(provided = true) final UserHeader userHeaderUi;
     @UiField(provided = true) final AuthorizedContentDecoratorMobile decoratorUi;
     @UiField(provided = true) SuggestedMultiSelection<SimpleCompetitorWithIdDTO> favoriteCompetitorsSelctionUi;
-    @UiField(provided = true) SuggestedMultiSelection<BoatClassMasterdata> favoriteBoatClassesSelctionUi;
+    @UiField(provided = true) SuggestedMultiSelection<BoatClassDTO> favoriteBoatClassesSelctionUi;
     @UiField DivElement notificationsTextUi;
     
     public UserProfilePreferencesViewImpl(Presenter presenter) {
@@ -77,7 +77,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
     }
     
     private class BoatClassDisplayImpl implements SuggestedMultiSelectionBoatClassDataProvider.Display {
-        private final SuggestedMultiSelection<BoatClassMasterdata> selectionUi;
+        private final SuggestedMultiSelection<BoatClassDTO> selectionUi;
         private final HasEnabled notifyAboutUpcomingRacesUi;
         private final HasEnabled notifyAboutResultsUi;
         
@@ -99,7 +99,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
         }
         
         @Override
-        public void setSelectedItems(Collection<BoatClassMasterdata> selectedItems) {
+        public void setSelectedItems(Collection<BoatClassDTO> selectedItems) {
             selectionUi.setSelectedItems(selectedItems);
         }
         
