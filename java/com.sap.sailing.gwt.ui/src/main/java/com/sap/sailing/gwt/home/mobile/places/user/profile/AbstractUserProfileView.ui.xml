@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+        xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+        xmlns:uh="urn:import:com.sap.sse.security.ui.userprofile.mobile.userheader"
+        xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<g:FlowPanel>
+        <uh:UserHeader ui:field="userHeaderUi" />
+        <mp:quickfinder.Quickfinder ui:field="quickfinderUi" />
+        <um:AuthorizedContentDecoratorMobile ui:field="decoratorUi">
+            <um:content>
+                <g:SimplePanel ui:field="contentContainerUi"/>
+            </um:content>
+        </um:AuthorizedContentDecoratorMobile>
+    </g:FlowPanel>
+</ui:UiBinder> 
