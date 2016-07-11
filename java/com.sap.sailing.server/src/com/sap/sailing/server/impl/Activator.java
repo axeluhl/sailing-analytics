@@ -32,7 +32,8 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
-import com.sap.sailing.server.impl.preferences.model.NotificationPreferences;
+import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
+import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
@@ -152,9 +153,10 @@ public class Activator implements BundleActivator {
     }
 
     protected void registerPreferenceConvertersForUserStore(UserStore userStore) {
-        userStore.registerPreferenceConverter(NotificationPreferences.PREF_NAME,
-                new GenericJSONPreferenceConverter<NotificationPreferences>(
-                        () -> new NotificationPreferences(racingEventService)));
+        userStore.registerPreferenceConverter(CompetitorNotificationPreferences.PREF_NAME,
+                new GenericJSONPreferenceConverter<>(() -> new CompetitorNotificationPreferences(racingEventService)));
+        userStore.registerPreferenceConverter(BoatClassNotificationPreferences.PREF_NAME,
+                new GenericJSONPreferenceConverter<>(() -> new BoatClassNotificationPreferences(racingEventService)));
     }
 
     public void stop(BundleContext context) throws Exception {

@@ -6,12 +6,12 @@ import com.sap.sse.common.settings.generic.SettingsList;
 
 public class CompetitorNotificationPreferences extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -3682996540081614053L;
+    
+    public static final String PREF_NAME = SailingPreferences.NOTIFICATION_PREFERENCES_PREFIX + "competitors";
 
     private transient SettingsList<CompetitorNotificationPreference> competitors;
 
-    public CompetitorNotificationPreferences(String name, AbstractGenericSerializableSettings settings,
-            RacingEventService racingEventService) {
-        super(name, settings);
+    public CompetitorNotificationPreferences(RacingEventService racingEventService) {
         competitors = new SettingsList<>("competitors", this,
                 () -> new CompetitorNotificationPreference(racingEventService.getCompetitorStore()));
     }

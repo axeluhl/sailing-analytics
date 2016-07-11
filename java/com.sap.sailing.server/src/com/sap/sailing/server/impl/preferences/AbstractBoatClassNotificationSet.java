@@ -6,21 +6,21 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreference;
-import com.sap.sailing.server.impl.preferences.model.NotificationPreferences;
+import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
 import com.sap.sse.security.UserStore;
 
 public abstract class AbstractBoatClassNotificationSet
-        extends PreferenceObjectBasedNotificationSet<NotificationPreferences, BoatClass> {
+        extends PreferenceObjectBasedNotificationSet<BoatClassNotificationPreferences, BoatClass> {
 
     public AbstractBoatClassNotificationSet(UserStore store) {
-        super(NotificationPreferences.PREF_NAME, store);
+        super(BoatClassNotificationPreferences.PREF_NAME, store);
     }
 
     @Override
-    protected Collection<BoatClass> calculateObjectsToNotify(NotificationPreferences preference) {
+    protected Collection<BoatClass> calculateObjectsToNotify(BoatClassNotificationPreferences preference) {
         Set<BoatClass> result = new HashSet<>();
-        for (BoatClassNotificationPreference pref : preference.getBoatClassPreferences().getBoatClasses()) {
+        for (BoatClassNotificationPreference pref : preference.getBoatClasses()) {
             if (shouldNotifyFor(pref)) {
                 result.add(pref.getBoatClass());
             }

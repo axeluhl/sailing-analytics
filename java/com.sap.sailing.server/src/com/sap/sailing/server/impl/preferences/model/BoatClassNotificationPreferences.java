@@ -7,11 +7,11 @@ import com.sap.sse.common.settings.generic.SettingsList;
 public class BoatClassNotificationPreferences extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -3682996540081614053L;
 
+    public static final String PREF_NAME = SailingPreferences.NOTIFICATION_PREFERENCES_PREFIX + "boatclasses";
+
     private transient SettingsList<BoatClassNotificationPreference> boatClasses;
 
-    public BoatClassNotificationPreferences(String name, AbstractGenericSerializableSettings settings,
-            RacingEventService racingEventService) {
-        super(name, settings);
+    public BoatClassNotificationPreferences(RacingEventService racingEventService) {
         boatClasses = new SettingsList<>("boatClasses", this,
                 () -> new BoatClassNotificationPreference(racingEventService.getBaseDomainFactory()));
     }
