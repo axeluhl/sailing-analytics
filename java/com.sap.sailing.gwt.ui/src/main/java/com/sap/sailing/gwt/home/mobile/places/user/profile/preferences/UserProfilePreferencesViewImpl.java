@@ -42,7 +42,7 @@ public class UserProfilePreferencesViewImpl extends AbstractUserProfileView impl
         private final HasEnabled notifyAboutResultsUi;
         
         private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider) {
-            selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, i18n.favouriteCompetitors());
+            selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, i18n.favoriteCompetitors());
             notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
                 public void onNotificationToggled(boolean enabled) {
@@ -69,7 +69,7 @@ public class UserProfilePreferencesViewImpl extends AbstractUserProfileView impl
         private final HasEnabled notifyAboutResultsUi;
         
         private BoatClassDisplayImpl(final SuggestedMultiSelectionBoatClassDataProvider dataProvider) {
-            selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, i18n.favouriteBoatClasses());
+            selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, i18n.favoriteBoatClasses());
             notifyAboutUpcomingRacesUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
                 public void onNotificationToggled(boolean enabled) {

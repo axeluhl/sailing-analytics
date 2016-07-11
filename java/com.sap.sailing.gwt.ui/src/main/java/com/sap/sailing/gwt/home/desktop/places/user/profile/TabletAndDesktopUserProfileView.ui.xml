@@ -45,7 +45,7 @@
       <c:tabcontent title="{i18n.details}">
         <s:detailstab.UserProfileDetailsTabView ui:field="detailsTabUi" />
       </c:tabcontent>
-      <c:tabcontent title="{i18n.favouritesAndNotifications}">
+      <c:tabcontent title="{i18n.favoritesAndNotifications}">
         <s:preferencestab.UserProfilePreferencesTabView ui:field="preferencesTabUi" />
       </c:tabcontent>
     </c:TabPanel>

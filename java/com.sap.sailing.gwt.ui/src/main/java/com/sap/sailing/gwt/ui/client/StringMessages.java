@@ -1378,6 +1378,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String regattaQuickfinder();
     String resultsQuickfinder();
     String racesQuickfinder();
+    String profileQuickfinder();
     String statistics();
     String impressions();
     String notAvailableOnMobileMessage();
@@ -1619,9 +1620,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String userNotificationsOnlyIfMailAddressIsVerified();
     String enabled();
     String disabled();
-    String favouritesAndNotifications();
-    String favouriteCompetitors();
-    String favouriteBoatClasses();
+    String favoritesAndNotifications();
+    String favoriteCompetitors();
+    String favoriteBoatClasses();
     String notificationAboutNewResults();
     String notificationAboutUpcomingRaces();
 }

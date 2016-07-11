@@ -52,7 +52,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
         private final HasEnabled notifyAboutResultsUi;
         
         private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider) {
-            selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.favouriteCompetitors());
+            selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.favoriteCompetitors());
             notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
                 public void onNotificationToggled(boolean enabled) {
@@ -79,7 +79,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
         private final HasEnabled notifyAboutResultsUi;
         
         private BoatClassDisplayImpl(final SuggestedMultiSelectionBoatClassDataProvider dataProvider) {
-            selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, StringMessages.INSTANCE.favouriteBoatClasses());
+            selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, StringMessages.INSTANCE.favoriteBoatClasses());
             notifyAboutUpcomingRacesUi = selectionUi.addNotificationToggle(new NotificationCallback() {
                 @Override
                 public void onNotificationToggled(boolean enabled) {
