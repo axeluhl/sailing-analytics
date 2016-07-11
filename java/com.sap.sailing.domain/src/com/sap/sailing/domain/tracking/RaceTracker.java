@@ -8,7 +8,6 @@ import java.util.Set;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 
 /**
  * Centerpiece of a tracking adapter. A tracker is responsible for receiving tracking data for one or more
@@ -35,8 +34,8 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 public interface RaceTracker {
     /**
      * By default, wait one minute for race data; sometimes, a tracking provider's server may be under heavy load and
-     * may serve races one after another. If many races are requested concurrently, this can lead to a queue
-     * of several minutes length.
+     * may serve races one after another. If many races are requested concurrently, this can lead to a queue of several
+     * minutes length.
      */
     static long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 60000;
 
@@ -69,11 +68,36 @@ public interface RaceTracker {
     
     WindStore getWindStore();
     
-    GPSFixStore getGPSFixStore();
-
     /**
      * returns a unique key for this tracker which can, e.g., be used as a key in a {@link Map}
      */
     Object getID();
     
+    /**
+     * Listener interface for race tracker related events
+     */
+    interface Listener {
+        /**
+         * Tracker has stopped event, see {@link RaceTracker#stop(boolean)} method
+         * 
+         * @param preemptive
+         */
+        void onTrackerWillStop(boolean preemptive);
+    }
+
+    /**
+     * Register a new RaceTracker.Listener for this race tracker.
+     * 
+     * @param newListener
+     * @return true if listener has been added
+     */
+    boolean add(RaceTracker.Listener newListener);
+
+    /**
+     * Remove listener from racetracker
+     * 
+     * @param newListener
+     * @return the listener registration for listener removal
+     */
+    void remove(RaceTracker.Listener newListener);
 }

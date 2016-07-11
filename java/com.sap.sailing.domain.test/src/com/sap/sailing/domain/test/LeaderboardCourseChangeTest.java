@@ -47,7 +47,6 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -139,7 +138,8 @@ public class LeaderboardCourseChangeTest {
         TrackedRegatta mockedTrackedRegatta = createMockedTrackedRegatta(regatta);
         RaceDefinition mockedRace = createMockedRace(course, boatClass);
         TrackedRace spyedTrackedRace = spy(new DynamicTrackedRaceImpl(mockedTrackedRegatta, mockedRace,
-                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, 5000, 20000, 20000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
+                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, 5000, 20000, 20000,
+                /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogResolver.class)));
 
         return spyedTrackedRace;

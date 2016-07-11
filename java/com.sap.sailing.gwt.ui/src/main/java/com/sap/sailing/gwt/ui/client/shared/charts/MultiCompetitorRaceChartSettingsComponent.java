@@ -14,16 +14,20 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSettingsComponent<MultiCompetitorRaceChartSettings> implements
+public class MultiCompetitorRaceChartSettingsComponent extends
+        AbstractChartSettingsComponent<MultiCompetitorRaceChartSettings> implements
         SettingsDialogComponent<MultiCompetitorRaceChartSettings> {
-    private ListBox chartTypeSelectionListBox;
-    private final DetailType initialDetailType;
-    private final List<DetailType> availableDetailsTypes;    
-    
-    public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings, StringMessages stringMessages, boolean hasOverallLeaderboard) {
+    private ListBox chartFirstTypeSelectionListBox;
+    private ListBox chartSecondTypeSelectionListBox;
+    private final DetailType initialFirstDetailType;
+    private final DetailType initialSecondDetailType;
+    private final List<DetailType> availableDetailsTypes;
+
+    public MultiCompetitorRaceChartSettingsComponent(MultiCompetitorRaceChartSettings settings,
+            StringMessages stringMessages, boolean hasOverallLeaderboard) {
         super(settings, stringMessages);
-        this.initialDetailType = settings.getDetailType();
-        
+        this.initialFirstDetailType = settings.getFirstDetailType();
+        this.initialSecondDetailType = settings.getSecondDetailType();
         availableDetailsTypes = new ArrayList<DetailType>();
         availableDetailsTypes.add(DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD);
         availableDetailsTypes.add(DetailType.DISTANCE_TRAVELED);
@@ -36,7 +40,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
         availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
         availableDetailsTypes.add(DetailType.BEAT_ANGLE);
         availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
-        
+        availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
         if (hasOverallLeaderboard) {
             availableDetailsTypes.add(DetailType.OVERALL_RANK);
         }
@@ -46,44 +50,61 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSpacing(5);
-
         Label chartSelectionLabel = new Label(stringMessages.chooseChart());
         mainPanel.add(chartSelectionLabel);
-        chartTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */ false);
-        int i=0;
+        chartFirstTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
+        int i = 0;
         for (DetailType detailType : availableDetailsTypes) {
-            chartTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
-            if (detailType == initialDetailType) {
-                chartTypeSelectionListBox.setSelectedIndex(i);
+            chartFirstTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
+            if (detailType == initialFirstDetailType) {
+                chartFirstTypeSelectionListBox.setSelectedIndex(i);
             }
             i++;
         }
-        mainPanel.add(chartTypeSelectionListBox);
-
+        mainPanel.add(chartFirstTypeSelectionListBox);
+        chartSecondTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
+        i = 0;
+        for (DetailType detailType : availableDetailsTypes) {
+            chartSecondTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
+            if (detailType == initialSecondDetailType) {
+                chartSecondTypeSelectionListBox.setSelectedIndex(i);
+            }
+            i++;
+        }
+        chartSecondTypeSelectionListBox.addItem("--", "--");
+        if (initialSecondDetailType == null) {
+            chartSecondTypeSelectionListBox.setSelectedIndex(chartSecondTypeSelectionListBox.getItemCount() - 1);
+        }
+        mainPanel.add(chartSecondTypeSelectionListBox);
         mainPanel.add(new Label(stringMessages.stepSizeInSeconds()));
         stepSizeBox = dialog.createDoubleBox(((double) getSettings().getStepSizeInMillis()) / 1000, 5);
         mainPanel.add(stepSizeBox);
-        
         return mainPanel;
     }
 
     @Override
     public MultiCompetitorRaceChartSettings getResult() {
-        DetailType newDetailType = null;
-        int selectedIndex = chartTypeSelectionListBox.getSelectedIndex();
-        String selectedDetailType = chartTypeSelectionListBox.getValue(selectedIndex);
-        for (DetailType detailType : availableDetailsTypes){
-            if (detailType.name().equals(selectedDetailType)){
-                newDetailType = detailType;
-                break;
+        DetailType newFirstDetailType = findSelectedTypeFor(chartFirstTypeSelectionListBox);
+        DetailType newSecondDetailType = findSelectedTypeFor(chartSecondTypeSelectionListBox);
+        if (com.sap.sse.common.Util.equalsWithNull(newFirstDetailType, newSecondDetailType)) {
+            newSecondDetailType = null;
+        }
+        return new MultiCompetitorRaceChartSettings(getAbstractResult(), newFirstDetailType, newSecondDetailType);
+    }
+
+    private DetailType findSelectedTypeFor(ListBox typeSelectionListBox) {
+        int itemIndex = typeSelectionListBox.getSelectedIndex();
+        String selectedDetailType = typeSelectionListBox.getValue(itemIndex);
+        for (DetailType detailType : availableDetailsTypes) {
+            if (detailType.name().equals(selectedDetailType)) {
+                return detailType;
             }
         }
-        return new MultiCompetitorRaceChartSettings(getAbstractResult(), newDetailType);
+        return null;
     }
 
     @Override
     public FocusWidget getFocusWidget() {
-        return chartTypeSelectionListBox;
+        return chartFirstTypeSelectionListBox;
     }
-
 }
