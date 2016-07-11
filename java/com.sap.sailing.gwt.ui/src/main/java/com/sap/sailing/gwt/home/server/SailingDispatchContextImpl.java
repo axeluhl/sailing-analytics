@@ -81,7 +81,7 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     public <T> T getPreferenceForCurrentUser(String preferenceKey) {
         User currentUser = securityService.getCurrentUser();
         if(currentUser != null) {
-            userStore.getPreferenceObject(currentUser.getName(), preferenceKey);
+            return userStore.getPreferenceObject(currentUser.getName(), preferenceKey);
         }
         return null;
     }
