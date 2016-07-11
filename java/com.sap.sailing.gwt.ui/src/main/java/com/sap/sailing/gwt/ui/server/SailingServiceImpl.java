@@ -91,7 +91,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMa
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.BaseRegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
@@ -222,6 +222,7 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -246,6 +247,8 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
+import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -269,7 +272,9 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
+import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -367,6 +372,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
+import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
@@ -2932,6 +2938,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
                 }
                 break;
+            case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    result = bravoFixTrack.getRideHeight(timePoint);
+                }
+                break;
             default:
                 throw new UnsupportedOperationException("Theres currently no support for the enum value '" + dataType
                         + "' in this method.");
@@ -5432,13 +5445,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<DeviceMappingDTO> getDeviceMappings(RegattaLog regattaLog)
             throws TransformationException {
         List<DeviceMappingDTO> result = new ArrayList<DeviceMappingDTO>();
-        for (List<? extends DeviceMapping<Competitor>> list : new RegattaLogDeviceCompetitorMappingFinder(regattaLog).analyze().values()) {
-            for (DeviceMapping<Competitor> mapping : list) {
-                result.add(convertToDeviceMappingDTO(mapping));
-            }
-        }
-        for (List<? extends DeviceMapping<Mark>> list : new RegattaLogDeviceMarkMappingFinder(regattaLog).analyze().values()) {
-            for (DeviceMapping<Mark> mapping : list) {
+        for (List<? extends DeviceMapping<WithID>> list : new RegattaLogDeviceMappingFinder<>(
+                regattaLog).analyze().values()) {
+            for (DeviceMapping<WithID> mapping : list) {
                 result.add(convertToDeviceMappingDTO(mapping));
             }
         }
@@ -5470,6 +5479,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
+    public void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto)
+            throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException {
+        RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
+        DeviceMapping<?> mapping = convertToDeviceMapping(dto);
+        TimePoint now = MillisecondsTimePoint.now();
+        RegattaLogEvent event = null;
+        TimePoint from = mapping.getTimeRange().hasOpenBeginning() ? null : mapping.getTimeRange().from();
+        TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
+        if (dto.mappedTo instanceof CompetitorDTO) {
+            DoubleVectorFixImporter importer = getRegisteredImporter(DoubleVectorFixImporter.class, dto.dataType);
+            event = importer.createEvent(now, now, getService().getServerAuthor(), UUID.randomUUID(),
+                    getCompetitor((CompetitorDTO) dto.mappedTo), mapping.getDevice(), from, to);
+        } else {
+            throw new RuntimeException("Can only map devices to competitors");
+        }
+        regattaLog.add(event);
+    }
+    
+    @Override
     public List<String> getDeserializableDeviceIdentifierTypes() {
         List<String> result = new ArrayList<String>();
         for (ServiceReference<DeviceIdentifierStringSerializationHandler> reference :
@@ -5487,11 +5515,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true);
             //expect UUIDs
-            return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds);
+            return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceMarkMappingEventImpl.class);
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
                     ((CompetitorDTO) dto.mappedTo).getIdAsString());
-            return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds);
+            return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceCompetitorMappingEventImpl.class);
         } else {
             throw new RuntimeException("Can only map devices to competitors or marks");
         }
@@ -5588,17 +5616,40 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public Collection<String> getGPSFixImporterTypes() {
+        return getRegisteredImporterTypes(GPSFixImporter.class);
+    }
+    
+    @Override
+    public Collection<String> getSensorDataImporterTypes() {
+        return getRegisteredImporterTypes(DoubleVectorFixImporter.class);
+    }
+    
+    private <S> Collection<String> getRegisteredImporterTypes(Class<S> referenceClass) {
         Set<String> result = new HashSet<>();
-        Collection<ServiceReference<GPSFixImporter>> refs = Collections.emptyList();
-        try {
-            refs = Activator.getDefault(). getServiceReferences(GPSFixImporter.class, null);
-        } catch (InvalidSyntaxException e) {
-            //shouldn't happen, as we are passing null for the filter
-        }
-        for (ServiceReference<GPSFixImporter> ref : refs) {
-            result.add((String) ref.getProperty(TypeBasedServiceFinder.TYPE));
+        for (ServiceReference<S> reference : getRegisteredServiceReferences(referenceClass)) {
+            result.add((String) reference.getProperty(TypeBasedServiceFinder.TYPE));
         }
         return result;
+    }
+    
+    private <S extends DoubleVectorFixImporter> S getRegisteredImporter(Class<S> referenceClass, String type)
+            throws NoCorrespondingServiceRegisteredException {
+        for (ServiceReference<S> reference : getRegisteredServiceReferences(referenceClass)) {
+            S importer = Activator.getDefault().getService(reference);
+            if (importer != null && importer.getType().equals(type)) {
+                return importer;
+            }
+        }
+        throw new NoCorrespondingServiceRegisteredException("No importer service found!", type, referenceClass.getName());
+    }
+    
+    private <S> Collection<ServiceReference<S>> getRegisteredServiceReferences(Class<S> referenceClass) {
+        try {
+            return Activator.getDefault().getServiceReferences(referenceClass, null);
+        } catch (InvalidSyntaxException e) {
+            // shouldn't happen, as we are passing null for the filter
+        }
+        return Collections.emptyList();
     }
     
     @Override
@@ -5608,8 +5659,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (String uuidAsString : uuids) {
             UUID uuid = UUID.fromString(uuidAsString);
             TrackFileImportDeviceIdentifier device = TrackFileImportDeviceIdentifierImpl.getOrCreate(uuid);
-            long numFixes = getService().getGPSFixStore().getNumberOfFixes(device);
-            TimeRange timeRange = getService().getGPSFixStore().getTimeRangeCoveredByFixes(device);
+            long numFixes = getService().getSensorFixStore().getNumberOfFixes(device);
+            TimeRange timeRange = getService().getSensorFixStore().getTimeRangeCoveredByFixes(device);
             Date from = timeRange == null ? null : timeRange.from().asDate();
             Date to = timeRange == null ? null : timeRange.to().asDate();
             result.add(new TrackFileImportDeviceIdentifierDTO(uuidAsString, device.getFileName(), device.getTrackName(),
@@ -6121,7 +6172,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             final TrackingTimesFinder trackingTimesFinder = new TrackingTimesFinder(raceLog);
                             final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = trackingTimesFinder.analyze();
                             try {
-                                getService().getGPSFixStore().loadMarkTrack(writeableMarkTrack, regattaLog, mark,
+                                GPSFixStore gfs = new GPSFixStoreImpl(getService().getSensorFixStore());
+                                gfs.loadMarkTrack(writeableMarkTrack, regattaLog, mark,
                                         trackingTimes.getA().getTimePoint(), trackingTimes.getB().getTimePoint());
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                                 logger.info("Error trying to load mark track for mark "+mark+" from "+trackingTimes.getA()+" to "+trackingTimes.getB());
@@ -6195,7 +6247,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (raceColumn != null) {
                 final TimePoint fixTimePoint = new MillisecondsTimePoint(fix.timepoint);
                 final RegattaLog regattaLog = raceColumn.getRegattaLog();
-                final RegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(regattaLog);
+                final BaseRegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(
+                        regattaLog);
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
                     for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {
@@ -6237,7 +6290,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
                 final RegattaLog regattaLog = raceColumn.getRegattaLog();
-                final RegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(regattaLog);
+                final BaseRegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(
+                        regattaLog);
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
                     final TimePoint fixTimePoint = new MillisecondsTimePoint(oldFix.timepoint);

@@ -107,7 +107,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -288,7 +288,7 @@ public class MasterDataImportTest {
         regatta.getRegattaLog().add(mappingEvent);
         GPSFix gpsFix = new GPSFixMovingImpl(new DegreePosition(54.333, 10.133), logTimePoint2,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90)));
-        sourceService.getGPSFixStore().storeFix(deviceIdentifier, gpsFix);
+        sourceService.getSensorFixStore().storeFix(deviceIdentifier, gpsFix);
 
         // Set score correction
         double scoreCorrection = 12.0;
@@ -427,7 +427,7 @@ public class MasterDataImportTest {
         Assert.assertEquals(competitor.getId(), registerEventOnTarget.getCompetitor().getId());
 
         // Check for import of racelogtracking fix
-        Assert.assertTrue(destService.getGPSFixStore().getNumberOfFixes(deviceIdentifier) == 1);
+        Assert.assertTrue(destService.getSensorFixStore().getNumberOfFixes(deviceIdentifier) == 1);
 
         // Check for persisting of race log events:
         RacingEventService dest2 = new RacingEventServiceImplMock(){};
@@ -773,7 +773,7 @@ public class MasterDataImportTest {
         RacingEventService sourceService = new RacingEventServiceImpl(
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, sourceDomainFactory),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE),
-                MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+                MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE);
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();
@@ -1794,13 +1794,21 @@ public class MasterDataImportTest {
         MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID).getResult();
 
         // ---Asserts---
+
         Assert.assertNotNull(creationCount);
+
         Iterable<MediaTrack> targetTracks = destService.getAllMediaTracks();
+
         Assert.assertEquals(1, Util.size(targetTracks));
+
         MediaTrack trackOnTarget = targetTracks.iterator().next();
+
         Assert.assertEquals(trackOnSource.dbId, trackOnTarget.dbId);
+
         Assert.assertEquals(trackOnSource.url, trackOnTarget.url);
+
         Assert.assertEquals(trackOnSource.assignedRaces, trackOnTarget.assignedRaces);
+
     }
 
     @Test

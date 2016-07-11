@@ -79,6 +79,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
+import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
@@ -670,6 +671,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Void> callback);
 
     void getGPSFixImporterTypes(AsyncCallback<Collection<String>> callback);
+    
+    void getSensorDataImporterTypes(AsyncCallback<Collection<String>> callback);
 
     void getTrackFileImportDeviceIds(List<String> uuids,
             AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>> callback);
@@ -725,6 +728,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Void> asyncCallback);
 
     void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto, AsyncCallback<Void> callback);
+    
+    void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto, AsyncCallback<Void> callback);
 
     void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean> regattaLogCallBack);
 

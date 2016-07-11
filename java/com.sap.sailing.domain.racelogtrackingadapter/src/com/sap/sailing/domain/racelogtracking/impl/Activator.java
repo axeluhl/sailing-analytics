@@ -10,15 +10,21 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
+import com.sap.sailing.domain.racelogsensortracking.impl.SensorFixMapperFactoryImpl;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.MasterDataImportClassLoaderService;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixMovingJsonDeserializer;
@@ -30,12 +36,16 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonH
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.GPSFixJsonHandlerImpl;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.replication.Replicable;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
     
     private static BundleContext context;
-    
+    private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private ServiceTracker<SensorFixMapper<?, ?, ?>, SensorFixMapper<?, ?, ?>> sensorFixMapperTracker;
+
     public static BundleContext getContext() {
         return context;
     }
@@ -76,14 +86,31 @@ public class Activator implements BundleActivator {
 
         registrations.add(context.registerService(MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceImpl(), null));
+        registrations.add(context.registerService(SensorFixMapper.class, new BravoDataFixMapper(), null));
+        
+        sensorFixMapperTracker = createSensorFixMapperServiceTracker(context);
+        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
+
+        RegattaLogFixTrackerRegattaListener regattaLogSensorDataTrackerTrackedRegattaListener = new RegattaLogFixTrackerRegattaListener(
+                racingEventServiceTracker, new SensorFixMapperFactoryImpl(sensorFixMapperTracker));
+        registrations.add(context.registerService(TrackedRegattaListener.class,
+                regattaLogSensorDataTrackerTrackedRegattaListener, null));
+        registrations.add(context.registerService(Replicable.class,
+                regattaLogSensorDataTrackerTrackedRegattaListener, null));
         
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private ServiceTracker<SensorFixMapper<?, ?, ?>, SensorFixMapper<?, ?, ?>> createSensorFixMapperServiceTracker(BundleContext context) {
+        return (ServiceTracker) ServiceTrackerFactory.createAndOpen(context, SensorFixMapper.class);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         Activator.context = null;
-        
+        racingEventServiceTracker.close();
+        sensorFixMapperTracker.close();
         for (ServiceRegistration<?> reg : registrations) {
             reg.unregister();
         }
