@@ -19,6 +19,8 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractSu
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfilePreferencesPlace;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
@@ -131,5 +133,15 @@ public class UserProfilePreferencesActivity extends AbstractActivity implements 
         @Override
         public void onSuccess(VoidResult result) {
         }
+    }
+
+    @Override
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
+        return clientFactory.getNavigator().getUserProfileNavigation();
+    }
+    
+    @Override
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserPreferencesNavigation() {
+        return clientFactory.getNavigator().getUserPreferencesNavigation();
     }
 }

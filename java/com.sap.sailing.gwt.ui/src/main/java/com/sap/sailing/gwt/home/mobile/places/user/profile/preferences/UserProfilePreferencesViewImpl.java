@@ -15,7 +15,6 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedM
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.AbstractUserProfileView;
-import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class UserProfilePreferencesViewImpl extends AbstractUserProfileView implements UserProfilePreferencesView {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -23,7 +22,6 @@ public class UserProfilePreferencesViewImpl extends AbstractUserProfileView impl
     interface MyUiBinder extends UiBinder<Widget, UserProfilePreferencesViewImpl> {
     }
 
-    private final StringMessages i18n = StringMessages.INSTANCE;
     @UiField(provided = true) SuggestedMultiSelection<SimpleCompetitorWithIdDTO> favoriteCompetitorsSelctionUi;
     @UiField(provided = true) SuggestedMultiSelection<BoatClassDTO> favoriteBoatClassesSelctionUi;
     @UiField DivElement notificationsTextUi;

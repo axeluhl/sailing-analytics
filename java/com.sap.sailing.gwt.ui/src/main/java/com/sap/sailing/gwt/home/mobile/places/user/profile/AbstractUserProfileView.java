@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorMobile;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.userprofile.mobile.userheader.UserHeader;
 
@@ -32,11 +33,15 @@ public class AbstractUserProfileView extends Composite implements UserProfileVie
         }
     }
     
+    protected final StringMessages i18n = StringMessages.INSTANCE;
     private final AbstractUserProfileViewLayout layout;
 
     protected AbstractUserProfileView(UserProfileViewBase.Presenter presenter) {
         this.layout = new AbstractUserProfileViewLayout(presenter);
         initWidget(uiBinder.createAndBindUi(this.layout));
+        this.layout.quickfinderUi.addPlaceholderItem(i18n.profileQuickfinder());
+        this.layout.quickfinderUi.addItem(i18n.details(), presenter.getUserProfileNavigation());
+        this.layout.quickfinderUi.addItem(i18n.favoritesAndNotifications(), presenter.getUserPreferencesNavigation());
     }
     
     protected final void setViewContent(IsWidget content) {

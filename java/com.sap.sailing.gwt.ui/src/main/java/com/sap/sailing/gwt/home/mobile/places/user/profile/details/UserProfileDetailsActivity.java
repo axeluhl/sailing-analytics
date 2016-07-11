@@ -4,6 +4,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.userprofile.shared.userdetails.UserDetailsPresenter;
@@ -12,12 +13,13 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
 
     private final MobileApplicationClientFactory clientFactory;
     
-    private final UserProfileDetailsView currentView = new UserProfileDetailsViewImpl(this);
+    private final UserProfileDetailsView currentView;
 
     private UserDetailsPresenter userDetailsPresenter;
     
     public UserProfileDetailsActivity(AbstractUserProfilePlace place, MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
+        this.currentView = new UserProfileDetailsViewImpl(this);
     }
 
     @Override
@@ -41,5 +43,15 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     @Override
     public void doTriggerLoginForm() {
         clientFactory.getNavigator().getSignInNavigation().goToPlace();
+    }
+    
+    @Override
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
+        return clientFactory.getNavigator().getUserProfileNavigation();
+    }
+    
+    @Override
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserPreferencesNavigation() {
+        return clientFactory.getNavigator().getUserPreferencesNavigation();
     }
 }
