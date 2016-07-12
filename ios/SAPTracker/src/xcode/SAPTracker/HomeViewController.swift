@@ -63,6 +63,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let imageView = UIImageView(image: UIImage(named: "sap_logo"))
         let barButtonItem = UIBarButtonItem(customView: imageView)
         navigationItem.leftBarButtonItem = barButtonItem
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 140
+        tableView.tableFooterView = UIView()
     }
 	
 	func loadSplashScreen() {		
@@ -188,7 +191,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: - UITableViewDataSource
     
     func resizeTable() {
-        let info = fetchedResultsController!.sections![0] 
+        /*
+        let info = fetchedResultsController!.sections![0]
         let rows = info.numberOfObjects
         if rows < 3 {
             tableView.removeConstraint(tableViewHeight)
@@ -201,6 +205,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             tableView.addConstraint(tableViewHeight)
             tableView.scrollEnabled = true
         }
+ */
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -214,14 +219,18 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as UITableViewCell!
+        let cell = tableView.dequeueReusableCellWithIdentifier("Regatta", forIndexPath: indexPath ) as! CheckInCell
         configureCell(cell, atIndexPath: indexPath)
         return cell
     }
     
-    func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
+    func configureCell(cell: CheckInCell, atIndexPath indexPath: NSIndexPath) {
         let checkIn = fetchedResultsController!.objectAtIndexPath(indexPath) as! CheckIn
-        cell.textLabel?.text = checkIn.leaderBoardName
+        cell.regattaUi?.text = checkIn.leaderBoardName
+        cell.eventUi?.text = checkIn.event?.name
+        cell.competitorUi?.text = checkIn.competitor?.name
+        cell.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(0.6)
+     
     }
     
     // MARK: - NSFetchedResultsControllerDelegate
@@ -237,18 +246,15 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             case .Insert:
                 tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
             case .Update:
-                let cell = tableView.cellForRowAtIndexPath(indexPath!)
-                if cell != nil {
-                    configureCell(cell!, atIndexPath: indexPath!)
+                //let cell = tableView.cellForRowAtIndexPath(indexPath!)
+                let cell = tableView.dequeueReusableCellWithIdentifier("Regatta", forIndexPath: indexPath!) as! CheckInCell
+                    configureCell(cell, atIndexPath: indexPath!)
                     tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
-                }
             case .Move:
                 tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
                 tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
             case .Delete:
                 tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
-            default:
-                return
             }
     }
     
