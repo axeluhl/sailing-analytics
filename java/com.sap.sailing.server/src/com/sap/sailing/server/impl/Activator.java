@@ -46,49 +46,56 @@ public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
     private static final String CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME = "persistentcompetitors.clear";
-    
+
     private static ExtenderBundleTracker extenderBundleTracker;
-    
+
     private CachedOsgiTypeBasedServiceFinderFactory serviceFinderFactory;
 
     private RacingEventServiceImpl racingEventService;
-    
+
     private final boolean clearPersistentCompetitors;
-    
+
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
 
     private ObjectName mBeanName;
-    
+
     private ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> masterDataImportClassLoaderServiceTracker;
-    
+
     private ServiceTracker<PolarDataService, PolarDataService> polarDataServiceTracker;
 
     private OSGiBasedTrackedRegattaListener trackedRegattaListener;
-    
+
     public Activator() {
-        clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+false));
-        logger.log(Level.INFO, "setting "+CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME+" to "+clearPersistentCompetitors);
+        clearPersistentCompetitors = Boolean
+                .valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, "" + false));
+        logger.log(Level.INFO,
+                "setting " + CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME + " to " + clearPersistentCompetitors);
         // there is exactly one instance of the racingEventService in the whole server
     }
-    
+
     public void start(BundleContext context) throws Exception {
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
-        
+
+        // TODO implement
+//        MailQueue mailQueue = new ExecutorMailQueue(ServiceTrackerFactory.createAndOpen(context, MailService.class));
+//        SailingNotificationService notificationService = new SailingNotificationServiceImpl(context, mailQueue);
+
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
-        
+
         // At this point the OSGi resolver is used as device type service finder.
         // In the case that we are not in an OSGi context (e.g. running a JUnit test instead),
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
-        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory, trackedRegattaListener);
-        
+        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
+                trackedRegattaListener);
+
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));
         masterDataImportClassLoaderServiceTracker.open();
-        
+
         polarDataServiceTracker = new ServiceTracker<PolarDataService, PolarDataService>(context,
                 PolarDataService.class, new PolarDataServiceTrackerCustomizer(context, racingEventService));
         polarDataServiceTracker.open();
@@ -96,41 +103,39 @@ public class Activator implements BundleActivator {
         // register the racing service in the OSGi registry
         racingEventService.setBundleContext(context);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
-        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, racingEventService.getId().toString());
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
+                racingEventService.getId().toString());
         context.registerService(Replicable.class.getName(), racingEventService, replicableServiceProperties);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
         context.registerService(ClearStateTestSupport.class.getName(), racingEventService, null);
         Dictionary<String, String> properties = new Hashtable<String, String>();
-        final GPSFixMongoHandlerImpl gpsFixMongoHandler = new GPSFixMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
-                racingEventService.getDomainObjectFactory());
+        final GPSFixMongoHandlerImpl gpsFixMongoHandler = new GPSFixMongoHandlerImpl(
+                racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
         properties.put(TypeBasedServiceFinder.TYPE, GPSFixImpl.class.getName());
-        registrations.add(context.registerService(FixMongoHandler.class,
-                        gpsFixMongoHandler, properties));
+        registrations.add(context.registerService(FixMongoHandler.class, gpsFixMongoHandler, properties));
         // legacy type name; some DBs may still contain fixes marked with this old package name:
         properties.put(TypeBasedServiceFinder.TYPE, "com.sap.sailing.domain.tracking.impl.GPSFixImpl");
-        registrations.add(context.registerService(FixMongoHandler.class,
-                        gpsFixMongoHandler, properties));
-        final GPSFixMovingMongoHandlerImpl gpsFixMovingMongoHandler = new GPSFixMovingMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
-                racingEventService.getDomainObjectFactory());
+        registrations.add(context.registerService(FixMongoHandler.class, gpsFixMongoHandler, properties));
+        final GPSFixMovingMongoHandlerImpl gpsFixMovingMongoHandler = new GPSFixMovingMongoHandlerImpl(
+                racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
         properties.put(TypeBasedServiceFinder.TYPE, GPSFixMovingImpl.class.getName());
         registrations.add(context.registerService(FixMongoHandler.class, gpsFixMovingMongoHandler, properties));
         // legacy type name; some DBs may still contain fixes marked with this old package name:
         properties.put(TypeBasedServiceFinder.TYPE, "com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl");
         registrations.add(context.registerService(FixMongoHandler.class, gpsFixMovingMongoHandler, properties));
         properties.put(TypeBasedServiceFinder.TYPE, DoubleVectorFixImpl.class.getName());
-        registrations.add(context.registerService(FixMongoHandler.class, new DoubleVectorFixMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
-                racingEventService.getDomainObjectFactory()), properties));
+        registrations.add(context.registerService(FixMongoHandler.class, new DoubleVectorFixMongoHandlerImpl(
+                racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory()), properties));
 
-        
         registerPreferenceConvertersForUserStore(context);
-        
+
         // Add an MBean for the service to the JMX bean server:
         RacingEventServiceMXBean mbean = new RacingEventServiceMXBeanImpl(racingEventService);
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mBeanName = new ObjectName("com.sap.sailing:type=RacingEventService");
         mbs.registerMBean(mbean, mBeanName);
-        logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName()+". Character encoding: "+
-                Charset.defaultCharset());
+        logger.log(Level.INFO, "Started " + context.getBundle().getSymbolicName() + ". Character encoding: "
+                + Charset.defaultCharset());
     }
 
     /**
@@ -171,14 +176,15 @@ public class Activator implements BundleActivator {
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.unregisterMBean(mBeanName);
     }
-    
+
     private class MasterDataImportClassLoaderServiceTrackerCustomizer implements
             ServiceTrackerCustomizer<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> {
 
         private final BundleContext context;
         private RacingEventServiceImpl racingEventService;
 
-        public MasterDataImportClassLoaderServiceTrackerCustomizer(BundleContext context, RacingEventServiceImpl racingEventService) {
+        public MasterDataImportClassLoaderServiceTrackerCustomizer(BundleContext context,
+                RacingEventServiceImpl racingEventService) {
             this.context = context;
             this.racingEventService = racingEventService;
         }
@@ -193,7 +199,8 @@ public class Activator implements BundleActivator {
 
         @Override
         public void modifiedService(ServiceReference<MasterDataImportClassLoaderService> reference,
-                MasterDataImportClassLoaderService service) {}
+                MasterDataImportClassLoaderService service) {
+        }
 
         @Override
         public void removedService(ServiceReference<MasterDataImportClassLoaderService> reference,
@@ -203,8 +210,8 @@ public class Activator implements BundleActivator {
 
     }
 
-    private class PolarDataServiceTrackerCustomizer implements
-            ServiceTrackerCustomizer<PolarDataService, PolarDataService> {
+    private class PolarDataServiceTrackerCustomizer
+            implements ServiceTrackerCustomizer<PolarDataService, PolarDataService> {
 
         private final BundleContext context;
         private RacingEventServiceImpl racingEventService;
@@ -231,5 +238,5 @@ public class Activator implements BundleActivator {
         }
 
     }
-    
+
 }

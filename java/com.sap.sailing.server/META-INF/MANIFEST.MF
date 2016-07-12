@@ -7,6 +7,8 @@ Bundle-Activator: com.sap.sailing.server.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sap.sailing.server.gateway.deserialization,
+ javax.mail;version="1.4.0",
+ javax.mail.internet;version="1.4.0",
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.3.0",
@@ -33,7 +35,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.security,
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.core;bundle-version="1.2.2",
- javax.servlet;bundle-version="3.1.0"
+ javax.servlet;bundle-version="3.1.0",
+ com.sap.sse.mail
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;
