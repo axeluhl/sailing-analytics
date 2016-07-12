@@ -137,7 +137,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
      * The given consumer will be called for every user that needs to be notified about the given object.
      * Users without a verified email address will be skipped.
      */
-    public void forUsersMappedTo(T object, Consumer<User> consumer) {
+    public void forUsersWithVerifiedEmailMappedTo(T object, Consumer<User> consumer) {
         for (String username : getUsersnamesToNotifyFor(object)) {
             // User objects can change silently. So we just keep the usernames and get the associated user objects on
             // the fly.

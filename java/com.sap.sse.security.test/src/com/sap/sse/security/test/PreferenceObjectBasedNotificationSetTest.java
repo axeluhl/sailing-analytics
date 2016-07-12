@@ -165,7 +165,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
         
         UserConsumerMock mock = new UserConsumerMock();
-        notificationSet.forUsersMappedTo(A, mock);
+        notificationSet.forUsersWithVerifiedEmailMappedTo(A, mock);
         Assert.assertEquals(0, mock.calls.size());
     }
     
@@ -178,7 +178,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         
         UserConsumerMock mock = new UserConsumerMock();
         
-        notificationSet.forUsersMappedTo(A, mock);
+        notificationSet.forUsersWithVerifiedEmailMappedTo(A, mock);
         Assert.assertTrue(Util.equals(users(store.getUserByName(user1)), mock.calls));
     }
     
@@ -191,7 +191,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         
         UserConsumerMock mock = new UserConsumerMock();
         
-        notificationSet.forUsersMappedTo(A, mock);
+        notificationSet.forUsersWithVerifiedEmailMappedTo(A, mock);
         Assert.assertTrue(Util.isEmpty(mock.calls));
     }
     
@@ -205,11 +205,11 @@ public class PreferenceObjectBasedNotificationSetTest {
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
         
         UserConsumerMock mock = new UserConsumerMock();
-        notificationSet.forUsersMappedTo(A, mock);
+        notificationSet.forUsersWithVerifiedEmailMappedTo(A, mock);
         Assert.assertTrue(Util.equals(users(store.getUserByName(user1)), mock.calls));
         
         mock = new UserConsumerMock();
-        notificationSet.forUsersMappedTo(B, mock);
+        notificationSet.forUsersWithVerifiedEmailMappedTo(B, mock);
         Assert.assertTrue(Util.equals(users(store.getUserByName(user1), store.getUserByName(user2)), mock.calls));
     }
     
@@ -222,7 +222,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
         
         UserConsumerMock mock = new UserConsumerMock();
-        notificationSet.forUsersMappedTo(B, mock);
+        notificationSet.forUsersWithVerifiedEmailMappedTo(B, mock);
         Assert.assertTrue(Util.equals(users(store.getUserByName(user1)), mock.calls));
     }
     
