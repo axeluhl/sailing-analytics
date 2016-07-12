@@ -1,46 +1,9 @@
 package com.sap.sailing.android.tracking.app.utils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.net.Uri;
-import android.widget.Toast;
-
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
-import com.sap.sailing.android.shared.data.http.HttpGetRequest;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
-import com.sap.sailing.android.shared.util.NetworkHelper;
-import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
-import com.sap.sse.common.Util;
-import com.sap.sse.shared.media.ImageDescriptor;
 
 public class CheckinManager {
 
@@ -88,8 +51,8 @@ public class CheckinManager {
         urlData.hostWithPort = urlData.server + (urlData.port == -1 ? "" : (":" + urlData.port));
         Exception exception = null;
         try {
-            String leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
-                .replace("+", "%20");
+            String leaderboardNameFromQR = URLEncoder
+                    .encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8");
             urlData.competitorId = uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
             // TODO alternatively consider a mark_id
             urlData.checkinURLStr = urlData.hostWithPort + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);

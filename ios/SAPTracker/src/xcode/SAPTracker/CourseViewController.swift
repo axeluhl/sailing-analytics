@@ -12,8 +12,13 @@ class CourseViewController: UIViewController {
     
     @IBOutlet weak var courseLabel: UILabel!
     
+    let defaultCourseText = "- °"
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        courseLabel.text = defaultCourseText
+        
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
     }
 
@@ -22,7 +27,8 @@ class CourseViewController: UIViewController {
     }
     
     func newLocation(notification: NSNotification) {
-        courseLabel.text = String(format: "%.0f °", notification.userInfo!["course"] as! Double)
+        let course = notification.userInfo!["course"] as! Double
+        courseLabel.text = course < 0 ? defaultCourseText : String(format: "%.0f °", course)
     }
     
 }
