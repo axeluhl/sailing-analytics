@@ -85,7 +85,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
     }
 
     /**
-     * Constructor used to work with a given {@link UserStore}.
+     * Constructor used to directly work with a given {@link UserStore}.
      */
     public PreferenceObjectBasedNotificationSet(String key, UserStore store) {
         this(key, /* context */ (BundleContext) null);
