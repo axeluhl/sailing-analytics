@@ -473,7 +473,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return null;
     }
     
-    private void updateCoordinateSystemFromSettings() {
+    /**
+     * @return {@code true} if the map was redrawn by the call to this method
+     */
+    private boolean updateCoordinateSystemFromSettings() {
+        boolean redrawn = false;
         final MapOptions mapOptions;
         orientationChangeInProgress = true;
         if (getSettings().isWindUp()) {
@@ -511,6 +515,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (mapOptions != null) { // if no coordinate system change happened that affects an existing map, don't redraw 
             fixesAndTails.clearTails();
             redraw();
+            redrawn = true;
             // zooming and setting options while the event loop is still working doesn't work reliably; defer until event loop returns
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
@@ -525,6 +530,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             });
         }
+        return redrawn;
     }
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {
@@ -743,6 +749,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     public MapWidget getMap() {
         return map;
+    }
+    
+    public RaceSimulationOverlay getSimulationOverlay() {
+        return simulationOverlay;
     }
     
     /**
@@ -2506,10 +2516,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         this.settings = newSettings;
         
+        boolean redrawn = false;
         if (requiresUpdateCoordinateSystem) {
-            updateCoordinateSystemFromSettings();
+            redrawn = updateCoordinateSystemFromSettings();
         }
-        if (requiresRedraw) {
+        if (requiresRedraw && !redrawn) {
             redraw();
         }
     }
