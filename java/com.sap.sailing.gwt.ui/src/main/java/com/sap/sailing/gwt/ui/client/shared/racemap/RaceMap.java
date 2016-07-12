@@ -2516,11 +2516,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         this.settings = newSettings;
         
-        boolean redrawn = false;
         if (requiresUpdateCoordinateSystem) {
-            redrawn = updateCoordinateSystemFromSettings();
+            updateCoordinateSystemFromSettings();
         }
-        if (requiresRedraw && !redrawn) {
+        if (requiresRedraw) {
             redraw();
         }
     }
