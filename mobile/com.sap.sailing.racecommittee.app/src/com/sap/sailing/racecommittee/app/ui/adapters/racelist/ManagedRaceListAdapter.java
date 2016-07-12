@@ -161,20 +161,20 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (type == ViewType.HEADER.index) {
             final RaceListDataTypeHeader header = (RaceListDataTypeHeader) raceListElement;
             String regatta = header.getRaceGroup().getDisplayName();
-            if (TextUtils.isEmpty(regatta)) {
-                regatta = header.getRaceGroup().getName();
-            }
-            boat_class.setText(regatta);
-            fleet_series.setText(RaceHelper.getSeriesName(header.getSeries(), ""));
-            if (fleet_series.getText().length() == 0) {
-                fleet_series.setVisibility(View.GONE);
-            } else {
-                fleet_series.setVisibility(View.VISIBLE);
-            }
-            protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
-            if (protest_image.getTag(R.id.protest_flag_image_click_listener) == null ||
-                    protest_image.getTag(R.id.protest_flag_image_click_listener) != Boolean.TRUE) {
-                protest_image.setTag(R.id.protest_flag_image_click_listener, Boolean.TRUE);
+            String series = RaceHelper.getSeriesName(header.getSeries(), "");
+
+            if (!(regatta + series).equals(convertView.getTag(R.id.race_list_header))) {
+                if (TextUtils.isEmpty(regatta)) {
+                    regatta = header.getRaceGroup().getName();
+                }
+                boat_class.setText(regatta);
+                fleet_series.setText(series);
+                if (fleet_series.getText().length() == 0) {
+                    fleet_series.setVisibility(View.GONE);
+                } else {
+                    fleet_series.setVisibility(View.VISIBLE);
+                }
+                protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
                 protest_image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -184,6 +184,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         BroadcastManager.getInstance(getContext()).addIntent(intent);
                     }
                 });
+                convertView.setTag(R.id.race_list_header, regatta + series);
             }
         } else if (type == ViewType.RACE.index) {
             final RaceListDataTypeRace race = (RaceListDataTypeRace) raceListElement;
