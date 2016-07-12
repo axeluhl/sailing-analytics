@@ -143,7 +143,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                     public int hashCode(RegattaDTO t) {
                         return t.getRegattaIdentifier().hashCode();
                     }
-                }, filterablePanelRegattas.getListDataProvider(), table);
+                }, filterablePanelRegattas.getAllListDataProvider(), table);
         
         ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);

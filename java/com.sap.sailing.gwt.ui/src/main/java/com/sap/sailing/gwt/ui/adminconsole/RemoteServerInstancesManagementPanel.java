@@ -174,7 +174,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                     public int hashCode(RemoteSailingServerReferenceDTO t) {
                         return t.getUrl().hashCode();
                     }
-                }, filteredServerTablePanel.getListDataProvider());
+                }, filteredServerTablePanel.getAllListDataProvider());
         serverTable.setSelectionModel(refreshableServerSelectionModel);
 
         return serverTable;

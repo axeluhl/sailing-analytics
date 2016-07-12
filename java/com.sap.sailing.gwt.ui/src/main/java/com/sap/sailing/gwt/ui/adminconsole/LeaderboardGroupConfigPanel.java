@@ -215,7 +215,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     public int hashCode(StrippedLeaderboardDTO t) {
                         return t.name.hashCode();
                     }
-                }, leaderboardsFilterablePanel.getListDataProvider(), leaderboardsTable);
+                }, leaderboardsFilterablePanel.getAllListDataProvider(), leaderboardsTable);
         refreshableLeaderboardsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
         leaderboardsTable.setSelectionModel(refreshableLeaderboardsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
         leaderboardsFilterablePanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
@@ -589,7 +589,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     public int hashCode(LeaderboardGroupDTO t) {
                         return t.getId().hashCode();
                     }
-                }, groupsFilterablePanel.getListDataProvider());
+                }, groupsFilterablePanel.getAllListDataProvider());
         refreshableGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

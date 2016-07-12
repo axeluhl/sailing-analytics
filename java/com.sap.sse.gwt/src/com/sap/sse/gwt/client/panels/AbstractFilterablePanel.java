@@ -160,8 +160,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         sort();
     }
    
-    private void sort(){
-        ColumnSortEvent.fire(display, display.getColumnSortList());
+    private void sort() {
+        if (display != null) {
+            ColumnSortEvent.fire(display, display.getColumnSortList());
+        }
     }
 
     public TextBox getTextBox() {
@@ -174,7 +176,8 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     
     /**
      * Registers a {@link RefreshableSelectionModel} on the all data structure. So the selection can be maintained when
-     * the {@link CellTable} is filtered.
+     * the {@link CellTable} is filtered. You can use the {@link RefreshableSelectionModel} returned by this method
+     * e.g. for a {@link CellTable} using {@link CellTable#setSelectionModel(com.google.gwt.view.client.SelectionModel)}
      * 
      * @param comp
      *            {@link EntityIdentityComparator Comperator} to create the {@link RefreshableSelectionModel selection
@@ -193,10 +196,24 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
     }
 
-    public ListDataProvider<T> getListDataProvider() {
+    /**
+     * You can use this method to get the {@link ListDataProvider} that represents the all data structure. On this
+     * {@link ListDataProvider} a {@link RefreshableSelectionModel} can be registered. So the selection can also be
+     * maintained when the data is filtered.
+     * 
+     * @return The original all data structure. It's no copy.
+     */
+    public ListDataProvider<T> getAllListDataProvider() {
         return all;
     }
     
+    /**
+     * This method can be used to set the CellTable, when the {@link CellTable} on which this Panel should work is
+     * created after this Panel. When the table isn't set correctly the order of elements, could be wrong after
+     * filtering the data.
+     * 
+     * @param table {@link AbstractCellTable} on which this panel works.
+     */
     public void setTable(AbstractCellTable<T> table) {
         display = table;
     }

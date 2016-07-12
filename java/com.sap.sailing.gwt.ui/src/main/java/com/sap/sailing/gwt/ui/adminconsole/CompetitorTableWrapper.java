@@ -230,7 +230,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 return string;
             }
         };
-        registerSelectionModelOnNewDataProvider(filterField.getListDataProvider());
+        registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         
         //CompetitorTableEditFeatures
         ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(

@@ -92,7 +92,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
             }
         };
         refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>(null,
-                filterAccountsPanel.getListDataProvider());
+                filterAccountsPanel.getAllListDataProvider());
         allAccounts.setSelectionModel(refreshableAccountsSelectionModel);
         final Panel controlsPanel = new HorizontalPanel();
         final Button removeAccountButton = new Button(stringMessages.remove());

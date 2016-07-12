@@ -163,7 +163,7 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
                     public int hashCode(LeaderboardGroupDTO t) {
                         return t.getName().hashCode();
                     }
-                }, availableLeaderboardGroupsFilterablePanel.getListDataProvider());
+                }, availableLeaderboardGroupsFilterablePanel.getAllListDataProvider());
         availableLeaderboardGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

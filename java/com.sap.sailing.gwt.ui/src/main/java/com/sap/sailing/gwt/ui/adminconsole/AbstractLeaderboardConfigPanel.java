@@ -179,7 +179,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
         addColumnsToLeaderboardTableAndSetSelectionModel(leaderboardTable, tableRes,
-                filterLeaderboardPanel.getListDataProvider());
+                filterLeaderboardPanel.getAllListDataProvider());
         @SuppressWarnings("unchecked")
         RefreshableMultiSelectionModel<StrippedLeaderboardDTO> multiSelectionModel = (RefreshableMultiSelectionModel<StrippedLeaderboardDTO>) leaderboardTable
                 .getSelectionModel();

@@ -291,7 +291,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                     public int hashCode(SwissTimingRaceRecordDTO t) {
                         return t.raceId.hashCode();
                     }
-                }, filterablePanelEvents.getListDataProvider()) {
+                }, filterablePanelEvents.getAllListDataProvider()) {
         });
 
         trackableRacesPanel.add(raceTable);

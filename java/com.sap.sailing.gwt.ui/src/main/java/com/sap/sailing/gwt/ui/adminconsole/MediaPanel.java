@@ -181,7 +181,7 @@ public class MediaPanel extends FlowPanel {
             public int hashCode(MediaTrack t) {
                 return t.dbId.hashCode();
             }
-        }, filterableMediaTracks.getListDataProvider());
+        }, filterableMediaTracks.getAllListDataProvider());
         mediaTracksTable.setSelectionModel(refreshableSelectionModel,
                 DefaultSelectionEventManager.<MediaTrack> createDefaultManager());
 
