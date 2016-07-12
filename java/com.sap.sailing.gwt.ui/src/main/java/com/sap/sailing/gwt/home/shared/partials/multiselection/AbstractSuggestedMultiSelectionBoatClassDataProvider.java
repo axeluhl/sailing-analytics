@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
+package com.sap.sailing.gwt.home.shared.partials.multiselection;
 
 import java.util.ArrayList;
 import java.util.Arrays;

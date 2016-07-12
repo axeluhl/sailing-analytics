@@ -1,7 +1,7 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
+package com.sap.sailing.gwt.home.shared.partials.multiselection;
 
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider.Display;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider.Display;
 
 public interface SuggestedMultiSelectionBoatClassDataProvider
         extends SuggestedMultiSelectionDataProvider<BoatClassDTO, Display> {

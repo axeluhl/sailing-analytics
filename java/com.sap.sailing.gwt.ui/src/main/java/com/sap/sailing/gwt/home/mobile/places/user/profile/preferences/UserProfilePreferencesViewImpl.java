@@ -10,11 +10,11 @@ import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelection;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelection.NotificationCallback;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.AbstractUserProfileView;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.NotificationCallback;
 
 public class UserProfilePreferencesViewImpl extends AbstractUserProfileView implements UserProfilePreferencesView {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);

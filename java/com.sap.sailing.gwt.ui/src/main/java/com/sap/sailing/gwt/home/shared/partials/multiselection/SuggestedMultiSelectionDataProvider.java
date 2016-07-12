@@ -1,9 +1,9 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
+package com.sap.sailing.gwt.home.shared.partials.multiselection;
 
 import java.util.Collection;
 
 import com.google.gwt.view.client.ProvidesKey;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionDataProvider.Display;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider.Display;
 
 public interface SuggestedMultiSelectionDataProvider<T, D extends Display<T>> extends ProvidesKey<T> {
     

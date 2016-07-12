@@ -4,7 +4,7 @@
         xmlns:s="urn:import:com.sap.sailing.gwt.home.desktop.places.user.profile.selection">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources" />
     <ui:style>
         .noResults {
             font-weight: bold;

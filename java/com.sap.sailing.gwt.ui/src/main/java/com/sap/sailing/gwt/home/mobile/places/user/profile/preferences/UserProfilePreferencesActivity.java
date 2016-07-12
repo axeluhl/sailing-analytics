@@ -14,12 +14,12 @@ import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggesti
 import com.sap.sailing.gwt.home.communication.user.profile.GetFavoritesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteBoatClassesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteCompetitorsAction;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractSuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionBoatClassDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfilePreferencesPlace;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;

@@ -1,7 +1,7 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
+package com.sap.sailing.gwt.home.shared.partials.multiselection;
 
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider.Display;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider.Display;
 
 public interface SuggestedMultiSelectionCompetitorDataProvider
         extends SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, Display> {

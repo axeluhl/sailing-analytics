@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
+package com.sap.sailing.gwt.home.shared.partials.multiselection;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.view.client.ProvidesKey;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionDataProvider.Display;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider.Display;
 
 public abstract class AbstractSuggestedMultiSelectionDataProvider<T, D extends Display<T>> 
         implements SuggestedMultiSelectionDataProvider<T, D> {

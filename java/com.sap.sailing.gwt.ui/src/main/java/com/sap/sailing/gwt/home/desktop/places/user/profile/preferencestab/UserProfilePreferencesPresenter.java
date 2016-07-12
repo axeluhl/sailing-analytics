@@ -12,10 +12,10 @@ import com.sap.sailing.gwt.home.communication.user.profile.GetFavoritesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteBoatClassesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteCompetitorsAction;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractSuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionBoatClassDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
