@@ -135,6 +135,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
 
     /**
      * The given consumer will be called for every user that needs to be notified about the given object.
+     * Users without a verified email address will be skipped.
      */
     public void forUsersMappedTo(T object, Consumer<User> consumer) {
         for (String username : getUsersnamesToNotifyFor(object)) {
@@ -144,7 +145,11 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
             if (user == null) {
                 logger.log(Level.SEVERE, "Could not get User for name \"" + username + "\"");
             } else {
-                consumer.accept(user);
+                // we can not exclude users without verified email address when calculating the association because this
+                // state could have changed meanwhile. So this need to be done on the fly.
+                if(user.isEmailValidated()) {
+                    consumer.accept(user);
+                }
             }
         }
     }

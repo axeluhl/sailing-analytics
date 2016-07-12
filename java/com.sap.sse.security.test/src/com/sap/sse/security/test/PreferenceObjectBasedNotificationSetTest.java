@@ -3,6 +3,7 @@ package com.sap.sse.security.test;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.function.Consumer;
 
@@ -170,7 +171,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     @Test
     public void userMappingTest() throws UserManagementException {
-        store.createUser(user1, mail);
+        createUserWithVerifiedEmail(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -182,9 +183,22 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     @Test
-    public void userMappingWithTwoUsersTest() throws UserManagementException {
+    public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException {
         store.createUser(user1, mail);
-        store.createUser(user2, mail);
+        store.registerPreferenceConverter(prefKey, prefConverter);
+        store.setPreferenceObject(user1, prefKey, values1);
+        PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
+        
+        UserConsumerMock mock = new UserConsumerMock();
+        
+        notificationSet.forUsersMappedTo(A, mock);
+        Assert.assertTrue(Util.isEmpty(mock.calls));
+    }
+    
+    @Test
+    public void userMappingWithTwoUsersTest() throws UserManagementException {
+        createUserWithVerifiedEmail(user1, mail);
+        createUserWithVerifiedEmail(user2, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         store.setPreferenceObject(user2, prefKey, values2);
@@ -201,7 +215,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     @Test
     public void userMappingWithOneExistingAndOneUnknownUserTest() throws UserManagementException {
-        store.createUser(user1, mail);
+        createUserWithVerifiedEmail(user1, mail);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         store.setPreferenceObject(user2, prefKey, values2);
@@ -245,6 +259,11 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     private static HashSet<User> users(User... values) {
         return new HashSet<>(Arrays.asList(values));
+    }
+    
+    private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException {
+        store.createUser(username, email);
+        store.updateUser(new User(username, email, null, null, true, null, null, Collections.emptySet()));
     }
     
     private static class PreferenceObjectBasedNotificationSetImpl extends PreferenceObjectBasedNotificationSet<HashSet<String>, String> {
