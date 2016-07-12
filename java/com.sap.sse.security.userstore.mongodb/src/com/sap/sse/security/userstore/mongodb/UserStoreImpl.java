@@ -593,7 +593,7 @@ public class UserStoreImpl implements UserStore {
         }
         // if the new preference object is simply null, we remove the entry instead of putting null
         Object oldPreference = convertedObject == null ? userMap.remove(key) : userMap.put(key, convertedObject);
-        if(oldPreference != null || convertedObject != null) {
+        if (oldPreference != null || convertedObject != null) {
             // preference hasn't changed if it was null and is now null
             notifyListenersOnPreferenceObjectChange(username, key, oldPreference, convertedObject);
         }
@@ -631,7 +631,7 @@ public class UserStoreImpl implements UserStore {
         if (preferenceConverter == null) {
             throw new IllegalArgumentException("Setting preference for key "+key+" but there is no converter associated!");
         }
-        if(preferenceObject == null) {
+        if (preferenceObject == null) {
             unsetPreference(username, key);
         } else {
             try {

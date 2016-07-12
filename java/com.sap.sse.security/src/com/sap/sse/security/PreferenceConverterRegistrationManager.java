@@ -12,7 +12,7 @@ import com.sap.sse.common.Stoppable;
 
 /**
  * Automatically registers/removes {@link PreferenceConverter} instances found in the OSGi service registry on the given
- * {@link UserStore}.
+ * {@link UserStore}.<p>
  *
  * {@link PreferenceConverter} found are required to have a property with the key
  * {@link PreferenceConverter#KEY_PARAMETER_NAME} defining the preference key the converter should be registered with.

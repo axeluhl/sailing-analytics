@@ -17,6 +17,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.common.Stoppable;
 import com.sap.sse.common.Util;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * <p>
@@ -33,10 +35,15 @@ import com.sap.sse.common.Util;
  * </p>
  * 
  * <p>
- * To speed up this part, the PreferenceObjectBasedNotificationSet holds an optimized association of who to notify about
+ * To speed up this part, the {@link PreferenceObjectBasedNotificationSet} holds an optimized association of who to notify about
  * specific objects. On preference changes for the given key in the given {@link UserStore}, the associations are being
  * updated to make the model always reflect the current state of the associations. Due to this the calculation of the
  * users to notify is a simple lookup.
+ * </p>
+ * 
+ * <p>
+ * To use this, implement a subclass in which the {@link #calculateObjectsToNotify(Object)} method determines the domain
+ * objects from a preference object for which the user needs to be notified.
  * </p>
  *
  * @param <PrefT>
@@ -60,6 +67,8 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
     private final String key;
 
     private final ServiceTracker<UserStore, UserStore> tracker;
+    
+    private final NamedReentrantReadWriteLock lock;
 
     /**
      * Constructor used to automatically track {@link UserStore} as OSGi service.
@@ -67,17 +76,20 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
     public PreferenceObjectBasedNotificationSet(String key, BundleContext context) {
         this.key = key;
         this.context = context;
-        tracker = new ServiceTracker<UserStore, UserStore>(context, UserStore.class, new Cutomizer());
+        if (context == null) {
+            this.tracker = null;
+        } else {
+            this.tracker = new ServiceTracker<UserStore, UserStore>(context, UserStore.class, new Cutomizer());
+        }
+        this.lock = new NamedReentrantReadWriteLock(getClass().getName()+" for "+key, /* fair */ false);
     }
 
     /**
      * Constructor used to work with a given {@link UserStore}.
      */
     public PreferenceObjectBasedNotificationSet(String key, UserStore store) {
-        this.key = key;
+        this(key, /* context */ (BundleContext) null);
         this.store = store;
-        context = null;
-        tracker = null;
         store.addPreferenceObjectListener(key, listener, true);
     }
 
@@ -94,18 +106,30 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
             store.removePreferenceObjectListener(listener);
             store = null;
         }
-        // TODO use write lock
-        synchronized (notifications) {
+        LockUtil.lockForWrite(lock);
+        try {
             notifications.clear();
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
         }
     }
 
+    /**
+     * Determines the domain objects for which the user needs to be notified.
+     * 
+     * @param preference
+     *            a notification preference of some sort which typically describes or contains a set of domain objects
+     *            the user is "interested" in and for changes of which the user wants to be notified.
+     * @return the domain objects described by the {@code preference} object thta the user is "interested" in
+     */
     protected abstract Collection<T> calculateObjectsToNotify(PrefT preference);
 
     public Iterable<String> getUsersnamesToNotifyFor(T object) {
-        // TODO use read lock
-        synchronized (notifications) {
+        LockUtil.lockForRead(lock);
+        try {
             return new HashSet<>(Util.get(notifications, object, Collections.emptySet()));
+        } finally {
+            LockUtil.unlockAfterRead(lock);
         }
     }
 
@@ -139,14 +163,16 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
             Set<T> objectsToAdd = new HashSet<>(newObjectsToNotify);
             objectsToAdd.removeAll(oldObjectsToNotify);
 
-            // TODO use write lock
-            synchronized (notifications) {
+            LockUtil.lockForWrite(lock);
+            try {
                 for (T objectToRemove : objectsToRemove) {
                     Util.removeFromValueSet(notifications, objectToRemove, username);
                 }
                 for (T objectToAdd : objectsToAdd) {
                     Util.addToValueSet(notifications, objectToAdd, username);
                 }
+            } finally {
+                LockUtil.unlockAfterWrite(lock);
             }
         }
     }
