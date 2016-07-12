@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.osgi.framework.BundleContext;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreference;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
@@ -15,6 +17,13 @@ public abstract class AbstractBoatClassNotificationSet
 
     public AbstractBoatClassNotificationSet(UserStore store) {
         super(BoatClassNotificationPreferences.PREF_NAME, store);
+    }
+    
+    /**
+     * Constructor used to automatically track {@link UserStore} as OSGi service.
+     */
+    public AbstractBoatClassNotificationSet(BundleContext bundleContext) {
+        super(BoatClassNotificationPreferences.PREF_NAME, bundleContext);
     }
 
     @Override
