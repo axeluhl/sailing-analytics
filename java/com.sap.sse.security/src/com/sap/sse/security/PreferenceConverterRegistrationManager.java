@@ -12,7 +12,8 @@ import com.sap.sse.common.Stoppable;
 
 /**
  * Automatically registers/removes {@link PreferenceConverter} instances found in the OSGi service registry on the given
- * {@link UserStore}.<p>
+ * {@link UserStore}.
+ * <p>
  *
  * {@link PreferenceConverter} found are required to have a property with the key
  * {@link PreferenceConverter#KEY_PARAMETER_NAME} defining the preference key the converter should be registered with.
@@ -25,6 +26,13 @@ public class PreferenceConverterRegistrationManager implements Stoppable {
 
     private final ServiceTracker<PreferenceConverter<?>, PreferenceConverter<?>> tracker;
 
+    /**
+     * @param bundleContext
+     *            the {@link BundleContext} needed to track {@link PreferenceConverter} instances that need to be
+     *            registered a the given UserStore.
+     * @param userStore
+     *            the {@link UserStore} to register {@link PreferenceConverter} at.
+     */
     public PreferenceConverterRegistrationManager(BundleContext bundleContext, UserStore userStore) {
         this.context = bundleContext;
         this.userStore = userStore;
