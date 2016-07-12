@@ -88,6 +88,7 @@ clean="clean"
 offline=0
 proxy=0
 android=1
+java=1
 reporting=0
 suppress_confirmation=0
 extra=''
@@ -101,6 +102,7 @@ if [ $# -eq 0 ]; then
     echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
     echo "-a Disable mobile projects (RaceCommittee App, e.g., in case no AndroidSDK is installed)"
+    echo "-A Only build mobile projects (e.g. RaceCommittee App) and skip backend/server build"
     echo "-r Enable generating surefire test reports"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
@@ -152,7 +154,7 @@ echo SERVERS_HOME is $SERVERS_HOME
 echo BRANCH is $active_branch
 echo VERSION is $VERSION_INFO
 
-options=':bgtocparvm:n:l:s:w:x:j:u'
+options=':bgtocpaArvm:n:l:s:w:x:j:u'
 while getopts $options option
 do
     case $option in
@@ -163,6 +165,8 @@ do
         c) clean="";;
         p) proxy=1;;
         a) android=0;;
+        A) android=1
+           java=0;;
         r) reporting=1;;
         m) MAVEN_SETTINGS=$OPTARG;;
         n) OSGI_BUNDLE_NAME=$OPTARG;;
@@ -709,48 +713,50 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         fi
     fi
 
-    if [ $reporting -eq 1 ]; then
-        echo "INFO: Activating reporting"
-        extra="$extra -Dreportsdirectory=$PROJECT_HOME/target/surefire-reports"
+    if [ $java -eq 1 ]; then
+        if [ $reporting -eq 1 ]; then
+            echo "INFO: Activating reporting"
+            extra="$extra -Dreportsdirectory=$PROJECT_HOME/target/surefire-reports"
+        fi
+    
+        # make sure to honour the service configuration
+        # needed to make sure that tests use the right servers
+        APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+    
+        extra="$extra -P with-not-android-relevant,!with-mobile"
+    
+        echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
+        echo "Maven version used: `mvn --version`"
+        mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
+        # now get the exit status from mvn, and not that of tee which is what $? contains now
+        MVN_EXIT_CODE=${PIPESTATUS[0]}
+        echo "Maven exit code is $MVN_EXIT_CODE"
+    
+        if [ $reporting -eq 1 ]; then
+            echo "INFO: Generating reports"
+            echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS surefire-report:report-only"
+            mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS surefire-report:report-only 2>&1 | tee $START_DIR/reporting.log
+            tar -xzf configuration/surefire-reports-resources.tar.gz
+            echo "INFO: Reports generated in $PROJECT_HOME/target/site/surefire-report.html"
+            echo "INFO: Be sure to check the result of the actual BUILD run!"
+        fi
+    
+        cd $PROJECT_HOME/java
+        if [ $gwtcompile -eq 1 ]; then
+    	# Now move back the backup .gwt.xml files before they were (maybe) patched
+    	echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
+    	for i in $GWT_XML_FILES; do
+    	    mv -v $i.bak $i
+    	done
+        fi
+    
+        if [ $MVN_EXIT_CODE -eq 0 ]; then
+    	echo "Build complete. Do not forget to install product..."
+        else
+            echo "Build had errors. Maven exit status was $MVN_EXIT_CODE"
+        fi
+        exit $MVN_EXIT_CODE
     fi
-
-    # make sure to honour the service configuration
-    # needed to make sure that tests use the right servers
-    APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
-
-    extra="$extra -P with-not-android-relevant,!with-mobile"
-
-    echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
-    echo "Maven version used: `mvn --version`"
-    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
-    # now get the exit status from mvn, and not that of tee which is what $? contains now
-    MVN_EXIT_CODE=${PIPESTATUS[0]}
-    echo "Maven exit code is $MVN_EXIT_CODE"
-
-    if [ $reporting -eq 1 ]; then
-        echo "INFO: Generating reports"
-        echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS surefire-report:report-only"
-        mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS surefire-report:report-only 2>&1 | tee $START_DIR/reporting.log
-        tar -xzf configuration/surefire-reports-resources.tar.gz
-        echo "INFO: Reports generated in $PROJECT_HOME/target/site/surefire-report.html"
-        echo "INFO: Be sure to check the result of the actual BUILD run!"
-    fi
-
-    cd $PROJECT_HOME/java
-    if [ $gwtcompile -eq 1 ]; then
-	# Now move back the backup .gwt.xml files before they were (maybe) patched
-	echo "INFO: restoring backup copies of .gwt.xml files after they has been patched before"
-	for i in $GWT_XML_FILES; do
-	    mv -v $i.bak $i
-	done
-    fi
-
-    if [ $MVN_EXIT_CODE -eq 0 ]; then
-	echo "Build complete. Do not forget to install product..."
-    else
-        echo "Build had errors. Maven exit status was $MVN_EXIT_CODE"
-    fi
-    exit $MVN_EXIT_CODE
 fi
 
 if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
