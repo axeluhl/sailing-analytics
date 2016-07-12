@@ -102,7 +102,7 @@ if [ $# -eq 0 ]; then
     echo "-b Build GWT permutation only for one browser and English language."
     echo "-t Disable tests"
     echo "-a Disable mobile projects (RaceCommittee App, e.g., in case no AndroidSDK is installed)"
-    echo "-A Only build mobile projects (RaceCommittee App, e.g., in case no AndroidSDK is installed) and skip backend/server build"
+    echo "-A Only build mobile projects (e.g. RaceCommittee App) and skip backend/server build"
     echo "-r Enable generating surefire test reports"
     echo "-o Enable offline mode (does not work for tycho surefire plugin)"
     echo "-c Disable cleaning (use only if you are sure that no java file has changed)"
