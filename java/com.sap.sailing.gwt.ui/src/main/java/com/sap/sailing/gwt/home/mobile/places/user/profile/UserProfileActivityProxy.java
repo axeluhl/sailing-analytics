@@ -5,7 +5,7 @@ import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.details.UserProfileDetailsActivity;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.preferences.UserProfilePreferencesActivity;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class UserProfileActivityProxy extends AbstractActivityProxy {

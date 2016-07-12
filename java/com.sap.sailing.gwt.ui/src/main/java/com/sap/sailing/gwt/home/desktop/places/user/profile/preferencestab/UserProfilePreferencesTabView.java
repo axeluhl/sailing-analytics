@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class UserProfilePreferencesTabView extends Composite implements UserProfileTabView<UserProfilePreferencesPlace> {

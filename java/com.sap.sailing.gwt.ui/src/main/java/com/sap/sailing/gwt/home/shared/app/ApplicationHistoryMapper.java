@@ -37,7 +37,7 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlac
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
-import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 
 @WithTokenizers({ AboutUsPlace.Tokenizer.class, ContactPlace.Tokenizer.class, EventPlace.Tokenizer.class,
         EventsPlace.Tokenizer.class, SolutionsPlace.Tokenizer.class, WhatsNewPlace.Tokenizer.class,

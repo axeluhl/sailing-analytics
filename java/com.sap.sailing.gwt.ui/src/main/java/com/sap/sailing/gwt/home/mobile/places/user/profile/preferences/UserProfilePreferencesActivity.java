@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggested
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 
