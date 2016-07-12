@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 import org.apache.shiro.SecurityUtils;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.security.PreferenceObjectListener;
 import com.sap.sse.security.SocialSettingsKeys;
@@ -70,6 +72,8 @@ public class UserStoreImpl implements UserStore {
     
     private transient Map<String, Set<PreferenceObjectListener<?>>> listeners;
     
+    private transient NamedReentrantReadWriteLock listenersLock;
+    
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
@@ -90,6 +94,8 @@ public class UserStoreImpl implements UserStore {
         preferenceConverters = new ConcurrentHashMap<>();
         preferenceObjects = new ConcurrentHashMap<>();
         listeners = new HashMap<>();
+        listenersLock = new NamedReentrantReadWriteLock(
+                UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
         this.mongoObjectFactory = mongoObjectFactory;
         if (domainObjectFactory != null) {
             for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
@@ -130,6 +136,8 @@ public class UserStoreImpl implements UserStore {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashMap<>();
+        listenersLock = new NamedReentrantReadWriteLock(
+                UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
     }
     
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -647,20 +655,24 @@ public class UserStoreImpl implements UserStore {
 
     private void notifyListenersOnPreferenceObjectChange(String username, String key, Object oldPreference,
             Object newPreference) {
-        synchronized (listeners) {
+        LockUtil.lockForRead(listenersLock);
+        try {
             for (PreferenceObjectListener<? extends Object> listener : Util.get(listeners, key,
                     Collections.<PreferenceObjectListener<? extends Object>> emptySet())) {
                 @SuppressWarnings("unchecked")
                 PreferenceObjectListener<Object> listenerToFire = (PreferenceObjectListener<Object>) listener;
                 listenerToFire.preferenceObjectChanged(username, key, oldPreference, newPreference);
             }
+        } finally {
+            LockUtil.unlockAfterRead(listenersLock);
         }
     }
 
     @Override
     public void addPreferenceObjectListener(String key, PreferenceObjectListener<? extends Object> listener,
             boolean fireForAlreadyExistingPreferences) {
-        synchronized (listeners) {
+        LockUtil.lockForWrite(listenersLock);
+        try {
             Util.addToValueSet(listeners, key, listener);
             if (fireForAlreadyExistingPreferences) {
                 final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
@@ -676,13 +688,18 @@ public class UserStoreImpl implements UserStore {
                     }
                 }
             }
+        } finally {
+            LockUtil.unlockAfterWrite(listenersLock);
         }
     }
 
     @Override
     public void removePreferenceObjectListener(PreferenceObjectListener<?> listener) {
-        synchronized (listeners) {
+        LockUtil.lockForWrite(listenersLock);
+        try {
             Util.removeFromAllValueSets(listeners, listener);
+        } finally {
+            LockUtil.unlockAfterWrite(listenersLock);
         }
     }
 }
