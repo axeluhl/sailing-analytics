@@ -721,7 +721,9 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
                 ExLog.i(RacingActivity.this, TAG, "Same races are already loaded...");
             } else {
-                lastSeenRaces = data;
+                // need to be a new instance, because of Activity restart after background kill
+                // more information see bug 3741
+                lastSeenRaces = new ArrayList<>(data);
                 registerOnService(data);
                 mRaceList.setupOn(data);
                 setupRegattaSpecificConfiguration();
