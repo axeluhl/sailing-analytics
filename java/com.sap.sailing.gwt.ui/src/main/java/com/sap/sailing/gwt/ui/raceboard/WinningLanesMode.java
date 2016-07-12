@@ -106,7 +106,7 @@ public class WinningLanesMode extends AbstractRaceBoardMode {
                     existingMapSettings.getTransparentHoverlines(),
                     existingMapSettings.getHoverlineStrokeWeight(),
                     tailLength.asMillis(),
-                    existingMapSettings.isWindUp(),
+                    /* existingMapSettings.isWindUp() */ true,
                     existingMapSettings.getBuoyZoneRadiusInMeters(),
                     /* existingMapSettings.isShowOnlySelectedCompetitors() */ true, // show the top n competitors and their tails quickly
                     existingMapSettings.isShowSelectedCompetitorsInfo(),
@@ -126,7 +126,8 @@ public class WinningLanesMode extends AbstractRaceBoardMode {
      * one or more competitors.
      */
     private int getHowManyCompetitorsToSelect(Iterable<CompetitorDTO> competitors) {
-        return Util.isEmpty(competitors) ? 0 : Math.max(Util.size(competitors)/10, 1);
+        final int numberOfCompetitors = Util.size(competitors);
+        return numberOfCompetitors==0 ? 0 : numberOfCompetitors<=4 ? 1 : numberOfCompetitors <=9 ? 2 : 3;
     }
 
     @Override
