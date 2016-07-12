@@ -13,6 +13,7 @@ public interface SuggestedMultiSelectionResources extends ClientBundle {
     
     public interface LocalCss extends CssResource {
         String suggestions();
+        String suggestionsMobile();
         String suggestionsHeader();
         String suggestionsHeaderTitle();
         String suggestionsContent();

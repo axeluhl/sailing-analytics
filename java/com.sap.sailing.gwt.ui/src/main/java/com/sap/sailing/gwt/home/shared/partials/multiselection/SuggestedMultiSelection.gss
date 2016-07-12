@@ -1,9 +1,16 @@
-.suggestions {
+.suggestions, .suggestionsMobile {
   width: 100%;
   font-size: 1rem;
+  overflow: hidden;
+}
+.suggestions {
   border: 1px solid #dedede;
   border-radius: 0.333333333333333em;
-  overflow: hidden;
+}
+
+.suggestionsMobile {
+  border-top: 1px solid #dedede;
+  border-bottom: 1px solid #dedede;
 }
 
 .suggestionsHeader {
