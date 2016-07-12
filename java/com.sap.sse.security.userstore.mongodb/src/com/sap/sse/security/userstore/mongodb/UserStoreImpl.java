@@ -70,8 +70,15 @@ public class UserStoreImpl implements UserStore {
      */
     private final ConcurrentHashMap<String, Map<String, Object>> preferenceObjects;
     
+    /**
+     * Keys are preferences keys as used by {@link #preferenceObjects}, values are the listeners to inform on changes of
+     * the specific preference object for a {@link User}.
+     */
     private transient Map<String, Set<PreferenceObjectListener<?>>> listeners;
     
+    /**
+     * To be used for locking when working with {@link #listeners}.
+     */
     private transient NamedReentrantReadWriteLock listenersLock;
     
     /**
