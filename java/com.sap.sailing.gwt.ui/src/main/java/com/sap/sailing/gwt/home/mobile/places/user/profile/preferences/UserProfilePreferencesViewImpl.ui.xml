@@ -1,7 +1,5 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" 
-    xmlns:ud="urn:import:com.sap.sse.security.ui.userprofile.mobile.userdetails"
-    xmlns:uh="urn:import:com.sap.sse.security.ui.userprofile.mobile.userheader"
     xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
     xmlns:ms="urn:import:com.sap.sailing.gwt.home.shared.partials.multiselection">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
