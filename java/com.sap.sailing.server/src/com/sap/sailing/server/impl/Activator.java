@@ -133,6 +133,9 @@ public class Activator implements BundleActivator {
                 Charset.defaultCharset());
     }
 
+    /**
+     * {@link #racingEventService} must already be initialized when calling this method
+     */
     protected void registerPreferenceConvertersForUserStore(BundleContext context) {
         Dictionary<String, String> properties = new Hashtable<String, String>();
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, CompetitorNotificationPreferences.PREF_NAME);

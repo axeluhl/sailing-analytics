@@ -47,8 +47,8 @@ public class PreferenceConverterRegistrationManager implements Stoppable {
 
         @Override
         public PreferenceConverter<?> addingService(ServiceReference<PreferenceConverter<?>> reference) {
-            String preferenceKey = (String) reference.getProperty(PreferenceConverter.KEY_PARAMETER_NAME);
-            PreferenceConverter<?> converter = context.getService(reference);
+            final String preferenceKey = (String) reference.getProperty(PreferenceConverter.KEY_PARAMETER_NAME);
+            final PreferenceConverter<?> converter = context.getService(reference);
             if (preferenceKey == null) {
                 logger.log(Level.SEVERE,
                         "Found PreferenceConverter \"" + converter + "\" in OSGi registry without property "
