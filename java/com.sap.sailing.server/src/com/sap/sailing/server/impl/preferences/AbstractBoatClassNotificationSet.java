@@ -12,13 +12,18 @@ import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPrefer
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
 import com.sap.sse.security.UserStore;
 
+/**
+ * {@link PreferenceObjectBasedNotificationSet} for associations of {@link BoatClass} to a set of users to notify about
+ * specific events for the {@link BoatClass}. Subclasses define the concrete case of notification based on the flags in
+ * {@link BoatClassNotificationPreference} via implementing {@link #shouldNotifyFor(BoatClassNotificationPreference)}.
+ */
 public abstract class AbstractBoatClassNotificationSet
         extends PreferenceObjectBasedNotificationSet<BoatClassNotificationPreferences, BoatClass> {
 
     public AbstractBoatClassNotificationSet(UserStore store) {
         super(BoatClassNotificationPreferences.PREF_NAME, store);
     }
-    
+
     /**
      * Constructor used to automatically track {@link UserStore} as OSGi service.
      */
