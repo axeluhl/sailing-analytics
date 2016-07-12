@@ -11,9 +11,12 @@ import Foundation
 class SettingsViewController: UITableViewController {
     
     @IBOutlet weak var batterySavingSwitch: UISwitch!
+    @IBOutlet weak var deviceIdLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        deviceIdLabel.text = DeviceUDIDManager.UDID
         batterySavingSwitch.setOn(BatteryManager.sharedManager.batterySavingPreference, animated: true)
 		
 		// add logo to top left
