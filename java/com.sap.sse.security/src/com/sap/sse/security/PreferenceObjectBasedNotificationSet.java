@@ -199,7 +199,6 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
 
         @Override
         public void modifiedService(ServiceReference<UserStore> reference, UserStore service) {
-            // Should we do anything here? the preference key could have changed, but does this make any sense?
         }
 
         @Override

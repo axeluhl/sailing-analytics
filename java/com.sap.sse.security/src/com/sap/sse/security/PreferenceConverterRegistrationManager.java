@@ -72,7 +72,7 @@ public class PreferenceConverterRegistrationManager implements Stoppable {
         @Override
         public void modifiedService(ServiceReference<PreferenceConverter<?>> reference,
                 PreferenceConverter<?> service) {
-            // Should we do anything here?
+            // Should we do anything here? the preference key could have changed, but does this make any sense?
         }
 
         @Override
