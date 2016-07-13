@@ -30,6 +30,7 @@ public class UserDTO implements IsSerializable {
         this.email = email;
         this.fullName = fullName;
         this.company = company;
+        this.locale = locale;
         this.emailValidated = emailValidated;
         this.accounts = accounts;
         this.roles = new HashSet<>();
