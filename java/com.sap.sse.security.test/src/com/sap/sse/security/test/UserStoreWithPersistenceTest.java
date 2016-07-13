@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +15,7 @@ import com.mongodb.DB;
 import com.mongodb.MongoException;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -23,6 +26,8 @@ import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
  */
 public class UserStoreWithPersistenceTest {
     private final String username = "abc";
+    private final String fullName = "Arno Nym";
+    private final String company = "SAP SE";
     private final String email = "anonymous@sapsailing.com";
     private final String prefKey = "pk";
     private final String prefValue = "pv";
@@ -54,6 +59,18 @@ public class UserStoreWithPersistenceTest {
         newStore();
         assertNotNull(store.getUserByName(username));
         assertNotNull(store.getUserByEmail(email));
+    }
+    
+    @Test
+    public void testMasterdataIsSaved() throws UserManagementException {
+        store.createUser(username, email);
+        store.updateUser(new User(username, email, fullName, company, Locale.GERMAN, false, null, null, Collections.emptySet()));
+        newStore();
+        User savedUser = store.getUserByName(username);
+        assertEquals(username, savedUser.getName());
+        assertEquals(email, savedUser.getEmail());
+        assertEquals(company, savedUser.getCompany());
+        assertEquals(Locale.GERMAN, savedUser.getLocale());
     }
 
     /**
