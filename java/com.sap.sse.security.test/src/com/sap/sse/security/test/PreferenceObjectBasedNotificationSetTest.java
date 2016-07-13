@@ -263,7 +263,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException {
         store.createUser(username, email);
-        store.updateUser(new User(username, email, null, null, true, null, null, Collections.emptySet()));
+        store.updateUser(new User(username, email, null, null, null, true, null, null, Collections.emptySet()));
     }
     
     private static class PreferenceObjectBasedNotificationSetImpl extends PreferenceObjectBasedNotificationSet<HashSet<String>, String> {

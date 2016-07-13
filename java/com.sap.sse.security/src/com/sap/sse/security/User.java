@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -35,6 +36,12 @@ public class User implements NamedWithID {
      * corporate vs. private users, if used as a marketing tool.
      */
     private String company;
+    
+    /**
+     * An optional field specifying the locale preference of the user. This can be used to internationalize User
+     * specific elements as UIs or notification mails.
+     */
+    private Locale locale;
 
     private String email;
     
@@ -66,16 +73,17 @@ public class User implements NamedWithID {
     }
 
     public User(String name, String email, Collection<Account> accounts) {
-        this(name, email, /* fullName */ null, /* company */ null, /* is email validated */ false,
+        this(name, email, /* fullName */ null, /* company */ null, /* locale */ null, /* is email validated */ false,
              /* password reset secret */ null, /* validation secret */ null, accounts);
     }
 
-    public User(String name, String email, String fullName, String company, Boolean emailValidated,
+    public User(String name, String email, String fullName, String company, Locale locale, Boolean emailValidated,
             String passwordResetSecret, String validationSecret, Collection<Account> accounts) {
         super();
         this.name = name;
         this.fullName = fullName;
         this.company = company;
+        this.locale = locale;
         this.roles = new HashSet<>();
         this.permissions = new HashSet<>();
         this.email = email;
@@ -118,6 +126,18 @@ public class User implements NamedWithID {
 
     public void setCompany(String company) {
         this.company = company;
+    }
+    
+    public Locale getLocale() {
+        return locale;
+    }
+    
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+    
+    public Locale getLocaleOrDefault() {
+        return locale == null ? Locale.ENGLISH : locale;
     }
 
     public Iterable<String> getRoles() {
