@@ -43,12 +43,6 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
         toStop.forEach(Stoppable::stop);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.sap.sailing.server.notification.SailingNotificationService#notifyUserOnBoatClassResults(com.sap.sailing.
-     * domain.base.BoatClass, java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public void notifyUserOnBoatClassResults(BoatClass boatClass, String eventName, String regattaDisplayName,
             String link) {
@@ -67,13 +61,6 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
         });
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.sap.sailing.server.notification.SailingNotificationService#notifyUserOnBoatClassUpcomingRace(com.sap.sailing.
-     * domain.base.BoatClass, java.lang.String, java.lang.String, com.sap.sse.common.TimePoint, java.lang.String)
-     */
     @Override
     public void notifyUserOnBoatClassUpcomingRace(BoatClass boatClass, String eventName, String regattaDisplayName,
             TimePoint when, String link) {
@@ -94,13 +81,6 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
         });
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.sap.sailing.server.notification.SailingNotificationService#notifyUserOnCompetitorResults(com.sap.sailing.
-     * domain.base.Competitor, java.lang.String, java.lang.String, java.lang.String)
-     */
     @Override
     public void notifyUserOnCompetitorResults(Competitor competitor, String eventName, String regattaDisplayName,
             String link) {
