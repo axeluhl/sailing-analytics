@@ -48,7 +48,6 @@ public class OpenSansToolbar extends Toolbar {
     }
 
     public void hideSubtitle() {
-        TextView titleTextView = (TextView) findViewById(R.id.toolbar_title);
         TextView subtitleTextView = (TextView) findViewById(R.id.toolbar_subtitle);
         subtitleTextView.setVisibility(View.GONE);
     }

@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractBaseActivity;
@@ -33,7 +32,6 @@ public class BuoyActivity extends AbstractBaseActivity {
     private EventInfo event;
     private MarkInfo mark;
     private LeaderboardInfo leaderboard;
-    private CheckinUrlInfo checkinUrl;
     private String checkinDigest;
 
     private AppPreferences prefs;
@@ -45,7 +43,6 @@ public class BuoyActivity extends AbstractBaseActivity {
         checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
 
         prefs = new AppPreferences(this);
-        checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
         mark = DatabaseHelper.getInstance().getMarkInfo(this, checkinDigest);
         event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
         leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
