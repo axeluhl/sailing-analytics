@@ -7,9 +7,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
-import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 
-public class RaceviewerLaunchPad extends Composite {
+public abstract class RaceviewerLaunchPad extends Composite {
 
     private static RaceviewerLaunchPadUiBinder uiBinder = GWT.create(RaceviewerLaunchPadUiBinder.class);
 
@@ -19,17 +18,18 @@ public class RaceviewerLaunchPad extends Composite {
     @UiField RaceviewerLaunchPadResources local_res;
     @UiField DivElement itemContainerUi;
 
-    public RaceviewerLaunchPad(SimpleRaceMetadataDTO data, EventView.Presenter presenter) {
+    public RaceviewerLaunchPad(SimpleRaceMetadataDTO data) {
         initWidget(uiBinder.createAndBindUi(this));
+        local_res.css().ensureInjected();
         if (!data.isFinished()) addStyleName(local_res.css().raceviewerlaunchpadlive());
-        addItem(data, presenter, RaceviewerModes.REPLAY);
-        addItem(data, presenter, RaceviewerModes.RACE_ANALYSIS);
-        addItem(data, presenter, RaceviewerModes.START_ANALYSIS);
-        addItem(data, presenter, RaceviewerModes.WINNING_LANES);
+        addItem(data, RaceviewerModes.REPLAY);
+        addItem(data, RaceviewerModes.RACE_ANALYSIS);
+        addItem(data, RaceviewerModes.START_ANALYSIS);
+        addItem(data, RaceviewerModes.WINNING_LANES);
     }
     
-    private void addItem(SimpleRaceMetadataDTO data, EventView.Presenter presenter, RaceviewerModes mode) {
-        String raceViewerUrl = presenter.getRaceViewerURL(data); // TODO send mode
+    private void addItem(SimpleRaceMetadataDTO data, RaceviewerModes mode) {
+        String raceViewerUrl = getRaceViewerURL(data); // TODO send mode
         itemContainerUi.appendChild(new RaceviewerLaunchPadItem(mode.label, mode.icon, raceViewerUrl).getElement());
     }
     
@@ -48,5 +48,7 @@ public class RaceviewerLaunchPad extends Composite {
             this.icon = icon;
         }
     }
+    
+    protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO data);
 
 }

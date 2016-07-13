@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -51,7 +52,12 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     public void onBrowserEvent(Context context, final Element parent, T data, NativeEvent event,
             ValueUpdater<T> valueUpdater) {
         if (data.hasValidTrackingData() && BrowserEvents.CLICK.equals(event.getType())) {
-            panel.setWidget(new RaceviewerLaunchPad(data, presenter));
+            panel.setWidget(new RaceviewerLaunchPad(data) {
+                @Override
+                protected String getRaceViewerURL(SimpleRaceMetadataDTO data) {
+                    return presenter.getRaceViewerURL(data);
+                }
+            });
             panel.setPopupPositionAndShow(new PositionCallback() {
                 @Override
                 public void setPosition(int offsetWidth, int offsetHeight) {
