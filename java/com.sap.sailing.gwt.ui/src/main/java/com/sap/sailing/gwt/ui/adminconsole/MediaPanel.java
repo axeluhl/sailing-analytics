@@ -112,13 +112,14 @@ public class MediaPanel extends FlowPanel {
         });
         buttonAndFilterPanel.add(addUrlButton);
         add(buttonAndFilterPanel);
-        createMediaTracksTable();
+        
         Label lblFilterRaces = new Label(stringMessages.filterMediaByName() + ":");
         lblFilterRaces.setWordWrap(false);
         buttonAndFilterPanel.setSpacing(5);
         buttonAndFilterPanel.add(lblFilterRaces);
         buttonAndFilterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
-        this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrack>(lblFilterRaces, allMediaTracks, mediaTracksTable, mediaTrackListDataProvider) {
+        this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrack>(lblFilterRaces, allMediaTracks,
+                new CellTable<MediaTrack>(), mediaTrackListDataProvider) {
             @Override
             public List<String> getSearchableStrings(MediaTrack t) {
                 List<String> strings = new ArrayList<String>();
@@ -131,6 +132,8 @@ public class MediaPanel extends FlowPanel {
                 return strings;
             }
         };
+        createMediaTracksTable();
+        filterableMediaTracks.setTable(mediaTracksTable);
         filterableMediaTracks.getTextBox().ensureDebugId("MediaTracksFilterTextBox");
         buttonAndFilterPanel.add(filterableMediaTracks);
     }
@@ -178,7 +181,7 @@ public class MediaPanel extends FlowPanel {
             public int hashCode(MediaTrack t) {
                 return t.dbId.hashCode();
             }
-        }, mediaTrackListDataProvider);
+        }, filterableMediaTracks.getAllListDataProvider());
         mediaTracksTable.setSelectionModel(refreshableSelectionModel,
                 DefaultSelectionEventManager.<MediaTrack> createDefaultManager());
 
