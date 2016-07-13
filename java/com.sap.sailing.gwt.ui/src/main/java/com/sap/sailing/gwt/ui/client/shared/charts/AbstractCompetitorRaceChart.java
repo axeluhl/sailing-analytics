@@ -302,6 +302,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             Date fromDate = timeOfEarliestRequestInMillis == null ? null : new Date(timeOfEarliestRequestInMillis);
             Date toDate = timeOfLatestRequestInMillis == null ? null : new Date(timeOfLatestRequestInMillis);
             loadData(fromDate, toDate, competitorsToLoad, false);
+        } else {
+            // chart is not visible; adding a competitor will require re-loading all data when the
+            // chart becomes visible again
+            timeOfEarliestRequestInMillis = null;
+            timeOfLatestRequestInMillis = null;
         }
     }
 
