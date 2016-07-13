@@ -1,9 +1,11 @@
 package com.sap.sailing.server.notification.impl;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
 
@@ -33,6 +35,8 @@ import com.sap.sse.mail.queue.MailQueue;
 public class SailingNotificationServiceImpl implements Stoppable, SailingNotificationService {
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
 
+    private static final Logger logger = Logger.getLogger(SailingNotificationServiceImpl.class.getName());
+
     private final Set<Stoppable> toStop = new HashSet<>();
     private final MailQueue mailQueue;
     private RacingEventService racingEventService;
@@ -61,9 +65,14 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
         this.racingEventService = racingEventService;
     }
 
+    /**
+     * Calculates the best matching {@link Event} and {@link LeaderboardGroup} for the given {@link Leaderboard}. If
+     * there is just one Event/LeaderboardGroup, this pair is returned. If an event series is found and the associated
+     * Event can be obtained, this combination is returned. The first Event of the series is used otherwise.
+     */
     private Pair<Event, LeaderboardGroup> calculateAssociatedEventForLeaderboard(final Leaderboard leaderboard) {
-        Set<Event> foundEvents = new HashSet<>();
-        Set<LeaderboardGroup> foundLeaderboardGroups = new HashSet<>();
+        Set<Event> foundEvents = new LinkedHashSet<>();
+        Set<LeaderboardGroup> foundLeaderboardGroups = new LinkedHashSet<>();
         racingEventService.getAllEvents().forEach(event -> {
             event.getLeaderboardGroups().forEach(leaderboardGroup -> {
                 if (Util.contains(leaderboardGroup.getLeaderboards(), leaderboard)) {
@@ -74,6 +83,8 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
         });
         int foundEventsCount = foundEvents.size();
         if (foundEventsCount == 1) {
+            // if multiple LeaderboardGroups of the single event reference the same leaderboard, we just use the
+            // first LeaderboardGroup. This could be a non optimal match but helps to e.g. construct valid links.
             return new Pair<>(Util.get(foundEvents, 0), Util.get(foundLeaderboardGroups, 0));
         } else if (foundEventsCount > 1 && foundLeaderboardGroups.size() == 1) {
             // could be a series
@@ -87,15 +98,24 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
                         }
                     }
                 }
+                // Event <-> Leaderboard association is not set up correctly. The UI will show the Leaderboard for
+                // multiple Events. So any of the found Events is ok for this case.
+                return new Pair<>(Util.get(foundEvents, 0), leaderboardGroup);
             }
         }
         // No associated event found or association is ambiguous
         return null;
     }
 
+    /**
+     * Calculated the best matching Event/LeaderBoardGroup pair via
+     * {@link #calculateAssociatedEventForLeaderboard(Leaderboard)} and calls the given consumer with these instances.
+     * If the racingEventService isn't already set, this will do nothing.
+     */
     private void doWithEvent(Leaderboard leaderboard, BiConsumer<Event, LeaderboardGroup> consumer) {
         if (racingEventService == null) {
-            // TODO log
+            logger.severe(
+                    "Can't send notifications if " + getClass().getSimpleName() + ".racingEventService isn't set");
             return;
         }
         Pair<Event, LeaderboardGroup> eventAndLeaderboardGroup = calculateAssociatedEventForLeaderboard(leaderboard);
@@ -182,7 +202,8 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
             Fleet fleet, TimePoint when) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
             // TODO where to get the base URL?
-            String link = "/gwt/Home.html#/regatta/races/:eventId="+event.getId()+"&regattaId=" + leaderboard.getName();
+            String link = "/gwt/Home.html#/regatta/races/:eventId=" + event.getId() + "&regattaId="
+                    + leaderboard.getName();
 
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassUpcomingRace) {
                 @Override
