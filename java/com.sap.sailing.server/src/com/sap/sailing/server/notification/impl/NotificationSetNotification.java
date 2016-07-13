@@ -29,8 +29,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         // TODO idea (c) by Axel Uhl: In case of performance/mail queue problems: group mail addresses by locale and
         // send batches with the actual mail addresses as bcc?
         associatedNotificationSet.forUsersWithVerifiedEmailMappedTo(objectToNotifyAbout, (user) -> {
-            // TODO user defined locale
-            Locale locale = Locale.ENGLISH;
+            Locale locale = user.getLocaleOrDefault();
             Multipart multipart = new MimeMultipart();
             BodyPart bodyPart = new MimeBodyPart();
             try {
