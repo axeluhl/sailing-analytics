@@ -44,7 +44,8 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
     @Override
     public void handleSaveChangesRequest(String fullName, String company) {
         final String username = authenticationManager.getAuthenticationContext().getCurrentUser().getName();
-        userManagementService.updateUserProperties(username, fullName, company,
+        // FIXME set locale
+        userManagementService.updateUserProperties(username, fullName, company, null,
                 new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
