@@ -263,7 +263,8 @@ public class User implements NamedWithID {
 
     @Override
     public String toString() {
-        return "User [name=" + name + ", email=" + email + (isEmailValidated()?" (validated)":")")+", roles="
+        return "User [name=" + name + ", email=" + email + ", fullName=" + fullName + ", company=" + company
+                + ", locale=" + locale + (isEmailValidated() ? " (validated)" : ")") + ", roles="
                 + Arrays.toString(roles.toArray(new String[roles.size()])) + ", accounts="
                 + Arrays.toString(accounts.keySet().toArray(new AccountType[accounts.size()])) + "]";
     }
