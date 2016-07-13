@@ -34,12 +34,17 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
+import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.Util;
+import com.sap.sse.mail.MailService;
+import com.sap.sse.mail.queue.MailQueue;
+import com.sap.sse.mail.queue.impl.ExecutorMailQueue;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
 
@@ -65,6 +70,12 @@ public class Activator implements BundleActivator {
 
     private OSGiBasedTrackedRegattaListener trackedRegattaListener;
 
+    private MailQueue mailQueue;
+
+    private SailingNotificationServiceImpl notificationService;
+
+    private ServiceTracker<MailService, MailService> mailServiceTracker;
+
     public Activator() {
         clearPersistentCompetitors = Boolean
                 .valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, "" + false));
@@ -77,9 +88,9 @@ public class Activator implements BundleActivator {
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
 
-        // TODO implement
-//        MailQueue mailQueue = new ExecutorMailQueue(ServiceTrackerFactory.createAndOpen(context, MailService.class));
-//        SailingNotificationService notificationService = new SailingNotificationServiceImpl(context, mailQueue);
+        mailServiceTracker = ServiceTrackerFactory.createAndOpen(context, MailService.class);
+        mailQueue = new ExecutorMailQueue(mailServiceTracker);
+        notificationService = new SailingNotificationServiceImpl(context, mailQueue);
 
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
 
@@ -90,6 +101,7 @@ public class Activator implements BundleActivator {
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
                 trackedRegattaListener);
+        notificationService.setRacingEventService(racingEventService);
 
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
@@ -173,6 +185,9 @@ public class Activator implements BundleActivator {
         }
         trackedRegattaListener.close();
         registrations.clear();
+        notificationService.stop();
+        mailQueue.stop();
+        mailServiceTracker.close();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.unregisterMBean(mBeanName);
     }

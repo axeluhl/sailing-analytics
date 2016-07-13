@@ -28,7 +28,7 @@ public class ExecutorMailQueue implements MailQueue {
 
     @Override
     public void stop() {
-        executor.shutdown();
+        executor.shutdownNow();
     }
 
     @Override
