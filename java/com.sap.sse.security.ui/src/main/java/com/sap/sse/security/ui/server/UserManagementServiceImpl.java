@@ -302,7 +302,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
-                user.isEmailValidated(), accountDTOs, user.getRoles(), user.getPermissions());
+                user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
+                accountDTOs, user.getRoles(), user.getPermissions());
         return userDTO;
     }
 
