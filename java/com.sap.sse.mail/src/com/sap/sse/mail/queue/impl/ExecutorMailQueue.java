@@ -16,7 +16,11 @@ public class ExecutorMailQueue implements MailQueue {
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor(
-            (runnable) -> new Thread(runnable, ExecutorMailQueue.class.getName() + " executor"));
+            (runnable) -> {
+                Thread thread = new Thread(runnable, ExecutorMailQueue.class.getName() + " executor");
+                thread.setDaemon(true);
+                return thread;
+            });
 
     public ExecutorMailQueue(ServiceTracker<MailService, MailService> mailServiceTracker) {
         this.mailServiceTracker = mailServiceTracker;
