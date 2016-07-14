@@ -41,7 +41,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     private final String iconStyleNames = local_res.css().raceviewerlaunchpad_icon();
 
     private final EventView.Presenter presenter;
-    private final PopupPanel panel = new PopupPanel(true, true);
+    private final PopupPanel panel = new PopupPanel(true, false);
 
     public RaceviewerLaunchPadCell(Presenter presenter) {
         super(BrowserEvents.CLICK);
@@ -52,7 +52,8 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     @Override
     public void onBrowserEvent(Context context, final Element parent, T data, NativeEvent event,
             ValueUpdater<T> valueUpdater) {
-        if (data.hasValidTrackingData() && BrowserEvents.CLICK.equals(event.getType())) {
+        if (data.hasValidTrackingData() && BrowserEvents.CLICK.equals(event.getType())
+                && parent.getFirstChildElement().isOrHasChild(Element.as(event.getEventTarget()))) {
             panel.setWidget(new RaceviewerLaunchPad(data) {
                 @Override
                 protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String mode) {
@@ -65,6 +66,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
                     int alignBottom = parent.getAbsoluteTop() + parent.getOffsetHeight() - offsetHeight;
                     int top = (alignBottom - Window.getScrollTop() < 0 ? parent.getAbsoluteTop() - 1 : alignBottom + 1);
                     panel.setPopupPosition(parent.getAbsoluteRight() + 1 - offsetWidth, top);
+                    panel.getElement().scrollIntoView();
                 }
             });
             return;
