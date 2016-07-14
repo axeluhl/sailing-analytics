@@ -24,12 +24,12 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     public MultiCompetitorRaceChartSettings createDefaultSettings() {
         ChartSettings chartSettings = new ChartSettings(AbstractCompetitorRaceChart.DEFAULT_STEPSIZE);
         DetailType defaultDetailType = DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
-        return new MultiCompetitorRaceChartSettings(chartSettings, defaultDetailType);
+        return new MultiCompetitorRaceChartSettings(chartSettings, defaultDetailType, null);
     }
 
     @Override
     public MultiCompetitorRaceChartSettings cloneSettings(MultiCompetitorRaceChartSettings settings) {
-        return new MultiCompetitorRaceChartSettings(new ChartSettings(settings.getStepSize()), settings.getDetailType());
+        return new MultiCompetitorRaceChartSettings(new ChartSettings(settings.getStepSizeInMillis()), settings.getFirstDetailType(), settings.getSecondDetailType());
     }
 
     @Override

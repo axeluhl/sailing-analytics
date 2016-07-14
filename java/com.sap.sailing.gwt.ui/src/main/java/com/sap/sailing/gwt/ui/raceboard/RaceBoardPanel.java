@@ -159,13 +159,18 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
      *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
      *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
      *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint} class.
+     * @param showChartMarkEditMediaButtonsAndVideo
+     *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark 
+     *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that
+     *            aligns its right border with that of the chart. Otherwise those components will be hidden.
      */
     public RaceBoardPanel(PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleWithAllSettings, 
-            SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-            UserService userService, AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
+            SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,
+            AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
+            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
+            boolean showChartMarkEditMediaButtonsAndVideo) {
         super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(), perspectiveLifecycleWithAllSettings.getPerspectiveSettings());
         this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;
         this.sailingService = sailingService;
@@ -203,7 +208,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
 
         raceMap = new RaceMap(raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
-                getPerspectiveSettings().isSimulationEnabled(), /* showHeaderPanel */ true) {
+                /* showHeaderPanel */ true) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -250,7 +255,8 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
         leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel, isScreenLargeEnoughToInitiallyDisplayLeaderboard, raceMap, userService); // initializes the raceMap field
+        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel, isScreenLargeEnoughToInitiallyDisplayLeaderboard,
+                raceMap, userService, showChartMarkEditMediaButtonsAndVideo); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
@@ -263,9 +269,10 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
                 }
             }
         }
-        racetimePanel = new RaceTimePanel(raceTimePanelLifecycle, userService, timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
-                getPerspectiveSettings().isCanReplayDuringLiveRaces(), getPerspectiveSettings().isChartSupportEnabled(),
-                selectedRaceIdentifier,  getPerspectiveSettings().getInitialDurationAfterRaceStartInReplay());
+        racetimePanel = new RaceTimePanel(raceTimePanelLifecycle, userService, timer, timeRangeWithZoomModel,
+                stringMessages, raceTimesInfoProvider, getPerspectiveSettings().isCanReplayDuringLiveRaces(),
+                showChartMarkEditMediaButtonsAndVideo, selectedRaceIdentifier,
+                getPerspectiveSettings().getInitialDurationAfterRaceStartInReplay());
         racetimePanel.updateSettings(raceTimePanelSettings);
         timeRangeWithZoomModel.addTimeZoomChangeListener(racetimePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(racetimePanel);
@@ -289,14 +296,16 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
      * @param event
      *            an optional event; may be <code>null</code> or else can be used to show some context information in
      * the {@link GlobalNavigationPanel}.
+     * @param showChartMarkEditMediaButtonsAndVideo 
      * @param isScreenLargeEnoughToOfferChartSupport
      *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
      *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
      *            the charts are created.
      */
-    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, UUID event, FlowPanel mainPanel,
-            boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap, UserService userService) {
-        
+    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, UUID event,
+            FlowPanel mainPanel, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap,
+            UserService userService, boolean showChartMarkEditMediaButtonsAndVideo) {
+
         MediaPlayerLifecycle mediaPlayerLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getMediaPlayerLifecycle();
         MediaPlayerSettings mediaPlayerSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(mediaPlayerLifecycle);
 
@@ -309,7 +318,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         List<Component<?>> componentsForSideBySideViewer = new ArrayList<Component<?>>();
-        if (getPerspectiveSettings().isChartSupportEnabled()) {
+        if (showChartMarkEditMediaButtonsAndVideo) {
             competitorChart = new MultiCompetitorRaceChart(multiCompetitorRaceChartLifecycle, sailingService, asyncActionsExecutor,
                     competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomModel, stringMessages,
                     errorReporter, true, true, leaderboardGroupName, leaderboardName);
@@ -324,18 +333,23 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
             windChart.setVisible(false);
             windChart.getEntryWidget().setTitle(stringMessages.windChart());
             componentsForSideBySideViewer.add(windChart);
-            editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier, stringMessages,
-                    competitorSelectionProvider, errorReporter, timer);
+        }
+        
+        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier, stringMessages,
+                competitorSelectionProvider, errorReporter, timer);
+        if (showChartMarkEditMediaButtonsAndVideo) {
             editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
             componentsForSideBySideViewer.add(editMarkPassingPanel);
-            editMarkPositionPanel = new EditMarkPositionPanel(raceMap, leaderboardPanel, selectedRaceIdentifier, leaderboardName, stringMessages, sailingService, timer, timeRangeWithZoomModel,
-                    asyncActionsExecutor, errorReporter);
+        }
+        editMarkPositionPanel = new EditMarkPositionPanel(raceMap, leaderboardPanel, selectedRaceIdentifier, leaderboardName, stringMessages, sailingService, timer, timeRangeWithZoomModel,
+                asyncActionsExecutor, errorReporter);
+        if (showChartMarkEditMediaButtonsAndVideo) {
             editMarkPositionPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             componentsForSideBySideViewer.add(editMarkPositionPanel);
         }
+        
         mediaPlayerManagerComponent = new MediaPlayerManagerComponent(mediaPlayerLifecycle, 
-
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, mediaPlayerSettings);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent,
@@ -345,11 +359,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         mainPanel.add(leaderboardAndMapViewer.getViewerWidget());
         boolean showLeaderboard = getPerspectiveSettings().isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         setLeaderboardVisible(showLeaderboard);
-        if (getPerspectiveSettings().isChartSupportEnabled()) {
-            setWindChartVisible(getPerspectiveSettings().isShowWindChart());
-            setCompetitorChartVisible(getPerspectiveSettings().isShowCompetitorsChart());
-        }
-        if (getPerspectiveSettings().isShowChartMarkEditMediaButtonsAndVideo()) {
+        if (showChartMarkEditMediaButtonsAndVideo) {
             setWindChartVisible(getPerspectiveSettings().isShowWindChart());
             setCompetitorChartVisible(getPerspectiveSettings().isShowCompetitorsChart());
         }

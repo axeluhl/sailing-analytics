@@ -262,6 +262,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             while (table.getColumnCount() > 0) {
                 table.removeColumn(0);
             }
+            regattaOverviewDataProvider.removeDataDisplay(table);
         } else {
             sortInfos.add(new ColumnSortInfo(lastUpdateColumn, false));
         }

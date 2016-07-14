@@ -72,13 +72,17 @@ import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 /**
  * This class aggregates race information by preparing {@link DTO}s for different components representing a race in the
- * UI and providing convenience methods for several race state and other required information.
+ * UI and providing convenience methods for several race state and other required information.<p>
+ * 
+ * An object of this type represents a snapshot of a race for the time point when the object is created. Using the
+ * object at a later point in time will still represent the race at the time when this object was created, including
+ * the race's flag state, live state and view state.
  */
 @GwtIncompatible
 public class RaceContext {
     private static final Logger logger = Logger.getLogger(RaceContext.class.getName());
-    private static final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 60 * 60 * 1000; // 1 hour
-    private static final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
+    private static final Duration TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = Duration.ONE_HOUR;
+    private static final Duration TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = Duration.ONE_MINUTE.times(5);
     private final TimePoint now = MillisecondsTimePoint.now();
     private final LeaderboardContext leaderboardContext;
     private final Leaderboard leaderboard;
@@ -537,7 +541,7 @@ public class RaceContext {
             RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
             if (abortingFlagEvent != null) {
                 TimePoint abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint();
-                if (now.minus(abortingTimeInPassBefore.asMillis()).asMillis() < TIME_TO_SHOW_CANCELED_RACES_AS_LIVE) {
+                if (abortingTimeInPassBefore.until(now).compareTo(TIME_TO_SHOW_CANCELED_RACES_AS_LIVE) < 0) {
                     result = true;
                     // TODO: Problem: This causes the race added to the live races list without having a start time!!!
                     // This does not work right now -> consider using a start time of the last pass.
