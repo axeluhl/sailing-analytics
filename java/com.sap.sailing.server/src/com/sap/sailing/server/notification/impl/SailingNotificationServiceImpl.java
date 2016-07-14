@@ -31,6 +31,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.queue.MailQueue;
+import com.sap.sse.security.UserStore;
 
 public class SailingNotificationServiceImpl implements Stoppable, SailingNotificationService {
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
@@ -47,13 +48,32 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     private final CompetitorResultsNotificationSet competitorResults;
 
     public SailingNotificationServiceImpl(BundleContext bundleContext, MailQueue mailQueue) {
+        this(mailQueue,
+                new BoatClassResultsNotificationSet(bundleContext),
+                new BoatClassUpcomingRaceNotificationSet(bundleContext),
+                new CompetitorResultsNotificationSet(bundleContext));
+    }
+    
+    /**
+     * Constructor used for unit tests to not need BundelContext but directly work with a given UserStore.
+     */
+    public SailingNotificationServiceImpl(UserStore userStore, MailQueue mailQueue) {
+        this(mailQueue,
+                new BoatClassResultsNotificationSet(userStore),
+                new BoatClassUpcomingRaceNotificationSet(userStore),
+                new CompetitorResultsNotificationSet(userStore));
+    }
+
+    public SailingNotificationServiceImpl(MailQueue mailQueue, BoatClassResultsNotificationSet boatClassResults,
+            BoatClassUpcomingRaceNotificationSet boatClassUpcomingRace,
+            CompetitorResultsNotificationSet competitorResults) {
         this.mailQueue = mailQueue;
         this.messages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME,
                 this.getClass().getClassLoader());
-
-        toStop.add(boatClassResults = new BoatClassResultsNotificationSet(bundleContext));
-        toStop.add(boatClassUpcomingRace = new BoatClassUpcomingRaceNotificationSet(bundleContext));
-        toStop.add(competitorResults = new CompetitorResultsNotificationSet(bundleContext));
+        
+        toStop.add(this.boatClassResults = boatClassResults);
+        toStop.add(this.boatClassUpcomingRace = boatClassUpcomingRace);
+        toStop.add(this.competitorResults = competitorResults);
     }
 
     @Override
