@@ -339,7 +339,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     private void initTransientFields() {
         this.raceDetailsAtEndOfTrackingCache = new HashMap<com.sap.sse.common.Util.Pair<TrackedRace,Competitor>, RunnableFuture<RaceDetails>>();
-        this.raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        this.raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
         this.cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
