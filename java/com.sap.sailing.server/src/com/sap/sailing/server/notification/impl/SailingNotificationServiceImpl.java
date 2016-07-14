@@ -180,8 +180,16 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     }
 
     private String createHomeRacesListLink(Leaderboard leaderboard, Event event) {
+        return createHomeRegattaLink("races", leaderboard, event);
+    }
+    
+    private String createHomeLeaderboardLink(Leaderboard leaderboard, Event event) {
+        return createHomeRegattaLink("leaderboard", leaderboard, event);
+    }
+    
+    private String createHomeRegattaLink(String tab, Leaderboard leaderboard, Event event) {
         // TODO where to get the base URL?
-        String link = "/gwt/Home.html#/regatta/races/:eventId=" + event.getId() + "&regattaId="
+        String link = "/gwt/Home.html#/regatta/" + tab + "/:eventId=" + event.getId() + "&regattaId="
                 + leaderboard.getName();
         return link;
     }
@@ -211,7 +219,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     @Override
     public void notifyUserOnBoatClassWhenScoreCorrectionsAreAvailable(BoatClass boatClass, Leaderboard leaderboard) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            String link = createHomeRacesListLink(leaderboard, event);
+            String link = createHomeLeaderboardLink(leaderboard, event);
 
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassResults) {
                 @Override
@@ -277,7 +285,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     @Override
     public void notifyUserOnCompetitorScoreCorrections(Competitor competitor, Leaderboard leaderboard) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            String link = createHomeRacesListLink(leaderboard, event);
+            String link = createHomeLeaderboardLink(leaderboard, event);
 
             mailQueue.addNotification(new NotificationSetNotification<Competitor>(competitor, competitorResults) {
                 @Override
