@@ -282,6 +282,10 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         }
     }
 
+    private void reloadList() {
+        getLoaderManager().restartLoader(REGATTA_LOADER, null, this);
+    }
+
     private boolean showDeleteConfirmationDialog(int position) {
         // -1, because there's a header row
         Cursor cursor = (Cursor) adapter.getItem(position - 1);
@@ -310,8 +314,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                 StartActivity startActivity = (StartActivity) getActivity();
                 startActivity.dismissProgressDialog();
                 DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
-                adapter.swapCursor(null);
-                adapter.notifyDataSetInvalidated();
+                reloadList();
             }
         };
         NetworkHelperFailureListener failureListener = new NetworkHelperFailureListener() {
