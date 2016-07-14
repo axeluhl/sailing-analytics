@@ -5,11 +5,13 @@ import java.util.Map;
 
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.gwt.client.player.Timer;
@@ -24,7 +26,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesInfoProviderListener, LeaderboardUpdateListener {
+public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesInfoProviderListener, LeaderboardUpdateListener, CompetitorsForRaceDefinedListener {
     private Timer timer;
     private RegattaAndRaceIdentifier raceIdentifier;
     private RaceTimePanel raceTimePanel;
@@ -40,6 +42,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         this.leaderboardPanel.addLeaderboardUpdateListener(this);
         this.timer = raceBoardPanel.getTimer();
         this.raceIdentifier = raceBoardPanel.getSelectedRaceIdentifier();
+        raceBoardPanel.getMap().addCompetitorsForRaceDefinedListener(this);
     }
     
     protected Timer getTimer() {
@@ -64,7 +67,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
 
     /**
      * Called after the {@link RaceTimePanel} has reacted to this update. We assume that now the timing for the race has been
-     * received, and it should be clear by now whether we're talkign about a live or a replay race. In case of a replay race
+     * received, and it should be clear by now whether we're talking about a live or a replay race. In case of a replay race
      * the timer is set to 
      */
     @Override
@@ -84,5 +87,10 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
         // nothing to do
+    }
+    
+    @Override
+    public void competitorsForRaceDefined(Iterable<CompetitorDTO> competitorsInRace) {
+        // nothing to do here
     }
 }

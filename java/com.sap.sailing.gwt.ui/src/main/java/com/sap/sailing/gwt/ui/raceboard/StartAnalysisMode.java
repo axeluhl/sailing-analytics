@@ -3,10 +3,8 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
@@ -17,11 +15,8 @@ import com.google.gwt.maps.client.events.idle.IdleMapEvent;
 import com.google.gwt.maps.client.events.idle.IdleMapHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -48,16 +43,14 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
  * @author Axel Uhl (d043530)
  *
  */
-public class StartAnalysisMode extends AbstractRaceBoardMode {
+public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
     private static final Duration DURATION_AFTER_START_TO_SET_TIMER_TO_FOR_START_ANALYSIS = Duration.ONE_SECOND.times(10);
     private static final Duration DURATION_BEFORE_START_TO_INCLUDE_IN_CHART_TIME_RANGE = Duration.ONE_SECOND.times(30);
     private static final Duration DURATION_AFTER_START_TO_INCLUDE_IN_CHART_TIME_RANGE = Duration.ONE_SECOND.times(30);
     private MultiCompetitorRaceChart competitorChart;
     private boolean raceTimesInfoReceived;
     private boolean leaderboardUpdateReveiced;
-    private LeaderboardDTO leaderboard;
     private RaceTimesInfoDTO raceTimesInfo;
-    private RaceColumnDTO raceColumn;
 
     @Override
     public void applyTo(RaceBoardPanel raceBoardPanel) {
@@ -87,20 +80,25 @@ public class StartAnalysisMode extends AbstractRaceBoardMode {
             }
         }
     }
+    
+    @Override
+    protected void updateCompetitorSelection() {
+        updateCompetitorSelection(/* howManyTopCompetitorsInRaceToSelect */ 3);
+    }
 
     private void showCompetitorChartIfAllDataReceived() {
-        if (raceColumn != null && leaderboardUpdateReveiced && raceTimesInfoReceived && leaderboard != null
-                && leaderboard.getCompetitorsFromBestToWorst(raceColumn) != null
+        if (getRaceColumn() != null && leaderboardUpdateReveiced && raceTimesInfoReceived && getLeaderboard() != null
+                && getLeaderboard().getCompetitorsFromBestToWorst(getRaceColumn()) != null
                 && raceTimesInfo != null && raceTimesInfo.startOfRace != null) {
             ArrayList<String> raceColumnName = new ArrayList<>();
-            raceColumnName.add(raceColumn.getName());
+            raceColumnName.add(getRaceColumn().getName());
             // The problem with the leaderboard received in updatedLeaderboard(...) is that we don't know which request
             // has caused it to be delivered; there is an early request for "now" and maybe even another request for start of race;
             // therefore, we need to fire our own request for the time point desired and make sure we get the right
             // LeaderboardDTO to determine the competitor ordering for the current race.
             final GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(getLeaderboardPanel().getSailingService(), getLeaderboardPanel().getLeaderboard().name,
                     getTimer().getTime(), raceColumnName, /* addOverallDetails */ false,
-                    /* previousLeaderboard */ leaderboard, /* fillTotalPointsUncorrected */ false,
+                    getLeaderboard(), /* fillTotalPointsUncorrected */ false,
                     /* timerToAdjustOffsetIn */ getTimer(), /* errorReporter */ null, StringMessages.INSTANCE);
             getLeaderboardPanel().getExecutor().execute(getLeaderboardByNameAction, LeaderboardPanel.LOAD_LEADERBOARD_DATA_CATEGORY,
                             new AsyncCallback<LeaderboardDTO>() {
@@ -111,12 +109,9 @@ public class StartAnalysisMode extends AbstractRaceBoardMode {
 
                                 @Override
                                 public void onSuccess(LeaderboardDTO result) {
-                                    final Set<CompetitorDTO> competitorsToSelect = new HashSet<>();
-                                    for (int i=0; i<3 && i<result.getCompetitorsFromBestToWorst(raceColumn).size(); i++) {
-                                        competitorsToSelect.add(result.getCompetitorsFromBestToWorst(raceColumn).get(i));
-                                    }
+                                    setLeaderboard(result);
+                                    updateCompetitorSelection();
                                     getRaceBoardPanel().setCompetitorChartVisible(true);
-                                    getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(competitorsToSelect);
                                 }
                             });
             Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
@@ -208,14 +203,9 @@ public class StartAnalysisMode extends AbstractRaceBoardMode {
                     existingSettings.isShowCompetitorSailIdColumn(),
                     existingSettings.isShowCompetitorFullNameColumn());
             getLeaderboardPanel().updateSettings(newSettings);
-            this.leaderboard = leaderboard;
             leaderboardUpdateReveiced = true;
             showCompetitorChartIfAllDataReceived();
         }
     }
 
-    @Override
-    public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
-        this.raceColumn = raceColumn;
-    }
 }

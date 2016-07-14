@@ -1665,7 +1665,10 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
          */
         @Override
         public void addedToSelection(CompetitorDTO competitor) {
-            getSelectionModel().setSelected(getRow(competitor.getIdAsString()), true);
+            final LeaderboardRowDTO row = getRow(competitor.getIdAsString());
+            if (row != null) {
+                getSelectionModel().setSelected(row, true);
+            }
         }
 
         /**
@@ -1673,7 +1676,10 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
          */
         @Override
         public void removedFromSelection(CompetitorDTO competitor) {
-            getSelectionModel().setSelected(getRow(competitor.getIdAsString()), false);
+            final LeaderboardRowDTO row = getRow(competitor.getIdAsString());
+            if (row != null) {
+                getSelectionModel().setSelected(row, false);
+            }
         }
 
         @Override
@@ -2570,12 +2576,14 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
      */
     public Iterable<CompetitorDTO> getCompetitors(RaceIdentifier race) {
         Set<CompetitorDTO> result = new HashSet<CompetitorDTO>();
-        for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
-            if (raceColumn.hasTrackedRace(race)) {
-                for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : getLeaderboard().rows.entrySet()) {
-                    LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(raceColumn.getRaceColumnName());
-                    if (entry != null && entry.race != null && entry.race.equals(race)) {
-                        result.add(e.getKey());
+        if (getLeaderboard() != null) {
+            for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
+                if (raceColumn.hasTrackedRace(race)) {
+                    for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : getLeaderboard().rows.entrySet()) {
+                        LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(raceColumn.getRaceColumnName());
+                        if (entry != null && entry.race != null && entry.race.equals(race)) {
+                            result.add(e.getKey());
+                        }
                     }
                 }
             }
