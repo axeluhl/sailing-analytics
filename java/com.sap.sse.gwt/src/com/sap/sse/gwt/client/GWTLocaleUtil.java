@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client;
+package com.sap.sse.gwt.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
