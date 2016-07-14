@@ -44,7 +44,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      */
     private Iterable<CompetitorDTO> competitorsParticipatingInRace;
 
-    private Set<Object> competitorsForRaceDefinedListeners;
+    private Set<CompetitorsForRaceDefinedListener> competitorsForRaceDefinedListeners;
     
     /**
      * Such listeners are notified whenever the response to {@link #getCompetitorsParticipatingInRace()} changes.
@@ -86,6 +86,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
             @Override
             public void competitorsListChanged(final Iterable<CompetitorDTO> competitors) {
                 competitorsParticipatingInRace = computeCompetitorsFromIDs(competitors);
+                notifyListeners();
             }
             
             @Override
@@ -107,8 +108,15 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
     public void setIdsAsStringsOfCompetitorsInRace(Set<String> idsAsStringsOfCompetitorsInRace) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         super.setIdsAsStringsOfCompetitorsInRace(idsAsStringsOfCompetitorsInRace);
         competitorsParticipatingInRace = computeCompetitorsFromIDs(competitorSelection.getAllCompetitors());
+        notifyListeners();
     }
     
+    private void notifyListeners() {
+        for (final CompetitorsForRaceDefinedListener listener : competitorsForRaceDefinedListeners) {
+            listener.competitorsForRaceDefined(competitorsParticipatingInRace);
+        }
+    }
+
     public Iterable<CompetitorDTO> getCompetitorsParticipatingInRace() {
         return competitorsParticipatingInRace;
     }
