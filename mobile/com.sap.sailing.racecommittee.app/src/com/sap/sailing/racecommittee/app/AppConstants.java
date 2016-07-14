@@ -33,10 +33,10 @@ public class AppConstants {
     public final static String INTENT_ACTION_RELOAD_RACES = INTENT_ACTION + ".reloadRaces";
     public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = INTENT_ACTION + ".startProcedureSpecificAction";
 
-    public final static String INTENT_ACTION_POLLER_STOP = ".stopPoller";
-    public final static String INTENT_ACTION_POLLER_RACE_ADD = ".addRace";
-    public final static String INTENT_ACTION_POLLER_RACE_REMOVE = ".removeRace";
-    public final static String INTENT_ACTION_POLLER_POLL = ".poll";
+    public final static String INTENT_ACTION_POLLING_STOP = ".stopPolling";
+    public final static String INTENT_ACTION_POLLING_RACE_ADD = ".addRace";
+    public final static String INTENT_ACTION_POLLING_RACE_REMOVE = ".removeRace";
+    public final static String INTENT_ACTION_POLLING_POLL = ".poll";
 
     // Login activity
     public final static String EventIdTag = "EventId";

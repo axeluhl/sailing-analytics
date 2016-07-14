@@ -134,7 +134,7 @@ public class RaceStateService extends Service {
 
     private void unregisterAllRaces() {
         Intent intent = new Intent(this, RaceLogPollingService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_POLLER_STOP);
+        intent.setAction(AppConstants.INTENT_ACTION_POLLING_STOP);
         startService(intent);
 
         for (Entry<ManagedRace, RaceLogEventVisitor> entry : registeredLogListeners.entrySet()) {
@@ -159,7 +159,7 @@ public class RaceStateService extends Service {
 
     private void unregisterRace(ManagedRace race) {
         Intent intent = new Intent(this, RaceLogPollingService.class);
-        intent.setAction(AppConstants.INTENT_ACTION_POLLER_RACE_REMOVE);
+        intent.setAction(AppConstants.INTENT_ACTION_POLLING_RACE_REMOVE);
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, race.getId());
         startService(intent);
 
@@ -340,7 +340,7 @@ public class RaceStateService extends Service {
 
             // ... and register for polling!
             Intent intent = new Intent(this, RaceLogPollingService.class);
-            intent.setAction(AppConstants.INTENT_ACTION_POLLER_RACE_ADD);
+            intent.setAction(AppConstants.INTENT_ACTION_POLLING_RACE_ADD);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, race.getId());
             startService(intent);
 

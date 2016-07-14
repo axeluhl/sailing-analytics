@@ -64,11 +64,11 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
                 extra = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
             }
             switch (action) {
-                case AppConstants.INTENT_ACTION_POLLER_STOP:
+                case AppConstants.INTENT_ACTION_POLLING_STOP:
                     stopSelf();
                     break;
 
-                case AppConstants.INTENT_ACTION_POLLER_RACE_ADD:
+                case AppConstants.INTENT_ACTION_POLLING_RACE_ADD:
                     if (TextUtils.isEmpty(extra)) {
                         ExLog.i(this, TAG, "INTENT_ACTION_EXTRA was null for " + action);
                     } else {
@@ -76,7 +76,7 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
                     }
                     break;
 
-                case AppConstants.INTENT_ACTION_POLLER_RACE_REMOVE:
+                case AppConstants.INTENT_ACTION_POLLING_RACE_REMOVE:
                     if (TextUtils.isEmpty(extra)) {
                         ExLog.i(this, TAG, "INTENT_ACTION_EXTRA was null for " + action);
                     } else {
@@ -84,7 +84,7 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
                     }
                     break;
 
-                case AppConstants.INTENT_ACTION_POLLER_POLL:
+                case AppConstants.INTENT_ACTION_POLLING_POLL:
                     poll();
                     break;
             }
@@ -208,7 +208,7 @@ public class RaceLogPollingService extends Service implements AppPreferences.Pol
         if (mAppPreferences.isPollingActive() && mRaces.size() >= 0) {
             long time = MillisecondsTimePoint.now().asMillis() + (1000 * mAppPreferences.getPollingInterval());
             Intent intent = new Intent(this, this.getClass());
-            intent.setAction(AppConstants.INTENT_ACTION_POLLER_POLL);
+            intent.setAction(AppConstants.INTENT_ACTION_POLLING_POLL);
             mPendingIntent = PendingIntent.getService(this, 0, intent, 0);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 mAlarm.setExact(AlarmManager.RTC_WAKEUP, time, mPendingIntent);

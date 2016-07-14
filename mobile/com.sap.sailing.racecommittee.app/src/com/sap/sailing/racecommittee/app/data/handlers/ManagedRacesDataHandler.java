@@ -92,7 +92,7 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
             manager.getDataStore().removeRace(race);
 
             Intent intent = new Intent(context, RaceLogPollingService.class);
-            intent.setAction(AppConstants.INTENT_ACTION_POLLER_RACE_REMOVE);
+            intent.setAction(AppConstants.INTENT_ACTION_POLLING_RACE_REMOVE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, race.getId());
             context.startService(intent);
         }
