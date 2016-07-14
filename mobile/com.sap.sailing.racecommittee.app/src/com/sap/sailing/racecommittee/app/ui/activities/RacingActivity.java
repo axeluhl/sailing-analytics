@@ -316,7 +316,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
-    public void onRaceItemClicked(ManagedRace managedRace) {
+    private void onRaceItemClicked(ManagedRace managedRace) {
         onRaceItemClicked(managedRace, false);
     }
 
@@ -380,7 +380,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
-    public void onWindEntered(Wind windFix) {
+    private void onWindEntered(Wind windFix) {
         PanelButton windValue = (PanelButton) findViewById(R.id.button_wind);
         if (windFix != null) {
             if (windValue != null) {
@@ -407,35 +407,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
-    private void registerOnService(final Collection<ManagedRace> races) {
-        // close current race, if no longer on server
-        if (!races.contains(mSelectedRace)) {
-            BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_WELCOME));
-            mSelectedRace = null;
-        }
-
-        // since the service is the long-living component
-        // he should decide whether these races are already
-        // registered or not.
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // add all received races to the service
-                for (ManagedRace race : races) {
-                    Intent registerIntent = new Intent(RacingActivity.this, RaceStateService.class);
-                    registerIntent.setAction(AppConstants.INTENT_ACTION_REGISTER_RACE);
-                    registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
-                    RacingActivity.this.startService(registerIntent);
-                }
-
-                Intent cleanupIntent = new Intent(RacingActivity.this, RaceStateService.class);
-                cleanupIntent.setAction(AppConstants.INTENT_ACTION_CLEANUP_RACES);
-                RacingActivity.this.startService(cleanupIntent);
-            }
-        }).start();
-    }
-
-    public void setProgressSpinnerVisibility(boolean visible) {
+    private void setProgressSpinnerVisibility(boolean visible) {
         if (mProgressSpinner != null) {
             if (visible) {
                 mProgressSpinner.setVisibility(View.VISIBLE);
@@ -459,7 +431,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
-    public void resetRace() {
+    private void resetRace() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
         builder.setTitle(getString(R.string.race_reset_confirmation_title));
         builder.setMessage(getString(R.string.race_reset_message));
@@ -576,7 +548,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
-    public void processIntent(final Intent intent) {
+    private void processIntent(final Intent intent) {
         final Bundle args = new Bundle();
         if (mSelectedRace != null) {
             args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
@@ -717,16 +689,17 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
         @Override
         public void onLoadSucceeded(Collection<ManagedRace> data, boolean isCached) {
-            // Let's do the setup stuff only when the data is changed (or its the first time)
-            if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
-                ExLog.i(RacingActivity.this, TAG, "Same races are already loaded...");
-            } else {
-                // need to be a new instance, because of Activity restart after background kill
-                // more information see bug 3741
-                lastSeenRaces = new ArrayList<>(data);
-                registerOnService(data);
-                mRaceList.setupOn(data);
-                setupRegattaSpecificConfiguration();
+            // need to be a new instance, because of Activity restart after background kill
+            // more information see bug 3741
+            lastSeenRaces = new ArrayList<>(data);
+            mRaceList.setupOn(data);
+            setupRegattaSpecificConfiguration();
+            if (!isCached) {
+                // close current race, if no longer on server
+                if (!data.contains(mSelectedRace)) {
+                    BroadcastManager.getInstance(RacingActivity.this).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_WELCOME));
+                    mSelectedRace = null;
+                }
                 Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
             setProgressSpinnerVisibility(false);

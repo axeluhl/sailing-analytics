@@ -25,8 +25,6 @@ public class AppConstants {
 
     private final static String INTENT_ACTION = PACKAGE_NAME + ".action";
     public final static String INTENT_ACTION_RESET = INTENT_ACTION + ".reset";
-    public final static String INTENT_ACTION_REGISTER_RACE = INTENT_ACTION + ".registerRace";
-    public final static String INTENT_ACTION_UNREGISTER_RACE = INTENT_ACTION + ".unregisterRace";
     public final static String INTENT_ACTION_CLEAR_RACES = INTENT_ACTION + ".clearRaces";
     public final static String INTENT_ACTION_CLEANUP_RACES = INTENT_ACTION + ".cleanupRaces";
     public final static String INTENT_ACTION_ALARM_ACTION = INTENT_ACTION + ".alarmAction";
