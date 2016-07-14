@@ -253,9 +253,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     private void doLoadDataForCompetitorsAndDataType(final Date from, final Date to, final boolean append,
             ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve) {
-        long stepSize = (from==null||to==null) ?
-            getStepSizeInMillis() :
-            Math.max(getStepSizeInMillis(), Math.abs(to.getTime()-from.getTime())/SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY);
+        long stepSize = Math.max(getStepSizeInMillis(),
+                from==null||to==null ? 0 : Math.abs(to.getTime()-from.getTime())/SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY);
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
                 selectedRaceIdentifier, competitorsToLoad, from, to, stepSize, selectedDataTypeToRetrieve,
                 leaderboardGroupName, leaderboardName);

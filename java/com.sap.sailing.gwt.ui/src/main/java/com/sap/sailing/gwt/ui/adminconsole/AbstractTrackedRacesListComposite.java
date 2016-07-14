@@ -98,7 +98,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     protected void createUI() {
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
-        raceList = new ListDataProvider<RaceDTO>();
+        raceList = new ListDataProvider<>();
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
         VerticalPanel panel = new VerticalPanel();
@@ -116,6 +116,22 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         raceTable = new FlushableCellTable<RaceDTO>(/* pageSize */10000, tableRes);
         raceTable.ensureDebugId("TrackedRacesCellTable");
+        
+        filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable,
+                raceList) {
+            @Override
+            public List<String> getSearchableStrings(RaceDTO t) {
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.getName());
+                strings.add(t.boatClass);
+                strings.add(t.getRegattaName());
+                strings.add(t.toString());
+                return strings;
+            }
+        };
+        filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
+        
+        filterPanel.add(filterablePanelRaces);
         final EntityIdentityComparator<RaceDTO> entityIdentityComparator = new EntityIdentityComparator<RaceDTO>() {
             @Override
             public boolean representSameEntity(RaceDTO dto1, RaceDTO dto2) {
@@ -130,12 +146,13 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
             this.selectionCheckboxColumn = new SelectionCheckboxColumn<RaceDTO>(
                     tableResources.cellTableStyle().cellTableCheckboxSelected(),
                     tableResources.cellTableStyle().cellTableCheckboxDeselected(),
-                    tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                    entityIdentityComparator, raceList, raceTable);
+                    tableResources.cellTableStyle().cellTableCheckboxColumnCell(), entityIdentityComparator,
+                    filterablePanelRaces.getAllListDataProvider(), raceTable);
             refreshableSelectionModel = selectionCheckboxColumn.getSelectionModel();
             raceTable.setSelectionModel(refreshableSelectionModel, this.selectionCheckboxColumn.getSelectionManager());
         } else {
-            refreshableSelectionModel = new RefreshableSingleSelectionModel<RaceDTO>(entityIdentityComparator, raceList);
+            refreshableSelectionModel = new RefreshableSingleSelectionModel<RaceDTO>(entityIdentityComparator,
+                    filterablePanelRaces.getAllListDataProvider());
             raceTable.setSelectionModel(refreshableSelectionModel);
         }
         
@@ -153,19 +170,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 makeControlsReactToSelectionChange(selectedRaces);
             }
         });
-        filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable, raceList) {
-            @Override
-            public List<String> getSearchableStrings(RaceDTO t) {
-                List<String> strings = new ArrayList<String>();
-                strings.add(t.getName());
-                strings.add(t.boatClass);
-                strings.add(t.getRegattaName());
-                strings.add(t.toString());
-                return strings;
-            }
-        };
-        filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
-        filterPanel.add(filterablePanelRaces);
+        
         HorizontalPanel trackedRacesButtonPanel = new HorizontalPanel();
         trackedRacesButtonPanel.setSpacing(10);
         panel.add(trackedRacesButtonPanel);
