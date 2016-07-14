@@ -1982,7 +1982,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (cacheInvalidationTimerLock) {
             if (cacheInvalidationTimer == null) {
                 cacheInvalidationTimer = new Timer("Cache invalidation timer for TrackedRaceImpl "
-                        + getRace().getName());
+                        + getRace().getName(), /* isDaemon */ true);
                 cacheInvalidationTimer.schedule(new TimerTask() {
                     @Override
                     public void run() {
