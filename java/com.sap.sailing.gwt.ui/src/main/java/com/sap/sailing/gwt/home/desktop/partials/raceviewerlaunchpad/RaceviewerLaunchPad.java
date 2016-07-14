@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 
 public abstract class RaceviewerLaunchPad extends Composite {
 
@@ -17,7 +16,6 @@ public abstract class RaceviewerLaunchPad extends Composite {
     interface RaceviewerLaunchPadUiBinder extends UiBinder<Widget, RaceviewerLaunchPad> {
     }
 
-    @UiField StringMessages i18n;
     @UiField RaceviewerLaunchPadResources local_res;
     @UiField DivElement itemContainerUi;
 
@@ -41,23 +39,21 @@ public abstract class RaceviewerLaunchPad extends Composite {
     }
     
     private enum RaceviewerLaunchPadMenuItem {
-        // TODO i18n
-        REPLAY("TODO Replay", "<svg><use xlink:href=\"#launch-replay\"></use></svg>", RaceBoardModes.PLAYER),
-        WATCH_LIVE("TODO Watch live", "<svg><use xlink:href=\"#launch-play\"></use></svg>", RaceBoardModes.PLAYER),
-        RACE_ANALYSIS("TODO Race analysis", "<svg><use xlink:href=\"#launch-loupe\"></use></svg>", RaceBoardModes.FULL_ANALYSIS),
-        START_ANALYSIS("TODO Start analysis", "<svg><use xlink:href=\"#launch-start\"></use></svg>", RaceBoardModes.START_ANALYSIS),
-        WINNING_LANES("TODO Winning lanes", "<svg><use xlink:href=\"#launch-winning-lanes\"></use></svg>", RaceBoardModes.WINNING_LANES);
+        REPLAY(StringMessages.INSTANCE.replay(), "launch-replay", "PLAYER"),
+        WATCH_LIVE(StringMessages.INSTANCE.watchLive(), "launch-play", "PLAYER"),
+        RACE_ANALYSIS(StringMessages.INSTANCE.raceAnalysis(), "launch-loupe", "FULL_ANALYSIS"),
+        START_ANALYSIS(StringMessages.INSTANCE.startAnalysis(), "launch-start", "START_ANALYSIS"),
+        WINNING_LANES(StringMessages.INSTANCE.winningLanes(), "launch-winning-lanes", "WINNING_LANES");
         
-        private String label, icon; 
-        private RaceBoardModes raceBoardMode; 
+        private String label, icon, raceBoardMode; 
         
-        private RaceviewerLaunchPadMenuItem(String label, String icon, RaceBoardModes raceBoardMode) {
+        private RaceviewerLaunchPadMenuItem(String label, String iconKey, String raceBoardMode) {
             this.label = label;
-            this.icon = icon;
+            this.icon = "<svg><use xlink:href=\"#" + iconKey + "\"></use></svg>";
             this.raceBoardMode = raceBoardMode;
         }
     }
     
-    protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO data, RaceBoardModes mode);
+    protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO data, String raceBoardMode);
 
 }

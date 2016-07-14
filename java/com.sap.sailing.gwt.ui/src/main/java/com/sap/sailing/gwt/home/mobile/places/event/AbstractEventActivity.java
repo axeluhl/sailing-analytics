@@ -45,7 +45,6 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 
@@ -244,11 +243,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, RaceBoardModes mode) {
+    public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
         RaceIdentifier raceIdentifier = raceMetadata.getRegattaAndRaceIdentifier();
         Map<String, String> params = createRaceBoardLinkParameters(raceMetadata.getLeaderboardName(),
                 raceMetadata.getLeaderboardGroupName(), raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
-        params.put("mode", mode.name());
+        params.put("mode", mode);
         return EntryPointLinkFactory.createRaceBoardLink(params);
     }
     

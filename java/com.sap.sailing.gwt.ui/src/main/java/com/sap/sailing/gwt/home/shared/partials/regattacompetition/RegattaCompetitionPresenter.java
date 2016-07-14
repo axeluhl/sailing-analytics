@@ -16,7 +16,6 @@ import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompet
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionSeriesView;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
@@ -98,6 +97,6 @@ public abstract class RegattaCompetitionPresenter implements
         seriesView.doFilter(unfilteredFleetCount == 0);
     }
     
-    protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, RaceBoardModes mode);
+    protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 
 }
