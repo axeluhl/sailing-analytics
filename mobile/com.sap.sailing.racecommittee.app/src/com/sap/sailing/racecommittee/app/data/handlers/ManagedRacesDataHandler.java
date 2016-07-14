@@ -39,6 +39,7 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
             }
             manager.addRaces(data);
             calcRaceState(data);
+            manager.getDataStore().registerRaces(data);
         }
     }
 

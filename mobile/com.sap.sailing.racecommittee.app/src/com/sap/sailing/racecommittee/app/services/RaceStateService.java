@@ -118,7 +118,7 @@ public class RaceStateService extends Service {
     }
 
     @Override
-    public IBinder onBind(Intent arg0) {
+    public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
@@ -167,7 +167,7 @@ public class RaceStateService extends Service {
         ExLog.i(this, TAG, "All races unregistered.");
     }
 
-    private void unregisterRace(ManagedRace race) {
+    public void unregisterRace(ManagedRace race) {
         poller.unregister(race);
 
         race.getState().getRaceLog().removeAllListeners();
@@ -183,6 +183,7 @@ public class RaceStateService extends Service {
         managedIntents.remove(race.getId());
 
         ExLog.i(this, TAG, "Race " + race.getId() + " unregistered");
+        updateNotification();
     }
 
     private void unregisterRace(@Nullable String raceId) {
@@ -209,16 +210,6 @@ public class RaceStateService extends Service {
 
         if (AppConstants.INTENT_ACTION_CLEANUP_RACES.equals(action)) {
             handleCleanupRaces();
-            return;
-        }
-
-        if (AppConstants.INTENT_ACTION_REGISTER_RACE.equals(action)) {
-            handleRegisterRace(intent);
-            return;
-        }
-
-        if (AppConstants.INTENT_ACTION_UNREGISTER_RACE.equals(action)) {
-            handleUnregisterRace(intent);
             return;
         }
 
@@ -293,28 +284,6 @@ public class RaceStateService extends Service {
         return false;
     }
 
-    private void handleRegisterRace(Intent intent) {
-        ManagedRace race = getRaceFromIntent(intent);
-        if (race == null) {
-            ExLog.w(this, TAG, "Intent did not carry valid race information.");
-            return;
-        }
-        registerRace(race);
-
-        updateNotification();
-    }
-
-    private void handleUnregisterRace(Intent intent) {
-        ManagedRace race = getRaceFromIntent(intent);
-        if (race == null) {
-            ExLog.w(this, TAG, "Intent did not carry valid race information");
-            return;
-        }
-        unregisterRace(race);
-
-        updateNotification();
-    }
-
     private void updateNotification() {
         int numRaces = managedIntents.keySet().size();
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder
@@ -323,15 +292,7 @@ public class RaceStateService extends Service {
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
     }
 
-    private ManagedRace getRaceFromIntent(Intent intent) {
-        if (intent.getExtras() == null || !intent.getExtras().containsKey(AppConstants.RACE_ID_KEY)) {
-            return null;
-        }
-        String raceId = intent.getExtras().getString(AppConstants.RACE_ID_KEY);
-        return dataManager.getDataStore().getRace(raceId);
-    }
-
-    private void registerRace(final ManagedRace race) {
+    public void registerRace(ManagedRace race) {
         ExLog.i(this, TAG, "Trying to register race " + race.getId());
 
         if (!managedIntents.containsKey(race.getId())) {
@@ -360,6 +321,8 @@ public class RaceStateService extends Service {
             unregisterRace(race.getId());
             registerRace(race);
         }
+
+        updateNotification();
     }
 
     private PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
@@ -372,7 +335,7 @@ public class RaceStateService extends Service {
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public void setAlarm(ManagedRace race, RaceStateEvent event) {
+    /* package */ void setAlarm(ManagedRace race, RaceStateEvent event) {
         PendingIntent intent = createAlarmPendingIntent(race, event);
         managedIntents.get(race.getId()).add(Pair.create(intent, event.getEventName()));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -383,7 +346,7 @@ public class RaceStateService extends Service {
         ExLog.i(this, TAG, "The alarm " + event.getEventName() + " will be fired at " + event.getTimePoint());
     }
 
-    public void clearAlarmByName(ManagedRace race, RaceStateEvents stateEventName) {
+    /* package */ void clearAlarmByName(ManagedRace race, RaceStateEvents stateEventName) {
         List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
         Pair<PendingIntent, RaceStateEvents> toBeRemoved = null;
         for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
@@ -400,7 +363,7 @@ public class RaceStateService extends Service {
         }
     }
 
-    public void clearAllAlarms(ManagedRace race) {
+    /* package */ void clearAllAlarms(ManagedRace race) {
         Serializable raceId = race.getId();
         List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(raceId);
 
