@@ -206,13 +206,6 @@ public class RaceStateService extends Service {
                     handleCleanupRaces();
                     break;
 
-                case AppConstants.INTENT_ACTION_REGISTER_RACE:
-                    handleRegisterRace(intent);
-                    break;
-                case AppConstants.INTENT_ACTION_UNREGISTER_RACE:
-                    handleUnregisterRace(intent);
-                    break;
-
                 default:
                     String id = intent.getStringExtra(AppConstants.RACE_ID_KEY);
                     ManagedRace race = dataManager.getDataStore().getRace(id);
