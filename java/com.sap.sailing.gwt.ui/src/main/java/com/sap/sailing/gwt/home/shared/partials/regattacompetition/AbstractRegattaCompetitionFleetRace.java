@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceVie
 import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPad;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 
 public abstract class AbstractRegattaCompetitionFleetRace extends Widget implements RegattaCompetitionRaceView {
     
@@ -48,8 +49,8 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
         if (race.hasValidTrackingData() && event.getTypeInt() == Event.ONCLICK) {
             panel.setWidget(new RaceviewerLaunchPad(race) {
                 @Override
-                protected String getRaceViewerURL(SimpleRaceMetadataDTO data) {
-                    return presenter.getRaceViewerURL(data);
+                protected String getRaceViewerURL(SimpleRaceMetadataDTO data, RaceBoardModes mode) {
+                    return presenter.getRaceViewerURL(data, mode);
                 }
             });
             panel.setVisible(false);

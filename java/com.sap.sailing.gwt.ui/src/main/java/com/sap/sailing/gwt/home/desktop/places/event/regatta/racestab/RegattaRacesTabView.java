@@ -52,6 +52,7 @@ import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
@@ -248,8 +249,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
         
         @Override
-        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
-            return currentPresenter.getRaceViewerURL(raceMetadata);
+        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, RaceBoardModes mode) {
+            return currentPresenter.getRaceViewerURL(raceMetadata, mode);
         }
     }
 

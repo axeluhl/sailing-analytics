@@ -25,6 +25,7 @@ import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.RacesByCompetitorTextBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionPresenter;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 
 public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implements RacesView {
 
@@ -61,8 +62,9 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         }
         
         @Override
-        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
-            return ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE ? currentPresenter.getRaceViewerURL(raceMetadata) : null;
+        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, RaceBoardModes mode) {
+            return ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE
+                    ? currentPresenter.getRaceViewerURL(raceMetadata, mode) : null;
         }
     }
     

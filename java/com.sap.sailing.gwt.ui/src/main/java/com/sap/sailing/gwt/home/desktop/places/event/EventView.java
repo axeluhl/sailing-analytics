@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 import com.sap.sse.gwt.client.player.Timer;
 
 public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventView.Presenter> extends IsWidget {
@@ -70,6 +71,8 @@ public interface EventView<PLACE extends AbstractEventPlace, PRES extends EventV
         EventViewDTO getEventDTO();
 
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+        
+        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, RaceBoardModes mode);
 
         String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
                 RegattaAndRaceIdentifier raceIdentifier);

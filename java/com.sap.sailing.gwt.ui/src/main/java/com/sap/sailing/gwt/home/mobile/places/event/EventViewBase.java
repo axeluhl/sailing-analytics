@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.mobile.places.SeriesLeaderboardNavigationProvide
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 
 public interface EventViewBase extends IsWidget {
 
@@ -48,6 +49,8 @@ public interface EventViewBase extends IsWidget {
         PlaceNavigation<?> getMediaPageNavigation();
         
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+        
+        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, RaceBoardModes mode);
 
         String getRegattaId();
         

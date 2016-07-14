@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 import com.sap.sse.common.Util;
 
 public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends AbstractCell<T> {
@@ -54,8 +55,8 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
         if (data.hasValidTrackingData() && BrowserEvents.CLICK.equals(event.getType())) {
             panel.setWidget(new RaceviewerLaunchPad(data) {
                 @Override
-                protected String getRaceViewerURL(SimpleRaceMetadataDTO data) {
-                    return presenter.getRaceViewerURL(data);
+                protected String getRaceViewerURL(SimpleRaceMetadataDTO data, RaceBoardModes mode) {
+                    return presenter.getRaceViewerURL(data, mode);
                 }
             });
             panel.setPopupPositionAndShow(new PositionCallback() {
