@@ -2,9 +2,7 @@ package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -18,6 +16,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -88,7 +87,7 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         String currentLocale = currentUser.getLocale();
         Collection<Pair<String, String>> values = new ArrayList<>();
         Pair<String, String> selectedValue = null;
-        for (String localeName : getAvailableLocales()) {
+        for (String localeName : GWTLocaleUtil.getAvailableLocales()) {
             Pair<String, String> value = new Pair<String, String>(localeName, LocaleInfo.getLocaleNativeDisplayName(localeName));
             values.add(value);
             if (currentLocale != null && currentLocale.equals(localeName)) {
@@ -99,14 +98,6 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         localeUi.setAcceptableValues(values);
         
         clearPasswordFields();
-    }
-    
-    // FIXME taken from GWTLocaleUtil -> move GWTLocaleUtil somwhere else so it can be seen here
-    public static Iterable<String> getAvailableLocales() {
-        List<String> result = new ArrayList<>();
-        result.addAll(Arrays.asList(LocaleInfo.getAvailableLocaleNames()));
-        result.remove("default");
-        return result;
     }
 
     public void clearPasswordFields() {
