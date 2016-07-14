@@ -5,5 +5,6 @@
     <item name="fling_remove" type="id" />
     <item name="click_remove" type="id" />
     <item name="race_list_header" type="id" />
+    <item name="race_list_holder" type="id" />
 
 </resources>
