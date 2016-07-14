@@ -99,6 +99,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -2895,6 +2896,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     @Override
     public String getId() {
         return getLocalizedShortName();
+    }
+
+    public void addCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
+        raceCompetitorSet.addCompetitorsForRaceDefinedListener(listener);
+    }
+
+    public void removeCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
+        raceCompetitorSet.removeCompetitorsForRaceDefinedListener(listener);
     }
 
 }

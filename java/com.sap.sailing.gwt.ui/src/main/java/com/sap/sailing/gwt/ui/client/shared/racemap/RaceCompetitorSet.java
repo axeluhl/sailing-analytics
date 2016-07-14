@@ -43,6 +43,15 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      * When {@link #idsAsStringOfCompetitorsParticipatingInRace} is <code>null</code> then so is this field, and vice versa.
      */
     private Iterable<CompetitorDTO> competitorsParticipatingInRace;
+
+    private Set<Object> competitorsForRaceDefinedListeners;
+    
+    /**
+     * Such listeners are notified whenever the response to {@link #getCompetitorsParticipatingInRace()} changes.
+     */
+    public static interface CompetitorsForRaceDefinedListener {
+        void competitorsForRaceDefined(Iterable<CompetitorDTO> competitors);
+    }
     
     RaceCompetitorSet() {} // for GWT serialization only
     
@@ -54,6 +63,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      */
     public RaceCompetitorSet(CompetitorSelectionProvider competitorSelection) {
         super();
+        this.competitorsForRaceDefinedListeners = new HashSet<>();
         this.competitorSelection = competitorSelection;
         this.competitorsParticipatingInRace = competitorSelection.getAllCompetitors();
         competitorSelection.addCompetitorSelectionChangeListener(new CompetitorSelectionChangeListener() {
@@ -85,6 +95,15 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
         });
     }
     
+
+    public void addCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
+        competitorsForRaceDefinedListeners.add(listener);
+    }
+    
+    public void removeCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
+        competitorsForRaceDefinedListeners.remove(listener);
+    }
+
     public void setIdsAsStringsOfCompetitorsInRace(Set<String> idsAsStringsOfCompetitorsInRace) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         super.setIdsAsStringsOfCompetitorsInRace(idsAsStringsOfCompetitorsInRace);
         competitorsParticipatingInRace = computeCompetitorsFromIDs(competitorSelection.getAllCompetitors());

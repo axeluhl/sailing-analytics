@@ -6,11 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
@@ -29,9 +27,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
  * @author Axel Uhl (d043530)
  *
  */
-public class WinningLanesMode extends AbstractRaceBoardMode {
-    private RaceColumnDTO raceColumn;
-    
+public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
     private Duration tailLength;
     
     /**
@@ -71,6 +67,12 @@ public class WinningLanesMode extends AbstractRaceBoardMode {
     }
 
     @Override
+    protected void updateCompetitorSelection() {
+        final int howManyCompetitorsToSelect = getHowManyCompetitorsToSelect(getLeaderboardPanel().getCompetitors(getRaceIdentifier()));
+        updateCompetitorSelection(howManyCompetitorsToSelect);
+    }
+
+    @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         if (stopReceivingLeaderboardUpdatesAndAdjustTailLength) {
             // it's important to first unregister the listener before updateSettings is called because
@@ -97,9 +99,6 @@ public class WinningLanesMode extends AbstractRaceBoardMode {
                     existingSettings.isShowCompetitorSailIdColumn(),
                     existingSettings.isShowCompetitorFullNameColumn());
             getLeaderboardPanel().updateSettings(newSettings);
-            final int howManyCompetitorsToSelect = getHowManyCompetitorsToSelect(getLeaderboardPanel().getCompetitors(getRaceIdentifier()));
-            final Iterable<CompetitorDTO> topCompetitorsInRaceToSelect = leaderboard.getCompetitorsFromBestToWorst(raceColumn.getName()).subList(0, howManyCompetitorsToSelect);
-            getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(topCompetitorsInRaceToSelect);
             final RaceMapSettings existingMapSettings = getRaceBoardPanel().getMap().getSettings();
             final RaceMapSettings newMapSettings = new RaceMapSettings(existingMapSettings.getZoomSettings(),
                     existingMapSettings.getHelpLinesSettings(),
@@ -128,10 +127,5 @@ public class WinningLanesMode extends AbstractRaceBoardMode {
     private int getHowManyCompetitorsToSelect(Iterable<CompetitorDTO> competitors) {
         final int numberOfCompetitors = Util.size(competitors);
         return numberOfCompetitors==0 ? 0 : numberOfCompetitors<=4 ? 1 : numberOfCompetitors <=9 ? 2 : 3;
-    }
-
-    @Override
-    public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
-        this.raceColumn = raceColumn;
     }
 }
