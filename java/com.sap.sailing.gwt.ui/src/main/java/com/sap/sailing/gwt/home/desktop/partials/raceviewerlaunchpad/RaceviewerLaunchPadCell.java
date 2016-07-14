@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
@@ -61,8 +62,9 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
             panel.setPopupPositionAndShow(new PositionCallback() {
                 @Override
                 public void setPosition(int offsetWidth, int offsetHeight) {
-                    panel.setPopupPosition(parent.getAbsoluteRight() + 1 - offsetWidth, 
-                            parent.getAbsoluteBottom() - offsetHeight);
+                    int alignBottom = parent.getAbsoluteTop() + parent.getOffsetHeight() - offsetHeight;
+                    int top = (alignBottom - Window.getScrollTop() < 0 ? parent.getAbsoluteTop() - 1 : alignBottom + 1);
+                    panel.setPopupPosition(parent.getAbsoluteRight() + 1 - offsetWidth, top);
                 }
             });
             return;

@@ -11,6 +11,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.DateUtil;
@@ -46,6 +47,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
     @Override
     public void onBrowserEvent(Event event) {
         if (race.hasValidTrackingData() && event.getTypeInt() == Event.ONCLICK) {
+            this.getElement().scrollIntoView();
             panel.setWidget(new RaceviewerLaunchPad(race) {
                 @Override
                 protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String mode) {
@@ -59,8 +61,9 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
                 public void execute() {
                     Widget button = AbstractRegattaCompetitionFleetRace.this, panelContent = panel.getWidget();
                     int alignRight = button.getAbsoluteLeft() + button.getOffsetWidth() - panelContent.getOffsetWidth();
-                    int left = (alignRight < 0 ? button.getAbsoluteLeft() - 1 : alignRight + 1);
-                    int top = button.getAbsoluteTop() + button.getOffsetHeight() - panelContent.getOffsetHeight() + 1;
+                    int left = (alignRight - Window.getScrollLeft() < 0 ? button.getAbsoluteLeft() - 1 : alignRight + 1);
+                    int alignBottom = button.getAbsoluteTop() + button.getOffsetHeight() - panelContent.getOffsetHeight();
+                    int top = (alignBottom - Window.getScrollTop() < 0 ? button.getAbsoluteTop() - 1 : alignBottom + 1);
                     panel.setPopupPosition(left, top);
                     panel.setVisible(true);
                 }
