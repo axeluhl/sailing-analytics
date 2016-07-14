@@ -9,7 +9,6 @@ import java.net.URL;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
@@ -65,21 +64,21 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws MalformedURLException, FileNotFoundException, URISyntaxException,
+            RaceLogResolver raceLogResolver) throws MalformedURLException, FileNotFoundException, URISyntaxException,
             CreateModelException, SubscriberInitializationException {
         RaceTracker tracker = domainFactory.createRaceTracker(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
-                regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
+                regattaLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus,
                 raceVisibility, trackedRegattaRegistry, raceLogResolver);
         return tracker;
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception {
+            WindStore windStore, RaceLogResolver raceLogResolver) throws Exception {
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, paramURL, liveURI, storedURI,
                 courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm,
-                raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
+                raceLogStore, regattaLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus,
                 raceVisibility, trackedRegattaRegistry, raceLogResolver);
         return tracker;
     }

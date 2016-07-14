@@ -177,18 +177,24 @@ public class SimulationServiceImpl implements SimulationService {
         }
 
         @Override
+        public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+            // relevant for simulation? for last leg?
+            // TODO: update last leg?
+        }
+
+        @Override
         public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
             // relevant for simulation: update all legs when wind changes overall
             // TODO: update all legs
         }
 
         @Override
-        public void startOfTrackingChanged(TimePoint startOfTracking) {
+        public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
             // irrelevant for simulation
         }
 
         @Override
-        public void endOfTrackingChanged(TimePoint endOfTracking) {
+        public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
             // irrelevant for simulation
         }
 

@@ -1,7 +1,13 @@
 package com.sap.sse.gwt.dispatch.servlets;
 
-import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.gwt.user.client.rpc.SerializationException;
+import com.google.gwt.user.server.rpc.RPCServletUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 
@@ -29,6 +35,36 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
         }
 
         return super.doGetSerializationPolicy(request, moduleBaseURL, strongName);
+    }
+
+    @Override
+    protected void doUnexpectedFailure(Throwable e) {
+        if ((e.getCause() != null && e.getCause().getClass().getName().matches("org\\.apache\\.shiro\\.authz\\..*[Aa]uth.*Exception")) ||
+                (e instanceof SerializationException && e.getMessage().matches("Type 'org\\.apache\\.shiro\\.authz\\..*[Aa]uth.*Exception' was not included in the set of types which can be serialized.*"))) {
+            final HttpServletResponse servletResponse = getThreadLocalResponse();
+            try {
+                servletResponse.reset();
+            } catch (IllegalStateException ex) {
+                throw new RuntimeException("Unable to report failure", e);
+            }
+            ServletContext servletContext = getServletContext();
+            RPCServletUtils.writeResponseForUnexpectedFailure(servletContext, servletResponse, e);
+            servletContext.log("Exception while dispatching incoming RPC call", e.getCause()==null?e:e.getCause());
+            try {
+                servletResponse.setContentType("text/plain");
+                servletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                try {
+                    servletResponse.getOutputStream().write((e.getCause()==null?e:e.getCause()).getLocalizedMessage().getBytes("UTF-8"));
+                } catch (IllegalStateException ex) {
+                    // Handle the (unexpected) case where getWriter() was previously used
+                    servletResponse.getWriter().write("Couldn't write exception");
+                }
+            } catch (IOException ex) {
+                servletContext.log(
+                        "respondWithUnexpectedFailure failed while sending the previous failure to the client", ex);
+            }
+        } else {
+            super.doUnexpectedFailure(e);
+        }
     }    
-    
 }

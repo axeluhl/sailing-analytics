@@ -31,8 +31,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -49,7 +47,7 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
@@ -64,6 +62,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 
@@ -129,6 +128,7 @@ public class ImportMasterDataOperation extends
                 importDeviceConfigurations(toState);
             }
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
+            toState.mediaTracksImported(masterData.getFilteredMediaTracks(), override);
             return creationCount;
         } catch (Exception e) {
             logger.severe("Error during execution of ImportMasterDataOperation");
@@ -291,18 +291,18 @@ public class ImportMasterDataOperation extends
                     RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
                     RaceLog currentPersistedLog = mongoRaceLogStore.getRaceLog(identifier, true);
                     if (currentPersistedLog.isEmpty()) {
-                        addAllmportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
+                        addAllImportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
                     } else if (override) {
                         // Clear existing race log
                         mongoRaceLogStore.removeRaceLog(identifier);
-                        addAllmportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
+                        addAllImportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
                     }
                 }
             }
         }
     }
 
-    private void addAllmportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
+    private void addAllImportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
             RaceLog log, RaceLogIdentifier identifier) {
         RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE
                 .getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);
@@ -401,21 +401,23 @@ public class ImportMasterDataOperation extends
 
     
     private void importRaceLogTrackingGPSFixes(RacingEventService toState) {
-        Map<DeviceIdentifier, Set<GPSFix>> raceLogTrackingFixes = masterData.getRaceLogTrackingFixes();
+        Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes = masterData.getRaceLogTrackingFixes();
         if (raceLogTrackingFixes != null) {
-            GPSFixStore store = toState.getGPSFixStore();
-            for (Entry<DeviceIdentifier, Set<GPSFix>> entry : raceLogTrackingFixes.entrySet()) {
+            SensorFixStore store = toState.getSensorFixStore();
+            for (Entry<DeviceIdentifier, Set<Timed>> entry : raceLogTrackingFixes.entrySet()) {
                 DeviceIdentifier device = entry.getKey();
-                for (GPSFix fixToAdd : entry.getValue()) {
+                for (Timed fixToAdd : entry.getValue()) {
                     try {
                         if (fixToAdd instanceof CompactGPSFixMovingImpl) {
-                            fixToAdd = new GPSFixMovingImpl(fixToAdd.getPosition(), fixToAdd.getTimePoint(),
+                            CompactGPSFixMovingImpl gpsFix = (CompactGPSFixMovingImpl) fixToAdd;
+                            fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
                                     ((CompactGPSFixMovingImpl) fixToAdd).getSpeed());
                         } else if (fixToAdd instanceof CompactGPSFixImpl) {
-                            fixToAdd = new GPSFixImpl(fixToAdd.getPosition(), fixToAdd.getTimePoint());
+                            CompactGPSFixImpl gpsFix = (CompactGPSFixImpl) fixToAdd;
+                            fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());
                         } 
                         store.storeFix(device, fixToAdd);
-                    } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                    } catch (NoCorrespondingServiceRegisteredException e) {
                         logger.severe("Failed to store race log tracking fix while importing.");
                         e.printStackTrace();
                     }

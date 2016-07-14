@@ -46,12 +46,12 @@ public class LowPointForLeagueOverallLeaderboard extends LowPoint {
         assert Math.abs(o1ScoreSum - o2ScoreSum) < 0.00001;
         assert o1Scores.stream().allMatch(rcAndScore->rcAndScore.getA() instanceof MetaLeaderboardColumn);
         assert o2Scores.stream().allMatch(rcAndScore->rcAndScore.getA() instanceof MetaLeaderboardColumn);
-        double totalPointsSumO1 = getTotalPoints(o1, o1Scores.stream().map(rcAndScore->rcAndScore.getA()), timePoint);
-        double totalPointsSumO2 = getTotalPoints(o2, o1Scores.stream().map(rcAndScore->rcAndScore.getA()), timePoint);
-        return getScoreComparator(nullScoresAreBetter).compare(totalPointsSumO1, totalPointsSumO2);
+        double netPointsSumO1 = getNetPoints(o1, o1Scores.stream().map(rcAndScore->rcAndScore.getA()), timePoint);
+        double netPointsSumO2 = getNetPoints(o2, o1Scores.stream().map(rcAndScore->rcAndScore.getA()), timePoint);
+        return getScoreComparator(nullScoresAreBetter).compare(netPointsSumO1, netPointsSumO2);
     }
 
-    private double getTotalPoints(Competitor competitor, Stream<RaceColumn> raceColumns, TimePoint timePoint) {
-        return raceColumns.collect(Collectors.summingDouble(rc->((MetaLeaderboardColumn) rc).getLeaderboard().getTotalPoints(competitor, timePoint)));
+    private double getNetPoints(Competitor competitor, Stream<RaceColumn> raceColumns, TimePoint timePoint) {
+        return raceColumns.collect(Collectors.summingDouble(rc->((MetaLeaderboardColumn) rc).getLeaderboard().getNetPoints(competitor, timePoint)));
     }
 }

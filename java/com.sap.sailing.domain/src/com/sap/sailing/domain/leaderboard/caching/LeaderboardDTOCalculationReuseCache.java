@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.leaderboard.caching;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
@@ -48,7 +49,7 @@ public class LeaderboardDTOCalculationReuseCache implements WindLegTypeAndLegBea
     /**
      * the leg types at "timePoint"
      */
-    final ConcurrentHashMap<Leg, LegType> legTypeCache;
+    final ConcurrentMap<Leg, LegType> legTypeCache;
     
     /**
      * the wind at competitor's position at timePoint; <code>null</code> values are represented by {@link #NULL_WIND}.

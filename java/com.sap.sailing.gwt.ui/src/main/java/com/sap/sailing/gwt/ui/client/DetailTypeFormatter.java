@@ -26,18 +26,22 @@ public class DetailTypeFormatter {
             return stringMessages.regattaRank();
         case OVERALL_RANK:
             return stringMessages.overallRank();
-        case RACE_TOTAL_POINTS:
-            return stringMessages.totalPoints();
-        case REGATTA_TOTAL_POINTS:
-            return stringMessages.totalPoints();            
-        case REGATTA_TOTAL_POINTS_SUM:
-            return stringMessages.totalPoints();            
+        case RACE_NET_POINTS:
+            return stringMessages.netPoints();
+        case REGATTA_NET_POINTS:
+            return stringMessages.netPoints();            
+        case REGATTA_NET_POINTS_SUM:
+            return stringMessages.netPoints();            
         case NUMBER_OF_MANEUVERS:
             return stringMessages.numberOfManeuvers();
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentOrAverageSpeedOverGroundInKnots();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnots();
+        case CURRENT_RIDE_HEIGHT_IN_METERS:
+            return stringMessages.currentOrAverageRideHeightInMeters();
+        case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+            return stringMessages.currentRideHeightInMeters();
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
             return stringMessages.estimatedTimeToNextWaypointInSeconds();
         case VELOCITY_MADE_GOOD_IN_KNOTS:
@@ -189,6 +193,8 @@ public class DetailTypeFormatter {
         case DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS:
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
         case DISTANCE_TO_START_LINE:
+        case CURRENT_RIDE_HEIGHT_IN_METERS:
+        case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.metersUnit();
             
         case COURSE_OVER_GROUND_TRUE_DEGREES:
@@ -225,9 +231,9 @@ public class DetailTypeFormatter {
         case RACE_RANK:
         case REGATTA_RANK:
         case OVERALL_RANK:
-        case RACE_TOTAL_POINTS:
-        case REGATTA_TOTAL_POINTS:
-        case REGATTA_TOTAL_POINTS_SUM:
+        case RACE_NET_POINTS:
+        case REGATTA_NET_POINTS:
+        case REGATTA_NET_POINTS_SUM:
         case CURRENT_LEG:
         case TACK:
         case START_TACK:
@@ -304,6 +310,10 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageSpeedOverGroundInKnotsTooltip();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnotsTooltip();
+        case CURRENT_RIDE_HEIGHT_IN_METERS:
+            return stringMessages.currentOrAverageRideHeightInMetersTooltip();
+        case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+            return stringMessages.currentRideHeightInMetersTooltip();
         case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
             return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
         case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:
@@ -336,12 +346,12 @@ public class DetailTypeFormatter {
             return stringMessages.regattaRankTooltip();
         case OVERALL_RANK:
             return stringMessages.overallRankTooltip();
-        case RACE_TOTAL_POINTS:
-            return stringMessages.raceTotalPointsTooltip();
-        case REGATTA_TOTAL_POINTS:
-            return stringMessages.regattaTotalPointsTooltip();            
-        case REGATTA_TOTAL_POINTS_SUM:
-            return stringMessages.regattaTotalPointsTooltip();            
+        case RACE_NET_POINTS:
+            return stringMessages.raceNetPointsTooltip();
+        case REGATTA_NET_POINTS:
+            return stringMessages.regattaNetPointsTooltip();            
+        case REGATTA_NET_POINTS_SUM:
+            return stringMessages.regattaNetPointsTooltip();            
         case RANK_GAIN:
             return stringMessages.rankGainTooltip();
         case TACK:

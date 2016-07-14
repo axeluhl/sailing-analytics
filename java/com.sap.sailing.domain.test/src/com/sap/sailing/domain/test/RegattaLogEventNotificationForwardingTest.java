@@ -163,16 +163,16 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
         final TimePoint now = MillisecondsTimePoint.now();
         leaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);
         LeaderboardDTO dto = leaderboard.getLeaderboardDTO(now.plus(10), Collections.emptySet(), /* addOverallDetails */ false,
-                /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
+                /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertTrue(dto.competitors.isEmpty());
         final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         regatta.getRegattaLog().add(event);
         LeaderboardDTO dto2 = leaderboard.computeDTO(now.plus(20), Collections.emptySet(), /* addOverallDetails */ false,
-                /* waitForLatestAnalyses */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
+                /* waitForLatestAnalyses */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertFalse(dto2.competitors.isEmpty());
         assertEquals(event.getCompetitor().getName(), dto2.competitors.get(0).getName());
         LeaderboardDTO dto3 = leaderboard.getLeaderboardDTO(now.plus(20), Collections.emptySet(), /* addOverallDetails */ false,
-                /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
+                /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertFalse(dto3.competitors.isEmpty());
         assertEquals(event.getCompetitor().getName(), dto3.competitors.get(0).getName());
     }
@@ -195,16 +195,16 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
         leaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);
         RegattaLeaderboard deserializedLeaderboard = cloneBySerialization(leaderboard, DomainFactory.INSTANCE);
         LeaderboardDTO dto = deserializedLeaderboard.getLeaderboardDTO(now.plus(10), Collections.emptySet(), /* addOverallDetails */ false,
-                /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
+                /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertTrue(dto.competitors.isEmpty());
         final RegattaLogRegisterCompetitorEvent event = createRegattaLogEvent();
         deserializedLeaderboard.getRegatta().getRegattaLog().add(event);
         LeaderboardDTO dto2 = deserializedLeaderboard.computeDTO(now.plus(20), Collections.emptySet(), /* addOverallDetails */ false,
-                /* waitForLatestAnalyses */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
+                /* waitForLatestAnalyses */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertFalse(dto2.competitors.isEmpty());
         assertEquals(event.getCompetitor().getName(), dto2.competitors.get(0).getName());
         LeaderboardDTO dto3 = deserializedLeaderboard.getLeaderboardDTO(now.plus(20), Collections.emptySet(), /* addOverallDetails */ false,
-                /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
+                /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE, /* fillTotalPointsUncorrected */ false);
         assertFalse(dto3.competitors.isEmpty());
         assertEquals(event.getCompetitor().getName(), dto3.competitors.get(0).getName());
     }

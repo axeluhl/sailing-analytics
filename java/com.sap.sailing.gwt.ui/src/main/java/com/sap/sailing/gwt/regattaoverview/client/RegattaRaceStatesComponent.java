@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.regattaoverview.client;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -261,6 +262,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             while (table.getColumnCount() > 0) {
                 table.removeColumn(0);
             }
+            regattaOverviewDataProvider.removeDataDisplay(table);
         } else {
             sortInfos.add(new ColumnSortInfo(lastUpdateColumn, false));
         }
@@ -684,8 +686,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                     if (isInfoBefore) {
                         additionalInformation.append("  /  ");
                     }
-                    additionalInformation.append("Finished at: "
-                            + (timeFormatter.format(entryDTO.raceInfo.finishedTime)));
+                    additionalInformation.append(stringMessages.finishTime((timeFormatter.format(entryDTO.raceInfo.finishedTime))));
                     isInfoBefore = true;
                 }
                 return additionalInformation.toString();
@@ -763,6 +764,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         refreshTableWithNewSettings();
         storeRegattaRaceStatesSettings(settings);
+    }
+
+    @Override
+    public RegattaRaceStatesSettings getSettings() {
+        return settings;
     }
 
     private void refreshTableWithNewSettings() {
@@ -963,5 +969,10 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     }
     public void setRepeatedInfoLabel(FlowPanel repeatedInfoLabel) {
         this.repeatedInfoLabel = repeatedInfoLabel;
+    }
+
+    @Override
+    public Serializable getId() {
+        return getLocalizedShortName();
     }
 }

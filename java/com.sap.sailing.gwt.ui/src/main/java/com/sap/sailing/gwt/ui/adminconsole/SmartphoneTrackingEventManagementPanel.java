@@ -498,7 +498,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     raceColumnTable.getDataProvider().getList().clear();
                     for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                         for (FleetDTO fleet : raceColumn.getFleets()) {
-                            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet2 = new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet);
+                            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet2 = new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet, getSelectedLeaderboard());
                             raceColumnTable.getDataProvider().getList().add(raceColumnDTOAndFleet2);
                         }
                     }

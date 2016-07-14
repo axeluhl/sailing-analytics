@@ -5,6 +5,8 @@
     <string name="course_type">Course Type</string>
     <string name="marks">Marks</string>
     <string name="set_position">Set Position</string>
+    <string name="set_position_disabled_gps">SET POSITION\nPlease activate GPS</string>
+    <string name="set_position_no_gps_yet">SET POSITION\nWaiting for GPS connection</string>
     <string name="reset_position">Reset Position</string>
     <string name="getting_marks">Getting race marks&#8230;</string>
     <string name="set">set</string>
@@ -29,5 +31,7 @@
 
     <string name="options_menu_checkout">Checkout</string>
     <string name="checkout_warning_message">Do you REALLY want to logout? You will need to re-login with the provided QR code to access your marks!</string>
+
+    <string name="no_marks_message">No marks</string>
 
 </resources>

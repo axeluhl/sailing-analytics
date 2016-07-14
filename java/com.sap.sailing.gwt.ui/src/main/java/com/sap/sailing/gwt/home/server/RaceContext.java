@@ -51,6 +51,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO.RaceDataInfo;
 import com.sap.sailing.gwt.home.communication.race.FlagStateDTO;
 import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
@@ -67,12 +68,21 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
+/**
+ * This class aggregates race information by preparing {@link DTO}s for different components representing a race in the
+ * UI and providing convenience methods for several race state and other required information.<p>
+ * 
+ * An object of this type represents a snapshot of a race for the time point when the object is created. Using the
+ * object at a later point in time will still represent the race at the time when this object was created, including
+ * the race's flag state, live state and view state.
+ */
 @GwtIncompatible
 public class RaceContext {
     private static final Logger logger = Logger.getLogger(RaceContext.class.getName());
-    private static final long TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = 60 * 60 * 1000; // 1 hour
-    private static final long TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = 5 * 60 * 1000; // 5 min
+    private static final Duration TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE = Duration.ONE_HOUR;
+    private static final Duration TIME_TO_SHOW_CANCELED_RACES_AS_LIVE = Duration.ONE_MINUTE.times(5);
     private final TimePoint now = MillisecondsTimePoint.now();
     private final LeaderboardContext leaderboardContext;
     private final Leaderboard leaderboard;
@@ -135,6 +145,12 @@ public class RaceContext {
         return getFleetMetadata();
     }
 
+    /**
+     * Prepares a {@link FleetMetadataDTO} which is used to show the regattas progress or to visualize the races in
+     * competition format. 
+     * 
+     * @return the {@link FleetMetadataDTO} instance
+     */
     public FleetMetadataDTO getFleetMetadata() {
         return new FleetMetadataDTO(fleet.getName(), fleet.getColor() == null ? null : fleet.getColor().getAsHtml(),
                 fleet.getOrdering());
@@ -363,6 +379,11 @@ public class RaceContext {
         return finishTime;
     }
 
+    /**
+     * Prepares a {@link LiveRaceDTO} to show in the "Live" section, if this race is live or of public interest. 
+     * 
+     * @return the {@link LiveRaceDTO} if this race is live or of public interest, <code>null</code> otherwise
+     */
     public LiveRaceDTO getLiveRaceOrNull() {
         // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
@@ -378,26 +399,33 @@ public class RaceContext {
         return null;
     }
 
+    /**
+     * Prepares a {@link RaceListRaceDTO} to show in the "Finished Races" section, if this race is finished. 
+     * 
+     * @return the {@link RaceListRaceDTO} if this race is finished, <code>null</code> otherwise
+     */
     public RaceListRaceDTO getFinishedRaceOrNull() {
         // a race is of 'public interest' of a race is a combination of it's 'live' state
         // and special flags states indicating how the postponed/canceled races will be continued
         if (getLiveRaceViewState() == RaceViewState.FINISHED) {
             // the start time is always given for live races
-            RaceListRaceDTO liveRaceDTO = new RaceListRaceDTO(getLeaderboardName(), getRaceIdentifierOrNull(), getRaceName());
-            fillRaceMetadata(liveRaceDTO);
-            liveRaceDTO.setDuration(getDurationOrNull());
-            liveRaceDTO.setWinner(getWinnerOrNull());
-            liveRaceDTO.setWindSourcesCount(getWindSourceCount());
-            liveRaceDTO.setVideoCount(getVideoCount());
-            liveRaceDTO.setAudioCount(getAudioCount());
-            liveRaceDTO.setWind(getWindStatisticsOrNull());
-            return liveRaceDTO;
+            RaceListRaceDTO raceListRaceDTO = new RaceListRaceDTO(getLeaderboardName(), 
+                    getRaceIdentifierOrNull(), getRaceName());
+            fillRaceMetadata(raceListRaceDTO);
+            raceListRaceDTO.setDuration(getDurationOrNull());
+            raceListRaceDTO.setWinner(getWinnerOrNull());
+            raceListRaceDTO.setWindSourcesCount(getWindSourceCount());
+            raceListRaceDTO.setVideoCount(getVideoCount());
+            raceListRaceDTO.setAudioCount(getAudioCount());
+            raceListRaceDTO.setWind(getWindStatisticsOrNull());
+            return raceListRaceDTO;
         }
         return null;
     }
     
     public SimpleRaceMetadataDTO getRaceCompetitionFormat() {
-        SimpleRaceMetadataDTO raceDTO = new SimpleRaceMetadataDTO(getLeaderboardName(), getRaceIdentifierOrNull(), getRaceName());
+        SimpleRaceMetadataDTO raceDTO = new SimpleRaceMetadataDTO(getLeaderboardName(), 
+                getRaceIdentifierOrNull(), getRaceName());
         fillSimpleRaceMetadata(raceDTO);
         return raceDTO;
     }
@@ -474,7 +502,9 @@ public class RaceContext {
     }
     
     private void fillSimpleRaceMetadata(SimpleRaceMetadataDTO dto) {
-        dto.setLeaderboardGroupName(leaderboardContext.getLeaderboardGroupName());
+        final Iterable<String> leaderboardGroupNames = leaderboardContext.getLeaderboardGroupNames();
+        dto.setLeaderboardGroupName(leaderboardGroupNames == null || Util.isEmpty(leaderboardGroupNames) ? null :
+            leaderboardGroupNames.iterator().next());
         dto.setStart(getStartTimeAsDate());
         dto.setViewState(getLiveRaceViewState());
         dto.setTrackingState(getRaceTrackingState());
@@ -511,7 +541,7 @@ public class RaceContext {
             RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
             if (abortingFlagEvent != null) {
                 TimePoint abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint();
-                if (now.minus(abortingTimeInPassBefore.asMillis()).asMillis() < TIME_TO_SHOW_CANCELED_RACES_AS_LIVE) {
+                if (abortingTimeInPassBefore.until(now).compareTo(TIME_TO_SHOW_CANCELED_RACES_AS_LIVE) < 0) {
                     result = true;
                     // TODO: Problem: This causes the race added to the live races list without having a start time!!!
                     // This does not work right now -> consider using a start time of the last pass.
@@ -521,17 +551,30 @@ public class RaceContext {
         return result;
     }
 
+    /**
+     * Calculates the races tracking state, which is {@link RaceTrackingState#TRACKED_VALID_DATA tracked with GPS data
+     * available}, {@link RaceTrackingState#TRACKED_NO_VALID_DATA tracked with no GPS data available} or
+     * {@link RaceTrackingState#NOT_TRACKED not tracked at all}.
+     * 
+     * @return the {@link RaceTrackingState}
+     */
     public RaceTrackingState getRaceTrackingState() {
         RaceTrackingState trackingState = RaceTrackingState.NOT_TRACKED;
         if (trackedRace != null) {
             trackingState = RaceTrackingState.TRACKED_NO_VALID_DATA;
-            if (trackedRace.hasWindData() && trackedRace.hasGPSData()) {
+            if (trackedRace.hasGPSData()) {
                 trackingState = RaceTrackingState.TRACKED_VALID_DATA;
             }
         }
         return trackingState;
     }
-
+    
+    /**
+     * Get the races calculated {@link RaceViewState}, which depends on start/finish time, possible
+     * {@link RaceLogFlagEvent}s or {@link ScoreCorrection}s.
+     * 
+     * @return the calculated {@link RaceViewState}
+     */
     public RaceViewState getLiveRaceViewState() {
         if (raceViewState == null) {
             raceViewState = calculateRaceViewState();
@@ -629,10 +672,22 @@ public class RaceContext {
         return fleet.getName();
     }
 
+    /**
+     * Determine if this race is already finished or not.
+     * 
+     * @return <code>true</code> if this races {@link #getLiveRaceViewState() view state} is
+     *         {@link RaceViewState#FINISHED}, false otherwise
+     */
     public boolean isFinished() {
         return getLiveRaceViewState() == RaceViewState.FINISHED;
     }
     
+    /**
+     * Determine if this race is currently running or not.
+     * 
+     * @return <code>true</code> if this races {@link #getLiveRaceViewState() view state} is
+     *         {@link RaceViewState#RUNNING}, false otherwise
+     */
     public boolean isLive() {
         return getLiveRaceViewState() == RaceViewState.RUNNING;
     }
@@ -653,5 +708,16 @@ public class RaceContext {
     private boolean isCompetitorInFleet(Competitor competitor) {
         Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
         return fleetOfCompetitor != null && Util.equalsWithNull(fleet.getName(), fleetOfCompetitor.getName());
+    }
+    
+    /**
+     * Gets the {@link RaceDataInfo} for this race.
+     * 
+     * @return the {@link RaceDataInfo} instance
+     */
+    public RaceDataInfo getRaceDataInfo() {
+        boolean hasGPSData = getRaceTrackingState() == RaceTrackingState.TRACKED_VALID_DATA; 
+        boolean hasWindData = getWindSourceCount() > 0, hasVideo = getVideoCount() > 0, hasAudioData = getAudioCount() > 0;
+        return new RaceDataInfo(hasGPSData, hasWindData, hasVideo, hasAudioData);
     }
 }

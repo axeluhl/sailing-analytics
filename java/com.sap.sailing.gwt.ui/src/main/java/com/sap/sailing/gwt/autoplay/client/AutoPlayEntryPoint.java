@@ -10,7 +10,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
 
 public class AutoPlayEntryPoint extends AbstractMvpEntryPoint<StringMessages, AutoPlayAppClientFactory> {
-
     @Override
     public void doOnModuleLoad() {
         AutoPlayAppClientFactory clientFactory = GWT.create(AutoPlayAppClientFactory.class);

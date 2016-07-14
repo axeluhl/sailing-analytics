@@ -5,7 +5,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
@@ -52,17 +51,18 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception {
+            RaceLogResolver raceLogResolver) throws Exception {
         return swissTimingFactory.createRaceTracker(raceID, raceName, raceDescription, boatClass, hostname, port,
-                startList, delayToLiveInMillis, raceLogStore, regattaLogStore, windStore, gpsFixStore, useInternalMarkPassingAlgorithm,
+                startList, delayToLiveInMillis, raceLogStore, regattaLogStore, windStore,
+                useInternalMarkPassingAlgorithm,
                 domainFactory, trackedRegattaRegistry, raceLogResolver);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception {
+            WindStore windStore, RaceLogResolver raceLogResolver) throws Exception {
         return swissTimingFactory.createRaceTracker(regatta, raceID, raceName, raceDescription, boatClass, hostname,
-                port, startList, delayToLiveInMillis, windStore, gpsFixStore, useInternalMarkPassingAlgorithm,
+                port, startList, delayToLiveInMillis, windStore, useInternalMarkPassingAlgorithm,
                 domainFactory, trackedRegattaRegistry, raceLogResolver);
     }
 

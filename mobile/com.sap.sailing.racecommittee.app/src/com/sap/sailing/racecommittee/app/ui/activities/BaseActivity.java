@@ -39,7 +39,7 @@ public class BaseActivity extends SendingServiceAwareActivity {
         AppUtils.lockOrientation(this);
         ThemeHelper.setTheme(this);
 
-        this.preferences = AppPreferences.on(getApplicationContext());
+        preferences = AppPreferences.on(this);
     }
 
     @Override
@@ -102,10 +102,16 @@ public class BaseActivity extends SendingServiceAwareActivity {
     public void onResume() {
         super.onResume();
 
-        preferences = AppPreferences.on(this);
         if (preferences.wakelockEnabled()) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+    }
+
+    public AppPreferences getPreferences() {
+        if (preferences == null) {
+            preferences = AppPreferences.on(this);
+        }
+        return preferences;
     }
 
     public void safeClose(Closeable c) {

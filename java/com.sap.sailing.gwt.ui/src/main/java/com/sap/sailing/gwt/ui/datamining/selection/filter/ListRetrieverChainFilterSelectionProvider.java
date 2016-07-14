@@ -37,9 +37,10 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class ListRetrieverChainFilterSelectionProvider implements FilterSelectionProvider {
+public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent<SerializableSettings> implements FilterSelectionProvider {
 
     private final DataMiningSession session;
     private final StringMessages stringMessages;
@@ -328,6 +329,11 @@ public class ListRetrieverChainFilterSelectionProvider implements FilterSelectio
 
     @Override
     public void updateSettings(SerializableSettings newSettings) {
+        // no-op
     }
 
+    @Override
+    public SerializableSettings getSettings() {
+        return null;
+    }
 }

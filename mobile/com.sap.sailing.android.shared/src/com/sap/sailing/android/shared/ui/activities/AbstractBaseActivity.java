@@ -13,7 +13,13 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
 
     private static final String TAG = AbstractBaseActivity.class.getName();
 
-    protected ProgressDialog progressDialog;
+    /**
+     * An object used to synchronize access to the {@link #progressDialog} field to avoid concurrency
+     * issues during re-assigning a new dialog.
+     */
+    private final Object progressDialogMonitor = new Object();
+    
+    private ProgressDialog progressDialog;
 
     public void replaceFragment(int view, Fragment fragment) {
         ExLog.i(this, TAG, "Set new Fragment: " + fragment.toString());
@@ -25,11 +31,13 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
     }
 
     public void showProgressDialog(String title, String message) {
-        if (progressDialog == null || !progressDialog.isShowing()) {
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle(title);
-            progressDialog.setMessage(message);
-            progressDialog.show();
+        synchronized (progressDialogMonitor) {
+            if (progressDialog == null || !progressDialog.isShowing()) {
+                progressDialog = new ProgressDialog(this);
+                progressDialog.setTitle(title);
+                progressDialog.setMessage(message);
+                progressDialog.show();
+            }
         }
     }
 
@@ -38,8 +46,10 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
     }
 
     public void dismissProgressDialog() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
+        synchronized (progressDialogMonitor) {
+            if (progressDialog != null && progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
         }
     }
 
