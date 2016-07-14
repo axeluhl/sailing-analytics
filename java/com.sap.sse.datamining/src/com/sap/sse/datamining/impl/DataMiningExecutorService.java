@@ -10,7 +10,7 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 public class DataMiningExecutorService extends ThreadPoolExecutor {
     public DataMiningExecutorService(int corePoolSize) {
         super(corePoolSize, corePoolSize, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(corePoolSize),
-                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true),
+                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true),
                 new RejectedExecutionHandler() {
                     @Override
                     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
