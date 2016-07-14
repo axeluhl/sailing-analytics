@@ -4,13 +4,13 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 
 import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.util.CheckinDataHandler;
 
 public abstract class CheckinDataActivity extends AbstractBaseActivity implements CheckinDataHandler {
 
     @Override
-    public abstract void onCheckinDataAvailable(AbstractCheckinData data);
+    public abstract void onCheckinDataAvailable(BaseCheckinData data);
 
     /**
      * Shows a pop-up-dialog that informs the user than an DB-operation has failed.
