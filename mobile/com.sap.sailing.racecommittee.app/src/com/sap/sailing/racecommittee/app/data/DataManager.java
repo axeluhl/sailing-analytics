@@ -15,6 +15,7 @@ public abstract class DataManager implements ReadonlyDataManager {
 
     public static ReadonlyDataManager create(Context context) {
         DataStore dataStore = InMemoryDataStore.INSTANCE;
+        dataStore.setContext(context);
         if (AppPreferences.on(context).isOfflineMode()) {
             return new OfflineDataManager(context, dataStore, dataStore.getDomainFactory());
         }

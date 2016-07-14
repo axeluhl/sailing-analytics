@@ -19,7 +19,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -35,11 +35,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
-import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
 import com.sap.sailing.android.shared.util.BitmapHelper;
@@ -47,7 +46,6 @@ import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperFailureListener;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessListener;
-import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
@@ -57,8 +55,10 @@ import com.sap.sailing.android.tracking.app.upload.UploadTeamImageTask;
 import com.sap.sailing.android.tracking.app.utils.AboutHelper;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinManager;
+import com.sap.sailing.android.tracking.app.utils.CheckoutHelper;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
+import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
@@ -104,15 +104,17 @@ public class RegattaActivity extends AbstractRegattaActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
             getSupportActionBar().setTitle(leaderboard.name);
             getSupportActionBar().setSubtitle(event.name);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
         }
         RegattaFragment regattaFragment = new RegattaFragment();
         regattaFragment.setFragmentWatcher(this);
@@ -410,19 +412,23 @@ public class RegattaActivity extends AbstractRegattaActivity
     }
 
     @Override
-    public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
+    public void onCheckinDataAvailable(BaseCheckinData checkinData) {
         if (checkinData != null) {
             CheckinData data = (CheckinData) checkinData;
             try {
-                DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
-                DatabaseHelper.getInstance().storeCheckinRow(this, data.getEvent(), data.getCompetitor(), data.getLeaderboard(), data.getCheckinUrl());
-                competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
-                event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
-                leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
-                checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
-                RegattaFragment regattaFragment = new RegattaFragment();
-                regattaFragment.setFragmentWatcher(this);
-                replaceFragment(R.id.content_frame, regattaFragment);
+                if (data instanceof CompetitorCheckinData) {
+                    CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) data;
+                    DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
+                    DatabaseHelper.getInstance().storeCompetitorCheckinRow(this, competitorCheckinData.getEvent(), competitorCheckinData.getCompetitor(),
+                        competitorCheckinData.getLeaderboard(), competitorCheckinData.getCheckinUrl());
+                    competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
+                    event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+                    leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
+                    checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
+                    RegattaFragment regattaFragment = new RegattaFragment();
+                    regattaFragment.setFragmentWatcher(this);
+                    replaceFragment(R.id.content_frame, regattaFragment);
+                }
             } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                 ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                 displayDatabaseError();
@@ -461,48 +467,23 @@ public class RegattaActivity extends AbstractRegattaActivity
      * Check out from regatta;
      */
     public void checkout() {
-        final String checkoutURLStr = event.server
-                + prefs.getServerCheckoutPath().replace("{leaderboard-name}", Uri.encode(leaderboard.name));
-
-        showProgressDialog(R.string.please_wait, R.string.checking_out);
-
-        JSONObject checkoutData = new JSONObject();
-        try {
-            checkoutData.put("competitorId", competitor.id);
-            checkoutData.put("deviceUuid", UniqueDeviceUuid.getUniqueId(this));
-            checkoutData.put("toMillis", System.currentTimeMillis());
-        } catch (JSONException e) {
-            showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
-            ExLog.e(this, TAG, "Error populating checkout-data: " + e.getMessage());
-            return;
-        }
-
-        try {
-            HttpJsonPostRequest request = new HttpJsonPostRequest(this, new URL(checkoutURLStr), checkoutData.toString());
-            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(request,
-                    new NetworkHelperSuccessListener() {
-
-                        @Override
-                        public void performAction(JSONObject response) {
-                            DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this,
-                                    event.checkinDigest);
-                            deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
-                            dismissProgressDialog();
-                            finish();
-                        }
-                    }, new NetworkHelperFailureListener() {
-
-                        @Override
-                        public void performAction(NetworkHelperError e) {
-                            dismissProgressDialog();
-                            showErrorPopup(R.string.error,
-                                    R.string.error_could_not_complete_operation_on_server_try_again);
-                        }
-                    });
-
-        } catch (MalformedURLException e) {
-            ExLog.w(this, TAG, "Error, can't check out, MalformedURLException: " + e.getMessage());
-        }
+        CheckoutHelper checkoutHelper = new CheckoutHelper();
+        checkoutHelper.checkoutCompetitor(this, leaderboard.name, event.server, competitor.id, new NetworkHelperSuccessListener() {
+            @Override
+            public void performAction(JSONObject response) {
+                DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this, event.checkinDigest);
+                deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
+                dismissProgressDialog();
+                finish();
+            }
+        }, new NetworkHelperFailureListener() {
+            @Override
+            public void performAction(NetworkHelperError e) {
+                dismissProgressDialog();
+                showErrorPopup(R.string.error,
+                    R.string.error_could_not_complete_operation_on_server_try_again);
+            }
+        });
     }
 
     @Override

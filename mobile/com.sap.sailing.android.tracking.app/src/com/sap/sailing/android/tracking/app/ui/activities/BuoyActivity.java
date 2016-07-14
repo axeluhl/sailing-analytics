@@ -1,0 +1,156 @@
+package com.sap.sailing.android.tracking.app.ui.activities;
+
+import org.json.JSONObject;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.activities.AbstractBaseActivity;
+import com.sap.sailing.android.shared.util.NetworkHelper;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.ui.fragments.BuoyFragment;
+import com.sap.sailing.android.tracking.app.utils.AboutHelper;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.utils.CheckoutHelper;
+import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.android.tracking.app.valueobjects.MarkInfo;
+
+public class BuoyActivity extends AbstractBaseActivity {
+
+    private static String TAG = BuoyActivity.class.getName();
+
+    private EventInfo event;
+    private MarkInfo mark;
+    private LeaderboardInfo leaderboard;
+    private String checkinDigest;
+
+    private AppPreferences prefs;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
+
+        prefs = new AppPreferences(this);
+        mark = DatabaseHelper.getInstance().getMarkInfo(this, checkinDigest);
+        event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+        leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
+
+        setContentView(R.layout.fragment_container);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+        }
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
+            getSupportActionBar().setTitle(leaderboard.name);
+            getSupportActionBar().setSubtitle(event.name);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
+        }
+        replaceFragment(R.id.content_frame, BuoyFragment.newInstance(mark.markName));
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (prefs != null && prefs.getTrackerIsTracking()) {
+            String checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
+            startTrackingActivity(checkinDigest);
+        }
+    }
+
+    @Override
+    protected int getOptionsMenuResId() {
+        return 0;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.buoy_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.options_menu_settings:
+                ExLog.i(this, TAG, "Clicked SETTINGS.");
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.options_menu_checkout:
+                ExLog.i(this, TAG, "Clicked CHECKOUT.");
+                displayCheckoutConfirmationDialog();
+                return true;
+            case R.id.options_menu_info:
+                AboutHelper.showInfoActivity(this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void startTrackingActivity(String checkinDigest) {
+        Intent intent = new Intent(this, TrackingActivity.class);
+        intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
+        startActivity(intent);
+    }
+
+    public void startTrackingActivity() {
+        Intent intent = new Intent(this, TrackingActivity.class);
+        intent.putExtra(getString(R.string.tracking_activity_checkin_digest_parameter), checkinDigest);
+        startActivity(intent);
+    }
+
+    private void displayCheckoutConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.warning);
+        builder.setMessage(R.string.checkout_warning_message);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                checkout();
+            }
+        });
+        builder.setNegativeButton(R.string.no, null);
+        builder.show();
+    }
+
+    /**
+     * Check out from regatta;
+     */
+    public void checkout() {
+        CheckoutHelper checkoutHelper = new CheckoutHelper();
+        checkoutHelper.checkoutMark(this, leaderboard.name, event.server, mark.markId, new NetworkHelper.NetworkHelperSuccessListener() {
+            @Override
+            public void performAction(JSONObject response) {
+                DatabaseHelper.getInstance().deleteRegattaFromDatabase(BuoyActivity.this, event.checkinDigest);
+                dismissProgressDialog();
+                finish();
+            }
+        }, new NetworkHelper.NetworkHelperFailureListener() {
+            @Override
+            public void performAction(NetworkHelper.NetworkHelperError e) {
+                dismissProgressDialog();
+                showErrorPopup(R.string.error,
+                    R.string.error_could_not_complete_operation_on_server_try_again);
+            }
+        });
+    }
+}

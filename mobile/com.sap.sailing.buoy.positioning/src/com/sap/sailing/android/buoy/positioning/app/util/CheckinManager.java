@@ -19,7 +19,7 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
@@ -49,7 +49,7 @@ import android.widget.Toast;
 
 public class CheckinManager {
     private final static String TAG = CheckinManager.class.getName();
-    private AbstractCheckinData checkinData;
+    private BaseCheckinData checkinData;
     private final CheckinDataActivity activity;
     private final Context mContext;
     private final AppPreferences prefs;
@@ -254,7 +254,7 @@ public class CheckinManager {
         }
     }
 
-    public void setCheckinData(AbstractCheckinData data) {
+    public void setCheckinData(BaseCheckinData data) {
         checkinData = data;
         if (activity != null) {
             activity.onCheckinDataAvailable(getCheckinData());
@@ -264,14 +264,14 @@ public class CheckinManager {
     }
 
     public interface DataChangedListner{
-        void handleData(AbstractCheckinData data);
+        void handleData(BaseCheckinData data);
     }
 
     public void setDataChangedListner(DataChangedListner listner){
         dataChangedListner = listner;
     }
 
-    public AbstractCheckinData getCheckinData() {
+    public BaseCheckinData getCheckinData() {
         return checkinData;
     }
 

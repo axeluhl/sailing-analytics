@@ -12,7 +12,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.LeaderboardColumns;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CheckinUriColumns;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CheckinColumns;
 
 public class AnalyticsDatabase extends SQLiteOpenHelper {
 
@@ -20,8 +20,13 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "sap_sailing_analytics.db";
 
-    private static final int VER_2014_RELEASE_1 = 1;
-    private static final int CUR_DATABASE_VERSION = VER_2014_RELEASE_1;
+    private static final int VER_2016_RELEASE_1 = 2;
+    private static final int CUR_DATABASE_VERSION = VER_2016_RELEASE_1;
+
+    private static final String createMarkTable = "CREATE TABLE " + Tables.MARKS + " (" + BaseColumns._ID
+        + " INTEGER PRIMARY KEY AUTOINCREMENT, " + AnalyticsContract.Mark.MARK_ID + " TEXT, "
+        + AnalyticsContract.Mark.MARK_NAME + " TEXT, "
+        + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " TEXT );" ;
 
     private final Context mContext;
 
@@ -31,15 +36,23 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
         String EVENTS_COMPETITORS = "events_competitors";
         String LEADERBOARDS = "leaderboards";
         String CHECKIN_URIS = "checkin_uris";
+        String MARKS = "marks";
+        String EVENTS_JOIN_LEADERBOARDS_JOIN_MARKS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
+            + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
+            + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.MARKS + " ON ("
+            + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.MARKS + "."
+            + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + ") ";
         String EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
                 + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
                 + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.COMPETITORS + " ON ("
                 + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.COMPETITORS + "."
                 + Competitor.COMPETITOR_CHECKIN_DIGEST + ") ";
 
-        String LEADERBOARDS_JOIN_EVENTS = "events LEFT JOIN leaderboards ON " + Tables.EVENTS + "."
-                + Event.EVENT_CHECKIN_DIGEST + " = " + Tables.LEADERBOARDS + "."
-                + Leaderboard.LEADERBOARD_CHECKIN_DIGEST;
+        String LEADERBOARDS_JOIN_EVENTS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
+            + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
+            + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.CHECKIN_URIS + " ON ("
+            + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.CHECKIN_URIS + "."
+            + AnalyticsContract.Checkin.CHECKIN_URI_CHECKIN_DIGEST + ") ";
     }
 
     public AnalyticsDatabase(Context context) {
@@ -54,8 +67,9 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + LeaderboardColumns.LEADERBOARD_NAME + " TEXT );");
 
         db.execSQL("CREATE TABLE " + Tables.CHECKIN_URIS + " (" + BaseColumns._ID
-                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CheckinUriColumns.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, "
-                + CheckinUriColumns.CHECKIN_URI_VALUE + " TEXT );");
+                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CheckinColumns.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, "
+                + CheckinColumns.CHECKIN_URI_VALUE + " TEXT, "
+                + CheckinColumns.CHECKIN_TYPE + " INTEGER );");
 
         db.execSQL("CREATE TABLE " + Tables.COMPETITORS + " (" + BaseColumns._ID
                 + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CompetitorColumns.COMPETITOR_ID + " TEXT, "
@@ -69,24 +83,16 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + EventColumns.EVENT_DATE_START + " INTEGER, " + EventColumns.EVENT_DATE_END + " INTEGER, "
                 + EventColumns.EVENT_SERVER + " TEXT, " + EventColumns.EVENT_IMAGE_URL + " TEXT, "
                 + EventColumns.EVENT_CHECKIN_DIGEST + " TEXT )");
+
+        db.execSQL(createMarkTable);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         ExLog.i(mContext, TAG, "onUpgrade() from " + oldVersion + " to " + newVersion);
-
-        int version = oldVersion;
-
-        if (version != CUR_DATABASE_VERSION) {
-            ExLog.i(mContext, TAG, "Upgrade unsuccessful - destroying old data during upgrade");
-
-            db.execSQL("DROP TABLE IF EXISTS " + Tables.COMPETITORS);
-            db.execSQL("DROP TABLE IF EXISTS " + Tables.EVENTS);
-            db.execSQL("DROP TABLE IF EXISTS " + Tables.LEADERBOARDS);
-            db.execSQL("DROP TABLE IF EXISTS " + Tables.CHECKIN_URIS);
-
-            onCreate(db);
-            version = CUR_DATABASE_VERSION;
+        if (oldVersion == 1 && newVersion == 2) {
+            db.execSQL(createMarkTable);
+            db.execSQL("ALTER TABLE " + Tables.CHECKIN_URIS + " ADD COLUMN " + AnalyticsContract.Checkin.CHECKIN_TYPE + " INTEGER DEFAULT 0");
         }
     }
 
