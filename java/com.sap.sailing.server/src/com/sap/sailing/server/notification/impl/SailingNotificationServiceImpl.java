@@ -168,16 +168,29 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
         return messages.get(locale, "leaderboardOfEvent", leaderboardDisplayName, eventName);
     }
 
+    private String createRaceBoardLink(TrackedRace trackedRace, Leaderboard leaderboard, Event event,
+            LeaderboardGroup leaderboardGroup) {
+        RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+        // TODO where to get the base URL?
+        String link = "/gwt/RaceBoard.html?eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
+                + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&raceName="
+                + raceIdentifier.getRaceName() + "&showMapControls=true&viewShowNavigationPanel=true&regattaName="
+                + raceIdentifier.getRegattaName();
+        return link;
+    }
+
+    private String createHomeRacesListLink(Leaderboard leaderboard, Event event) {
+        // TODO where to get the base URL?
+        String link = "/gwt/Home.html#/regatta/races/:eventId=" + event.getId() + "&regattaId="
+                + leaderboard.getName();
+        return link;
+    }
+
     @Override
     public void notifyUserOnBoatClassRaceChangesStateToFinishing(BoatClass boatClass, TrackedRace trackedRace,
             Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-            // TODO where to get the base URL?
-            String link = "/gwt/RaceBoard.html?eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
-                    + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&raceName="
-                    + raceIdentifier.getRaceName() + "&showMapControls=true&viewShowNavigationPanel=true&regattaName="
-                    + raceIdentifier.getRegattaName();
+            String link = createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup);
 
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassResults) {
                 @Override
@@ -198,9 +211,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     @Override
     public void notifyUserOnBoatClassWhenScoreCorrectionsAreAvailable(BoatClass boatClass, Leaderboard leaderboard) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            // TODO where to get the base URL?
-            String link = "/gwt/Home.html#/regatta/races/:eventId=" + event.getId() + "&regattaId="
-                    + leaderboard.getName();
+            String link = createHomeRacesListLink(leaderboard, event);
 
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassResults) {
                 @Override
@@ -221,9 +232,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     public void notifyUserOnBoatClassUpcomingRace(BoatClass boatClass, Leaderboard leaderboard, RaceColumn raceColumn,
             Fleet fleet, TimePoint when) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            // TODO where to get the base URL?
-            String link = "/gwt/Home.html#/regatta/races/:eventId=" + event.getId() + "&regattaId="
-                    + leaderboard.getName();
+            String link = createHomeRacesListLink(leaderboard, event);
 
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassUpcomingRace) {
                 @Override
@@ -247,12 +256,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     public void notifyUserOnCompetitorPassesFinish(Competitor competitor, TrackedRace trackedRace,
             Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-            // TODO where to get the base URL?
-            String link = "/gwt/RaceBoard.html?eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
-                    + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&raceName="
-                    + raceIdentifier.getRaceName() + "&showMapControls=true&viewShowNavigationPanel=true&regattaName="
-                    + raceIdentifier.getRegattaName();
+            String link = createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup);
 
             mailQueue.addNotification(new NotificationSetNotification<Competitor>(competitor, competitorResults) {
                 @Override
@@ -273,9 +277,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     @Override
     public void notifyUserOnCompetitorScoreCorrections(Competitor competitor, Leaderboard leaderboard) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            // TODO where to get the base URL?
-            String link = "/gwt/Home.html#/regatta/races/:eventId=" + event.getId() + "&regattaId="
-                    + leaderboard.getName();
+            String link = createHomeRacesListLink(leaderboard, event);
 
             mailQueue.addNotification(new NotificationSetNotification<Competitor>(competitor, competitorResults) {
                 @Override
