@@ -152,21 +152,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventControlsPanel.add(removeEventsButton);
 
         eventListDataProvider = new ListDataProvider<EventDTO>();
-        eventTable = createEventTable();
-        eventTable.ensureDebugId("EventsCellTable");
-        refreshableEventSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
-        eventTable.setVisible(false);
-
-        this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                final boolean somethingSelected = !refreshableEventSelectionModel.getSelectedSet().isEmpty();
-                removeEventsButton.setEnabled(somethingSelected);
-            }
-        });
-        
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()), allEvents,
-                eventTable, eventListDataProvider) {
+                new CellTable<EventDTO>(), eventListDataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(EventDTO t) {
                 List<String> result = new ArrayList<String>();
@@ -181,6 +168,20 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return result;
             }
         };
+        eventTable = createEventTable();
+        eventTable.ensureDebugId("EventsCellTable");
+        filterTextbox.setTable(eventTable);
+        refreshableEventSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
+        eventTable.setVisible(false);
+
+        this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                final boolean somethingSelected = !refreshableEventSelectionModel.getSelectedSet().isEmpty();
+                removeEventsButton.setEnabled(somethingSelected);
+            }
+        });
+        
         panel.add(filterTextbox);
         panel.add(eventTable);
         
@@ -211,7 +212,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     public int hashCode(EventDTO t) {
                         return t.id.hashCode();
                     }
-                },eventListDataProvider,table);
+                },filterTextbox.getAllListDataProvider(),table);
         
         AnchorCell anchorCell = new AnchorCell();
         Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {
