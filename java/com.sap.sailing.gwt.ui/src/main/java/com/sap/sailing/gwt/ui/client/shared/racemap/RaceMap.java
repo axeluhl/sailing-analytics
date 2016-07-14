@@ -1036,7 +1036,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData, boolean updateTailsOnly) {
         final Map<CompetitorDTO, Runnable> tailPreparersPerCompetitor =
                 fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
-        showBoatsOnMap(newTime, transitionTimeInMillis, competitorsToShow, updateTailsOnly, tailPreparersPerCompetitor);
+        showBoatsOnMap(newTime, transitionTimeInMillis,
+                /* re-calculate; it could have changed since the asynchronous request was made: */ getCompetitorsToShow(),
+                updateTailsOnly, tailPreparersPerCompetitor);
         if (!updateTailsOnly) {
             showCompetitorInfoOnMap(newTime, transitionTimeInMillis, competitorSelection.getSelectedFilteredCompetitors());
             // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
