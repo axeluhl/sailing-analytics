@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.services;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
@@ -40,7 +38,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.services.polling.RaceLogPoller;
+import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollingService;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -60,20 +58,15 @@ public class RaceStateService extends Service {
         }
     }
 
-    private final static String EXTRAS_SERVICE_ID = RaceStateService.class.getName() + ".serviceId";
     private final static int NOTIFICATION_ID = 42;
 
     private final IBinder mBinder = new RaceStateServiceBinder();
-
-    private UUID serviceId;
 
     private AlarmManager alarmManager;
 
     private int alarmManagerRequestCode = 0;
 
     private ReadonlyDataManager dataManager;
-
-    private RaceLogPoller poller;
 
     private Map<ManagedRace, RaceLogEventVisitor> registeredLogListeners;
     private Map<ManagedRace, RaceStateEventScheduler> registeredStateEventSchedulers;
@@ -85,11 +78,8 @@ public class RaceStateService extends Service {
 
     @Override
     public void onCreate() {
-        this.serviceId = UUID.randomUUID();
         this.alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         this.dataManager = DataManager.create(this);
-
-        this.poller = new RaceLogPoller(this);
 
         this.registeredLogListeners = new HashMap<>();
         this.registeredStateEventSchedulers = new HashMap<>();
@@ -139,13 +129,13 @@ public class RaceStateService extends Service {
     public void onDestroy() {
         unregisterAllRaces();
 
-        // ... and remove from status bar!
-        stopForeground(true);
         super.onDestroy();
     }
 
     private void unregisterAllRaces() {
-        poller.unregisterAllAndStop();
+        Intent intent = new Intent(this, RaceLogPollingService.class);
+        intent.setAction(AppConstants.INTENT_ACTION_POLLING_STOP);
+        startService(intent);
 
         for (Entry<ManagedRace, RaceLogEventVisitor> entry : registeredLogListeners.entrySet()) {
             entry.getKey().getState().getRaceLog().removeListener(entry.getValue());
@@ -168,7 +158,10 @@ public class RaceStateService extends Service {
     }
 
     public void unregisterRace(ManagedRace race) {
-        poller.unregister(race);
+        Intent intent = new Intent(this, RaceLogPollingService.class);
+        intent.setAction(AppConstants.INTENT_ACTION_POLLING_RACE_REMOVE);
+        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, race.getId());
+        startService(intent);
 
         race.getState().getRaceLog().removeAllListeners();
         registeredLogListeners.remove(race);
@@ -203,34 +196,40 @@ public class RaceStateService extends Service {
         String action = intent.getAction();
         ExLog.i(this, TAG, String.format("Command action '%s' received.", action));
 
-        if (AppConstants.INTENT_ACTION_CLEAR_RACES.equals(action)) {
-            handleClearRaces();
-            return;
-        }
+        if (action != null) {
+            switch (action) {
+                case AppConstants.INTENT_ACTION_CLEAR_RACES:
+                    handleClearRaces();
+                    break;
 
-        if (AppConstants.INTENT_ACTION_CLEANUP_RACES.equals(action)) {
-            handleCleanupRaces();
-            return;
-        }
+                case AppConstants.INTENT_ACTION_CLEANUP_RACES:
+                    handleCleanupRaces();
+                    break;
 
-        if (!serviceId.equals(intent.getSerializableExtra(EXTRAS_SERVICE_ID))) {
-            ExLog.w(this, TAG, "Received event for different service version.");
-            return;
-        }
+                case AppConstants.INTENT_ACTION_REGISTER_RACE:
+                    handleRegisterRace(intent);
+                    break;
+                case AppConstants.INTENT_ACTION_UNREGISTER_RACE:
+                    handleUnregisterRace(intent);
+                    break;
 
-        String id = intent.getStringExtra(AppConstants.RACE_ID_KEY);
-        ManagedRace race = dataManager.getDataStore().getRace(id);
-        if (race == null) {
-            ExLog.w(this, TAG, "No race for id " + id);
-            return;
-        }
+                default:
+                    String id = intent.getStringExtra(AppConstants.RACE_ID_KEY);
+                    ManagedRace race = dataManager.getDataStore().getRace(id);
+                    if (race == null) {
+                        ExLog.w(this, TAG, "No race for id " + id);
+                        return;
+                    }
 
-        if (AppConstants.INTENT_ACTION_ALARM_ACTION.equals(action)) {
-            RaceStateEvent stateEvent = (RaceStateEvent) intent.getExtras().getSerializable(AppConstants.EXTRAS_RACE_STATE_EVENT);
-            ExLog.i(this, TAG, String.format("Processing %s", stateEvent.toString()));
-            race.getState().processStateEvent(stateEvent);
-            clearAlarmByName(race, stateEvent.getEventName());
-            return;
+                    switch (action) {
+                        case AppConstants.INTENT_ACTION_ALARM_ACTION:
+                            RaceStateEvent stateEvent = (RaceStateEvent) intent.getExtras().getSerializable(AppConstants.EXTRAS_RACE_STATE_EVENT);
+                            ExLog.i(this, TAG, String.format("Processing %s", stateEvent.toString()));
+                            race.getState().processStateEvent(stateEvent);
+                            clearAlarmByName(race, stateEvent.getEventName());
+                            break;
+                    }
+            }
         }
     }
 
@@ -241,7 +240,7 @@ public class RaceStateService extends Service {
         dataStore.setEventUUID(null);
         dataStore.setCourseUUID(null);
         ExLog.i(this, TAG, "handleClearRaces: Cleared all races.");
-        stopForeground(true);
+        stopSelf();
     }
 
     private class RemoveRaceAction implements Runnable {
@@ -310,7 +309,10 @@ public class RaceStateService extends Service {
             state.setStateEventScheduler(stateEventScheduler);
 
             // ... and register for polling!
-            poller.register(race);
+            Intent intent = new Intent(this, RaceLogPollingService.class);
+            intent.setAction(AppConstants.INTENT_ACTION_POLLING_RACE_ADD);
+            intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, race.getId());
+            startService(intent);
 
             registeredLogListeners.put(race, logListener);
             registeredStateEventSchedulers.put(race, stateEventScheduler);
@@ -328,7 +330,6 @@ public class RaceStateService extends Service {
     private PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
         Intent intent = new Intent(this, RaceStateService.class);
         intent.setAction(AppConstants.INTENT_ACTION_ALARM_ACTION);
-        intent.putExtra(EXTRAS_SERVICE_ID, serviceId);
         intent.putExtra(AppConstants.RACE_ID_KEY, managedRace.getId());
         intent.putExtra(AppConstants.EXTRAS_RACE_STATE_EVENT, event);
         return PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -352,6 +353,7 @@ public class RaceStateService extends Service {
         for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
             if (intentPair.second.equals(stateEventName)) {
                 toBeRemoved = intentPair;
+                break;
             }
         }
         if (toBeRemoved != null) {
@@ -364,11 +366,10 @@ public class RaceStateService extends Service {
     }
 
     /* package */ void clearAllAlarms(ManagedRace race) {
-        Serializable raceId = race.getId();
-        List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(raceId);
+        List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
 
         if (intents == null) {
-            ExLog.w(this, TAG, "There are no intents for race " + raceId);
+            ExLog.w(this, TAG, "There are no intents for race " + race.getId());
             return;
         }
 
@@ -377,6 +378,6 @@ public class RaceStateService extends Service {
         }
 
         intents.clear();
-        ExLog.w(this, TAG, "All intents cleared for race " + raceId);
+        ExLog.w(this, TAG, "All intents cleared for race " + race.getId());
     }
 }
