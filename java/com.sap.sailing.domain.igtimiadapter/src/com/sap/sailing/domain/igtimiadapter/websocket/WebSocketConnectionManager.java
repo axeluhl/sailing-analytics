@@ -111,7 +111,11 @@ public class WebSocketConnectionManager implements LiveDataConnection {
         if (session != null) {
             session.disconnect();
         }
-        client.stop();
+        synchronized (this) {
+            if (client != null) {
+                client.stop();
+            }
+        }
     }
 
     private class WebSocket extends WebSocketAdapter {
