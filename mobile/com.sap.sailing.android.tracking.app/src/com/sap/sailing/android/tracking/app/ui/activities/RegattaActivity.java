@@ -233,7 +233,7 @@ public class RegattaActivity extends AbstractRegattaActivity
     }
 
     private void setTeamImage(ImageView imageView, int width, int height) {
-        String fileName = getLeaderboardImageFileName(leaderboard.name);
+        String fileName = getTeamImageFileName(leaderboard.name, competitor.name);
         Bitmap storedImage = getStoredImage(fileName, width, height);
         if (storedImage == null) {
             askServerAboutTeamImageUrl(imageView);
@@ -303,7 +303,7 @@ public class RegattaActivity extends AbstractRegattaActivity
      * @param bitmap
      */
     public void updateLeaderboardPictureChosenByUser(final Bitmap bitmap) {
-        storeImageAndSendToServer(bitmap, getLeaderboardImageFileName(leaderboard.name), true);
+        storeImageAndSendToServer(bitmap, getTeamImageFileName(leaderboard.name, competitor.name), true);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -435,8 +435,8 @@ public class RegattaActivity extends AbstractRegattaActivity
         setUpView();
     }
 
-    private String getLeaderboardImageFileName(String leaderboardName) {
-        return LEADERBOARD_IMAGE_FILENAME_PREFIX + leaderboardName;
+    private String getTeamImageFileName(String leaderboardName, String competitorName) {
+        return LEADERBOARD_IMAGE_FILENAME_PREFIX + leaderboardName + "_" + competitorName;
     }
 
     private String getFlagImageFileName(String countryCode) {
@@ -486,7 +486,7 @@ public class RegattaActivity extends AbstractRegattaActivity
                         public void performAction(JSONObject response) {
                             DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this,
                                     event.checkinDigest);
-                            deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
+                            deleteImageFile(getTeamImageFileName(leaderboard.name, competitor.name));
                             dismissProgressDialog();
                             finish();
                         }
@@ -546,7 +546,7 @@ public class RegattaActivity extends AbstractRegattaActivity
 
     public void retryUpload(View view) {
         if (prefs.hasFailedUpload(leaderboard.name)) {
-            pictureFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
+            pictureFile = getImageFile(getTeamImageFileName(leaderboard.name, competitor.name));
         }
         if (pictureFile != null) {
             sendTeamImageToServer(pictureFile);
@@ -608,7 +608,7 @@ public class RegattaActivity extends AbstractRegattaActivity
             FileOutputStream outputStream = null;
             try {
                 in = new java.net.URL(downloadUrl).openStream();
-                imageFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
+                imageFile = getImageFile(getTeamImageFileName(leaderboard.name, competitor.name));
                 if (!imageFile.exists()) {
                     imageFile.createNewFile();
                 }
