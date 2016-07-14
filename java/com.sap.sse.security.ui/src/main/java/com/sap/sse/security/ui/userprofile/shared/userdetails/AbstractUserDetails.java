@@ -1,12 +1,9 @@
 package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -15,7 +12,6 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -34,24 +30,17 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
     @UiField public TextBox companyUi;
     
     @UiField(provided = true)
-    public ValueListBox<Pair<String, String>> localeUi = new ValueListBox<Pair<String, String>>(
-            new Renderer<Pair<String, String>>() {
-                @Override
-                public String render(Pair<String, String> object) {
-                    if (object == null) {
-                        return "";
-                    }
-                    if (object.getB() != null) {
-                        return object.getB();
-                    }
-                    return object.getA();
-                }
+    public ValueListBox<String> localeUi = new ValueListBox<String>(new Renderer<String>() {
+        @Override
+        public String render(String object) {
+            return GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(object);
+        }
 
-                @Override
-                public void render(Pair<String, String> object, Appendable appendable) throws IOException {
-                    appendable.append(render(object));
-                }
-            });
+        @Override
+        public void render(String object, Appendable appendable) throws IOException {
+            appendable.append(render(object));
+        }
+    });
     
     @UiField public TextBox emailUi;
     @UiField public PasswordTextBox oldPasswordUi;
@@ -85,17 +74,8 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         emailUi.setValue(currentUser.getEmail());
         
         String currentLocale = currentUser.getLocale();
-        Collection<Pair<String, String>> values = new ArrayList<>();
-        Pair<String, String> selectedValue = null;
-        for (String localeName : GWTLocaleUtil.getAvailableLocales()) {
-            Pair<String, String> value = new Pair<String, String>(localeName, LocaleInfo.getLocaleNativeDisplayName(localeName));
-            values.add(value);
-            if (currentLocale != null && currentLocale.equals(localeName)) {
-                selectedValue = value;
-            }
-        }
-        localeUi.setValue(selectedValue);
-        localeUi.setAcceptableValues(values);
+        localeUi.setValue(currentLocale);
+        localeUi.setAcceptableValues(GWTLocaleUtil.getAvailableLocalesAndDefault());
         
         clearPasswordFields();
     }
@@ -112,9 +92,7 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
     
     @UiHandler("saveChangesUi")
     public void onSaveChangesClicked(ClickEvent event) {
-        Pair<String, String> selectedLocaleValue = localeUi.getValue();
-        String locale = selectedLocaleValue != null ? selectedLocaleValue.getA() : null;
-        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue(), locale);
+        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue(), localeUi.getValue());
     }
     
     @UiHandler("changeEmailUi")

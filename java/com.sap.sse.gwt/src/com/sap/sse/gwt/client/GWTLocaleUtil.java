@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -35,7 +36,7 @@ public final class GWTLocaleUtil {
      * 
      * @return all available client locales plus a null entry
      */
-    public static Iterable<String> getAvailableLocalesAndDefault() {
+    public static Collection<String> getAvailableLocalesAndDefault() {
         List<String> result = new ArrayList<>();
         result.add(null);
         Util.addAll(getAvailableLocales(), result);
