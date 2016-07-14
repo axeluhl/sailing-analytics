@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.HttpMessageSenderServletConstants;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 
 /**
@@ -42,7 +43,7 @@ public class HttpServletMessageReceiver {
     }
 
     private static final Logger logger = Logger.getLogger(HttpServletMessageReceiver.class.getName());
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
     private final Receiver receiver;
     private long timestampOfLastHeartbeatReceived;
     private final URL url;

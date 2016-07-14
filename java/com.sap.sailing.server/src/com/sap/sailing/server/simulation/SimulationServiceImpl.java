@@ -59,6 +59,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.SmartFutureCache;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class SimulationServiceImpl implements SimulationService {
 
@@ -74,7 +75,7 @@ public class SimulationServiceImpl implements SimulationService {
     
     public SimulationServiceImpl(Executor executor, RacingEventService racingEventService) {
         this.executor = executor;
-        this.scheduler = Executors.newScheduledThreadPool(1);
+        this.scheduler = Executors.newScheduledThreadPool(1, new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
         this.racingEventService = racingEventService;
         if (racingEventService != null) {
             this.raceListeners = new HashMap<String, SimulationRaceListener>();
