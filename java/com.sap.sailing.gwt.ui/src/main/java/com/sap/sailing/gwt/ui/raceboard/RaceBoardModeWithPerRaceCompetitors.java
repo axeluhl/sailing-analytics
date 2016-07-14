@@ -51,16 +51,18 @@ public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBo
     }
 
     protected void updateCompetitorSelection(final int howManyTopCompetitorsInRaceToSelect) {
-        final List<CompetitorDTO> competitorsFromBestToWorstInColumn = getLeaderboard().getCompetitorsFromBestToWorst(getRaceColumn());
-        final Set<CompetitorDTO> competitorsToSelect = new HashSet<>();
-        int numberOfSelectedCompetitors = 0;
-        for (int i=0; numberOfSelectedCompetitors<howManyTopCompetitorsInRaceToSelect && i<competitorsFromBestToWorstInColumn.size(); i++) {
-            if (getCompetitorsInRace() == null || Util.contains(getCompetitorsInRace(), competitorsFromBestToWorstInColumn.get(i))) {
-                competitorsToSelect.add(competitorsFromBestToWorstInColumn.get(i));
-                numberOfSelectedCompetitors++;
+        if (getLeaderboard() != null) {
+            final List<CompetitorDTO> competitorsFromBestToWorstInColumn = getLeaderboard().getCompetitorsFromBestToWorst(getRaceColumn());
+            final Set<CompetitorDTO> competitorsToSelect = new HashSet<>();
+            int numberOfSelectedCompetitors = 0;
+            for (int i=0; numberOfSelectedCompetitors<howManyTopCompetitorsInRaceToSelect && i<competitorsFromBestToWorstInColumn.size(); i++) {
+                if (getCompetitorsInRace() == null || Util.contains(getCompetitorsInRace(), competitorsFromBestToWorstInColumn.get(i))) {
+                    competitorsToSelect.add(competitorsFromBestToWorstInColumn.get(i));
+                    numberOfSelectedCompetitors++;
+                }
             }
+            getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(competitorsToSelect);
         }
-        getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(competitorsToSelect);
     }
 
 }
