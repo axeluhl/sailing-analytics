@@ -61,7 +61,8 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
             panel.setPopupPositionAndShow(new PositionCallback() {
                 @Override
                 public void setPosition(int offsetWidth, int offsetHeight) {
-                    panel.setPopupPosition(parent.getAbsoluteRight() - offsetWidth, parent.getAbsoluteBottom());
+                    panel.setPopupPosition(parent.getAbsoluteRight() + 1 - offsetWidth, 
+                            parent.getAbsoluteBottom() - offsetHeight);
                 }
             });
             return;
