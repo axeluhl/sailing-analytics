@@ -117,7 +117,7 @@ public class TrackingFragment extends BaseFragment {
                 textView.setTextColor(getResources().getColor(R.color.sap_red));
             } else {
                 textView.setText(getString(R.string.tracking_status_tracking));
-                textView.setTextColor(getResources().getColor(R.color.sap_green));
+                textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
             }
         }
     }
@@ -137,21 +137,21 @@ public class TrackingFragment extends BaseFragment {
                     if (apiConnectivity == APIConnectivity.transmissionSuccess) {
                         if (prefs.getEnergySavingEnabledByUser()) {
                             textView.setText(getString(R.string.tracking_mode_battery_saving));
-                            textView.setTextColor(getResources().getColor(R.color.sap_yellow));
+                            textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
                         } else {
                             textView.setText(getString(R.string.tracking_mode_live));
-                            textView.setTextColor(getResources().getColor(R.color.sap_green));
+                            textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
                         }
 
                     } else if (apiConnectivity == APIConnectivity.noAttempt) {
                         textView.setText(getString(R.string.tracking_mode_offline));
-                        textView.setTextColor(getResources().getColor(R.color.sap_green));
+                        textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
                     } else if (apiConnectivity == APIConnectivity.transmissionError) {
                         textView.setText(getString(R.string.tracking_mode_api_error));
                         textView.setTextColor(getResources().getColor(R.color.sap_red));
                     } else {
                         textView.setText(getString(R.string.tracking_mode_caching));
-                        textView.setTextColor(getResources().getColor(R.color.sap_green));
+                        textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
                     }
                 }
             });
