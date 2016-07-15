@@ -1,11 +1,13 @@
 package com.sap.sailing.server.notification.impl;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
@@ -183,9 +185,23 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
         return createHomeRegattaLink("races", leaderboard, event);
     }
     
+    /**
+     * The base URL for notifications as extracted from the {@link Event#getBaseURL() event}; defaults
+     * to {@code https://www.sapsailing.com} if no base URL has been provided for the event.
+     */
     private URL getBaseURL(final Event event) {
-        // TODO where to get the base URL?
-        return event.getBaseURL();
+        URL result;
+        if (event.getBaseURL() == null) {
+            try {
+                result = new URL("https://www.sapsailing.com");
+            } catch (MalformedURLException e) {
+                logger.log(Level.WARNING, "Strange... why isn't https://www.sapsailing.com a valid URL?", e);
+                result = null;
+            }
+        } else {
+            result = event.getBaseURL();
+        }
+        return result;
     }
     
     private String createHomeLeaderboardLink(Leaderboard leaderboard, Event event) {
