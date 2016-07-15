@@ -1696,6 +1696,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                                 leaderboard.getName()).start();
                 lastNotificationForCompetitor.put(competitor, now);
             }
+            // a change to a single competitor also means a change to the leaderboard
+            notifyForLeaderboardIfNotAlreadyNotifiedRecently();
         }
 
     }
