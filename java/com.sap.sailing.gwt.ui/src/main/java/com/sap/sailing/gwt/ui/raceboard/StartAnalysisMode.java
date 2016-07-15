@@ -66,9 +66,13 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
     @Override
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
-        if (getTimer().getPlayMode() != PlayModes.Live && !raceTimesInfo.isEmpty() && raceTimesInfo.containsKey(getRaceIdentifier())) {
+        if (!raceTimesInfo.isEmpty() && raceTimesInfo.containsKey(getRaceIdentifier())) {
             final RaceTimesInfoDTO times = raceTimesInfo.get(getRaceIdentifier());
             if (times.startOfRace != null) {
+                // make sure we're no longer in live/playing mode/state; the start analysis is supposed to be a "frozen" display at first
+                if (getTimer().getPlayMode() == PlayModes.Live) {
+                    getTimer().setPlayMode(PlayModes.Replay);
+                }
                 // the following call will always trigger a leaderboard load and therefore a callback
                 // to updatedLeaderboard; therefore, updatedLeaderboard can decide when it's time to
                 // trigger the chart display and the map settings application
@@ -110,6 +114,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                                 @Override
                                 public void onSuccess(LeaderboardDTO result) {
                                     setLeaderboard(result);
+                                    getLeaderboardPanel().updateLeaderboard(result);
                                     updateCompetitorSelection();
                                     getRaceBoardPanel().setCompetitorChartVisible(true);
                                 }

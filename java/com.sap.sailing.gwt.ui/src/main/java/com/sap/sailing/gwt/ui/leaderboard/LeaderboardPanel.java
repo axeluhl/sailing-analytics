@@ -2357,7 +2357,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
      * Assigns <code>leaderboard</code> to {@link #leaderboard} and updates the UI accordingly. Also updates the min/max
      * values on the columns.
      */
-    protected void updateLeaderboard(LeaderboardDTO leaderboard) {
+    public void updateLeaderboard(LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
             Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
