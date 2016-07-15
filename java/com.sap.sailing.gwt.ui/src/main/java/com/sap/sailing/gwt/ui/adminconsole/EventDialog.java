@@ -206,7 +206,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(9 + GWTLocaleUtil.getLanguageCountWithDefault(), 2);
+        Grid formGrid = new Grid(10 + GWTLocaleUtil.getLanguageCountWithDefault(), 2);
         int rowIndex = 0;
         formGrid.setWidget(rowIndex,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(rowIndex++, 1, nameEntryField);

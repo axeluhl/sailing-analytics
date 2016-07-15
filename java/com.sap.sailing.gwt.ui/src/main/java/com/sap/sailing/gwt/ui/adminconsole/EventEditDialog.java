@@ -30,7 +30,7 @@ public class EventEditDialog extends EventDialog {
         id = event.id;
         officialWebsiteURLEntryField = createTextBox(event.getOfficialWebsiteURL());
         officialWebsiteURLEntryField.setVisibleLength(50);
-        baseURLEntryField = createTextBox(event.getOfficialWebsiteURL());
+        baseURLEntryField = createTextBox(event.getBaseURL());
         baseURLEntryField.setVisibleLength(50);
         sailorsInfoWebsiteURLEntryFields = createTextBoxesForLocalesAndDefault(event.getSailorsInfoWebsiteURLs());
         courseAreaNameList.setValue(new ArrayList<>(event.venue.getCourseAreas()));
