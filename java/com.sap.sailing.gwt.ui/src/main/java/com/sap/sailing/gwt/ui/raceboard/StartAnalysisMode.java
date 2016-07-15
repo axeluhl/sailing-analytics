@@ -116,7 +116,9 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                                     setLeaderboard(result);
                                     getLeaderboardPanel().updateLeaderboard(result);
                                     updateCompetitorSelection();
-                                    getRaceBoardPanel().setCompetitorChartVisible(true);
+                                    if (isCompetitorChartEnabled()) {
+                                        getRaceBoardPanel().setCompetitorChartVisible(true);
+                                    }
                                 }
                             });
             Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
@@ -126,13 +128,15 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                     // settings is largely more successful because 
                     boolean result = getRaceBoardPanel().getMap().getSimulationOverlay() == null;
                     if (!result) {
-                        final MultiCompetitorRaceChartSettings newCompetitorChartSettings = new MultiCompetitorRaceChartSettings(
-                                new ChartSettings(/* stepSizeInMillis */ 1000), DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
-                                /* no second series */ null);
-                        competitorChart.updateSettings(newCompetitorChartSettings);
-                        getRaceTimePanel().getTimeRangeProvider().setTimeZoom(
-                                new MillisecondsTimePoint(raceTimesInfo.startOfRace).minus(DURATION_BEFORE_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate(),
-                                new MillisecondsTimePoint(raceTimesInfo.startOfRace).plus(DURATION_AFTER_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate());
+                        if (isCompetitorChartEnabled()) {
+                            final MultiCompetitorRaceChartSettings newCompetitorChartSettings = new MultiCompetitorRaceChartSettings(
+                                    new ChartSettings(/* stepSizeInMillis */ 1000), DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
+                                    /* no second series */ null);
+                            competitorChart.updateSettings(newCompetitorChartSettings);
+                            getRaceTimePanel().getTimeRangeProvider().setTimeZoom(
+                                    new MillisecondsTimePoint(raceTimesInfo.startOfRace).minus(DURATION_BEFORE_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate(),
+                                    new MillisecondsTimePoint(raceTimesInfo.startOfRace).plus(DURATION_AFTER_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate());
+                        }
                         final RaceMapSettings existingMapSettings = getRaceBoardPanel().getMap().getSettings();
                         final RaceMapSettings newMapSettings = new RaceMapSettings(
                                 new RaceMapZoomSettings(Collections.singleton(ZoomTypes.BOATS), /* zoomToSelected */ false),
@@ -211,6 +215,10 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
             leaderboardUpdateReveiced = true;
             showCompetitorChartIfAllDataReceived();
         }
+    }
+    
+    private boolean isCompetitorChartEnabled() {
+        return competitorChart != null;
     }
 
 }
