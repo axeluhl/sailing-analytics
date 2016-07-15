@@ -1,12 +1,15 @@
 package com.sap.sailing.server.notification.impl;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
@@ -228,7 +231,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
                 protected String constructBody(BoatClass objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
                     return messages.get(locale, "boatClassRaceFinishedBody", boatClass.getDisplayName(),
-                            raceDescription, link);
+                            raceDescription, encodeLink(link));
                 }
             });
         });
@@ -250,7 +253,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
                 protected String constructBody(BoatClass objectToNotifyAbout, Locale locale) {
                     String leaderboardDescription = calculateLeaderboardDescription(locale, event, leaderboard);
                     return messages.get(locale, "boatClassScoreCorrectionBody", boatClass.getDisplayName(),
-                            leaderboardDescription, link);
+                            leaderboardDescription, encodeLink(link));
                 }
             });
         });
@@ -273,10 +276,22 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
                     // TODO properly format time in the user's locale
                     String time = when.toString();
                     return messages.get(locale, "boatClassUpcomingRaceBody", boatClass.getDisplayName(),
-                            raceDescription, time, link);
+                            raceDescription, time, encodeLink(link));
                 }
             });
         });
+    }
+
+
+    private String encodeLink(String link) {
+        String encodedLink;
+        try {
+            encodedLink = URLEncoder.encode(link, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            logger.log(Level.WARNING, "Why is UTF-8 not known?", e);
+            encodedLink = link;
+        }
+        return encodedLink;
     }
 
     @Override
@@ -295,7 +310,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
                 protected String constructBody(Competitor objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
                     return messages.get(locale, "competitorPassesFinishBody", competitor.getName(), raceDescription,
-                            link);
+                            encodeLink(link));
                 }
             });
         });
@@ -316,7 +331,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
                 protected String constructBody(Competitor objectToNotifyAbout, Locale locale) {
                     String leaderboardDescription = calculateLeaderboardDescription(locale, event, leaderboard);
                     return messages.get(locale, "boatClassScoreCorrectionBody", competitor.getName(),
-                            leaderboardDescription, link);
+                            leaderboardDescription, encodeLink(link));
                 }
             });
         });
