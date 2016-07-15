@@ -155,4 +155,16 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
     public boolean isFinished() {
         return getViewState() == RaceViewState.FINISHED;
     }
+    
+    /**
+     * Convenience method to check if this {@link SimpleRaceMetadataDTO race} is currently running.
+     * 
+     * @return <code>true</code> if the {@link #getViewState() view state} is {@link RaceViewState#RUNNING},
+     *         <code>false</code> otherwise
+     */
+    public boolean isRunning() {
+        return getViewState() == RaceViewState.FINISHED;
+    }
+    
+    
 }
