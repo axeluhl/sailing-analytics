@@ -11,12 +11,12 @@ import com.sap.sailing.android.shared.data.http.HttpJsonGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sse.common.Util;
 
-public class RacePositionsPollerTask extends AsyncTask<Util.Pair<String, URL>, PollingResult, Void> {
+public class RacePositionsPollingTask extends AsyncTask<Util.Pair<String, URL>, PollingResult, Void> {
 
     private final PollingResultListener listener;
     private final Context context;
 
-    public RacePositionsPollerTask(PollingResultListener listener, Context context) {
+    public RacePositionsPollingTask(PollingResultListener listener, Context context) {
         this.listener = listener;
         this.context = context;
     }
@@ -32,8 +32,7 @@ public class RacePositionsPollerTask extends AsyncTask<Util.Pair<String, URL>, P
             HttpRequest request = new HttpJsonGetRequest(context, query.getB());
             try {
                 InputStream responseStream = request.execute();
-                publishProgress(new PollingResult(true,
-                        new Util.Pair<>(query.getA(), responseStream)));
+                publishProgress(new PollingResult(true, new Util.Pair<>(query.getA(), responseStream)));
             } catch (IOException e) {
                 // don't need to close responseStream as it still must
                 // be null because the only call that may throw an
@@ -56,8 +55,8 @@ public class RacePositionsPollerTask extends AsyncTask<Util.Pair<String, URL>, P
     }
 
     public interface PollingResultListener {
-        public void onPollingResult(PollingResult result);
+        void onPollingResult(PollingResult result);
 
-        public void onPollingFinished();
+        void onPollingFinished();
     }
 }

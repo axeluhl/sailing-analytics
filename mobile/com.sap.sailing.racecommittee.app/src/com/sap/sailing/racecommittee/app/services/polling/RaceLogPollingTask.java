@@ -9,21 +9,21 @@ import android.os.AsyncTask;
 
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
+import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
 import com.sap.sse.common.Util;
 
-public class RaceLogPollerTask extends AsyncTask<Util.Pair<String, URL>, PollingResult, Void> {
+public class RaceLogPollingTask extends AsyncTask<Util.Pair<String, URL>, PollingResult, Void> {
 
     public interface PollingResultListener {
-        public void onPollingResult(PollingResult result);
-        public void onPollingFinished();
+        void onPollingFinished();
     }
     
-    private final PollingResultListener listener;
-    private final Context context;
+    private final PollingResultListener mListener;
+    private final Context mContext;
 
-    public RaceLogPollerTask(PollingResultListener listener, Context context) {
-        this.listener = listener;
-        this.context = context;
+    public RaceLogPollingTask(PollingResultListener listener, Context context) {
+        mListener = listener;
+        mContext = context.getApplicationContext();
     }
 
     @SuppressWarnings("unchecked")
@@ -34,30 +34,26 @@ public class RaceLogPollerTask extends AsyncTask<Util.Pair<String, URL>, Polling
                 return null;
             }
             
-            HttpRequest request = new HttpJsonPostRequest(context, query.getB());
-            InputStream responseStream = null;
+            HttpRequest request = new HttpJsonPostRequest(mContext, query.getB());
+            InputStream responseStream;
             try {
                 responseStream = request.execute();
-                publishProgress(new PollingResult(true, 
-                        new Util.Pair<String, InputStream>(query.getA(), responseStream)));
+                String raceId = query.getA();
+                new RaceLogEventsCallback().processResponse(mContext, responseStream, raceId);
             } catch (IOException e) {
                 // don't need to close responseStream as it still must
                 // be null because the only call that may throw an
                 // IOException is the execute() call that would have
                 // initialized responseStream
-                publishProgress(new PollingResult(false, null));
             }
         }
         return null;
     }
 
     @Override
-    protected void onProgressUpdate(PollingResult... values) {
-        listener.onPollingResult(values[0]);
-    }
-
-    @Override
     protected void onPostExecute(Void result) {
-        listener.onPollingFinished();
+        if (mListener != null) {
+            mListener.onPollingFinished();
+        }
     }
 }

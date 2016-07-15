@@ -486,6 +486,7 @@ import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ServiceTrackerFactory;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
 
@@ -608,7 +609,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
                 /* maximumPoolSize */ THREAD_POOL_SIZE,
                 /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>());
+                /* workQueue */ new LinkedBlockingQueue<Runnable>(),
+                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
     }
     
     /**

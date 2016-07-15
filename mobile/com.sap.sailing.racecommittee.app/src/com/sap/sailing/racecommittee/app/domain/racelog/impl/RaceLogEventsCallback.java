@@ -33,12 +33,12 @@ import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventD
  * </p>
  * <p>
  * If the server sends back some {@link RaceLogEvent}s the {@link RaceLogEventsCallback} will try to reach the
- * {@link EventSendingService} and tell him about the server-side {@link RaceLogEvent}s that will be added to
- * the {@link RaceLog}. This gives the {@link EventSendingService} the chance to ignore them the next time they
+ * {@link MessageSendingService} and tell him about the server-side {@link RaceLogEvent}s that will be added to
+ * the {@link RaceLog}. This gives the {@link MessageSendingService} the chance to ignore them the next time they
  * come around. The execution of the {@link RaceLogEventsCallback} will be deferred until the service is bound.
  * </p>
  * <p>
- * If the {@link EventSendingService} cannot be reached (this is a really bad sign) the events are added to the
+ * If the {@link MessageSendingService} cannot be reached (this is a really bad sign) the events are added to the
  * {@link RaceLogEvent} immediately.
  * </p>
  */
@@ -116,7 +116,7 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
     }
 
     /**
-     * Connects to the {@link EventSendingService} and continues with execution. The service will be released afterwards.
+     * Connects to the {@link MessageSendingService} and continues with execution. The service will be released afterwards.
      */
     private class EventSendingConnection implements ServiceConnection {
 
@@ -141,7 +141,7 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName arg) {
+        public void onServiceDisconnected(ComponentName name) {
 
         }
     }

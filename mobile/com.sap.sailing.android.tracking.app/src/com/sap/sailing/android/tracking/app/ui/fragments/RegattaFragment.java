@@ -11,7 +11,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -77,8 +76,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         TextView addPhotoText = (TextView) view.findViewById(R.id.add_photo_text);
         addPhotoText.setOnClickListener(this);
 
-        setLeaderboardImageHeight(view);
-
         return view;
     }
 
@@ -90,17 +87,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         RegattaActivity activity = (RegattaActivity) getActivity();
         if (prefs.hasFailedUpload(activity.leaderboard.name)) {
             activity.showRetryUploadLayout();
-        }
-    }
-
-    private void setLeaderboardImageHeight(View view){
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            RelativeLayout imageLayout = (RelativeLayout) view.findViewById(R.id.image);
-            ViewGroup.LayoutParams layoutParams = imageLayout.getLayoutParams();
-            int displayHeight = getResources().getDisplayMetrics().heightPixels;
-            // calculate 1/3 of display height
-            layoutParams.height = displayHeight / 3;
-            imageLayout.setLayoutParams(layoutParams);
         }
     }
 
@@ -117,11 +103,19 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         if (System.currentTimeMillis() > regattaStart) {
             textView.setText(getString(R.string.regatta_in_progress));
-            threeBoxesLayout.setVisibility(View.INVISIBLE);
+            threeBoxesLayout.setVisibility(View.GONE);
+            centerViewInParent(textView);
         } else {
             textView.setText(getString(R.string.regatta_starts_in));
             threeBoxesLayout.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void centerViewInParent(View view) {
+        RelativeLayout.LayoutParams layoutParams =
+            (RelativeLayout.LayoutParams) view.getLayoutParams();
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        view.setLayoutParams(layoutParams);
     }
 
     public boolean isShowingBigCheckoutButton() {

@@ -52,6 +52,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
@@ -77,7 +78,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link IControl control points}
      * with static position information otherwise not available through {@link MarkPassingReceiver}'s events.
      */
-    static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 
     /**
      * This value indicated how many stored data packets we allow that are not in the right sequence Background: It can
