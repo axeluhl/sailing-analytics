@@ -359,10 +359,12 @@ public class Util {
     }
 
     public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        if (! map.containsKey(key)) {
-            map.put(key, new HashSet<V>());
+        Set<V> set = map.get(key);
+        if (set == null) {
+            set = new HashSet<V>();
+            map.put(key, set);
         }
-        map.get(key).add(value);
+        set.add(value);
     }
     
     public static <K, V> void removeFromAllValueSets(Map<K, Set<V>> map, V value) {
