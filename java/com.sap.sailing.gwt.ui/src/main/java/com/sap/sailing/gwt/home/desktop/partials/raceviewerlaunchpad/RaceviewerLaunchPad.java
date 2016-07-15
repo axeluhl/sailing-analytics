@@ -27,9 +27,11 @@ public abstract class RaceviewerLaunchPad extends Composite {
             addItem(data, RaceviewerLaunchPadMenuItem.WATCH_LIVE);
         } else {
             addItem(data, RaceviewerLaunchPadMenuItem.REPLAY);
+            addItem(data, RaceviewerLaunchPadMenuItem.RACE_ANALYSIS);
         }
-        addItem(data, RaceviewerLaunchPadMenuItem.RACE_ANALYSIS);
-        addItem(data, RaceviewerLaunchPadMenuItem.START_ANALYSIS);
+        if (data.isRunning() || data.isFinished()) {
+            addItem(data, RaceviewerLaunchPadMenuItem.START_ANALYSIS);
+        }
         addItem(data, RaceviewerLaunchPadMenuItem.WINNING_LANES);
     }
     
