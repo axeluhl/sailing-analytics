@@ -557,6 +557,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final WindStore windStore, final SensorFixStore sensorFixStore, TypeBasedServiceFinderFactory serviceFinderFactory,
             TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService) {
         logger.info("Created " + this);
+        this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
         this.notificationService = sailingNotificationService;
         final ConstructorParameters constructorParameters = constructorParametersProvider.apply(this);
         this.domainObjectFactory = constructorParameters.getDomainObjectFactory();
