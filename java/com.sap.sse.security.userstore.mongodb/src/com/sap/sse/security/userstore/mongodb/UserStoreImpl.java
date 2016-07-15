@@ -153,6 +153,7 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void clear() {
+        listeners.clear();
         preferences.clear();
         preferenceConverters.clear();
         preferenceObjects.clear();
