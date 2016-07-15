@@ -1,5 +1,6 @@
 package com.sap.sailing.server.notification.impl;
 
+import java.net.URL;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -171,8 +172,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     private String createRaceBoardLink(TrackedRace trackedRace, Leaderboard leaderboard, Event event,
             LeaderboardGroup leaderboardGroup) {
         RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-        // TODO where to get the base URL?
-        String link = "/gwt/RaceBoard.html?eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
+        String link = getBaseURL(event).toString() + "/gwt/RaceBoard.html?eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
                 + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&raceName="
                 + raceIdentifier.getRaceName() + "&showMapControls=true&viewShowNavigationPanel=true&regattaName="
                 + raceIdentifier.getRegattaName();
@@ -183,13 +183,17 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
         return createHomeRegattaLink("races", leaderboard, event);
     }
     
+    private URL getBaseURL(final Event event) {
+        // TODO where to get the base URL?
+        return event.getBaseURL();
+    }
+    
     private String createHomeLeaderboardLink(Leaderboard leaderboard, Event event) {
         return createHomeRegattaLink("leaderboard", leaderboard, event);
     }
     
     private String createHomeRegattaLink(String tab, Leaderboard leaderboard, Event event) {
-        // TODO where to get the base URL?
-        String link = "/gwt/Home.html#/regatta/" + tab + "/:eventId=" + event.getId() + "&regattaId="
+        String link = getBaseURL(event).toString() + "/gwt/Home.html#/regatta/" + tab + "/:eventId=" + event.getId() + "&regattaId="
                 + leaderboard.getName();
         return link;
     }

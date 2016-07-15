@@ -2672,12 +2672,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Event addEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venue, boolean isPublic, UUID id) {
         Event result = createEventWithoutReplication(eventName, eventDescription, startDate, endDate, venue, isPublic,
-                id, /* officialWebsiteURL */null, /* sailorsInfoWebsiteURLAsString */null,
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList());
+                id, /* officialWebsiteURL */null, /* baseURL */null,
+                /* sailorsInfoWebsiteURLAsString */null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList());
         replicate(new CreateEvent(eventName, eventDescription, startDate, endDate, venue, isPublic, id,
-                /* officialWebsiteURLAsString */null, /* sailorsInfoWebsiteURLAsString */null,
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
-                /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
+                /* officialWebsiteURLAsString */null, /*baseURL*/null,
+                /* sailorsInfoWebsiteURLAsString */null, /* images */Collections.<ImageDescriptor> emptyList(),
+                /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         return result;
     }
 
@@ -2688,12 +2688,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate,
-            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs, 
-            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
+            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, URL baseURL, 
+            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
         result.setDescription(eventDescription);
         result.setOfficialWebsiteURL(officialWebsiteURL);
+        result.setBaseURL(baseURL);
         result.setSailorsInfoWebsiteURLs(sailorsInfoWebsiteURLs);
         result.setImages(images);
         result.setVideos(videos);
@@ -2711,8 +2712,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs,
-            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL baseURL,
+            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         final Event event = eventsById.get(id);
         if (event == null) {
             throw new IllegalArgumentException("Sailing event with ID " + id + " does not exist.");
@@ -2735,6 +2736,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         event.setLeaderboardGroups(leaderboardGroups);
         event.setOfficialWebsiteURL(officialWebsiteURL);
+        event.setBaseURL(baseURL);
         event.setSailorsInfoWebsiteURLs(sailorsInfoWebsiteURLs);
         event.setImages(images);
         event.setVideos(videos);

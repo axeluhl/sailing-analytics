@@ -1131,6 +1131,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSelectAScoringResult();
     String timeZone();
     String eventOfficialWebsiteURL();
+    String eventBaseURL();
     String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();
     String eventLogoImageURL();
