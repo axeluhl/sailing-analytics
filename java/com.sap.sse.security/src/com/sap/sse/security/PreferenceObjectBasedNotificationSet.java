@@ -80,6 +80,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
             this.tracker = null;
         } else {
             this.tracker = new ServiceTracker<UserStore, UserStore>(context, UserStore.class, new Cutomizer());
+            this.tracker.open();
         }
         this.lock = new NamedReentrantReadWriteLock(getClass().getName()+" for "+key, /* fair */ false);
     }
