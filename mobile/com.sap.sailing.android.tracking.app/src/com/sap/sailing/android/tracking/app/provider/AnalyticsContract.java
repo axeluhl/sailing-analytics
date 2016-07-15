@@ -30,9 +30,16 @@ public class AnalyticsContract {
         String EVENT_CHECKIN_DIGEST = "event_checkin_digest";
     }
 
-    interface CheckinUriColumns {
+    interface markColums {
+        String MARK_ID = "mark_id";
+        String MARK_NAME = "mark_name";
+        String MARK_CHECKIN_DIGEST = "mark_checkin_digest";
+    }
+
+    interface CheckinColumns {
         String CHECKIN_URI_VALUE = "uri_value";
         String CHECKIN_URI_CHECKIN_DIGEST = "uri_checkin_digest";
+        String CHECKIN_TYPE = "checkin_type";
     }
 
     public static final String CONTENT_AUTHORITY = "com.sap.sailing.android.tracking.app.provider.db";
@@ -40,9 +47,10 @@ public class AnalyticsContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     private static final String PATH_COMPETITOR = "competitors";
-    private static final String PATH_EVENT = "events";
-    private static final String PATH_LEADERBOARD = "leaderboards";
-    private static final String PATH_CHECKIN_URI = "checkin_uris";
+    public static final String PATH_EVENT = "events";
+    public static final String PATH_LEADERBOARD = "leaderboards";
+    public static final String PATH_CHECKIN = "checkin_uris";
+    private static final String PATH_MARK = "marks";
 
     public static class LeaderboardsEventsJoined {
         public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("leaderboards_events_joined")
@@ -52,6 +60,11 @@ public class AnalyticsContract {
     public static class EventLeaderboardCompetitorJoined {
         public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath("event_leaderboard_competitor_joined").build();
+    }
+
+    public static class EventLeaderboardMarkJoined {
+        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+            .appendPath("event_leaderboard_mark_joined").build();
     }
 
     public static class Competitor implements CompetitorColumns, BaseColumns {
@@ -116,8 +129,8 @@ public class AnalyticsContract {
         }
     }
 
-    public static class CheckinUri implements CheckinUriColumns, BaseColumns {
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHECKIN_URI).build();
+    public static class Checkin implements CheckinColumns, BaseColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_CHECKIN).build();
 
         public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
                 + "/vnd.sap_sailing_analytics.uri";
@@ -130,6 +143,23 @@ public class AnalyticsContract {
         }
 
         public static String getCheckinUriId(Uri uri) {
+            return uri.getPathSegments().get(1);
+        }
+    }
+
+    public static class Mark implements markColums, BaseColumns {
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MARK).build();
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
+            + "/vnd.sap_sailing_analytics.Mark";
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
+            + "/vnd.sap_sailing_analytics.Mark";
+        public static final String DEFAULT_SORT = BaseColumns._ID + " ASC ";
+
+        public static Uri buildMarkUri(String leaderboardId) {
+            return CONTENT_URI.buildUpon().appendPath(leaderboardId).build();
+        }
+
+        public static String getMarkId(Uri uri) {
             return uri.getPathSegments().get(1);
         }
     }

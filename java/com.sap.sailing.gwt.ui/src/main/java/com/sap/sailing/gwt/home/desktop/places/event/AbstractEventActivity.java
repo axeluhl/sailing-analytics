@@ -9,6 +9,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -144,6 +145,15 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
         return getRaceViewerURL(raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(),
                     raceMetadata.getRegattaAndRaceIdentifier());
+    }
+    
+    @Override
+    public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
+        RaceIdentifier raceIdentifier = raceMetadata.getRegattaAndRaceIdentifier();
+        Map<String, String> params = createRaceBoardLinkParameters(raceMetadata.getLeaderboardName(),
+                raceMetadata.getLeaderboardGroupName(), raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
+        params.put("mode", mode);
+        return EntryPointLinkFactory.createRaceBoardLink(params);
     }
     
     @Override

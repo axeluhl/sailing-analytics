@@ -19,7 +19,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
@@ -108,7 +108,7 @@ public abstract class AbstractHomeFragment extends BaseFragment {
      *
      * @param checkinData
      */
-    public abstract void displayUserConfirmationScreen(final AbstractCheckinData data);
+    public abstract void displayUserConfirmationScreen(final BaseCheckinData data);
 
     protected void clearScannedQRCodeInPrefs() {
         prefs.setLastScannedQRCode(null);

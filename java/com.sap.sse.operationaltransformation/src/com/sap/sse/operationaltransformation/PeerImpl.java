@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+
 
 /**
  * A very simple peer implementation for operational transformations that starts
@@ -64,7 +66,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	this.transformer = transformer;
 	currentState = initialState;
 	this.role = role;
-	this.merger = Executors.newSingleThreadExecutor();
+	this.merger = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
     }
     
     public PeerImpl(String name, Transformer<S, O> transformer, S initialState, Role role) {
@@ -82,7 +84,7 @@ public class PeerImpl<O extends Operation<S>, S> implements Peer<O, S> {
 	S initialState = server.addPeer(this);
         currentState = initialState;
 	this.role = Role.CLIENT;
-	this.merger = Executors.newSingleThreadExecutor();
+	this.merger = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 	addPeer(server);
     }
 

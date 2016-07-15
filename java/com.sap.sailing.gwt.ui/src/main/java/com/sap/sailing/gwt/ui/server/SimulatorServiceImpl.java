@@ -86,6 +86,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
@@ -110,7 +111,8 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
         Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
         /* maximumPoolSize */THREAD_POOL_SIZE,
         /* keepAliveTime */60, TimeUnit.SECONDS,
-        /* workQueue */new LinkedBlockingQueue<Runnable>());
+        /* workQueue */new LinkedBlockingQueue<Runnable>(),
+        new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
         // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, null);        
     }
