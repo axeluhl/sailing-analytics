@@ -7,7 +7,6 @@ import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
@@ -49,8 +48,9 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     private final BoatClassResultsNotificationSet boatClassResults;
     private final BoatClassUpcomingRaceNotificationSet boatClassUpcomingRace;
     private final CompetitorResultsNotificationSet competitorResults;
+    private final URL defaultBaseURL;
 
-    public SailingNotificationServiceImpl(BundleContext bundleContext, MailQueue mailQueue) {
+    public SailingNotificationServiceImpl(BundleContext bundleContext, MailQueue mailQueue) throws MalformedURLException {
         this(mailQueue,
                 new BoatClassResultsNotificationSet(bundleContext),
                 new BoatClassUpcomingRaceNotificationSet(bundleContext),
@@ -59,8 +59,9 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     
     /**
      * Constructor used for unit tests to not need BundelContext but directly work with a given UserStore.
+     * @throws MalformedURLException 
      */
-    public SailingNotificationServiceImpl(UserStore userStore, MailQueue mailQueue) {
+    public SailingNotificationServiceImpl(UserStore userStore, MailQueue mailQueue) throws MalformedURLException {
         this(mailQueue,
                 new BoatClassResultsNotificationSet(userStore),
                 new BoatClassUpcomingRaceNotificationSet(userStore),
@@ -69,10 +70,11 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
 
     public SailingNotificationServiceImpl(MailQueue mailQueue, BoatClassResultsNotificationSet boatClassResults,
             BoatClassUpcomingRaceNotificationSet boatClassUpcomingRace,
-            CompetitorResultsNotificationSet competitorResults) {
+            CompetitorResultsNotificationSet competitorResults) throws MalformedURLException {
         this.mailQueue = mailQueue;
         this.messages = new ResourceBundleStringMessagesImpl(STRING_MESSAGES_BASE_NAME,
                 this.getClass().getClassLoader());
+        this.defaultBaseURL = new URL("https://www.sapsailing.com");
         
         toStop.add(this.boatClassResults = boatClassResults);
         toStop.add(this.boatClassUpcomingRace = boatClassUpcomingRace);
@@ -109,21 +111,22 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
             // if multiple LeaderboardGroups of the single event reference the same leaderboard, we just use the
             // first LeaderboardGroup. This could be a non optimal match but helps to e.g. construct valid links.
             return new Pair<>(Util.get(foundEvents, 0), Util.get(foundLeaderboardGroups, 0));
-        } else if (foundEventsCount > 1 && foundLeaderboardGroups.size() == 1) {
+        } else if (foundEventsCount > 1) {
             // could be a series
-            LeaderboardGroup leaderboardGroup = Util.get(foundLeaderboardGroups, 0);
-            if (leaderboardGroup.hasOverallLeaderboard()) {
-                CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
-                if (defaultCourseArea != null) {
-                    for (Event event : foundEvents) {
-                        if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
-                            return new Pair<>(event, leaderboardGroup);
+            for (final LeaderboardGroup leaderboardGroup : foundLeaderboardGroups) {
+                if (leaderboardGroup.hasOverallLeaderboard()) {
+                    CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
+                    if (defaultCourseArea != null) {
+                        for (Event event : foundEvents) {
+                            if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
+                                return new Pair<>(event, leaderboardGroup);
+                            }
                         }
                     }
                 }
                 // Event <-> Leaderboard association is not set up correctly. The UI will show the Leaderboard for
                 // multiple Events. So any of the found Events is ok for this case.
-                return new Pair<>(Util.get(foundEvents, 0), leaderboardGroup);
+                return new Pair<>(Util.get(foundEvents, 0), Util.get(foundLeaderboardGroups, 0));
             }
         }
         // No associated event found or association is ambiguous
@@ -190,14 +193,9 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
      * to {@code https://www.sapsailing.com} if no base URL has been provided for the event.
      */
     private URL getBaseURL(final Event event) {
-        URL result;
+        final URL result;
         if (event.getBaseURL() == null) {
-            try {
-                result = new URL("https://www.sapsailing.com");
-            } catch (MalformedURLException e) {
-                logger.log(Level.WARNING, "Strange... why isn't https://www.sapsailing.com a valid URL?", e);
-                result = null;
-            }
+            result = defaultBaseURL;
         } else {
             result = event.getBaseURL();
         }
@@ -215,7 +213,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     }
 
     @Override
-    public void notifyUserOnBoatClassRaceChangesStateToFinishing(BoatClass boatClass, TrackedRace trackedRace,
+    public void notifyUserOnBoatClassRaceChangesStateToFinished(BoatClass boatClass, TrackedRace trackedRace,
             Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
             String link = createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup);
@@ -223,13 +221,13 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassResults) {
                 @Override
                 protected String constructSubject(BoatClass objectToNotifyAbout, Locale locale) {
-                    return messages.get(locale, "boatClassRaceFinishingSubject", boatClass.getDisplayName());
+                    return messages.get(locale, "boatClassRaceFinishedSubject", boatClass.getDisplayName());
                 }
 
                 @Override
                 protected String constructBody(BoatClass objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
-                    return messages.get(locale, "boatClassRaceFinishingBody", boatClass.getDisplayName(),
+                    return messages.get(locale, "boatClassRaceFinishedBody", boatClass.getDisplayName(),
                             raceDescription, link);
                 }
             });
@@ -238,6 +236,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
 
     @Override
     public void notifyUserOnBoatClassWhenScoreCorrectionsAreAvailable(BoatClass boatClass, Leaderboard leaderboard) {
+        // TODO don't send notifications when a notification for the same boatClass / leaderboard has already been sent shortly before
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
             String link = createHomeLeaderboardLink(leaderboard, event);
 

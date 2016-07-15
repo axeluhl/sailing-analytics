@@ -12,10 +12,9 @@ import com.sap.sse.common.TimePoint;
 public interface SailingNotificationService {
 
     /**
-     * Called when {@link RaceState} changes state to finishing/finished (?).
+     * Called when {@link RaceState} changes state to finished.
      */
-    void notifyUserOnBoatClassRaceChangesStateToFinishing(BoatClass boatClass, TrackedRace trackedRace, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet);
+    void notifyUserOnBoatClassRaceChangesStateToFinished(BoatClass boatClass, TrackedRace trackedRace, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet);
     
     /**
      * Called on score correction for a race with BoatClass if the last score correction was more than one minute.

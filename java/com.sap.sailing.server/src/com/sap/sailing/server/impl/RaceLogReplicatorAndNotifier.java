@@ -18,21 +18,28 @@ import com.sap.sailing.server.operationaltransformation.RecordRaceLogEventOnLead
 import com.sap.sailing.server.operationaltransformation.RecordRaceLogEventOnRegatta;
 
 /**
- * Being a {@link RaceColumnListener}, this replicator must be added to all {@link RaceColumn}s managing a
+ * Being a {@link RaceColumnListener}, this replicator and notifier must be added to all {@link RaceColumn}s managing a
  * {@link RaceLog} so as to be notified about changes to the race log. This largely happens by callbacks to the
  * {@link #raceLogEventAdded(RaceColumn, RaceLogIdentifier, RaceLogEvent)} method. This object will then use the
  * {@link Replicator} passed to this object's constructor and send a {@link RecordRaceLogEventOnLeaderboard} or a
- * {@link RecordRaceLogEventOnRegatta} operation to all replicas.
+ * {@link RecordRaceLogEventOnRegatta} operation to all replicas.<p>
+ * 
+ * Since all {@link RaceColumn}s can manage a {@link RaceLog}, this object is registered on all relevant
+ * {@link RaceColumn}s. This also lets this object conveniently being informed about all other events that
+ * a {@link RaceColumnListener} is notified about, some of which contain interesting information regarding
+ * the notifying of users interested in certain types of changes. For example, when a {@link TrackedRace}
+ * {@link #trackedRaceLinked(RaceColumn, Fleet, TrackedRace) is linked} to a race column, this may be of
+ * interest to some users.
  * 
  * @author Axel Uhl (d043530)
  * 
  */
-public class RaceLogReplicator implements RaceColumnListener {
+public class RaceLogReplicatorAndNotifier implements RaceColumnListener {
     private static final long serialVersionUID = 7190510926643574068L;
     
     private final Replicator service;
     
-    public RaceLogReplicator(Replicator service) {
+    public RaceLogReplicatorAndNotifier(Replicator service) {
         this.service = service;
     }
 

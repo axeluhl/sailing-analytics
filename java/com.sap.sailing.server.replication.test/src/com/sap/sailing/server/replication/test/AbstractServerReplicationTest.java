@@ -55,7 +55,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                     @Override public DomainFactory getBaseDomainFactory() { return baseDomainFactory; }
                     @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
                 };
-            }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, null, null);
+            }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, null, null, /* sailingNotificationService */ null);
         }
 
         @Override
@@ -74,7 +74,7 @@ public abstract class AbstractServerReplicationTest extends com.sap.sse.replicat
                             @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
                         };
                     }, MediaDBFactory.INSTANCE.getMediaDB(mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE,
-                    /* serviceFinderFactory */ null, null);
+                    /* serviceFinderFactory */ null, null, /* sailingNotificationService */ null);
         }
     }
 }

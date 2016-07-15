@@ -29,10 +29,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -93,6 +96,7 @@ import com.sap.sailing.util.impl.RaceColumnListeners;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -1938,6 +1942,25 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return new NumberOfCompetitorsFetcherImpl();
     }
     
+    @Override
+    public Pair<RaceColumn, Fleet> getRaceColumnAndFleet(TrackedRace trackedRace) {
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            for (final Fleet fleet : raceColumn.getFleets()) {
+                if (raceColumn.getTrackedRace(fleet) == trackedRace) {
+                    return new Pair<>(raceColumn, fleet);
+                }
+            }
+        }
+        return null;
+    }
+
+
+    @Override
+    public BoatClass getBoatClass() {
+        return Util.getDominantObject(StreamSupport.stream(getCompetitors().spliterator(), /* parallel */ false).
+                map(c->c.getBoat().getBoatClass()).collect(Collectors.toList()));
+    }
+
     protected abstract LeaderboardType getLeaderboardType();
     
 }
