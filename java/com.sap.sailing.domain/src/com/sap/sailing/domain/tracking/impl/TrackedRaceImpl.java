@@ -1101,7 +1101,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (getEndOfRace() == null) {
                 if (getTimePointOfNewestEvent() != null) {
                     endOfLivePeriod = getTimePointOfNewestEvent().plus(
-                            TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                            TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).plus(getDelayToLiveInMillis());
                 } else {
                     endOfLivePeriod = null;
                 }
