@@ -1,15 +1,12 @@
 package com.sap.sailing.server.notification.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleContext;
@@ -284,13 +281,7 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
 
 
     private String encodeLink(String link) {
-        String encodedLink;
-        try {
-            encodedLink = URLEncoder.encode(link, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            logger.log(Level.WARNING, "Why is UTF-8 not known?", e);
-            encodedLink = link;
-        }
+        String encodedLink = "<a href=\""+link+"\">"+link.replace("&", "&amp;")+"</a>";
         return encodedLink;
     }
 
