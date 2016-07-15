@@ -48,7 +48,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
     public void onBrowserEvent(Event event) {
         if (race.hasValidTrackingData() && event.getTypeInt() == Event.ONCLICK) {
             this.getElement().scrollIntoView();
-            panel.setWidget(new RaceviewerLaunchPad(race) {
+            panel.setWidget(new RaceviewerLaunchPad(race, panel) {
                 @Override
                 protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String mode) {
                     return presenter.getRaceViewerURL(data, mode);

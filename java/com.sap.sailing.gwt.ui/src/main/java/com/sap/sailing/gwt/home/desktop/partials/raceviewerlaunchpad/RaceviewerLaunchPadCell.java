@@ -54,7 +54,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
             ValueUpdater<T> valueUpdater) {
         if (data.hasValidTrackingData() && BrowserEvents.CLICK.equals(event.getType())
                 && parent.getFirstChildElement().isOrHasChild(Element.as(event.getEventTarget()))) {
-            panel.setWidget(new RaceviewerLaunchPad(data) {
+            panel.setWidget(new RaceviewerLaunchPad(data, panel) {
                 @Override
                 protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String mode) {
                     return presenter.getRaceViewerURL(data, mode);
