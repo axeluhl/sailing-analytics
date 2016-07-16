@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 
 public abstract class RaceviewerLaunchPad extends Composite {
 
@@ -54,11 +55,11 @@ public abstract class RaceviewerLaunchPad extends Composite {
     }
     
     private enum RaceviewerLaunchPadMenuItem {
-        REPLAY(StringMessages.INSTANCE.replay(), "launch-replay", "PLAYER"),
-        WATCH_LIVE(StringMessages.INSTANCE.watchLive(), "launch-play", "PLAYER"),
-        RACE_ANALYSIS(StringMessages.INSTANCE.raceAnalysis(), "launch-loupe", "FULL_ANALYSIS"),
-        START_ANALYSIS(StringMessages.INSTANCE.startAnalysis(), "launch-start", "START_ANALYSIS"),
-        WINNING_LANES(StringMessages.INSTANCE.winningLanes(), "launch-winning-lanes", "WINNING_LANES");
+        REPLAY(StringMessages.INSTANCE.replay(), "launch-replay", RaceBoardModes.PLAYER.name()),
+        WATCH_LIVE(StringMessages.INSTANCE.watchLive(), "launch-play", RaceBoardModes.PLAYER.name()),
+        RACE_ANALYSIS(StringMessages.INSTANCE.raceAnalysis(), "launch-loupe", RaceBoardModes.FULL_ANALYSIS.name()),
+        START_ANALYSIS(StringMessages.INSTANCE.startAnalysis(), "launch-start", RaceBoardModes.START_ANALYSIS.name()),
+        WINNING_LANES(StringMessages.INSTANCE.winningLanes(), "launch-winning-lanes", RaceBoardModes.WINNING_LANES.name());
         
         private String label, icon, raceBoardMode; 
         
