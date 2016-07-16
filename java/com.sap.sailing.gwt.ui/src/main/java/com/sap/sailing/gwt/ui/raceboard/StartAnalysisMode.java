@@ -53,7 +53,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
 
     @Override
     protected void updateCompetitorSelection() {
-        updateCompetitorSelection(/* howManyTopCompetitorsInRaceToSelect */ 3, getLeaderboard());
+        updateCompetitorSelection(/* howManyTopCompetitorsInRaceToSelect */ 3, getLeaderboardForSpecificTimePoint());
     }
 
     private void adjustMapSettings() {
@@ -166,6 +166,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.SPEED_OVER_GROUND_AT_RACE_START);
         raceDetailsToShow.add(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START);
         raceDetailsToShow.add(DetailType.START_TACK);
+        raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
         raceDetailsToShow.remove(DetailType.DISPLAY_LEGS);
         final LeaderboardSettings newSettings = new LeaderboardSettings(existingSettings.getManeuverDetailsToShow(),
                 existingSettings.getLegDetailsToShow(),

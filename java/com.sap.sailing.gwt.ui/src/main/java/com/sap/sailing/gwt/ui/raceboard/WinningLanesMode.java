@@ -33,7 +33,7 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
     @Override
     protected void updateCompetitorSelection() {
         final int howManyCompetitorsToSelect = getHowManyCompetitorsToSelect(getLeaderboardPanel().getCompetitors(getRaceIdentifier()));
-        updateCompetitorSelection(howManyCompetitorsToSelect, getLeaderboard());
+        updateCompetitorSelection(howManyCompetitorsToSelect, getLeaderboardForSpecificTimePoint());
     }
 
     private void adjustLeaderboardSettings() {
