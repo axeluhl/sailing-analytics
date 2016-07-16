@@ -19,12 +19,6 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
     private boolean leaderboardSettingsAdjusted;
     private boolean timerAdjusted;
     
-    @Override
-    public void applyTo(RaceBoardPanel raceBoardPanel) {
-        super.applyTo(raceBoardPanel);
-        stopReceivingCompetitorsInRace();
-    }
-
     /**
      * Listening for race times info continues until information about the end of the race has been received. The leaderboard
      * settings are adjusted as soon as a valid leaderboard has been received.

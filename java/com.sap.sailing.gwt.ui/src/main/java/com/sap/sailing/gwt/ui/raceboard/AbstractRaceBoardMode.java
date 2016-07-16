@@ -8,7 +8,6 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
@@ -50,7 +49,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesInfoProviderListener, LeaderboardUpdateListener, CompetitorsForRaceDefinedListener {
+public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesInfoProviderListener, LeaderboardUpdateListener {
     private Timer timer;
     private RegattaAndRaceIdentifier raceIdentifier;
     private RaceTimePanel raceTimePanel;
@@ -61,7 +60,6 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
     private RaceTimesInfoDTO raceTimesInfoForRace;
     private LeaderboardDTO leaderboard;
     private LeaderboardDTO leaderboardForSpecificTimePoint;
-    private Iterable<CompetitorDTO> competitorsInRace;
     private RaceColumnDTO raceColumn;
     
     @Override
@@ -73,7 +71,6 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         this.leaderboardPanel.addLeaderboardUpdateListener(this);
         this.timer = raceBoardPanel.getTimer();
         this.raceIdentifier = raceBoardPanel.getSelectedRaceIdentifier();
-        raceBoardPanel.getMap().addCompetitorsForRaceDefinedListener(this);
     }
     
     /**
@@ -172,16 +169,6 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         trigger();
     }
     
-    @Override
-    public void competitorsForRaceDefined(Iterable<CompetitorDTO> competitorsInRace) {
-        this.competitorsInRace = competitorsInRace;
-        trigger();
-    }
-    
-    protected void stopReceivingCompetitorsInRace() {
-        raceBoardPanel.getMap().removeCompetitorsForRaceDefinedListener(this);
-    }
-
     protected Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> getRaceTimesInfo() {
         return raceTimesInfo;
     }
@@ -196,10 +183,6 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
 
     protected LeaderboardDTO getLeaderboardForSpecificTimePoint() {
         return leaderboardForSpecificTimePoint;
-    }
-
-    protected Iterable<CompetitorDTO> getCompetitorsInRace() {
-        return competitorsInRace;
     }
 
     protected RaceColumnDTO getRaceColumn() {
