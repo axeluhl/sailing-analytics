@@ -248,8 +248,10 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                     AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event.EVENT_NAME,
                     AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event.EVENT_SERVER,
                     AnalyticsContract.PATH_LEADERBOARD + "." + AnalyticsContract.Leaderboard.LEADERBOARD_NAME,
+                    AnalyticsContract.PATH_COMPETITOR + "." + AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME,
+                    AnalyticsContract.PATH_MARK + "." + AnalyticsContract.Mark.MARK_NAME,
                     AnalyticsContract.PATH_CHECKIN + "." + AnalyticsContract.Checkin.CHECKIN_TYPE};
-                return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsEventsJoined.CONTENT_URI, projection, null, null, null);
+                return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsEventsCompetitorsMarksJoined.CONTENT_URI, projection, null, null, null);
 
             default:
                 return null;
@@ -280,6 +282,10 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         }
     }
 
+    private void reloadList() {
+        getLoaderManager().restartLoader(REGATTA_LOADER, null, this);
+    }
+
     private boolean showDeleteConfirmationDialog(int position) {
         // -1, because there's a header row
         Cursor cursor = (Cursor) adapter.getItem(position - 1);
@@ -308,8 +314,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                 StartActivity startActivity = (StartActivity) getActivity();
                 startActivity.dismissProgressDialog();
                 DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
-                adapter.swapCursor(null);
-                adapter.notifyDataSetInvalidated();
+                reloadList();
             }
         };
         NetworkHelperFailureListener failureListener = new NetworkHelperFailureListener() {
