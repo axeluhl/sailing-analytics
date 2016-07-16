@@ -24,6 +24,12 @@ public class PlayerMode extends AbstractRaceBoardMode {
 
     private boolean timerAdjusted;
     
+    @Override
+    public void applyTo(RaceBoardPanel raceBoardPanel) {
+        super.applyTo(raceBoardPanel);
+        stopReceivingCompetitorsInRace();
+    }
+
     private void adjustLeaderboardSettings() {
         final LeaderboardSettings existingSettings = getLeaderboardPanel().getSettings();
         final List<DetailType> raceDetailsToShow = new ArrayList<>(existingSettings.getRaceDetailsToShow());

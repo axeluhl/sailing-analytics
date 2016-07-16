@@ -30,6 +30,8 @@ import com.sap.sse.gwt.client.player.Timer;
  * {@link #trigger} method each time (abstract in this class). Subclasses can and should do the following:
  * 
  * <ul>
+ * <li>Redefine {@link #applyTo(RaceBoardPanel)} and call the {@code stopReceiving...} methods for those types of
+ *     events they don't need</li>
  * <li>Redefine specific callback methods in case more processing is required or canceling the listener is desired only
  * when certain preconditions are met</li>
  * <li>Implement the {@link #trigger} method to check if all information required has been received by now and then use
