@@ -4,7 +4,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -18,8 +20,10 @@ public abstract class RaceviewerLaunchPad extends Composite {
 
     @UiField RaceviewerLaunchPadResources local_res;
     @UiField DivElement itemContainerUi;
+    private final PopupPanel parent;
 
-    public RaceviewerLaunchPad(SimpleRaceMetadataDTO data) {
+    public RaceviewerLaunchPad(SimpleRaceMetadataDTO data, final PopupPanel parent) {
+        this.parent = parent;
         initWidget(uiBinder.createAndBindUi(this));
         local_res.css().ensureInjected();
         if (!data.isFinished()) {
@@ -27,10 +31,21 @@ public abstract class RaceviewerLaunchPad extends Composite {
             addItem(data, RaceviewerLaunchPadMenuItem.WATCH_LIVE);
         } else {
             addItem(data, RaceviewerLaunchPadMenuItem.REPLAY);
+            addItem(data, RaceviewerLaunchPadMenuItem.RACE_ANALYSIS);
         }
-        addItem(data, RaceviewerLaunchPadMenuItem.RACE_ANALYSIS);
-        addItem(data, RaceviewerLaunchPadMenuItem.START_ANALYSIS);
+        if (data.isRunning() || data.isFinished()) {
+            addItem(data, RaceviewerLaunchPadMenuItem.START_ANALYSIS);
+        }
         addItem(data, RaceviewerLaunchPadMenuItem.WINNING_LANES);
+        sinkEvents(Event.ONCLICK);
+    }
+    
+    @Override
+    public void onBrowserEvent(final Event event) {
+        if (event.getTypeInt() == Event.ONCLICK) {
+            parent.hide();
+        }
+        super.onBrowserEvent(event);
     }
     
     private void addItem(SimpleRaceMetadataDTO data, RaceviewerLaunchPadMenuItem item) {
