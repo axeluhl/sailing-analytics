@@ -100,7 +100,8 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
             // has caused it to be delivered; there is an early request for "now" and maybe even another request for start of race;
             // therefore, we need to fire our own request for the time point desired and make sure we get the right
             // LeaderboardDTO to determine the competitor ordering for the current race.
-            final GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(getLeaderboardPanel().getSailingService(), getLeaderboardPanel().getLeaderboard().name,
+            final GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(
+                    getLeaderboardPanel().getSailingService(), getLeaderboardPanel().getLeaderboard().name,
                     getTimer().getTime(), raceColumnName, /* addOverallDetails */ false,
                     getLeaderboard(), /* fillTotalPointsUncorrected */ false,
                     /* timerToAdjustOffsetIn */ getTimer(), /* errorReporter */ null, StringMessages.INSTANCE);
