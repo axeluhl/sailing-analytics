@@ -163,7 +163,7 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
      *         <code>false</code> otherwise
      */
     public boolean isRunning() {
-        return getViewState() == RaceViewState.FINISHED;
+        return getViewState() == RaceViewState.RUNNING;
     }
     
     
