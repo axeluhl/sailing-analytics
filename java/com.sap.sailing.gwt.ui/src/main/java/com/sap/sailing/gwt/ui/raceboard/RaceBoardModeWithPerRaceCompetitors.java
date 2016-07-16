@@ -20,7 +20,6 @@ public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBo
     @Override
     public void competitorsForRaceDefined(Iterable<CompetitorDTO> competitorsInRace) {
         this.competitorsInRace = competitorsInRace;
-        updateCompetitorSelection();
     }
 
     protected Iterable<CompetitorDTO> getCompetitorsInRace() {
@@ -31,28 +30,19 @@ public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBo
         return leaderboard;
     }
 
-    protected void setLeaderboard(LeaderboardDTO leaderboard) {
-        this.leaderboard = leaderboard;
-    }
-
-    @Override
-    public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        super.updatedLeaderboard(leaderboard);
-        setLeaderboard(leaderboard);
-    }
-
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
         this.raceColumn = raceColumn;
+        trigger();
     }
 
     protected RaceColumnDTO getRaceColumn() {
         return raceColumn;
     }
 
-    protected void updateCompetitorSelection(final int howManyTopCompetitorsInRaceToSelect) {
-        if (getLeaderboard() != null) {
-            final List<CompetitorDTO> competitorsFromBestToWorstInColumn = getLeaderboard().getCompetitorsFromBestToWorst(getRaceColumn());
+    protected void updateCompetitorSelection(final int howManyTopCompetitorsInRaceToSelect, LeaderboardDTO leaderboard) {
+        if (leaderboard != null) {
+            final List<CompetitorDTO> competitorsFromBestToWorstInColumn = leaderboard.getCompetitorsFromBestToWorst(getRaceColumn());
             final Set<CompetitorDTO> competitorsToSelect = new HashSet<>();
             int numberOfSelectedCompetitors = 0;
             for (int i=0; numberOfSelectedCompetitors<howManyTopCompetitorsInRaceToSelect && i<competitorsFromBestToWorstInColumn.size(); i++) {
