@@ -47,6 +47,9 @@ public class PlayerMode extends AbstractRaceBoardMode {
     
     @Override
     protected void trigger() {
+        if (getTimer().getPlayMode() == PlayModes.Live) {
+            stopReceivingRaceTimesInfos(); // this trigger wouldn't be stopped otherwise
+        }
         if (!adjustedLeaderboardSettings && getLeaderboard() != null) {
             adjustedLeaderboardSettings = true;
             // it's important to first unregister the listener before updateSettings is called because
