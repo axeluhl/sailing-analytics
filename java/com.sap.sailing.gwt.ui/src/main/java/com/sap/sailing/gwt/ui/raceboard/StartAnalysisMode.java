@@ -108,6 +108,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
             if (getTimer().getPlayMode() == PlayModes.Live) {
                 getTimer().setPlayMode(PlayModes.Replay);
             }
+            getTimer().pause();
             // the following call will always trigger a leaderboard load and therefore a callback
             // to updatedLeaderboard; therefore, updatedLeaderboard can decide when it's time to
             // trigger the chart display and the map settings application
