@@ -125,7 +125,7 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
         if (getLeaderboardForSpecificTimePoint() == null && tailLength != null && getLeaderboard() != null && getRaceColumn() != null) {
             loadLeaderboardForSpecificTimePoint(getLeaderboard().name, getRaceColumn().getName(), getTimer().getTime());
         }
-        if (!adjustedCompetitorSelection && getLeaderboardForSpecificTimePoint() != null) {
+        if (!adjustedCompetitorSelection && getLeaderboardForSpecificTimePoint() != null && getCompetitorsInRace() != null) {
             adjustedCompetitorSelection = true;
             updateCompetitorSelection();
         }
