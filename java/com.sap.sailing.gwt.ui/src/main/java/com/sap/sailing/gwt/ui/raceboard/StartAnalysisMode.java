@@ -125,6 +125,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                         final boolean simulationOverlayFound = getRaceBoardPanel().getMap().getSimulationOverlay() != null;
                         if (simulationOverlayFound) {
                             if (isCompetitorChartEnabled()) {
+                                getRaceBoardPanel().setCompetitorChartVisible(true);
                                 final MultiCompetitorRaceChartSettings newCompetitorChartSettings = new MultiCompetitorRaceChartSettings(
                                         new ChartSettings(/* stepSizeInMillis */ 1000), DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                                         /* no second series */ null);
@@ -149,9 +150,6 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
             competitorSelectionUpdated = true;
             stopReceivingCompetitorsInRace();
             updateCompetitorSelection();
-            if (isCompetitorChartEnabled()) {
-                getRaceBoardPanel().setCompetitorChartVisible(true);
-            }
         }
     }
 
