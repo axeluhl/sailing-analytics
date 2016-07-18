@@ -314,7 +314,6 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
                     return new NotificationMailTemplate(
                             messages.get(locale, "boatClassScoreCorrectionSubject", competitor.getName()), 
                             messages.get(locale, "boatClassScoreCorrectionBody", competitor.getName(), leaderboardDescription),
-                            createHomeLeaderboardLink(leaderboard, event, locale),
                             createHomeLeaderboardLink(leaderboard, event, locale));
                 }
             });
