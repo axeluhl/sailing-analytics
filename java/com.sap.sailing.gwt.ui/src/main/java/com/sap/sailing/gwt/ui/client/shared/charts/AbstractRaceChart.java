@@ -225,16 +225,8 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
         changeMinMaxAndExtremesInterval(zoomStartTimepoint, zoomEndTimepoint, true);
-        // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
-        this.showResetZoom();
+        chart.showResetZoom(); // Patched method
     }
-    
-    // Because there is no method within highcharts Java API, the respective JS method is called via JSNI. 
-    private native void showResetZoom() /*-{
-        var chartObject = this.@com.sap.sailing.gwt.ui.client.shared.charts.AbstractRaceChart::chart;
-        var chart = chartObject.@org.moxieapps.gwt.highcharts.client.Chart::getNativeChart()();
-        if (chart) chart.showResetZoom();
-    }-*/;
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
