@@ -99,6 +99,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -473,7 +474,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return null;
     }
     
-    private void updateCoordinateSystemFromSettings() {
+    /**
+     * @return {@code true} if the map was redrawn by the call to this method
+     */
+    private boolean updateCoordinateSystemFromSettings() {
+        boolean redrawn = false;
         final MapOptions mapOptions;
         orientationChangeInProgress = true;
         if (getSettings().isWindUp()) {
@@ -511,6 +516,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (mapOptions != null) { // if no coordinate system change happened that affects an existing map, don't redraw 
             fixesAndTails.clearTails();
             redraw();
+            redrawn = true;
             // zooming and setting options while the event loop is still working doesn't work reliably; defer until event loop returns
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
@@ -525,6 +531,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             });
         }
+        return redrawn;
     }
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {
@@ -743,6 +750,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     public MapWidget getMap() {
         return map;
+    }
+    
+    public RaceSimulationOverlay getSimulationOverlay() {
+        return simulationOverlay;
     }
     
     /**
@@ -1025,7 +1036,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData, boolean updateTailsOnly) {
         final Map<CompetitorDTO, Runnable> tailPreparersPerCompetitor =
                 fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
-        showBoatsOnMap(newTime, transitionTimeInMillis, competitorsToShow, updateTailsOnly, tailPreparersPerCompetitor);
+        showBoatsOnMap(newTime, transitionTimeInMillis,
+                /* re-calculate; it could have changed since the asynchronous request was made: */ getCompetitorsToShow(),
+                updateTailsOnly, tailPreparersPerCompetitor);
         if (!updateTailsOnly) {
             showCompetitorInfoOnMap(newTime, transitionTimeInMillis, competitorSelection.getSelectedFilteredCompetitors());
             // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
@@ -2885,6 +2898,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     @Override
     public String getId() {
         return getLocalizedShortName();
+    }
+
+    public void addCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
+        raceCompetitorSet.addCompetitorsForRaceDefinedListener(listener);
+    }
+
+    public void removeCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
+        raceCompetitorSet.removeCompetitorsForRaceDefinedListener(listener);
     }
 
 }

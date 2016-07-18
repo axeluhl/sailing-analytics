@@ -1618,6 +1618,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String finishTime(String timeAsString);
     String showCompetitorCharts();
     String showWindChart();
+    String watchLive();
+    String raceAnalysis();
+    String startAnalysis();
+    String winningLanes();
     String userNotificationsOnlyIfMailAddressIsVerified();
     String enabled();
     String disabled();

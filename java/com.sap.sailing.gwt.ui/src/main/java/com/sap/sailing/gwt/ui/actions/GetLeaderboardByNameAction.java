@@ -31,7 +31,7 @@ public class GetLeaderboardByNameAction implements AsyncAction<LeaderboardDTO> {
     private final SailingServiceAsync sailingService;
     private final String leaderboardName;
     private final Date date;
-    private final Collection<String> namesOfRacesForWhichToLoadLegDetails;
+    private final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails;
     private final boolean addOverallDetails;
     private final LeaderboardDTO previousLeaderboard;
     private final StringMessages stringMessages;
@@ -40,7 +40,7 @@ public class GetLeaderboardByNameAction implements AsyncAction<LeaderboardDTO> {
     private final boolean fillTotalPointsUncorrected;
     
     public GetLeaderboardByNameAction(SailingServiceAsync sailingService, String leaderboardName, Date date,
-            final Collection<String> namesOfRacesForWhichToLoadLegDetails, boolean addOverallDetails,
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             LeaderboardDTO previousLeaderboard, boolean fillTotalPointsUncorrected, Timer timerToAdjustOffsetIn,
             ErrorReporter errorReporter, StringMessages stringMessages) {
         this.sailingService = sailingService;
@@ -48,7 +48,7 @@ public class GetLeaderboardByNameAction implements AsyncAction<LeaderboardDTO> {
         this.stringMessages = stringMessages;
         this.leaderboardName = leaderboardName;
         this.date = date;
-        this.namesOfRacesForWhichToLoadLegDetails = namesOfRacesForWhichToLoadLegDetails;
+        this.namesOfRaceColumnsForWhichToLoadLegDetails = namesOfRaceColumnsForWhichToLoadLegDetails;
         this.addOverallDetails = addOverallDetails;
         this.previousLeaderboard = previousLeaderboard;
         this.timerToAdjustOffetIn = timerToAdjustOffsetIn;
@@ -58,7 +58,7 @@ public class GetLeaderboardByNameAction implements AsyncAction<LeaderboardDTO> {
     @Override
     public void execute(final AsyncCallback<LeaderboardDTO> callback) {
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-        sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, addOverallDetails,
+        sailingService.getLeaderboardByName(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
                 previousLeaderboard==null?null:previousLeaderboard.getId(), fillTotalPointsUncorrected,
                         new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
                     @Override

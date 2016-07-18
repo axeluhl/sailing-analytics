@@ -225,8 +225,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
         changeMinMaxAndExtremesInterval(zoomStartTimepoint, zoomEndTimepoint, true);
-        // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
-        // chart.showResetZoom();
+        chart.showResetZoom(); // Patched method
     }
 
     @Override
