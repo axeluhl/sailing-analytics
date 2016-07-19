@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.trackfiles.TrackFileExporter;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Export data to well-known formats such as GPX, KML etc. Internally, the RouteConverter Library is used.
@@ -55,7 +56,7 @@ public class TrackFileExporterImpl implements TrackFileExporter {
         };
 
         List<WriteRaceDataCallable> callables = new ArrayList<>();
-        ExecutorService executor = Executors.newCachedThreadPool();
+        ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
         List<String> errors = new ArrayList<>();
         for (TrackedRace race : races) {
             for (TrackFilesDataSource d : data) {

@@ -4,12 +4,12 @@
 		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.regattacompetition.RegattaCompetitionResources" />
-	<div class="{local_res.css.fleet}">
+	<g:HTMLPanel addStyleNames="{local_res.css.fleet}">
 		<div class="{local_res.css.fleet_corner}" ui:field="fleetCornerUi"></div>
 		<div class="{local_res.css.fleet_details}">
 			<div class="{local_res.css.fleet_details_name}" ui:field="fleetNameUi"></div>
 			<div class="{local_res.css.fleet_details_competitors}" ui:field="competitorCountUi"></div>
 		</div>
-		<div class="{local_res.css.fleet_races}" ui:field="racesContainerUi"></div>
-	</div>
+		<g:FlowPanel addStyleNames="{local_res.css.fleet_races}" ui:field="racesContainerUi"/>
+	</g:HTMLPanel>
 </ui:UiBinder>

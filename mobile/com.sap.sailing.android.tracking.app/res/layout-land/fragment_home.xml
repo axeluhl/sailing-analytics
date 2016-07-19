@@ -64,7 +64,7 @@
             android:layout_marginRight="10dp"
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
-            android:background="@drawable/rounded_btn_white"
+            android:background="@drawable/normal_btn_white"
             android:textColor="@color/black"
             android:text="@string/no_qr_code"/>
 

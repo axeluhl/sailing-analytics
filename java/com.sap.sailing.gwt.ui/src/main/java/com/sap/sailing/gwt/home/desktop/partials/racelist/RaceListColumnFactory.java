@@ -9,7 +9,6 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.TextTransform;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
@@ -25,9 +24,6 @@ import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
-import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -35,11 +31,11 @@ import com.sap.sailing.gwt.home.communication.race.FlagStateDTO;
 import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.RaceProgressDTO;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.home.communication.race.wind.AbstractWindDTO;
 import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
+import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPadCell;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.shared.utils.HomeSailingFlagsBuilder;
 import com.sap.sailing.gwt.regattaoverview.client.FlagsMeaningExplanator;
@@ -49,16 +45,13 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparatorWrapper;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.util.NaturalComparator;
 
 public class RaceListColumnFactory {
     
     private static final LocalCss CSS = RaceListResources.INSTANCE.css(); 
-    private static final MainCss MAIN_CSS = SharedResources.INSTANCE.mainCss();
     private static final StringMessages I18N = StringMessages.INSTANCE;
-    private static final TextMessages I18N_UBI = TextMessages.INSTANCE;
     private static final CellTemplates TEMPLATE = GWT.create(CellTemplates.class);
 
     interface CellTemplates extends SafeHtmlTemplates {
@@ -71,12 +64,6 @@ public class RaceListColumnFactory {
         @Template("<img style=\"{0}\" src=\"images/home/windkompass_nord.svg\"/>")
         SafeHtml windDirection(SafeStyles rotation);
 
-        @Template("<div style=\"{0}\">{1}</div>")
-        SafeHtml raceNotTracked(SafeStyles styles, String text);
-
-        @Template("<a href=\"{2}\" class=\"{0}\" target=\"_blank\">{1}</a>")
-        SafeHtml raceViewerLinkButton(String styleNames, String text, String link);
-        
         @Template("<img src=\"{3}\" class=\"{0}\" /><span class=\"{1}\">{4}</span><div class=\"{2}\" title=\"{5}\">{5}</div>")
         SafeHtml winner(String styleNamesFlag, String styleNamesSailId, String styleNamesText, SafeUri flagImageURL, String sailId, String name);
         
@@ -502,28 +489,6 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(final EventView.Presenter presenter) {
-        Cell<T> cell = new AbstractCell<T>() {
-            private final String watchNowStyle = getButtonStyleNames(MAIN_CSS.buttonred());
-            private final String analyseRaceStyle = getButtonStyleNames(MAIN_CSS.buttonprimary());
-
-            @Override
-            public void render(Context context, T data, SafeHtmlBuilder sb) {
-                if (data.getTrackingState() != RaceTrackingState.TRACKED_VALID_DATA) {
-                    SafeStylesBuilder styles = new SafeStylesBuilder().textTransform(TextTransform.UPPERCASE);
-                    styles.trustedColor("#666").trustedNameAndValue("font-size", "0.933333333333333rem").toSafeStyles();
-                    styles.trustedNameAndValue("padding", "0.714285714285714em 1.071428571428571em");
-                    sb.append(TEMPLATE.raceNotTracked(styles.toSafeStyles(), I18N_UBI.eventRegattaRaceNotTracked()));
-                } else {
-                    String styleNames = data.getViewState() == RaceViewState.FINISHED ? analyseRaceStyle : watchNowStyle;
-                    String text = data.getViewState() == RaceViewState.FINISHED ? I18N.analyseRace() : I18N_UBI.watchNow();
-                    sb.append(TEMPLATE.raceViewerLinkButton(styleNames, text, presenter.getRaceViewerURL(data)));
-                }
-            }
-
-            private final String getButtonStyleNames(String buttonColor) {
-                return Util.join(" ", MAIN_CSS.button(), MAIN_CSS.buttonstrong(), buttonColor, MAIN_CSS.buttonarrowrightwhite());
-            }
-        };
         InvertibleComparator<T> comparator = new InvertibleComparatorAdapter<T>() {
             @Override
             public int compare(T o1, T o2) {
@@ -538,7 +503,7 @@ public class RaceListColumnFactory {
                 return -o1.getTrackingState().compareTo(o2.getTrackingState());
             }
         };
-        return new SortableRaceListColumn<T, T>("", cell, comparator) {
+        return new SortableRaceListColumn<T, T>("", new RaceviewerLaunchPadCell<T>(presenter), comparator) {
             @Override
             public String getHeaderStyle() {
                 return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itembutton());

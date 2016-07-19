@@ -61,8 +61,9 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         }
         
         @Override
-        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
-            return ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE ? currentPresenter.getRaceViewerURL(raceMetadata) : null;
+        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
+            return ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE
+                    ? currentPresenter.getRaceViewerURL(raceMetadata, mode) : null;
         }
     }
     

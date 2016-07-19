@@ -120,7 +120,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<>(callback, new LoaderCreator<Collection<EventBase>>() {
             @Override
             public Loader<DataLoaderResult<Collection<EventBase>>> create(int id, Bundle args) throws Exception {
-                ExLog.i(context, TAG, String.format("Creating Events-OnlineDataLoader %d", id));
+                ExLog.i(context, TAG, "Creating Events-OnlineDataLoader " + id);
                 EventBaseJsonDeserializer serializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer());
                 DataParser<Collection<EventBase>> parser = new EventsDataParser(serializer);
                 DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
@@ -160,9 +160,7 @@ public class OnlineDataManager extends DataManager {
         return new ImmediateDataLoaderCallbacks<>(context, callback, new Callable<Collection<CourseArea>>() {
             @Override
             public Collection<CourseArea> call() throws Exception {
-
                 return dataStore.getCourseAreas(parentEvent);
-
             }
         });
     }
@@ -173,12 +171,12 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<>(callback, new LoaderCreator<Collection<ManagedRace>>() {
             @Override
             public Loader<DataLoaderResult<Collection<ManagedRace>>> create(int id, Bundle args) throws Exception {
-                ExLog.i(context, TAG, String.format("Creating races-OnlineDataLoader %d", id));
+                ExLog.i(context, TAG, "Creating races-OnlineDataLoader " + id);
                 ConfigurationLoader<RegattaConfiguration> globalConfiguration = PreferencesRegattaConfigurationLoader.loadFromPreferences(preferences);
 
                 DataParser<Collection<ManagedRace>> parser = new ManagedRacesDataParser(preferences
                     .getAuthor(), globalConfiguration, RaceGroupDeserializer.create(domainFactory, RegattaConfigurationJsonDeserializer.create()));
-                DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(OnlineDataManager.this);
+                DataHandler<Collection<ManagedRace>> handler = new ManagedRacesDataHandler(context, OnlineDataManager.this);
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAM_COURSE_AREA_FILTER, courseAreaId.toString()));
                 params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_CLIENT_UUID, MessageSendingService.uuid));
@@ -194,7 +192,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<>(callback, new LoaderCreator<Collection<Mark>>() {
             @Override
             public Loader<DataLoaderResult<Collection<Mark>>> create(int id, Bundle args) throws Exception {
-                ExLog.i(context, TAG, String.format("Creating marks-OnlineDataLoader %d", id));
+                ExLog.i(context, TAG, "Creating marks-OnlineDataLoader " + id);
                 JsonDeserializer<Mark> markDeserializer = new MarkDeserializer(domainFactory);
                 DataParser<Collection<Mark>> parser = new MarksDataParser(markDeserializer);
                 DataHandler<Collection<Mark>> handler = new MarksDataHandler(OnlineDataManager.this);
@@ -221,7 +219,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<>(callback, new LoaderCreator<CourseBase>() {
             @Override
             public Loader<DataLoaderResult<CourseBase>> create(int id, Bundle args) throws Exception {
-                ExLog.i(context, TAG, String.format("Creating Course-OnlineDataLoader %d", id));
+                ExLog.i(context, TAG, "Creating Course-OnlineDataLoader " + id);
                 JsonDeserializer<CourseBase> courseBaseDeserializer = new CourseBaseDeserializer(new WaypointDeserializer(new ControlPointDeserializer(new MarkDeserializer(domainFactory), new GateDeserializer(domainFactory, new MarkDeserializer(domainFactory)))));
                 DataParser<CourseBase> parser = new CourseBaseParser(courseBaseDeserializer);
                 DataHandler<CourseBase> handler = new CourseBaseHandler(OnlineDataManager.this, managedRace);
@@ -249,7 +247,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<>(callback, new LoaderCreator<Collection<Competitor>>() {
             @Override
             public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
-                ExLog.i(context, TAG, String.format("Creating Competitor-OnlineDataLoader %d", id));
+                ExLog.i(context, TAG, "Creating Competitor-OnlineDataLoader " + id);
                 JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(), new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))), new BoatJsonDeserializer(new BoatClassJsonDeserializer(domainFactory)));
                 DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
                 DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
@@ -276,7 +274,7 @@ public class OnlineDataManager extends DataManager {
         return new DataLoaderCallbacks<>(callback, new LoaderCreator<DeviceConfiguration>() {
             @Override
             public Loader<DataLoaderResult<DeviceConfiguration>> create(int id, Bundle args) throws Exception {
-                ExLog.i(context, TAG, String.format("Creating Configuration-OnlineDataLoader %d", id));
+                ExLog.i(context, TAG, "Creating Configuration-OnlineDataLoader " + id);
                 DataHandler<DeviceConfiguration> handler = new NullDataHandler<DeviceConfiguration>();
                 DataParser<DeviceConfiguration> parser = new DeviceConfigurationParser(DeviceConfigurationJsonDeserializer.create());
                 String encodedIdentifier = identifier.getClientIdentifier();
@@ -327,7 +325,7 @@ public class OnlineDataManager extends DataManager {
                 if (args == null || args.getString(LEADERBOARD) == null) {
                     throw new IllegalArgumentException("You need an leaderboard as bundle arg (" + LEADERBOARD + ").");
                 }
-                ExLog.i(context, TAG, String.format("Creating RaceColumnFactorLoader %d", id));
+                ExLog.i(context, TAG, "Creating RaceColumnFactorLoader " + id);
                 DataHandler<RaceColumnFactorImpl> handler = new NullDataHandler<>();
                 DataParser<RaceColumnFactorImpl> parser = new RaceColumnsParser(new RaceColumnFactorJsonDeserializer());
 

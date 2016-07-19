@@ -328,7 +328,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         htmlText.append("<head><title>");
         htmlText.append(B.get(locale, "welcomeTo")).append(" ").append(leaderboardName).append("</title>");
         htmlText.append("<style type=\"text/css\">\n");
-        htmlText.append(".b,.b:active,b:visited {padding:15px;margin:10px;width:200px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;}\n");
+        htmlText.append(".b,.b:active,.b:visited {padding:15px;margin:10px;width:200px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;}\n");
         htmlText.append(".b:hover {background-color:#2b618e;border:1px solid #204d74;}\n");
         htmlText.append(".qr {margin: 10px;height:250px; width: auto;}\n");
         htmlText.append(".spacer {margin-top: 50px;}\n");
