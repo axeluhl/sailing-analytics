@@ -179,7 +179,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         UserConsumerMock mock = new UserConsumerMock();
         
         notificationSet.forUsersWithVerifiedEmailMappedTo(A, mock);
-        Assert.assertTrue(Util.equals(users(store.getUserByName(user1)), mock.calls));
+        Assert.assertEquals(users(store.getUserByName(user1)), mock.calls);
     }
     
     @Test
@@ -206,11 +206,11 @@ public class PreferenceObjectBasedNotificationSetTest {
         
         UserConsumerMock mock = new UserConsumerMock();
         notificationSet.forUsersWithVerifiedEmailMappedTo(A, mock);
-        Assert.assertTrue(Util.equals(users(store.getUserByName(user1)), mock.calls));
+        Assert.assertEquals(users(store.getUserByName(user1)), mock.calls);
         
         mock = new UserConsumerMock();
         notificationSet.forUsersWithVerifiedEmailMappedTo(B, mock);
-        Assert.assertTrue(Util.equals(users(store.getUserByName(user1), store.getUserByName(user2)), mock.calls));
+        Assert.assertEquals(users(store.getUserByName(user1), store.getUserByName(user2)), mock.calls);
     }
     
     @Test
@@ -223,7 +223,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         
         UserConsumerMock mock = new UserConsumerMock();
         notificationSet.forUsersWithVerifiedEmailMappedTo(B, mock);
-        Assert.assertTrue(Util.equals(users(store.getUserByName(user1)), mock.calls));
+        Assert.assertEquals(users(store.getUserByName(user1)), mock.calls);
     }
     
     /**
