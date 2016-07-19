@@ -2859,8 +2859,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         mediaLibrary.clear();
         competitorStore.clear();
         remoteSailingServerSet.clear();
-        notificationService.stop();
-        notificationService = new EmptySailingNotificationService();
+        if (notificationService != null) {
+            notificationService.stop();
+            notificationService = new EmptySailingNotificationService();
+        }
     }
 
     // Used for TESTING only
