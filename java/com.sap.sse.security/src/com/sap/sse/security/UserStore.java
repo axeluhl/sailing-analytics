@@ -11,8 +11,14 @@ import com.sap.sse.security.shared.UserManagementException;
 public interface UserStore extends Named {
     Iterable<User> getUsers();
 
+    /**
+     * The user with that {@link User#getName() name} or {@code null} if no such user exists
+     */
     User getUserByName(String name);
 
+    /**
+     * The user with that {@link User#getEmail() email} or {@code null} if no such user exists
+     */
     User getUserByEmail(String email);
     
     User getUserByAccessToken(String accessToken);
