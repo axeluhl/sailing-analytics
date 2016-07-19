@@ -138,9 +138,7 @@ public class Activator implements BundleActivator {
         properties.put(TypeBasedServiceFinder.TYPE, DoubleVectorFixImpl.class.getName());
         registrations.add(context.registerService(FixMongoHandler.class, new DoubleVectorFixMongoHandlerImpl(
                 racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory()), properties));
-
         registerPreferenceConvertersForUserStore(context);
-
         // Add an MBean for the service to the JMX bean server:
         RacingEventServiceMXBean mbean = new RacingEventServiceMXBeanImpl(racingEventService);
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
