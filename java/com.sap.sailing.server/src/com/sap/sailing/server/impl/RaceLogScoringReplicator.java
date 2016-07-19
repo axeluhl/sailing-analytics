@@ -148,18 +148,15 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         if (positioningList != null) {
             for (CompetitorResult positionedCompetitor : positioningList) {
                 Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getCompetitorId());
-                if (positionedCompetitor.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
-                    try {
-                        resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor);
-                        int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
-                        correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
-                                competitor, rankByRaceCommittee, positionedCompetitor.getScore());
-                    } catch (NoWindException ex) {
-                        ex.printStackTrace();
-                    }
-                } else {
-                    setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor, competitor);
+                try {
+                    resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor);
+                    int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
+                    correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
+                            competitor, rankByRaceCommittee, positionedCompetitor.getScore());
+                } catch (NoWindException ex) {
+                    ex.printStackTrace();
                 }
+                setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor, competitor);
             }
             //Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to be triggered, even though 
             //no score correction was performed
