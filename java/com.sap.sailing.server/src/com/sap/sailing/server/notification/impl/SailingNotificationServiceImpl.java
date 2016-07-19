@@ -37,7 +37,7 @@ import com.sap.sse.mail.queue.MailQueue;
 import com.sap.sse.security.UserStore;
 
 public class SailingNotificationServiceImpl implements SailingNotificationService {
-    private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
+    public static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
 
     private static final Logger logger = Logger.getLogger(SailingNotificationServiceImpl.class.getName());
 
@@ -239,7 +239,9 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
                     return new NotificationMailTemplate(
                             messages.get(locale, "boatClassRaceFinishedSubject", boatClass.getDisplayName()), 
-                            messages.get(locale, "boatClassRaceFinishedBody", boatClass.getDisplayName(), raceDescription), 
+                            messages.get(locale, "boatClassRaceFinishedBody", boatClass.getDisplayName(),
+                                    raceDescription),
+                            getBaseURL(event),
                             createRaceBoardShowRaceLink(trackedRace, leaderboard, event, leaderboardGroup, locale),
                             createRaceBoardRaceAnalysisLink(trackedRace, leaderboard, event, leaderboardGroup, locale));
                 }
@@ -258,7 +260,9 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                     String leaderboardDescription = calculateLeaderboardDescription(locale, event, leaderboard);
                     return new NotificationMailTemplate(
                             messages.get(locale, "boatClassScoreCorrectionSubject", boatClass.getDisplayName()), 
-                            messages.get(locale, "boatClassScoreCorrectionBody", boatClass.getDisplayName(), leaderboardDescription),
+                            messages.get(locale, "boatClassScoreCorrectionBody", boatClass.getDisplayName(),
+                                    leaderboardDescription),
+                            getBaseURL(event),
                             createHomeLeaderboardLink(leaderboard, event, locale));
                 }
             });
@@ -278,7 +282,8 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                     return new NotificationMailTemplate(
                             messages.get(locale, "boatClassUpcomingRaceSubject", boatClass.getDisplayName()),
                             messages.get(locale, "boatClassUpcomingRaceBody", boatClass.getDisplayName(),
-                                    raceDescription, time), 
+                                    raceDescription, time),
+                            getBaseURL(event),
                             createHomeRacesListLink(leaderboard, event, locale));
                 }
             });
@@ -295,8 +300,9 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                 protected NotificationMailTemplate getMailTemplate(Competitor objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
                     return new NotificationMailTemplate(
-                            messages.get(locale, "competitorPassesFinishSubject", competitor.getName()), 
-                            messages.get(locale, "competitorPassesFinishBody", competitor.getName(), raceDescription), 
+                            messages.get(locale, "competitorPassesFinishSubject", competitor.getName()),
+                            messages.get(locale, "competitorPassesFinishBody", competitor.getName(), raceDescription),
+                            getBaseURL(event),
                             createRaceBoardShowRaceLink(trackedRace, leaderboard, event, leaderboardGroup, locale),
                             createRaceBoardRaceAnalysisLink(trackedRace, leaderboard, event, leaderboardGroup, locale));
                 }
@@ -313,8 +319,10 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                 protected NotificationMailTemplate getMailTemplate(Competitor objectToNotifyAbout, Locale locale) {
                     String leaderboardDescription = calculateLeaderboardDescription(locale, event, leaderboard);
                     return new NotificationMailTemplate(
-                            messages.get(locale, "competitorScoreCorrectionSubject", competitor.getName()), 
-                            messages.get(locale, "competitorScoreCorrectionBody", competitor.getName(), leaderboardDescription),
+                            messages.get(locale, "competitorScoreCorrectionSubject", competitor.getName()),
+                            messages.get(locale, "competitorScoreCorrectionBody", competitor.getName(),
+                                    leaderboardDescription),
+                            getBaseURL(event),
                             createHomeLeaderboardLink(leaderboard, event, locale));
                 }
             });
