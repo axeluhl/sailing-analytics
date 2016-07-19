@@ -72,10 +72,10 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         if (notificationMailTemplate.getTitle() != null) {
             bodyContent.append("<h1>").append(notificationMailTemplate.getTitle()).append("</h1>");
         }
-        bodyContent.append("<p>").append(notificationMailTemplate.getText()).append("</p>");
+        bodyContent.append("<p class=\"textContainer\">").append(notificationMailTemplate.getText()).append("</p>");
         for (Pair<String, String> link : notificationMailTemplate.getLabelsAndLinkUrls()) {
-            bodyContent.append("<a class=\"linkButton\" href=\"").append(link.getB()).append("\">");
-            bodyContent.append(link.getA()).append("</a>");
+            bodyContent.append("<div class=\"buttonContainer\">").append("<a class=\"linkButton\" href=\"");
+            bodyContent.append(link.getB()).append("\">").append(link.getA()).append("</a>").append("</div>");
         }
         return TEMPLATE.replace("${title}", notificationMailTemplate.getSubject()).replace("${body}", bodyContent.toString());
     }
