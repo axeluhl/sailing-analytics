@@ -313,8 +313,8 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                 protected NotificationMailTemplate getMailTemplate(Competitor objectToNotifyAbout, Locale locale) {
                     String leaderboardDescription = calculateLeaderboardDescription(locale, event, leaderboard);
                     return new NotificationMailTemplate(
-                            messages.get(locale, "boatClassScoreCorrectionSubject", competitor.getName()), 
-                            messages.get(locale, "boatClassScoreCorrectionBody", competitor.getName(), leaderboardDescription),
+                            messages.get(locale, "competitorScoreCorrectionSubject", competitor.getName()), 
+                            messages.get(locale, "competitorScoreCorrectionBody", competitor.getName(), leaderboardDescription),
                             createHomeLeaderboardLink(leaderboard, event, locale));
                 }
             });
