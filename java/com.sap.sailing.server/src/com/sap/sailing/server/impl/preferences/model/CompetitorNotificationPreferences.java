@@ -29,7 +29,7 @@ public class CompetitorNotificationPreferences extends AbstractGenericSerializab
         return competitors.getValues();
     }
 
-    public void setCompetitors(Iterable<CompetitorNotificationPreference> boatClasses) {
-        this.competitors.setValues(boatClasses);
+    public void setCompetitors(Iterable<CompetitorNotificationPreference> competitors) {
+        this.competitors.setValues(competitors);
     }
 }
