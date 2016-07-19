@@ -170,13 +170,13 @@ public class RegattaActivity extends AbstractRegattaActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.warning);
         builder.setMessage(R.string.checkout_warning_message);
-        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 checkOut();
             }
         });
-        builder.setNegativeButton(R.string.no, null);
+        builder.setNegativeButton(android.R.string.no, null);
         builder.show();
     }
 
