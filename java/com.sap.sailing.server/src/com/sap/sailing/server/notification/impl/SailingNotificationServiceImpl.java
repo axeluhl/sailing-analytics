@@ -2,6 +2,7 @@ package com.sap.sailing.server.notification.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -265,15 +266,15 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     }
 
     public void notifyUserOnBoatClassUpcomingRace(BoatClass boatClass, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet, TimePoint when) {
+            Fleet fleet,  TimePoint when) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
 
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassUpcomingRace) {
                 @Override
                 protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
-                    // TODO properly format time in the user's locale
-                    String time = when.toString();
+                    String time = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale)
+                            .format(when.asDate());
                     return new NotificationMailTemplate(
                             messages.get(locale, "boatClassUpcomingRaceSubject", boatClass.getDisplayName()),
                             messages.get(locale, "boatClassUpcomingRaceBody", boatClass.getDisplayName(),
