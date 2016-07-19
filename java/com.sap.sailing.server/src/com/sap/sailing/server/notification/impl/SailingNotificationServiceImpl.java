@@ -36,7 +36,7 @@ import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.queue.MailQueue;
 import com.sap.sse.security.UserStore;
 
-public class SailingNotificationServiceImpl implements Stoppable, SailingNotificationService {
+public class SailingNotificationServiceImpl implements SailingNotificationService {
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
 
     private static final Logger logger = Logger.getLogger(SailingNotificationServiceImpl.class.getName());

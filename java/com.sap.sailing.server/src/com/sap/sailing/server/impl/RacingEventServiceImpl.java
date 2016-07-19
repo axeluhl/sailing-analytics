@@ -180,6 +180,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardSearchResultBaseJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
+import com.sap.sailing.server.notification.EmptySailingNotificationService;
 import com.sap.sailing.server.notification.SailingNotificationService;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
@@ -405,7 +406,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * Replicas are expected to not notify users about anything, particularly because they usually don't
      * have a valid mail service, either.
      */
-    private transient final SailingNotificationService notificationService;
+    private transient SailingNotificationService notificationService;
     
     /**
      * Allow only one master data import at a time to avoid situation where multiple Imports override each other in
@@ -2863,6 +2864,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         mediaLibrary.clear();
         competitorStore.clear();
         remoteSailingServerSet.clear();
+        notificationService.stop();
+        notificationService = new EmptySailingNotificationService();
     }
 
     // Used for TESTING only
