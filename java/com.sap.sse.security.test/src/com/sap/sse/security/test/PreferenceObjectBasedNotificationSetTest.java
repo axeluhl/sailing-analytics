@@ -192,7 +192,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         UserConsumerMock mock = new UserConsumerMock();
         
         notificationSet.forUsersWithVerifiedEmailMappedTo(A, mock);
-        Assert.assertTrue(Util.isEmpty(mock.calls));
+        Assert.assertTrue(mock.calls.isEmpty());
     }
     
     @Test
