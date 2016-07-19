@@ -130,6 +130,7 @@ public interface UserStore extends Named {
     /**
      * Removes all users and all their preferences and all settings from this store's in-memory representation.
      * For safety reasons and because a replica's DB state is undefined anyhow, leaves persistent content in place.
+     * Registered listeners will not be removed automatically.
      * Use with due care.
      */
     void clear();

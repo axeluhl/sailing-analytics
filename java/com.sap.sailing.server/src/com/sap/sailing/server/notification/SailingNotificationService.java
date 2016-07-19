@@ -7,9 +7,10 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Stoppable;
 import com.sap.sse.common.TimePoint;
 
-public interface SailingNotificationService {
+public interface SailingNotificationService extends Stoppable {
 
     /**
      * Called when {@link RaceState} changes state to finished.

@@ -110,6 +110,20 @@
 	       "pseudoLocFolderPath":"."
             }
          ]
+      },
+      {
+         "collectionName":"SailingServer",
+         "folders":[  
+            {  
+               "sourceFolderPath":"java/com.sap.sailing.server/resources/stringmessages",
+               "sourceFilters":[  
+                  "StringMessages*.properties"
+               ],
+               "xlfFolderPath":"./XLF",
+               "targetFolderPath":".",
+               "pseudoLocFolderPath":"."
+            }
+         ]
       }
    ]
 }

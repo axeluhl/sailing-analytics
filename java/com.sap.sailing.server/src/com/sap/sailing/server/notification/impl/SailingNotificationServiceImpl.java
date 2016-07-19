@@ -2,6 +2,7 @@ package com.sap.sailing.server.notification.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -35,7 +36,7 @@ import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.queue.MailQueue;
 import com.sap.sse.security.UserStore;
 
-public class SailingNotificationServiceImpl implements Stoppable, SailingNotificationService {
+public class SailingNotificationServiceImpl implements SailingNotificationService {
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
 
     private static final Logger logger = Logger.getLogger(SailingNotificationServiceImpl.class.getName());
@@ -173,19 +174,44 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
 
         return messages.get(locale, "leaderboardOfEvent", leaderboardDisplayName, eventName);
     }
-
-    private String createRaceBoardLink(TrackedRace trackedRace, Leaderboard leaderboard, Event event,
-            LeaderboardGroup leaderboardGroup) {
-        RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-        String link = getBaseURL(event).toString() + "/gwt/RaceBoard.html?eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
-                + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&raceName="
-                + raceIdentifier.getRaceName() + "&showMapControls=true&viewShowNavigationPanel=true&regattaName="
-                + raceIdentifier.getRegattaName();
-        return link;
+    
+    private Pair<String, String> createRaceBoardShowRaceLink(TrackedRace trackedRace, Leaderboard leaderboard,
+            Event event, LeaderboardGroup leaderboardGroup, Locale locale) {
+        return createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup, "PLAYER",
+                "raceboardShowRaceLinkTitle", locale);
     }
 
-    private String createHomeRacesListLink(Leaderboard leaderboard, Event event) {
-        return createHomeRegattaLink("races", leaderboard, event);
+    private Pair<String, String> createRaceBoardRaceAnalysisLink(TrackedRace trackedRace, Leaderboard leaderboard,
+            Event event, LeaderboardGroup leaderboardGroup, Locale locale) {
+        return createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup, "FULL_ANALYSIS",
+                "raceboardRaceAnalysisLinkTitle", locale);
+    }
+
+    private Pair<String, String> createRaceBoardLink(TrackedRace trackedRace, Leaderboard leaderboard, Event event,
+            LeaderboardGroup leaderboardGroup, String raceboardMode, String labelMessageKey, Locale locale) {
+        RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+        String link = getBaseURL(event).toString() + "/gwt/RaceBoard.html?locale=" + locale.toLanguageTag()
+        + "&eventId=" + event.getId() + "&leaderboardName=" + leaderboard.getName()
+        + "&leaderboardGroupName=" + leaderboardGroup.getName() + "&raceName="
+        + raceIdentifier.getRaceName() + "&showMapControls=true&viewShowNavigationPanel=true&regattaName="
+        + raceIdentifier.getRegattaName() + "&mode=" + raceboardMode;
+        return new Pair<String, String>(messages.get(locale, labelMessageKey), link);
+    }
+    
+    private Pair<String, String> createHomeRacesListLink(Leaderboard leaderboard, Event event, Locale locale) {
+        return createHomeRegattaLink("races", "racesOverviewLinkTitle", leaderboard, event, locale);
+    }
+    
+    private Pair<String, String> createHomeLeaderboardLink(Leaderboard leaderboard, Event event,
+            Locale locale) {
+        return createHomeRegattaLink("leaderboard", "leaderboardShowResultsLinkTitle", leaderboard, event, locale);
+    }
+    
+    private Pair<String, String> createHomeRegattaLink(String tab, String labelMessageKey, Leaderboard leaderboard,
+            Event event, Locale locale) {
+        String link = getBaseURL(event).toString() + "/gwt/Home.html?locale=" + locale.toLanguageTag()
+                + "#/regatta/" + tab + "/:eventId=" + event.getId() + "&regattaId=" + leaderboard.getName();
+        return new Pair<String, String>(messages.get(locale, labelMessageKey), link);
     }
     
     /**
@@ -201,34 +227,21 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
         }
         return result;
     }
-    
-    private String createHomeLeaderboardLink(Leaderboard leaderboard, Event event) {
-        return createHomeRegattaLink("leaderboard", leaderboard, event);
-    }
-    
-    private String createHomeRegattaLink(String tab, Leaderboard leaderboard, Event event) {
-        String link = getBaseURL(event).toString() + "/gwt/Home.html#/regatta/" + tab + "/:eventId=" + event.getId() + "&regattaId="
-                + leaderboard.getName();
-        return link;
-    }
 
     @Override
     public void notifyUserOnBoatClassRaceChangesStateToFinished(BoatClass boatClass, TrackedRace trackedRace,
             Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            String link = createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup);
-
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassResults) {
+                
                 @Override
-                protected String constructSubject(BoatClass objectToNotifyAbout, Locale locale) {
-                    return messages.get(locale, "boatClassRaceFinishedSubject", boatClass.getDisplayName());
-                }
-
-                @Override
-                protected String constructBody(BoatClass objectToNotifyAbout, Locale locale) {
+                protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
-                    return messages.get(locale, "boatClassRaceFinishedBody", boatClass.getDisplayName(),
-                            raceDescription, encodeLink(link));
+                    return new NotificationMailTemplate(
+                            messages.get(locale, "boatClassRaceFinishedSubject", boatClass.getDisplayName()), 
+                            messages.get(locale, "boatClassRaceFinishedBody", boatClass.getDisplayName(), raceDescription), 
+                            createRaceBoardShowRaceLink(trackedRace, leaderboard, event, leaderboardGroup, locale),
+                            createRaceBoardRaceAnalysisLink(trackedRace, leaderboard, event, leaderboardGroup, locale));
                 }
             });
         });
@@ -238,70 +251,54 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     public void notifyUserOnBoatClassWhenScoreCorrectionsAreAvailable(BoatClass boatClass, Leaderboard leaderboard) {
         // TODO don't send notifications when a notification for the same boatClass / leaderboard has already been sent shortly before
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            String link = createHomeLeaderboardLink(leaderboard, event);
 
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassResults) {
                 @Override
-                protected String constructSubject(BoatClass objectToNotifyAbout, Locale locale) {
-                    return messages.get(locale, "boatClassScoreCorrectionSubject", boatClass.getDisplayName());
-                }
-
-                @Override
-                protected String constructBody(BoatClass objectToNotifyAbout, Locale locale) {
+                protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
                     String leaderboardDescription = calculateLeaderboardDescription(locale, event, leaderboard);
-                    return messages.get(locale, "boatClassScoreCorrectionBody", boatClass.getDisplayName(),
-                            leaderboardDescription, encodeLink(link));
+                    return new NotificationMailTemplate(
+                            messages.get(locale, "boatClassScoreCorrectionSubject", boatClass.getDisplayName()), 
+                            messages.get(locale, "boatClassScoreCorrectionBody", boatClass.getDisplayName(), leaderboardDescription),
+                            createHomeLeaderboardLink(leaderboard, event, locale));
                 }
             });
         });
     }
 
     public void notifyUserOnBoatClassUpcomingRace(BoatClass boatClass, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet, TimePoint when) {
+            Fleet fleet,  TimePoint when) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            String link = createHomeRacesListLink(leaderboard, event);
 
             mailQueue.addNotification(new NotificationSetNotification<BoatClass>(boatClass, boatClassUpcomingRace) {
                 @Override
-                protected String constructSubject(BoatClass objectToNotifyAbout, Locale locale) {
-                    return messages.get(locale, "boatClassUpcomingRaceSubject", boatClass.getDisplayName());
-                }
-
-                @Override
-                protected String constructBody(BoatClass objectToNotifyAbout, Locale locale) {
+                protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
-                    // TODO properly format time in the user's locale
-                    String time = when.toString();
-                    return messages.get(locale, "boatClassUpcomingRaceBody", boatClass.getDisplayName(),
-                            raceDescription, time, encodeLink(link));
+                    String time = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale)
+                            .format(when.asDate());
+                    return new NotificationMailTemplate(
+                            messages.get(locale, "boatClassUpcomingRaceSubject", boatClass.getDisplayName()),
+                            messages.get(locale, "boatClassUpcomingRaceBody", boatClass.getDisplayName(),
+                                    raceDescription, time), 
+                            createHomeRacesListLink(leaderboard, event, locale));
                 }
             });
         });
-    }
-
-
-    private String encodeLink(String link) {
-        String encodedLink = "<a href=\""+link+"\">"+link.replace("&", "&amp;")+"</a>";
-        return encodedLink;
     }
 
     @Override
     public void notifyUserOnCompetitorPassesFinish(Competitor competitor, TrackedRace trackedRace,
             Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            String link = createRaceBoardLink(trackedRace, leaderboard, event, leaderboardGroup);
 
             mailQueue.addNotification(new NotificationSetNotification<Competitor>(competitor, competitorResults) {
                 @Override
-                protected String constructSubject(Competitor objectToNotifyAbout, Locale locale) {
-                    return messages.get(locale, "competitorPassesFinishSubject", competitor.getName());
-                }
-
-                @Override
-                protected String constructBody(Competitor objectToNotifyAbout, Locale locale) {
+                protected NotificationMailTemplate getMailTemplate(Competitor objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
-                    return messages.get(locale, "competitorPassesFinishBody", competitor.getName(), raceDescription,
-                            encodeLink(link));
+                    return new NotificationMailTemplate(
+                            messages.get(locale, "competitorPassesFinishSubject", competitor.getName()), 
+                            messages.get(locale, "competitorPassesFinishBody", competitor.getName(), raceDescription), 
+                            createRaceBoardShowRaceLink(trackedRace, leaderboard, event, leaderboardGroup, locale),
+                            createRaceBoardRaceAnalysisLink(trackedRace, leaderboard, event, leaderboardGroup, locale));
                 }
             });
         });
@@ -310,19 +307,15 @@ public class SailingNotificationServiceImpl implements Stoppable, SailingNotific
     @Override
     public void notifyUserOnCompetitorScoreCorrections(Competitor competitor, Leaderboard leaderboard) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-            String link = createHomeLeaderboardLink(leaderboard, event);
 
             mailQueue.addNotification(new NotificationSetNotification<Competitor>(competitor, competitorResults) {
                 @Override
-                protected String constructSubject(Competitor objectToNotifyAbout, Locale locale) {
-                    return messages.get(locale, "boatClassScoreCorrectionSubject", competitor.getName());
-                }
-
-                @Override
-                protected String constructBody(Competitor objectToNotifyAbout, Locale locale) {
+                protected NotificationMailTemplate getMailTemplate(Competitor objectToNotifyAbout, Locale locale) {
                     String leaderboardDescription = calculateLeaderboardDescription(locale, event, leaderboard);
-                    return messages.get(locale, "boatClassScoreCorrectionBody", competitor.getName(),
-                            leaderboardDescription, encodeLink(link));
+                    return new NotificationMailTemplate(
+                            messages.get(locale, "boatClassScoreCorrectionSubject", competitor.getName()), 
+                            messages.get(locale, "boatClassScoreCorrectionBody", competitor.getName(), leaderboardDescription),
+                            createHomeLeaderboardLink(leaderboard, event, locale));
                 }
             });
         });

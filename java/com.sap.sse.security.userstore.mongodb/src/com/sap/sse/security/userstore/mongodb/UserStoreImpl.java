@@ -153,16 +153,27 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void clear() {
-        listeners.clear();
         preferences.clear();
         preferenceConverters.clear();
-        preferenceObjects.clear();
+        clearAllPreferenceObjects();
         emailForUsername.clear();
         settings.clear();
         settingTypes.clear();
         users.clear();
         usersByEmail.clear();
         usersByAccessToken.clear();
+    }
+
+    /**
+     * Preference objects can't be simply removed by clearing {@link #preferenceObjects} because listeners can have a
+     * state depending on the current preference objects. So we need to notify all listeners about the removal of the
+     * notification objects.
+     */
+    private void clearAllPreferenceObjects() {
+        final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
+        for (String username : usersToProcess) {
+            removeAllPreferenceObjectsForUser(username);
+        }
     }
 
     @Override
@@ -524,6 +535,10 @@ public class UserStoreImpl implements UserStore {
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storePreferences(username, Collections.<String, String>emptyMap());
         }
+        removeAllPreferenceObjectsForUser(username);
+    }
+
+    private void removeAllPreferenceObjectsForUser(String username) {
         Map<String, Object> preferenceObjectsToRemove;
         synchronized (preferenceObjects) {
             preferenceObjectsToRemove = preferenceObjects.remove(username);
