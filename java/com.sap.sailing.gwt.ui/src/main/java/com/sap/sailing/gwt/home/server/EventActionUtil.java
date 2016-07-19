@@ -111,7 +111,7 @@ public final class EventActionUtil {
     public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(SailingDispatchContext context, UUID eventId, CalculationWithEvent<T> callback) {
         Event event = context.getRacingEventService().getEvent(eventId);
         EventState eventState = HomeServiceUtil.calculateEventState(event);
-        if(eventState != EventState.RUNNING) {
+        if (eventState != EventState.RUNNING) {
             return new ResultWithTTL<T>(calculateTtlForNonLiveEvent(event, eventState), null);
         }
         return callback.calculateWithEvent(event);

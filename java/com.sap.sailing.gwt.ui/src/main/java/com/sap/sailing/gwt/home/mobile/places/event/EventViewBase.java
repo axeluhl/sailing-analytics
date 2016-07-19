@@ -48,6 +48,8 @@ public interface EventViewBase extends IsWidget {
         PlaceNavigation<?> getMediaPageNavigation();
         
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+        
+        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 
         String getRegattaId();
         

@@ -8,7 +8,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,6 +16,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -198,7 +198,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             String message1 = getString(R.string.confirm_data_hello_name).replace("{full_name}", checkinData.competitorName);
             String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}", checkinData.competitorSailId);
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
             builder.setMessage(message1 + "\n\n" + message2);
             builder.setCancelable(true);
             builder.setPositiveButton(getString(R.string.confirm_data_is_correct), new DialogInterface.OnClickListener() {
@@ -214,8 +214,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                     dialog.cancel();
                 }
             });
-            AlertDialog alert = builder.create();
-            alert.show();
+            builder.show();
         } else if (data instanceof MarkCheckinData) {
             MarkCheckinData checkinData = (MarkCheckinData) data;
             clearScannedQRCodeInPrefs();
