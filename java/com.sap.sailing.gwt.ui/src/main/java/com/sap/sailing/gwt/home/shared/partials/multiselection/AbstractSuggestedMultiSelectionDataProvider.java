@@ -54,6 +54,7 @@ public abstract class AbstractSuggestedMultiSelectionDataProvider<T, D extends D
     
     @Override
     public final void initSelectedItems(Collection<T> selectedItems) {
+        selectedItemsMap.clear();
         for (T item : selectedItems) {
             selectedItemsMap.put(getKey(item), item);
         }
