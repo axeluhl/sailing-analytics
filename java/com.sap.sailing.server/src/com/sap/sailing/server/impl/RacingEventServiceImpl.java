@@ -1675,10 +1675,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         private void notifyForLeaderboardIfNotAlreadyNotifiedRecently() {
             final TimePoint now = MillisecondsTimePoint.now();
             if (notificationService != null && (lastNotificationForLeaderboard == null ||
-                    lastNotificationForLeaderboard.until(now).compareTo(HOW_LONG_BETWEEN_TWO_NOTIFICATIONS_FOR_SIMILAR_EVENT) >= 0)) {
-                new Thread(()->notificationService.notifyUserOnBoatClassWhenScoreCorrectionsAreAvailable(
-                        leaderboard.getBoatClass(), leaderboard),
-                        "Score correction notifier for leaderboard "+leaderboard.getName()).start();
+                lastNotificationForLeaderboard.until(now).compareTo(HOW_LONG_BETWEEN_TWO_NOTIFICATIONS_FOR_SIMILAR_EVENT) >= 0)) {
+                    scheduler.execute(()->notificationService.notifyUserOnBoatClassWhenScoreCorrectionsAreAvailable(
+                                        leaderboard.getBoatClass(), leaderboard));
                 lastNotificationForLeaderboard = now;
             }
         }
@@ -1692,9 +1691,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final TimePoint now = MillisecondsTimePoint.now();
             if (notificationService != null && (!lastNotificationForCompetitor.containsKey(competitor) ||
                     lastNotificationForCompetitor.get(competitor).until(now).compareTo(HOW_LONG_BETWEEN_TWO_NOTIFICATIONS_FOR_SIMILAR_EVENT) >= 0)) {
-                new Thread(()->notificationService.notifyUserOnCompetitorScoreCorrections(competitor, leaderboard),
-                        "Score correction notifier for competitor "+competitor.getName()+" in leaderboard "+
-                                leaderboard.getName()).start();
+                scheduler.execute(()->notificationService.notifyUserOnCompetitorScoreCorrections(competitor, leaderboard));
                 lastNotificationForCompetitor.put(competitor, now);
             }
             // a change to a single competitor also means a change to the leaderboard
@@ -1772,11 +1769,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             // see raceTimesChanged(TimePoint, TimePoint, TimePoint).
             
             if (newStartOfRace != null && newStartOfRace.after(MillisecondsTimePoint.now())) {
-                new Thread(()->
-                // Notify interested users if the new start time is in the future
-                notificationService.notifyUserOnBoatClassUpcomingRace(trackedRace.getRace().getBoatClass(),
-                        getMostAppropriateLeaderboard(), getMostAppropriateRaceColumn(), getMostAppropriateFleet(), newStartOfRace),
-                    "Notifier about startOfRaceChanged for "+trackedRace).start();
+                scheduler.execute(()->
+                    // Notify interested users if the new start time is in the future
+                    notificationService.notifyUserOnBoatClassUpcomingRace(trackedRace.getRace().getBoatClass(),
+                        getMostAppropriateLeaderboard(), getMostAppropriateRaceColumn(), getMostAppropriateFleet(), newStartOfRace));
             }
         }
 
@@ -1785,11 +1781,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             // no action required; the update signaled by this call is implicit; the race log
             // updates that led to this change are replicated separately
             
-            new Thread(()->
-            // Notify interested users:
-            notificationService.notifyUserOnBoatClassRaceChangesStateToFinished(trackedRace.getRace().getBoatClass(), trackedRace,
-                    getMostAppropriateLeaderboard(), getMostAppropriateRaceColumn(), getMostAppropriateFleet()),
-                "Notifier about finishedTimeChanged for "+trackedRace).start();
+            scheduler.execute(()->
+                // Notify interested users:
+                notificationService.notifyUserOnBoatClassRaceChangesStateToFinished(trackedRace.getRace().getBoatClass(), trackedRace,
+                    getMostAppropriateLeaderboard(), getMostAppropriateRaceColumn(), getMostAppropriateFleet()));
         }
 
         @Override
@@ -1850,10 +1845,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final MarkPassing last = Util.last(markPassings);
             if (last != null && last.getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint() &&
                     trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.LOADING) {
-                new Thread(()->
-                // Notify interested users:
-                notificationService.notifyUserOnCompetitorPassesFinish(competitor, trackedRace, getMostAppropriateLeaderboard(), getMostAppropriateRaceColumn(), getMostAppropriateFleet()),
-                    "Notifier about finish waypoing passed for "+trackedRace).start();
+                scheduler.execute(() ->
+                    // Notify interested users:
+                    notificationService.notifyUserOnCompetitorPassesFinish(competitor, trackedRace,
+                        getMostAppropriateLeaderboard(), getMostAppropriateRaceColumn(), getMostAppropriateFleet()));
             }
         }
 
