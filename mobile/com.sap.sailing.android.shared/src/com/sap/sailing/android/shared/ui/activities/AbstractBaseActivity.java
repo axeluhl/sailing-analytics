@@ -55,7 +55,7 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
     }
 
     public void showErrorPopup(String title, String message) {
-        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
+        new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
