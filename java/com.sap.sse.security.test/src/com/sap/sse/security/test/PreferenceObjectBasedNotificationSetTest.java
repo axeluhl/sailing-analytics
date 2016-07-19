@@ -279,7 +279,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     private static class UserConsumerMock implements Consumer<User> {
-        HashSet<User> calls = new HashSet<>();
+        final HashSet<User> calls = new HashSet<>();
 
         @Override
         public void accept(User user) {
