@@ -47,8 +47,16 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
 
     public void dismissProgressDialog() {
         synchronized (progressDialogMonitor) {
-            if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
+            try {
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+            } catch (final IllegalArgumentException e) {
+                ExLog.i(this, TAG, "progressDialog was not attached: " + e);
+            } catch (final Exception e) {
+                ExLog.i(this, TAG, "Unknown exception: " + e);
+            } finally {
+                progressDialog = null;
             }
         }
     }

@@ -1,10 +1,10 @@
 package com.sap.sailing.android.shared.util;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
+import android.support.v7.app.AlertDialog;
 
 import com.sap.sailing.android.shared.R;
 
@@ -52,8 +52,11 @@ public class LocationHelper {
      */
     public static void showNoGPSError(final Context context, String errorMessage) {
         if (context != null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(context).setCancelable(true).setTitle(context.getString(R.string.warning)).setNegativeButton(context.getString(R.string.no), null)
-                .setPositiveButton(context.getString(R.string.yes), new DialogInterface.OnClickListener() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog)
+                .setCancelable(true)
+                .setTitle(context.getString(R.string.warning))
+                .setNegativeButton(android.R.string.no, null)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         openLocationSettings(context);

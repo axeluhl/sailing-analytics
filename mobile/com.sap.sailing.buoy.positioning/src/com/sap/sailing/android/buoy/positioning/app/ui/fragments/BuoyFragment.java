@@ -133,7 +133,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
 
     private void checkGPS() {
         if (lastKnownLocation == null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
                 .setMessage(R.string.error_message_no_position)
                 .setPositiveButton(android.R.string.ok, null);
             if (!LocationHelper.isGPSEnabled(getActivity())) {
