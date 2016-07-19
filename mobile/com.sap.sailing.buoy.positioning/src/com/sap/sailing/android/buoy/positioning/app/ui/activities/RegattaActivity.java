@@ -1,6 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,6 +8,7 @@ import android.content.ServiceConnection;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -167,16 +167,16 @@ public class RegattaActivity extends AbstractRegattaActivity {
     }
 
     private void displayCheckoutConfirmationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
         builder.setTitle(R.string.warning);
         builder.setMessage(R.string.checkout_warning_message);
-        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 checkOut();
             }
         });
-        builder.setNegativeButton(R.string.no, null);
+        builder.setNegativeButton(android.R.string.no, null);
         builder.show();
     }
 
