@@ -51,7 +51,6 @@ public class PreferenceObjectBasedNotificationSetTest {
         db.getCollection(CollectionNames.USERS.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
-        db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         store = new UserStoreImpl();
     }
     
