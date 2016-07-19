@@ -149,7 +149,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
             for (CompetitorResult positionedCompetitor : positioningList) {
                 Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getCompetitorId());
                 try {
-                    resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor);
+                  //  resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor);
                     int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
                     correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
                             competitor, rankByRaceCommittee, positionedCompetitor.getScore());
@@ -195,15 +195,6 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
     }
 
-    private boolean resetMaxPointsReasonIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint, Competitor competitor) {
-        boolean scoreHasBeenCorrected = false;
-        if (!leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint).equals(MaxPointsReason.NONE)) {
-            applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, MaxPointsReason.NONE, timePoint);
-            scoreHasBeenCorrected = true;
-        }
-        return scoreHasBeenCorrected;
-    }
-    
     private void applyScoreCorrectionOperation(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, Double correctedScore, TimePoint timePoint) {
         RacingEventServiceOperation<?> operation = new UpdateLeaderboardScoreCorrection(leaderboard.getName(), raceColumn.getName(), competitor.getId().toString(), correctedScore, timePoint);
         service.apply(operation);
