@@ -36,6 +36,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Waypoint;
@@ -2099,6 +2100,107 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
                     assertTrue(rankedCompetitors.indexOf(c) > rankedCompetitors.indexOf(theUntrackedCompetitorInLastRace));
                 }
             }
+        }
+    }
+
+    /**
+     * See bug 3798: special discarding rule that limits the number of discards for the final series; configured
+     * by {@link Series#getMaximumNumberOfDiscards()}.
+     */
+    @Test
+    public void testDiscardingWithLimitOnFinalSeries() throws NoWindException {
+        series = new ArrayList<Series>();
+        // -------- qualification series ------------
+        {
+            List<Fleet> qualificationFleets = new ArrayList<Fleet>();
+            for (String qualificationFleetName : new String[] { "Yellow", "Blue" }) {
+                qualificationFleets.add(new FleetImpl(qualificationFleetName));
+            }
+            List<String> qualificationRaceColumnNames = new ArrayList<String>();
+            for (int q=1; q<=7; q++) {
+                qualificationRaceColumnNames.add("Q"+q);
+            }
+            Series qualificationSeries = new SeriesImpl("Qualification", /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualificationFleets, qualificationRaceColumnNames, /* trackedRegattaRegistry */ null);
+            series.add(qualificationSeries);
+        }
+
+        // -------- final series ------------
+        {
+            List<Fleet> finalFleets = new ArrayList<Fleet>();
+            int fleetOrdering = 1;
+            for (String finalFleetName : new String[] { "Gold", "Silver" }) {
+                finalFleets.add(new FleetImpl(finalFleetName, fleetOrdering++));
+            }
+            List<String> finalRaceColumnNames = new ArrayList<String>();
+            for (int f=1; f<=7; f++) {
+                finalRaceColumnNames.add("F"+f);
+            }
+            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, /* isFleetsCanRunInParallel */ true, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            finalSeries.setMaximumNumberOfDiscards(1);
+            series.add(finalSeries);
+        }
+        final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null,
+                series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* course area */null, OneDesignRankingMetric::new);
+        final int TOTAL_NUMBER_OF_COMPETITORS = 100;
+        List<Competitor> competitors = createCompetitors(TOTAL_NUMBER_OF_COMPETITORS);
+        final int firstYellowCompetitorIndex = TOTAL_NUMBER_OF_COMPETITORS/4;
+        List<Competitor> yellow = new ArrayList<>(competitors.subList(firstYellowCompetitorIndex, firstYellowCompetitorIndex+TOTAL_NUMBER_OF_COMPETITORS/2));
+        List<Competitor> blue = new ArrayList<>(competitors);
+        blue.removeAll(yellow);
+        Collections.shuffle(yellow);
+        Collections.shuffle(blue);
+        final int firstGoldCompetitorIndex = TOTAL_NUMBER_OF_COMPETITORS/3;
+        List<Competitor> gold = new ArrayList<>(competitors.subList(firstGoldCompetitorIndex, firstGoldCompetitorIndex+TOTAL_NUMBER_OF_COMPETITORS/2));
+        List<Competitor> silver = new ArrayList<>(competitors);
+        silver.removeAll(gold);
+        Collections.shuffle(gold);
+        Collections.shuffle(silver);
+        
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[] { 5, 10 });
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        for (int q = 1; q <= 7; q++) {
+            RaceColumn qColumn = series.get(0).getRaceColumnByName("Q"+q);
+            TrackedRace qYellow = new MockedTrackedRaceWithStartTimeAndRanks(now, yellow);
+            qColumn.setTrackedRace(qColumn.getFleetByName("Yellow"), qYellow);
+            TrackedRace qBlue = new MockedTrackedRaceWithStartTimeAndRanks(now, blue);
+            qColumn.setTrackedRace(qColumn.getFleetByName("Blue"), qBlue);
+        }
+        for (int f = 1; f <= 7; f++) {
+            RaceColumn fColumn = series.get(1).getRaceColumnByName("F"+f);
+            TrackedRace f1Gold = new MockedTrackedRaceWithStartTimeAndRanks(now, gold);
+            fColumn.setTrackedRace(fColumn.getFleetByName("Gold"), f1Gold);
+            TrackedRace f1Silver = new MockedTrackedRaceWithStartTimeAndRanks(now, silver);
+            fColumn.setTrackedRace(fColumn.getFleetByName("Silver"), f1Silver);
+        }
+
+        for (final Competitor c : competitors) {
+            int totalDiscards = 0;
+            int discardsInFinalSeries = 0;
+            int numberOfRacesInFinalThatWereWorseThanWorstQualificationRace = 0;
+            double worstQualificationScore = 0;
+            for (final RaceColumn rc : leaderboard.getRaceColumns()) {
+                double score = leaderboard.getTotalPoints(c, rc, later);
+                if (rc instanceof RaceColumnInSeries && ((RaceColumnInSeries) rc).getSeries() == regatta.getSeriesByName("Qualification")) {
+                    if (score > worstQualificationScore) {
+                        worstQualificationScore = score;
+                    }
+                } else {
+                    if (score > worstQualificationScore) {
+                        numberOfRacesInFinalThatWereWorseThanWorstQualificationRace++;
+                    }
+                }
+                if (leaderboard.isDiscarded(c, rc, later)) {
+                    totalDiscards++;
+                    if (rc instanceof RaceColumnInSeries && ((RaceColumnInSeries) rc).getSeries() == regatta.getSeriesByName("Final")) {
+                        discardsInFinalSeries++;
+                    }
+                }
+            }
+            assertEquals(2, totalDiscards);
+            assertTrue(discardsInFinalSeries <= 1);
+            assertTrue(numberOfRacesInFinalThatWereWorseThanWorstQualificationRace == 0 || discardsInFinalSeries > 0);
         }
     }
 }
