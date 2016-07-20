@@ -169,8 +169,8 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                         // column may have been collapsed meanwhile, so that the columns must not be added to the table right now
                         if (isExpanded()) {
                             int insertIndex = table.getColumnIndex(ExpandableSortableColumn.this);
-                            // The check "insertIndex != -1" is necessary, because the child-columns might be deleted asynchronously
-                            // while toggling the columns.
+                            // The check "insertIndex != -1" is necessary, because the child-columns might be deleted
+                            // asynchronously while toggling the columns.
                             if (insertIndex != -1) {
                                 insertIndex++;
                                 for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
