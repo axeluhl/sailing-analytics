@@ -148,7 +148,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         if (positioningList != null) {
             for (CompetitorResult positionedCompetitor : positioningList) {
                 Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getCompetitorId());
-                if (positionedCompetitor.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+                if (Util.equalsWithNull(positionedCompetitor.getMaxPointsReason(), MaxPointsReason.NONE)) {
                     try {
                         resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor);
                         int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
@@ -172,7 +172,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         boolean scoreHasBeenCorrected = false;
         MaxPointsReason trackedMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
         MaxPointsReason maxPointsReasonByRaceCommittee = positionedCompetitor.getMaxPointsReason();
-        if (!maxPointsReasonByRaceCommittee.equals(trackedMaxPointsReason)) {
+        if (!Util.equalsWithNull(maxPointsReasonByRaceCommittee, trackedMaxPointsReason)) {
             applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, maxPointsReasonByRaceCommittee, timePoint);
             scoreHasBeenCorrected = true;
         }
