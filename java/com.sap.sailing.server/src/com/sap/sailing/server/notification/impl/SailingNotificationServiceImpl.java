@@ -277,7 +277,7 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
                 @Override
                 protected NotificationMailTemplate getMailTemplate(BoatClass objectToNotifyAbout, Locale locale) {
                     String raceDescription = calculateRaceDescription(locale, event, leaderboard, raceColumn, fleet);
-                    String time = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale)
+                    String time = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG, locale)
                             .format(when.asDate());
                     return new NotificationMailTemplate(
                             messages.get(locale, "boatClassUpcomingRaceSubject", boatClass.getDisplayName()),
