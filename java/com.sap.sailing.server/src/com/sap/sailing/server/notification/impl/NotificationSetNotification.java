@@ -107,38 +107,59 @@ public abstract class NotificationSetNotification<T> implements MailNotification
     private String getMailContent(NotificationMailTemplate notificationMailTemplate, User user, Locale locale) {
         StringBuilder bodyContent = new StringBuilder();
         if (notificationMailTemplate.getTitle() != null) {
-            bodyContent.append("<h1>").append(notificationMailTemplate.getTitle()).append("</h1>");
+            bodyContent.append("<h1>")
+                .append(notificationMailTemplate.getTitle())
+                .append("</h1>");
         }
         String name = user.getFullName() == null || user.getFullName().isEmpty() ? user.getName() : user.getFullName();
-        bodyContent.append("<p>").append(messages.get(locale, "salutation", name)).append("</p>");
-        bodyContent.append("<p>").append(notificationMailTemplate.getText()).append("</p>");
+        bodyContent.append("<p>")
+                .append(htmlify(messages.get(locale, "salutation", name)))
+                .append("</p>");
+        bodyContent.append("<p>")
+                .append(htmlify(notificationMailTemplate.getText()))
+                .append("</p>");
         for (Pair<String, String> link : notificationMailTemplate.getLabelsAndLinkUrls()) {
-            bodyContent.append("<div class=\"buttonContainer\">").append("<a class=\"linkButton\" href=\"");
-            bodyContent.append(link.getB()).append("\">").append(link.getA()).append("</a>").append("</div>");
+            bodyContent.append("<div class=\"buttonContainer\">")
+                .append("<a class=\"linkButton\" href=\"")
+                .append(link.getB())
+                .append("\">")
+                .append(htmlify(link.getA()))
+                .append("</a>")
+                .append("</div>");
         }
         String siteLink = "<a href=\"" + notificationMailTemplate.getServerBaseUrl() + "/gwt/Home.html\">"
                 + notificationMailTemplate.getServerBaseUrl() + "</a>";
         StringBuilder footerLinks = new StringBuilder();
-        footerLinks //
-                .append("<a href=\"") //
+        footerLinks.append("<a href=\"")
                 .append(notificationMailTemplate.getServerBaseUrl())
-                .append("/gwt/Home.html#/user/profile/:\">").append(messages.get(locale, "userProfile")).append("</a>")
+                .append("/gwt/Home.html#/user/profile/:\">")
+                .append(htmlify(messages.get(locale, "userProfile")))
+                .append("</a>")
                 .append(" | ");
         footerLinks.append("<a href=\"http://go.sap.com/about/legal/impressum.html\">")
-                .append(messages.get(locale, "imprint")).append("</a>")
+                .append(htmlify(messages.get(locale, "imprint")))
+                .append("</a>")
                 .append(" | ");
         footerLinks.append("<a href=\"http://go.sap.com/about/legal/privacy.html\">")
-                .append(messages.get(locale, "privacy"))
+                .append(htmlify(messages.get(locale, "privacy")))
                 .append("</a>");
 
-        String subscriptionInformation = messages.get(locale, "subscriptionInformation");
-        return TEMPLATE //
+        String subscriptionInformation = htmlify(messages.get(locale, "subscriptionInformation"));
+        return TEMPLATE
                 .replace("${title}", notificationMailTemplate.getSubject())
                 .replace("${content}", bodyContent.toString())
                 .replace("${subscription_information}", subscriptionInformation)
                 .replace("${site}", siteLink) //
                 .replace("${footer_links}", footerLinks.toString())
         ;
+    }
+    
+    private String htmlify(String source) {
+        StringBuilder result = new StringBuilder();
+        for (char c : source.toCharArray()) {
+            result.append(("\"<>&".indexOf(c) >= 0 || c > 127) ? ( "&#" + (int) c + ";") : Character.toString(c));
+        }
+        return result.toString();
     }
     
     protected abstract NotificationMailTemplate getMailTemplate(T objectToNotifyAbout, Locale locale);
