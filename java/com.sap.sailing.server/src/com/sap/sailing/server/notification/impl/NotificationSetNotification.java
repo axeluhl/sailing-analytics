@@ -23,6 +23,7 @@ import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.mail.queue.MailNotification;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
+import com.sap.sse.security.User;
 
 public abstract class NotificationSetNotification<T> implements MailNotification {
     private static final Logger logger = Logger.getLogger(NotificationSetNotification.class.getName());
@@ -86,7 +87,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
             try {
                 // TODO: add cid:saplogo
                 NotificationMailTemplate mailTemplate = getMailTemplate(objectToNotifyAbout, locale);
-                bodyPart.setContent(getMailContent(mailTemplate, locale), "text/html");
+                bodyPart.setContent(getMailContent(mailTemplate, user, locale), "text/html");
                 multipart.addBodyPart(bodyPart);
 
                 DataSource imageDs = new ByteArrayDataSource(LOGO_BYTES, "image/png");
@@ -103,11 +104,13 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         });
     }
     
-    private String getMailContent(NotificationMailTemplate notificationMailTemplate, Locale locale) {
+    private String getMailContent(NotificationMailTemplate notificationMailTemplate, User user, Locale locale) {
         StringBuilder bodyContent = new StringBuilder();
         if (notificationMailTemplate.getTitle() != null) {
             bodyContent.append("<h1>").append(notificationMailTemplate.getTitle()).append("</h1>");
         }
+        String name = user.getFullName() == null || user.getFullName().isEmpty() ? user.getName() : user.getFullName();
+        bodyContent.append("<p>").append(messages.get(locale, "salutation", name)).append("</p>");
         bodyContent.append("<p>").append(notificationMailTemplate.getText()).append("</p>");
         for (Pair<String, String> link : notificationMailTemplate.getLabelsAndLinkUrls()) {
             bodyContent.append("<div class=\"buttonContainer\">").append("<a class=\"linkButton\" href=\"");
