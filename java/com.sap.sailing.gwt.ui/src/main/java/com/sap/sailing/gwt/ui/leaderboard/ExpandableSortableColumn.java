@@ -166,22 +166,20 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                 setExpanded(!isExpanded());
                 ensureExpansionDataIsLoaded(new Runnable() {
                     public void run() {
-                        if(!isExpanded()) {
-                            // column was collapsed meanwhile, so that the columns must not be added to the table right now
-                            return;
-                        }
-                        int insertIndex = table.getColumnIndex(ExpandableSortableColumn.this);
-                        // The check "insertIndex != -1" is necessary, because the child-columns might be deleted asynchronously
-                        // while toggling the columns.
-                        if (insertIndex != -1) {
-                            insertIndex++;
-                            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
-                                column.updateMinMax();
-                                if(table.getColumnIndex(column) < 0) {
-                                    getLeaderboardPanel().insertColumn(insertIndex++, column);
+                        if(isExpanded()) { // if column was collapsed meanwhile, the columns must not be added right now
+                            int insertIndex = table.getColumnIndex(ExpandableSortableColumn.this);
+                            // The check "insertIndex != -1" is necessary, because the child-columns might be deleted
+                            // asynchronously while toggling the columns.
+                            if (insertIndex != -1) {
+                                insertIndex++;
+                                for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
+                                    column.updateMinMax();
+                                    if(table.getColumnIndex(column) < 0) {
+                                        getLeaderboardPanel().insertColumn(insertIndex++, column);
+                                    }
                                 }
+                                getLeaderboardPanel().getLeaderboardTable().redraw();
                             }
-                            getLeaderboardPanel().getLeaderboardTable().redraw();
                         }
                         getLeaderboardPanel().setBusyState(oldBusyState);
                         setTogglingInProcess(false);
