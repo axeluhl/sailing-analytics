@@ -1101,7 +1101,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (getEndOfRace() == null) {
                 if (getTimePointOfNewestEvent() != null) {
                     endOfLivePeriod = getTimePointOfNewestEvent().plus(
-                            TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                            TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).plus(getDelayToLiveInMillis());
                 } else {
                     endOfLivePeriod = null;
                 }
@@ -1982,7 +1982,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (cacheInvalidationTimerLock) {
             if (cacheInvalidationTimer == null) {
                 cacheInvalidationTimer = new Timer("Cache invalidation timer for TrackedRaceImpl "
-                        + getRace().getName());
+                        + getRace().getName(), /* isDaemon */ true);
                 cacheInvalidationTimer.schedule(new TimerTask() {
                     @Override
                     public void run() {

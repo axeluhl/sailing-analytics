@@ -2,7 +2,7 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
-public class BoatClassDTO extends NamedDTO implements Serializable {
+public class BoatClassDTO extends NamedDTO implements Serializable, Comparable<BoatClassDTO> {
     private static final long serialVersionUID = 1981789833769906676L;
     
     /**
@@ -33,5 +33,10 @@ public class BoatClassDTO extends NamedDTO implements Serializable {
 
     public String getDisplayName() {
         return displayName;
+    }
+    
+    @Override
+    public int compareTo(BoatClassDTO o) {
+        return getName().compareToIgnoreCase(o.getName());
     }
 }

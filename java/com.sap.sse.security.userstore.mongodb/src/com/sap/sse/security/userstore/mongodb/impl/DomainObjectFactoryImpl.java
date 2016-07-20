@@ -3,6 +3,7 @@ package com.sap.sse.security.userstore.mongodb.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -66,6 +67,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
         final String company = (String) userDBObject.get(FieldNames.User.COMPANY.name());
+        final String localeRaw = (String)  userDBObject.get(FieldNames.User.LOCALE.name());
+        final Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
         Boolean emailValidated = (Boolean) userDBObject.get(FieldNames.User.EMAIL_VALIDATED.name());
         String passwordResetSecret = (String) userDBObject.get(FieldNames.User.PASSWORD_RESET_SECRET.name());
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
@@ -85,7 +88,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
-        User result = new User(name, email, fullName, company, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, accounts.values());
+        User result = new User(name, email, fullName, company, locale, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, accounts.values());
         for (String role : roles) {
             result.addRole(role);
         }

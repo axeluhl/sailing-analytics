@@ -426,6 +426,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
     String scoringSchemeLowPointForLeagueOverallLeaderboard();
     String scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
+    String scoringSchemeLowPointTieBreakBasedOnLastSeriesOnly();
+    String scoringSchemeLowPointTieBreakBasedOnLastSeriesOnlyDescription();
     String scoringSchemeHighPointEssOverall12();
     String scoringSchemeHighPointEssOverall12Description();
     String scoringSchemeHighPointFirstGetsTwelveOrEight();
@@ -1131,6 +1133,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSelectAScoringResult();
     String timeZone();
     String eventOfficialWebsiteURL();
+    String eventBaseURL();
     String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();
     String eventLogoImageURL();
@@ -1378,6 +1381,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String regattaQuickfinder();
     String resultsQuickfinder();
     String racesQuickfinder();
+    String profileQuickfinder();
     String statistics();
     String impressions();
     String notAvailableOnMobileMessage();
@@ -1616,4 +1620,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String finishTime(String timeAsString);
     String showCompetitorCharts();
     String showWindChart();
+    String watchLive();
+    String raceAnalysis();
+    String startAnalysis();
+    String winningLanes();
+    String userNotificationsOnlyIfMailAddressIsVerified();
+    String enabled();
+    String disabled();
+    String favoritesAndNotifications();
+    String favoriteCompetitors();
+    String favoriteBoatClasses();
+    String notificationAboutNewResults();
+    String notificationAboutUpcomingRaces();
 }

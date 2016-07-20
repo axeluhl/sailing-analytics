@@ -62,7 +62,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
     private static final long CONNECTION_TIMEOUT_IN_MILLIS = 5000;
     
     public WebSocketConnectionManager(IgtimiConnectionFactoryImpl connectionFactory, Iterable<String> deviceSerialNumbers, Account account) throws Exception {
-        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account);
+        this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account, /* isDaemon */ true);
         this.deviceIds = deviceSerialNumbers;
         this.account = account;
         this.fixFactory = new FixFactory();
@@ -111,7 +111,11 @@ public class WebSocketConnectionManager implements LiveDataConnection {
         if (session != null) {
             session.disconnect();
         }
-        client.stop();
+        synchronized (this) {
+            if (client != null) {
+                client.stop();
+            }
+        }
     }
 
     private class WebSocket extends WebSocketAdapter {

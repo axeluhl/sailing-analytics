@@ -1,5 +1,6 @@
 package com.sap.sse.security;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -57,7 +58,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException;
     
-    void updateUserProperties(String username, String fullName, String company) throws UserManagementException;
+    void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
     User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 

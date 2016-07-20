@@ -13,16 +13,17 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -35,7 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
@@ -59,6 +60,7 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinManager;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
+import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
@@ -66,8 +68,8 @@ public class RegattaActivity extends AbstractRegattaActivity
         implements RegattaFragment.FragmentWatcher, UploadResponseHandler {
 
     private final static String TAG = RegattaActivity.class.getName();
-    private final static String LEADERBOARD_IMAGE_FILENAME_PREFIX = "leaderboardImage_";
-    private final static String FLAG_IMAGE_FILENAME_PREFIX = "flagImage_";
+    private final static String COMPETITOR_IMAGE_FILENAME_PREFIX = "competitor_";
+    private final static String FLAG_IMAGE_FILENAME_PREFIX = "flag_";
 
     public EventInfo event;
     public CompetitorInfo competitor;
@@ -104,15 +106,17 @@ public class RegattaActivity extends AbstractRegattaActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
-        if (getSupportActionBar() != null) {
+        if (toolbar != null && getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
             getSupportActionBar().setTitle(leaderboard.name);
             getSupportActionBar().setSubtitle(event.name);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
         }
         RegattaFragment regattaFragment = new RegattaFragment();
         regattaFragment.setFragmentWatcher(this);
@@ -233,7 +237,7 @@ public class RegattaActivity extends AbstractRegattaActivity
     }
 
     private void setTeamImage(ImageView imageView, int width, int height) {
-        String fileName = getLeaderboardImageFileName(leaderboard.name);
+        String fileName = getCompetitorImageFileName(competitor.id);
         Bitmap storedImage = getStoredImage(fileName, width, height);
         if (storedImage == null) {
             askServerAboutTeamImageUrl(imageView);
@@ -303,7 +307,7 @@ public class RegattaActivity extends AbstractRegattaActivity
      * @param bitmap
      */
     public void updateLeaderboardPictureChosenByUser(final Bitmap bitmap) {
-        storeImageAndSendToServer(bitmap, getLeaderboardImageFileName(leaderboard.name), true);
+        storeImageAndSendToServer(bitmap, getCompetitorImageFileName(competitor.id), true);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -376,7 +380,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         File mediaStorageDir = getMediaStorageDir();
 
         File mediaFile;
-        String mImageName = "MI_" + fileName + ".png";
+        String mImageName = fileName + ".png";
         mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
         return mediaFile;
     }
@@ -385,7 +389,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         File mediaStorageDir = getMediaStorageDir();
 
         File mediaFile;
-        String mImageName = "MI_" + fileName + ".png";
+        String mImageName = fileName + ".png";
         mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
 
         return mediaFile.delete();
@@ -410,19 +414,23 @@ public class RegattaActivity extends AbstractRegattaActivity
     }
 
     @Override
-    public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
+    public void onCheckinDataAvailable(BaseCheckinData checkinData) {
         if (checkinData != null) {
             CheckinData data = (CheckinData) checkinData;
             try {
-                DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
-                DatabaseHelper.getInstance().storeCheckinRow(this, data.getEvent(), data.getCompetitor(), data.getLeaderboard(), data.getCheckinUrl());
-                competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
-                event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
-                leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
-                checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
-                RegattaFragment regattaFragment = new RegattaFragment();
-                regattaFragment.setFragmentWatcher(this);
-                replaceFragment(R.id.content_frame, regattaFragment);
+                if (data instanceof CompetitorCheckinData) {
+                    CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) data;
+                    DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
+                    DatabaseHelper.getInstance().storeCompetitorCheckinRow(this, competitorCheckinData.getEvent(), competitorCheckinData.getCompetitor(),
+                        competitorCheckinData.getLeaderboard(), competitorCheckinData.getCheckinUrl());
+                    competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
+                    event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+                    leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
+                    checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
+                    RegattaFragment regattaFragment = new RegattaFragment();
+                    regattaFragment.setFragmentWatcher(this);
+                    replaceFragment(R.id.content_frame, regattaFragment);
+                }
             } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                 ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                 displayDatabaseError();
@@ -435,8 +443,8 @@ public class RegattaActivity extends AbstractRegattaActivity
         setUpView();
     }
 
-    private String getLeaderboardImageFileName(String leaderboardName) {
-        return LEADERBOARD_IMAGE_FILENAME_PREFIX + leaderboardName;
+    private String getCompetitorImageFileName(String competitorId) {
+        return COMPETITOR_IMAGE_FILENAME_PREFIX + competitorId;
     }
 
     private String getFlagImageFileName(String countryCode) {
@@ -444,7 +452,7 @@ public class RegattaActivity extends AbstractRegattaActivity
     }
 
     private void displayCheckoutConfirmationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
         builder.setTitle(R.string.warning);
         builder.setMessage(R.string.checkout_warning_message);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
@@ -486,7 +494,7 @@ public class RegattaActivity extends AbstractRegattaActivity
                         public void performAction(JSONObject response) {
                             DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this,
                                     event.checkinDigest);
-                            deleteImageFile(getLeaderboardImageFileName(leaderboard.name));
+                            deleteImageFile(getCompetitorImageFileName(competitor.id));
                             dismissProgressDialog();
                             finish();
                         }
@@ -546,7 +554,7 @@ public class RegattaActivity extends AbstractRegattaActivity
 
     public void retryUpload(View view) {
         if (prefs.hasFailedUpload(leaderboard.name)) {
-            pictureFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
+            pictureFile = getImageFile(getCompetitorImageFileName(competitor.id));
         }
         if (pictureFile != null) {
             sendTeamImageToServer(pictureFile);
@@ -608,7 +616,7 @@ public class RegattaActivity extends AbstractRegattaActivity
             FileOutputStream outputStream = null;
             try {
                 in = new java.net.URL(downloadUrl).openStream();
-                imageFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
+                imageFile = getImageFile(getCompetitorImageFileName(competitor.id));
                 if (!imageFile.exists()) {
                     imageFile.createNewFile();
                 }

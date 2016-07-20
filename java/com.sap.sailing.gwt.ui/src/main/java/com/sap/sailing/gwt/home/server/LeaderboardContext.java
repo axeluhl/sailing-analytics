@@ -63,9 +63,9 @@ public class LeaderboardContext {
     }
     
     public void forRaces(RaceCallback callback) {
-        for(RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            if(!raceColumn.isCarryForward()) {
-                for(Fleet fleet : raceColumn.getFleets()) {
+        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+            if (!raceColumn.isCarryForward()) {
+                for (Fleet fleet : raceColumn.getFleets()) {
                     callback.doForRace(new RaceContext(service, event, this, raceColumn, fleet, service));
                 }
             }

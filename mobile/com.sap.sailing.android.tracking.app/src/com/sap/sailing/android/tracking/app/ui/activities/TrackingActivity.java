@@ -1,11 +1,11 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.ColorDrawable;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -14,11 +14,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
@@ -100,15 +102,18 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
 
         if (getSupportActionBar() != null) {
-            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this, checkinDigest);
+            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+            LeaderboardInfo leaderboardInfo = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setTitle(eventInfo.leaderboardName);
+            getSupportActionBar().setTitle(leaderboardInfo.name);
             getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             if (toolbar != null) {
                 toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-                toolbar.setPadding(20, 0, 0, 0);
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+                toolbar.setPadding(sidePadding, 0, 0, 0);
             }
         }
 
@@ -388,13 +393,16 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     public void showStopTrackingConfirmationDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.please_confirm).setMessage(R.string.do_you_really_want_to_stop_tracking)
-            .setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
+            .setTitle(R.string.please_confirm)
+            .setMessage(R.string.do_you_really_want_to_stop_tracking)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface dialog, int whichButton) {
                     stopTracking();
                 }
-            }).setNegativeButton(android.R.string.no, null).create();
+            })
+            .setNegativeButton(android.R.string.no, null).create();
 
         dialog.show();
     }

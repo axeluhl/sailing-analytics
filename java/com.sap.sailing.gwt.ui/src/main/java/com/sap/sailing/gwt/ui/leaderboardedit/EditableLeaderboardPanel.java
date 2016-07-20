@@ -1012,7 +1012,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     @Override
-    protected void updateLeaderboard(LeaderboardDTO leaderboard) {
+    public void updateLeaderboard(LeaderboardDTO leaderboard) {
         super.updateLeaderboard(leaderboard);
         if (leaderboard != null) {
             String lastScoreCorrectionComment = leaderboard.getComment();

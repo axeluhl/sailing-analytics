@@ -526,7 +526,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         final LeaderboardDTO previousLeaderboard = getLeaderboard();
         getSailingService().getLeaderboardByName(getLeaderboardName(),
                 timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
-                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
+                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(),
                 shallAddOverallDetails(), previousLeaderboard.getId(), /* fillTotalPointsUncorrected */ false,
                 new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
                         new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
@@ -586,7 +586,11 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         }
         return raceTimesInfoProvider;
     }
-
+    
+    public AsyncActionsExecutor getExecutor() {
+        return asyncActionsExecutor;
+    }
+    
     protected class CompetitorColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, LeaderboardRowDTO> {
         private final CompetitorColumnBase<LeaderboardRowDTO> base;
         
@@ -1661,7 +1665,10 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
          */
         @Override
         public void addedToSelection(CompetitorDTO competitor) {
-            getSelectionModel().setSelected(getRow(competitor.getIdAsString()), true);
+            final LeaderboardRowDTO row = getRow(competitor.getIdAsString());
+            if (row != null) {
+                getSelectionModel().setSelected(row, true);
+            }
         }
 
         /**
@@ -1669,7 +1676,10 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
          */
         @Override
         public void removedFromSelection(CompetitorDTO competitor) {
-            getSelectionModel().setSelected(getRow(competitor.getIdAsString()), false);
+            final LeaderboardRowDTO row = getRow(competitor.getIdAsString());
+            if (row != null) {
+                getSelectionModel().setSelected(row, false);
+            }
         }
 
         @Override
@@ -2265,7 +2275,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         if (needsDataLoading()) {
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), useNullAsTimePoint() ? null : date,
-                    /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), shallAddOverallDetails(), /* previousLeaderboard */
+                    /* namesOfRaceColumnsForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(), shallAddOverallDetails(), /* previousLeaderboard */
                     getLeaderboard(), isFillTotalPointsUncorrected(), timer, errorReporter, stringMessages);
             this.asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
                     new AsyncCallback<LeaderboardDTO>() {
@@ -2309,18 +2319,18 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
     /**
      * Determine from column expansion state which races need their leg details
      */
-    private Collection<String> getNamesOfExpandedRaces() {
-        Collection<String> namesOfExpandedRaces = new ArrayList<String>();
+    private Collection<String> getNamesOfExpandedRaceColumns() {
+        Collection<String> namesOfExpandedRaceColumns = new ArrayList<String>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
             if (column instanceof RaceColumn<?>) {
                 RaceColumn<?> raceColumn = (RaceColumn<?>) column;
                 if (raceColumn.isExpanded()) {
-                    namesOfExpandedRaces.add(raceColumn.getRaceColumnName());
+                    namesOfExpandedRaceColumns.add(raceColumn.getRaceColumnName());
                 }
             }
         }
-        return namesOfExpandedRaces;
+        return namesOfExpandedRaceColumns;
     }
 
     private boolean shallAddOverallDetails() {
@@ -2347,7 +2357,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
      * Assigns <code>leaderboard</code> to {@link #leaderboard} and updates the UI accordingly. Also updates the min/max
      * values on the columns.
      */
-    protected void updateLeaderboard(LeaderboardDTO leaderboard) {
+    public void updateLeaderboard(LeaderboardDTO leaderboard) {
         if (leaderboard != null) {
             Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
@@ -2474,7 +2484,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
     	}
     }
 
-	/**
+    /**
      * Due to a course change, a race may change its number of legs. All expanded race columns that show leg columns and
      * whose leg count changed need to be collapsed before the leaderboard is replaced, and expanded afterwards again.
      * Race columns whose toggling is {@link ExpandableSortableColumn#isTogglingInProcess() currently in progress} are
@@ -2564,14 +2574,16 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
      * @return all competitors for which the {@link #getLeaderboard() leaderboard} has an entry whose
      *         {@link LeaderboardEntryDTO#race} equals <code>race</code>
      */
-    private Iterable<CompetitorDTO> getCompetitors(RaceIdentifier race) {
+    public Iterable<CompetitorDTO> getCompetitors(RaceIdentifier race) {
         Set<CompetitorDTO> result = new HashSet<CompetitorDTO>();
-        for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
-            if (raceColumn.hasTrackedRace(race)) {
-                for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : getLeaderboard().rows.entrySet()) {
-                    LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(raceColumn.getRaceColumnName());
-                    if (entry != null && entry.race != null && entry.race.equals(race)) {
-                        result.add(e.getKey());
+        if (getLeaderboard() != null) {
+            for (RaceColumnDTO raceColumn : getLeaderboard().getRaceList()) {
+                if (raceColumn.hasTrackedRace(race)) {
+                    for (Map.Entry<CompetitorDTO, LeaderboardRowDTO> e : getLeaderboard().rows.entrySet()) {
+                        LeaderboardEntryDTO entry = e.getValue().fieldsByRaceColumnName.get(raceColumn.getRaceColumnName());
+                        if (entry != null && entry.race != null && entry.race.equals(race)) {
+                            result.add(e.getKey());
+                        }
                     }
                 }
             }
@@ -3040,7 +3052,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         return leaderboardTable;
     }
 
-    protected SailingServiceAsync getSailingService() {
+    public SailingServiceAsync getSailingService() {
         return sailingService;
     }
 

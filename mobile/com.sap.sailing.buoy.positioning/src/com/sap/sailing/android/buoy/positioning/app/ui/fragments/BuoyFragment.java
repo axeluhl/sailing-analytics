@@ -2,7 +2,6 @@ package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
 import java.text.DecimalFormat;
 
-import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
@@ -16,14 +15,14 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.AbsoluteSizeSpan;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,8 +38,6 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.ui.customviews.OpenSansButton;
-import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -51,10 +48,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private static final int GPS_MIN_DISTANCE = 1;
     private static final int GPS_MIN_TIME = 1000;
     private static final String N_A = "n/a";
-    private OpenSansTextView markHeaderTextView;
-    private OpenSansTextView accuracyTextView;
-    private OpenSansTextView distanceTextView;
-    private OpenSansButton setPositionButton;
+    private TextView accuracyTextView;
+    private TextView distanceTextView;
+    private Button setPositionButton;
     private MapFragment mapFragment;
     private Location lastKnownLocation;
     private LatLng savedPosition;
@@ -72,7 +68,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         super.onCreateView(inflater, container, savedInstanceState);
         View layout = inflater.inflate(R.layout.fragment_buoy_postion_detail, container, false);
 
-        markHeaderTextView = ViewHelper.get(layout, R.id.mark_header);
         accuracyTextView = ViewHelper.get(layout, R.id.marker_gps_accuracy);
         distanceTextView = ViewHelper.get(layout, R.id.marker_gps_distance);
         ClickListener clickListener = new ClickListener();
@@ -133,15 +128,12 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         boolean gpsEnabled = LocationHelper.isGPSEnabled(getActivity());
         int buttonTextId = gpsEnabled ? R.string.set_position_no_gps_yet : R.string.set_position_disabled_gps;
         String text = getString(buttonTextId);
-        SpannableString disabledButtonText = new SpannableString(text);
-        AbsoluteSizeSpan absoluteSizeSpan = new AbsoluteSizeSpan(10, true);
-        disabledButtonText.setSpan(absoluteSizeSpan, text.indexOf("\n"), text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        setPositionButton.setText(disabledButtonText);
+        setPositionButton.setText(text);
     }
 
     private void checkGPS() {
         if (lastKnownLocation == null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
                 .setMessage(R.string.error_message_no_position)
                 .setPositiveButton(android.R.string.ok, null);
             if (!LocationHelper.isGPSEnabled(getActivity())) {
@@ -173,8 +165,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     public void setUpTextUI(Location location) {
-        MarkInfo mark = positioningActivity.getMarkInfo();
-        markHeaderTextView.setText(mark.getName());
         String accuracyText = N_A;
         String distanceText = N_A;
         DecimalFormat accuracyFormatter = new DecimalFormat("#.##");
@@ -226,8 +216,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     private void configureMap(GoogleMap map) {
-        map.getUiSettings().setZoomControlsEnabled(true);
-        map.setPadding(0, 50, 0, 0);
+        if (map != null) {
+            map.getUiSettings().setZoomControlsEnabled(true);
+        }
     }
 
     @Override
@@ -254,6 +245,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private void initLocationProvider() {
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
+        locationManager.removeGpsStatusListener(mGpsListener);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, GPS_MIN_DISTANCE, this);
         locationManager.addGpsStatusListener(mGpsListener);
         
@@ -346,7 +338,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             Log.d(TAG, "Action: " + action);
-            if (action.equals(getString(R.string.database_changed))) {
+            if (action.equals(getString(R.string.database_changed)) && isAdded()) {
                 positioningActivity.loadDataFromDatabase();
                 setUpTextUI(lastKnownLocation);
                 updateMap();
@@ -364,12 +356,14 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         public void onGpsStatusChanged(int event) {
             switch (event) {
                 case GpsStatus.GPS_EVENT_STOPPED: {
-                    disablePositionButton();
-                    distanceTextView.setText(N_A);
-                    accuracyTextView.setText(N_A);
-                    mapFragment.getMap().setMyLocationEnabled(false);
-                    reportGPSQuality(0);
-                    break;
+                    if (isAdded()) {
+                        disablePositionButton();
+                        distanceTextView.setText(N_A);
+                        accuracyTextView.setText(N_A);
+                        mapFragment.getMap().setMyLocationEnabled(false);
+                        reportGPSQuality(0);
+                        break;
+                    }
                 }
             }
         }

@@ -34,7 +34,6 @@ public class LoginTest {
         db.getCollection(CollectionNames.USERS.name()).drop();
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
-        db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         store = new UserStoreImpl();
         UsernamePasswordRealm.setTestUserStore(store);
         Activator.setTestUserStore(store);

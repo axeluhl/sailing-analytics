@@ -415,6 +415,38 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         componentViewer.forceLayout();
     }
     
+    LeaderboardPanel getLeaderboardPanel() {
+        return leaderboardPanel;
+    }
+    
+    MultiCompetitorRaceChart getCompetitorChart() {
+        return competitorChart;
+    }
+    
+    WindChart getWindChart() {
+        return windChart;
+    }
+    
+    RaceTimePanel getRaceTimePanel() {
+        return racetimePanel;
+    }
+    
+    Timer getTimer() {
+        return timer;
+    }
+    
+    RaceMap getMap() {
+        return raceMap;
+    }
+    
+    RegattaAndRaceIdentifier getSelectedRaceIdentifier() {
+        return selectedRaceIdentifier;
+    }
+    
+    CompetitorSelectionProvider getCompetitorSelectionProvider() {
+        return competitorSelectionProvider;
+    }
+    
     /**
      * Sets the collapsable panel for the leaderboard open or close, if in <code>CASCADE</code> view mode.<br />
      * Displays or hides the leaderboard, if in <code>ONESCREEN</code> view mode.<br /><br />
@@ -451,10 +483,6 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         setComponentVisible(leaderboardAndMapViewer, competitorChart, visible);
     }
     
-    public RaceTimePanel getTimePanel() {
-        return racetimePanel; 
-    }
-
     protected SailingServiceAsync getSailingService() {
         return sailingService;
     }
@@ -475,11 +503,11 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
         if (editMarkPassingPanel != null) {
-        editMarkPassingPanel.setLeaderboard(leaderboard);
+            editMarkPassingPanel.setLeaderboard(leaderboard);
         }
         if (editMarkPositionPanel != null) {
             editMarkPositionPanel.setLeaderboard(leaderboard);
-    }
+        }
     }
 
     @Override
@@ -560,12 +588,12 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     }
 
     private void manageTimePanelToggleButton(boolean advanceTimePanelEnabled) {
-        final Button toggleButton = getTimePanel().getAdvancedToggleButton();
+        final Button toggleButton = getRaceTimePanel().getAdvancedToggleButton();
         if (advanceTimePanelEnabled) {
             toggleButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    boolean advancedModeShown = getTimePanel().toggleAdvancedMode();
+                    boolean advancedModeShown = getRaceTimePanel().toggleAdvancedMode();
                     if (advancedModeShown) {
                         dockPanel.setWidgetSize(timePanelWrapper, TIMEPANEL_EXPANDED_HEIGHT);
                         toggleButton.removeStyleDependentName("Closed");
@@ -585,7 +613,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     private ResizableFlowPanel createTimePanelLayoutWrapper() {
         ResizableFlowPanel timeLineInnerBgPanel = new ResizableFlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
-        timeLineInnerBgPanel.add(getTimePanel());
+        timeLineInnerBgPanel.add(getRaceTimePanel());
         
         ResizableFlowPanel timeLineInnerPanel = new ResizableFlowPanel();
         timeLineInnerPanel.add(timeLineInnerBgPanel);

@@ -248,8 +248,8 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         }
         
         @Override
-        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
-            return currentPresenter.getRaceViewerURL(raceMetadata);
+        protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
+            return currentPresenter.getRaceViewerURL(raceMetadata, mode);
         }
     }
 

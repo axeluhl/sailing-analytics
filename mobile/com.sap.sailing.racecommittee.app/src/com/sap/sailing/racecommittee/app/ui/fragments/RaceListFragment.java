@@ -76,6 +76,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private Button mAllRacesButton;
     private TextView mCourse;
     private TextView mData;
+    private ImageView mRefresh;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private FilterMode mFilterMode;
@@ -256,9 +257,9 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mCourse = (TextView) view.findViewById(R.id.regatta_course);
         mData = (TextView) view.findViewById(R.id.regatta_data);
 
-        ImageView imageView = (ImageView) view.findViewById(R.id.nav_button);
-        if (imageView != null) {
-            imageView.setOnClickListener(new OnClickListener() {
+        mRefresh = (ImageView) view.findViewById(R.id.nav_button);
+        if (mRefresh != null) {
+            mRefresh.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
@@ -481,10 +482,14 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     public void showSpinner(boolean visible) {
         if (mProgress != null) {
             if (visible) {
+                mRefresh.setEnabled(false);
                 mProgress.setVisibility(View.VISIBLE);
+                mListView.setVisibility(View.GONE);
                 mUpdateList = false;
             } else {
+                mRefresh.setEnabled(true);
                 mProgress.setVisibility(View.GONE);
+                mListView.setVisibility(View.VISIBLE);
                 mUpdateList = true;
             }
         }
