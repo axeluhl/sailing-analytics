@@ -447,7 +447,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(settings.isShowMapControls(), showHeaderPanel);
-        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
+        combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(true);
