@@ -166,6 +166,10 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                 setExpanded(!isExpanded());
                 ensureExpansionDataIsLoaded(new Runnable() {
                     public void run() {
+                        if(!isExpanded()) {
+                            // column was collapsed meanwhile, so that the columns must not be added to the table right now
+                            return;
+                        }
                         int insertIndex = table.getColumnIndex(ExpandableSortableColumn.this);
                         // The check "insertIndex != -1" is necessary, because the child-columns might be deleted asynchronously
                         // while toggling the columns.
@@ -173,7 +177,9 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                             insertIndex++;
                             for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
                                 column.updateMinMax();
-                                getLeaderboardPanel().insertColumn(insertIndex++, column);
+                                if(table.getColumnIndex(column) < 0) {
+                                    getLeaderboardPanel().insertColumn(insertIndex++, column);
+                                }
                             }
                             getLeaderboardPanel().getLeaderboardTable().redraw();
                         }
