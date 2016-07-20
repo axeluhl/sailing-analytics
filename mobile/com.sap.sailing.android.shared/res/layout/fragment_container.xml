@@ -22,8 +22,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:ellipsize="middle"
                 android:gravity="center"
-                android:maxLines="1"
+                android:singleLine="true"
                 android:textColor="@color/toolbar_text_color"
                 android:textSize="16sp" />
 
@@ -32,8 +33,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:ellipsize="middle"
                 android:gravity="center"
-                android:maxLines="1"
+                android:singleLine="true"
                 android:textColor="@color/toolbar_text_color"
                 android:textSize="12sp" />
         </LinearLayout>
