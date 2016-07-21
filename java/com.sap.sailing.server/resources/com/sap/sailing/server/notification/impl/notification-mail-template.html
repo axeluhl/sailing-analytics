@@ -1,94 +1,30 @@
-<!doctype html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
 <html>
-<head>
+  <head>
     <title>${title}</title>
-    <style type="text/css">
-        .content {
-            margin: 10px;
-        }
-
-        .buttonContainer {
-            display: inline-block;
-        }
-
-        .linkButton, .linkButton:active, .linkButton:visited {
-            padding: 15px;
-            margin: 10px 10px 0px 0px;
-            display: inline-block;
-            background-color: #337ab7;
-            border-radius: 4px;
-            color: #ffffff;
-            border: 1px solid #2e6da4;
-            text-decoration: none;
-        }
-
-        .linkButton:hover {
-            background-color: #2b618e;
-            border: 1px solid #204d74;
-        }
-
-        .body {
-            background-color: #e3e3e3;
-            color: black;
-            padding: 40px;
-            max-width: 800px;
-            margin: 0 auto;
-            margin-bottom: 100px;
-            font-family: 'Open Sans', sans-serif;
-        }
-
-        .main {
-            border: 1px solid black;
-            background-color: white;
-        }
-
-        .header {
-            background-color: black;
-            padding: 10px;
-            font-size: 16px;
-            border-bottom: .2em solid #efaa00;
-            color: white;
-        }
-
-        .content {
-            padding: 20px 30px;
-            min-height: 200px;
-        }
-
-        .footer {
-            margin: 30px 10% 200px 10%;
-            text-align: center;
-            font-size: 13px;
-        }
-
-        .sapLogo {
-            height: 30px;
-            width: auto;
-            vertical-align: middle;
-        }
-
-        .sailingAnalytics {
-            display: inline-block;
-            line-height: 30px;
-            vertical-align: middle;
-        }
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <style>
+      .linkButton:active{padding:15px;margin:10px 10px 0px 0px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none}
+      .linkButton:visited{padding:15px;margin:10px 10px 0px 0px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none}
+      .linkButton:hover{background-color:#2b618e;border:1px solid #204d74}
     </style>
-</head>
-<body style="margin: 0px;padding: 0px;">
-<div class="body">
-    <div class="main">
-        <div class="header">
-            <img src="cid:saplogo" class="sapLogo" alt="SAP "/><span class="sailingAnalytics">Sailing Analytics</span>
+    
+  </head>
+  <body marginheight="0" topmargin="0" marginwidth="0" bgcolor="#e3e3e3" offset="0" leftmargin="0" style="background-color: #e3e3e3;">
+    <div class="body" style="background-color:#e3e3e3;color:black;padding:40px;max-width:800px;margin:0 auto;margin-bottom:100px;font-family:'Open Sans', sans-serif">
+      <div class="main" style="border:1px solid black;background-color:white">
+        <div class="header" style="background-color:black;padding:10px;font-size:16px;border-bottom:.2em solid #efaa00;color:white">
+          <img src="cid:saplogo" class="sapLogo" alt="SAP " style="height:30px;width:auto;vertical-align:middle"><span class="sailingAnalytics" style="display:inline-block;line-height:30px;vertical-align:middle">Sailing Analytics</span>
         </div>
-        <div class="content">
-            ${content}
+        <div class="content" style="margin:10px;padding:20px 30px;min-height:200px">
+          ${content}
         </div>
-    </div>
-    <div class="footer">
+      </div>
+      <div class="footer" style="margin:30px 10% 200px 10%;text-align:center;font-size:13px">
         <p>${subscription_information}</p>
         <p>${site}</p>
         <p>${footer_links}</p>
+      </div>
     </div>
-</div>
-</body>
+  </body>
 </html>
