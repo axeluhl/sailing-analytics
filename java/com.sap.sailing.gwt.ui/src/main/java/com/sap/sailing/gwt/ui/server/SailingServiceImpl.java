@@ -858,7 +858,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<RaceColumnDTO> raceColumns = convertToRaceColumnDTOs(series.getRaceColumns());
         SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(), series.isFleetsCanRunInParallel(),
                 series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
-                        series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring());
+                        series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
+                        series.getMaximumNumberOfDiscards());
         return result;
     }
 
@@ -3946,7 +3947,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
-            List<FleetDTO> fleets) {
+            Integer maximumNumberOfDiscards, List<FleetDTO> fleets) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
@@ -3954,7 +3955,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         getService().apply(
                 new UpdateSeries(regattaIdentifier, seriesName, newSeriesName, isMedal, isFleetsCanRunInParallel, resultDiscardingThresholds,
                         startsWithZeroScore, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring,
-                        fleets));
+                        maximumNumberOfDiscards, fleets));
     }
 
     @Override
@@ -4269,12 +4270,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private SeriesParameters getSeriesParameters(SeriesDTO seriesDTO) {
-        SeriesParameters series = new SeriesParameters(false, false, false, null);
-            series
-                    .setFirstColumnIsNonDiscardableCarryForward(seriesDTO.isFirstColumnIsNonDiscardableCarryForward());
-            series.setHasSplitFleetContiguousScoring(seriesDTO.hasSplitFleetContiguousScoring());
-            series.setStartswithZeroScore(seriesDTO.isStartsWithZeroScore());
-            series.setDiscardingThresholds(seriesDTO.getDiscardThresholds());
+        SeriesParameters series = new SeriesParameters(false, false, false, null, seriesDTO.getMaximumNumberOfDiscards());
+        series.setFirstColumnIsNonDiscardableCarryForward(seriesDTO.isFirstColumnIsNonDiscardableCarryForward());
+        series.setHasSplitFleetContiguousScoring(seriesDTO.hasSplitFleetContiguousScoring());
+        series.setStartswithZeroScore(seriesDTO.isStartsWithZeroScore());
+        series.setDiscardingThresholds(seriesDTO.getDiscardThresholds());
         return series;
     }
     
@@ -4284,7 +4284,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 SeriesParameters seriesParameters = getSeriesParameters(series);
                 seriesCreationParams.put(series.getName(), new SeriesCreationParametersDTO(series.getFleets(),
                 false, true, seriesParameters.isStartswithZeroScore(), seriesParameters.isFirstColumnIsNonDiscardableCarryForward(),
-                        seriesParameters.getDiscardingThresholds(), seriesParameters.isHasSplitFleetContiguousScoring()));
+                        seriesParameters.getDiscardingThresholds(), seriesParameters.isHasSplitFleetContiguousScoring(),
+                        seriesParameters.getMaximumNumberOfDiscards()));
             }
         return seriesCreationParams;
     }

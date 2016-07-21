@@ -43,6 +43,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private CheckBox startWithZeroScoreCheckbox;
     private CheckBox hasSplitFleetContiguousScoringCheckbox;
     private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
+    private com.sap.sse.gwt.client.controls.IntegerBox maximumNumberOfDiscardsBox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private final StringMessages stringMessages;
     private VerticalPanel additionalWidgetPanel;
@@ -137,7 +138,8 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                 fleetsCanRunInParallelCheckbox.getValue(),
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()
                         : null, startWithZeroScoreCheckbox.getValue(),
-                firstColumnIsNonDiscardableCarryForwardCheckbox.getValue(), hasSplitFleetContiguousScoringCheckbox.getValue());
+                firstColumnIsNonDiscardableCarryForwardCheckbox.getValue(), hasSplitFleetContiguousScoringCheckbox.getValue(),
+                maximumNumberOfDiscardsBox.getValue());
     }
 
     private RaceColumnDTO findRaceColumnInSeriesByName(SeriesDTO series, String raceColumnName) {
@@ -192,6 +194,11 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         firstColumnIsNonDiscardableCarryForwardCheckbox.ensureDebugId("StartsWithNonDiscardableCarryForwardCheckbox");
         firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(selectedSeries.isFirstColumnIsNonDiscardableCarryForward());
         additionalWidgetPanel.add(firstColumnIsNonDiscardableCarryForwardCheckbox);
+        
+        final HorizontalPanel maximumNumberOfDiscardsPanel = new HorizontalPanel();
+        maximumNumberOfDiscardsPanel.add(new Label(stringMessages.maximumNumberOfDiscards()));
+        maximumNumberOfDiscardsBox = createIntegerBox(selectedSeries.getMaximumNumberOfDiscards(), /* visibleLength */ 3);
+        maximumNumberOfDiscardsPanel.add(maximumNumberOfDiscardsBox);
         
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
         useSeriesResultDiscardingThresholdsCheckbox.ensureDebugId("DefinesResultDiscardingRulesCheckbox");

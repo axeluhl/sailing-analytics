@@ -1622,4 +1622,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceAnalysis();
     String startAnalysis();
     String winningLanes();
+    String maximumNumberOfDiscards();
 }

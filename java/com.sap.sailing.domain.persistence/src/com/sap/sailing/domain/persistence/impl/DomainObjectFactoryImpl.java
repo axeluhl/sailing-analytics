@@ -1196,6 +1196,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (isFleetCanRunInParallelObject != null) {
             isFleetsCanRunInParallel = (Boolean) dbSeries.get(FieldNames.SERIES_IS_FLEETS_CAN_RUN_IN_PARALLEL.name());
         }
+        final Integer maximumNumberOfDiscards = (Integer) dbSeries.get(FieldNames.SERIES_MAXIMUM_NUMBER_OF_DISCARDS.name());
         Boolean startsWithZeroScore = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name());
         Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries.get(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name());
         Boolean firstColumnIsNonDiscardableCarryForward = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name());
@@ -1214,6 +1215,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (hasSplitFleetContiguousScoring != null) {
             series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoring);
         }
+        series.setMaximumNumberOfDiscards(maximumNumberOfDiscards);
         if (firstColumnIsNonDiscardableCarryForward != null) {
             series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForward);
         }
