@@ -112,14 +112,14 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 .append("</h1>");
         }
         String name = user.getFullName() == null || user.getFullName().isEmpty() ? user.getName() : user.getFullName();
-        bodyContent.append("<p>")
+        bodyContent.append("<div class=\"paragraph\" style=\" border-top: 5px solid white; border-bottom: 5px solid white;\">")
                 .append(htmlify(messages.get(locale, "salutation", name)))
-                .append("</p>");
-        bodyContent.append("<p>")
+                .append("</div>");
+        bodyContent.append("<div class=\"paragraph\" style=\" border-top: 5px solid white; border-bottom: 5px solid white;\">")
                 .append(htmlify(notificationMailTemplate.getText()))
-                .append("</p>");
+                .append("</div>");
         for (Pair<String, String> link : notificationMailTemplate.getLabelsAndLinkUrls()) {
-            bodyContent.append("<div class=\"buttonContainer\" style=\"display: inline-block;border-top: 10px solid white;border-right: 10px solid white;\">")
+            bodyContent.append("<div class=\"buttonContainer\" style=\"float: left; border-top: 10px solid white; border-right: 10px solid white;\">")
                 .append("<a class=\"linkButton\" href=\"")
                 .append(link.getB())
                 .append("\" style=\"display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;\">")

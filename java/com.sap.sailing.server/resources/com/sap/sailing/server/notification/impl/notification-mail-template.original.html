@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <style type="text/css">
         .buttonContainer {
-            display: inline-block;
+            float: left;
             border-top: 10px solid white;
             border-right: 10px solid white;
         }
@@ -80,13 +80,24 @@
         .sapLogo {
             height: 30px;
             width: auto;
-            vertical-align: middle;
+            float: left;
         }
 
         .sailingAnalytics {
             display: inline-block;
-            line-height: 30px;
-            vertical-align: middle;
+            line-height: 16px;
+            border-top: 7px solid black;
+            border-bottom: 7px solid black;
+            border-left: 5px solid black;
+        }
+        
+        .clear {
+            clear: both;
+        }
+        
+        .paragraph {
+            border-top: 5px solid white;
+            border-bottom: 5px solid white;
         }
     </style>
 </head>
@@ -94,14 +105,16 @@
 <div class="body">
     <div class="main">
         <div class="headerWrapper">
-	        <div class="header">
-	            <img src="cid:saplogo" class="sapLogo" alt="SAP "/><span class="sailingAnalytics">Sailing Analytics</span>
-	        </div>
+            <div class="header">
+                <img src="cid:saplogo" class="sapLogo" alt="SAP"/><span class="sailingAnalytics">Sailing Analytics</span>
+                <div class="clear"></div>
+            </div>
         </div>
         <div class="contentWrapper">
-	        <div class="content">
-	            ${content}
-	        </div>
+            <div class="content">
+                ${content}
+            </div>
+            <div class="clear"></div>
         </div>
     </div>
     <div class="footer">

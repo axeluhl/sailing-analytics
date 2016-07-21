@@ -1,4 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<!-- 
+    use a css inliner tool like https://putsmail.com/inliner to inline css
+ -->
 <html>
   <head>
     <title>${title}</title>
@@ -15,13 +18,15 @@
       <div class="main" style="border:1px solid black">
         <div class="headerWrapper" style="background-color:black;font-size:16px;border-bottom:.2em solid #efaa00;color:white">
           <div class="header" style="border:10px solid black">
-            <img src="cid:saplogo" class="sapLogo" alt="SAP " style="height:30px;width:auto;vertical-align:middle"><span class="sailingAnalytics" style="display:inline-block;line-height:30px;vertical-align:middle">Sailing Analytics</span>
+            <img src="cid:saplogo" class="sapLogo" alt="SAP" style="height:30px;width:auto;float:left"><span class="sailingAnalytics" style="display:inline-block;line-height:16px;border-top:7px solid black;border-bottom:7px solid black;border-left:5px solid black">Sailing Analytics</span>
+            <div class="clear" style="clear:both"></div>
           </div>
         </div>
         <div class="contentWrapper" style="background-color:white">
           <div class="content" style="border:20px solid white;border-right:30px solid white;border-left:30px solid white;min-height:200px">
             ${content}
-            </div>
+          </div>
+          <div class="clear" style="clear:both"></div>
         </div>
       </div>
       <div class="footer" style="margin:30px 10% 200px 10%;text-align:center;font-size:13px">
