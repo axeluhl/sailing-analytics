@@ -148,6 +148,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
             @Override
             public void onSuccess(LeaderboardDTO result) {
                 leaderboardForSpecificTimePoint = result;
+                getLeaderboardPanel().updateLeaderboard(result);
                 trigger();
             }
         };
