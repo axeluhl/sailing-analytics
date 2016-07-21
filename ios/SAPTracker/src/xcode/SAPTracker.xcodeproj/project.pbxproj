@@ -308,6 +308,7 @@
 		7FED45CC1A25F5910022505F /* leaderboard1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C61A25F5900022505F /* leaderboard1.json */; };
 		9E95C3D61C723AB30016632B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95C3D51C723AB30016632B /* Constants.swift */; };
 		9ECBDDAE1C9C4F0300F76AEB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */; };
+		C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936171D40D295000F30E8 /* GPSFixController.swift */; };
 		C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */; };
 		C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAAA1CF736680093B0C5 /* Preferences.swift */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
@@ -701,6 +702,7 @@
 		9E95C3D51C723AB30016632B /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B1229BB88872CD20C0AE25DE /* libPods-SAPTracker.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SAPTracker.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
 		C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestManager.swift; sourceTree = "<group>"; };
 		C852BAAA1CF736680093B0C5 /* Preferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
@@ -803,10 +805,10 @@
 		7F06590219F7FEA40077FF95 /* DataController */ = {
 			isa = PBXGroup;
 			children = (
-				C8739E0E1D2BEE7900A89F3C /* RegattaController.swift */,
 				7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */,
+				C84936171D40D295000F30E8 /* GPSFixController.swift */,
+				C8739E0E1D2BEE7900A89F3C /* RegattaController.swift */,
 				C8739E101D2BF13200A89F3C /* Data */,
-				C852BAA61CF5E1F40093B0C5 /* CheckIn */,
 			);
 			name = DataController;
 			sourceTree = "<group>";
@@ -1168,13 +1170,6 @@
 				26E434E29A70875531BDD3C3 /* Pods-SAPTrackerTests.release.xcconfig */,
 			);
 			name = Pods;
-			sourceTree = "<group>";
-		};
-		C852BAA61CF5E1F40093B0C5 /* CheckIn */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = CheckIn;
 			sourceTree = "<group>";
 		};
 		C852BAA91CF736440093B0C5 /* Preferences */ = {
@@ -1877,6 +1872,7 @@
 				C89C5FCA1D06CECD002AAAD2 /* StatusTrackingTableViewCell.swift in Sources */,
 				C8739E051D2AA2A500A89F3C /* Regatta.swift in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
+				C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
 				C8739E0D1D2AA2A500A89F3C /* Event.swift in Sources */,

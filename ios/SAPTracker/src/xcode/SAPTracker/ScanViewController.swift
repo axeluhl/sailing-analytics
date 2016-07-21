@@ -116,11 +116,11 @@ class ScanViewController: UIViewController {
 
 extension ScanViewController: CheckInControllerDelegate {
 
-    func showCheckInAlert(checkInController: CheckInController, alertController: UIAlertController) {
+    func showCheckInAlert(sender: CheckInController, alertController: UIAlertController) {
         presentViewController(alertController, animated: true, completion: nil)
     }
     
-    func checkInDidEnd(checkInController: CheckInController, withSuccess succeed: Bool) {
+    func checkInDidEnd(sender: CheckInController, withSuccess succeed: Bool) {
         if succeed {
             navigationController?.popViewControllerAnimated(true)
         } else {

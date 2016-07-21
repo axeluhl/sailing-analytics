@@ -254,7 +254,7 @@ class RequestManager: NSObject {
         manager.POST(urlString, parameters: body, success: success, failure: failure)
     }
     
-    func postGPSFixes(gpsFixes: [GPSFix]!,
+    func postGPSFixes(gpsFixes: Set<GPSFix>,
                       success: (AFHTTPRequestOperation!, AnyObject!) -> Void,
                       failure: (AFHTTPRequestOperation!, AnyObject!) -> Void)
     {

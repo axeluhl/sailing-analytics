@@ -12,10 +12,10 @@ import AVFoundation
 
 @objc protocol CheckInControllerDelegate {
     
-    func showCheckInAlert(checkInController: CheckInController, alertController: UIAlertController)
+    func showCheckInAlert(sender: CheckInController, alertController: UIAlertController)
 
-    optional func checkInDidStart(checkInController: CheckInController)
-    optional func checkInDidEnd(checkInController: CheckInController, withSuccess succeed: Bool)
+    optional func checkInDidStart(sender: CheckInController)
+    optional func checkInDidEnd(sender: CheckInController, withSuccess succeed: Bool)
 
 }
 
@@ -71,30 +71,15 @@ class CheckInController : NSObject {
     }
     
     private func postCheckInSuccess(regattaData: RegattaData) {
-        
-        // Regatta
-        let regatta = CoreDataManager.sharedManager.fetchRegatta(regattaData.eventID,
-                                                                 leaderboardName: regattaData.leaderboardName,
-                                                                 competitorID: regattaData.competitorID
-        ) ?? CoreDataManager.sharedManager.newRegatta()
+        let regatta = CoreDataManager.sharedManager.fetchRegatta(regattaData) ?? CoreDataManager.sharedManager.newRegatta()
         regatta.updateWirhRegattaData(regattaData)
-        
-        // Event
         let event = regatta.event ?? CoreDataManager.sharedManager.newEvent(regatta)
         event.updateWithEventData(regattaData.eventData)
-        
-        // Leaderboard
         let leaderboard = regatta.leaderboard ?? CoreDataManager.sharedManager.newLeaderboard(regatta)
         leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
-        
-        // Competitor
         let competitor = regatta.competitor ?? CoreDataManager.sharedManager.newCompetitor(regatta)
         competitor.updateWithCompetitorData(regattaData.competitorData)
-        
-        // Save
         CoreDataManager.sharedManager.saveContext()
-        
-        // Check-in completed
         checkInDidEnd(withSuccess: true)
     }
     

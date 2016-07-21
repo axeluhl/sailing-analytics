@@ -50,7 +50,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         setupImageSourceTypes()
         setupTeamImage()
         
-        // Test
+        // Update
         regattaController.update()
     }
     
@@ -212,8 +212,17 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
-        if regattaController.startTracking() {
+        do {
+            try regattaController.startTracking()
             performSegueWithIdentifier("Tracking", sender: sender)
+        } catch let error as LocationManager.LocationManagerError {
+            let alertController = UIAlertController(title: error.description, message: nil, preferredStyle: .Alert)
+            let cancelTitle = NSLocalizedString("Cancel", comment: "")
+            let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+            alertController.addAction(cancelAction)
+            presentViewController(alertController, animated: true, completion: nil)
+        } catch {
+            print("Unknown error")
         }
     }
     
@@ -237,7 +246,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
                                     success: { (operation, responseObject) in },
                                     failure: { (operation, error) in
         })
-        CoreDataManager.sharedManager.deleteRegatta(regatta)
+        CoreDataManager.sharedManager.deleteObject(regatta)
         CoreDataManager.sharedManager.saveContext()
         navigationController!.popViewControllerAnimated(true)
     }
@@ -354,8 +363,20 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
 
 extension RegattaViewController: RegattaControllerDelegate {
     
-    func showRegattaAlert(regattaController: RegattaController, alertController: UIAlertController) {
-        presentViewController(alertController, animated: true, completion: nil)
+    //    func showRegattaAlert(sender: RegattaController, alertController: UIAlertController) {
+    //        presentViewController(alertController, animated: true, completion: nil)
+    //    }
+    
+    //    func regattaControllerDidUpdate(sender: RegattaController) {
+    //        // FIXME: Update UI
+    //    }
+    
+    func regattaControllerDidStartTracking(sender: RegattaController) {
+        
+    }
+    
+    func regattaControllerDidStopTracking(sender: RegattaController) {
+        
     }
     
 }

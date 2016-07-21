@@ -10,12 +10,8 @@ import UIKit
 
 @objc protocol RegattaControllerDelegate {
     
-    func showRegattaAlert(regattaController: RegattaController, alertController: UIAlertController)
-    
-    optional func regattaControllerDidUpdate(regattaController: RegattaController)
-    
-//    optional func checkInDidStart(checkInController: CheckInController)
-//    optional func checkInDidEnd(checkInController: CheckInController, withSuccess succeed: Bool)
+    //   optional func regattaControllerDidStartTracking(sender: RegattaController)
+    //   optional func regattaControllerDidStopTracking(sender: RegattaController)
     
 }
 
@@ -30,7 +26,7 @@ class RegattaController: NSObject {
     }
     
     enum Mode: String {
-        case BatterySaving = "Battery Saving"
+        case BatterySaving = "BatterySaving"
         case Error = "Error"
         case Online = "Online"
         case Offline = "Offline"
@@ -52,12 +48,15 @@ class RegattaController: NSObject {
     let regatta: Regatta
     
     var delegate: RegattaControllerDelegate?
+    var sendingBackgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
+    var sendingDate: NSDate = NSDate()
     
     private (set) var isTracking: Bool = false
-
+    
     init(regatta: Regatta) {
         self.regatta = regatta
         super.init()
+        subscribeForNotifications()
     }
     
     // MARK: - Notifications
@@ -82,7 +81,29 @@ class RegattaController: NSObject {
             let gpsFix = CoreDataManager.sharedManager.newGPSFix(self.regatta)
             gpsFix.updateWithLocationData(locationData)
             CoreDataManager.sharedManager.saveContext()
+            self.beginGPSFixSendingInBackgroundTask()
         })
+    }
+    
+    // MARK: - Background Task
+    
+    private func beginGPSFixSendingInBackgroundTask() {
+        if sendingDate.compare(NSDate()) == .OrderedAscending {
+            sendingBackgroundTask = UIApplication.sharedApplication().beginBackgroundTaskWithName("Send GPS Fixes", expirationHandler: {
+                self.endGPSFixSendingInBackgroundTask()
+            })
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
+                self.sendingDate = NSDate().dateByAddingTimeInterval(self.sendingPeriod)
+                self.gpsFixController.sendGPSFixes({
+                    self.endGPSFixSendingInBackgroundTask()
+                })
+            })
+        }
+    }
+    
+    private func endGPSFixSendingInBackgroundTask() {
+        UIApplication.sharedApplication().endBackgroundTask(sendingBackgroundTask)
+        sendingBackgroundTask = UIBackgroundTaskInvalid;
     }
     
     // MARK: - Update
@@ -119,84 +140,31 @@ class RegattaController: NSObject {
     
     // MARK: - Methods
     
-    func startTracking() -> Bool {
+    func startTracking() throws {
         isTracking = false
-        do {
-            try LocationManager.sharedManager.startTracking()
-            isTracking = true
-        } catch let error as LocationManager.LocationManagerError {
-            let alertController = UIAlertController(title: error.description, message: nil, preferredStyle: .Alert)
-            let cancelTitle = NSLocalizedString("Cancel", comment: "")
-            let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
-            alertController.addAction(cancelAction)
-            delegate?.showRegattaAlert(self, alertController: alertController)
-        } catch {
-            print("Unknown error")
-        }
-        
-        
+        try LocationManager.sharedManager.startTracking()
         isTracking = true
-        sendGPSFixes()
-        return isTracking
     }
     
     func stopTracking() {
         isTracking = false
+        LocationManager.sharedManager.stopTracking()
     }
-    
-    func sendGPSFixes() {
-        var gpsFixes = [GPSFix]()
-        if regatta.gpsFixes != nil {
-            regatta.gpsFixes!.forEach { (gpsFix) in gpsFixes.append(gpsFix as! GPSFix) }
-        }
-        if gpsFixes.count > 0 {
-            print("\(gpsFixes.count) GPS fixes will be sent")
-            requestManager.postGPSFixes(gpsFixes,
-                                        success: { (operation, responseObject) in self.sendGPSFixesSuccess(gpsFixes) },
-                                        failure: { (operation, error) in self.sendGPSFixesFailure(error) })
-        } else {
-            print("No GPS fixes available")
-            sendGPSFixesFinished()
-        }
-    }
-    
-    private func sendGPSFixesSuccess(gpsFixes: [GPSFix]!) {
-        print(NSThread.isMainThread)
-        dispatch_async(dispatch_get_main_queue(), {
-            print("sending \(gpsFixes.count) GPS fixes was successful")
-            CoreDataManager.sharedManager.deleteGPSFixes(gpsFixes)
-            CoreDataManager.sharedManager.saveContext()
-            self.sendGPSFixesFinished()
-        })
-    }
-    
-    private func sendGPSFixesFailure(error: AnyObject) {
-        print(NSThread.isMainThread)
-        dispatch_async(dispatch_get_main_queue(), {
-            print("sending GPS fixes failed for reason: \(error)")
-            self.sendGPSFixesFinished()
-        })
-    }
-    
-    private func sendGPSFixesFinished() {
-        if isTracking {
-            let delay = sendingPeriod
-            print("sending next GPS fixes in \(delay) seconds")
-            performSelector(#selector(RegattaController.sendGPSFixes), withObject: nil, afterDelay: delay)
-        } else {
-            print("sending GPS fixes stopped")
-        }
-    }
-    
-    // MARK: - Helper
-    
-    var sendingPeriod: NSTimeInterval { get { return BatteryManager.sharedManager.batterySaving ? SendingInterval.BatterySaving : SendingInterval.Normal } }
     
     // MARK: - Properties
+    
+    lazy var gpsFixController: GPSFixController = {
+        let gpsFixController = GPSFixController(regatta: self.regatta)
+        return gpsFixController
+    }()
     
     lazy var requestManager: RequestManager = {
         let requestManager = RequestManager(baseURLString: self.regatta.serverURL)
         return requestManager
     }()
+    
+    // MARK: - Helper
+    
+    var sendingPeriod: NSTimeInterval { get { return BatteryManager.sharedManager.batterySaving ? SendingInterval.BatterySaving : SendingInterval.Normal } }
     
 }

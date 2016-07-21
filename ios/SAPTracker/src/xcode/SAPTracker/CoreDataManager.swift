@@ -20,16 +20,13 @@ public class CoreDataManager: NSObject {
     
     // MARK: - Fetch
     
-    func fetchRegatta(eventID: String,
-                      leaderboardName: String,
-                      competitorID: String) -> Regatta?
-    {
+    func fetchRegatta(regattaData: RegattaData) -> Regatta? {
         let fetchRequest = NSFetchRequest()
         fetchRequest.entity = NSEntityDescription.entityForName("Regatta", inManagedObjectContext: managedObjectContext!)
         fetchRequest.predicate = NSPredicate(format: "event.eventID = %@ AND leaderboard.name = %@ AND competitor.competitorID = %@",
-                                             eventID,
-                                             leaderboardName,
-                                             competitorID)
+                                             regattaData.eventID,
+                                             regattaData.leaderboardName,
+                                             regattaData.competitorID)
         do {
             let results = try managedObjectContext!.executeFetchRequest(fetchRequest)
             if results.count == 0 {
@@ -81,16 +78,13 @@ public class CoreDataManager: NSObject {
     
     // MARK: - Delete
     
-    func deleteRegatta(regatta: Regatta) {
-        managedObjectContext!.deleteObject(regatta)
+    func deleteObject(object: AnyObject?) {
+        guard let o = object as? NSManagedObject else { return }
+        managedObjectContext?.deleteObject(o)
     }
     
-    func deleteGPSFixes(gpsFixes: [GPSFix]) {
-        gpsFixes.forEach { (gpsFix) in deleteGPSFix(gpsFix) }
-    }
-    
-    func deleteGPSFix(gpsFix: GPSFix) {
-        managedObjectContext!.deleteObject(gpsFix)
+    func deleteObjects(objects: NSSet?) {
+        objects?.forEach { (o) in deleteObject(o) }
     }
     
     // MARK: - Save
