@@ -118,8 +118,9 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         bodyContent.append("<div class=\"paragraph\" style=\" border-top: 5px solid white; border-bottom: 5px solid white;\">")
                 .append(htmlify(notificationMailTemplate.getText()))
                 .append("</div>");
+        StringBuilder buttons = new StringBuilder();
         for (Pair<String, String> link : notificationMailTemplate.getLabelsAndLinkUrls()) {
-            bodyContent.append("<span class=\"buttonContainer\" style=\"float: left; border-top: 10px solid white; border-right: 10px solid white;\">")
+            buttons.append("<span class=\"buttonContainer\" style=\"float: left; border-top: 10px solid white; border-right: 10px solid white;\">")
                 .append("<a class=\"linkButton\" href=\"")
                 .append(link.getB())
                 .append("\" style=\"display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;\">")
@@ -150,6 +151,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         return TEMPLATE
                 .replace("${title}", notificationMailTemplate.getSubject())
                 .replace("${content}", bodyContent.toString())
+                .replace("${buttons}", buttons.toString())
                 .replace("${subscription_information}", subscriptionInformation)
                 .replace("${site}", siteLink) //
                 .replace("${footer_links}", footerLinks.toString())
