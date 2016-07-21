@@ -81,7 +81,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         // send batches with the actual mail addresses as bcc?
         associatedNotificationSet.forUsersWithVerifiedEmailMappedTo(objectToNotifyAbout, (user) -> {
             Locale locale = user.getLocaleOrDefault();
-            Multipart multipart = new MimeMultipart();
+            Multipart multipart = new MimeMultipart("alternative");
             BodyPart bodyPart = new MimeBodyPart();
             BodyPart messageImagePart = new MimeBodyPart();
             try {
@@ -112,20 +112,23 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 .append("</h1>");
         }
         String name = user.getFullName() == null || user.getFullName().isEmpty() ? user.getName() : user.getFullName();
-        bodyContent.append("<p>")
+        bodyContent.append("<div class=\"paragraph\" style=\" border-top: 5px solid white; border-bottom: 5px solid white;\">")
                 .append(htmlify(messages.get(locale, "salutation", name)))
-                .append("</p>");
-        bodyContent.append("<p>")
+                .append("</div>");
+        bodyContent.append("<div class=\"paragraph\" style=\" border-top: 5px solid white; border-bottom: 5px solid white;\">")
                 .append(htmlify(notificationMailTemplate.getText()))
-                .append("</p>");
+                .append("</div>");
+        StringBuilder buttons = new StringBuilder();
         for (Pair<String, String> link : notificationMailTemplate.getLabelsAndLinkUrls()) {
-            bodyContent.append("<div class=\"buttonContainer\">")
+            buttons.append("<span class=\"buttonContainer\" style=\"float: left; border-top: 10px solid white; border-right: 10px solid white;\">")
                 .append("<a class=\"linkButton\" href=\"")
                 .append(link.getB())
-                .append("\" style=\"padding:15px;margin:10px 10px 0px 0px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;\">")
+                .append("\" style=\"display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;\">")
+                .append("<span class=\"linkButtonContent\" style=\"border:15px solid #337ab7;display:inline-block;background-color: #337ab7;\">")
                 .append(htmlify(link.getA()))
-                .append("</a>")
-                .append("</div>");
+                .append("</span>")
+                .append("</a> ")
+                .append("</span>");
         }
         String siteLink = "<a href=\"" + notificationMailTemplate.getServerBaseUrl() + "/gwt/Home.html\">"
                 + notificationMailTemplate.getServerBaseUrl() + "</a>";
@@ -148,6 +151,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         return TEMPLATE
                 .replace("${title}", notificationMailTemplate.getSubject())
                 .replace("${content}", bodyContent.toString())
+                .replace("${buttons}", buttons.toString())
                 .replace("${subscription_information}", subscriptionInformation)
                 .replace("${site}", siteLink) //
                 .replace("${footer_links}", footerLinks.toString())

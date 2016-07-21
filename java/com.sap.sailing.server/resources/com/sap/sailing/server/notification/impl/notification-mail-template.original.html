@@ -9,23 +9,29 @@
     <title>${title}</title>
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <style type="text/css">
-        .content {
-            margin: 10px;
+        .buttons {
+            border-top: 15px solid white;
+            border-bottom: 15px solid white;
         }
-
         .buttonContainer {
-            display: inline-block;
+            float: left;
+            border-top: 10px solid white;
+            border-right: 10px solid white;
         }
 
         .linkButton, .linkButton:active, .linkButton:visited {
-            padding: 15px;
-            margin: 10px 10px 0px 0px;
             display: inline-block;
             background-color: #337ab7;
             border-radius: 4px;
             color: #ffffff;
             border: 1px solid #2e6da4;
             text-decoration: none;
+        }
+
+        .linkButtonContent {
+            border: 15px solid #337ab7;
+            display: inline-block;
+            background-color: #337ab7;
         }
 
         .linkButton:hover {
@@ -45,19 +51,27 @@
 
         .main {
             border: 1px solid black;
-            background-color: white;
         }
 
-        .header {
+        .headerWrapper {
             background-color: black;
-            padding: 10px;
             font-size: 16px;
             border-bottom: .2em solid #efaa00;
             color: white;
         }
 
+        .header {
+            border: 10px solid black;
+        }
+
+        .contentWrapper {
+            background-color: white;
+        }
+
         .content {
-            padding: 20px 30px;
+            border: 20px solid white;
+            border-right: 30px solid white;
+            border-left: 30px solid white;
             min-height: 200px;
         }
 
@@ -70,24 +84,44 @@
         .sapLogo {
             height: 30px;
             width: auto;
-            vertical-align: middle;
+            float: left;
         }
 
         .sailingAnalytics {
             display: inline-block;
-            line-height: 30px;
-            vertical-align: middle;
+            line-height: 16px;
+            border-top: 7px solid black;
+            border-bottom: 7px solid black;
+            border-left: 5px solid black;
+        }
+        
+        .clear {
+            clear: both;
+        }
+        
+        .paragraph {
+            border-top: 5px solid white;
+            border-bottom: 5px solid white;
         }
     </style>
 </head>
 <body marginheight="0" topmargin="0" marginwidth="0" bgcolor="#e3e3e3" offset="0" leftmargin="0" style="background-color: #e3e3e3;">
 <div class="body">
     <div class="main">
-        <div class="header">
-            <img src="cid:saplogo" class="sapLogo" alt="SAP "/><span class="sailingAnalytics">Sailing Analytics</span>
+        <div class="headerWrapper">
+            <div class="header">
+                <img src="cid:saplogo" class="sapLogo" alt="SAP"/><span class="sailingAnalytics">Sailing Analytics</span>
+                <div class="clear"></div>
+            </div>
         </div>
-        <div class="content">
-            ${content}
+        <div class="contentWrapper">
+            <div class="content">
+                ${content}
+                <div class="buttons">
+                    ${buttons}
+                </div>
+            </div>
+            <div class="clear"></div>
         </div>
     </div>
     <div class="footer">
