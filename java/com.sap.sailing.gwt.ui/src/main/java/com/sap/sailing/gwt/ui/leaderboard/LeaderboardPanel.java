@@ -2484,7 +2484,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
     	}
     }
 
-	/**
+    /**
      * Due to a course change, a race may change its number of legs. All expanded race columns that show leg columns and
      * whose leg count changed need to be collapsed before the leaderboard is replaced, and expanded afterwards again.
      * Race columns whose toggling is {@link ExpandableSortableColumn#isTogglingInProcess() currently in progress} are

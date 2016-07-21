@@ -22,6 +22,6 @@ public abstract class AbstractUserProfilePlace extends Place implements HasLocat
             return "";
         }
         
-        abstract PLACE getRealPlace();
+        protected abstract PLACE getRealPlace();
     }
 }

@@ -1,12 +1,11 @@
 package com.sap.sailing.gwt.regattaoverview.client;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -17,19 +16,16 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewBaseSettings;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
-import com.sap.sse.gwt.client.URLEncoder;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
 
-    private final static String PARAM_EVENT = "event";
-    private final static String PARAM_ONLY_RUNNING_RACES = "onlyrunningraces";
-    private final static String PARAM_ONLY_RACES_OF_SAME_DAY = "onlyracesofsameday";
-    private final static String PARAM_REGATTA = "regatta";
-    private final static String PARAM_COURSE_AREA = "coursearea";
-    private final static String PARAM_IGNORE_LOCAL_SETTINGS = "ignoreLocalSettings";
+    private static final SettingsToUrlSerializer serializer = new SettingsToUrlSerializer();
     
     private DockLayoutPanel containerPanel;
     private RaceDetailPanel detailPanel;
@@ -61,14 +57,16 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         siteHeader.addWidgetToRightSide(clockLabel);
         containerPanel.addNorth(siteHeader, 75);
 
-        String eventIdAsString = Window.Location.getParameter(PARAM_EVENT);
-        if (eventIdAsString == null) {
+        RegattaOverviewBaseSettings regattaOverviewSettings = serializer
+                .deserializeFromCurrentLocation(new RegattaOverviewBaseSettings());
+
+        if (regattaOverviewSettings.getEvent() == null) {
             Window.alert("Missing parameter");
             return;
         }
 
         createAndAddDetailPanel();
-        createAndAddRegattaPanel(UUID.fromString(eventIdAsString));
+        createAndAddRegattaPanel(regattaOverviewSettings.getEvent(), regattaOverviewSettings.isIgnoreLocalSettings());
         toggleDetailPanel(false);
         
         regattaPanel.setEntryClickedHandler(new EntryHandler() { 
@@ -91,9 +89,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         // containerPanel.setWidgetHidden(detailPanel, !visibile);
     }
 
-    private void createAndAddRegattaPanel(UUID eventId) {
+    private void createAndAddRegattaPanel(UUID eventId, boolean ignoreLocalSettings) {
         RegattaRaceStatesSettings settings = createRegattaRaceStatesSettingsFromURL();
-        boolean ignoreLocalSettings = getIgnoreLocalSettingsFromURL();
         regattaPanel = new RegattaOverviewPanel(sailingService, this, getStringMessages(), eventId, settings, userAgent, ignoreLocalSettings);
 
         regattaPanel.addHandler(new EventDTOLoadedEvent.Handler() {
@@ -117,10 +114,6 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         containerPanel.add(scrollPanel);
     }
 
-    private boolean getIgnoreLocalSettingsFromURL() {
-        return Boolean.parseBoolean(Window.Location.getParameter(PARAM_IGNORE_LOCAL_SETTINGS));
-    }
-
     private void createAndAddDetailPanel() {
         detailPanel = new RaceDetailPanel(getStringMessages(), new ClickHandler() {
             @Override
@@ -132,60 +125,12 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     }
 
     public static RegattaRaceStatesSettings createRegattaRaceStatesSettingsFromURL() {
-        List<UUID> visibleCourseAreas = new ArrayList<UUID>();
-        List<String> visibleRegattas = new ArrayList<String>();
-
-        boolean showOnlyCurrentlyRunningRaces = Window.Location.getParameter(PARAM_ONLY_RUNNING_RACES) == null 
-                || !Window.Location.getParameter(PARAM_ONLY_RUNNING_RACES).equalsIgnoreCase("false");
-
-        boolean showOnlyRacesOfSameDay = Window.Location.getParameter(PARAM_ONLY_RACES_OF_SAME_DAY) != null 
-                && Window.Location.getParameter(PARAM_ONLY_RACES_OF_SAME_DAY).equalsIgnoreCase("true");
-
-        if (Window.Location.getParameterMap().containsKey(PARAM_COURSE_AREA)) {
-            for (String value : Window.Location.getParameterMap().get(PARAM_COURSE_AREA)) {
-                visibleCourseAreas.add(UUID.fromString(value));
-            }
-        }
-
-        if (Window.Location.getParameterMap().containsKey(PARAM_REGATTA)) {
-            visibleRegattas.addAll(Window.Location.getParameterMap().get(PARAM_REGATTA));
-        }
-
-        return new RegattaRaceStatesSettings(visibleCourseAreas, visibleRegattas, showOnlyRacesOfSameDay, showOnlyCurrentlyRunningRaces);
+        return serializer.deserializeFromCurrentLocation(new RegattaRaceStatesSettings());
     }
 
-    public static String getUrl(UUID eventId, RegattaRaceStatesSettings settings, 
-            boolean isSetVisibleCourseAreasInUrl, boolean isSetVisibleRegattasInUrl) {
-        String debugParam = Window.Location.getParameter("gwt.codesvr");
-        String showOnlyCurrentlyRunningRaces = "&" + PARAM_ONLY_RUNNING_RACES + "=" + (settings.isShowOnlyCurrentlyRunningRaces() ? "true" : "false");
-        String showOnlyRacesOfSameDay = "&" + PARAM_ONLY_RACES_OF_SAME_DAY + "=" + (settings.isShowOnlyRacesOfSameDay() ? "true" : "false");
-        String ignoreLocalSettings = "&" + PARAM_IGNORE_LOCAL_SETTINGS + "=true";
-
-        StringBuilder visibleCourseAreas = new StringBuilder();
-        if (isSetVisibleCourseAreasInUrl) {
-            for (UUID visibleCourseArea : settings.getVisibleCourseAreas()) {
-                visibleCourseAreas.append('&');
-                visibleCourseAreas.append(PARAM_COURSE_AREA);
-                visibleCourseAreas.append('=');
-                visibleCourseAreas.append(visibleCourseArea.toString());
-            }
-        }
-        StringBuilder visibleRegattas = new StringBuilder();
-        if (isSetVisibleRegattasInUrl) {
-            for (String visibleRegatta : settings.getVisibleRegattas()) {
-                visibleRegattas.append('&');
-                visibleRegattas.append(PARAM_REGATTA);
-                visibleRegattas.append('=');
-                visibleRegattas.append(visibleRegatta);
-            }
-        }
-        String link = URLEncoder.encode("/gwt/RegattaOverview.html?" + PARAM_EVENT+ "=" + eventId.toString()
-                + visibleCourseAreas.toString()
-                + visibleRegattas.toString()
-                + showOnlyCurrentlyRunningRaces
-                + showOnlyRacesOfSameDay
-                + ignoreLocalSettings
-                + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
-        return link;
+    public static String getUrl(UUID eventId, RegattaRaceStatesSettings settings) {
+        UrlBuilder urlBuilder = serializer.serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(settings);
+        serializer.serializeToUrlBuilder(new RegattaOverviewBaseSettings(eventId), urlBuilder);
+        return urlBuilder.buildString();
     }
 }

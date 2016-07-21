@@ -26,7 +26,29 @@ import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithM
  */
 public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, C> {
     private boolean enableExpansion;
+    
+    /**
+     * Set when the {@link #toggleExpansion()} method begins with its work. Three things can happen:
+     * <ol>
+     * <li>the column is to be collapsed. This can happen synchronously, and the flag is cleared again before the method
+     * returns</li>
+     * <li>the column is to be expanded and all information required for this is already available; again, this type
+     * of request can be handled synchronously, and the flag is cleared before the method returns</li>
+     * <li>the column is to be expanded but not all information required is available yet; it has to be requested using
+     * an asynchronous call; the method returns with the flag still set, and the callback will clear it when done</li>
+     * </ol>
+     */
     private boolean togglingInProcess;
+    
+    /**
+     * If {@link #togglingInProcess} is {@code true} and a call to {@link #toggleExpansion()} is received,
+     * instead of running the method, the request is "queued" only by incrementing this counter. When the
+     * asynchronous task completes the running toggle action, the counter is decremented by one and
+     * {@link #toggleExpansion()} is called. This way, overlapping asynchronous requests triggered by calls
+     * to {@link #toggleExpansion()} are avoiided.
+     */
+    private int numberOfQueuedToggleRequests;
+    
     private boolean suppressSortingOnce;
     private final LeaderboardPanel leaderboardPanel;
     private final Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> detailColumnsMap;
@@ -145,42 +167,63 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
      * <p>
      * 
      * Precondition: this column must currently be contained in the {@link CellTable} showing the
-     * {@link #leaderboardPanel leaderboard}.
+     * {@link #leaderboardPanel leaderboard}.<p>
+     * 
+     * When the method starts to toggle the expansion state, it sets the {@link #togglingInProcess} flag. When the
+     * method returns the {@link #isExpanded()} method yields the new expansion state. However, when the column contents
+     * need to be loaded asynchronously first, the expansion will not have affected the table structure yet and is
+     * still "pending." This state is indicated by the {@link #isTogglingInProcess()} method returning {@code true}
+     * after this method has returned. Only after the asynchronous data loading has happened and the table has
+     * actually been updated to reflect the expanded state, the {@link #isTogglingInProcess()} will then again
+     * return {@code false}.
      */
     public void toggleExpansion() {
         if (isExpansionEnabled()) {
-            final boolean oldBusyState = getLeaderboardPanel().isBusy(); 
-            getLeaderboardPanel().setBusyState(true);
-            setTogglingInProcess(true);
-            final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
-            if (isExpanded()) {
-                for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
-                    getLeaderboardPanel().removeColumn(column); // removes only the children currently displayed
-                }
-                getLeaderboardPanel().setBusyState(false);
-                setTogglingInProcess(false);
-                // important: toggle expanded state after asking for all visible children
-                setExpanded(!isExpanded());
+            if (isTogglingInProcess()) {
+                numberOfQueuedToggleRequests++;
             } else {
-                // important: toggle expanded state before asking for all visible children
-                setExpanded(!isExpanded());
-                ensureExpansionDataIsLoaded(new Runnable() {
-                    public void run() {
-                        int insertIndex = table.getColumnIndex(ExpandableSortableColumn.this);
-                        // The check "insertIndex != -1" is necessary, because the child-columns might be deleted asynchronously
-                        // while toggling the columns.
-                        if (insertIndex != -1) {
-                            insertIndex++;
-                            for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
-                                column.updateMinMax();
-                                getLeaderboardPanel().insertColumn(insertIndex++, column);
-                            }
-                            getLeaderboardPanel().getLeaderboardTable().redraw();
-                        }
-                        getLeaderboardPanel().setBusyState(oldBusyState);
-                        setTogglingInProcess(false);
+                final boolean oldBusyState = getLeaderboardPanel().isBusy(); 
+                getLeaderboardPanel().setBusyState(true);
+                setTogglingInProcess(true);
+                final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
+                if (isExpanded()) {
+                    for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
+                        getLeaderboardPanel().removeColumn(column); // removes only the children currently displayed
                     }
-                });
+                    getLeaderboardPanel().setBusyState(false);
+                    setTogglingInProcess(false);
+                    // important: toggle expanded state after asking for all visible children
+                    setExpanded(!isExpanded());
+                } else {
+                    // important: toggle expanded state before asking for all visible children
+                    setExpanded(!isExpanded());
+                    ensureExpansionDataIsLoaded(new Runnable() {
+                        public void run() {
+                            // column may have been collapsed meanwhile, so that the columns must not be added to the table right now
+                            if (isExpanded()) {
+                                int insertIndex = table.getColumnIndex(ExpandableSortableColumn.this);
+                                // The check "insertIndex != -1" is necessary, because the child-columns might be deleted
+                                // asynchronously while toggling the columns.
+                                if (insertIndex != -1) {
+                                    insertIndex++;
+                                    for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
+                                        column.updateMinMax();
+                                        if (table.getColumnIndex(column) < 0) {
+                                            getLeaderboardPanel().insertColumn(insertIndex++, column);
+                                        }
+                                    }
+                                    getLeaderboardPanel().getLeaderboardTable().redraw();
+                                }
+                            }
+                            getLeaderboardPanel().setBusyState(oldBusyState);
+                            setTogglingInProcess(false);
+                            if (numberOfQueuedToggleRequests > 0) {
+                                numberOfQueuedToggleRequests--;
+                                toggleExpansion();
+                            }
+                        }
+                    });
+                }
             }
         }
     }

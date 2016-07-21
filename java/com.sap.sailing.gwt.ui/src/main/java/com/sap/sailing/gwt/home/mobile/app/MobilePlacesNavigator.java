@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlac
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 
 public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -104,6 +105,10 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
     
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
         return createLocalPlaceNavigation(new UserProfileDefaultPlace());
+    }
+    
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserPreferencesNavigation() {
+        return createLocalPlaceNavigation(new UserProfilePreferencesPlace());
     }
 
     public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {

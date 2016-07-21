@@ -1133,6 +1133,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSelectAScoringResult();
     String timeZone();
     String eventOfficialWebsiteURL();
+    String eventBaseURL();
     String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();
     String eventLogoImageURL();
@@ -1382,6 +1383,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String regattaQuickfinder();
     String resultsQuickfinder();
     String racesQuickfinder();
+    String profileQuickfinder();
     String statistics();
     String impressions();
     String notAvailableOnMobileMessage();
@@ -1624,4 +1626,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceAnalysis();
     String startAnalysis();
     String winningLanes();
+    String userNotificationsOnlyIfMailAddressIsVerified();
+    String enabled();
+    String disabled();
+    String favoritesAndNotifications();
+    String favoriteCompetitors();
+    String favoriteBoatClasses();
+    String notificationAboutNewResults();
+    String notificationAboutUpcomingRaces();
 }
