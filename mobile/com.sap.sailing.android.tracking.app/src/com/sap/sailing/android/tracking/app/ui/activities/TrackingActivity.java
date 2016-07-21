@@ -74,17 +74,17 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
      * This isn't nice. The callbacks for fragments inside a view pager are unreliable, but I want the values to be
      * displayed immediately after device rotation. Thus they are cached here and the fragments can pick them up.
      */
-    public String lastSpeedIndicatorText;
+    public String lastSpeedIndicatorTextWithoutUnit;
     public String lastCompassIndicatorText = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT, getString(R.string.initial_hyphen_degrees));
-            lastSpeedIndicatorText = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, getString(R.string.initial_hyphen));
+            lastSpeedIndicatorTextWithoutUnit = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, getString(R.string.initial_hyphen));
         } else {
             lastCompassIndicatorText = getString(R.string.initial_hyphen_degrees);
-            lastSpeedIndicatorText = getString(R.string.initial_hyphen);
+            lastSpeedIndicatorTextWithoutUnit = getString(R.string.initial_hyphen);
         }
         super.onCreate(savedInstanceState);
 
@@ -173,7 +173,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         super.onSaveInstanceState(outState);
 
         outState.putInt(SIS_LAST_VIEWPAGER_ITEM, lastViewPagerItem);
-        outState.putString(SIS_LAST_SPEED_TEXT, lastSpeedIndicatorText);
+        outState.putString(SIS_LAST_SPEED_TEXT, lastSpeedIndicatorTextWithoutUnit);
         outState.putString(SIS_LAST_COMPASS_TEXT, lastCompassIndicatorText);
 
         if (trackingFragment.isAdded()) {
