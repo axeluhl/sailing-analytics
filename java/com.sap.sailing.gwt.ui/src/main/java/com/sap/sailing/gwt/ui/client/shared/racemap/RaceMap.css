@@ -26,4 +26,6 @@
 
 .combinedWindPanel {}
 
-.trueNorthIndicator {}
+.trueNorthIndicatorPanel {
+	margin-top: 10px;
+}

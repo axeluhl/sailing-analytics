@@ -35,7 +35,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
         this.raceMapResources = theRaceMapResources;
         this.raceMapStyle = raceMapStyle;
         addStyleName(raceMapStyle.raceMapIndicatorPanel());
-        addStyleName(raceMapStyle.trueNorthIndicator());
+        addStyleName(raceMapStyle.trueNorthIndicatorPanel());
         transformer = raceMapResources.getTrueNorthIndicatorIconTransformer();
         canvas = transformer.getCanvas();
         canvas.addStyleName(this.raceMapStyle.raceMapIndicatorPanelCanvas());
@@ -65,7 +65,8 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
     protected void redraw() {
         final double mappedTrueNorthDeg = coordinateSystem.mapDegreeBearing(0);
         transformer.drawTransformedImage(mappedTrueNorthDeg, 1.0);
-        String title = stringMessages.rotatedFromTrueNorthClickToToggleWindUp(Math.round(mappedTrueNorthDeg));
+        String title = stringMessages.rotatedFromTrueNorth(Math.round(mappedTrueNorthDeg)) + '\n' +
+                stringMessages.clickToToggleWindUp();
         canvas.setTitle(title);
         NumberFormat numberFormat = NumberFormat.getFormat("0.0");
         textLabel.setText(mappedTrueNorthDeg == 0 ? "N" : numberFormat.format(mappedTrueNorthDeg));
