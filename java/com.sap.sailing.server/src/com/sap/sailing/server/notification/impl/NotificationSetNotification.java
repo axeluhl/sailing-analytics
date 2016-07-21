@@ -125,7 +125,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 .append(link.getB())
                 .append("\" style=\"display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;\">")
                 .append("<span class=\"linkButtonContent\" style=\"border:15px solid #337ab7;display:inline-block;background-color: #337ab7;\">")
-                .append(htmlify(link.getA()))
+                .append(htmlify(link.getA()).replaceAll(" ", "&nbsp;"))
                 .append("</span>")
                 .append("</a> ")
                 .append("</span>");
