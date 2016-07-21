@@ -30,12 +30,12 @@ public class CombinedWindPanel extends FlowPanel {
     
     public CombinedWindPanel(final RaceMap map, RaceMapImageManager theRaceMapResources, RaceMapStyle raceMapStyle,
             StringMessages stringMessages, CoordinateSystem coordinateSystem) {
-        raceMapStyle.ensureInjected();
         this.stringMessages = stringMessages;
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
         this.raceMapStyle = raceMapStyle;
         addStyleName(raceMapStyle.raceMapIndicatorPanel());
+        addStyleName(raceMapStyle.combinedWindPanel());
         transformer = raceMapResources.getCombinedWindIconTransformer();
         canvas = transformer.getCanvas();
         canvas.addStyleName(this.raceMapStyle.raceMapIndicatorPanelCanvas());

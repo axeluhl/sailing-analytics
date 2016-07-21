@@ -35,7 +35,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
         this.raceMapResources = theRaceMapResources;
         this.raceMapStyle = raceMapStyle;
         addStyleName(raceMapStyle.raceMapIndicatorPanel());
-        addStyleName(raceMapStyle.trueNorthIndicator());
+        addStyleName(raceMapStyle.trueNorthIndicatorPanel());
         transformer = raceMapResources.getTrueNorthIndicatorIconTransformer();
         canvas = transformer.getCanvas();
         canvas.addStyleName(this.raceMapStyle.raceMapIndicatorPanelCanvas());

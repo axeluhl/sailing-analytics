@@ -355,8 +355,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
 
     private final CombinedWindPanel combinedWindPanel;
-    
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
+    private final FlowPanel topLeftControlsWrapperPanel;
     
     private final AsyncActionsExecutor asyncActionsExecutor;
 
@@ -447,10 +447,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(settings.isShowMapControls(), showHeaderPanel);
-        combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
+        RaceMapStyle raceMapStyle = raceMapResources.raceMapStyle();
+        raceMapStyle.ensureInjected();
+        combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
-        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
+        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(true);
+        topLeftControlsWrapperPanel = new FlowPanel();
+        topLeftControlsWrapperPanel.add(combinedWindPanel);
+        topLeftControlsWrapperPanel.add(trueNorthIndicatorPanel);
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
@@ -552,8 +557,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   Image sapLogo = createSAPLogo();
                   RaceMap.this.add(sapLogo);
               }
-              map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
-              map.setControls(ControlPosition.LEFT_TOP, trueNorthIndicatorPanel);
+              
+              map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
               adjustLeftControlsIndent();
 
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
@@ -2656,18 +2661,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         getRightHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
         
         // Adjust combined wind and true north indicator panel indent, based on the RaceMap height
-        if (combinedWindPanel.getParent() != null && trueNorthIndicatorPanel.getParent() != null) {
+        if (topLeftControlsWrapperPanel.getParent() != null) {
             this.adjustLeftControlsIndent();
         }
     }
     
     private void adjustLeftControlsIndent() {
-        combinedWindPanel.getParent().setStyleName("CombinedWindPanelParentDiv");
-        trueNorthIndicatorPanel.getParent().setStyleName("TrueNorthIndicatorPanelParentDiv");
+        topLeftControlsWrapperPanel.getParent().setStyleName("TopLeftControlsWrapperPanelParentDiv");
         String leftControlsIndentStyle = getLeftControlsIndentStyle();
         if (leftControlsIndentStyle != null) {
-            combinedWindPanel.getParent().addStyleName(leftControlsIndentStyle);
-            trueNorthIndicatorPanel.getParent().addStyleName(leftControlsIndentStyle);
+            topLeftControlsWrapperPanel.getParent().addStyleName(leftControlsIndentStyle);
         }
     }
 
