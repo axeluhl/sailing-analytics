@@ -423,7 +423,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                     // now toggle expansion back and forth,
                     // enforcing a re-build of the visible
                     // child columns
-                    expandableSortableColumn.toggleExpansion();
+                    expandableSortableColumn.changeExpansionState(/* expand */ false);
                     columnsToExpandAgain.add(expandableSortableColumn);
                 }
             }
@@ -500,7 +500,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                     timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
                 }
                 for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
-                    expandableSortableColumn.toggleExpansion();
+                    expandableSortableColumn.changeExpansionState(/* expand */ true);
                 }
                 if (newSettings.getNameOfRaceToSort() != null) {
                     final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(newSettings
@@ -2254,7 +2254,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             ExpandableSortableColumn<?> expandableColumn = (ExpandableSortableColumn<?>) c;
             if (expandableColumn.isExpanded()) {
                 // remove expanded child columns from the leaderboard...
-                expandableColumn.toggleExpansion();
+                expandableColumn.changeExpansionState(/* expand */ false);
                 // them remember that column c was expanded:
                 expandableColumn.setExpanded(true);
             }
@@ -2361,7 +2361,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         if (leaderboard != null) {
             Collection<RaceColumn<?>> columnsToCollapseAndExpandAgain = getExpandedRaceColumnsWhoseDisplayedLegCountChanged(leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
-                columnToCollapseAndExpandAgain.toggleExpansion();
+                columnToCollapseAndExpandAgain.changeExpansionState(/* expand */ false);
             }
             competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */this);
             if (!initialCompetitorFilterHasBeenApplied) {
@@ -2373,7 +2373,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             adjustColumnLayout(leaderboard);
             updateRaceColumnDTOsToRaceColumns(leaderboard);
             for (RaceColumn<?> columnToCollapseAndExpandAgain : columnsToCollapseAndExpandAgain) {
-                columnToCollapseAndExpandAgain.toggleExpansion();
+                columnToCollapseAndExpandAgain.changeExpansionState(/* expand */ true);
             }
             adjustDelayToLive();
             final Map<CompetitorDTO, LeaderboardRowDTO> rowsToDisplay = getRowsToDisplay();
@@ -2417,7 +2417,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                         (isAutoExpandLastRaceColumn() && c == lastRaceColumn)) {
                     ExpandableSortableColumn<?> expandableSortableColumn = (ExpandableSortableColumn<?>) c;
                     if (!expandableSortableColumn.isExpanded()) {
-                        expandableSortableColumn.toggleExpansion();
+                        expandableSortableColumn.changeExpansionState(/* expand */ true);
                         autoExpandPerformedOnce = true;
                     }
                 }
@@ -2683,7 +2683,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         int columnIndex = getRaceColumnPosition(raceColumn);
         if (raceColumn.isExpansionEnabled() != race.hasTrackedRaces() || race.isMedalRace() != raceColumn.isMedalRace()) {
             if (raceColumn.isExpanded()) {
-                raceColumn.toggleExpansion(); // remove children from table
+                raceColumn.changeExpansionState(/* expand */ false); // remove children from table
             }
             removeColumn(columnIndex);
             insertColumn(columnIndex, createRaceColumn(race));
