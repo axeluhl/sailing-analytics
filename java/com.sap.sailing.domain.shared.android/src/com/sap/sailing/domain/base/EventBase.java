@@ -50,6 +50,16 @@ public interface EventBase extends NamedWithID, WithDescription, Renamable, With
     void setOfficialWebsiteURL(URL officialWebsiteURL);
 
     /**
+     * @return the URL under which the event's landing page in the {@code sapsailing.com} universe can be reached. This
+     *         could be something like {@code tw2015.sapsailing.com} or {@link 505worlds2012.sapsailing.com} or similar.
+     *         It shall be a URL to which relative paths to pages in the context of this event can be appended, such
+     *         as links to race boards, leaderboards or the regatta overview.
+     */
+    URL getBaseURL();
+    
+    void setBaseURL(URL baseURL);
+    
+    /**
      * Returns a mapping of Locales to URLs where the URLs are meant as an external web site containing sailor related
      * information like protests, official results, etc.
      * The default, language independent URL has {@code null} as key.

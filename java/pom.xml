@@ -143,6 +143,7 @@
         <module>com.sap.sse.security.test</module>
         <module>com.sap.sse.operationaltransformation.test</module>
         <module>com.sap.sse.common.test</module>
+        <module>com.sap.sse.shared.android.test</module>
         <module>com.sap.sse.filestorage.test</module>
         <module>com.sap.sailing.datamining.test</module>
         <module>com.sap.sailing.domain.deckmanadapter.test</module>

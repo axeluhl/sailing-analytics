@@ -1033,6 +1033,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 logger.severe("Error parsing official website URL "+officialWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
             }
         }
+        String baseURLAsString = (String) eventDBObject.get(FieldNames.EVENT_BASE_URL.name());
+        if (baseURLAsString != null) {
+            try {
+                result.setBaseURL(new URL(baseURLAsString));
+            } catch (MalformedURLException e) {
+                logger.severe("Error parsing base URL "+baseURLAsString+" for event "+name+". Ignoring this URL.");
+            }
+        }
         BasicDBList images = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGES.name());
         if (images != null) {
             for (Object imageObject : images) {

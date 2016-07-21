@@ -52,6 +52,12 @@
 			    Leave the maximum empty to not provide any maximum. Setting to 0 will cause no scores to
 			    be discarded in that series.
 			</li>
+			<li>An event now has a "Base URL" which should be used to enable useful e-mail notifications with
+			    links embedded in them that lead to the correct server. If a notification is to contain
+			    a link to a dedicated event server, the event cannot be reached through www.sapsailing.com,
+			    and so if this generic link is used as a default, users will end up not finding the page
+			    linked to by the notification.
+			</li>
                     </ul>
 			
                     <h2 class="articleSubheadline">June 2016</h2>
@@ -137,6 +143,11 @@
                             There is a default value that can be overwritten on a per locale base.
                             No sailors info link is shown for UI languages if there is neither a default link nor one for the specific locale,
                             even if there is one for another locale configured.
+                        </li>
+                        <li>The mechanism to handle RegattaOverview settings has been changed to a more generic approach.
+                            This leads to slightly changed URL parameter names so that old bookmarks could be broken in a way
+                            so that the actual shown set of races is different using the new version because the old parameters aren't correctly recognized.
+                            All automatically generated links to this page in Home and AdminConsole have been updated to use the new parameter names.
                         </li>
                     </ul>
                     

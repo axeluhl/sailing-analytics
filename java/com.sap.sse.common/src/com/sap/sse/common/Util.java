@@ -359,10 +359,25 @@ public class Util {
     }
 
     public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        if (! map.containsKey(key)) {
-            map.put(key, new HashSet<V>());
+        Set<V> set = map.get(key);
+        if (set == null) {
+            set = new HashSet<V>();
+            map.put(key, set);
         }
-        map.get(key).add(value);
+        set.add(value);
+    }
+    
+    public static <K, V> void removeFromAllValueSets(Map<K, Set<V>> map, V value) {
+        for (Set<V> set : map.values()) {
+            set.remove(value);
+        }
+    }
+    
+    public static <K, V> void removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
+        final Set<V> valuesPerKey = map.get(key);
+        if(valuesPerKey != null) {
+            valuesPerKey.remove(value);
+        }
     }
 
     public static String join(String separator, String... strings) {
@@ -482,5 +497,11 @@ public class Util {
             }
         }
         return result;
+    }
+
+    public static <T> List<T> asList(Iterable<T> visibleCourseAreas) {
+        ArrayList<T> list = new ArrayList<T>();
+        addAll(visibleCourseAreas, list);
+        return list;
     }
 }
