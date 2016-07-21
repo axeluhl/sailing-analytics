@@ -1327,7 +1327,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentFilterSelection();
     String notCapableOfGeneratingACodeForIdentifier();
     String serverUrl();
-    String rotatedFromTrueNorthClickToToggleWindUp(double mappedTrueNorthDeg);
+    String rotatedFromTrueNorth(double mappedTrueNorthDeg);
+    String clickToToggleWindUp();
+    String clickToToggleWindStreamlets();
     String startLineToFirstMarkTriangle(String distanceInMeters);
     String dataMiningComponentsHaveBeenUpdated();
     String dataMiningComponentsNeedReloadDialogMessage();
