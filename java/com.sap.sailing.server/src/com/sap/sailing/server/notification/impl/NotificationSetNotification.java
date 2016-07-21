@@ -119,11 +119,11 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 .append(htmlify(notificationMailTemplate.getText()))
                 .append("</p>");
         for (Pair<String, String> link : notificationMailTemplate.getLabelsAndLinkUrls()) {
-            bodyContent.append("<div class=\"buttonContainer\">")
+            bodyContent.append("<div class=\"buttonContainer\" style=\"display: inline-block;border-top: 10px solid white;border-right: 10px solid white;\">")
                 .append("<a class=\"linkButton\" href=\"")
                 .append(link.getB())
-                .append("\" style=\"margin:10px 10px 0px 0px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;\">")
-                .append("<span class=\"linkButtonContent\" style=\"padding: 15px;display: inline-block;\">")
+                .append("\" style=\"display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;\">")
+                .append("<span class=\"linkButtonContent\" style=\"border:15px solid #337ab7;display:inline-block;background-color: #337ab7;\">")
                 .append(htmlify(link.getA()))
                 .append("</span>")
                 .append("</a>")
