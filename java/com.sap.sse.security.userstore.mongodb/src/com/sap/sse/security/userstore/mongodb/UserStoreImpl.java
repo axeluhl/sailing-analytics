@@ -62,13 +62,13 @@ public class UserStoreImpl implements UserStore {
      * Converter objects to map preference Strings to Objects.
      * The keys must match the keys of the preferences. 
      */
-    private final ConcurrentHashMap<String, PreferenceConverter<?>> preferenceConverters;
+    private transient ConcurrentHashMap<String, PreferenceConverter<?>> preferenceConverters;
     
     /**
      * This is another view of the String preferences mapped by {@link #preferenceConverters} to Objects.
      * Keys are the usernames, values are the key/value pairs representing the user's preferences.
      */
-    private final ConcurrentHashMap<String, Map<String, Object>> preferenceObjects;
+    private transient ConcurrentHashMap<String, Map<String, Object>> preferenceObjects;
     
     /**
      * Keys are preferences keys as used by {@link #preferenceObjects}, values are the listeners to inform on changes of
@@ -142,6 +142,8 @@ public class UserStoreImpl implements UserStore {
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        preferenceConverters = new ConcurrentHashMap<>();
+        preferenceObjects = new ConcurrentHashMap<>();
         listeners = new HashMap<>();
         listenersLock = new NamedReentrantReadWriteLock(
                 UserStoreImpl.class.getSimpleName() + " lock for listeners collection", false);
