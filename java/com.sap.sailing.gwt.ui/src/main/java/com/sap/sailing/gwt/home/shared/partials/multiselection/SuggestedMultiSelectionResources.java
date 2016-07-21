@@ -28,5 +28,6 @@ public interface SuggestedMultiSelectionResources extends ClientBundle {
         String suggestionsItemDescription();
         String suggestionsItemDescriptionImage();
         String suggestionsItemDescriptionId();
+        String suggestionsContentSeparator();
     }
 }

@@ -49,11 +49,7 @@
   right: 8.666666666666667em; 
 }
 
-.suggestionsSettingsMenuItemLabel {
-	padding-right: 8.666666666666667em
-}
-
-.suggestionsRemoveButton ,.suggestionsToggleButton {
+.suggestionsRemoveButton {
   padding: 0.433333333333333em 1em;
 }
 
@@ -61,6 +57,13 @@
   position: absolute;
   right: 0.333333333333333em;
   top: 0.333333333333333em;
+  width: 2em;
+  height: 2em;
+}
+
+.suggestionsToggleButton input {
+  width: 1.333333333333333em;
+  height: 2em;
 }
 
 .suggestionsAddFilter {
@@ -87,6 +90,7 @@
 
 .suggestionsSettingsMenuItemLabel {
   font-weight: 600;
+  padding-right: 2.666666666666667em
 }
 
 .suggestionsSettingsMenuItemLabel, .suggestionsItemDescription {
@@ -116,4 +120,10 @@
   font-weight: 600;
   display: inline-block;
   min-width: 5.5em;
+}
+
+.suggestionsContentSeparator {
+  border-bottom: 1px solid #dedede;
+  background-color: #f2f2f2;
+  height: 1.333333333333333em;
 }
