@@ -5,6 +5,6 @@
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources" />
 	<g:HTMLPanel addStyleNames="{local_res.css.suggestionsSettingsMenuItem}">
 	   <g:Label addStyleNames="{local_res.css.suggestionsSettingsMenuItemLabel}" ui:field="labelUi"/>
-	   <g:Button addStyleNames="{local_res.css.suggestionsToggleButton} {res.mainCss.button} {res.mainCss.buttonprimary}" ui:field="toggleButtonUi" />
+	   <g:CheckBox addStyleNames="{local_res.css.suggestionsToggleButton}" ui:field="toggleButtonUi" />
 	</g:HTMLPanel>
 </ui:UiBinder> 
