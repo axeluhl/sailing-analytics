@@ -13,22 +13,35 @@
   <body marginheight="0" topmargin="0" marginwidth="0" bgcolor="#e3e3e3" offset="0" leftmargin="0" style="background-color: #e3e3e3;">
     <div class="body" style="background-color:#e3e3e3;color:black;padding:40px;max-width:800px;margin:0 auto;margin-bottom:100px;font-family:'Open Sans', sans-serif">
       <div class="main" style="border:1px solid black">
-        <div class="headerWrapper" style="background-color:black;font-size:16px;border-bottom:.2em solid #efaa00;color:white">
-          <div class="header" style="border:10px solid black">
-            <img src="cid:saplogo" class="sapLogo" alt="SAP" style="height:30px;width:auto;float:left"><span class="sailingAnalytics" style="display:inline-block;line-height:16px;border-top:7px solid black;border-bottom:7px solid black;border-left:5px solid black">Sailing Analytics</span>
-            <div class="clear" style="clear:both"></div>
-          </div>
-        </div>
-        <div class="contentWrapper" style="background-color:white">
-          <div class="content" style="border:20px solid white;border-right:30px solid white;border-left:30px solid white;min-height:200px;font-size:16px">
-            ${content}
-                
-            <div class="buttons" style="border-top:15px solid white;border-bottom:15px solid white">
-              ${buttons}
-                </div>
-          </div>
-          <div class="clear" style="clear:both"></div>
-        </div>
+        <table class="header" width="100%" border="0" cellspacing="0" cellpadding="0" style="padding:0;margin:0;background-color:black;border-color:black;width:100%;border-bottom:3px solid #efaa00">
+          <tr>
+            <td height="10" colspan="4"></td>
+          </tr>
+          <tr>
+            <td width="10"></td>
+            <td width="65" valign="top"><img src="cid:saplogo" class="sapLogo" alt="SAP" style="height:30px;width:60px"></td>
+            <td width="auto" valign="middle" class="sailingAnalytics" style="color:white;font-family:'Open Sans', sans-serif;font-size:16px">Sailing&nbsp;Analytics</td>
+            <td width="10"></td>
+          </tr>
+          <tr>
+            <td height="10" colspan="4"></td>
+          </tr>
+        </table>
+        <table class="content" width="100%" border="0" cellspacing="0" cellpadding="0" style="padding:0;margin:0;background-color:white;border-color:white;min-height:200px;font-size:16px;width:100%;border-top:20px solid white;border-bottom:20px solid white">
+          <tr>
+            <td width="30"></td>
+            <td width="auto">${content}</td>
+            <td width="30"></td>
+          </tr>
+          <tr>
+            <td height="20" colspan="3"></td>
+          </tr>
+          <tr>
+            <td width="30"></td>
+            <td width="auto">${buttons}</td>
+            <td width="30"></td>
+          </tr>
+        </table>
       </div>
       <div class="footer" style="margin:30px 10% 200px 10%;text-align:center;font-size:13px">
         <p>${subscription_information}</p>
