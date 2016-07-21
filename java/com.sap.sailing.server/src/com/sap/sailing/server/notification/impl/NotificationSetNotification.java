@@ -81,7 +81,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         // send batches with the actual mail addresses as bcc?
         associatedNotificationSet.forUsersWithVerifiedEmailMappedTo(objectToNotifyAbout, (user) -> {
             Locale locale = user.getLocaleOrDefault();
-            Multipart multipart = new MimeMultipart();
+            Multipart multipart = new MimeMultipart("alternative");
             BodyPart bodyPart = new MimeBodyPart();
             BodyPart messageImagePart = new MimeBodyPart();
             try {
@@ -126,7 +126,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 .append("<span class=\"linkButtonContent\" style=\"border:15px solid #337ab7;display:inline-block;background-color: #337ab7;\">")
                 .append(htmlify(link.getA()))
                 .append("</span>")
-                .append("</a>")
+                .append("</a> ")
                 .append("</span>");
         }
         String siteLink = "<a href=\"" + notificationMailTemplate.getServerBaseUrl() + "/gwt/Home.html\">"
