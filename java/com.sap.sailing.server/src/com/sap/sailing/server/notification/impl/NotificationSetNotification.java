@@ -119,7 +119,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 .append(htmlify(notificationMailTemplate.getText()))
                 .append("</div>");
         for (Pair<String, String> link : notificationMailTemplate.getLabelsAndLinkUrls()) {
-            bodyContent.append("<div class=\"buttonContainer\" style=\"float: left; border-top: 10px solid white; border-right: 10px solid white;\">")
+            bodyContent.append("<span class=\"buttonContainer\" style=\"float: left; border-top: 10px solid white; border-right: 10px solid white;\">")
                 .append("<a class=\"linkButton\" href=\"")
                 .append(link.getB())
                 .append("\" style=\"display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;\">")
@@ -127,7 +127,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 .append(htmlify(link.getA()))
                 .append("</span>")
                 .append("</a>")
-                .append("</div>");
+                .append("</span>");
         }
         String siteLink = "<a href=\"" + notificationMailTemplate.getServerBaseUrl() + "/gwt/Home.html\">"
                 + notificationMailTemplate.getServerBaseUrl() + "</a>";
