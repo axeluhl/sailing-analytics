@@ -98,7 +98,7 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
         SeriesCreationParametersDTO creationParametersForDefaultSeries = new SeriesCreationParametersDTO(
                 Arrays.asList(new FleetDTO[] { new FleetDTO(fleetName, 0, Color.BLACK), }), /* medal */false, /* fleetsCanRunInParallel */ true, /* startsWithZero */
                 false, /* firstColumnIsNonDiscardableCarryForward */false, /* discardingThresholds */new int[0], /* hasSplitFleetContiguousScoring */
-                false, maximumNumberOfDiscards);
+                false, /* maximumNumberOfDiscards */ null);
         seriesCreationParameters.put(seriesName, creationParametersForDefaultSeries);
         // 1. Install some race column on master...
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);

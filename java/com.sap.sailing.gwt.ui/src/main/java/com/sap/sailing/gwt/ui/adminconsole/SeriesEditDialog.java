@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
@@ -43,7 +44,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private CheckBox startWithZeroScoreCheckbox;
     private CheckBox hasSplitFleetContiguousScoringCheckbox;
     private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
-    private com.sap.sse.gwt.client.controls.IntegerBox maximumNumberOfDiscardsBox;
+    private IntegerBox maximumNumberOfDiscardsBox;
     private CheckBox useSeriesResultDiscardingThresholdsCheckbox;
     private final StringMessages stringMessages;
     private VerticalPanel additionalWidgetPanel;
@@ -199,6 +200,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         maximumNumberOfDiscardsPanel.add(new Label(stringMessages.maximumNumberOfDiscards()));
         maximumNumberOfDiscardsBox = createIntegerBox(selectedSeries.getMaximumNumberOfDiscards(), /* visibleLength */ 3);
         maximumNumberOfDiscardsPanel.add(maximumNumberOfDiscardsBox);
+        additionalWidgetPanel.add(maximumNumberOfDiscardsPanel);
         
         useSeriesResultDiscardingThresholdsCheckbox = createCheckbox(stringMessages.seriesDefinesResultDiscardingRule());
         useSeriesResultDiscardingThresholdsCheckbox.ensureDebugId("DefinesResultDiscardingRulesCheckbox");
