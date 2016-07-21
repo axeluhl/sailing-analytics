@@ -81,7 +81,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         // send batches with the actual mail addresses as bcc?
         associatedNotificationSet.forUsersWithVerifiedEmailMappedTo(objectToNotifyAbout, (user) -> {
             Locale locale = user.getLocaleOrDefault();
-            Multipart multipart = new MimeMultipart("alternative");
+            Multipart multipart = new MimeMultipart("related");
             BodyPart bodyPart = new MimeBodyPart();
             BodyPart messageImagePart = new MimeBodyPart();
             try {
@@ -120,12 +120,12 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 .append("</div>");
         StringBuilder buttons = new StringBuilder();
         for (Pair<String, String> link : notificationMailTemplate.getLabelsAndLinkUrls()) {
-            buttons.append("<span class=\"buttonContainer\" style=\"float: left; border-top: 10px solid white; border-right: 10px solid white;\">")
+            buttons.append("<span class=\"buttonContainer\" style=\"border-top: 10px solid white; border-right: 10px solid white;\">")
                 .append("<a class=\"linkButton\" href=\"")
                 .append(link.getB())
                 .append("\" style=\"display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;\">")
                 .append("<span class=\"linkButtonContent\" style=\"border:15px solid #337ab7;display:inline-block;background-color: #337ab7;\">")
-                .append(htmlify(link.getA()))
+                .append(htmlify(link.getA()).replaceAll(" ", "&nbsp;"))
                 .append("</span>")
                 .append("</a> ")
                 .append("</span>");

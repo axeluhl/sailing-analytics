@@ -9,12 +9,7 @@
     <title>${title}</title>
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <style type="text/css">
-        .buttons {
-            border-top: 15px solid white;
-            border-bottom: 15px solid white;
-        }
         .buttonContainer {
-            float: left;
             border-top: 10px solid white;
             border-right: 10px solid white;
         }
@@ -53,26 +48,25 @@
             border: 1px solid black;
         }
 
-        .headerWrapper {
-            background-color: black;
-            font-size: 16px;
-            border-bottom: .2em solid #efaa00;
-            color: white;
-        }
-
         .header {
-            border: 10px solid black;
-        }
-
-        .contentWrapper {
-            background-color: white;
+            padding: 0;
+            margin: 0;
+            background-color: black;
+            border-color: black;
+            width: 100%;
+            border-bottom: 3px solid #efaa00;
         }
 
         .content {
-            border: 20px solid white;
-            border-right: 30px solid white;
-            border-left: 30px solid white;
+            padding: 0;
+            margin: 0;
+            background-color: white;
+            border-color: white;
             min-height: 200px;
+            font-size: 16px;
+            width: 100%;
+            border-top: 20px solid white;
+            border-bottom: 20px solid white;
         }
 
         .footer {
@@ -83,20 +77,13 @@
 
         .sapLogo {
             height: 30px;
-            width: auto;
-            float: left;
+            width: 60px;
         }
 
         .sailingAnalytics {
-            display: inline-block;
-            line-height: 16px;
-            border-top: 7px solid black;
-            border-bottom: 7px solid black;
-            border-left: 5px solid black;
-        }
-        
-        .clear {
-            clear: both;
+            color: white;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 16px;
         }
         
         .paragraph {
@@ -108,21 +95,35 @@
 <body marginheight="0" topmargin="0" marginwidth="0" bgcolor="#e3e3e3" offset="0" leftmargin="0" style="background-color: #e3e3e3;">
 <div class="body">
     <div class="main">
-        <div class="headerWrapper">
-            <div class="header">
-                <img src="cid:saplogo" class="sapLogo" alt="SAP"/><span class="sailingAnalytics">Sailing Analytics</span>
-                <div class="clear"></div>
-            </div>
-        </div>
-        <div class="contentWrapper">
-            <div class="content">
-                ${content}
-                <div class="buttons">
-                    ${buttons}
-                </div>
-            </div>
-            <div class="clear"></div>
-        </div>
+        <table class="header" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td height="10" colspan="4"></td>
+            </tr>
+            <tr>
+                <td width="10"></td>
+                <td width="65" valign="top"><img src="cid:saplogo" class="sapLogo" alt="SAP"/></td>
+                <td width="auto" valign="middle" class="sailingAnalytics">Sailing&nbsp;Analytics</td>
+                <td width="10"></td>
+            </tr>
+            <tr>
+                <td height="10" colspan="4"></td>
+            </tr>
+        </table>
+        <table class="content" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td width="30"></td>
+                <td width="auto">${content}</td>
+                <td width="30"></td>
+            </tr>
+            <tr>
+                <td height="20" colspan="3"></td>
+            </tr>
+            <tr>
+                <td width="30"></td>
+                <td width="auto">${buttons}</td>
+                <td width="30"></td>
+            </tr>
+        </table>
     </div>
     <div class="footer">
         <p>${subscription_information}</p>
