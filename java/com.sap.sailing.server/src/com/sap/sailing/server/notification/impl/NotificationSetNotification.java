@@ -81,7 +81,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         // send batches with the actual mail addresses as bcc?
         associatedNotificationSet.forUsersWithVerifiedEmailMappedTo(objectToNotifyAbout, (user) -> {
             Locale locale = user.getLocaleOrDefault();
-            Multipart multipart = new MimeMultipart("alternative");
+            Multipart multipart = new MimeMultipart("related");
             BodyPart bodyPart = new MimeBodyPart();
             BodyPart messageImagePart = new MimeBodyPart();
             try {
