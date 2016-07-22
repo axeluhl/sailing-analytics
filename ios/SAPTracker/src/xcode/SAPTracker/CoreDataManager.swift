@@ -11,6 +11,14 @@ import CoreData
 
 public class CoreDataManager: NSObject {
     
+    private enum Entities: String {
+        case Competitor
+        case Event
+        case GPSFix
+        case Leaderboard
+        case Regatta
+    }
+    
     public class var sharedManager: CoreDataManager {
         struct Singleton {
             static let sharedManager = CoreDataManager()
@@ -20,19 +28,31 @@ public class CoreDataManager: NSObject {
     
     // MARK: - Fetch
     
+    func fetchRegattas() -> [Regatta]? {
+        let fetchRequest = NSFetchRequest()
+        fetchRequest.entity = NSEntityDescription.entityForName(Entities.Regatta.rawValue, inManagedObjectContext: managedObjectContext!)
+        var regattas: [AnyObject]?
+        do {
+            regattas = try managedObjectContext!.executeFetchRequest(fetchRequest)
+        } catch {
+            print(error)
+        }
+        return regattas as? [Regatta]
+    }
+    
     func fetchRegatta(regattaData: RegattaData) -> Regatta? {
         let fetchRequest = NSFetchRequest()
-        fetchRequest.entity = NSEntityDescription.entityForName("Regatta", inManagedObjectContext: managedObjectContext!)
+        fetchRequest.entity = NSEntityDescription.entityForName(Entities.Regatta.rawValue, inManagedObjectContext: managedObjectContext!)
         fetchRequest.predicate = NSPredicate(format: "event.eventID = %@ AND leaderboard.name = %@ AND competitor.competitorID = %@",
                                              regattaData.eventID,
                                              regattaData.leaderboardName,
                                              regattaData.competitorID)
         do {
-            let results = try managedObjectContext!.executeFetchRequest(fetchRequest)
-            if results.count == 0 {
+            let regattas = try managedObjectContext!.executeFetchRequest(fetchRequest)
+            if regattas.count == 0 {
                 return nil
             } else {
-                return results[0] as? Regatta
+                return regattas[0] as? Regatta
             }
         } catch {
             print(error)
@@ -41,7 +61,7 @@ public class CoreDataManager: NSObject {
     }
 
     func regattaFetchedResultsController() -> NSFetchedResultsController {
-        let fetchRequest = NSFetchRequest(entityName: "Regatta")
+        let fetchRequest = NSFetchRequest(entityName: Entities.Regatta.rawValue)
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "leaderboard.name", ascending: true)]
         return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext!, sectionNameKeyPath: nil, cacheName: nil)
     }
@@ -49,29 +69,29 @@ public class CoreDataManager: NSObject {
     // MARK: - Insert
     
     func newRegatta() -> Regatta {
-        return NSEntityDescription.insertNewObjectForEntityForName("Regatta", inManagedObjectContext: managedObjectContext!) as! Regatta
+        return NSEntityDescription.insertNewObjectForEntityForName(Entities.Regatta.rawValue, inManagedObjectContext: managedObjectContext!) as! Regatta
     }
     
     func newEvent(regatta: Regatta) -> Event {
-        let event = NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: managedObjectContext!) as! Event
+        let event = NSEntityDescription.insertNewObjectForEntityForName(Entities.Event.rawValue, inManagedObjectContext: managedObjectContext!) as! Event
         event.regatta = regatta
         return event
     }
     
     func newLeaderboard(regatta: Regatta) -> Leaderboard {
-        let leaderboard = NSEntityDescription.insertNewObjectForEntityForName("Leaderboard", inManagedObjectContext: managedObjectContext!) as! Leaderboard
+        let leaderboard = NSEntityDescription.insertNewObjectForEntityForName(Entities.Leaderboard.rawValue, inManagedObjectContext: managedObjectContext!) as! Leaderboard
         leaderboard.regatta = regatta
         return leaderboard
     }
     
     func newCompetitor(regatta: Regatta) -> Competitor {
-        let competitor = NSEntityDescription.insertNewObjectForEntityForName("Competitor", inManagedObjectContext: managedObjectContext!) as! Competitor
+        let competitor = NSEntityDescription.insertNewObjectForEntityForName(Entities.Competitor.rawValue, inManagedObjectContext: managedObjectContext!) as! Competitor
         competitor.regatta = regatta
         return competitor
     }
     
     func newGPSFix(regatta: Regatta) -> GPSFix {
-        let gpsFix = NSEntityDescription.insertNewObjectForEntityForName("GPSFix", inManagedObjectContext: managedObjectContext!) as! GPSFix
+        let gpsFix = NSEntityDescription.insertNewObjectForEntityForName(Entities.GPSFix.rawValue, inManagedObjectContext: managedObjectContext!) as! GPSFix
         gpsFix.regatta = regatta
         return gpsFix
     }
@@ -83,7 +103,7 @@ public class CoreDataManager: NSObject {
         managedObjectContext?.deleteObject(o)
     }
     
-    func deleteObjects(objects: NSSet?) {
+    func deleteObjects(objects: Array<AnyObject>?) {
         objects?.forEach { (o) in deleteObject(o) }
     }
     

@@ -59,7 +59,10 @@ class RegattaController: NSObject {
             let gpsFix = CoreDataManager.sharedManager.newGPSFix(self.regatta)
             gpsFix.updateWithLocationData(locationData)
             CoreDataManager.sharedManager.saveContext()
-            self.beginGPSFixSendingInBackgroundTask()
+            if self.sendingDate.compare(NSDate()) == .OrderedAscending {
+                self.sendingDate = NSDate().dateByAddingTimeInterval(self.sendingPeriod)
+                self.beginGPSFixSendingInBackgroundTask()
+            }
         })
     }
     
@@ -75,17 +78,14 @@ class RegattaController: NSObject {
     // MARK: - Background Task
     
     private func beginGPSFixSendingInBackgroundTask() {
-        if sendingDate.compare(NSDate()) == .OrderedAscending {
-            sendingBackgroundTask = UIApplication.sharedApplication().beginBackgroundTaskWithName("Send GPS Fixes", expirationHandler: {
+        sendingBackgroundTask = UIApplication.sharedApplication().beginBackgroundTaskWithName("Send GPS Fixes", expirationHandler: {
+            self.endGPSFixSendingInBackgroundTask()
+        })
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
+            self.gpsFixController.sendSlice({ (withSuccess) in
                 self.endGPSFixSendingInBackgroundTask()
             })
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-                self.sendingDate = NSDate().dateByAddingTimeInterval(self.sendingPeriod)
-                self.gpsFixController.sendGPSFixes({
-                    self.endGPSFixSendingInBackgroundTask()
-                })
-            })
-        }
+        })
     }
     
     private func endGPSFixSendingInBackgroundTask() {
@@ -96,7 +96,7 @@ class RegattaController: NSObject {
     // MARK: - Update
     
     func update() {
-        SVProgressHUD.show()
+        updateDidStart()
         let regattaData = RegattaData(serverURL: regatta.serverURL,
                                       eventID: regatta.event.eventID,
                                       leaderboardName: regatta.leaderboard.name,
@@ -113,15 +113,18 @@ class RegattaController: NSObject {
         regatta.leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
         regatta.competitor.updateWithCompetitorData(regattaData.competitorData)
         CoreDataManager.sharedManager.saveContext()
-        SVProgressHUD.popActivity()
-        updateFinished()
+        updateDidFinish()
     }
     
     func updateFailure() {
-        updateFinished()
+        updateDidFinish()
     }
     
-    func updateFinished() {
+    func updateDidStart() {
+        SVProgressHUD.show()
+    }
+    
+    func updateDidFinish() {
         SVProgressHUD.popActivity()
     }
     

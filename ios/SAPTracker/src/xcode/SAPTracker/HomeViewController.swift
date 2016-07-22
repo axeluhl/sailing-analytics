@@ -21,7 +21,7 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         setups()
     }
-
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         reviews()
@@ -71,29 +71,53 @@ class HomeViewController: UIViewController {
     
     func reviews() {
         if !Preferences.termsAccepted {
-            reviewEULA()
+            reviewTerms()
         } else {
-            reviewNewCheckIn()
+            reviewsAfterTermsAccepted()
         }
     }
     
-    func reviewEULA() {
+    func reviewTerms() {
         let alertTitle = NSLocalizedString("EULA_title", comment: "")
         let alertMessage = NSLocalizedString("EULA_content", comment: "")
         let alertController = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .Alert)
         let viewTitle = NSLocalizedString("EULA_view", comment: "")
         let viewAction = UIAlertAction(title: viewTitle, style: .Cancel, handler: { action in
             UIApplication.sharedApplication().openURL(URLs.EULA)
-            self.reviewEULA() // Reopen alert again until user confirms
+            self.reviewTerms() // Reopen alert again until user accepted terms
         })
         let confirmTitle = NSLocalizedString("EULA_confirm", comment: "")
         let confirmAction = UIAlertAction(title: confirmTitle, style: .Default, handler: { action in
             Preferences.termsAccepted = true
-            self.reviewNewCheckIn()
+            self.reviewsAfterTermsAccepted()
         })
         alertController.addAction(viewAction)
         alertController.addAction(confirmAction)
         presentViewController(alertController, animated: true, completion: nil)
+    }
+    
+    func reviewsAfterTermsAccepted() {
+        reviewGPSFixes()
+    }
+    
+    func reviewGPSFixes() {
+        SVProgressHUD.show()
+        fetchedResultsController.delegate = nil
+        var regattas = CoreDataManager.sharedManager.fetchRegattas() ?? []
+        reviewGPSFixes(&regattas)
+    }
+    
+    func reviewGPSFixes(inout regattas: [Regatta]) {
+        if let regatta = regattas.popLast() {
+            let gpsFixController = GPSFixController.init(regatta: regatta)
+            gpsFixController.sendAll({ (withSuccess) in
+                self.reviewGPSFixes(&regattas)
+            })
+        } else {
+            fetchedResultsController.delegate = self
+            SVProgressHUD.popActivity()
+            reviewNewCheckIn()
+        }
     }
     
     func reviewNewCheckIn() {
@@ -195,7 +219,7 @@ class HomeViewController: UIViewController {
 // MARK: - UITableViewDataSource
 
 extension HomeViewController: UITableViewDataSource {
-
+    
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
@@ -210,17 +234,17 @@ extension HomeViewController: UITableViewDataSource {
         guard let regatta = fetchedResultsController.objectAtIndexPath(indexPath) as? Regatta else { return }
         cell.textLabel?.text = regatta.leaderboard.name
     }
-
+    
 }
 
 // MARK: - UITableViewDelegate
 
 extension HomeViewController: UITableViewDelegate {
-
+    
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         return 74
     }
-
+    
 }
 
 // MARK: - NSFetchedResultsControllerDelegate
@@ -263,7 +287,7 @@ extension HomeViewController: NSFetchedResultsControllerDelegate {
 // MARK: - CheckInControllerDelegate
 
 extension HomeViewController: CheckInControllerDelegate {
-
+    
     func showCheckInAlert(sender: CheckInController, alertController: UIAlertController) {
         presentViewController(alertController, animated: true, completion: nil)
     }
@@ -271,5 +295,5 @@ extension HomeViewController: CheckInControllerDelegate {
     func checkInDidEnd(sender: CheckInController, withSuccess succeed: Bool) {
         Preferences.newCheckInURL = nil
     }
-
+    
 }

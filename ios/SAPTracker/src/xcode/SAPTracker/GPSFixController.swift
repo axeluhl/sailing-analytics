@@ -9,13 +9,18 @@
 import UIKit
 
 class GPSFixController: NSObject {
-
+    
     struct NotificationType {
         static let ModeChanged = "RegattaController.ModeChanged"
     }
-
+    
     struct UserInfo {
         static let Mode = "Mode"
+    }
+    
+    struct GPSFixSending {
+        // FIXME: - Change me back to 1000
+        static let SliceSize = 10
     }
     
     enum Mode: String {
@@ -39,46 +44,95 @@ class GPSFixController: NSObject {
         self.regatta = regatta
     }
     
-    // MARK: - Methods
+    // MARK: - Send All
     
-    func sendGPSFixes(completion: () -> Void) {
-        guard let gpsFixes = regatta.gpsFixes as? Set<GPSFix> else {
-            log("Can't get GPS fixes")
-            completion()
-            return
+    func sendAll(completion: (withSuccess: Bool) -> Void) {
+        sendAll({
+            completion(withSuccess: true)
+        }) { (error, gpsFixesLeft) in
+            completion(withSuccess: false)
         }
-        guard gpsFixes.count > 0 else {
-            log("No GPS fixes available")
-            completion()
-            return
-        }
-        sendGPSFixes(gpsFixes, completion: completion)
     }
-
-    func sendGPSFixes(gpsFixes: Set<GPSFix>, completion: () -> Void) {
-        log("\(gpsFixes.count) GPS fixes will be sent")
+    
+    private func sendAll(success: () -> Void, failure: (error: AnyObject, gpsFixesLeft: Set<GPSFix>) -> Void) {
+        sendAll(regatta.gpsFixes as? Set<GPSFix> ?? [], success: success, failure: failure)
+    }
+    
+    private func sendAll(gpsFixesLeft: Set<GPSFix>,
+                         success: () -> Void,
+                         failure: (error: AnyObject, gpsFixesLeft: Set<GPSFix>) -> Void)
+    {
+        guard gpsFixesLeft.count > 0 else { success(); return }
+        sendSlice(gpsFixesLeft, success: { (gpsFixesLeft) in
+            self.sendAll(gpsFixesLeft, success: success, failure: failure)
+        }) { (error, gpsFixesLeft) in
+            failure(error: error, gpsFixesLeft: gpsFixesLeft)
+        }
+    }
+    
+    // MARK: - Send Slice
+    
+    func sendSlice(completion: (withSuccess: Bool) -> Void) {
+        sendSlice({ (gpsFixesLeft) in
+            completion(withSuccess: true)
+        }) { (error, gpsFixesLeft) in
+            completion(withSuccess: false)
+        }
+    }
+    
+    private func sendSlice(success: (gpsFixesLeft: Set<GPSFix>) -> Void,
+                           failure: (error: AnyObject?, gpsFixesLeft: Set<GPSFix>?) -> Void)
+    {
+        sendSlice(regatta.gpsFixes as? Set<GPSFix> ?? [], success: success, failure: failure)
+    }
+    
+    private func sendSlice(gpsFixes: Set<GPSFix>,
+                           success: (gpsFixesLeft: Set<GPSFix>) -> Void,
+                           failure: (error: AnyObject, gpsFixesLeft: Set<GPSFix>) -> Void)
+    {
+        guard gpsFixes.count > 0 else { success(gpsFixesLeft: []); return }
+        let slicedGPSFixes = sliceGPSFixes(gpsFixes)
+        let gpsFixesLeft = gpsFixes.subtract(slicedGPSFixes)
+        sendSlice(slicedGPSFixes,
+                  gpsFixesLeft: gpsFixesLeft,
+                  success: success,
+                  failure: failure)
+    }
+    
+    private func sendSlice(gpsFixes: Array<GPSFix>,
+                           gpsFixesLeft: Set<GPSFix>,
+                           success: (gpsFixesLeft: Set<GPSFix>) -> Void,
+                           failure: (error: AnyObject, gpsFixesLeft: Set<GPSFix>) -> Void)
+    {
+        log("\(gpsFixes.count) GPS fixes will be sent and \(gpsFixesLeft.count) will be left")
         requestManager.postGPSFixes(gpsFixes,
-                                    success: { (operation, responseObject) in self.sendGPSFixesSuccess(gpsFixes, completion: completion) },
-                                    failure: { (operation, error) in self.sendGPSFixesFailure(error, completion: completion) }
+                                    success: { (operation, responseObject) in self.sendSliceSuccess(gpsFixes, gpsFixesLeft: gpsFixesLeft, success: success) },
+                                    failure: { (operation, error) in self.sendSliceFailure(error, gpsFixesLeft: gpsFixesLeft, failure: failure) }
         )
     }
     
-    private func sendGPSFixesSuccess(gpsFixes: Set<GPSFix>, completion: () -> Void) {
+    private func sendSliceSuccess(gpsFixes: Array<GPSFix>,
+                                  gpsFixesLeft: Set<GPSFix>,
+                                  success: (gpsFixesLeft: Set<GPSFix>) -> Void)
+    {
         dispatch_async(dispatch_get_main_queue(), {
             self.log("Sending \(gpsFixes.count) GPS fixes was successful")
             self.postModeChangedNotification(BatteryManager.sharedManager.batterySaving ? .BatterySaving : .Online)
             CoreDataManager.sharedManager.deleteObjects(gpsFixes)
             CoreDataManager.sharedManager.saveContext()
             self.log("\(gpsFixes.count) GPS fixes deleted")
-            completion()
+            success(gpsFixesLeft: gpsFixesLeft)
         })
     }
     
-    private func sendGPSFixesFailure(error: AnyObject, completion: () -> Void) {
+    private func sendSliceFailure(error: AnyObject,
+                                  gpsFixesLeft: Set<GPSFix>,
+                                  failure: (error: AnyObject, gpsFixesLeft: Set<GPSFix>) -> Void)
+    {
         dispatch_async(dispatch_get_main_queue(), {
-            self.log("Sending GPS fixes failed for reason: \(error)")
+            self.log("Sending GPS fixes failed for reason: \(error.description)")
             self.postModeChangedNotification(AFNetworkReachabilityManager.sharedManager().reachable ? .Error : .Offline)
-            completion()
+            failure(error: error, gpsFixesLeft: gpsFixesLeft)
         })
     }
     
@@ -92,7 +146,7 @@ class GPSFixController: NSObject {
     
     // MARK: - Properties
     
-    lazy var requestManager: RequestManager = {
+    private lazy var requestManager: RequestManager = {
         let requestManager = RequestManager(baseURLString: self.regatta.serverURL)
         return requestManager
     }()
@@ -101,6 +155,10 @@ class GPSFixController: NSObject {
     
     private func log(message: String) {
         print("[GPSFixController] \(message)")
+    }
+    
+    private func sliceGPSFixes(gpsFixes: Set<GPSFix>) -> Array<GPSFix> {
+        return Array(gpsFixes.sort { (gpsFix1, gpsFix2) -> Bool in gpsFix1.timestamp < gpsFix2.timestamp }.prefix(GPSFixSending.SliceSize))
     }
     
 }
