@@ -5735,7 +5735,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {
             if (event instanceof RaceLogFixedMarkPassingEventImpl && event.getInvolvedBoats().contains(competitor)) {
                 RaceLogFixedMarkPassingEvent fixedEvent = (RaceLogFixedMarkPassingEvent) event;
-                if (fixedEvent.getZeroBasedIndexOfPassedWaypoint() == indexOfWaypoint) {
+                if (Util.equalsWithNull(fixedEvent.getZeroBasedIndexOfPassedWaypoint(), indexOfWaypoint)) {
                     oldFixedMarkPassingEvent = fixedEvent;
                 }
             }
