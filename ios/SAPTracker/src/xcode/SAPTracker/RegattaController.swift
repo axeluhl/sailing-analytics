@@ -8,37 +8,7 @@
 
 import UIKit
 
-@objc protocol RegattaControllerDelegate {
-    
-    //   optional func regattaControllerDidStartTracking(sender: RegattaController)
-    //   optional func regattaControllerDidStopTracking(sender: RegattaController)
-    
-}
-
 class RegattaController: NSObject {
-    
-    struct NotificationType {
-        static let ModeChanged = "RegattaController.ModeChanged"
-    }
-    
-    struct UserInfo {
-        static let Mode = "Mode"
-    }
-    
-    enum Mode: String {
-        case BatterySaving = "BatterySaving"
-        case Error = "Error"
-        case Online = "Online"
-        case Offline = "Offline"
-        var description: String {
-            switch self {
-            case .BatterySaving: return NSLocalizedString("Battery Saving", comment: "")
-            case .Error: return NSLocalizedString("Error", comment: "")
-            case .Offline: return NSLocalizedString("Offline", comment: "")
-            case .Online: return NSLocalizedString("Online", comment: "")
-            }
-        }
-    }
     
     private struct SendingInterval {
         static let Normal: NSTimeInterval = 3
@@ -47,7 +17,6 @@ class RegattaController: NSObject {
     
     let regatta: Regatta
     
-    var delegate: RegattaControllerDelegate?
     var sendingBackgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
     var sendingDate: NSDate = NSDate()
     
@@ -59,12 +28,21 @@ class RegattaController: NSObject {
         subscribeForNotifications()
     }
     
+    deinit {
+        unsubscribeFromNotifications()
+    }
+    
     // MARK: - Notifications
     
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector:#selector(locationManagerUpdated(_:)),
                                                          name:LocationManager.NotificationType.Updated,
+                                                         object: nil
+        )
+        NSNotificationCenter.defaultCenter().addObserver(self,
+                                                         selector:#selector(batterySavingChanged(_:)),
+                                                         name:Preferences.NotificationType.BatterySavingChanged,
                                                          object: nil
         )
     }
@@ -82,6 +60,15 @@ class RegattaController: NSObject {
             gpsFix.updateWithLocationData(locationData)
             CoreDataManager.sharedManager.saveContext()
             self.beginGPSFixSendingInBackgroundTask()
+        })
+    }
+    
+    func batterySavingChanged(notification: NSNotification) {
+        dispatch_async(dispatch_get_main_queue(), {
+            guard let batterySaving = notification.userInfo?[Preferences.UserInfo.BatterySaving] as? Bool else { return }
+            if !batterySaving {
+                self.sendingDate = NSDate() // Send next GPS fixes soon as possible
+            }
         })
     }
     
@@ -103,7 +90,7 @@ class RegattaController: NSObject {
     
     private func endGPSFixSendingInBackgroundTask() {
         UIApplication.sharedApplication().endBackgroundTask(sendingBackgroundTask)
-        sendingBackgroundTask = UIBackgroundTaskInvalid;
+        sendingBackgroundTask = UIBackgroundTaskInvalid
     }
     
     // MARK: - Update

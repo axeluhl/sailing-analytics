@@ -15,23 +15,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-
-        // Set up connection logging for debug builds
-        #if DEBUG
-        //AFNetworkActivityLogger.sharedLogger().startLogging()
-        //AFNetworkActivityLogger.sharedLogger().level = AFHTTPRequestLoggerLevel.AFLoggerLevelDebug
-        #endif
         
         // Initialize core data, migrate database if needed, or delete if migration needed but not possible
         CoreDataManager.sharedManager
         
-        // Start timer in case GPS fixes need to be sent
-//        SendGPSFixController.sharedManager.timer()
-        
         // Setup
-        self.setupNavigationBarApperance()
-        self.setupPageControlApperance()
-        
+        setupAFNetworking()
+        setupNavigationBarApperance()
+        setupPageControlApperance()
         return true
     }
     
@@ -65,6 +56,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     // MARK: - Setups
+    
+    private func setupAFNetworking() {
+        AFNetworkActivityIndicatorManager.sharedManager().enabled = true
+        AFNetworkReachabilityManager.sharedManager().startMonitoring()
+
+        // Set up connection logging for debug builds
+        #if DEBUG
+            //AFNetworkActivityLogger.sharedLogger().startLogging()
+            //AFNetworkActivityLogger.sharedLogger().level = AFHTTPRequestLoggerLevel.AFLoggerLevelDebug
+        #endif
+    }
     
     private func setupNavigationBarApperance() {
         let tintColor = UIColor(hex: 0x009de0)

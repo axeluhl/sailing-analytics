@@ -11,7 +11,13 @@ import UIKit
 class Preferences: NSObject {
 
     struct NotificationType {
-        static let NewCheckInURLChanged = "NewCheckInURLStringChanged"
+        static let BatterySavingChanged = "BatterySavingChanged"
+        static let NewCheckInURLChanged = "NewCheckInURLChanged"
+    }
+    
+    struct UserInfo {
+        static let BatterySaving = "BatterySaving"
+        static let CheckInURL = "CheckInURL"
     }
     
     struct PreferenceKey {
@@ -34,7 +40,9 @@ class Preferences: NSObject {
             preferences.synchronize()
 
             // Send notification
-            let notification = NSNotification(name: NotificationType.NewCheckInURLChanged, object: self)
+            var userInfo = [String: AnyObject]()
+            userInfo[UserInfo.CheckInURL] = value
+            let notification = NSNotification(name: NotificationType.NewCheckInURLChanged, object: self, userInfo: userInfo)
             NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
         }
     }
@@ -69,6 +77,11 @@ class Preferences: NSObject {
         set(value) {
             preferences.setBool(value, forKey: PreferenceKey.BatterySaving)
             preferences.synchronize()
+            
+            // Send notification
+            let userInfo = [UserInfo.BatterySaving: value]
+            let notification = NSNotification(name: NotificationType.BatterySavingChanged, object: self, userInfo: userInfo)
+            NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
         }
     }
     

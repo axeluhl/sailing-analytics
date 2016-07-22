@@ -213,7 +213,7 @@ class RequestManager: NSObject {
             result(imageURL: nil)
         }
     }
-
+    
     private func getTeamImageURLFailed(error: AnyObject, result: (imageURL: String?) -> Void) {
         result(imageURL: nil) // No image but that's ok
     }
@@ -297,10 +297,6 @@ class RequestManager: NSObject {
         })
         dataTask.resume();
     }
-    
-    // MARK: - Connection
-    
-    var suspended: Bool { get { return manager.operationQueue.suspended } }
     
     // MARK: - Helper
     

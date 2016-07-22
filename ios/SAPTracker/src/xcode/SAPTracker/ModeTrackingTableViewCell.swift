@@ -14,8 +14,8 @@ class ModeTrackingTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        self.setupModeLabel(RegattaController.Mode.Offline)
-        self.subscribeForNotifications()
+        setupModeLabel(GPSFixController.Mode.Offline)
+        subscribeForNotifications()
     }
     
     deinit {
@@ -24,7 +24,7 @@ class ModeTrackingTableViewCell: UITableViewCell {
     
     // MARK: - Setups
     
-    private func setupModeLabel(mode: RegattaController.Mode) {
+    private func setupModeLabel(mode: GPSFixController.Mode) {
         modeLabel.text = mode.description
     }
     
@@ -33,7 +33,7 @@ class ModeTrackingTableViewCell: UITableViewCell {
     private func subscribeForNotifications() {
         NSNotificationCenter.defaultCenter().addObserver(self,
                                                          selector:#selector(regattaControllerModeChanged),
-                                                         name:RegattaController.NotificationType.ModeChanged,
+                                                         name:GPSFixController.NotificationType.ModeChanged,
                                                          object: nil
         )
     }
@@ -44,7 +44,8 @@ class ModeTrackingTableViewCell: UITableViewCell {
     
     func regattaControllerModeChanged(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
-            guard let mode = notification.userInfo?[RegattaController.UserInfo.Mode] as? RegattaController.Mode else { return }
+            guard let rawValue = notification.userInfo?[GPSFixController.UserInfo.Mode] as? String else { return }
+            guard let mode = GPSFixController.Mode(rawValue: rawValue) else { return }
             self.setupModeLabel(mode)
         })
     }

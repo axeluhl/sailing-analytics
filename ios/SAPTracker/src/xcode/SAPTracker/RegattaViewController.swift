@@ -358,25 +358,3 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
     }
     
 }
-
-// MARK: - RegattaControllerDelegate
-
-extension RegattaViewController: RegattaControllerDelegate {
-    
-    //    func showRegattaAlert(sender: RegattaController, alertController: UIAlertController) {
-    //        presentViewController(alertController, animated: true, completion: nil)
-    //    }
-    
-    //    func regattaControllerDidUpdate(sender: RegattaController) {
-    //        // FIXME: Update UI
-    //    }
-    
-    func regattaControllerDidStartTracking(sender: RegattaController) {
-        
-    }
-    
-    func regattaControllerDidStopTracking(sender: RegattaController) {
-        
-    }
-    
-}

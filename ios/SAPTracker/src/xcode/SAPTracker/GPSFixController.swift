@@ -10,6 +10,29 @@ import UIKit
 
 class GPSFixController: NSObject {
 
+    struct NotificationType {
+        static let ModeChanged = "RegattaController.ModeChanged"
+    }
+
+    struct UserInfo {
+        static let Mode = "Mode"
+    }
+    
+    enum Mode: String {
+        case BatterySaving
+        case Error
+        case Online
+        case Offline
+        var description: String {
+            switch self {
+            case .BatterySaving: return NSLocalizedString("Battery Saving", comment: "")
+            case .Error: return NSLocalizedString("Error", comment: "")
+            case .Offline: return NSLocalizedString("Offline", comment: "")
+            case .Online: return NSLocalizedString("Online", comment: "")
+            }
+        }
+    }
+    
     let regatta: Regatta
     
     init(regatta: Regatta) {
@@ -43,6 +66,7 @@ class GPSFixController: NSObject {
     private func sendGPSFixesSuccess(gpsFixes: Set<GPSFix>, completion: () -> Void) {
         dispatch_async(dispatch_get_main_queue(), {
             self.log("Sending \(gpsFixes.count) GPS fixes was successful")
+            self.postModeChangedNotification(BatteryManager.sharedManager.batterySaving ? .BatterySaving : .Online)
             CoreDataManager.sharedManager.deleteObjects(gpsFixes)
             CoreDataManager.sharedManager.saveContext()
             self.log("\(gpsFixes.count) GPS fixes deleted")
@@ -53,8 +77,17 @@ class GPSFixController: NSObject {
     private func sendGPSFixesFailure(error: AnyObject, completion: () -> Void) {
         dispatch_async(dispatch_get_main_queue(), {
             self.log("Sending GPS fixes failed for reason: \(error)")
+            self.postModeChangedNotification(AFNetworkReachabilityManager.sharedManager().reachable ? .Error : .Offline)
             completion()
         })
+    }
+    
+    // MARK: - Notifications
+    
+    private func postModeChangedNotification(mode: Mode) {
+        let userInfo = [UserInfo.Mode: mode.rawValue]
+        let notification = NSNotification(name: NotificationType.ModeChanged, object: self, userInfo: userInfo)
+        NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
     // MARK: - Properties
