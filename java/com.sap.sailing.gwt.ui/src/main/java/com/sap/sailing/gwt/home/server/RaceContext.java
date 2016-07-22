@@ -521,34 +521,36 @@ public class RaceContext {
     }
 
     public boolean isLiveOrOfPublicInterest() {
-        TimePoint startTime = getStartTime();
-        boolean result = false;
-        if (startTime != null) {
-            if (trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
-                result = trackedRace.isLive(now);
-            } else {
+        boolean isLive = false;
+        boolean isOfPublicInterest = false;
+        if (trackedRace != null) {
+            isLive = trackedRace.isLive(now);
+        }
+        if (!isLive) {
+            TimePoint startTime = getStartTime();
+            if (startTime != null) {
                 TimePoint finishTime = getFinishTime();
                 // no data from tracking but maybe a manual setting of the start and finish time
                 TimePoint startOfLivePeriod = startTime.minus(TIME_BEFORE_START_TO_SHOW_RACES_AS_LIVE);
                 TimePoint endOfLivePeriod = finishTime != null ? finishTime
                         .plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS) : null;
                 if (now.after(startOfLivePeriod) && (endOfLivePeriod == null || now.before(endOfLivePeriod))) {
-                    result = true;
+                    isOfPublicInterest = true;
                 }
-            }
-        } else if (raceLog != null) {
-            // in case there is not start time set it could be an postponed or abandoned race
-            RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
-            if (abortingFlagEvent != null) {
-                TimePoint abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint();
-                if (abortingTimeInPassBefore.until(now).compareTo(TIME_TO_SHOW_CANCELED_RACES_AS_LIVE) < 0) {
-                    result = true;
-                    // TODO: Problem: This causes the race added to the live races list without having a start time!!!
-                    // This does not work right now -> consider using a start time of the last pass.
+            } else if (raceLog != null) {
+                // in case there is not start time set it could be an postponed or abandoned race
+                RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
+                if (abortingFlagEvent != null) {
+                    TimePoint abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint();
+                    if (abortingTimeInPassBefore.until(now).compareTo(TIME_TO_SHOW_CANCELED_RACES_AS_LIVE) < 0) {
+                        isOfPublicInterest = true;
+                        // TODO: Problem: This causes the race added to the live races list without having a start time!!!
+                        // This does not work right now -> consider using a start time of the last pass.
+                    }
                 }
             }
         }
-        return result;
+        return isLive || isOfPublicInterest;
     }
 
     /**

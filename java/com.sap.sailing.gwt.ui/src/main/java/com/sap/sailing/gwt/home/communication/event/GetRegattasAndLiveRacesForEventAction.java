@@ -69,7 +69,11 @@ public class GetRegattasAndLiveRacesForEventAction implements SailingAction<Resu
                     }
                 }
             });
-            ttl = Duration.ONE_MINUTE.times(2);
+            if (eventState == EventState.RUNNING) {
+                ttl = Duration.ONE_SECOND.times(30);
+            } else {
+                ttl = Duration.ONE_MINUTE.times(3);
+            }
         } else {
             ttl = EventActionUtil.calculateTtlForNonLiveEvent(event, eventState);
         }
