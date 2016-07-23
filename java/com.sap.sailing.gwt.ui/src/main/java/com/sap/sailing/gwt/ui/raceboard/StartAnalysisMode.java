@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
@@ -167,10 +168,13 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.START_TACK);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
         raceDetailsToShow.remove(DetailType.DISPLAY_LEGS);
-        final LeaderboardSettings newSettings = new LeaderboardSettings(existingSettings.getManeuverDetailsToShow(),
-                existingSettings.getLegDetailsToShow(),
-                raceDetailsToShow, existingSettings.getOverallDetailsToShow(), existingSettings.getNamesOfRaceColumnsToShow(),
-                existingSettings.getNamesOfRacesToShow(),
+        final LeaderboardSettings newSettings = new LeaderboardSettings(
+                Util.cloneListOrNull(existingSettings.getManeuverDetailsToShow()),
+                Util.cloneListOrNull(existingSettings.getLegDetailsToShow()),
+                Util.cloneListOrNull(raceDetailsToShow),
+                Util.cloneListOrNull(existingSettings.getOverallDetailsToShow()),
+                Util.cloneListOrNull(existingSettings.getNamesOfRaceColumnsToShow()),
+                Util.cloneListOrNull(existingSettings.getNamesOfRacesToShow()),
                 existingSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,
                 existingSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 existingSettings.getNameOfRaceToSort(), existingSettings.isSortAscending(),

@@ -504,4 +504,14 @@ public class Util {
         addAll(visibleCourseAreas, list);
         return list;
     }
+
+    public static <T> List<T> cloneListOrNull(List<T> list) {
+        final List<T> result;
+        if (list == null) {
+            result = null;
+        } else {
+            result = new ArrayList<T>(list);
+        }
+        return result;
+    }
 }
