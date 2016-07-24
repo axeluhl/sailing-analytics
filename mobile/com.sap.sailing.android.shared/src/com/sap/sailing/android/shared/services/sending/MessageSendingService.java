@@ -6,9 +6,15 @@ import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import com.sap.sailing.android.shared.R;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
+import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
+import com.sap.sailing.android.shared.util.PrefUtils;
+import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
 import android.app.Service;
 import android.content.ComponentName;
@@ -21,13 +27,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-
-import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
-import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
-import com.sap.sailing.android.shared.util.PrefUtils;
-import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
 /**
  * Service that handles sending messages to a webservice. Deals with an offline setting
@@ -58,6 +57,11 @@ import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 public class MessageSendingService extends Service implements MessageSendingListener {
     public final static String URL = "url";
     public final static String PAYLOAD = "payload";
+    /**
+     * A boolean property that indicates whether the intent in which this is used as an extra represents
+     * a re-send action ({@code true}) or a first original send attempt ({@code false}).
+     */
+    public final static String RESEND = "resend";
     public final static String CALLBACK_CLASS = "callback";
     public final static String CALLBACK_PAYLOAD = "callbackPayload"; // passed back to callback
     public final static String MESSAGE_ID = "messageId";
@@ -70,6 +74,10 @@ public class MessageSendingService extends Service implements MessageSendingList
     private Handler handler;
     private final IBinder mBinder = new MessageSendingBinder();
     private MessagePersistenceManager persistenceManager;
+    
+    /**
+     * Tells whether a timer has been set to run {@link #handler} to trigger trying sending the delayed messages again
+     */
     private boolean isHandlerSet;
 
     /**
@@ -117,7 +125,10 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     private Date lastSuccessfulSend;
 
-    public List<String> getDelayedIntentsContent() {
+    /**
+     * Callers that want to iterate over the result need to synchronize on the result
+     */
+    public Iterable<String> getDelayedIntentsContent() {
         return persistenceManager.getContent();
     }
 
@@ -135,14 +146,24 @@ public class MessageSendingService extends Service implements MessageSendingList
         serviceLogger.onMessageSentSuccessful();
     }
 
+    /**
+     * Constructs an original message sending intent that is not a "re-send" attempt
+     */
+    public static Intent createMessageIntent(Context context, String url,
+            Serializable callbackPayload, Serializable messageId, String payload,
+            Class<? extends ServerReplyCallback> callbackClass) {
+        return createMessageIntent(context, url, callbackPayload, messageId, payload, /* isResend */ false, callbackClass);
+    }
+    
     public static Intent createMessageIntent(Context context, String url,
                                              Serializable callbackPayload, Serializable messageId, String payload,
-                                             Class<? extends ServerReplyCallback> callbackClass) {
+                                             boolean isResend, Class<? extends ServerReplyCallback> callbackClass) {
         Intent messageIntent = new Intent(context, MessageSendingService.class);
         messageIntent.setAction(context.getString(R.string.intent_send_message));
         messageIntent.putExtra(CALLBACK_PAYLOAD, callbackPayload);
         messageIntent.putExtra(MESSAGE_ID, messageId);
         messageIntent.putExtra(PAYLOAD, payload);
+        messageIntent.putExtra(RESEND, isResend);
         messageIntent.putExtra(URL, url);
         messageIntent.putExtra(CALLBACK_CLASS, callbackClass == null ? null : callbackClass.getName());
         return messageIntent;
@@ -263,7 +284,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     private void sendNextDelayedMessage() {
         try {
-            final Intent firstDelayedIntent = persistenceManager.restoreFirstDelayedIntent();
+            final Intent firstDelayedIntent = persistenceManager.restoreFirstDelayedIntentNotUnderwayAndMarkAsUnderway();
             if (firstDelayedIntent != null) {
                 ExLog.i(this, TAG, String.format("Resending one message..."));
                 sendMessage(firstDelayedIntent);
@@ -299,7 +320,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             reportApiConnectivity(APIConnectivity.transmissionError);
             ExLog.w(this, TAG, "Error while posting intent to server. Will persist intent...");
             try {
-                persistenceManager.persistIntent(result.getIntent());
+                persistenceManager.sendFailed(result.getIntent());
             } catch (UnsupportedEncodingException e) {
                 ExLog.e(this, TAG, "Could not store message (unsupported encoding)");
             }
@@ -316,7 +337,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             ExLog.i(this, TAG, "Message successfully sent.");
             if (persistenceManager.areIntentsDelayed()) {
                 try {
-                    persistenceManager.removeIntent(result.getIntent());
+                    persistenceManager.sentSuccessfully(result.getIntent());
                     sendNextDelayedMessage();
                 } catch (UnsupportedEncodingException e) {
                     ExLog.e(this, TAG, "Could not remove message (unsupported encoding)");
