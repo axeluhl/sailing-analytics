@@ -295,7 +295,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient ConcurrentMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     protected transient MarkPassingCalculator markPassingCalculator;
-    private final boolean hasMarkPassingCalculator;
     
     private final ConcurrentMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
 
@@ -546,7 +545,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } else {
             markPassingCalculator = null;
         }
-        hasMarkPassingCalculator = useInternalMarkPassingAlgorithm;
         sensorTracks = new HashMap<>();
         sensorTracksLock = new NamedReentrantReadWriteLock("sensorTracksLock", true);
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
@@ -648,17 +646,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         adjustStructureToCourse();
         triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
-    }
-
-    /**
-     * After the object graph has entirely been re-constructed, create the mark passing calculator if
-     * the original object had one.
-     */
-    protected Object readResolve() {
-        if (hasMarkPassingCalculator) {
-            markPassingCalculator = createMarkPassingCalculator();
-        }
-        return this;
     }
 
     /**
