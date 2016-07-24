@@ -538,7 +538,7 @@ public class RaceContext {
                     isOfPublicInterest = true;
                 }
             } else if (raceLog != null) {
-                // in case there is not start time set it could be an postponed or abandoned race
+                // in case there is no start time set it could be an postponed or abandoned race
                 RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
                 if (abortingFlagEvent != null) {
                     TimePoint abortingTimeInPassBefore = abortingFlagEvent.getLogicalTimePoint();
