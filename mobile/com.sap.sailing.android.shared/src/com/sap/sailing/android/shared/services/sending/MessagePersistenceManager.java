@@ -114,42 +114,34 @@ public class MessagePersistenceManager {
         void restoreMessage(Context context, Intent messageIntent);
     }
 
-    public List<Intent> restoreMessages() throws UnsupportedEncodingException {
-        List<Intent> delayedIntents = new ArrayList<Intent>();
-        for (String persistedMessage : persistedMessages) {
-            String[] lineParts = persistedMessage.split(";");
-            String url = lineParts[2];
-            String callbackPayload = lineParts[0];
-            String payload = URLDecoder.decode(lineParts[1], MessageSendingService.charsetName);
-            String callbackClassString = lineParts[3];
+    private Intent restorePersistedIntent(String persistedMessage) throws UnsupportedEncodingException {
+        String[] lineParts = persistedMessage.split(";");
+        String url = lineParts[2];
+        String callbackPayload = lineParts[0];
+        String payload = URLDecoder.decode(lineParts[1], MessageSendingService.charsetName);
+        String callbackClassString = lineParts[3];
 
-            Class<? extends ServerReplyCallback> callbackClass = null;
-            if (!"null".equals(callbackClassString)) {
-                try {
-                    @SuppressWarnings("unchecked")
-                    Class<? extends ServerReplyCallback> tmp =
-                            (Class<? extends ServerReplyCallback>) Class.forName(callbackClassString);
-                    callbackClass = tmp;
-                } catch (ClassNotFoundException e) {
-                    ExLog.e(context, TAG, "Could not find class for callback name: " + callbackClassString);
-                }
-            }
-
-            // We are passing no message id, because we know it used to suppress message sending and
-            // we want this message to be sent.
-            Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload,
-                    null, payload, callbackClass);
-
-            if (messageRestorer != null) {
-                messageRestorer.restoreMessage(context, messageIntent);
-            }
-
-            if (messageIntent != null) {
-                delayedIntents.add(messageIntent);
+        Class<? extends ServerReplyCallback> callbackClass = null;
+        if (!"null".equals(callbackClassString)) {
+            try {
+                @SuppressWarnings("unchecked")
+                Class<? extends ServerReplyCallback> tmp =
+                        (Class<? extends ServerReplyCallback>) Class.forName(callbackClassString);
+                callbackClass = tmp;
+            } catch (ClassNotFoundException e) {
+                ExLog.e(context, TAG, "Could not find class for callback name: " + callbackClassString);
             }
         }
-        ExLog.i(context, TAG, "Restored " + delayedIntents.size() + " messages");
-        return delayedIntents;
+
+        // We are passing no message id, because we know it used to suppress message sending and
+        // we want this message to be sent.
+        Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload,
+                null, payload, callbackClass);
+
+        if (messageRestorer != null) {
+            messageRestorer.restoreMessage(context, messageIntent);
+        }
+        return messageIntent;
     }
 
     /**
@@ -172,8 +164,8 @@ public class MessagePersistenceManager {
 
     private void saveMessage(String messageLine) {
         persistedMessages.add(messageLine);
-        writePersistedMessagesToFile();
-        ExLog.i(context, TAG, "Wrote message to file: " + messageLine);
+        writeToFile(messageLine, Context.MODE_APPEND);
+        ExLog.i(context, TAG, "Appended message to file: " + messageLine);
     }
 
     private void writePersistedMessagesToFile() {
@@ -215,6 +207,10 @@ public class MessagePersistenceManager {
         } catch (IOException e) {
             ExLog.e(context, TAG, "In Method writeToFile: " + e.getMessage() + " with content " + content + " and mode " + mode);
         }
+    }
+
+    public Intent restoreFirstDelayedIntent() throws UnsupportedEncodingException {
+        return persistedMessages.isEmpty() ? null : restorePersistedIntent(persistedMessages.get(0));
     }
 
 }

@@ -72,6 +72,10 @@ public class MessageSendingService extends Service implements MessageSendingList
     private MessagePersistenceManager persistenceManager;
     private boolean isHandlerSet;
 
+    /**
+     * Can be used to keep messages from being sent; the race manager app, for example, uses this
+     * to avoid sending messages back to the server that were received from the server in the first place.
+     */
     private Set<Serializable> suppressedMessageIds = new HashSet<Serializable>();
 
     private APIConnectivityListener apiConnectivityListener;
@@ -253,16 +257,16 @@ public class MessageSendingService extends Service implements MessageSendingList
             ConnectivityChangedReceiver.enable(this);
             serviceLogger.onMessageSentFailed();
         } else {
-            sendDelayedMessages();
+            sendNextDelayedMessage();
         }
     }
 
-    private void sendDelayedMessages() {
+    private void sendNextDelayedMessage() {
         try {
-            List<Intent> delayedIntents = persistenceManager.restoreMessages();
-            ExLog.i(this, TAG, String.format("Resending %d messages...", delayedIntents.size()));
-            for (Intent intent : delayedIntents) {
-                sendMessage(intent);
+            final Intent firstDelayedIntent = persistenceManager.restoreFirstDelayedIntent();
+            if (firstDelayedIntent != null) {
+                ExLog.i(this, TAG, String.format("Resending one message..."));
+                sendMessage(firstDelayedIntent);
             }
         } catch (UnsupportedEncodingException e) {
             ExLog.e(this, TAG, "Could not restore messages (unsupported encoding)");
@@ -313,6 +317,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             if (persistenceManager.areIntentsDelayed()) {
                 try {
                     persistenceManager.removeIntent(result.getIntent());
+                    sendNextDelayedMessage();
                 } catch (UnsupportedEncodingException e) {
                     ExLog.e(this, TAG, "Could not remove message (unsupported encoding)");
                 }
