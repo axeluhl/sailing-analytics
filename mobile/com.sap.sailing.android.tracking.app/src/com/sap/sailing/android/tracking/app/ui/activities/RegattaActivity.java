@@ -476,9 +476,7 @@ public class RegattaActivity extends AbstractRegattaActivity
     public void checkout() {
         final String checkoutURLStr = event.server
                 + prefs.getServerCheckoutPath().replace("{leaderboard-name}", Uri.encode(leaderboard.name));
-
         showProgressDialog(R.string.please_wait, R.string.checking_out);
-
         JSONObject checkoutData = new JSONObject();
         try {
             checkoutData.put("competitorId", competitor.id);
@@ -489,12 +487,10 @@ public class RegattaActivity extends AbstractRegattaActivity
             ExLog.e(this, TAG, "Error populating checkout-data: " + e.getMessage());
             return;
         }
-
         try {
             HttpJsonPostRequest request = new HttpJsonPostRequest(this, new URL(checkoutURLStr), checkoutData.toString());
             NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(request,
                     new NetworkHelperSuccessListener() {
-
                         @Override
                         public void performAction(JSONObject response) {
                             DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this,
@@ -504,7 +500,6 @@ public class RegattaActivity extends AbstractRegattaActivity
                             finish();
                         }
                     }, new NetworkHelperFailureListener() {
-
                         @Override
                         public void performAction(NetworkHelperError e) {
                             dismissProgressDialog();
@@ -512,7 +507,6 @@ public class RegattaActivity extends AbstractRegattaActivity
                                     R.string.error_could_not_complete_operation_on_server_try_again);
                         }
                     });
-
         } catch (MalformedURLException e) {
             ExLog.w(this, TAG, "Error, can't check out, MalformedURLException: " + e.getMessage());
         }
