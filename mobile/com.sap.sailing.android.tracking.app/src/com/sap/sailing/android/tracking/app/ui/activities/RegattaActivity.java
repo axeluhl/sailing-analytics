@@ -118,6 +118,7 @@ public class RegattaActivity extends AbstractRegattaActivity
             ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
         }
+        // FIXME bug 3823: a RegattaFragment must only be created if a competitor, not a mark, is being tracked
         RegattaFragment regattaFragment = new RegattaFragment();
         regattaFragment.setFragmentWatcher(this);
         replaceFragment(R.id.content_frame, regattaFragment);
@@ -187,7 +188,6 @@ public class RegattaActivity extends AbstractRegattaActivity
                 hasPicture = true;
                 LinearLayout addTeamPhotoTextView = (LinearLayout) findViewById(R.id.add_photo);
                 addTeamPhotoTextView.setVisibility(View.INVISIBLE);
-
                 getRegattaFragment().setChangePhotoButtonHidden(false);
             }
         });
@@ -237,25 +237,29 @@ public class RegattaActivity extends AbstractRegattaActivity
     }
 
     private void setTeamImage(ImageView imageView, int width, int height) {
-        String fileName = getCompetitorImageFileName(competitor.id);
-        Bitmap storedImage = getStoredImage(fileName, width, height);
-        if (storedImage == null) {
-            askServerAboutTeamImageUrl(imageView);
-        } else {
-            imageView.setImageBitmap(storedImage);
-            userImageUpdated();
+        if (competitor != null && competitor.id != null) {
+            String fileName = getCompetitorImageFileName(competitor.id);
+            Bitmap storedImage = getStoredImage(fileName, width, height);
+            if (storedImage == null) {
+                askServerAboutTeamImageUrl(imageView);
+            } else {
+                imageView.setImageBitmap(storedImage);
+                userImageUpdated();
+            }
         }
     }
 
     private void setFlagImage(ImageView imageView, int width, int height) {
-        String flagFileName = getFlagImageFileName(competitor.countryCode.toLowerCase(Locale.getDefault()));
-        Bitmap storedFlagImage = getStoredImage(flagFileName, width, height);
-        if (storedFlagImage == null) {
-            String urlStr = String.format("%s/gwt/images/flags/%s.png", event.server,
-                    competitor.countryCode.toLowerCase(Locale.getDefault()));
-            new DownloadFlagImageTask(imageView, competitor.countryCode).execute(urlStr);
-        } else {
-            imageView.setImageBitmap(storedFlagImage);
+        if (competitor != null && competitor.countryCode != null) {
+            String flagFileName = getFlagImageFileName(competitor.countryCode.toLowerCase(Locale.getDefault()));
+            Bitmap storedFlagImage = getStoredImage(flagFileName, width, height);
+            if (storedFlagImage == null) {
+                String urlStr = String.format("%s/gwt/images/flags/%s.png", event.server,
+                        competitor.countryCode.toLowerCase(Locale.getDefault()));
+                new DownloadFlagImageTask(imageView, competitor.countryCode).execute(urlStr);
+            } else {
+                imageView.setImageBitmap(storedFlagImage);
+            }
         }
     }
 
@@ -431,6 +435,7 @@ public class RegattaActivity extends AbstractRegattaActivity
                     regattaFragment.setFragmentWatcher(this);
                     replaceFragment(R.id.content_frame, regattaFragment);
                 }
+                // FIXME bug3823: what about MarkCheckinData? Which fragment shall be shown?
             } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                 ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                 displayDatabaseError();
