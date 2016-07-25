@@ -6157,10 +6157,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         return getDeviceMappings(regattaLog);
     }
-
+    
     @Override
-    public MarkTracksDTO getMarkTracks(String leaderboardName, String raceColumnName, String fleetName) {
-        final List<MarkTrackDTO> markTracks = new ArrayList<>();
+    public Iterable<MarkDTO> getMarksInTrackedRace(String leaderboardName, String raceColumnName, String fleetName) {
+        final List<MarkDTO> marks = new ArrayList<>();
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
@@ -6168,34 +6168,74 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
                     for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {
-                        final MarkDTO markDTO = convertToMarkDTO(mark, /* position */ null);
-                        final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                        final GPSFixTrack<Mark, ? extends GPSFix> markTrack;
-                        if (trackedRace != null) {
-                            markTrack = trackedRace.getOrCreateTrack(mark);
-                        } else {
-                            DynamicGPSFixTrackImpl<Mark> writeableMarkTrack = new DynamicGPSFixTrackImpl<Mark>(mark, BoatClass.APPROXIMATE_AVERAGE_MANEUVER_DURATION.asMillis());
-                            markTrack = writeableMarkTrack;
-                            final RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                            final RegattaLog regattaLog = raceColumn.getRegattaLog();
-                            final TrackingTimesFinder trackingTimesFinder = new TrackingTimesFinder(raceLog);
-                            final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = trackingTimesFinder.analyze();
-                            try {
-                                GPSFixStore gfs = new GPSFixStoreImpl(getService().getSensorFixStore());
-                                gfs.loadMarkTrack(writeableMarkTrack, regattaLog, mark,
-                                        trackingTimes.getA().getTimePoint(), trackingTimes.getB().getTimePoint());
-                            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                                logger.info("Error trying to load mark track for mark "+mark+" from "+trackingTimes.getA()+" to "+trackingTimes.getB());
-                            }
-                        }
-                        Iterable<GPSFixDTO> gpsFixDTOTrack = convertToGPSFixDTOTrack(markTrack);
-                        final MarkTrackDTO markTrackDTO = new MarkTrackDTO(markDTO, gpsFixDTOTrack, /* thinned out */ false);
-                        markTracks.add(markTrackDTO);
+                        marks.add(new MarkDTO(mark.getId().toString(), mark.getName()));
                     }
                 }
             }
         }
+        return marks;
+    }
+
+    @Override
+    public MarkTracksDTO getMarkTracks(String leaderboardName, String raceColumnName, String fleetName) {
+        final List<MarkTrackDTO> markTracks = new ArrayList<>();
+        for (final MarkDTO mark : getMarksInTrackedRace(leaderboardName, raceColumnName, fleetName)) {
+            MarkTrackDTO markTrackDTO = getMarkTrack(leaderboardName, raceColumnName, fleetName, mark.getIdAsString());
+            markTracks.add(markTrackDTO);
+        }
         return new MarkTracksDTO(markTracks);
+    }
+    
+    private MarkTrackDTO getMarkTrack(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, String markIdAsString) {
+        MarkDTO markDTO = null;
+        Mark mark = null;
+        for (final Mark currMark : raceColumn.getAvailableMarks(fleet)) {
+            if (currMark.getId().toString().equals(markIdAsString)) {
+                mark = currMark;
+                markDTO = convertToMarkDTO(currMark, /* position */ null);
+                break;
+            }
+        }
+        
+        if (markDTO != null) {
+            final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+            final GPSFixTrack<Mark, ? extends GPSFix> markTrack;
+            if (trackedRace != null) {
+                markTrack = trackedRace.getOrCreateTrack(mark);
+            } else {
+                DynamicGPSFixTrackImpl<Mark> writeableMarkTrack = new DynamicGPSFixTrackImpl<Mark>(mark, BoatClass.APPROXIMATE_AVERAGE_MANEUVER_DURATION.asMillis());
+                markTrack = writeableMarkTrack;
+                final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                final RegattaLog regattaLog = raceColumn.getRegattaLog();
+                final TrackingTimesFinder trackingTimesFinder = new TrackingTimesFinder(raceLog);
+                final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = trackingTimesFinder.analyze();
+                try {
+                    GPSFixStore gfs = new GPSFixStoreImpl(getService().getSensorFixStore());
+                    gfs.loadMarkTrack(writeableMarkTrack, regattaLog, mark,
+                            trackingTimes.getA().getTimePoint(), trackingTimes.getB().getTimePoint());
+                } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                    logger.info("Error trying to load mark track for mark "+mark+" from "+trackingTimes.getA()+" to "+trackingTimes.getB());
+                }
+            }
+            Iterable<GPSFixDTO> gpsFixDTOTrack = convertToGPSFixDTOTrack(markTrack);
+            return new MarkTrackDTO(markDTO, gpsFixDTOTrack, /* thinned out */ false);
+        }
+        return null;
+    }
+    
+    @Override
+    public MarkTrackDTO getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString) {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet != null) {
+                    return getMarkTrack(leaderboard, raceColumn, fleet, markIdAsString);
+                }
+            }
+        }
+        return null;
     }
     
     /**
