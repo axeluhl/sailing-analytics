@@ -92,7 +92,7 @@ class ScanViewController: UIViewController {
     
     // MARK: - Properties
     
-    lazy var checkInController: CheckInController = {
+    private lazy var checkInController: CheckInController = {
         let checkInController = CheckInController()
         checkInController.delegate = self
         return checkInController
@@ -120,14 +120,6 @@ extension ScanViewController: CheckInControllerDelegate {
         presentViewController(alertController, animated: true, completion: nil)
     }
     
-    func checkInDidEnd(sender: CheckInController, withSuccess succeed: Bool) {
-        if succeed {
-            navigationController?.popViewControllerAnimated(true)
-        } else {
-            startScanning()
-        }
-    }
-    
 }
 
 // MARK: - AVCaptureMetadataOutputObjectsDelegate
@@ -142,7 +134,9 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
             if let regattaData = RegattaData(urlString: metadataObject.stringValue) {
                 stopScanning()
-                checkInController.checkIn(regattaData)
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.captureOutputSuccess(regattaData)
+                })
             } else {
                 let alertTitle = NSLocalizedString("Incorrect QR Code", comment: "")
                 let alertController = UIAlertController(title: alertTitle, message: "", preferredStyle: .Alert)
@@ -154,4 +148,14 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
         }
     }
 
+    private func captureOutputSuccess(regattaData: RegattaData) {
+        checkInController.checkIn(regattaData, completion: { (withSuccess) in
+            if withSuccess {
+                self.navigationController?.popViewControllerAnimated(true)
+            } else {
+                self.startScanning()
+            }
+        })
+    }
+    
 }

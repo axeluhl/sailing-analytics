@@ -69,62 +69,75 @@ class HomeViewController: UIViewController {
     
     // MARK: - Reviews
     
-    func reviews() {
-        if !Preferences.termsAccepted {
-            reviewTerms()
-        } else {
-            reviewsAfterTermsAccepted()
-        }
+    private func reviews() {
+        self.reviewTerms({
+            print("Review terms done.")
+            self.reviewGPSFixes({
+                print("Review GPS fixes done.")
+                self.reviewNewCheckIn({
+                    print("Review new check-in done.")
+                })
+            })
+        })
     }
     
-    func reviewTerms() {
+    // MARK: - 1. Review Terms
+    
+    private func reviewTerms(completion: () -> Void) {
+        guard Preferences.termsAccepted == false else { completion(); return }
         let alertTitle = NSLocalizedString("EULA_title", comment: "")
         let alertMessage = NSLocalizedString("EULA_content", comment: "")
         let alertController = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .Alert)
         let viewTitle = NSLocalizedString("EULA_view", comment: "")
         let viewAction = UIAlertAction(title: viewTitle, style: .Cancel, handler: { action in
             UIApplication.sharedApplication().openURL(URLs.EULA)
-            self.reviewTerms() // Reopen alert again until user accepted terms
+            self.reviewTerms(completion) // Review terms until user accepted terms
         })
         let confirmTitle = NSLocalizedString("EULA_confirm", comment: "")
         let confirmAction = UIAlertAction(title: confirmTitle, style: .Default, handler: { action in
             Preferences.termsAccepted = true
-            self.reviewsAfterTermsAccepted()
+            completion() // Terms accepted
         })
         alertController.addAction(viewAction)
         alertController.addAction(confirmAction)
         presentViewController(alertController, animated: true, completion: nil)
     }
     
-    func reviewsAfterTermsAccepted() {
-        reviewGPSFixes()
-    }
+    // MARK: 2. Review GPS Fixes
     
-    func reviewGPSFixes() {
+    private func reviewGPSFixes(completion: () -> Void) {
         SVProgressHUD.show()
         fetchedResultsController.delegate = nil
         var regattas = CoreDataManager.sharedManager.fetchRegattas() ?? []
-        reviewGPSFixes(&regattas)
-    }
-    
-    func reviewGPSFixes(inout regattas: [Regatta]) {
-        if let regatta = regattas.popLast() {
-            let gpsFixController = GPSFixController.init(regatta: regatta)
-            gpsFixController.sendAll({ (withSuccess) in
-                self.reviewGPSFixes(&regattas)
-            })
-        } else {
-            fetchedResultsController.delegate = self
-            SVProgressHUD.popActivity()
-            reviewNewCheckIn()
+        reviewGPSFixes(&regattas) {
+            self.reviewGPSFixesCompleted(completion)
         }
     }
     
-    func reviewNewCheckIn() {
-        guard Preferences.termsAccepted else { return }
-        guard let urlString = Preferences.newCheckInURL else { return }
-        guard let regattaData = RegattaData(urlString: urlString) else { return }
-        checkInController.checkIn(regattaData)
+    private func reviewGPSFixes(inout regattas: [Regatta], completion: () -> Void) {
+        guard let regatta = regattas.popLast() else { completion(); return }
+        let gpsFixController = GPSFixController.init(regatta: regatta)
+        gpsFixController.sendAll({ (withSuccess) in
+            self.reviewGPSFixes(&regattas, completion: completion)
+        })
+    }
+    
+    private func reviewGPSFixesCompleted(completion: () -> Void) {
+        SVProgressHUD.popActivity()
+        fetchedResultsController.delegate = self
+        completion()
+    }
+    
+    // MARK: 3. Review New Check-In
+    
+    private func reviewNewCheckIn(completion: () -> Void) {
+        guard Preferences.termsAccepted else { completion(); return }
+        guard let urlString = Preferences.newCheckInURL else { completion(); return }
+        guard let regattaData = RegattaData(urlString: urlString) else { completion(); return }
+        checkInController.checkIn(regattaData, completion: { (withSuccess) in
+            Preferences.newCheckInURL = nil
+            completion()
+        })
     }
     
     // MARK: - Notifications
@@ -140,9 +153,11 @@ class HomeViewController: UIViewController {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func newCheckInURLNotification(notification: NSNotification) {
+    @objc private func newCheckInURLNotification(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
-            self.reviewNewCheckIn()
+            self.reviewNewCheckIn({ 
+                print("Review new check-in done.")
+            })
         })
     }
     
@@ -202,13 +217,13 @@ class HomeViewController: UIViewController {
     
     // MARK: - Properties
     
-    lazy var checkInController: CheckInController = {
+    private lazy var checkInController: CheckInController = {
         let checkInController = CheckInController()
         checkInController.delegate = self
         return checkInController
     }()
     
-    lazy var fetchedResultsController: NSFetchedResultsController = {
+    private lazy var fetchedResultsController: NSFetchedResultsController = {
         let fetchedResultsController = CoreDataManager.sharedManager.regattaFetchedResultsController()
         fetchedResultsController.delegate = self
         return fetchedResultsController
@@ -290,10 +305,6 @@ extension HomeViewController: CheckInControllerDelegate {
     
     func showCheckInAlert(sender: CheckInController, alertController: UIAlertController) {
         presentViewController(alertController, animated: true, completion: nil)
-    }
-    
-    func checkInDidEnd(sender: CheckInController, withSuccess succeed: Bool) {
-        Preferences.newCheckInURL = nil
     }
     
 }

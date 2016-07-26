@@ -14,9 +14,6 @@ import AVFoundation
     
     func showCheckInAlert(sender: CheckInController, alertController: UIAlertController)
 
-    optional func checkInDidStart(sender: CheckInController)
-    optional func checkInDidEnd(sender: CheckInController, withSuccess succeed: Bool)
-
 }
 
 class CheckInController : NSObject {
@@ -27,50 +24,64 @@ class CheckInController : NSObject {
     
     // MARK: - CheckIn
     
-    func checkIn(regattaData: RegattaData) {
-        checkInDidStart()
+    func checkIn(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
+        SVProgressHUD.show()
         requestManager = RequestManager(baseURLString: regattaData.serverURL)
         requestManager.getRegattaData(regattaData,
-                                      success: { (regattaData) in self.checkInSuccess(regattaData) },
-                                      failure: { (title, error) in self.checkInFailure(title, error: error) }
+                                      success:
+            { (regattaData) in
+                SVProgressHUD.popActivity()
+                self.checkInSuccess(regattaData, completion: completion)
+            }, failure: { (title, error) in
+                SVProgressHUD.popActivity()
+                self.checkInFailure(title, error: error, completion: completion)
+            }
         )
     }
     
-    private func checkInSuccess(regattaData: RegattaData) {
+    private func checkInSuccess(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
         let alertController = UIAlertController(title: regattaData.welcomeString, message: nil, preferredStyle: .Alert)
         let okTitle = NSLocalizedString("OK", comment: "")
         let okAction = UIAlertAction(title: okTitle, style: .Default) { (action) in
-            self.postCheckIn(regattaData)
+            self.postCheckIn(regattaData, completion: completion)
         }
         let cancelTitle = NSLocalizedString("Cancel", comment: "")
         let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
-            self.checkInDidEnd(withSuccess: false)
+            self.checkInDidFinish(withSuccess: false, completion: completion)
         }
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
         showCheckInAlert(alertController)
     }
     
-    private func checkInFailure(title: String, error: NSError) {
+    private func checkInFailure(title: String, error: NSError, completion: (withSuccess: Bool) -> Void) {
         let alertController = UIAlertController(title: title, message: error.localizedDescription, preferredStyle: .Alert)
         let cancelTitle = NSLocalizedString("Cancel", comment: "")
         let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
-            self.checkInDidEnd(withSuccess: false)
+            self.checkInDidFinish(withSuccess: false, completion: completion)
         }
         alertController.addAction(cancelAction)
         showCheckInAlert(alertController)
     }
     
-    private func postCheckIn(regattaData: RegattaData) {
+    // MARK: - PostCheckIn
+    
+    private func postCheckIn(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
         SVProgressHUD.show()
         requestManager.postCheckIn(regattaData.leaderboardData.name,
                                    competitorID: regattaData.competitorData.competitorID,
-                                   success: { (operation, responseObject) -> Void in self.postCheckInSuccess(regattaData) },
-                                   failure: { (operation, error) -> Void in self.postCheckInFailure(regattaData, error: error) }
+                                   success:
+            { (operation, responseObject) -> Void in
+                SVProgressHUD.popActivity()
+                self.postCheckInSuccess(regattaData, completion: completion)
+            }, failure: { (operation, error) -> Void in
+                SVProgressHUD.popActivity()
+                self.postCheckInFailure(regattaData, error: error, completion: completion)
+            }
         )
     }
     
-    private func postCheckInSuccess(regattaData: RegattaData) {
+    private func postCheckInSuccess(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
         let regatta = CoreDataManager.sharedManager.fetchRegatta(regattaData) ?? CoreDataManager.sharedManager.newRegatta()
         regatta.updateWirhRegattaData(regattaData)
         let event = regatta.event ?? CoreDataManager.sharedManager.newEvent(regatta)
@@ -80,34 +91,27 @@ class CheckInController : NSObject {
         let competitor = regatta.competitor ?? CoreDataManager.sharedManager.newCompetitor(regatta)
         competitor.updateWithCompetitorData(regattaData.competitorData)
         CoreDataManager.sharedManager.saveContext()
-        checkInDidEnd(withSuccess: true)
+        checkInDidFinish(withSuccess: true, completion: completion)
     }
     
-    private func postCheckInFailure(regattaData: RegattaData, error: AnyObject) {
+    private func postCheckInFailure(regattaData: RegattaData, error: AnyObject, completion: (withSuccess: Bool) -> Void) {
         let alertTitle = String(format:NSLocalizedString("Couldn't check-in to %@", comment: ""), regattaData.leaderboardName)
         let alertController = UIAlertController(title: alertTitle, message: error.localizedDescription, preferredStyle: .Alert)
         let cancelTitle = NSLocalizedString("Cancel", comment: "")
         let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
-            self.checkInDidEnd(withSuccess: false)
+            self.checkInDidFinish(withSuccess: false, completion: completion)
         }
         alertController.addAction(cancelAction)
         showCheckInAlert(alertController)
     }
     
+    private func checkInDidFinish(withSuccess success: Bool, completion: (withSuccess: Bool) -> Void) {
+        completion(withSuccess: success)
+    }
+    
     // MARK: - Controller
     
-    private func checkInDidStart() {
-        SVProgressHUD.show()
-        self.delegate?.checkInDidStart?(self)
-    }
-    
-    private func checkInDidEnd(withSuccess succeed: Bool) {
-        SVProgressHUD.popActivity()
-        self.delegate?.checkInDidEnd?(self, withSuccess: succeed)
-    }
-    
     private func showCheckInAlert(alertController: UIAlertController) {
-        SVProgressHUD.popActivity()
         self.delegate?.showCheckInAlert(self, alertController: alertController)
     }
 
