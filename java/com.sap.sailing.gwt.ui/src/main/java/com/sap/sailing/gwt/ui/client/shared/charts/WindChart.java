@@ -56,16 +56,16 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class WindChart extends AbstractRaceChart implements Component<WindChartSettings>, RequiresResize {
+public class WindChart extends AbstractRaceChart<WindChartSettings> implements RequiresResize {
     public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
     
     private static final int LINE_WIDTH = 1;
 
     private final WindChartSettings settings;
+    private final WindChartLifecycle windChartLifecycle;
     
     /**
      * Holds one series for each wind source for which data has been received.
@@ -89,10 +89,11 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
      *            constructor must ensure to trigger {@link RaceSelectionChangeListener#onRaceSelectionChange(List)} at
      *            least once to ensure that this chart sets its {@link AbstractRaceChart#selectedRaceIdentifier} field.
      */
-    public WindChart(SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
+    public WindChart(WindChartLifecycle windChartLifecycle, SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
             TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
-        super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        this.windChartLifecycle = windChartLifecycle;
         this.settings = settings;
         windSourceDirectionSeries = new HashMap<WindSource, Series>();
         windSourceSpeedSeries = new HashMap<WindSource, Series>();
@@ -188,7 +189,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                  .getXAxis().setAxisTitle(null);
         }
         setSize("100%", "100%");
-        this.selectedRaceIdentifier = selectedRaceIdentifier;
         if (selectedRaceIdentifier != null) {
             clearCacheAndReload();
             if (isVisible()) {
@@ -207,7 +207,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.wind();
+        return windChartLifecycle.getLocalizedShortName();
     }
 
     @Override
@@ -420,14 +420,12 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
 
     @Override
     public boolean hasSettings() {
-        return true;
+        return windChartLifecycle.hasSettings();
     }
 
     @Override
     public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent() {
-        WindChartSettings windChartSettings = new WindChartSettings(settings.isShowWindSpeedSeries(), settings.getWindSpeedSourcesToDisplay(),
-                settings.isShowWindDirectionsSeries(), settings.getWindDirectionSourcesToDisplay(), settings.getResolutionInMilliseconds());
-        return new WindChartSettingsDialogComponent(windChartSettings, stringMessages);
+        return windChartLifecycle.getSettingsDialogComponent(windChartLifecycle.cloneSettings(settings));
     }
 
     /**
@@ -543,12 +541,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         }
      }
 
-    private void updateTimePlotLine(Date date) {
-        chart.getXAxis().removePlotLine(timePlotLine);
-        timePlotLine.setValue(date.getTime());
-        chart.getXAxis().addPlotLines(timePlotLine);
-    }
-
     @Override
     public void onResize() {
         chart.setSizeToMatchContainer();
@@ -629,5 +621,9 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     public String getDependentCssClassName() {
         return "windChart";
     }
-    
+
+    @Override
+    public WindChartSettings getSettings() {
+        return settings;
+    }
 }

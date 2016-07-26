@@ -1,21 +1,17 @@
 package com.sap.sailing.selenium.pages.adminconsole;
 
-import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
-import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
+import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
@@ -30,15 +26,12 @@ import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagem
  * @author
  *   D049941
  */
-public class AdminConsolePage extends HostPage {
+public class AdminConsolePage extends HostPageWithAuthentication {
     private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
     
-    private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
-            ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
-    
-    private static final MessageFormat VERTICAL_TAB_EXPRESSION = new MessageFormat(
-            ".//div[contains(@class, \"gwt-VerticalTabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
+    private static final String EVENTS_TAB_LABEL = "Events"; //$NON-NLS-1$
+    private static final String EVENTS_TAB_IDENTIFIER = "EventManagement"; //$NON-NLS-1$
     
     private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas"; //$NON-NLS-1$
     private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement"; //$NON-NLS-1$
@@ -80,8 +73,7 @@ public class AdminConsolePage extends HostPage {
      *   The page object for the administration console.
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
-        driver.get(root + "gwt/AdminConsole.html?" + getGWTCodeServer()); //$NON-NLS-1$
-        return new AdminConsolePage(driver);
+        return HostPage.goToUrl(AdminConsolePage::new, driver, root + "gwt/AdminConsole.html");
     }
     
     @FindBy(how = BySeleniumId.class, using = "AdministrationTabs")
@@ -89,6 +81,10 @@ public class AdminConsolePage extends HostPage {
     
     private AdminConsolePage(WebDriver driver) {
         super(driver);
+    }
+    
+    public EventConfigurationPanelPO goToEvents() {
+        return new EventConfigurationPanelPO(this.driver, goToTab(EVENTS_TAB_LABEL, EVENTS_TAB_IDENTIFIER, true));
     }
     
     public RegattaStructureManagementPanelPO goToRegattaStructure() {
@@ -155,18 +151,6 @@ public class AdminConsolePage extends HostPage {
     }
     
     private WebElement goToTab(String label, final String id, boolean isVertical) {
-        String expression = TAB_EXPRESSION.format(new Object[] {label});
-        if (isVertical) {
-            expression = VERTICAL_TAB_EXPRESSION.format(new Object[] {label});
-        }
-        WebElement tab = this.administrationTabPanel.findElement(By.xpath(expression));
-        WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
-        waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
-        tab.click();
-        // Wait for the tab to become visible due to the used animations.
-        FluentWait<WebElement> wait = createFluentWait(this.administrationTabPanel);
-        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
-        waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
-        return content;
+        return goToTab(administrationTabPanel, label, id, isVertical);
     }
 }

@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
+
+import java.text.SimpleDateFormat;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,16 +28,13 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
+import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.text.SimpleDateFormat;
-
-import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
 
 public class TimePanelFragment extends BasePanelFragment {
 
@@ -43,7 +44,7 @@ public class TimePanelFragment extends BasePanelFragment {
     private IntentReceiver mReceiver;
     private SimpleDateFormat dateFormat;
 
-    private View mRaceHeader;
+    private TimePanelHeaderLayout mRaceHeader;
     private View mTimeLock;
     private TextView mCurrentTime;
     private TextView mHeaderTime;
@@ -69,9 +70,12 @@ public class TimePanelFragment extends BasePanelFragment {
         mStateListener = new RaceStateChangedListener();
 
         mRaceHeader = ViewHelper.get(layout, R.id.race_content_header);
-        if (mRaceHeader != null) {
-            mRaceHeader.setOnClickListener(new RaceHeaderClick());
-        }
+        mRaceHeader.setRunnable(new Runnable() {
+            @Override
+            public void run() {
+                new RaceHeaderClick().onClick(null);
+            }
+        });
 
         mTimeLock = ViewHelper.get(layout, R.id.time_start_lock);
         mCurrentTime = ViewHelper.get(layout, R.id.current_time);
@@ -154,10 +158,9 @@ public class TimePanelFragment extends BasePanelFragment {
             if (result != null) {
                 mLinkedRace = result.isDependentStartTime();
                 if (mLinkedRace && mHeaderTime != null && result.getResolutionFailed() == NO_START_TIME_SET) {
-                    SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
+                    SimpleRaceLogIdentifier identifier = Util.get(result.getDependingOnRaces(), 0);
                     ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(identifier);
-                    mHeaderTime
-                            .setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getRaceName(race, " / ")));
+                    mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getShortReverseRaceName(race, " / ", getRace())));
                 }
             }
         }
@@ -256,30 +259,32 @@ public class TimePanelFragment extends BasePanelFragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            View view = new View(context);
-            String action = intent.getAction();
-            if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
-                uncheckMarker(view);
-            }
-            if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
-                if (intent.getExtras() != null) {
-                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                    if (AppConstants.INTENT_ACTION_TOGGLE_TIME.equals(data)) {
-                        uncheckMarker(mRaceHeader);
-                    } else {
-                        uncheckMarker(view);
+            if (isAdded()) {
+                View view = new View(context);
+                String action = intent.getAction();
+                if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
+                    uncheckMarker(view);
+                }
+                if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
+                    if (intent.getExtras() != null) {
+                        String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                        if (AppConstants.INTENT_ACTION_TOGGLE_TIME.equals(data)) {
+                            uncheckMarker(mRaceHeader);
+                        } else {
+                            uncheckMarker(view);
+                        }
                     }
                 }
-            }
 
-            view = getActivity().findViewById(R.id.race_panel_time);
-            if (getActivity().findViewById(R.id.race_edit) == null && view != null) {
-                if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
-                    view.setVisibility(View.GONE);
-                }
+                view = getActivity().findViewById(R.id.race_panel_time);
+                if (getActivity().findViewById(R.id.race_edit) == null && view != null) {
+                    if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
+                        view.setVisibility(View.GONE);
+                    }
 
-                if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
-                    view.setVisibility(View.VISIBLE);
+                    if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
+                        view.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         }

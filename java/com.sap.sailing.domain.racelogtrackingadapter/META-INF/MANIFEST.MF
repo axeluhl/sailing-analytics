@@ -21,13 +21,16 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.mail
 Import-Package: com.google.zxing;version="3.1.0",
  com.mongodb,
+ com.sap.sse.concurrent,
+ com.sap.sse.shared.media,
  javax.mail;version="1.4.0",
  javax.mail.internet;version="1.4.0",
  javax.mail.util;version="1.4.0",
  javax.servlet;version="2.6.0",
  org.json.simple,
  org.json.simple.parser,
- org.osgi.framework;version="1.6.0"
+ org.osgi.framework;version="1.6.0",
+ org.osgi.util.tracker;version="1.5.1"
 Export-Package: com.sap.sailing.domain.racelogtracking,
  com.sap.sailing.domain.racelogtracking.impl;x-friends:="com.sap.sailing.domain.racelogtrackingadapter.testsupport,com.sap.sailing.gwt.ui.test"
 Bundle-Activator: com.sap.sailing.domain.racelogtracking.impl.Activator

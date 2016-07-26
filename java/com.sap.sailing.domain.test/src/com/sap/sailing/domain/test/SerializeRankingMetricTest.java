@@ -19,7 +19,6 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.TimeOnTimeAndDistanceRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
@@ -38,7 +37,7 @@ public class SerializeRankingMetricTest extends AbstractSerializationTest {
                         new LowPoint(), UUID.randomUUID(), /* courseArea */ null)),
                 new RaceDefinitionImpl("Race", new CourseImpl("Course", Collections.<Waypoint>emptyList()) , 
                         /* boatClass */ _49er, Collections.<Competitor>emptySet()),
-                Collections.<Sideline>emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, 0l, 0l, 0l,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0l, 0l, 0l,
                 false, TimeOnTimeAndDistanceRankingMetric::new, null);
         RankingMetric clone = cloneBySerialization(trackedRace.getRankingMetric(), DomainFactory.INSTANCE);
         assertNotNull(clone);

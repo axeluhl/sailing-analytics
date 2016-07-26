@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 
-public class RacesByCompetitorTextBoxFilter extends AbstractSuggestBoxFilter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
+public class RacesByCompetitorTextBoxFilter extends AbstractListSuggestBoxFilter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
     
     private final RacesByCompetitorFilter filter = new RacesByCompetitorFilter();
     
@@ -25,6 +25,10 @@ public class RacesByCompetitorTextBoxFilter extends AbstractSuggestBoxFilter<Sim
             this.filter.keywords.add(searchValue.trim());
         }
         return filter;
+    }
+    
+    @Override
+    protected void onSuggestionSelected(SimpleCompetitorDTO selectedItem) {
     }
     
     @Override

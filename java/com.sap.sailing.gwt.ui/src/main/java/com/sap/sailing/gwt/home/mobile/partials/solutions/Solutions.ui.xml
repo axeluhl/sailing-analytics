@@ -2,6 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+    <ui:with field="smI18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.solutions.SolutionsResources" />
      <ui:style>
@@ -107,12 +108,12 @@
                             class="{style.storeBadgesContainer}"
                             >
                             <a  ui:field="raceManagerPlayStoreLinkUi"
-                                href="{i18n.playstoreRacecommitteeApp}&amp;{i18n.playstoreCampaign}"
+                                href="{smI18n.playstoreRacecommitteeApp}"
                                 target="_blank"
                                 ><img
                                     ui:field="raceManagerPlayStoreImgUi" 
                                     alt="Get it on Google Play" 
-                                    src="{i18n.playstoreRacecommitteeBadge}" 
+                                    src="{smI18n.playstoreBadge}" 
                                     /></a>
                         </div>
 					</div>
@@ -155,9 +156,9 @@
                             >
                             <a
                                 alt="Get it on Appstore" 
-                                href="{i18n.appstoreStgTrainingstagebuch}"
+                                href="{smI18n.appstoreStgTrainingstagebuch}"
                                 target="_blank" >
-                                <img src="images/home/appstore{i18n.appstoreBadgeSuffix}.svg"></img>
+                                <img src="images/home/appstore{smI18n.appstoreBadgeSuffix}.svg"></img>
                             </a>
                         </div>
 					</div>

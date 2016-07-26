@@ -208,6 +208,7 @@ public interface TextMessages extends Messages {
     String solutionsTrainingText();
     String solutionsSimulatorText();
     String sapSailingAnalytics();
+    String autoPlayerConfiguration();
     String contentSapSailingAnalytics1();
     String contentSapSailingAnalytics2();
 
@@ -230,13 +231,5 @@ public interface TextMessages extends Messages {
 
     String impressum();
 
-    String playstoreCampaign();
 
-    String playstoreRacecommitteeApp();
-
-    String playstoreRacecommitteeBadge();
-
-    String appstoreStgTrainingstagebuch();
-
-    String appstoreBadgeSuffix();
 }

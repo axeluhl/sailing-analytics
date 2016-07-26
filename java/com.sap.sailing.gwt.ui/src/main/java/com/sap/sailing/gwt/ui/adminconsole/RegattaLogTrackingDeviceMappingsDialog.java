@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -91,6 +92,12 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
             }
         });
         buttonPanel.add(importBtn);
+        buttonPanel.add(new Button(stringMessages.importAdditionalSensorData(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                importFoiling();
+            }
+        }));
         mainPanel.add(buttonPanel);
         
         deviceMappingTable = new DeviceMappingTableWrapper(sailingService, stringMessages, errorReporter);
@@ -268,8 +275,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
 
     private void importFixes() {
         new RegattaLogImportFixesAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
-                new DataEntryDialog.DialogCallback<Collection<DeviceMappingDTO>>() {
-
+                new DialogCallback<Collection<DeviceMappingDTO>>() {
                     @Override
                     public void ok(Collection<DeviceMappingDTO> editedObject) {
                         for (DeviceMappingDTO mapping : editedObject) {
@@ -277,7 +283,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                                     new AsyncCallback<Void>() {
                                         @Override
                                         public void onSuccess(Void result) {
-                                            refresh();
+                                            RegattaLogTrackingDeviceMappingsDialog.this.refresh();
                                         }
 
                                         @Override
@@ -292,6 +298,32 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                     public void cancel() {
                     }
                 }).show();
+    }
+    
+    private void importFoiling() {
+        new RegattaLogImportSensorDataAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+                new DialogCallback<Collection<TypedDeviceMappingDTO>>() {
+            @Override
+            public void ok(Collection<TypedDeviceMappingDTO> editedObject) {
+                for (TypedDeviceMappingDTO mapping : editedObject) {
+                    sailingService.addTypedDeviceMappingToRegattaLog(leaderboardName, mapping, new AsyncCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            RegattaLogTrackingDeviceMappingsDialog.this.refresh();
+                        }
+                        
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                        }
+                    });
+                }
+            }
+            
+            @Override
+            public void cancel() {
+            }
+        }).show();
     }
 
     private FieldUpdater<DeviceMappingDTO, String> getActionColFieldUpdater() {
@@ -346,4 +378,5 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     protected Void getResult() {
         return null;
     }
+    
 }

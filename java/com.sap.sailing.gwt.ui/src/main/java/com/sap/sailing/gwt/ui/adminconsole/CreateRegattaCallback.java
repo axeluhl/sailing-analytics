@@ -58,9 +58,9 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesStructure = new LinkedHashMap<String, SeriesCreationParametersDTO>();
         for (SeriesDTO seriesDTO : newRegatta.series) {
             SeriesCreationParametersDTO seriesPair = new SeriesCreationParametersDTO(seriesDTO.getFleets(),
-                    seriesDTO.isMedal(), seriesDTO.isStartsWithZeroScore(),
+                    seriesDTO.isMedal(), seriesDTO.isFleetsCanRunInParallel(), seriesDTO.isStartsWithZeroScore(),
                     seriesDTO.isFirstColumnIsNonDiscardableCarryForward(), seriesDTO.getDiscardThresholds(),
-                    seriesDTO.hasSplitFleetContiguousScoring());
+                    seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
         sailingService.createRegatta(newRegatta.getName(), newRegatta.boatClass==null?null:newRegatta.boatClass.getName(),
@@ -156,7 +156,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
             public void cancel() {
             }
         });
-        dialog.ensureDebugId("CreateDefaultRegattaDialog");
+        dialog.ensureDebugId("CreateDefaultRegattaLeaderboardDialog");
         dialog.show();
     }
     

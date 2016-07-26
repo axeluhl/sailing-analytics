@@ -29,7 +29,7 @@ public class ScoreCorrectionForCompetitorInRaceImpl implements ScoreCorrectionFo
             if (competitorEntry.getMaxPointsReason() != null && competitorEntry.getMaxPointsReason().length() > 0) {
                 // no int; try parsing a MaxPointsReason
                 try {
-                    mpe = MaxPointsReason.valueOf(competitorEntry.getMaxPointsReason());
+                    mpe = MaxPointsReason.valueOf(competitorEntry.getMaxPointsReason().toUpperCase());
                 } catch (IllegalArgumentException iae) {
                     logger.info("Don't understand rank "+competitorEntry.getMaxPointsReason());
                     mpe = null;

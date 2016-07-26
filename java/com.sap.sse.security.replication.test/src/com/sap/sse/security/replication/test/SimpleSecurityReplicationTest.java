@@ -40,6 +40,12 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertEquals(emailValidationSecret, replicatedErnie.getValidationSecret());
         assertEquals(fullName, replicatedErnie.getFullName());
         assertEquals(company, replicatedErnie.getCompany());
+        
+        // check that incremental replication of access token handling works
+        final String accessToken = master.createAccessToken(username);
+        replicaReplicator.waitUntilQueueIsEmpty();
+        Thread.sleep(3000);
+        assertEquals(username, replica.getUserByAccessToken(accessToken).getName());
     }
 
     @Test

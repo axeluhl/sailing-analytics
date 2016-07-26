@@ -47,7 +47,6 @@ import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -120,7 +119,7 @@ public class LeaderboardCourseChangeTest {
         
         DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false,
-                trackedRegattaRegistry, baseDomainFactory, /* fillNetPointsUncorrected */ false);
+                trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
 
         assertEquals(6, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
@@ -129,7 +128,7 @@ public class LeaderboardCourseChangeTest {
         course.removeWaypoint(3);
 
         leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false, trackedRegattaRegistry,
-                baseDomainFactory, /* fillNetPointsUncorrected */ false);
+                baseDomainFactory, /* fillTotalPointsUncorrected */ false);
         assertEquals(4, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
 
@@ -139,7 +138,8 @@ public class LeaderboardCourseChangeTest {
         TrackedRegatta mockedTrackedRegatta = createMockedTrackedRegatta(regatta);
         RaceDefinition mockedRace = createMockedRace(course, boatClass);
         TrackedRace spyedTrackedRace = spy(new DynamicTrackedRaceImpl(mockedTrackedRegatta, mockedRace,
-                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, 5000, 20000, 20000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
+                new HashSet<Sideline>(), EmptyWindStore.INSTANCE, 5000, 20000, 20000,
+                /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogResolver.class)));
 
         return spyedTrackedRace;
@@ -161,7 +161,7 @@ public class LeaderboardCourseChangeTest {
         DynamicBoat mockedBoat = mock(DynamicBoat.class);
         when(mockedBoat.getBoatClass()).thenReturn(boatClass);
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", Color.BLACK, null, null,
-                mock(DynamicTeam.class), mockedBoat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+                mock(DynamicTeam.class), mockedBoat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         return competitors;
     }
 
@@ -175,7 +175,7 @@ public class LeaderboardCourseChangeTest {
         Set<Fleet> fleets = new HashSet<>();
         fleets.add(fleet);
 
-        Series series = new SeriesImpl("TestSeries", false, fleets, new HashSet<String>(), trackedRegattaRegistry);
+        Series series = new SeriesImpl("TestSeries", false, true, fleets, new HashSet<String>(), trackedRegattaRegistry);
         return series;
     }
 

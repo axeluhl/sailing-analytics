@@ -8,10 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -19,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,11 +32,11 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.activities.EventActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -77,8 +76,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         TextView addPhotoText = (TextView) view.findViewById(R.id.add_photo_text);
         addPhotoText.setOnClickListener(this);
 
-        setLeaderboardImageHeight(view);
-
         return view;
     }
 
@@ -90,17 +87,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         RegattaActivity activity = (RegattaActivity) getActivity();
         if (prefs.hasFailedUpload(activity.leaderboard.name)) {
             activity.showRetryUploadLayout();
-        }
-    }
-
-    private void setLeaderboardImageHeight(View view){
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            RelativeLayout imageLayout = (RelativeLayout) view.findViewById(R.id.image);
-            ViewGroup.LayoutParams layoutParams = imageLayout.getLayoutParams();
-            int displayHeight = getResources().getDisplayMetrics().heightPixels;
-            // calculate 1/3 of display height
-            layoutParams.height = displayHeight / 3;
-            imageLayout.setLayoutParams(layoutParams);
         }
     }
 
@@ -117,11 +103,18 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         if (System.currentTimeMillis() > regattaStart) {
             textView.setText(getString(R.string.regatta_in_progress));
-            threeBoxesLayout.setVisibility(View.INVISIBLE);
+            threeBoxesLayout.setVisibility(View.GONE);
+            centerViewInParent(textView);
         } else {
             textView.setText(getString(R.string.regatta_starts_in));
             threeBoxesLayout.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void centerViewInParent(View view) {
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        view.setLayoutParams(layoutParams);
     }
 
     public boolean isShowingBigCheckoutButton() {
@@ -186,7 +179,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             } else if (LocationHelper.isGPSEnabled(getActivity())) {
                 startTrackingActivity();
             } else {
-                showNoGPSError();
+                LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
             }
             break;
         case R.id.add_photo_button:
@@ -203,20 +196,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         }
     }
 
-    private void showNoGPSError() {
-        new AlertDialog.Builder(getActivity())
-            .setCancelable(true).setTitle(getString(R.string.warning))
-            .setMessage(getString(R.string.enable_gps))
-            .setNegativeButton(getString(R.string.no), null)
-            .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    LocationHelper.openLocationSettings(getActivity());
-                }
-            })
-            .show();
-    }
-
     public void setChangePhotoButtonHidden(boolean hidden) {
         LinearLayout changePhotoLayout = (LinearLayout) getActivity().findViewById(R.id.change_photo);
         if (hidden) {
@@ -230,20 +209,20 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
      * Ask user if he wants to take a new picture or select an existing one.
      */
     public void showChooseExistingPictureOrTakeNewPhotoAlert() {
-        AlertDialog dialog = new AlertDialog.Builder(getActivity()).setTitle(R.string.add_photo_select)
-                .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(R.string.existing_image, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        pickExistingImage();
-                    }
-                }).setNegativeButton(R.string.take_photo, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        showTakePhotoActivity();
-                    }
-                }).create();
-
+        AlertDialog dialog = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
+            .setTitle(R.string.add_photo_select)
+            .setMessage(R.string.do_you_want_to_choose_existing_img_or_take_a_new_one)
+            .setPositiveButton(R.string.existing_image, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    pickExistingImage();
+                }
+            }).setNegativeButton(R.string.take_photo, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    showTakePhotoActivity();
+                }
+            })
+            .create();
         dialog.show();
     }
 
@@ -320,10 +299,8 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         int scale = 1;
         if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
-            scale = (int) Math.pow(
-                    2,
-                    (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth))
-                            / Math.log(0.5)));
+            scale = (int) Math
+                .pow(2, (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
         }
 
         BitmapFactory.Options options2 = new BitmapFactory.Options();
@@ -348,8 +325,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     private void startEventActivity() {
         RegattaActivity activity = (RegattaActivity) getActivity();
-        Intent intent = new Intent(getActivity(), EventActivity.class);
-        intent.putExtra(EventActivity.EVENT, activity.event);
+        AppPreferences preferences = new AppPreferences(getActivity());
+        EventInfo eventInfo = activity.event;
+        String url = eventInfo.server + preferences.getServerEventUrl(eventInfo.id);
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         startActivity(intent);
     }
 
@@ -418,6 +397,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         watcher = fWatcher;
     }
 
+    public interface FragmentWatcher {
+        public void onViewCreated();
+    }
+
     private class TimerRunnable implements Runnable {
 
         public Thread t;
@@ -452,10 +435,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             running = false;
         }
 
-    }
-
-    public interface FragmentWatcher {
-        public void onViewCreated();
     }
 
 }

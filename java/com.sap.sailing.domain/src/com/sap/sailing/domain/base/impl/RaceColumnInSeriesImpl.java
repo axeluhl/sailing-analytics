@@ -136,6 +136,6 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     @Override
     public RegattaLog getRegattaLog() {
         Regatta regatta = getRegatta();
-        return regatta.getRegattaLog();
+        return regatta == null ? null : regatta.getRegattaLog();
     }
 }

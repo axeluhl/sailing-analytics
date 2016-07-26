@@ -1,20 +1,20 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 
 public abstract class CourseFragment extends BaseFragment {
 
-    public static RaceFragment newInstance(@START_MODE_VALUES int startMode, ManagedRace race, Context context) {
-        CourseDesignerMode mode = race.getState().getConfiguration().getDefaultCourseDesignerMode();
+    public static RaceFragment newInstance(@START_MODE_VALUES int startMode, AppPreferences preferences) {
+        CourseDesignerMode mode = preferences.getDefaultCourseDesignerMode();
 
         RaceFragment fragment;
         switch (mode) {
@@ -42,17 +42,14 @@ public abstract class CourseFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
 
         if (getView() != null && getArguments() != null) {
-            View header = getView().findViewById(R.id.header);
+            HeaderLayout header = (HeaderLayout) getView().findViewById(R.id.header);
             if (header != null) {
-                View text = header.findViewById(R.id.header_text);
-                if (text != null) {
-                    text.setOnClickListener(new View.OnClickListener() {
+                header.setHeaderOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             goHome();
                         }
                     });
-                }
                 switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
                     case START_MODE_PLANNED:
                         if (AppUtils.with(getActivity()).isLand() && AppUtils.with(getActivity()).is10inch()) {

@@ -5,6 +5,8 @@
     <string name="course_type">Course Type</string>
     <string name="marks">Marks</string>
     <string name="set_position">Set Position</string>
+    <string name="set_position_disabled_gps">Enable GPS\nto set Position</string>
+    <string name="set_position_no_gps_yet">Waiting for GPS connection</string>
     <string name="reset_position">Reset Position</string>
     <string name="getting_marks">Getting race marks&#8230;</string>
     <string name="set">set</string>
@@ -12,10 +14,8 @@
     <string name="mark_list_accuracy">(Accurary ca. %1$sm)</string>
     <string name="buoy_detail_accuracy_ca" translatable="false">ca. %1$sm</string>
     <string name="buoy_detail_distance" translatable="false">%1$sm</string>
-    <string name="accuracy">Accuracy</string>
-    <string name="distance">Distance</string>
-    <string name="accuracy_detail">of GPS position</string>
-    <string name="distance_detail">to old buoy</string>
+    <string name="accuracy">GPS Accuracy</string>
+    <string name="distance">Distance to old buoy</string>
     <string name="position_set">The position has been set</string>
     <string name="no_information">No information</string>
     <string name="title_activity_settings">@string/settings</string>
@@ -28,5 +28,8 @@
     <string name="server_sync_settings">Polling Interval (seconds)</string>
 
     <string name="options_menu_checkout">Checkout</string>
+    <string name="checkout_warning_message">Do you REALLY want to logout? You will need to re-login with the provided QR code to access your marks!</string>
+
+    <string name="no_marks_message">No marks</string>
 
 </resources>

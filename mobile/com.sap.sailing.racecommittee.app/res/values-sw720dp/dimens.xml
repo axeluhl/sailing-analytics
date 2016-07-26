@@ -13,7 +13,7 @@
 	<dimen name="listView_row_height">85dp</dimen>
 	<dimen name="listView_row_min_height">85dp</dimen>
 
-	<dimen name="preference_margin">0dp</dimen>
+	<dimen name="header_line">@dimen/thick_line</dimen>
 
 	<dimen name="panel_text_padding">5dp</dimen>
 
@@ -46,6 +46,9 @@
 
 	<dimen name="flags">96dp</dimen>
 
+	<dimen name="preference_side_margin">72dp</dimen>
+	<item name="preference_columns" format="integer" type="integer">2</item>
+
 	<!-- custom dimens (float, integer) -->
 	<item name="picker_scale" format="float" type="integer">1.55</item>
 	<item name="flag_size" format="integer" type="integer">48</item>
@@ -62,7 +65,6 @@
 
 	<!-- race state dependent -->
 	<!-- unscheduled -->
-	<dimen name="unscheduled_header_line">@dimen/thick_line</dimen>
 	<dimen name="unscheduled_confirm_button_margin">@dimen/default_margin_twice</dimen>
 	<dimen name="unscheduled_padding_dependent_race_item">@dimen/default_padding_half</dimen>
 	<dimen name="unscheduled_spinner_width">460dp</dimen>

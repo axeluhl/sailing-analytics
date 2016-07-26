@@ -86,7 +86,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
-        super.onListItemClick(listView, view, position, id);
         listAdapter.setCheckedPosition(position);
 
         mSelectedIndex = position;
@@ -126,7 +125,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         //TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
-            Collections.sort(namedList, new NaturalNamedComparator());
+            Collections.sort(namedList, new NaturalNamedComparator<T>());
             for (Named named : namedList) {
                 CheckedItem item = new CheckedItem();
                 item.setText(named.getName());

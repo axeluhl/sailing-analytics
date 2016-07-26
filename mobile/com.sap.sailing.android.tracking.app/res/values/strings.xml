@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <string name="empty"></string>
     <string name="app_name">SAP Sail InSight</string>
     <string name="options_menu_settings">Settings</string>
@@ -12,8 +11,7 @@
     <string name="tracker_started">SAP Sail InSight started</string>
     <string name="tracker_stopped">SAP Sail InSight stopped</string>
     <string name="title_activity_regatta">Regatta</string>
-    <string name="title_activity_leaderboard">Leader board</string>
-    <string name="title_activity_event">Event</string>
+    <string name="title_activity_leaderboard">Leaderboard</string>
     <string name="title_activity_start">Set Up GPS Tracker</string>
     <string name="title_activity_tracking">Tracking</string>
     <string name="please_confirm">Please confirm</string>
@@ -41,28 +39,28 @@
     <string name="hour">Hour</string>
     <string name="minute">Minute</string>
     <string name="day">Day</string>
-    <string name="please_listen_to_announcements">Please listen to the announcements</string>
+    <string name="please_listen_to_announcements">Please listen to announcements</string>
     <string name="close">Close</string>
-    <string name="thank_you_you_successfully_participated">Thank you, you have successfully taken part in the regatta.\n\nYour SAP Sailing Team</string>
+    <string name="thank_you_you_successfully_participated">Thank you! You have successfully taken part in the regatta.\n\nYour SAP Sailing Team</string>
     <string name="tracking_colon">Tracking:</string>
     <string name="regatta_in_progress">The regatta is in progress.</string>
     <string name="heading">Heading</string>
     <string name="course_over_ground">Course over Ground</string>
     <string name="speed_over_ground">Speed over Ground</string>
     <string name="none">None</string>
-    <string name="show_leaderboard">Leader board</string>
+    <string name="show_leaderboard">Leaderboard</string>
     <string name="show_event">Event</string>
     <string name="error_while_receiving_server_data">Error while receiving server data</string>
     <string name="info_already_checked_in_this_qr_code">Already checked in to this regatta</string>
     <string name="warning">Warning</string>
-    <string name="enable_gps">GPS is turned off. Tracking requires GPS positions. Do you want to turn on GPS in the location settings?</string>
-    <string name="gps_turned_off">GPS is turned off. Please turn on location access (GPS) in your Android Settings!</string>
+    <string name="enable_gps">GPS is turned off, but tracking requires GPS positions. Do you want to turn on GPS in the location settings?</string>
+    <string name="gps_turned_off">GPS is turned off. Please turn on location services (GPS) in your Android settings to start tracking.</string>
     <string name="knots">%sKn</string>
     <string name="preferences">Preferences</string>
-
     <string name="initial_timer_text_zerozero" translatable="false">00:00:00</string>
     <string name="initial_hyphen" translatable="false">-</string>
     <string name="initial_hyphen_degrees" translatable="false">-°</string>
+    <string name="course_over_ground_display" translatable="false">%d°</string>
     <string name="content_description_flag_icon" translatable="false">flag icon</string>
     <string name="tracking_notification_text">Currently Tracking %s</string>
     <string name="waiting_for_gps">Waiting for GPS</string>

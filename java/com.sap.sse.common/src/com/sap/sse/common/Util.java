@@ -2,6 +2,7 @@ package com.sap.sse.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -253,13 +254,34 @@ public class Util {
             List<T> l = (List<T>) iterable;
             return l.get(i);
         } else {
-            Iterator<T> iter = iterable.iterator();
+            final Iterator<T> iter = iterable.iterator();
             T result = iter.next();
             for (int j=0; j<i; j++) {
                 result = iter.next();
             }
             return result;
         }
+    }
+    
+    public static <T> T first(Iterable<T> iterable) {
+        final Iterator<T> iter = iterable.iterator();
+        final T result;
+        if (iter.hasNext()) {
+            result = iter.next();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public static <T> T last(Iterable<T> iterable) {
+        final T result;
+        if (isEmpty(iterable)) {
+            result = null;
+        } else {
+            result = get(iterable, size(iterable)-1);
+        }
+        return result;
     }
 
     /**
@@ -337,13 +359,32 @@ public class Util {
     }
 
     public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        if (! map.containsKey(key)) {
-            map.put(key, new HashSet<V>());
+        Set<V> set = map.get(key);
+        if (set == null) {
+            set = new HashSet<V>();
+            map.put(key, set);
         }
-        map.get(key).add(value);
+        set.add(value);
+    }
+    
+    public static <K, V> void removeFromAllValueSets(Map<K, Set<V>> map, V value) {
+        for (Set<V> set : map.values()) {
+            set.remove(value);
+        }
+    }
+    
+    public static <K, V> void removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
+        final Set<V> valuesPerKey = map.get(key);
+        if(valuesPerKey != null) {
+            valuesPerKey.remove(value);
+        }
     }
 
-    public static String join(String separator, String...strings) {
+    public static String join(String separator, String... strings) {
+        return joinStrings(separator, Arrays.asList(strings));
+    }
+
+    public static String joinStrings(String separator, Iterable<String> strings) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for (String string : strings) {
@@ -454,6 +495,22 @@ public class Util {
                     }
                 }
             }
+        }
+        return result;
+    }
+
+    public static <T> List<T> asList(Iterable<T> visibleCourseAreas) {
+        ArrayList<T> list = new ArrayList<T>();
+        addAll(visibleCourseAreas, list);
+        return list;
+    }
+
+    public static <T> List<T> cloneListOrNull(List<T> list) {
+        final List<T> result;
+        if (list == null) {
+            result = null;
+        } else {
+            result = new ArrayList<T>(list);
         }
         return result;
     }

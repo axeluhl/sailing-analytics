@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
+import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
@@ -47,9 +48,9 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         Competitor c = createCompetitors(1).get(0);
         competitor = racingEventService.getBaseDomainFactory().getOrCreateCompetitor(c.getId(), c.getName(),
                 c.getColor(), c.getEmail(), c.getFlagImage(), (DynamicTeam) c.getTeam(), (DynamicBoat) c.getBoat(),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), MillisecondsTimePoint.now(),
-                MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, Collections
+                MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections
                         .singleton(new FleetImpl("fleet")), Arrays.asList("column"), racingEventService)), false,
                 new HighPoint(), 0, null, OneDesignRankingMetric::new);
         racingEventService.addRegattaWithoutReplication(regatta);
@@ -74,11 +75,12 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         assertThat("checkin returns OK", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
 
         Set<Competitor> registeredCompetitors = new CompetitorsInLogAnalyzer<>(log).analyze();
-        Map<Competitor, List<DeviceMapping<Competitor>>> mappings = new RegattaLogDeviceCompetitorMappingFinder(log).analyze();
+        Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = new RegattaLogDeviceCompetitorMappingFinder(
+                log).analyze();
 
         assertThat("competitor was registered", registeredCompetitors.size(), equalTo(1));
         assertThat("device mappings for competitor exist", mappings.size(), equalTo(1));
-        List<DeviceMapping<Competitor>> mappingsForC = mappings.get(competitor);
+        List<DeviceMappingWithRegattaLogEvent<Competitor>> mappingsForC = mappings.get(competitor);
         assertThat("exactly one device mapping for competitor exists", mappingsForC.size(), equalTo(1));
         DeviceMapping<Competitor> mappingForC = mappingsForC.get(0);
         assertThat("that mapping is for the correct device",

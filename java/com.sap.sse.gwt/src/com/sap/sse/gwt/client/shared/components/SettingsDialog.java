@@ -17,6 +17,14 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
         this(component, stringMessages, /* animationEnabled */ true);
     }
 
+    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages, boolean animationEnabled) {
+        this(component, component.getSettingsDialogComponent(), stringMessages, animationEnabled, null);
+    }
+
+    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages, DialogCallback<SettingsType> callback) {
+        this(component, component.getSettingsDialogComponent(), stringMessages, /* animationEnabled */ true, callback);
+    }
+
     /**
      * Creates a settings button for <code>component</code> that, when clicked, opens a settings dialog for that
      * component and when confirmed, updates that component's settings. The button has no CSS style attached to
@@ -43,24 +51,26 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
      */
     private SettingsDialog(final Component<SettingsType> component,
             SettingsDialogComponent<SettingsType> dialogComponent, StringMessages stringMessages,
-            boolean animationEnabled) {
+            boolean animationEnabled, final DialogCallback<SettingsType> callback) {
         super(stringMessages.settingsForComponent(component.getLocalizedShortName()), null, stringMessages.ok(),
                 stringMessages.cancel(), dialogComponent.getValidator(), animationEnabled,
-                new DialogCallback<SettingsType>() {
-                    @Override
-                    public void cancel() {
-                    }
-
-                    @Override
-                    public void ok(SettingsType newSettings) {
-                        component.updateSettings(newSettings);
-                    }
-                });
+                    new DialogCallback<SettingsType>() {
+                        @Override
+                        public void cancel() {
+                            if (callback != null) {
+                                callback.cancel();
+                            }
+                        }
+    
+                        @Override
+                        public void ok(SettingsType newSettings) {
+                            component.updateSettings(newSettings);
+                            if (callback != null) {
+                                callback.ok(newSettings);
+                            }
+                        }
+                    });
         this.settingsDialogComponent = dialogComponent;
-    }
-
-    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages, boolean animationEnabled) {
-        this(component, component.getSettingsDialogComponent(), stringMessages, animationEnabled);
     }
 
     @Override

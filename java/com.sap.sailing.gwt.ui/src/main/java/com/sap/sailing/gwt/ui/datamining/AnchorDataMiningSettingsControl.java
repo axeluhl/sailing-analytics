@@ -1,7 +1,11 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,7 +18,6 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -88,18 +91,47 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
 
     @Override
     public void updateSettings(CompositeSettings newSettings) {
-        for (CompositeSettings.ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (Entry<Serializable, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
             updateSettings(componentAndSettings);
         }
     }
 
-    private <SettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
-        componentAndSettings.getA().updateSettings(componentAndSettings.getB());
+    @Override 
+    public CompositeSettings getSettings() {
+        Map<Serializable, Settings> settings = new HashMap<>();
+        for (Component<?> component : components) {
+            settings.put(component.getId(), component.hasSettings() ? component.getSettings() : null);
+        }
+        return new CompositeSettings(settings);
+    }
+    
+    private <S extends Settings> void updateSettings(Entry<Serializable, S> componentIdAndSettings) {
+        // we assume that the component to which the ID resolves matches with the settings type provided
+        @SuppressWarnings("unchecked")
+        Component<S> component = (Component<S>) findComponentById(componentIdAndSettings.getKey());
+        if (component != null) {
+            final S settings = componentIdAndSettings.getValue();
+            component.updateSettings(settings);
+        }
+    }
+    
+    private Component<?> findComponentById(Serializable componentId) {
+        for (Component<?> component : components) {
+            if (component.getId().equals(componentId)) {
+                return component;
+            }
+        }
+        return null;
     }
 
     @Override
     public String getDependentCssClassName() {
         return "AnchorDataMiningSettingsControl";
+    }
+
+    @Override
+    public Serializable getId() {
+        return getLocalizedShortName();
     }
 
 }

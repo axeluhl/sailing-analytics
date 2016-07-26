@@ -28,9 +28,9 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[SSL / HTTPS Support|wiki/ssl-support]]
   * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
+  * [[EC2 mail relaying|wiki/mail-relaying]]
   * [[TracTrac|wiki/tractrac-lifecycle]]
   * [[Analytics on a stick|wiki/analytics-on-a-stick]]
-  * [[Operating Igtimi WindBots/windbot-operations]]
   * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
   * [[JMX Support|wiki/jmx]]
   * [[Log File Analysis|wiki/log-file-analysis]]
@@ -62,9 +62,11 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Uploading Media Content|wiki/uploading-media-content]]
 * Information for Event Managers
   * [[Set up local network with replication server|wiki/event-network-with-replica]]
-  * [[Operating Igtimi WindBots/windbot-operations]]
+  * [[Operating Igtimi WindBots|wiki/windbot-operations]]
   * [[Linking Race Videos|wiki/linking-race-videos]]
   * [[Import official results|wiki/results-import]]
+* Information for League operators
+  * [[FAQ|wiki/league-operators-faq]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
@@ -72,6 +74,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
   * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
   * [[Kieler Woche event page|wiki/kieler-woche-2015]]
+  * [[Charleston Race Week 2016|wiki/Charleston-Race-Week-2016]]
+  * [[Sailing Leagues 2016|wiki/Sailing-Leagues-2016]]
 * Lean DI Support
   * [[Setting up internal Jenkins on SAP Monsoon|wiki/setting-up-jenkins-on-sap-monsoon]]
 

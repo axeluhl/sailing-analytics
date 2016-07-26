@@ -59,11 +59,12 @@ public class PlaceNavigation<T extends Place> {
             if (!GWT.isProdMode()) {
                 url += "?gwt.codesvr=127.0.0.1:9997";
             }
-            url += getPlaceToken();
-        } else {
-            url = getPlaceToken();
+            String localeValue = Window.Location.getParameter("locale");
+            if (localeValue != null) {
+                url += "?locale=" + localeValue;
+            }
         }
-        return url;
+        return url + getPlaceToken();
     }
 
     public boolean isRemotePlace() {

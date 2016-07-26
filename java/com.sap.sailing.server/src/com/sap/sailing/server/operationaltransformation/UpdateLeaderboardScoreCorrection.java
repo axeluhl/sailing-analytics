@@ -41,8 +41,8 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
     @Override
     public Util.Triple<Double, Double, Boolean> internalApplyTo(RacingEventService toState) throws NoWindException {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
-        Double newNetPoints;
         Double newTotalPoints;
+        Double newNetPoints;
         boolean isScoreCorrected;
         if (leaderboard != null) {
             Competitor competitor = leaderboard.getCompetitorByIdAsString(competitorIdAsString);
@@ -50,12 +50,12 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
                 RaceColumn raceColumn = leaderboard.getRaceColumnByName(getColumnName());
                 if (correctedScore == null) {
                     leaderboard.getScoreCorrection().uncorrectScore(competitor, raceColumn);
-                    newNetPoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
+                    newTotalPoints = leaderboard.getTotalPoints(competitor, raceColumn, timePoint);
                 } else {
                     leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, correctedScore);
-                    newNetPoints = correctedScore;
+                    newTotalPoints = correctedScore;
                 }
-                newTotalPoints = leaderboard.getEntry(competitor, raceColumn, timePoint).getTotalPoints();
+                newNetPoints = leaderboard.getEntry(competitor, raceColumn, timePoint).getNetPoints();
                 isScoreCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint);
             } else {
                 throw new IllegalArgumentException("Didn't find competitor with ID "+competitorIdAsString+" in leaderboard "+getLeaderboardName());
@@ -64,7 +64,7 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
             throw new IllegalArgumentException("Didn't find leaderboard "+getLeaderboardName());
         }
         updateStoredLeaderboard(toState, leaderboard);
-        return new Util.Triple<Double, Double, Boolean>(newNetPoints, newTotalPoints, isScoreCorrected);
+        return new Util.Triple<Double, Double, Boolean>(newTotalPoints, newNetPoints, isScoreCorrected);
     }
 
 }

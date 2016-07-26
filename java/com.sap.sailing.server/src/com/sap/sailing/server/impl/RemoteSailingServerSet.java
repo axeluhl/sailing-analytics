@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -32,6 +33,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
  * A set of {@link RemoteSailingServerReference}s including a cache of their {@link EventBase events} that is
@@ -49,9 +51,9 @@ public class RemoteSailingServerSet {
      * Holds the remote server references managed by this set. Keys are the
      * {@link RemoteSailingServerReference#getName() names} of the server references.
      */
-    private final ConcurrentHashMap<String, RemoteSailingServerReference> remoteSailingServers;
+    private final ConcurrentMap<String, RemoteSailingServerReference> remoteSailingServers;
     
-    private final ConcurrentHashMap<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
+    private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
 
     /**
      * @param scheduler
@@ -101,8 +103,7 @@ public class RemoteSailingServerSet {
             try {
                 final URL eventsURL = getEventsURL(ref.getURL());
                 logger.fine("Updating events for remote server "+ref+" from URL "+eventsURL);
-                URLConnection urlConnection = eventsURL.openConnection();
-                urlConnection.connect();
+                URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 JSONParser parser = new JSONParser();
                 Object eventsAsObject = parser.parse(bufferedReader);

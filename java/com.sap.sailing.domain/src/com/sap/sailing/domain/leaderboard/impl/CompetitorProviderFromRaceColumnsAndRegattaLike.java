@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +18,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -59,7 +61,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
 
     private Iterable<Competitor> allCompetitorsCache;
 
-    private final ConcurrentHashMap<Pair<RaceColumn, Fleet>, Iterable<Competitor>> allCompetitorsCacheByRace;
+    private final ConcurrentMap<Pair<RaceColumn, Fleet>, Iterable<Competitor>> allCompetitorsCacheByRace;
 
     public CompetitorProviderFromRaceColumnsAndRegattaLike(HasRaceColumnsAndRegattaLike provider) {
         super();
@@ -157,15 +159,23 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
     public Iterable<Competitor> getAllCompetitors() {
         if (allCompetitorsCache == null) {
             final Set<Competitor> result = new HashSet<>();
+            boolean hasRaceColumns = false;
             for (RaceColumn rc : provider.getRaceColumns()) {
+                hasRaceColumns = true;
                 Util.addAll(rc.getAllCompetitors(), result);
                 for (final Fleet fleet : rc.getFleets()) {
                     rc.getRaceLog(fleet).addListener(raceLogCompetitorsCacheInvalidationListener);
                 }
             }
             final RegattaLog regattaLog = provider.getRegattaLike().getRegattaLog();
-            // Don't add regatta log competitors; if no race exists, the leaderboard is not considered to have any
-            // competitors. The competitors are collected from the races. Those, however, will be the regatta log
+            if (!hasRaceColumns) {
+                // If no race exists, the regatta log-provided competitor registrations will not have
+                // been considered yet; add them:
+                final Set<Competitor> regattaLogProvidedCompetitors = new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
+                result.addAll(regattaLogProvidedCompetitors);
+            }
+            // else, don't add regatta log competitors because they have been added in each column already.
+            // The competitors are collected from the races. Those, however, will be the regatta log
             // competitors if the race does not define its own.
             // Note: adding listeners is idempotent; at most one occurrence of this listener exists in the race/regatta log's
             // listeners set
@@ -187,7 +197,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
         Iterable<Competitor> result = allCompetitorsCacheByRace.get(key);
         if (result == null) {
             final Set<Competitor> resultSet = new HashSet<>(); 
-            //raceColumn already considers trackedRace, RaceLog and RegattaLog
+            // raceColumn already considers trackedRace, RaceLog and RegattaLog
             Util.addAll(raceColumn.getAllCompetitors(fleet), resultSet);
             // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race/regatta log's
             // listeners set

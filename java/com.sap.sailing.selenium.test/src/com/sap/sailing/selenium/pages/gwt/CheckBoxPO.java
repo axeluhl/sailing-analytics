@@ -5,14 +5,15 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.FindBy;
+import com.sap.sailing.selenium.pages.PageObject;
 
-import com.sap.sailing.selenium.pages.PageArea;
-import com.sap.sailing.selenium.pages.common.CSSHelper;
-
-public class CheckBoxPO extends PageArea {
-    protected static final String TAG_NAME = "span"; //$NON-NLS-1$
+/**
+ * {@link PageObject} implementation for GWT check boxes.
+ */
+public class CheckBoxPO extends AbstractInputPO {
     
-    private static final String CHECKBOX_CSS_CLASS = "gwt-CheckBox";
+    private static final String TAG_NAME = "span";
+    private static final String CSS_CLASS = "gwt-CheckBox";
     
     @FindBy(how = ByTagName.class, using = "input")
     private WebElement input;
@@ -20,37 +21,67 @@ public class CheckBoxPO extends PageArea {
     @FindBy(how = ByTagName.class, using = "label")
     private WebElement label;
     
+    /**
+     * Factory method to create a {@link CheckBoxPO}.
+     * 
+     * @param driver the web driver to use
+     * @param element the element representing the check box on the page
+     * @return a new {@link CheckBoxPO} instance
+     */
+    public static CheckBoxPO create(WebDriver driver, WebElement element) {
+        return new CheckBoxPO(driver, element);
+    }
+    
+    /**
+     * @see AbstractInputPO#AbstractInputPO(WebDriver, WebElement)
+     */
     public CheckBoxPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
-
-    @Override
-    protected void verify() {
-        WebElement element = (WebElement) this.context;
-        String tagName = element.getTagName();
-        
-        if(!TAG_NAME.equalsIgnoreCase(tagName) || !CSSHelper.hasCSSClass(element, getCssClassName()))
-            throw new IllegalArgumentException("WebElement does not represent a CheckBox");
-    }
     
-    public boolean isEnabled() {
-        return this.input.isEnabled();
-    }
-    
+    /**
+     * Get the text of the check boxes label.
+     * 
+     * @return the label text
+     */
     public String getLabel() {
         return this.label.getText();
     }
     
+    /**
+     * Determines whether or not the underlying {@link WebElement} is selected.
+     * 
+     * @return <code>true</code> if the {@link WebElement} is enabled, <code>false</code> otherwise
+     * 
+     * @see WebElement#isSelected()
+     */
     public boolean isSelected() {
         return this.input.isSelected();
     }
     
+    /**
+     * Changes the {@link WebElement}s selection by clicking it, if desired and current state don't match. 
+     * 
+     * @param selected the desired selection state
+     */
     public void setSelected(boolean selected) {
-        if(selected != isSelected())
+        if(selected != isSelected()) {
             this.input.click();
+        }
     }
     
+    @Override
+    public boolean isEnabled() {
+        return this.input.isEnabled();
+    }
+    
+    @Override
+    protected String getTagName() {
+        return TAG_NAME;
+    }
+
+    @Override
     protected String getCssClassName() {
-        return CHECKBOX_CSS_CLASS;
+        return CSS_CLASS;
     }
 }

@@ -1,9 +1,21 @@
 package com.sap.sse.gwt.client.shared.components;
 
+import java.io.Serializable;
+
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.perspective.Perspective;
 
 public interface Component<SettingsType extends Settings> {
+    /**
+     * Each component instance has an ID that has to be unique in the context in which the component is used
+     * and has its siblings. In particular, multiple components of the same type but with distinct IDs may
+     * exist, e.g., multiple wind charts showing wind readings coming from different sensors. The uniqueness
+     * constraint applies only to the single level (in a composite pattern of components, such as
+     * {@link Perspective}) in which this component instance is used.
+     */
+    Serializable getId();
+    
     /**
      * @return the name to display to a user for quick navigation to this component
      */
@@ -33,6 +45,11 @@ public interface Component<SettingsType extends Settings> {
      */
     SettingsDialogComponent<SettingsType> getSettingsDialogComponent();
     
+    /** 
+     * @return the current settings of the component or {@code null} if the component has no settings.
+     */
+    SettingsType getSettings();
+
     /**
      * Updates the settings of this component. Expected to be called when a settings dialog using this component's
      * {@link #getSettingsDialogComponent()} has been confirmed.

@@ -8,8 +8,9 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sse.common.CountryCode;
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
-public class SimpleCompetitorDTO extends NamedDTO implements Serializable, Comparable<SimpleCompetitorDTO> {
+public class SimpleCompetitorDTO extends NamedDTO implements DTO, Serializable, Comparable<SimpleCompetitorDTO> {
 
     private static final long serialVersionUID = -5743976446085202047L;
     

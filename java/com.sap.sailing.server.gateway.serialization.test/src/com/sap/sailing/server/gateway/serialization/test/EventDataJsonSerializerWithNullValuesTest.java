@@ -43,6 +43,7 @@ public class EventDataJsonSerializerWithNullValuesTest {
     protected final TimePoint expectedEndDate = new MillisecondsTimePoint(new Date());
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
     protected final URL expectedOfficialWebsiteURL = null;
+    protected final URL expectedBaseURL = null;
     protected final LeaderboardGroup expectedLeaderbaordGroup = mock(LeaderboardGroup.class);
     
     protected JsonSerializer<Venue> venueSerializer;
@@ -59,6 +60,7 @@ public class EventDataJsonSerializerWithNullValuesTest {
         when(event.getName()).thenReturn(expectedName);
         when(event.getDescription()).thenReturn(expectedDescription);
         when(event.getOfficialWebsiteURL()).thenReturn(expectedOfficialWebsiteURL);
+        when(event.getBaseURL()).thenReturn(expectedBaseURL);
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);

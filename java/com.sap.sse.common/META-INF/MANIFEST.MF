@@ -13,7 +13,11 @@ Export-Package: com.sap.sse.common,
  com.sap.sse.common.scalablevalue,
  com.sap.sse.common.search,
  com.sap.sse.common.settings,
+ com.sap.sse.common.settings.generic,
+ com.sap.sse.common.settings.generic.base,
+ com.sap.sse.common.settings.generic.converter,
+ com.sap.sse.common.settings.serializer,
+ com.sap.sse.common.settings.value,
  com.sap.sse.common.util
-Require-Bundle: org.json.simple;bundle-version="1.1.0",
- com.sap.sse.datamining.annotations
+Require-Bundle: com.sap.sse.datamining.annotations
 Bundle-ActivationPolicy: lazy

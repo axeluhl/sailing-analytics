@@ -22,6 +22,9 @@ public interface RegattaHeaderResources extends ClientBundle {
         String regattaheader_toggle_icon();
         String standings_listhidden();
         String regattaheader_arrow();
+        String regattaheader_indicators();
+        String regattaheader_indicators_next_to_arrow();
+        String regattaheader_indicator_disabled();
         String regattaheader_update();
         String regattaheader_update_title();
         String regattaheader_update_title_icon();

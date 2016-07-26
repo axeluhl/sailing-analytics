@@ -7,7 +7,7 @@
     android:clickable="true">
 
     <RelativeLayout
-        android:id="@+id/tracking_header"
+        android:id="@+id/protest_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
         android:background="?attr/sap_gray"
@@ -41,7 +41,7 @@
         <View
             android:id="@+id/line_top"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/unscheduled_header_line"
+            android:layout_height="@dimen/header_line"
             android:layout_alignParentBottom="true"
             android:background="?attr/black"/>
     </RelativeLayout>
@@ -78,7 +78,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_bar"
-        android:layout_below="@+id/tracking_header"
+        android:layout_below="@id/protest_header"
         android:background="?attr/sap_gray_black_30">
 
         <RelativeLayout
