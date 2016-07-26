@@ -19,6 +19,14 @@ import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSel
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 
+/**
+ * Reusable implementation of {@link UserPreferencesView.Presenter} which handles the selections and notification
+ * toggles of a {@link UserPreferencesView}. It only require an appropriate client factory which implements
+ * {@link ClientFactoryWithDispatch} and {@link ErrorAndBusyClientFactory}.
+ * 
+ * @param <C>
+ *            the provided client factory type
+ */
 public class UserPreferencesPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory>
         implements UserPreferencesView.Presenter {
 
@@ -47,12 +55,12 @@ public class UserPreferencesPresenter<C extends ClientFactoryWithDispatch & Erro
             }
         });
     }
-    
+
     @Override
     public SuggestedMultiSelectionCompetitorDataProvider getFavoriteCompetitorsDataProvider() {
         return competitorDataProvider;
     }
-    
+
     @Override
     public SuggestedMultiSelectionBoatClassDataProvider getFavoriteBoatClassesDataProvider() {
         return boatClassDataProvider;

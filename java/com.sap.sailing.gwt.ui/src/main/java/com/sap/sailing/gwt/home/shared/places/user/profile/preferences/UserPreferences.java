@@ -19,6 +19,9 @@ import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSel
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
+/**
+ * Implementation of {@link UserPreferencesView} where users can change their preferred selections and notifications.
+ */
 public class UserPreferences extends Composite implements UserPreferencesView {
 
     private static UserPreferencesUiBinder uiBinder = GWT.create(UserPreferencesUiBinder.class);
