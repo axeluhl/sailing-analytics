@@ -6,9 +6,6 @@
     <!-- override default values of android.shared -->
     <string name="app_folder">tracking</string>
 
-    <string name="preference_server_url_key">http://95.85.58.11:8000</string>
-    <string name="preference_server_url_default">http://95.85.58.11:8000</string>
-
     <string name="preference_energy_saving_enabled_key">preferenceEnergySavingEnabled</string>
     <string name="preference_heading_with_declination_subtracted_key">preferenceHeadingWithDeclinationSubtracted</string>
 
