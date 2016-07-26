@@ -86,12 +86,10 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.BaseRegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
@@ -5241,31 +5239,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         final List<RegattaLogEvent> regattaLogDefineMarkEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogDefineMarkEvent.class).analyze();
         
-        RegattaLogEvent eventToRevoke = null;
+        RegattaLogDefineMarkEvent eventToRevoke = null;
         for (RegattaLogEvent event : regattaLogDefineMarkEvents) {
             RegattaLogDefineMarkEvent defineMarkEvent = (RegattaLogDefineMarkEvent) event;
             if (defineMarkEvent.getMark().getId().toString().equals(markDTO.getIdAsString())){
-                eventToRevoke = event;
+                eventToRevoke = defineMarkEvent;
+                break;
             }
         }
         
-        if (eventToRevoke != null){
-            RegattaLogEvent event = new RegattaLogRevokeEventImpl(getService().getServerAuthor(), eventToRevoke, "Revoked by AdminConsole (RaceLogTracking)");
-            regattaLog.add(event);
-        } else {
-            logger.warning("Could not revoke event for mark "+markDTO.getIdAsString()+". Mark not found in RegattaLog.");
-        }
-        
-        final List<RegattaLogEvent> regattaLogDeviceMarkMappingEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogDeviceMappingEvent.class).analyze();
-        
-        for (RegattaLogEvent event : regattaLogDeviceMarkMappingEvents) {
-            @SuppressWarnings("unchecked") // The list can only contain device mapping events
-            WithID withID = ((RegattaLogDeviceMappingEvent<WithID>) event).getMappedTo();
-            if (withID instanceof Mark && ((Mark) withID).getId().toString().equals(markDTO.getIdAsString())) {
-                RegattaLogEvent revokeEvent = new RegattaLogRevokeEventImpl(getService().getServerAuthor(), event, "Revoked because AdminConsole (RaceLogTracking) revoked mark");
-                regattaLog.add(revokeEvent);
-            }
-        }
+        regattaLog.revokeDefineMarkEventAndRelatedDeviceMappings(eventToRevoke, getService().getServerAuthor(), logger);
     }
 
     @Override
