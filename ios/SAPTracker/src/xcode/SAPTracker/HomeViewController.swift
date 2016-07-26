@@ -39,6 +39,7 @@ class HomeViewController: UIViewController {
         setupButtons()
         setupLanguage()
         setupNavigationBar()
+        setupTableView()
         setupTableViewDataSource()
     }
     
@@ -57,6 +58,11 @@ class HomeViewController: UIViewController {
     
     private func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+    }
+    
+    private func setupTableView() {
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 140
     }
     
     private func setupTableViewDataSource() {
@@ -246,8 +252,11 @@ extension HomeViewController: UITableViewDataSource {
     }
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
+        guard let regattaCell = cell as? HomeViewRegattaTableViewCell else { return }
         guard let regatta = fetchedResultsController.objectAtIndexPath(indexPath) as? Regatta else { return }
-        cell.textLabel?.text = regatta.leaderboard.name
+        regattaCell.eventLabel.text = regatta.event.name
+        regattaCell.leaderboardLabel.text = regatta.leaderboard.name
+        regattaCell.competitorLabel.text = regatta.competitor.name
     }
     
 }
@@ -256,9 +265,7 @@ extension HomeViewController: UITableViewDataSource {
 
 extension HomeViewController: UITableViewDelegate {
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return 74
-    }
+    
     
 }
 

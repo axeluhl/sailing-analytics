@@ -11,6 +11,7 @@
             <string>OpenSans-Bold</string>
             <string>OpenSans-Bold</string>
             <string>OpenSans-Bold</string>
+            <string>OpenSans-Bold</string>
         </mutableArray>
         <mutableArray key="OpenSans-Light.ttf">
             <string>OpenSans-Light</string>
@@ -18,6 +19,7 @@
             <string>OpenSans-Light</string>
         </mutableArray>
         <mutableArray key="OpenSans-Regular.ttf">
+            <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
@@ -73,7 +75,7 @@
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="home_bg" translatesAutoresizingMaskIntoConstraints="NO" id="npJ-tu-ac3" userLabel="Background Image">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                             </imageView>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="OXU-ft-TXZ">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="81" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="OXU-ft-TXZ">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="330.5"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <view key="tableHeaderView" contentMode="scaleToFill" id="mhw-sY-eah" userLabel="Title View">
@@ -97,29 +99,55 @@
                                     </constraints>
                                 </view>
                                 <view key="tableFooterView" contentMode="scaleToFill" id="ntQ-jE-XcH">
-                                    <rect key="frame" x="0.0" y="148" width="600" height="0.0"/>
+                                    <rect key="frame" x="0.0" y="155" width="600" height="0.0"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 </view>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="Regatta" textLabel="FzL-oN-acm" rowHeight="74" style="IBUITableViewCellStyleDefault" id="01f-yF-69S" userLabel="Regatta Cell">
-                                        <rect key="frame" x="0.0" y="74" width="600" height="74"/>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Regatta" id="01f-yF-69S" userLabel="Regatta Cell" customClass="HomeViewRegattaTableViewCell" customModule="SAPTracker" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="74" width="600" height="81"/>
                                         <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="01f-yF-69S" id="vse-xJ-e2c">
-                                            <rect key="frame" x="0.0" y="0.0" width="567" height="73.5"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" tableViewCell="01f-yF-69S" id="vse-xJ-e2c">
+                                            <rect key="frame" x="0.0" y="0.0" width="600" height="80.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" id="FzL-oN-acm">
-                                                    <rect key="frame" x="15" y="0.0" width="550" height="73.5"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                    <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="18"/>
-                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="Event Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4Xi-He-o21">
+                                                    <rect key="frame" x="20" y="8" width="140.5" height="25"/>
+                                                    <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="18"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Competitor Label" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sNr-Dr-sM5">
+                                                    <rect key="frame" x="168" y="8" width="411.5" height="64.5"/>
+                                                    <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Leaderboard Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yqN-BN-c2a">
+                                                    <rect key="frame" x="20" y="41" width="140.5" height="31"/>
+                                                    <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="bottom" secondItem="yqN-BN-c2a" secondAttribute="bottom" constant="8" id="2Zs-ss-yHp"/>
+                                                <constraint firstItem="yqN-BN-c2a" firstAttribute="leading" secondItem="vse-xJ-e2c" secondAttribute="leading" constant="20" id="6wi-Rv-c4K"/>
+                                                <constraint firstItem="4Xi-He-o21" firstAttribute="top" secondItem="vse-xJ-e2c" secondAttribute="top" constant="8" id="L6x-7R-n97"/>
+                                                <constraint firstAttribute="trailing" secondItem="sNr-Dr-sM5" secondAttribute="trailing" constant="20" id="NFc-FD-zPd"/>
+                                                <constraint firstItem="sNr-Dr-sM5" firstAttribute="top" secondItem="vse-xJ-e2c" secondAttribute="top" constant="8" id="QNc-rL-vcf"/>
+                                                <constraint firstItem="sNr-Dr-sM5" firstAttribute="leading" secondItem="4Xi-He-o21" secondAttribute="trailing" constant="8" id="Xst-QP-CN0"/>
+                                                <constraint firstItem="sNr-Dr-sM5" firstAttribute="leading" secondItem="yqN-BN-c2a" secondAttribute="trailing" constant="8" id="ZqI-Vl-jhi"/>
+                                                <constraint firstItem="4Xi-He-o21" firstAttribute="leading" secondItem="vse-xJ-e2c" secondAttribute="leading" constant="20" id="g5X-ph-ew0"/>
+                                                <constraint firstItem="yqN-BN-c2a" firstAttribute="top" secondItem="4Xi-He-o21" secondAttribute="bottom" constant="8" id="kUK-Km-5Tj"/>
+                                                <constraint firstAttribute="bottom" secondItem="sNr-Dr-sM5" secondAttribute="bottom" constant="8" id="wMf-aW-CZl"/>
+                                            </constraints>
                                         </tableViewCellContentView>
                                         <color key="backgroundColor" red="0.96470588235294119" green="0.98431372549019602" blue="0.98431372549019602" alpha="1" colorSpace="calibratedRGB"/>
                                         <connections>
+                                            <outlet property="competitorLabel" destination="sNr-Dr-sM5" id="XjN-ac-0yL"/>
+                                            <outlet property="eventLabel" destination="4Xi-He-o21" id="W7y-Nr-cR6"/>
+                                            <outlet property="leaderboardLabel" destination="yqN-BN-c2a" id="nGQ-81-E6W"/>
                                             <segue destination="G3a-SV-Maf" kind="show" id="XWZ-NP-fiD"/>
                                         </connections>
                                     </tableViewCell>
@@ -1976,8 +2004,8 @@ Cg
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
-        <segue reference="Irs-ey-Uhs"/>
+        <segue reference="Xxn-jp-xEB"/>
+        <segue reference="QMa-LQ-D8c"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="calibratedRGB"/>
 </document>
