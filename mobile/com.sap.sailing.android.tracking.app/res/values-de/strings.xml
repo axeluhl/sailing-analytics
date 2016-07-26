@@ -2,7 +2,6 @@
 <resources>
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
-    <string name="empty"></string>
     <string name="tracking_time">Tracking Zeit</string>
     <string name="app_name">SAP Sail InSight</string>
     <string name="options_menu_settings">Einstellungen</string>
