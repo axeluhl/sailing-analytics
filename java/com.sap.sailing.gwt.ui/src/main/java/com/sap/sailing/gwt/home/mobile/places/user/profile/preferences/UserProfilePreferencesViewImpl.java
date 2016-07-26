@@ -10,7 +10,7 @@ public class UserProfilePreferencesViewImpl extends AbstractUserProfileView impl
     
     public UserProfilePreferencesViewImpl(UserProfilePreferencesView.Presenter presenter) {
         super(presenter);
-        this.userPreferencesView = new UserPreferences(presenter);
+        this.userPreferencesView = new UserPreferences(presenter.getUserPreferencesPresenter());
         this.userPreferencesView.setEdgeToEdge(true);
         this.setViewContent(userPreferencesView);
     }

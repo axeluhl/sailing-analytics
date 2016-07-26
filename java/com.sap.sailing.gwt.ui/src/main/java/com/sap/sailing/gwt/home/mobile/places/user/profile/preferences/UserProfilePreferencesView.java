@@ -5,7 +5,8 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserPrefe
 
 public interface UserProfilePreferencesView extends UserProfileViewBase {
     
-    public interface Presenter extends UserProfileViewBase.Presenter, UserPreferencesView.Presenter {
+    public interface Presenter extends UserProfileViewBase.Presenter {
+        UserPreferencesView.Presenter getUserPreferencesPresenter();
     }
 }
 

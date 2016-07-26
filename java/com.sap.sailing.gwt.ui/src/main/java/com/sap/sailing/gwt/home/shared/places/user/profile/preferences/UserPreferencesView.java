@@ -9,6 +9,7 @@ public interface UserPreferencesView extends IsWidget {
     public void setEdgeToEdge(boolean edgeToEdge);
     
     public interface Presenter {
+        void loadPreferences();
         SuggestedMultiSelectionBoatClassDataProvider getFavoriteBoatClassesDataProvider();
         SuggestedMultiSelectionCompetitorDataProvider getFavoriteCompetitorsDataProvider();
     }
