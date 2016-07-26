@@ -11,6 +11,7 @@ public interface UserProfilePreferencesView extends IsWidget {
     
     NeedsAuthenticationContext getDecorator();
     
-    public interface Presenter extends UserPreferencesView.Presenter, NotLoggedInPresenter, NeedsAuthenticationContext {
+    public interface Presenter extends NotLoggedInPresenter, NeedsAuthenticationContext {
+        UserPreferencesView.Presenter getUserPreferencesPresenter();
     }
 }

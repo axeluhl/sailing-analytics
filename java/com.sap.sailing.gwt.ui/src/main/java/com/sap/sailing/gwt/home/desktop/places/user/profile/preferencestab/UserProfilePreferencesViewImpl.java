@@ -22,7 +22,7 @@ public class UserProfilePreferencesViewImpl extends Composite implements UserPro
     @Override
     public void setPresenter(Presenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
-        userPreferencesUi = new UserPreferences(presenter);
+        userPreferencesUi = new UserPreferences(presenter.getUserPreferencesPresenter());
         initWidget(uiBinder.createAndBindUi(this));
     }
     
