@@ -68,7 +68,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
     private final static int UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE = 30000;
-    private final static float BATTERY_POWER_SAVE_TRESHOLD = 0.2f;
+    private final static float BATTERY_POWER_SAVE_THRESHOLD = 0.2f;
     private boolean initialLocation;
 
     private String checkinDigest;
@@ -316,7 +316,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
         int updateInterval = UPDATE_INTERVAL_IN_MILLIS_DEFAULT;
 
-        if (prefs.getEnergySavingEnabledByUser() || (batteryPct < BATTERY_POWER_SAVE_TRESHOLD && !batteryIsCharging)) {
+        if (prefs.getEnergySavingEnabledByUser() || (batteryPct < BATTERY_POWER_SAVE_THRESHOLD && !batteryIsCharging)) {
             if (BuildConfig.DEBUG) {
                 ExLog.i(this, "POWER-LEVELS", "in power saving mode");
             }
