@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.NotificationCallback;
@@ -30,6 +31,7 @@ public class UserPreferences extends Composite implements UserPreferencesView {
     }
     
     @UiField Style style;
+    @UiField SharedResources res;
     @UiField(provided = true) SuggestedMultiSelection<SimpleCompetitorWithIdDTO> favoriteCompetitorsSelctionUi;
     @UiField(provided = true) SuggestedMultiSelection<BoatClassDTO> favoriteBoatClassesSelctionUi;
     @UiField DivElement notificationsTextUi;
@@ -46,6 +48,8 @@ public class UserPreferences extends Composite implements UserPreferencesView {
     public void setEdgeToEdge(boolean edgeToEdge) {
         favoriteBoatClassesSelctionUi.setStyleName(style.edgeToEdge(), edgeToEdge);
         favoriteCompetitorsSelctionUi.setStyleName(style.edgeToEdge(), edgeToEdge);
+        favoriteBoatClassesSelctionUi.getElement().getParentElement().removeClassName(res.mediaCss().column());
+        favoriteCompetitorsSelctionUi.getElement().getParentElement().removeClassName(res.mediaCss().column());
     }
     
     private class CompetitorDisplayImpl implements SuggestedMultiSelectionCompetitorDataProvider.Display {
