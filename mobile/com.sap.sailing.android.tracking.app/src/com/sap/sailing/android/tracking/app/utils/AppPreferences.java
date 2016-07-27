@@ -63,7 +63,7 @@ public class AppPreferences extends BaseAppPreferences {
                 URLEncoder.encode(competitorId, "UTF-8").replaceAll("\\+", "%20"));
     }
 
-    public String getServerCompetiorTeamPath(String competitorId){
+    public String getServerCompetitorTeamPath(String competitorId){
         return context.getString(R.string.preference_server_team_info_path).replace("{competitor_id}",
             competitorId);
     }

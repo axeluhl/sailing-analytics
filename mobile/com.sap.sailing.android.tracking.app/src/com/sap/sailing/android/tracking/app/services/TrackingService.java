@@ -195,7 +195,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         // no-op
     }
 
-    public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed, double latitude,
+    private void reportGPSQualityBearingAndSpeed(float gpsAccuracy, float bearing, float speed, double latitude,
             double longitude, double altitude) {
         Bearing bearingImpl = null;
         Speed speedImpl = null;
@@ -216,15 +216,15 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
         GPSQuality quality = GPSQuality.noSignal;
         if (gpsQualityListener != null) {
-            if (gpsAccurracy > 48) {
+            if (gpsAccuracy > 48) {
                 quality = GPSQuality.poor;
-            } else if (gpsAccurracy > 10) {
+            } else if (gpsAccuracy > 10) {
                 quality = GPSQuality.good;
-            } else if (gpsAccurracy <= 10) {
+            } else if (gpsAccuracy <= 10) {
                 quality = GPSQuality.great;
             }
 
-            gpsQualityListener.gpsQualityAndAccurracyUpdated(quality, gpsAccurracy, bearingImpl, speedImpl);
+            gpsQualityListener.gpsQualityAndAccuracyUpdated(quality, gpsAccuracy, bearingImpl, speedImpl);
         }
     }
 
@@ -409,7 +409,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     }
 
     public interface GPSQualityListener {
-        void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing gpsBearing,
+        void gpsQualityAndAccuracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing gpsBearing,
             Speed gpsSpeed);
     }
 

@@ -273,7 +273,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         sb.append(":");
         //get given port by check-in url or standard http(s) protocol port by defaultPort
         sb.append((url.getPort() == -1) ? url.getDefaultPort() : url.getPort());
-        sb.append(prefs.getServerCompetiorTeamPath(competitorId));
+        sb.append(prefs.getServerCompetitorTeamPath(competitorId));
 
         return new URL(sb.toString());
     }
