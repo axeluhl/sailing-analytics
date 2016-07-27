@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,15 +21,13 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.ui.activities.PasswordActivity;
 import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     private static int requestCodeQRCode = 45392;
-
-    private EditTextPreference identifierPreference;
-    private EditTextPreference serverUrlPreference;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,7 +40,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         setupDeveloperOptions();
     }
 
-    protected void setupGeneral() {
+    private void setupGeneral() {
         setupLanguageButton();
         setupCourseAreasList();
 
@@ -83,7 +82,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         bindPreferenceSummaryToInteger(intervalPreference);
     }
 
-    protected void setupDeveloperOptions() {
+    private void setupDeveloperOptions() {
         PreferenceScreen screen = getPreferenceScreen();
         PreferenceCategory category = findPreference(R.string.preference_developer_key);
         if (!BuildConfig.DEBUG) {
@@ -93,16 +92,17 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         }
     }
 
-    protected void setupConnection() {
+    private void setupConnection() {
         setupIdentifierBox();
         setupServerUrlBox();
         setupSyncQRCodeButton();
         setupForceUpdateButton();
+        setupLogoutButton();
     }
 
     private void setupIdentifierBox() {
         final AppPreferences appPreferences = AppPreferences.on(getActivity());
-        identifierPreference = findPreference(R.string.preference_identifier_key);
+        EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
         identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
         addOnPreferenceChangeListener(identifierPreference, new OnPreferenceChangeListener() {
             @Override
@@ -119,7 +119,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
     }
 
     private void setupServerUrlBox() {
-        serverUrlPreference = findPreference(R.string.preference_server_url_key);
+        EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
         addOnPreferenceChangeListener(serverUrlPreference, new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -158,6 +158,29 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         });
     }
 
+    private void setupLogoutButton() {
+        Preference preference = findPreference(R.string.preference_logout_key);
+        preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
+                    .setTitle(R.string.logout_dialog_title)
+                    .setMessage(getString(R.string.logout_dialog_message))
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            AppPreferences.on(getActivity()).setAccessToken(null);
+                            startActivity(new Intent(getActivity(), PasswordActivity.class));
+                            getActivity().finish();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+                return true;
+            }
+        });
+    }
+
     private void setupCourseAreasList() {
         EditSetPreference preference = findPreference(R.string.preference_course_areas_key);
         // TODO: example values from DataStore
@@ -177,7 +200,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         });
     }
 
-    protected boolean requestQRCodeScan() {
+    private boolean requestQRCodeScan() {
         try {
             Intent intent = new Intent("com.google.zxing.client.android.SCAN");
             intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
