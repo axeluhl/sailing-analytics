@@ -153,7 +153,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         return Service.START_STICKY;
     }
 
-    public void startTracking() {
+    private void startTracking() {
         googleApiClient.connect();
         locationUpdateRequested = true;
 
@@ -164,7 +164,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
     }
 
-    public void stopTracking() {
+    private void stopTracking() {
         if (googleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
         }
