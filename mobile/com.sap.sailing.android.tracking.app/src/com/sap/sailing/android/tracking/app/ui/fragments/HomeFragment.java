@@ -17,6 +17,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.internal.view.ContextThemeWrapper;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ClickableSpan;
@@ -322,7 +323,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         final String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Event.EVENT_CHECKIN_DIGEST));
         final int type = cursor.getInt(cursor.getColumnIndex(AnalyticsContract.Checkin.CHECKIN_TYPE));
         DatabaseHelper.getInstance().getEventInfo(getActivity(), checkinDigest);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.Base_Theme_AppCompat_Dialog_Alert);
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AppTheme_AlertDialog));
         builder.setMessage(getString(R.string.confirm_delete_checkin));
         builder.setCancelable(true);
         builder.setNegativeButton(getString(R.string.no), null);
