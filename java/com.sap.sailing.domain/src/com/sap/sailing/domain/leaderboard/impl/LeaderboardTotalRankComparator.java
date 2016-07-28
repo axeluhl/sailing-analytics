@@ -330,10 +330,18 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         return fleetWithCorrectOrdering;
     }
 
+    private Fleet getFleetOfCompetitorInRaceColumn(final RaceColumn raceColumn, final Competitor competitor) {
+        for (final Fleet fleet : raceColumn.getFleets()) {
+            if (Util.contains(getLeaderboard().getAllCompetitors(raceColumn, fleet), competitor)) {
+                return fleet;
+            }
+        }
+        return null;
+    }
     private Fleet getFleetOfCompetitorFromRaceColumnAndCache(final RaceColumn raceColumn, final Competitor competitor,
             final Map<Series, Map<Competitor, Fleet>> orderedFleetsForCompetitorsBySeries, final Series series,
             Map<Competitor, Fleet> fleetForCompetitorInSeries) {
-        final Fleet fleetWithCorrectOrdering = raceColumn.getFleetOfCompetitor(competitor);
+        final Fleet fleetWithCorrectOrdering = getFleetOfCompetitorInRaceColumn(raceColumn, competitor);
         if (fleetWithCorrectOrdering != null) {
             if (fleetForCompetitorInSeries == null) {
                 fleetForCompetitorInSeries = new HashMap<>();
