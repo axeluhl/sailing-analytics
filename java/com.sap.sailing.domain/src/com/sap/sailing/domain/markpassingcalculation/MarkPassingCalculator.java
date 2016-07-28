@@ -53,7 +53,7 @@ public class MarkPassingCalculator {
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
     private final MarkPassingUpdateListener listener;
     private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime
-            .getRuntime().availableProcessors() - 1, 3),
+            .getRuntime().availableProcessors()/2, 3),
     /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
     /* keepAliveTime */60, TimeUnit.SECONDS,
     /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1, /* daemon */ true));

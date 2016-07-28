@@ -150,8 +150,8 @@ public class CandidateFinderImpl implements CandidateFinder {
      */
     public CandidateFinderImpl(DynamicTrackedRace race) {
         this(race, new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime
-                .getRuntime().availableProcessors() - 1, 3),
-                /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
+                .getRuntime().availableProcessors()/2, 3),
+                /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors()/2, 3),
                 /* keepAliveTime */60, TimeUnit.SECONDS,
                 /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1, /* daemon */ true)));
     }
