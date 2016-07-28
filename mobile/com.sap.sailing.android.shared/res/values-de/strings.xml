@@ -52,5 +52,9 @@
     <!-- Message Sending -->
     <string name="sending_waiting">%1$d Events konnten noch nicht gesendet werden.\nLetzter erfolgreicher Versand fand statt %2$s</string>
     <string name="sending_no_waiting">Derzeit keine unversendeten Events.</string>
-    
+
+    <!-- Competitor list footer text -->
+    <string name="footer_text">Mehr Informationen auf https://www.sapsailing.com</string>
+    <string name="footer_text_link">https://www.sapsailing.com</string>
+
 </resources>

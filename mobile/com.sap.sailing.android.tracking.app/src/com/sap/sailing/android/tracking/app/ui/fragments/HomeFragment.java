@@ -17,6 +17,9 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ClickableSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +27,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.data.BaseCheckinData;
@@ -60,6 +64,9 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
     private final static String TAG = HomeFragment.class.getName();
 
+    private ListView mListView;
+    private View mHeader;
+
     @SuppressLint("InflateParams")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -67,19 +74,38 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
         prefs = new AppPreferences(getActivity());
 
-        ListView listView = (ListView) view.findViewById(R.id.listRegatta);
-        if (listView != null) {
-            listView.addHeaderView(inflater.inflate(R.layout.regatta_listview_header, null));
+        mListView = (ListView) view.findViewById(R.id.listRegatta);
+        if (mListView != null) {
+            mHeader = inflater.inflate(R.layout.regatta_listview_header, mListView, false);
+            setFooterView(inflater);
 
             adapter = new RegattaAdapter(getActivity(), R.layout.ragatta_listview_row, null, 0);
-            listView.setAdapter(adapter);
-            listView.setOnItemClickListener(new ItemClickListener());
-            listView.setOnItemLongClickListener(new LongItemClickListener());
+            mListView.setAdapter(adapter);
+            mListView.setOnItemClickListener(new ItemClickListener());
+            mListView.setOnItemLongClickListener(new LongItemClickListener());
         }
 
         getLoaderManager().initLoader(REGATTA_LOADER, null, this);
 
         return view;
+    }
+
+    private void setFooterView(LayoutInflater inflater) {
+        View footer = inflater.inflate(R.layout.regatta_listview_footer, mListView, false);
+        TextView text = (TextView) footer.findViewById(R.id.list_header_text);
+        final String footerText = getString(R.string.footer_text);
+        final String url = getString(R.string.footer_text_link);
+        SpannableString spannable = new SpannableString(footerText);
+        ClickableSpan click = new ClickableSpan() {
+            @Override
+            public void onClick(View widget) {
+                // just for styling the link
+                // isn't working in a ListView -> see ItemClickListener
+            }
+        };
+        spannable.setSpan(click, footerText.indexOf(url), footerText.indexOf(url) + url.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        text.setText(spannable);
+        mListView.addFooterView(footer);
     }
 
     @Override
@@ -261,6 +287,10 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         switch (loader.getId()) {
             case REGATTA_LOADER:
+                mListView.removeHeaderView(mHeader);
+                if (cursor != null && cursor.getCount() > 0) {
+                    mListView.addHeaderView(mHeader);
+                }
                 adapter.changeCursor(cursor);
                 break;
 
@@ -273,6 +303,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     public void onLoaderReset(Loader<Cursor> loader) {
         switch (loader.getId()) {
             case REGATTA_LOADER:
+                mListView.removeHeaderView(mHeader);
                 adapter.changeCursor(null);
                 break;
 
@@ -344,8 +375,13 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-            if (position < 1) // tapped header
-            {
+            if (position == adapter.getCount() + 1 || adapter.getCount() == 0) { // footer
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.footer_text_link)));
+                startActivity(browserIntent);
+                return;
+            }
+
+            if (position < 1) { // header
                 return;
             }
 
@@ -362,13 +398,12 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            if (position < 1) // tapped header
+            if (position < 1 || adapter.getCount() == 0 || position == adapter.getCount() + 1) // tapped header
             {
                 return false;
             }
             return showDeleteConfirmationDialog(position);
         }
-
     }
 
     private class CheckinListener implements NetworkHelperSuccessListener {
