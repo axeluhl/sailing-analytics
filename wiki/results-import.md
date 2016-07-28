@@ -21,6 +21,8 @@ Before we can start the .csv export we must change some settings to export the d
  
 ## 3. Set ranking format
 
+Make sure the highlighted checkbox is **UNCHECKED**
+
 <img src="/wiki/images/sailwave/general_options.jpg" width="100%" height="100%" alt="" />
 
 ## 4. Set column separator and export the data...
