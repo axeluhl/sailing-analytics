@@ -30,9 +30,9 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
+import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
-import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
@@ -102,7 +102,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         if (preemptiveStopRequested.get()) {
                             return;
                         }
-                        SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<Competitor, SensorFix>, Competitor> mapper = sensorFixMapperFactory
+                        SensorFixMapper<SensorFix, DynamicSensorFixTrack<Competitor, SensorFix>, Competitor> mapper = sensorFixMapperFactory
                                 .createCompetitorMapper(event.getClass());
                         DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace,
                                 event.getMappedTo());
@@ -171,9 +171,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         mapping.getRegattaLogEvent().accept(new MappingEventVisitor() {
             @Override
             public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
-                SensorFixMapper<Timed, Track<?>, Competitor> mapper = sensorFixMapperFactory
+                SensorFixMapper<Timed, DynamicTrack<Timed>, Competitor> mapper = sensorFixMapperFactory
                         .createCompetitorMapper(event.getClass());
-                Track<?> track = mapper.getTrack(trackedRace, event.getMappedTo());
+                DynamicTrack<Timed> track = mapper.getTrack(trackedRace, event.getMappedTo());
                 try {
                     sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(),
                             timeRangeToLoad.from(), timeRangeToLoad.to(), true);
