@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.LeaderboardFragment;
@@ -41,6 +42,10 @@ public class LeaderboardWebViewActivity extends BaseActivity {
             getSupportActionBar().setTitle(getString(R.string.title_activity_leaderboard));
             ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
+        }
+        View view = findViewById(R.id.toolbar_subtitle);
+        if (view != null) {
+            view.setVisibility(View.GONE);
         }
 
         replaceFragment(R.id.content_frame, new LeaderboardFragment());
