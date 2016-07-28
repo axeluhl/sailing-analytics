@@ -1,3 +1,11 @@
+## DNS entries for mails regarding DNS setup
+- SPF record for zone `sapsailing.com` which points to `"v=spf1 mx ip4:54.229.94.254 -all"`
+- MX record for zone `sapsailing.com` which points to `10 mail.sapsailing.com`
+- CNAME record for zone `mail.sapsailing.com` which points to `sapsailing.com`
+- Reverse DNS entry for IP `54.229.94.254` pointing to `sapsailing.com` through AWS support case
+- DKIM keys: not done yet: [DKIM keys](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-dkim-with-postfix-on-debian-wheezy)
+- DMARC keys: not done yet (and not really neccessary if smtp ports are closed)
+
 ## Setup central mail server (instance "Webserver")
 - you need to add the local subnet (which the instance which should relay) is in
   - edit `/etc/postfix/main.cf` and edit `mynetworks = x.y.z.w/v` to match the subnet. Currently all subnets from VPC Ireland and US East are in here, this means adding an instance to existing subnets / zones will not require a change here

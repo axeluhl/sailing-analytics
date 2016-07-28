@@ -1,6 +1,5 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
@@ -74,17 +74,17 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
      * This isn't nice. The callbacks for fragments inside a view pager are unreliable, but I want the values to be
      * displayed immediately after device rotation. Thus they are cached here and the fragments can pick them up.
      */
-    public String lastSpeedIndicatorText;
+    public String lastSpeedIndicatorTextWithoutUnit;
     public String lastCompassIndicatorText = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT, getString(R.string.initial_hyphen_degrees));
-            lastSpeedIndicatorText = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, getString(R.string.initial_hyphen));
+            lastSpeedIndicatorTextWithoutUnit = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, getString(R.string.initial_hyphen));
         } else {
             lastCompassIndicatorText = getString(R.string.initial_hyphen_degrees);
-            lastSpeedIndicatorText = getString(R.string.initial_hyphen);
+            lastSpeedIndicatorTextWithoutUnit = getString(R.string.initial_hyphen);
         }
         super.onCreate(savedInstanceState);
 
@@ -173,7 +173,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         super.onSaveInstanceState(outState);
 
         outState.putInt(SIS_LAST_VIEWPAGER_ITEM, lastViewPagerItem);
-        outState.putString(SIS_LAST_SPEED_TEXT, lastSpeedIndicatorText);
+        outState.putString(SIS_LAST_SPEED_TEXT, lastSpeedIndicatorTextWithoutUnit);
         outState.putString(SIS_LAST_COMPASS_TEXT, lastCompassIndicatorText);
 
         if (trackingFragment.isAdded()) {
@@ -393,13 +393,16 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     public void showStopTrackingConfirmationDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.please_confirm).setMessage(R.string.do_you_really_want_to_stop_tracking)
-            .setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
+            .setTitle(R.string.please_confirm)
+            .setMessage(R.string.do_you_really_want_to_stop_tracking)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface dialog, int whichButton) {
                     stopTracking();
                 }
-            }).setNegativeButton(android.R.string.no, null).create();
+            })
+            .setNegativeButton(android.R.string.no, null).create();
 
         dialog.show();
     }

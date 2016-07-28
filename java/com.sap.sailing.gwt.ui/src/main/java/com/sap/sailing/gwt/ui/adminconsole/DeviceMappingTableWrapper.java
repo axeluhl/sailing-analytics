@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
@@ -117,7 +118,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
         listHandler.setComparator(fromCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
-                return o1.from.compareTo(o2.from);
+                return Util.compareToWithNull(o1.from, o2.from, /* nullIsLess */ false);
             }
         });
         table.addColumn(fromCol, stringMessages.from());
@@ -132,7 +133,7 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Re
         listHandler.setComparator(toCol, new Comparator<DeviceMappingDTO>() {
             @Override
             public int compare(DeviceMappingDTO o1, DeviceMappingDTO o2) {
-                return o1.to.compareTo(o2.to);
+                return Util.compareToWithNull(o1.to, o2.to, /* nullIsLess */ false);
             }
         });
         table.addColumn(toCol, stringMessages.to());

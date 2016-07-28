@@ -612,18 +612,18 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public BoatClass getDominantBoatClass(Iterable<String> competitorClassNames) {
+        final BoatClass result;
         if (competitorClassNames == null) {
-            return null;
-            
+            result = null;
         } else {
             Collection<BoatClass> boatClasses = new ArrayList<>();
             for (String competitorClassName : competitorClassNames) {
                 BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
                 boatClasses.add(boatClass);
             }
-
-            return Util.getDominantObject(boatClasses);
+            result = Util.getDominantObject(boatClasses);
         }
+        return result;
     }
 
     @Override

@@ -20,7 +20,7 @@ import com.sap.sailing.server.operationaltransformation.RecordRegattaLogEventOnR
  * passed to this object's constructor and send a {@link RecordRegattaLogEventOnRegatta} or a
  * {@link RecordRegattaLogEventOnFlexibleLeaderboard} operation to all replicas.
  * 
- * This class is a modified version of {@link RaceLogReplicator}
+ * This class is a modified version of {@link RaceLogReplicatorAndNotifier}
  * 
  */
 public class RegattaLogReplicator implements RegattaLikeListener {

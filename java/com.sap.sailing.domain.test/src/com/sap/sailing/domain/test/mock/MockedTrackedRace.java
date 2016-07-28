@@ -44,6 +44,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.ranking.RankingMetric;
@@ -522,6 +523,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public void deregisterCompetitors(Iterable<Competitor> competitor) {
                     }
+
+                    @Override
+                    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+                        return null;
+                    }
                 };
             }
 
@@ -809,6 +815,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public TrackedRaceStatus getStatus() {
         return null;
+    }
+
+    @Override
+    public void setStatus(TrackedRaceStatus newStatus) {
     }
 
     @Override

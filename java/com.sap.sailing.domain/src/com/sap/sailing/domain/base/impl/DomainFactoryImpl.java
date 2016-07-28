@@ -52,6 +52,7 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointMatchRacing;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LowPointTieBreakBasedOnLastSeriesOnly;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminationsAndRoundsWinnerGets07;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -127,6 +128,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new LowPointWithEliminationsAndRoundsWinnerGets07();
         case LOW_POINT_LEAGUE_OVERALL:
             return new LowPointForLeagueOverallLeaderboard();
+        case LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY:
+            return new LowPointTieBreakBasedOnLastSeriesOnly();
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }

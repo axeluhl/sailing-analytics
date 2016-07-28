@@ -4,55 +4,29 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sse.common.Util;
 
-public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBoardMode {
+public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBoardMode implements CompetitorsForRaceDefinedListener {
     private Iterable<CompetitorDTO> competitorsInRace;
-    private LeaderboardDTO leaderboard;
-    private RaceColumnDTO raceColumn;
 
     abstract protected void updateCompetitorSelection();
 
     @Override
-    public void competitorsForRaceDefined(Iterable<CompetitorDTO> competitorsInRace) {
-        this.competitorsInRace = competitorsInRace;
-        updateCompetitorSelection();
+    public void applyTo(RaceBoardPanel raceBoardPanel) {
+        super.applyTo(raceBoardPanel);
+        raceBoardPanel.getMap().addCompetitorsForRaceDefinedListener(this);
     }
 
-    protected Iterable<CompetitorDTO> getCompetitorsInRace() {
-        return competitorsInRace;
+    protected void stopReceivingCompetitorsInRace() {
+        getRaceBoardPanel().getMap().removeCompetitorsForRaceDefinedListener(this);
     }
 
-    protected LeaderboardDTO getLeaderboard() {
-        return leaderboard;
-    }
-
-    protected void setLeaderboard(LeaderboardDTO leaderboard) {
-        this.leaderboard = leaderboard;
-    }
-
-    @Override
-    public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-        super.updatedLeaderboard(leaderboard);
-        setLeaderboard(leaderboard);
-    }
-
-    @Override
-    public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
-        this.raceColumn = raceColumn;
-    }
-
-    protected RaceColumnDTO getRaceColumn() {
-        return raceColumn;
-    }
-
-    protected void updateCompetitorSelection(final int howManyTopCompetitorsInRaceToSelect) {
-        if (getLeaderboard() != null) {
-            final List<CompetitorDTO> competitorsFromBestToWorstInColumn = getLeaderboard().getCompetitorsFromBestToWorst(getRaceColumn());
+    protected void updateCompetitorSelection(final int howManyTopCompetitorsInRaceToSelect, LeaderboardDTO leaderboard) {
+        if (leaderboard != null) {
+            final List<CompetitorDTO> competitorsFromBestToWorstInColumn = leaderboard.getCompetitorsFromBestToWorst(getRaceColumn());
             final Set<CompetitorDTO> competitorsToSelect = new HashSet<>();
             int numberOfSelectedCompetitors = 0;
             for (int i=0; numberOfSelectedCompetitors<howManyTopCompetitorsInRaceToSelect && i<competitorsFromBestToWorstInColumn.size(); i++) {
@@ -63,6 +37,16 @@ public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBo
             }
             getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(competitorsToSelect);
         }
+    }
+
+    @Override
+    public void competitorsForRaceDefined(Iterable<CompetitorDTO> competitorsInRace) {
+        this.competitorsInRace = competitorsInRace;
+        trigger();
+    }
+    
+    protected Iterable<CompetitorDTO> getCompetitorsInRace() {
+        return competitorsInRace;
     }
 
 }

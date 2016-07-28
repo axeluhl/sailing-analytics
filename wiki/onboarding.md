@@ -159,6 +159,8 @@ The Android Apps can be build in Android Studio or gradle command line. Android 
     * Debug (starts the app with an attached debugger)
     * Attach Debugger (useful, if the app is currently running and you want to start debugging against the correspond sources)
 
+If git is not in the Path system environment variable, the gradle build will not work.
+
 ##### To enable missing git integration
 
 1. navigate to VCS -> Enable Version Control Integration
