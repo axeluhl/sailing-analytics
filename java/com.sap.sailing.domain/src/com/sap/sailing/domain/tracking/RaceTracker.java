@@ -27,6 +27,10 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
  * A tracker may be {@link #stop(boolean) stopped}. In this case, it will no longer receive any data at all. Stopping a tracker
  * will not modify the {@link Regatta} and the {@link TrackedRegatta} with regards to their ownership of their
  * {@link RaceDefiniion} and {@link TrackedRace}, respectively.
+ * <p>
+ * 
+ * A {@link RaceTracker} controls the lifecycle of a {@link TrackedRace} in contrast to a {@link TrackingDataLoader} which just
+ * contributes to the composite status but does not control the lifecycle.
  * 
  * @author Axel Uhl (d043530)
  * 
