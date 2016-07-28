@@ -17,6 +17,8 @@ Before we can start the .csv export we must change some settings to export the d
 
 ## 2. Set points/discard format
 
+Make sure to press Tools > Rescore so that the penalty fields are correctly filled in the format `p,c`. If you see just the penalty and not the points it will _not_ work. The CSV needs to containt points and penalty codes.
+
 <img src="/wiki/images/sailwave/discard_format.jpg" width="100%" height="100%" alt="" />
  
 ## 3. Set ranking format
