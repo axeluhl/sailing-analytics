@@ -128,6 +128,4 @@
     <string name="preference_config_needs_refresh_key" translatable="false">config_refresh</string>
     <bool name="preference_config_needs_refresh_default" translatable="false">true</bool>
 
-    <string name="preference_logout_key">logout_key</string>
-
 </resources>

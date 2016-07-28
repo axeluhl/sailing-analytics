@@ -1,7 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.ui.activities.PasswordActivity;
 import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
@@ -97,7 +95,6 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         setupServerUrlBox();
         setupSyncQRCodeButton();
         setupForceUpdateButton();
-        setupLogoutButton();
     }
 
     private void setupIdentifierBox() {
@@ -154,29 +151,6 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
             public boolean onPreferenceClick(Preference preference) {
                 new AutoUpdater(getActivity()).checkForUpdate(true);
                 return false;
-            }
-        });
-    }
-
-    private void setupLogoutButton() {
-        Preference preference = findPreference(R.string.preference_logout_key);
-        preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
-                    .setTitle(R.string.logout_dialog_title)
-                    .setMessage(getString(R.string.logout_dialog_message))
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            AppPreferences.on(getActivity()).setAccessToken(null);
-                            startActivity(new Intent(getActivity(), PasswordActivity.class));
-                            getActivity().finish();
-                        }
-                    })
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show();
-                return true;
             }
         });
     }

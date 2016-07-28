@@ -543,7 +543,4 @@
     <string name="sync_to_minute">Sync to minute</string>
     <string name="non_public_changed_title">Non-Public Events</string>
 
-    <string name="preference_logout_title">@string/logout</string>
-    <string name="preference_logout_summary">Delete login credential, so you have to enter it manually or scan the QR code</string>
-
 </resources>

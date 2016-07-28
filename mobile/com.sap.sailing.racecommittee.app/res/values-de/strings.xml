@@ -515,7 +515,4 @@
     <string name="sync_to_minute">Sync zur Minute</string>
     <string name="non_public_changed_title">Nicht öffentliche Events</string>
 
-    <string name="preference_logout_title">@string/logout</string>
-    <string name="preference_logout_summary">Löscht die Logindaten, danach müssen diese manuell eingeben oder der QR-Code gescannt werden</string>
-
 </resources>
