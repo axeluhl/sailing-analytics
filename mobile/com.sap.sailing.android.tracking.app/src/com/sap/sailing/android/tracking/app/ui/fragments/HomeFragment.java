@@ -93,10 +93,9 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
     private void setFooterView(LayoutInflater inflater) {
         View footer = inflater.inflate(R.layout.regatta_listview_footer, mListView, false);
-        TextView text = (TextView) footer.findViewById(R.id.list_header_text);
-        final String footerText = getString(R.string.footer_text);
+        TextView text = (TextView) footer.findViewById(R.id.list_header_url);
         final String url = getString(R.string.footer_text_link);
-        SpannableString spannable = new SpannableString(footerText);
+        SpannableString spannable = new SpannableString(url);
         ClickableSpan click = new ClickableSpan() {
             @Override
             public void onClick(View widget) {
@@ -104,7 +103,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
                 // isn't working in a ListView -> see ItemClickListener
             }
         };
-        spannable.setSpan(click, footerText.indexOf(url), footerText.indexOf(url) + url.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(click, 0, url.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         text.setText(spannable);
         mListView.addFooterView(footer);
     }

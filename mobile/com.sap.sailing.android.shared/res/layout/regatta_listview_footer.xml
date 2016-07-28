@@ -6,19 +6,28 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingLeft="@dimen/fragment_side_margin"
+        android:paddingRight="@dimen/fragment_side_margin"
+        android:paddingTop="10dp">
 
         <TextView
             android:id="@+id/list_header_text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
             android:gravity="center"
-            android:paddingBottom="10dp"
-            android:paddingLeft="@dimen/fragment_side_margin"
-            android:paddingRight="@dimen/fragment_side_margin"
-            android:paddingTop="10dp"
-            android:text="@string/your_regattas"
+            android:text="@string/footer_text"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/list_header_text_size" />
+
+        <TextView
+            android:id="@+id/list_header_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/footer_text_link"
             android:textColor="@color/fiori_text_color"
             android:textSize="@dimen/list_header_text_size" />
     </LinearLayout>
