@@ -130,4 +130,9 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     public BoatClass getBoatClass() {
         return getRegatta().getBoatClass();
     }
+
+    @Override
+    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+        return getRegatta().getOrCreateCompetitorsProvider();
+    }
 }
