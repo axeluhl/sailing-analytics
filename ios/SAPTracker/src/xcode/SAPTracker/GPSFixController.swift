@@ -19,21 +19,20 @@ class GPSFixController: NSObject {
     }
     
     struct GPSFixSending {
-        // FIXME: - Change me back to 1000
-        static let SliceSize = 10
+        static let SliceSize = 1000
     }
     
     enum Mode: String {
         case BatterySaving
         case Error
-        case Online
         case Offline
+        case Online
         var description: String {
             switch self {
-            case .BatterySaving: return NSLocalizedString("Battery Saving", comment: "")
-            case .Error: return NSLocalizedString("Error", comment: "")
-            case .Offline: return NSLocalizedString("Offline", comment: "")
-            case .Online: return NSLocalizedString("Online", comment: "")
+            case .BatterySaving: return Translation.GPSFixController.Mode.BatterySaving.String
+            case .Error: return Translation.GPSFixController.Mode.Error.String
+            case .Offline: return Translation.GPSFixController.Mode.Offline.String
+            case .Online: return Translation.GPSFixController.Mode.Online.String
             }
         }
     }

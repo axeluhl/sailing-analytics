@@ -13,18 +13,19 @@ class ScanViewController: UIViewController {
     
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var targetImageView: UIImageView!
-
-    private var session: AVCaptureSession!
-    private var output: AVCaptureMetadataOutput!
-    private var previewLayer: AVCaptureVideoPreviewLayer!
+    
+    private var scanSession: AVCaptureSession?
+    private var scanOutput: AVCaptureMetadataOutput?
+    private var scanPreviewLayer: AVCaptureVideoPreviewLayer?
+    private var scanError: NSError?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupSession()
+        setup()
     }
     
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
         startScanning()
     }
     
@@ -36,16 +37,26 @@ class ScanViewController: UIViewController {
     // MARK: - Layouts
     
     private func layoutPreviewLayer() {
+        guard let previewLayer = scanPreviewLayer else { return }
         previewLayer.frame = previewView.bounds
         previewLayer.position = CGPointMake(CGRectGetMidX(previewView.bounds), CGRectGetMidY(previewView.bounds))
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
     
-    private func setupSession() {
-        session = AVCaptureSession()
-        output = AVCaptureMetadataOutput()
+    private func setup() {
+        setupLocalization()
+        setupScanning()
+    }
+    
+    private func setupLocalization() {
+        navigationItem.title = Translation.ScanView.Title.String
+    }
+    
+    private func setupScanning() {
         do {
+            let session = AVCaptureSession()
+            let output = AVCaptureMetadataOutput()
             let device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
             let input = try AVCaptureDeviceInput(device: device);
             output.setMetadataObjectsDelegate(self, queue: dispatch_get_main_queue())
@@ -57,37 +68,54 @@ class ScanViewController: UIViewController {
                 session.addOutput(output)
             }
             output.metadataObjectTypes = [AVMetadataObjectTypeQRCode]
-            previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
+            let previewLayer = AVCaptureVideoPreviewLayer(session: session)
             previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
             previewLayer.connection.videoOrientation = videoOrientation(forInterfaceOrientation: UIApplication.sharedApplication().statusBarOrientation)
             previewLayer.frame = previewView.bounds
             previewLayer.position = CGPointMake(CGRectGetMidX(previewView.bounds), CGRectGetMidY(previewView.bounds))
             previewView.layer.addSublayer(previewLayer)
-        } catch {
-            print(error)
+            scanSession = session
+            scanOutput = output
+            scanPreviewLayer = previewLayer
+        } catch let error as NSError {
+            scanError = error
         }
-    }
-    
-    // MARK: - UIViewControllerDelegate
-    
-    override func willRotateToInterfaceOrientation(toInterfaceOrientation: UIInterfaceOrientation, duration: NSTimeInterval) {
-        previewLayer.connection.videoOrientation = videoOrientation(forInterfaceOrientation: toInterfaceOrientation)
     }
     
     // MARK: - Scanning
     
     private func startScanning() {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-            self.session.startRunning()
-        })
         targetImageView.image = UIImage(named: "scan_white")
+        if let error = scanError {
+            let alertController = UIAlertController(title: error.localizedDescription, message: error.localizedFailureReason, preferredStyle: .Alert)
+            let settingsAction = UIAlertAction(title: Translation.Common.SystemSettings.String, style: .Default) { (action) in
+                UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString) ?? NSURL())
+                self.navigationController?.popViewControllerAnimated(true)
+            }
+            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel) { (action) in
+                self.navigationController?.popViewControllerAnimated(true)
+            }
+            alertController.addAction(settingsAction)
+            alertController.addAction(cancelAction)
+            presentViewController(alertController, animated: true, completion: nil)
+        } else {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
+                self.scanSession?.startRunning()
+            })
+        }
     }
     
     private func stopScanning() {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-            self.session.stopRunning()
+            self.scanSession?.stopRunning()
         })
         targetImageView.image = UIImage(named: "scan_green")
+    }
+    
+    // MARK: - UIViewControllerDelegate
+    
+    override func willRotateToInterfaceOrientation(toInterfaceOrientation: UIInterfaceOrientation, duration: NSTimeInterval) {
+        scanPreviewLayer?.connection.videoOrientation = videoOrientation(forInterfaceOrientation: toInterfaceOrientation)
     }
     
     // MARK: - Properties
@@ -115,7 +143,7 @@ class ScanViewController: UIViewController {
 // MARK: - CheckInControllerDelegate
 
 extension ScanViewController: CheckInControllerDelegate {
-
+    
     func showCheckInAlert(sender: CheckInController, alertController: UIAlertController) {
         presentViewController(alertController, animated: true, completion: nil)
     }
@@ -125,7 +153,7 @@ extension ScanViewController: CheckInControllerDelegate {
 // MARK: - AVCaptureMetadataOutputObjectsDelegate
 
 extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
-
+    
     func captureOutput(captureOutput: AVCaptureOutput!,
                        didOutputMetadataObjects metadataObjects: [AnyObject]!,
                                                 fromConnection connection: AVCaptureConnection!)
@@ -138,16 +166,14 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
                     self.captureOutputSuccess(regattaData)
                 })
             } else {
-                let alertTitle = NSLocalizedString("Incorrect QR Code", comment: "")
-                let alertController = UIAlertController(title: alertTitle, message: "", preferredStyle: .Alert)
-                let cancelTitle = NSLocalizedString("Cancel", comment: "")
-                let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+                let alertController = UIAlertController(title: Translation.ScanView.IncorrectCodeAlert.Title.String, message: "", preferredStyle: .Alert)
+                let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
                 alertController.addAction(cancelAction)
                 presentViewController(alertController, animated: true, completion: nil)
             }
         }
     }
-
+    
     private func captureOutputSuccess(regattaData: RegattaData) {
         checkInController.checkIn(regattaData, completion: { (withSuccess) in
             if withSuccess {

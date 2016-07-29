@@ -1,5 +1,5 @@
 //
-//  CachedFixesTrackingTableViewCell.swift
+//  TrackingViewGPSFixesCell.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 07.06.16.
@@ -8,26 +8,36 @@
 
 import UIKit
 
-class CachedFixesTrackingTableViewCell: UITableViewCell {
+class TrackingViewGPSFixesCell: UITableViewCell {
 
     var regatta: Regatta?
     
-    @IBOutlet weak var cachedFixesLabel: UILabel!
+    @IBOutlet weak var gpsFixesTitleLabel: UILabel!
+    @IBOutlet weak var gpsFixesLabel: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        self.setupCachedFixesLabel()
-        self.subscribeForNotifications()
+        setup()
+        subscribeForNotifications()
     }
     
     deinit {
-        self.unsubscribeFromNotifications()
+        unsubscribeFromNotifications()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
     
-    private func setupCachedFixesLabel() {
-        self.cachedFixesLabel.text = String(format: "%d", regatta?.gpsFixes?.count ?? 0)
+    private func setup() {
+        setupLocalization()
+        setupGPSFixesLabel()
+    }
+    
+    private func setupLocalization() {
+        gpsFixesTitleLabel.text = Translation.TrackingView.TableView.GPSFixesCell.GPSFixesTitleLabel.Text.String
+    }
+    
+    private func setupGPSFixesLabel() {
+        gpsFixesLabel.text = String(format: "%d", regatta?.gpsFixes?.count ?? 0)
     }
     
     // MARK: - Notifications
@@ -44,9 +54,9 @@ class CachedFixesTrackingTableViewCell: UITableViewCell {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func locationManagerUpdated(notification: NSNotification) {
+    @objc private func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
-            self.setupCachedFixesLabel()
+            self.setupGPSFixesLabel()
         })
     }
     

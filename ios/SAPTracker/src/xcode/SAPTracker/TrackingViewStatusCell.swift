@@ -1,5 +1,5 @@
 //
-//  StatusTrackingTableViewCell.swift
+//  TrackingViewStatusCell.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 07.06.16.
@@ -8,26 +8,35 @@
 
 import UIKit
 
-class StatusTrackingTableViewCell: UITableViewCell {
+class TrackingViewStatusCell: UITableViewCell {
 
+    @IBOutlet weak var statusTitleLabel: UILabel!
     @IBOutlet weak var statusLabel: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        self.setupStatusLabel(false)
-        self.subscribeForNotifications()
+        setup()
+        subscribeForNotifications()
     }
     
     deinit {
-        self.unsubscribeFromNotifications()
+        unsubscribeFromNotifications()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
     
-    private func setupStatusLabel(isTracking: Bool) {
-        statusLabel.text = isTracking ?
-            NSLocalizedString("Tracking", comment: "") :
-            NSLocalizedString("Not Tracking", comment: "")
+    private func setup() {
+        setupLocalization()
+        setupStatusLabel(LocationManager.Status.NotTracking)
+    }
+    
+    private func setupLocalization() {
+        statusTitleLabel.text = Translation.LocationManager.Status.String
+    }
+    
+    private func setupStatusLabel(status: LocationManager.Status) {
+        statusLabel.text = status.description
+        statusLabel.textColor = (status == .NotTracking ? UIColor.redColor() : UIColor.blackColor())
     }
     
     // MARK: - Notifications
@@ -49,15 +58,15 @@ class StatusTrackingTableViewCell: UITableViewCell {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func locationManagerUpdated(notification: NSNotification) {
+    @objc private func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
-            self.setupStatusLabel(true)
+            self.setupStatusLabel(LocationManager.Status.Tracking)
         })
     }
     
-    func locationManagerFailed(notification: NSNotification) {
+    @objc private func locationManagerFailed(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
-            self.setupStatusLabel(false)
+            self.setupStatusLabel(LocationManager.Status.NotTracking)
         })
     }
     

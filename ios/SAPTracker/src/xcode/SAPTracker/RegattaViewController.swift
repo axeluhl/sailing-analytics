@@ -10,12 +10,19 @@ import Foundation
 
 class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     
+    private struct Segue {
+        static let About = "About"
+        static let Leaderboard = "Leaderboard"
+        static let Settings = "Settings"
+        static let Tracking = "Tracking"
+    }
+    
     private struct TeamImageKeys {
         static let TeamImageURL = "teamImageUri"
     }
     
-    var sourceTypes = [UIImagePickerControllerSourceType]()
-    var sourceTypeNames = [String]()
+    //var sourceTypes = [UIImagePickerControllerSourceType]()
+    //var sourceTypeNames = [String]()
     
     @IBOutlet weak var teamImageView: UIImageView!
     @IBOutlet weak var teamImageAddButton: UIButton!
@@ -28,12 +35,15 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     @IBOutlet weak var countdownView: UIView!
     @IBOutlet weak var countdownViewHeight: NSLayoutConstraint!
     @IBOutlet weak var countdownDaysLabel: UILabel!
+    @IBOutlet weak var countdownDaysTitleLabel: UILabel!
     @IBOutlet weak var countdownHoursLabel: UILabel!
+    @IBOutlet weak var countdownHoursTitleLabel: UILabel!
     @IBOutlet weak var countdownMinutesLabel: UILabel!
+    @IBOutlet weak var countdownMinutesTitleLabel: UILabel!
     @IBOutlet weak var leaderboardButton: UIButton!
     @IBOutlet weak var eventButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
-    @IBOutlet weak var announcementsLabel: UILabel!
+    @IBOutlet weak var announcementLabel: UILabel!
     
     var regatta: Regatta!
     var requestManager: RequestManager!
@@ -43,18 +53,23 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         requestManager = RequestManager(baseURLString: regatta.serverURL)
-        setupButtons()
-        setupCompetitor()
-        setupCountdownTimer()
-        setupNavigationBar()
-        setupImageSourceTypes()
-        setupTeamImage()
+        setup()
         
-        // Update
+        // FIXME: - UI refresh?!
         regattaController.update()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
+    
+    private func setup() {
+        setupButtons()
+        setupCompetitor()
+        setupCountdownTimer()
+        setupLocalization()
+        setupNavigationBar()
+        //        setupImageSourceTypes()
+        setupTeamImage()
+    }
     
     private func setupButtons() {
         eventButton.setBackgroundImage(Images.BlueHighlighted, forState: .Highlighted)
@@ -79,15 +94,25 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         refreshCountdown()
     }
     
-    private func setupImageSourceTypes() {
-        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-            sourceTypes.append(UIImagePickerControllerSourceType.Camera)
-            sourceTypeNames.append(NSLocalizedString("Camera", comment: ""))
-        }
-        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.PhotoLibrary) {
-            sourceTypes.append(UIImagePickerControllerSourceType.PhotoLibrary)
-            sourceTypeNames.append(NSLocalizedString("Photo Library", comment: ""))
-        }
+    //    private func setupImageSourceTypes() {
+    //        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
+    //            sourceTypes.append(UIImagePickerControllerSourceType.Camera)
+    //            sourceTypeNames.append(Translation.Common.Camera.String)
+    //        }
+    //        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.PhotoLibrary) {
+    //            sourceTypes.append(UIImagePickerControllerSourceType.PhotoLibrary)
+    //            sourceTypeNames.append(Translation.Common.PhotoLibrary.String)
+    //        }
+    //    }
+    
+    private func setupLocalization() {
+        countdownDaysTitleLabel.text = Translation.RegattaView.CountdownDaysTitleLabel.Text.String
+        countdownHoursTitleLabel.text = Translation.RegattaView.CountdownHoursTitleLabel.Text.String
+        countdownMinutesTitleLabel.text = Translation.RegattaView.CountdownMinutesTitleLabel.Text.String
+        eventButton.setTitle(Translation.RegattaView.EventButton.Title.String, forState: .Normal)
+        leaderboardButton.setTitle(Translation.LeaderboardView.Title.String, forState: .Normal)
+        startTrackingButton.setTitle(Translation.RegattaView.StartTrackingButton.Title.String, forState: .Normal)
+        announcementLabel.text = Translation.RegattaView.AnnouncementLabel.Text.String
     }
     
     private func setupNavigationBar() {
@@ -148,7 +173,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     
     func refreshCountdown() {
         if regatta.event.startDate - NSDate().timeIntervalSince1970 > 0 {
-            regattaStartLabel.text = NSLocalizedString("Regatta will start in", comment: "")
+            regattaStartLabel.text = Translation.RegattaView.RegattaStartLabel.Text.BeforeRegattaDidStart.String
             let duration = regatta.event.startDate - NSDate().timeIntervalSince1970
             let days = Int(duration / (60 * 60 * 24))
             let hours = Int(duration / (60 * 60)) - (days * 24)
@@ -159,7 +184,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
             countdownView.hidden = false
             countdownViewHeight.constant = 60
         } else {
-            regattaStartLabel.text = NSLocalizedString("Regatta in progress", comment: "")
+            regattaStartLabel.text = Translation.RegattaView.RegattaStartLabel.Text.AfterRegattaDidStart.String
             countdownView.hidden = true
             countdownViewHeight.constant = 0
         }
@@ -168,11 +193,11 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     // MARK: - Actions
     
     @IBAction func teamImageAddButtonTapped(sender: AnyObject) {
-        showImageAlertController()
+        showSelectImageAlertController()
     }
     
     @IBAction func teamImageEditButtonTapped(sender: AnyObject) {
-        showImageAlertController()
+        showSelectImageAlertController()
     }
     
     @IBAction func teamImageRetryButtonTapped(sender: AnyObject) {
@@ -180,33 +205,40 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     @IBAction func eventButtonTapped(sender: UIButton) {
-        // FIXME: - Alert?
-        guard let url = regatta.eventURL() else { return }
-        UIApplication.sharedApplication().openURL(url)
+        UIApplication.sharedApplication().openURL(regatta.eventURL() ?? NSURL())
     }
     
-    @IBAction func showMenuActionSheet(sender: AnyObject) {
+    @IBAction func optionButtonTapped(sender: AnyObject) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
-        let checkOutTitle = NSLocalizedString("Check-Out", comment: "")
-        let checkOutAction = UIAlertAction(title: checkOutTitle, style: .Default) { (action) in
+        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .Default) { (action) in
+            self.performSegueWithIdentifier(Segue.Settings, sender: self)
+        }
+        let checkOutAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.CheckOutAction.Title.String, style: .Default) { (action) in
             self.showCheckOutAlertController()
         }
-        let settingsTitle = NSLocalizedString("Settings", comment: "")
-        let settingsAction = UIAlertAction(title: settingsTitle, style: .Default) { (action) in
-            self.performSegueWithIdentifier("Settings", sender: self)
+        
+        
+        // FIXME: Replace or edit or a mix of both?
+        let replaceImageAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.ReplaceImageAction.Title.String, style: .Default) { (action) in
+            self.showSelectImageAlertController()
         }
-        let editPhotoTitle = NSLocalizedString("Replace Team Photo", comment: "")
-        let editPhotoAction = UIAlertAction(title: editPhotoTitle, style: .Default) { (action) in
-            self.showImageAlertController()
+        
+        
+        let refreshAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.RefreshAction.Title.String, style: .Default) { (action) -> Void in
+            self.regattaController.update()
         }
-        let cancelTitle = NSLocalizedString("Cancel", comment: "")
-        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
-        alertController.addAction(checkOutAction)
+        let aboutAction = UIAlertAction(title: Translation.AboutView.Title.String, style: .Default) { (action) -> Void in
+            self.performSegueWithIdentifier(Segue.About, sender: alertController)
+        }
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
         alertController.addAction(settingsAction)
-        alertController.addAction(editPhotoAction)
+        alertController.addAction(checkOutAction)
+        alertController.addAction(replaceImageAction)
+        alertController.addAction(refreshAction)
+        alertController.addAction(aboutAction)
         alertController.addAction(cancelAction)
         presentViewController(alertController, animated: true, completion: nil)
     }
@@ -214,11 +246,10 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
         do {
             try regattaController.startTracking()
-            performSegueWithIdentifier("Tracking", sender: sender)
+            performSegueWithIdentifier(Segue.Tracking, sender: sender)
         } catch let error as LocationManager.LocationManagerError {
             let alertController = UIAlertController(title: error.description, message: nil, preferredStyle: .Alert)
-            let cancelTitle = NSLocalizedString("Cancel", comment: "")
-            let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
             alertController.addAction(cancelAction)
             presentViewController(alertController, animated: true, completion: nil)
         } catch {
@@ -229,12 +260,12 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     // MARK: - Alerts
     
     private func showCheckOutAlertController() {
-        let alertTitle = NSLocalizedString("Check-out of Regatta?", comment: "")
-        let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
-        let okTitle = NSLocalizedString("OK", comment: "")
-        let okAction = UIAlertAction(title: okTitle, style: .Default) { (action) in self.preformCheckOut() }
-        let cancelTitle = NSLocalizedString("Cancel", comment: "")
-        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+        let alertController = UIAlertController(title: Translation.Common.Warning.String,
+                                                message: Translation.RegattaView.CheckOutAlert.Message.String,
+                                                preferredStyle: .Alert
+        )
+        let okAction = UIAlertAction(title: Translation.Common.Yes.String, style: .Default) { (action) in self.preformCheckOut() }
+        let cancelAction = UIAlertAction(title: Translation.Common.No.String, style: .Cancel, handler: nil)
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
         presentViewController(alertController, animated: true, completion: nil)
@@ -251,36 +282,39 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         navigationController!.popViewControllerAnimated(true)
     }
     
-    func showImageAlertController() {
-        if sourceTypes.count == 1 {
-            imagePicker(sourceTypes[0])
-        }
-        if sourceTypes.count == 2 {
-            let alertTitle = NSLocalizedString("Select a photo for your team", comment: "")
-            let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
-            let sourceType1Action = UIAlertAction(title: sourceTypeNames[0], style: .Default) { (action) in
-                self.imagePicker(self.sourceTypes[0])
+    private func showSelectImageAlertController() {
+        if UIImagePickerController.isSourceTypeAvailable(.Camera) && UIImagePickerController.isSourceTypeAvailable(.PhotoLibrary) {
+            let alertController = UIAlertController(title: Translation.RegattaView.SelectImageAlert.Title.String,
+                                                    message: Translation.RegattaView.SelectImageAlert.Message.String,
+                                                    preferredStyle: .Alert
+            )
+            let cameraAction = UIAlertAction(title: Translation.RegattaView.SelectImageAlert.CameraAction.Title.String, style: .Default) { (action) in
+                self.imagePicker(.Camera)
             }
-            let sourceType2Action = UIAlertAction(title: sourceTypeNames[1], style: .Default) { (action) in
-                self.imagePicker(self.sourceTypes[1])
+            let photoLibraryAction = UIAlertAction(title: Translation.RegattaView.SelectImageAlert.PhotoLibraryAction.Title.String, style: .Default) { (action) in
+                self.imagePicker(.PhotoLibrary)
             }
-            let cancelTitle = NSLocalizedString("Cancel", comment: "")
-            let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
-            alertController.addAction(sourceType1Action)
-            alertController.addAction(sourceType2Action)
+            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
+            alertController.addAction(cameraAction)
+            alertController.addAction(photoLibraryAction)
             alertController.addAction(cancelAction)
             presentViewController(alertController, animated: true, completion: nil)
+        } else if UIImagePickerController.isSourceTypeAvailable(.Camera) {
+            imagePicker(.Camera)
+        } else if UIImagePickerController.isSourceTypeAvailable(.PhotoLibrary) {
+            imagePicker(.PhotoLibrary)
         }
     }
     
     // MARK: - Segue
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if (segue.identifier == "Tracking") {
+        if (segue.identifier == Segue.Tracking) {
             let trackingNC = segue.destinationViewController as! UINavigationController
             let trackingVC = trackingNC.viewControllers[0] as! TrackingViewController
             trackingVC.regatta = regatta
-        } else if (segue.identifier == "Leaderboard") {
+            trackingVC.regattaController = regattaController
+        } else if (segue.identifier == Segue.Leaderboard) {
             let leaderboardNC = segue.destinationViewController as! UINavigationController
             let leaderboardVC = leaderboardNC.viewControllers[0] as! LeaderboardViewController
             leaderboardVC.regatta = regatta
@@ -289,7 +323,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     
     // MARK: - Properties
     
-    lazy var regattaController: RegattaController = {
+    private lazy var regattaController: RegattaController = {
         return RegattaController(regatta: self.regatta)
     }()
     
@@ -299,7 +333,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
 
 extension RegattaViewController: UIImagePickerControllerDelegate {
     
-    func imagePicker(sourceType: UIImagePickerControllerSourceType) {
+    private func imagePicker(sourceType: UIImagePickerControllerSourceType) {
         let imagePickerController = UIImagePickerController()
         imagePickerController.delegate = self
         imagePickerController.sourceType = sourceType;
@@ -308,7 +342,7 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         presentViewController(imagePickerController, animated: true, completion: nil)
     }
     
-    func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage!, editingInfo: [NSObject : AnyObject]!) {
+    private func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage!, editingInfo: [NSObject : AnyObject]!) {
         dismissViewControllerAnimated(true, completion: nil)
         teamImageView.image = image
         teamImageAddButton.hidden = true
@@ -346,10 +380,11 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         CoreDataManager.sharedManager.saveContext()
         
         // Show alert
-        let alertTitle = NSLocalizedString("Failed to upload image", comment: "")
-        let alertController = UIAlertController(title: alertTitle, message: error.localizedDescription, preferredStyle: .Alert)
-        let okTitle = NSLocalizedString("OK", comment: "")
-        let okAction = UIAlertAction(title: okTitle, style: .Default, handler: nil)
+        let alertController = UIAlertController(title: Translation.RegattaView.ImageUploadFailureAlert.Title.String,
+                                                message: error.localizedDescription,
+                                                preferredStyle: .Alert
+        )
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default, handler: nil)
         alertController.addAction(okAction)
         presentViewController(alertController, animated: true, completion: nil)
         

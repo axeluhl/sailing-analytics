@@ -9,22 +9,32 @@
 import Foundation
 
 class SpeedViewController: UIViewController {
- 
+    
     private let mpsToKn = 1.94552529182879
     
+    @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var speedLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.setupSpeedLabel(-1.0)
-        self.subscribeForNotifications()
+        setup()
+        subscribeForNotifications()
     }
     
     deinit {
-        self.unsubscribeFromNotifications()
+        unsubscribeFromNotifications()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
+    
+    private func setup() {
+        setupLocalization()
+        setupSpeedLabel(-1.0)
+    }
+    
+    private func setupLocalization() {
+        titleLabel.text = Translation.SpeedView.TitleLabel.Text.String
+    }
     
     private func setupSpeedLabel(mps: Double) {
         if mps >= 0 {
@@ -54,14 +64,14 @@ class SpeedViewController: UIViewController {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func locationManagerUpdated(notification: NSNotification) {
+    @objc private func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
             self.setupSpeedLabel(locationData.location.speed)
         })
     }
-
-    func locationManagerFailed(notification: NSNotification) {
+    
+    @objc private func locationManagerFailed(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             self.setupSpeedLabel(-1.0)
         })

@@ -11,6 +11,12 @@ import CoreData
 
 class HomeViewController: UIViewController {
     
+    private struct Segue {
+        static let About = "About"
+        static let Scan = "Scan"
+        static let Settings = "Settings"
+    }
+    
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var scanCodeButton: UIButton!
@@ -19,7 +25,7 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setups()
+        setup()
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -33,11 +39,11 @@ class HomeViewController: UIViewController {
         unsubscribeFromNewCheckInURLNotifications()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
     
-    private func setups() {
+    private func setup() {
         setupButtons()
-        setupLanguage()
+        setupLocalization()
         setupNavigationBar()
         setupTableView()
         setupTableViewDataSource()
@@ -48,12 +54,12 @@ class HomeViewController: UIViewController {
         noCodeButton.setBackgroundImage(Images.GrayHighlighted, forState: .Highlighted)
     }
     
-    private func setupLanguage() {
-        navigationItem.title = NSLocalizedString("Header", comment: "")
-        titleLabel.text = NSLocalizedString("Your Regattas", comment: "")
-        scanCodeButton.setTitle(NSLocalizedString("Scan Code", comment: ""), forState: .Normal)
-        noCodeButton.setTitle(NSLocalizedString("No Code", comment: ""), forState: .Normal)
-        infoCodeLabel.text = NSLocalizedString("QR found", comment: "")
+    private func setupLocalization() {
+        navigationItem.title = Application.Title
+        titleLabel.text = Translation.HomeView.TableView.Title.String
+        scanCodeButton.setTitle(Translation.ScanView.Title.String, forState: .Normal)
+        noCodeButton.setTitle(Translation.HomeView.NoCodeAlert.Title.String, forState: .Normal)
+        infoCodeLabel.text = Translation.HomeView.InfoCodeLabel.Text.String
     }
     
     private func setupNavigationBar() {
@@ -91,21 +97,20 @@ class HomeViewController: UIViewController {
     
     private func reviewTerms(completion: () -> Void) {
         guard Preferences.termsAccepted == false else { completion(); return }
-        let alertTitle = NSLocalizedString("EULA_title", comment: "")
-        let alertMessage = NSLocalizedString("EULA_content", comment: "")
-        let alertController = UIAlertController(title: alertTitle, message: alertMessage, preferredStyle: .Alert)
-        let viewTitle = NSLocalizedString("EULA_view", comment: "")
-        let viewAction = UIAlertAction(title: viewTitle, style: .Cancel, handler: { action in
+        let alertController = UIAlertController(title: Translation.HomeView.TermsAlert.Title.String,
+                                                message: Translation.HomeView.TermsAlert.Message.String,
+                                                preferredStyle: .Alert
+        )
+        let showTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.ShowTermsAction.Title.String, style: .Cancel) { action in
             UIApplication.sharedApplication().openURL(URLs.EULA)
             self.reviewTerms(completion) // Review terms until user accepted terms
-        })
-        let confirmTitle = NSLocalizedString("EULA_confirm", comment: "")
-        let confirmAction = UIAlertAction(title: confirmTitle, style: .Default, handler: { action in
+        }
+        let acceptTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.AcceptTermsAction.Title.String, style: .Default) { action in
             Preferences.termsAccepted = true
             completion() // Terms accepted
-        })
-        alertController.addAction(viewAction)
-        alertController.addAction(confirmAction)
+        }
+        alertController.addAction(showTermsAction)
+        alertController.addAction(acceptTermsAction)
         presentViewController(alertController, animated: true, completion: nil)
     }
     
@@ -161,7 +166,7 @@ class HomeViewController: UIViewController {
     
     @objc private func newCheckInURLNotification(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
-            self.reviewNewCheckIn({ 
+            self.reviewNewCheckIn({
                 print("Review new check-in done.")
             })
         })
@@ -169,42 +174,54 @@ class HomeViewController: UIViewController {
     
     // MARK: - Actions
     
-    @IBAction func optionButtonTap(sender: AnyObject) {
+    @IBAction func optionButtonTapped(sender: AnyObject) {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
         if let popoverController = alertController.popoverPresentationController {
             popoverController.barButtonItem = sender as? UIBarButtonItem
         }
-        let settingsAction = UIAlertAction(title: NSLocalizedString("Settings", comment: ""), style: .Default) { (action) -> Void in
-            self.performSegueWithIdentifier("SettingsFromHome", sender: alertController)
+        let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .Default) { (action) -> Void in
+            self.performSegueWithIdentifier(Segue.Settings, sender: alertController)
         }
-        let aboutAction = UIAlertAction(title: NSLocalizedString("About", comment: ""), style: .Default) { (action) -> Void in
-            self.performSegueWithIdentifier("AboutFromHome", sender: alertController)
+        let aboutAction = UIAlertAction(title: Translation.AboutView.Title.String, style: .Default) { (action) -> Void in
+            self.performSegueWithIdentifier(Segue.About, sender: alertController)
         }
-        let cancelAction = UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .Cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
         alertController.addAction(settingsAction)
         alertController.addAction(aboutAction)
         alertController.addAction(cancelAction)
         presentViewController(alertController, animated: true, completion: nil)
     }
     
-    @IBAction func scanButtonTap(sender: AnyObject) {
+    @IBAction func scanButtonTapped(sender: AnyObject) {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-            performSegueWithIdentifier("Scan", sender: sender)
+            performSegueWithIdentifier(Segue.Scan, sender: sender)
         } else {
-            let alertTitle = NSLocalizedString("No camera available.", comment: "")
-            let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
-            let cancelTitle = NSLocalizedString("Cancel", comment: "")
-            let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
-            alertController.addAction(cancelAction)
-            presentViewController(alertController, animated: true, completion: nil)
+            showNoCameraAlert()
         }
     }
     
-    @IBAction func noCodeButtonTap(sender: AnyObject) {
-        let alertTitle = NSLocalizedString("In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either.", comment: "")
-        let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
-        let cancelTitle = NSLocalizedString("Cancel", comment: "")
-        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
+    @IBAction func noCodeButtonTapped(sender: AnyObject) {
+        showNoCodeAlert()
+    }
+    
+    // MARK: - Alerts
+    
+    private func showNoCameraAlert() {
+        let alertController = UIAlertController(title: Translation.Common.Error.String,
+                                                message: Translation.HomeView.NoCameraAlert.Message.String,
+                                                preferredStyle: .Alert
+        )
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
+        alertController.addAction(cancelAction)
+        presentViewController(alertController, animated: true, completion: nil)
+    }
+    
+    private func showNoCodeAlert() {
+        let alertController = UIAlertController(title: Translation.HomeView.NoCodeAlert.Title.String,
+                                                message: Translation.HomeView.NoCodeAlert.Message.String,
+                                                preferredStyle: .Alert
+        )
+        let cancelAction = UIAlertAction(title: Translation.Common.OK.String, style: .Cancel, handler: nil)
         alertController.addAction(cancelAction)
         presentViewController(alertController, animated: true, completion: nil)
     }

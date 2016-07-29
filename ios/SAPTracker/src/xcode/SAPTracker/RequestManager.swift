@@ -139,7 +139,7 @@ class RequestManager: NSObject {
     }
     
     func getEventFailure(eventID: String, error: NSError, failure: (String, NSError) -> Void) -> Void {
-        failure(String(format: NSLocalizedString("Couldn't get event %@", comment: ""), eventID), error)
+        failure(String(format: Translation.RequestManager.EventLoadingFailure.String, eventID), error)
     }
     
     // MARK: - Leaderboard
@@ -162,7 +162,7 @@ class RequestManager: NSObject {
     }
     
     func getLeaderboardFailure(leaderboardName: String, error: NSError, failure: (String, NSError) -> Void) {
-        failure(String(format: NSLocalizedString("Couldn't get leader board %@", comment: ""), leaderboardName), error)
+        failure(String(format: Translation.RequestManager.LeaderboardLoadingFailure.String, leaderboardName), error)
     }
     
     // MARK: - Competitor
@@ -185,7 +185,7 @@ class RequestManager: NSObject {
     }
     
     func getCompetitorFailure(competitorID: String, error: NSError, failure: (String, NSError) -> Void) {
-        failure(String(format: NSLocalizedString("Couldn't get competitor %@", comment: ""), competitorID), error)
+        failure(String(format: Translation.RequestManager.CompetitorLoadingFailure.String, competitorID), error)
     }
     
     // MARK: - Team

@@ -11,21 +11,24 @@ import Foundation
 class TimerViewController: UIViewController {
 
     private let startDate = NSDate()
-    private let dateFormatter = NSDateFormatter()
     
-    @IBOutlet weak var trackingTimeLabel: UILabel!
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var timeLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.setupDateFormatter()
-        self.setupTimer()
+        setup()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
     
-    private func setupDateFormatter() {
-        dateFormatter.dateFormat = "HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
+    private func setup() {
+        setupLocalization()
+        setupTimer()
+    }
+    
+    private func setupLocalization() {
+        titleLabel.text = Translation.TimerView.TitleLabel.Text.String
     }
     
     private func setupTimer() {
@@ -44,7 +47,16 @@ class TimerViewController: UIViewController {
         let currentDate = NSDate()
         let timeInterval = currentDate.timeIntervalSinceDate(startDate)
         let timerDate = NSDate(timeIntervalSince1970: timeInterval)
-        trackingTimeLabel.text = dateFormatter.stringFromDate(timerDate)
+        timeLabel.text = dateFormatter.stringFromDate(timerDate)
     }
+    
+    // MARK: - Properties
+    
+    private lazy var dateFormatter: NSDateFormatter = {
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateFormat = "HH:mm:ss"
+        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
+        return dateFormatter
+    }()
     
 }

@@ -17,10 +17,19 @@ class LeaderboardViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setup()
+    }
+    
+    // MARK: - Setup
+    
+    private func setup() {
+        setupLocalization()
         setupWebView()
     }
     
-    // MARK: - Setups
+    private func setupLocalization() {
+        navigationItem.title = Translation.LeaderboardView.Title.String
+    }
     
     private func setupWebView() {
         guard let url = regatta.leaderboardURL() else { return }
@@ -45,11 +54,8 @@ extension LeaderboardViewController: UIWebViewDelegate {
     
     func webView(webView: UIWebView, didFailLoadWithError error: NSError?) {
         activityIndicator.stopAnimating()
-        // FIXME: - Translation
-        let alertTitle = NSLocalizedString("Couldn't load leaderboard view", comment: "")
-        let alertController = UIAlertController(title: alertTitle, message: nil, preferredStyle: .Alert)
-        let okTitle = NSLocalizedString("OK", comment: "")
-        let okAction = UIAlertAction(title: okTitle, style: .Default) { (action) in
+        let alertController = UIAlertController(title: error?.localizedDescription, message: nil, preferredStyle: .Alert)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
             self.presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
         }
         alertController.addAction(okAction)

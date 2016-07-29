@@ -84,17 +84,6 @@ public class RegattaData: NSObject {
         self.init(url: url)
     }    
     
-    // Properties
-    
-    var welcomeString: String {
-        get {
-            return String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""),
-                          competitorData.name,
-                          leaderboardData.name,
-                          competitorData.sailID)
-        }
-    }
-    
     // MARK: - Helper
     
     class private func queryItemValue(queryItems: [NSURLQueryItem]?, itemName: String) -> String? {

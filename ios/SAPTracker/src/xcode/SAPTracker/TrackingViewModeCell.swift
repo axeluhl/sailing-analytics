@@ -1,5 +1,5 @@
 //
-//  ModeTrackingTableViewCell.swift
+//  TrackingViewModeCell.swift
 //  SAPTracker
 //
 //  Created by Raimund Wege on 07.06.16.
@@ -8,13 +8,14 @@
 
 import UIKit
 
-class ModeTrackingTableViewCell: UITableViewCell {
+class TrackingViewModeCell: UITableViewCell {
 
+    @IBOutlet weak var modeTitleLabel: UILabel!
     @IBOutlet weak var modeLabel: UILabel!
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        setupModeLabel(GPSFixController.Mode.Offline)
+        setup()
         subscribeForNotifications()
     }
     
@@ -22,7 +23,16 @@ class ModeTrackingTableViewCell: UITableViewCell {
         self.unsubscribeFromNotifications()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
+    
+    private func setup() {
+        setupLocalization()
+        setupModeLabel(GPSFixController.Mode.Offline)
+    }
+    
+    private func setupLocalization() {
+        modeTitleLabel.text = Translation.GPSFixController.Mode.String
+    }
     
     private func setupModeLabel(mode: GPSFixController.Mode) {
         modeLabel.text = mode.description
@@ -42,7 +52,7 @@ class ModeTrackingTableViewCell: UITableViewCell {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func regattaControllerModeChanged(notification: NSNotification) {
+    @objc private func regattaControllerModeChanged(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             guard let rawValue = notification.userInfo?[GPSFixController.UserInfo.Mode] as? String else { return }
             guard let mode = GPSFixController.Mode(rawValue: rawValue) else { return }

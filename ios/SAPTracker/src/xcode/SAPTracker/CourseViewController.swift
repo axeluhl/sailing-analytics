@@ -12,22 +12,32 @@ class CourseViewController: UIViewController {
     
     private let defaultCourseText = "- °"
     
+    @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var courseLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.setupCourseLabel(-1.0)
-        self.subscribeForNotifications()
-    }
-
-    deinit {
-        self.unsubscribeFromNotifications()
+        setup()
+        subscribeForNotifications()
     }
     
-    // MARK: - Setups
+    deinit {
+        unsubscribeFromNotifications()
+    }
+    
+    // MARK: - Setup
+    
+    private func setup() {
+        setupCourseLabel(-1.0)
+        setupLocalization()
+    }
     
     private func setupCourseLabel(course: Double) {
-        self.courseLabel.text = course < 0 ? defaultCourseText : String(format: "%.0f °", course)
+        courseLabel.text = course < 0 ? defaultCourseText : String(format: "%.0f °", course)
+    }
+    
+    private func setupLocalization() {
+        titleLabel.text = Translation.CourseView.TitleLabel.Text.String
     }
     
     // MARK: - Notifications
@@ -47,14 +57,14 @@ class CourseViewController: UIViewController {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func locationManagerUpdated(notification: NSNotification) {
+    @objc private func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
             self.setupCourseLabel(locationData.location.course)
         })
     }
     
-    func locationManagerFailed(notification: NSNotification) {
+    @objc private func locationManagerFailed(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             self.setupCourseLabel(-1.0)
         })

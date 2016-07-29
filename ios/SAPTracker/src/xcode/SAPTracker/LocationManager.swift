@@ -21,15 +21,27 @@ class LocationManager: NSObject {
     struct UserInfo {
         static let Error = "NSError"
         static let LocationData = "LocationData"
+        static let Status = "Status"
+    }
+    
+    enum Status: String {
+        case Tracking
+        case NotTracking
+        var description: String {
+            switch self {
+            case .Tracking: return Translation.LocationManager.Status.Tracking.String
+            case .NotTracking: return Translation.LocationManager.Status.NotTracking.String
+            }
+        }
     }
     
     enum LocationManagerError: ErrorType {
-        case LocationServicesDisabled
         case LocationServicesDenied
+        case LocationServicesDisabled
         var description: String {
             switch self {
-            case .LocationServicesDenied: return NSLocalizedString("Please enable location services for this app.", comment: "")
-            case .LocationServicesDisabled: return NSLocalizedString("Please enable location services.", comment: "")
+            case .LocationServicesDenied: return Translation.LocationManager.LocationServicesDeniedError.String
+            case .LocationServicesDisabled: return Translation.LocationManager.LocationServicesDisabledError.String
             }
         }
     }
@@ -47,10 +59,14 @@ class LocationManager: NSObject {
     override init() {
         locationManager = CLLocationManager()
         super.init()
-        setupLocationManager()
+        setup()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
+    
+    private func setup() {
+        setupLocationManager()
+    }
     
     private func setupLocationManager() {
         locationManager.pausesLocationUpdatesAutomatically = false;

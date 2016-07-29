@@ -29,7 +29,7 @@ class GPSAccuracyView : UIView {
     }
     
     private func initialize() {
-        setups()
+        setup()
         subscribeForNotifications()
     }
     
@@ -37,9 +37,9 @@ class GPSAccuracyView : UIView {
         unsubscribeFromNotifications()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
     
-    private func setups() {
+    private func setup() {
         setupBarView()
         setupBackroundColor()
     }
@@ -72,14 +72,14 @@ class GPSAccuracyView : UIView {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func locationManagerUpdated(notification: NSNotification) {
+    @objc private func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
             self.drawBar(locationData.location.horizontalAccuracy)
         })
     }
     
-    func locationManagerFailed(notification: NSNotification) {
+    @objc private func locationManagerFailed(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             self.drawBar(-1.0)
         })

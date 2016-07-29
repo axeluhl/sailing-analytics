@@ -40,13 +40,14 @@ class CheckInController : NSObject {
     }
     
     private func checkInSuccess(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
-        let alertController = UIAlertController(title: regattaData.welcomeString, message: nil, preferredStyle: .Alert)
-        let okTitle = NSLocalizedString("OK", comment: "")
-        let okAction = UIAlertAction(title: okTitle, style: .Default) { (action) in
+        let alertController = UIAlertController(title: String(format: Translation.CheckInController.WelcomeAlert.Title.String, regattaData.competitorData.name),
+                                                message: String(format: Translation.CheckInController.WelcomeAlert.Message.String, regattaData.competitorData.sailID),
+                                                preferredStyle: .Alert
+        )
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
             self.postCheckIn(regattaData, completion: completion)
         }
-        let cancelTitle = NSLocalizedString("Cancel", comment: "")
-        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
+        let cancelAction = UIAlertAction(title: Translation.CheckInController.WelcomeAlert.CancelAction.Title.String, style: .Cancel) { (action) in
             self.checkInDidFinish(withSuccess: false, completion: completion)
         }
         alertController.addAction(okAction)
@@ -56,8 +57,7 @@ class CheckInController : NSObject {
     
     private func checkInFailure(title: String, error: NSError, completion: (withSuccess: Bool) -> Void) {
         let alertController = UIAlertController(title: title, message: error.localizedDescription, preferredStyle: .Alert)
-        let cancelTitle = NSLocalizedString("Cancel", comment: "")
-        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel) { (action) in
             self.checkInDidFinish(withSuccess: false, completion: completion)
         }
         alertController.addAction(cancelAction)
@@ -95,10 +95,11 @@ class CheckInController : NSObject {
     }
     
     private func postCheckInFailure(regattaData: RegattaData, error: AnyObject, completion: (withSuccess: Bool) -> Void) {
-        let alertTitle = String(format:NSLocalizedString("Couldn't check-in to %@", comment: ""), regattaData.leaderboardName)
-        let alertController = UIAlertController(title: alertTitle, message: error.localizedDescription, preferredStyle: .Alert)
-        let cancelTitle = NSLocalizedString("Cancel", comment: "")
-        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
+        let alertController = UIAlertController(title: Translation.Common.Error.String,
+                                                message: Translation.CheckInController.PostCheckInFailureAlert.Message.String,
+                                                preferredStyle: .Alert
+        )
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel) { (action) in
             self.checkInDidFinish(withSuccess: false, completion: completion)
         }
         alertController.addAction(cancelAction)
@@ -114,5 +115,5 @@ class CheckInController : NSObject {
     private func showCheckInAlert(alertController: UIAlertController) {
         self.delegate?.showCheckInAlert(self, alertController: alertController)
     }
-
+    
 }

@@ -19,7 +19,7 @@ class TrackingViewController : UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setups()
+        setup()
     }
 	
     override func updateViewConstraints() {
@@ -27,15 +27,20 @@ class TrackingViewController : UIViewController {
         tableViewHeight.constant = tableView.contentSize.height
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
     
-    private func setups() {
+    private func setup() {
         setupButtons()
+        setupLocalization()
         setupNavigationBar()    
     }
     
     private func setupButtons() {
         stopTrackingButton.setBackgroundImage(Images.RedHighlighted, forState: .Highlighted)
+    }
+    
+    private func setupLocalization() {
+        stopTrackingButton.setTitle(Translation.TrackingView.StopTrackingButton.Title.String, forState: .Normal)
     }
     
     private func setupNavigationBar() {
@@ -45,19 +50,20 @@ class TrackingViewController : UIViewController {
 	// MARK: - Actions
 	
 	@IBAction func stopTrackingButtonTapped(sender: AnyObject) {
-		let alertTitle = NSLocalizedString("Stop tracking?", comment: "")
-		let alertController = UIAlertController(title: alertTitle, message: "", preferredStyle: .Alert)
-        let stopTitle = NSLocalizedString("Stop", comment: "")
-		let stopAction = UIAlertAction(title: stopTitle, style: .Default) { action in
+		let alertController = UIAlertController(title: Translation.TrackingView.StopTrackingAlert.Title.String,
+		                                        message: Translation.TrackingView.StopTrackingAlert.Message.String,
+		                                        preferredStyle: .Alert
+        )
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { action in
 			LocationManager.sharedManager.stopTracking()
-            
-			// SendGPSFixController.sharedManager.checkIn = nil
-            
-			self.dismissViewControllerAnimated(true, completion: nil)
+            SVProgressHUD.show()
+            self.regattaController.gpsFixController.sendAll({ (withSuccess) in
+                SVProgressHUD.dismiss()
+                self.dismissViewControllerAnimated(true, completion: nil)
+            })
 		}
-        let cancelTitle = NSLocalizedString("Cancel", comment: "")
-        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
-        alertController.addAction(stopAction)
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
+        alertController.addAction(okAction)
         alertController.addAction(cancelAction)
 		presentViewController(alertController, animated: true, completion: nil)
 	}
@@ -88,9 +94,8 @@ extension TrackingViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier(TrackingViewController.Rows[indexPath.row]) ?? UITableViewCell()
-        if (cell.isKindOfClass(CachedFixesTrackingTableViewCell)) {
-            let cachedFixesCell = cell as! CachedFixesTrackingTableViewCell
-            cachedFixesCell.regatta = regatta
+        if let gpsFixesCell = cell as? TrackingViewGPSFixesCell {
+            gpsFixesCell.regatta = regatta
         }
         return cell
     }

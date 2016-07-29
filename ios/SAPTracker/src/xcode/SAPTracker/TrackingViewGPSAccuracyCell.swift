@@ -8,14 +8,15 @@
 
 import UIKit
 
-class GPSAccuracyTrackingTableViewCell: UITableViewCell {
+class TrackingViewGPSAccuracyCell: UITableViewCell {
 
+    @IBOutlet weak var gpsAccuracyTitleLabel: UILabel!
     @IBOutlet weak var gpsAccuracyLabel: UILabel!
     @IBOutlet weak var gpsAccuracyView: GPSAccuracyView!
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        setupGPSAccuracyLabel()
+        setup()
         subscribeForNotifications()
     }
     
@@ -23,14 +24,23 @@ class GPSAccuracyTrackingTableViewCell: UITableViewCell {
         unsubscribeFromNotifications()
     }
     
-    // MARK: - Setups
+    // MARK: - Setup
+    
+    private func setup() {
+        setupGPSAccuracyLabel()
+        setupLocalization()
+    }
     
     private func setupGPSAccuracyLabel() {
-        gpsAccuracyLabel.text = NSLocalizedString("No GPS", comment: "")
+        gpsAccuracyLabel.text = Translation.TrackingView.TableView.GPSAccuracyCell.GPSAccuracyLabel.Text.NoGPS.String
     }
     
     private func setupGPSAccuracyLabel(horizontalAccuracy: Double!) {
         gpsAccuracyLabel.text = "~ " + String(format: "%.0f", horizontalAccuracy) + " m"
+    }
+    
+    private func setupLocalization() {
+        gpsAccuracyTitleLabel.text = Translation.TrackingView.TableView.GPSAccuracyCell.GPSAccuracyTitleLabel.Text.String
     }
     
     // MARK: - Notifications
@@ -52,14 +62,14 @@ class GPSAccuracyTrackingTableViewCell: UITableViewCell {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
-    func locationManagerUpdated(notification: NSNotification) {
+    @objc private func locationManagerUpdated(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             guard let locationData = notification.userInfo?[LocationManager.UserInfo.LocationData] as? LocationData else { return }
             self.setupGPSAccuracyLabel(locationData.location.horizontalAccuracy)
         })
     }
     
-    func locationManagerFailed(notification: NSNotification) {
+    @objc private func locationManagerFailed(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             self.setupGPSAccuracyLabel()
         })

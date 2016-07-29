@@ -8,6 +8,10 @@
 
 import Foundation
 
+struct Application {
+    static let Title = "SAP Sail InSight"
+}
+
 struct URLs {
     static let EULA =  NSURL(string: "http://www.sapsailing.com/EULA_iOS_SailingBoatTracker.html")!
 }

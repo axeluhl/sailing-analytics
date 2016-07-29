@@ -18,11 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Initialize core data, migrate database if needed, or delete if migration needed but not possible
         CoreDataManager.sharedManager
-        
-        // Setup
-        setupAFNetworking()
-        setupNavigationBarApperance()
-        setupPageControlApperance()
+        setup()
         return true
     }
     
@@ -55,7 +51,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         CoreDataManager.sharedManager.saveContext()
     }
 
-    // MARK: - Setups
+    // MARK: - Setup
+    
+    private func setup() {
+        setupAFNetworking()
+        setupNavigationBarApperance()
+        setupPageControlApperance()
+    }
     
     private func setupAFNetworking() {
         AFNetworkActivityIndicatorManager.sharedManager().enabled = true
