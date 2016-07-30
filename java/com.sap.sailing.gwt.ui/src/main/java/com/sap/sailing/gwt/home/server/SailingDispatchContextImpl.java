@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.server;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.util.Date;
 import java.util.Locale;
@@ -87,10 +88,10 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     }
     
     @Override
-    public void setPreferenceForCurrentUser(String preferenceKey, Object preference) {
+    public void setPreferenceForCurrentUser(String preferenceKey, Serializable preference) {
         User currentUser = securityService.getCurrentUser();
         if (currentUser != null) {
-            userStore.setPreferenceObject(currentUser.getName(), preferenceKey, preference);
+            securityService.setPreferenceObject(currentUser.getName(), preferenceKey, preference);
         }
     }
 }
