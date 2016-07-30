@@ -116,6 +116,11 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     public MarkInfo getMarkInfo() {
         return markInfo;
     }
