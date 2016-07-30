@@ -1,28 +1,15 @@
 package com.sap.sailing.android.tracking.app.services;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.annotation.TargetApi;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.BitmapFactory;
-import android.hardware.GeomagneticField;
-import android.location.Location;
-import android.os.BatteryManager;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -43,6 +30,24 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 
+import android.annotation.TargetApi;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.BitmapFactory;
+import android.hardware.GeomagneticField;
+import android.location.Location;
+import android.os.BatteryManager;
+import android.os.Binder;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
+
 public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -61,17 +66,47 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION_ID = R.string.tracker_started;
 
-    private final int UPDATE_INTERVAL_DEFAULT = 3000;
-    private final int UPDATE_INTERVAL_POWERSAVE_MODE = 30000;
-    private final float BATTERY_POWER_SAVE_TRESHOLD = 0.2f;
+    public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
+    private final static int UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE = 30000;
+    private final static float BATTERY_POWER_SAVE_TRESHOLD = 0.2f;
     private boolean initialLocation;
 
     private String checkinDigest;
     private EventInfo event;
+    
+    /**
+     * Must be synchronized upon while modifying the {@link #timerForDelayingSendingMessages} field
+     * and while modifying the {@link #messagesQueuedBasedOnSendingInterval} list.
+     */
+    private final Object messageSendingTimerMonitor = new Object();
+    
+    /**
+     * If {@code null}, no timer is currently active for sending out messages queued in
+     * {@link #messagesQueuedBasedOnSendingInterval} after the send interval, and the next message sending intent
+     * arriving can be forwarded to the sending service immediately, with the timer being started immediately afterwards
+     * to delay the sending of messages arriving later until the resend interval has expired. If not {@code null},
+     * messages that arrive in {@link #enqueueForSending(Intent)} will be appended to
+     * {@link #messagesQueuedBasedOnSendingInterval}.
+     * <p>
+     * 
+     * When the timer "rings" it acquires the {@link #messageSendingTimerMonitor} and checks for messages to send. If
+     * messages are found, they are removed from the {@link #messagesQueuedBasedOnSendingInterval} list, the monitor is
+     * released and the messages are then forwarded to the sending service. The timer remains running. Otherwise, the
+     * timer stops itself, sets this field to {@code null} and releases the monitor.
+     */
+    private Timer timerForDelayingSendingMessages;
+    
+    /**
+     * When a message is added and {@link #timerForDelayingSendingMessages} is {@code null}, a new timer
+     * will be created and assigned to {@link #timerForDelayingSendingMessages}. Otherwise, we can assume that the
+     * existing timer will pick up this new element upon its next turn.
+     */
+    private List<Intent> messagesQueuedBasedOnSendingInterval;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        messagesQueuedBasedOnSendingInterval = new LinkedList<>();
         prefs = new AppPreferences(this);
 
         initialLocation = true;
@@ -202,33 +237,69 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         updateResendIntervalSetting();
         reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
                 location.getLatitude(), location.getLongitude(), location.getAltitude());
-
         JSONObject json = new JSONObject();
         try {
             JSONArray jsonArray = new JSONArray();
             JSONObject fixJson = new JSONObject();
-
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.BEARING_DEG, location.getBearing());
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, location.getTime());
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.SPEED_M_PER_S, location.getSpeed());
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
-
             jsonArray.put(fixJson);
-
             json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.FIXES, jsonArray);
             json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.DEVICE_UUID, prefs.getDeviceIdentifier());
-
             String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
-
-            startService(MessageSendingService.createMessageIntent(this, postUrlStr, null, UUID.randomUUID(),
-                    json.toString(), null));
-
+            final Intent messageSendingIntent = MessageSendingService.createMessageIntent(
+                    this, postUrlStr, null, UUID.randomUUID(), json.toString(), null);
+            enqueueForSending(messageSendingIntent);
         } catch (JSONException ex) {
             ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
         }
     }
 
+    /**
+     * Based on the {@link #prefs} and the {@link AppPreferences#getMessageSendingIntervalInMillis()} the message
+     * sending intent is either immediately forwarded to the message sending service or it is enqueued for a timer
+     * to pick it up in a bulk operation later, after the sending interval has expired.
+     */
+    private void enqueueForSending(final Intent messageSendingIntent) {
+        synchronized (messageSendingTimerMonitor) {
+            messagesQueuedBasedOnSendingInterval.add(messageSendingIntent);
+            if (timerForDelayingSendingMessages == null) {
+                timerForDelayingSendingMessages = new Timer("Message collecting timer", /* daemon */ true);
+                final TimerTask timerTask = createTimerTask();
+                timerForDelayingSendingMessages.schedule(timerTask, /* initial delay */ 0);
+            }
+        }
+    }
+
+    private TimerTask createTimerTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                final List<Intent> intentsToSend = new ArrayList<>();
+                boolean reschedule = false;
+                synchronized (messageSendingTimerMonitor) {
+                    if (!messagesQueuedBasedOnSendingInterval.isEmpty()) {
+                        reschedule = true;
+                        intentsToSend.addAll(messagesQueuedBasedOnSendingInterval);
+                        messagesQueuedBasedOnSendingInterval.clear();
+                    }
+                    if (!reschedule) {
+                        timerForDelayingSendingMessages.cancel();
+                        timerForDelayingSendingMessages = null;
+                    } else {
+                        timerForDelayingSendingMessages.schedule(createTimerTask(), prefs.getMessageSendingIntervalInMillis());
+                    }
+                }
+                for (final Intent intentToSend : intentsToSend) {
+                    startService(intentToSend);
+                }
+            }
+        };
+    }
+    
     private void storeInitialTrackingTimestamp() {
         if (prefs.getTrackingTimerStarted() == 0) {
             prefs.setTrackingTimerStarted(System.currentTimeMillis());
@@ -243,21 +314,21 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         float batteryPct = getBatteryPercentage();
         boolean batteryIsCharging = prefs.getBatteryIsCharging();
 
-        int updateInterval = UPDATE_INTERVAL_DEFAULT;
+        int updateInterval = UPDATE_INTERVAL_IN_MILLIS_DEFAULT;
 
         if (prefs.getEnergySavingEnabledByUser() || (batteryPct < BATTERY_POWER_SAVE_TRESHOLD && !batteryIsCharging)) {
             if (BuildConfig.DEBUG) {
                 ExLog.i(this, "POWER-LEVELS", "in power saving mode");
             }
 
-            updateInterval = UPDATE_INTERVAL_POWERSAVE_MODE;
+            updateInterval = UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE;
         } else {
             if (BuildConfig.DEBUG) {
                 ExLog.i(this, "POWER-LEVELS", "in default power mode");
             }
         }
 
-        prefs.setMessageResendInterval(updateInterval);
+        prefs.setMessageResendIntervalInMillis(updateInterval);
     }
 
     /**

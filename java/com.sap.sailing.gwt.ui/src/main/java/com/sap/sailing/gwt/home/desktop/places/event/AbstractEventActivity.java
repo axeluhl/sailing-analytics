@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.desktop.places.event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.core.shared.GWT;
@@ -33,6 +34,9 @@ import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewBaseSettings;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
@@ -229,19 +233,20 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     @Override
     public String getRegattaOverviewLink() {
-        String url = "RegattaOverview.html?ignoreLocalSettings=true&onlyrunningraces=false&event=" + getCtx().getEventId();
-        url += "&onlyracesofsameday=" + eventDTO.isRunning();
+        RegattaRaceStatesSettings regattaRaceStatesSettings = new RegattaRaceStatesSettings();
+        regattaRaceStatesSettings.setShowOnlyCurrentlyRunningRaces(false);
+        regattaRaceStatesSettings.setShowOnlyRaceOfSameDay(eventDTO.isRunning());
         if(showRegattaMetadata()) {
             if(getRegattaMetadata().isFlexibleLeaderboard()) {
                 String defaultCourseAreaId = getRegattaMetadata().getDefaultCourseAreaId();
                 if(defaultCourseAreaId != null && !defaultCourseAreaId.isEmpty()) {
-                    url += "&coursearea=" + defaultCourseAreaId;
+                    regattaRaceStatesSettings.getVisibleCourseAreaSettings().addValue(UUID.fromString(defaultCourseAreaId));
                 }
             } else {
-                url += "&regatta=" + getRegattaId();
+                regattaRaceStatesSettings.getVisibleRegattaSettings().addValue(getRegattaId());
             }
         }
-        return url;
+        return EntryPointWithSettingsLinkFactory.createRegattaOverviewLink(new RegattaOverviewBaseSettings(getCtx().getEventId()), regattaRaceStatesSettings);
     }
     
     @Override

@@ -156,7 +156,12 @@ public class RegattaDetailsComposite extends Composite {
                 return series.isFleetsCanRunInParallel() ? stringMessages.yes() : stringMessages.no();
             }
         };
-
+        TextColumn<SeriesDTO> maximumNumberOfDiscardsColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.getMaximumNumberOfDiscards() == null ? "" : (""+series.getMaximumNumberOfDiscards());
+            }
+        };
 
         TextColumn<SeriesDTO> racesColumn = new TextColumn<SeriesDTO>() {
             @Override
@@ -256,6 +261,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(startsWithZeroScoreColumn, stringMessages.startsWithZeroScore());
         table.addColumn(hasSplitFleetContiguousScoringColumn, stringMessages.hasSplitFleetContiguousScoring());
         table.addColumn(isFleetsCanRunInParallelColumn, stringMessages.canFleetsRunInParallel());
+        table.addColumn(maximumNumberOfDiscardsColumn, stringMessages.maximumNumberOfDiscards());
         table.addColumn(seriesActionColumn, stringMessages.actions());
         
         return table;
@@ -295,7 +301,8 @@ public class RegattaDetailsComposite extends Composite {
         final boolean isFirstColumnIsNonDiscardableCarryForwardChanged = series.isFirstColumnIsNonDiscardableCarryForward() != seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward();
         final boolean hasSplitFleetContiguousScoringChanged = series.hasSplitFleetContiguousScoring() != seriesDescriptor.hasSplitFleetContiguousScoring();
         final boolean seriesResultDiscardingThresholdsChanged = !Arrays.equals(series.getDiscardThresholds(),
-                seriesDescriptor.getResultDiscardingThresholds());       
+                seriesDescriptor.getResultDiscardingThresholds());
+        final boolean maximumNumberOfDiscardsChanged = series.getMaximumNumberOfDiscards() != seriesDescriptor.getMaximumNumberOfDiscards();
         final boolean seriesNameChanged = !series.getName().equals(seriesDescriptor.getSeriesName());
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
@@ -356,13 +363,13 @@ public class RegattaDetailsComposite extends Composite {
                     });
             if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
                     || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
-                    || seriesNameChanged) {
+                    || seriesNameChanged || maximumNumberOfDiscardsChanged) {
                 sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
                         seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
                         seriesDescriptor.isStartsWithZeroScore(),
                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
-                        seriesDescriptor.hasSplitFleetContiguousScoring(), series.getFleets(),
-                        new AsyncCallback<Void>() {
+                        seriesDescriptor.hasSplitFleetContiguousScoring(), seriesDescriptor.getMaximumNumberOfDiscards(),
+                        series.getFleets(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error trying to update series " + series.getName() + ": "

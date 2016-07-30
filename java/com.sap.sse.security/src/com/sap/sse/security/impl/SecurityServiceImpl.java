@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -391,17 +392,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void updateUserProperties(String username, String fullName, String company) throws UserManagementException {
+    public void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        updateUserProperties(user, fullName, company);
+        updateUserProperties(user, fullName, company, locale);
     }
 
-    private void updateUserProperties(User user, String fullName, String company) {
+    private void updateUserProperties(User user, String fullName, String company, Locale locale) {
         user.setFullName(fullName);
         user.setCompany(company);
+        user.setLocale(locale);
         apply(s->s.internalStoreUser(user));
     }
 

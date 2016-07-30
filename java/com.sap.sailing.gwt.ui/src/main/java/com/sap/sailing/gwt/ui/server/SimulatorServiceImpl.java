@@ -107,7 +107,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private SpeedWithBearing averageWind = null;
 
     public SimulatorServiceImpl() {
-        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
         Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
         /* maximumPoolSize */THREAD_POOL_SIZE,
         /* keepAliveTime */60, TimeUnit.SECONDS,

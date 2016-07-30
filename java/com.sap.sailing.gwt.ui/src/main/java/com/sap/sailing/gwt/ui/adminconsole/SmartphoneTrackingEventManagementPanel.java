@@ -110,7 +110,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     protected void addColumnsToLeaderboardTableAndSetSelectionModel(FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, 
             AdminConsoleTableResources tableResources, ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
-                leaderboardList.getList());
+                filteredLeaderboardList.getList());
         SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
                 leaderboardTable, tableResources, leaderboardColumnListHandler, listDataProvider);
         TextColumn<StrippedLeaderboardDTO> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
@@ -371,7 +371,9 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     @Override
     protected void addSelectedLeaderboardRacesControls(Panel racesPanel) {
         trackWind = new CheckBox(stringMessages.trackWind());
+        trackWind.setValue(true);
         correctWindDirectionForDeclination = new CheckBox(stringMessages.declinationCheckbox());
+        correctWindDirectionForDeclination.setValue(true);
         startStopTrackingButton = new ToggleButton(stringMessages.startTracking(), stringMessages.stopTracking());
         startStopTrackingButton.ensureDebugId("StartTrackingButton");
         startStopTrackingButton.setEnabled(false);

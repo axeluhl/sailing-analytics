@@ -160,8 +160,8 @@ public class LeaderboardCacheManager {
         }
 
         @Override
-        public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
-                MaxPointsReason newMaxPointsReason) {
+        public void maxPointsReasonChanced(Competitor competitor, RaceColumn raceColumn,
+                MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
             removeFromCache(leaderboard);
         }
 

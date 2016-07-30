@@ -126,8 +126,8 @@ public class SearchServiceTest {
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
         pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate,
-                "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /* sailorsInfoWebsiteURLAsString */ null,
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
+                "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /*baseURL*/null,
+                /* sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         kiel = pfingstbusch.getVenue();
         final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
         kiel.addCourseArea(kielAlpha);
@@ -137,7 +137,7 @@ public class SearchServiceTest {
         seriesCreationParams.put("Default",
                 new SeriesCreationParametersDTO(Collections.singletonList(new FleetDTO("Default", /* order */-1, Color.RED)),
                 /* medal */false, /* fleetsCanRunInParallel */ true, /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
-                /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false));
+                /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false, /* maximumNumberOfDiscards */ null));
         pfingstbusch29er = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "29er"), "29er", 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
@@ -164,8 +164,8 @@ public class SearchServiceTest {
         cal.set(2014, 5, 8, 18, 00);
         final TimePoint aalEndDate = new MillisecondsTimePoint(cal.getTime());
         aalEvent = server.apply(new CreateEvent("Aalregatta", /* eventDescription */ null, aalStartDate, aalEndDate,
-                "Flensburg", /* isPublic */ true, UUID.randomUUID(),  /* officialWebsiteURLAsString */ null, /*sailorsInfoWebsiteURLAsString */ null,
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
+                "Flensburg", /* isPublic */ true, UUID.randomUUID(),  /* officialWebsiteURLAsString */ null, /*baseURL*/null,
+                /*sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         flensburg = aalEvent.getVenue();
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
         flensburg.addCourseArea(flensburgStandard);

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/fiori_main_background">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fiori_main_background">
 
     <ImageView
         android:id="@+id/homeBackground"
@@ -12,8 +12,7 @@
         android:layout_alignParentTop="true"
         android:contentDescription="@string/empty"
         android:scaleType="centerCrop"
-        android:src="@drawable/working_title"/>
-
+        android:src="@drawable/working_title" />
 
     <TextView
         android:id="@+id/scan_hint_text"
@@ -21,9 +20,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/home_land_margin"
+        android:paddingBottom="@dimen/home_land_margin"
         android:text="@string/scan_hint"
-        android:textColor="@color/fiori_text_color"/>
+        android:textColor="@color/fiori_text_color" />
 
     <LinearLayout
         android:id="@+id/two_buttons_layout"
@@ -32,13 +31,13 @@
         android:layout_above="@+id/scan_hint_text"
         android:layout_marginBottom="@dimen/home_land_margin"
         android:layout_marginTop="@dimen/home_land_margin"
-        android:orientation="horizontal"
-        >
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/noQrCode"
             android:layout_width="0dp"
             android:layout_height="@dimen/home_button_height"
+            android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/home_land_margin"
             android:layout_marginRight="@dimen/home_land_margin"
             android:layout_weight="0.4"
@@ -46,23 +45,19 @@
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:text="@string/no_qr_code"
-            android:textColor="@color/fiori_text_color"/>
+            android:textColor="@color/fiori_text_color" />
 
         <Button
             android:id="@+id/scanQr"
             android:layout_width="0dp"
             android:layout_height="@dimen/home_button_height"
-            android:layout_marginLeft="@dimen/home_land_margin"
             android:layout_marginRight="@dimen/home_land_margin"
             android:layout_weight="0.6"
             android:background="@drawable/blue_button"
             android:text="@string/scan_qr"
             android:textAllCaps="true"
-            android:textStyle="bold"/>
-
-
+            android:textStyle="bold" />
     </LinearLayout>
-
 
     <ListView
         android:id="@+id/listRegatta"
@@ -71,8 +66,6 @@
         android:layout_above="@id/two_buttons_layout"
         android:layout_alignParentTop="true"
         android:divider="@color/separator_color"
-        android:dividerHeight="1dp"
-        >
-    </ListView>
+        android:dividerHeight="1dp" />
 
 </RelativeLayout>

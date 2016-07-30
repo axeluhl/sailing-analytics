@@ -550,6 +550,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         eventDBObject.put(FieldNames.EVENT_DESCRIPTION.name(), event.getDescription());
         eventDBObject.put(FieldNames.EVENT_ID.name(), event.getId());
         eventDBObject.put(FieldNames.EVENT_OFFICIAL_WEBSITE_URL.name(), event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
+        eventDBObject.put(FieldNames.EVENT_BASE_URL.name(), event.getBaseURL() != null ? event.getBaseURL().toString() : null);
         storeTimePoint(event.getStartDate(), eventDBObject, FieldNames.EVENT_START_DATE);
         storeTimePoint(event.getEndDate(), eventDBObject, FieldNames.EVENT_END_DATE);
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
@@ -677,6 +678,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbSeries.put(FieldNames.SERIES_NAME.name(), s.getName());
         dbSeries.put(FieldNames.SERIES_IS_MEDAL.name(), s.isMedal());
         dbSeries.put(FieldNames.SERIES_IS_FLEETS_CAN_RUN_IN_PARALLEL.name(), s.isFleetsCanRunInParallel());
+        dbSeries.put(FieldNames.SERIES_MAXIMUM_NUMBER_OF_DISCARDS.name(), s.getMaximumNumberOfDiscards());
         dbSeries.put(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name(), s.hasSplitFleetContiguousScoring());
         dbSeries.put(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name(), s.isStartsWithZeroScore());
         dbSeries.put(FieldNames.SERIES_STARTS_WITH_NON_DISCARDABLE_CARRY_FORWARD.name(), s.isFirstColumnIsNonDiscardableCarryForward());

@@ -52,8 +52,6 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * Searches the requested importer in the importers provided by the OSGi registry and imports the priovided sensor
      * data file.
      * 
-     * @param files
-     * @return
      * @throws IOException
      */
     private Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, InputStream>> files)

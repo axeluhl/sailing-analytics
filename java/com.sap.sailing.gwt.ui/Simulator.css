@@ -494,13 +494,8 @@ table {
 	border-collapse: separate;
 }
 
-.CombinedWindPanelParentDiv {
+.TopLeftControlsWrapperPanelParentDiv {
 	padding-top: 34px;
-	padding-left: 10px;
-}
-
-.TrueNorthIndicatorPanelParentDiv {
-	padding-top: 10px;
 	padding-left: 10px;
 }
 

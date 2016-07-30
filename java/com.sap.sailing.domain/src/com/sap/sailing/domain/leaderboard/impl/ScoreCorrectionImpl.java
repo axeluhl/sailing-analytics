@@ -103,10 +103,10 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         }
     }
 
-    protected void notifyListeners(Competitor competitor, MaxPointsReason oldMaxPointsReason,
-            MaxPointsReason newMaxPointsReason) {
+    protected void notifyListeners(Competitor competitor, RaceColumn raceColumn,
+            MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
         for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
-            listener.maxPointsReasonChanced(competitor, oldMaxPointsReason, newMaxPointsReason);
+            listener.maxPointsReasonChanced(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);
         }
     }
 
@@ -148,7 +148,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         } else {
             oldMaxPointsReason = maxPointsReasons.put(key, reason);
         }
-        notifyListeners(competitor, oldMaxPointsReason, reason);
+        notifyListeners(competitor, raceColumn, oldMaxPointsReason, reason);
     }
 
     @Override

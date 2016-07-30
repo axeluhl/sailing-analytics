@@ -151,7 +151,7 @@ public class ManeuverCountRaceColumn extends ExpandableSortableColumn<String> im
             for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
                 if (legDetail != null) {
                     for (ManeuverType maneuverType : new ManeuverType[] { ManeuverType.TACK, ManeuverType.JIBE, ManeuverType.PENALTY_CIRCLE }) {
-                        if (legDetail.numberOfManeuvers.get(maneuverType) != null) {
+                        if (legDetail.numberOfManeuvers != null && legDetail.numberOfManeuvers.get(maneuverType) != null) {
                             totalNumberOfManeuvers.put(maneuverType,
                                     totalNumberOfManeuvers.get(maneuverType) + (double) legDetail.numberOfManeuvers.get(maneuverType));
                         }

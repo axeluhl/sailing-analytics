@@ -132,6 +132,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String venueName = "Venue Name";
         final String[] courseAreaNames = new String[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrott" };
         final URL officialWebsiteURL = new URL("http://official.website.com");
+        final URL baseURL = new URL("http://base.url.com");
         final URL sailorsInfoWebsiteURL = new URL("http://sailorsinfo.website.com");
         final URL sailorsInfoWebsiteURLDE = new URL("http://sailorsinfo-de.website.com");
         final Venue venue = new VenueImpl(venueName);
@@ -148,6 +149,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         event.addLeaderboardGroup(lg2);
         event.setDescription(eventDescription);
         event.setOfficialWebsiteURL(officialWebsiteURL);
+        event.setBaseURL(baseURL);
         event.setSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
         event.setSailorsInfoWebsiteURL(Locale.GERMAN, sailorsInfoWebsiteURLDE);
         mof.storeEvent(event);
@@ -174,6 +176,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(eventName, loadedEvent.getName());
         assertEquals(eventDescription, loadedEvent.getDescription());
         assertEquals(event.getOfficialWebsiteURL(), loadedEvent.getOfficialWebsiteURL());
+        assertEquals(event.getBaseURL(), loadedEvent.getBaseURL());
         assertEquals(sailorsInfoWebsiteURL, loadedEvent.getSailorsInfoWebsiteURL(null));
         assertEquals(sailorsInfoWebsiteURLDE, loadedEvent.getSailorsInfoWebsiteURL(Locale.GERMAN));
         assertEquals(2, loadedEvent.getSailorsInfoWebsiteURLs().size());
