@@ -1,11 +1,11 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.ColorDrawable;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -14,11 +14,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
@@ -38,6 +40,8 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Speed;
 import com.viewpagerindicator.CirclePageIndicator;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
@@ -70,11 +74,18 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
      * This isn't nice. The callbacks for fragments inside a view pager are unreliable, but I want the values to be
      * displayed immediately after device rotation. Thus they are cached here and the fragments can pick them up.
      */
-    public String lastSpeedIndicatorText = "-";
-    public String lastCompassIndicatorText = "-°";
+    public String lastSpeedIndicatorTextWithoutUnit;
+    public String lastCompassIndicatorText = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT, getString(R.string.initial_hyphen_degrees));
+            lastSpeedIndicatorTextWithoutUnit = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, getString(R.string.initial_hyphen));
+        } else {
+            lastCompassIndicatorText = getString(R.string.initial_hyphen_degrees);
+            lastSpeedIndicatorTextWithoutUnit = getString(R.string.initial_hyphen);
+        }
         super.onCreate(savedInstanceState);
 
         prefs = new AppPreferences(this);
@@ -84,25 +95,25 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         } else {
             checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
         }
-        lastSpeedIndicatorText = getString(R.string.initial_hyphen);
-
         setContentView(R.layout.activity_tracking);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
 
         if (getSupportActionBar() != null) {
-            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this, checkinDigest);
+            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
+            LeaderboardInfo leaderboardInfo = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setTitle(eventInfo.leaderboardName);
+            getSupportActionBar().setTitle(leaderboardInfo.name);
             getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             if (toolbar != null) {
                 toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-                toolbar.setPadding(20, 0, 0, 0);
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+                toolbar.setPadding(sidePadding, 0, 0, 0);
             }
         }
 
@@ -121,10 +132,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             } else {
                 trackingFragment = new TrackingFragment();
             }
-
             lastViewPagerItem = savedInstanceState.getInt(SIS_LAST_VIEWPAGER_ITEM);
-            lastSpeedIndicatorText = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, "-");
-            lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT, "-°");
         } else {
             trackingFragment = new TrackingFragment();
         }
@@ -165,7 +173,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         super.onSaveInstanceState(outState);
 
         outState.putInt(SIS_LAST_VIEWPAGER_ITEM, lastViewPagerItem);
-        outState.putString(SIS_LAST_SPEED_TEXT, lastSpeedIndicatorText);
+        outState.putString(SIS_LAST_SPEED_TEXT, lastSpeedIndicatorTextWithoutUnit);
         outState.putString(SIS_LAST_COMPASS_TEXT, lastCompassIndicatorText);
 
         if (trackingFragment.isAdded()) {
@@ -245,7 +253,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     @Override
-    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float bearing, float speed) {
+    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing bearing, Speed speed) {
         if (trackingFragment.isAdded()) {
             trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
         }
@@ -385,13 +393,16 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     public void showStopTrackingConfirmationDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.please_confirm).setMessage(R.string.do_you_really_want_to_stop_tracking)
-            .setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
+            .setTitle(R.string.please_confirm)
+            .setMessage(R.string.do_you_really_want_to_stop_tracking)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface dialog, int whichButton) {
                     stopTracking();
                 }
-            }).setNegativeButton(android.R.string.no, null).create();
+            })
+            .setNegativeButton(android.R.string.no, null).create();
 
         dialog.show();
     }

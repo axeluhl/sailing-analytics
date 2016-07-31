@@ -505,7 +505,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
             invalidateCache();
         } else {
             final Timer cacheInvalidationTimer = new Timer(
-                    "TrackBasedEstimationWindTrackImpl cache invalidation timer for race " + getTrackedRace().getRace());
+                    "TrackBasedEstimationWindTrackImpl cache invalidation timer for race " + getTrackedRace().getRace(), /* isDaemon */ true);
             cacheInvalidationTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -618,6 +618,12 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
             // no action required; we're calculating based on each competitor's individual start time, not the start of
             // race
+        }
+
+        @Override
+        public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+            // no action required; we're calculating based on each competitor's individual finishing time, not the finishing of
+            // the race
         }
 
         @Override

@@ -11,11 +11,13 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -103,7 +105,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private UserStore store;
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
-    private final ConcurrentHashMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
+    private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
     /**
      * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not currently
@@ -390,17 +392,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void updateUserProperties(String username, String fullName, String company) throws UserManagementException {
+    public void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        updateUserProperties(user, fullName, company);
+        updateUserProperties(user, fullName, company, locale);
     }
 
-    private void updateUserProperties(User user, String fullName, String company) {
+    private void updateUserProperties(User user, String fullName, String company, Locale locale) {
         user.setFullName(fullName);
         user.setCompany(company);
+        user.setLocale(locale);
         apply(s->s.internalStoreUser(user));
     }
 

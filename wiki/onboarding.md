@@ -52,6 +52,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Fortmatter)
   * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
   * Install the Google Android SDK from the same Google Plugin for Eclipse update site
+  * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> Google -> Web Toolkit -> Add...)
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
@@ -60,7 +61,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
   * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
-  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder
+  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import as a git project in eclipse)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
@@ -157,6 +158,8 @@ The Android Apps can be build in Android Studio or gradle command line. Android 
     * Run (starts the app on a real device or emulator)
     * Debug (starts the app with an attached debugger)
     * Attach Debugger (useful, if the app is currently running and you want to start debugging against the correspond sources)
+
+If git is not in the Path system environment variable, the gradle build will not work.
 
 ##### To enable missing git integration
 

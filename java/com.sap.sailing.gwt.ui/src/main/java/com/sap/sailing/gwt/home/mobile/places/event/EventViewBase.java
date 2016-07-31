@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -21,7 +23,7 @@ import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 
 public interface EventViewBase extends IsWidget {
 
-    void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas);
+    void setQuickFinderValues(Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName);
 
     void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries);
 
@@ -46,6 +48,8 @@ public interface EventViewBase extends IsWidget {
         PlaceNavigation<?> getMediaPageNavigation();
         
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+        
+        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 
         String getRegattaId();
         

@@ -12,6 +12,8 @@ import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.RequestWrapper;
 import com.sap.sse.gwt.dispatch.servlets.AbstractDispatchServlet;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispatchContext> {
@@ -19,18 +21,22 @@ public class SailingDispatchServlet extends AbstractDispatchServlet<SailingDispa
 
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     private final ServiceTracker<EventNewsService, EventNewsService> eventNewsServiceTracker;
+    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final ServiceTracker<UserStore, UserStore> userStoreTracker;
 
     public SailingDispatchServlet() {
         final BundleContext context = Activator.getDefault();
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
         eventNewsServiceTracker = ServiceTrackerFactory.createAndOpen(context, EventNewsService.class);
+        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        userStoreTracker = ServiceTrackerFactory.createAndOpen(context, UserStore.class);
     }
 
     @Override
     protected <R extends Result, A extends Action<R, SailingDispatchContext>> SailingDispatchContext createDispatchContextFor(
             RequestWrapper<R, A, SailingDispatchContext> request) {
-        return new SailingDispatchContextImpl(request.getCurrentClientTime(),
-        racingEventServiceTracker.getService(), eventNewsServiceTracker.getService(), request
-                .getClientLocaleName(), getThreadLocalRequest());
+        return new SailingDispatchContextImpl(request.getCurrentClientTime(), racingEventServiceTracker.getService(),
+                eventNewsServiceTracker.getService(), securityServiceTracker.getService(),
+                userStoreTracker.getService(), request.getClientLocaleName(), getThreadLocalRequest());
     }
 }

@@ -3,6 +3,7 @@ package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 import java.util.List;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,7 +24,7 @@ public class PositioningActivity extends BaseActivity implements pingListener {
     private MarkInfo markInfo;
     private MarkPingInfo markPing;
     private LeaderboardInfo leaderBoard;
-    private String markerID;
+    private String markIdAsString;
     private String checkinDigest;
 
     @Override
@@ -31,7 +32,7 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_container);
         Intent intent = getIntent();
-        markerID = intent.getExtras().getString(getString(R.string.mark_id));
+        markIdAsString = intent.getExtras().getString(getString(R.string.mark_id));
         checkinDigest = intent.getExtras().getString(getString(R.string.checkin_digest));
 
         loadDataFromDatabase();
@@ -41,14 +42,16 @@ public class PositioningActivity extends BaseActivity implements pingListener {
             toolbar.hideSubtitle();
             toolbar.setTitleSize(20);
             setSupportActionBar(toolbar);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
         }
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
-            getSupportActionBar().setTitle(getString(R.string.set_position));
+            getSupportActionBar().setTitle(markInfo.getName());
         }
         BuoyFragment fragment = new BuoyFragment();
         fragment.setPingListener(this);
@@ -60,13 +63,13 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this, checkinDigest);
         setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest));
         for (MarkInfo mark : marks) {
-            if (mark.getId().equals(markerID)) {
+            if (mark.getId().toString().equals(markIdAsString)) {
                 setMarkInfo(mark);
                 break;
             }
         }
         if (markInfo != null) {
-            setPingFromDatabase(markerID);
+            setPingFromDatabase(markIdAsString);
         }
     }
 
@@ -139,6 +142,6 @@ public class PositioningActivity extends BaseActivity implements pingListener {
 
     @Override
     public void updatePing() {
-        setPingFromDatabase(markInfo.getId());
+        setPingFromDatabase(markInfo.getId().toString());
     }
 }

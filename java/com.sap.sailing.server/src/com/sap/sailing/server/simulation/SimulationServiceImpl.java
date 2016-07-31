@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.LegIdentifier;
 import com.sap.sailing.domain.common.LegIdentifierImpl;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.PathType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -42,7 +43,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.SimulationResults;
@@ -59,6 +59,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.SmartFutureCache;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class SimulationServiceImpl implements SimulationService {
 
@@ -74,7 +75,7 @@ public class SimulationServiceImpl implements SimulationService {
     
     public SimulationServiceImpl(Executor executor, RacingEventService racingEventService) {
         this.executor = executor;
-        this.scheduler = Executors.newScheduledThreadPool(1);
+        this.scheduler = Executors.newScheduledThreadPool(1, new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
         this.racingEventService = racingEventService;
         if (racingEventService != null) {
             this.raceListeners = new HashMap<String, SimulationRaceListener>();
@@ -177,18 +178,24 @@ public class SimulationServiceImpl implements SimulationService {
         }
 
         @Override
+        public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+            // relevant for simulation? for last leg?
+            // TODO: update last leg?
+        }
+
+        @Override
         public void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
             // relevant for simulation: update all legs when wind changes overall
             // TODO: update all legs
         }
 
         @Override
-        public void startOfTrackingChanged(TimePoint startOfTracking) {
+        public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
             // irrelevant for simulation
         }
 
         @Override
-        public void endOfTrackingChanged(TimePoint endOfTracking) {
+        public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
             // irrelevant for simulation
         }
 

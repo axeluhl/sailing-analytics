@@ -32,4 +32,11 @@ public interface TimePoint extends Comparable<TimePoint>, Serializable {
     boolean after(TimePoint other);
     
     boolean before(TimePoint other);
+
+    /**
+     * @return a {@link TimePoint} such that when used to set the time of a calendar, the seconds and milliseconds will
+     *         match that of {@code syncToClosestSecondsAndMillisOf} and the time difference to {@code this} time point is
+     *         minimal. In particular, the time difference will always be less than or equal to 30s.
+     */
+    TimePoint getNearestModuloOneMinute(TimePoint syncToClosestSecondsAndMillisOf);
 }

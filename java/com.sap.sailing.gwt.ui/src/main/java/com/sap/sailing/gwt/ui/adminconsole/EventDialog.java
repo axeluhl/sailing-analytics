@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.GWTLocaleUtil;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -33,6 +32,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
+import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
@@ -49,6 +49,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected CheckBox isPublicCheckBox;
     protected UUID id;
     protected TextBox officialWebsiteURLEntryField;
+    protected TextBox baseURLEntryField;
     protected Map<String, TextBox> sailorsInfoWebsiteURLEntryFields = new HashMap<>();
     protected CourseAreaListInlineEditorComposite courseAreaNameList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
@@ -94,15 +95,15 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             Date endDate = eventToValidate.endDate;
             String datesErrorMessage = null;
             // remark: startDate == null and endDate == null is valid
-            if(startDate != null && endDate != null) {
-                if(startDate.after(endDate)) {
+            if (startDate != null && endDate != null) {
+                if (startDate.after(endDate)) {
                     datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate(); 
                 }
-            } else if((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
+            } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
             }
             
-            if(datesErrorMessage != null) {
+            if (datesErrorMessage != null) {
                 errorMessage = datesErrorMessage;
             } else if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
@@ -151,7 +152,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
         courseAreaNameList.addValueChangeHandler(courseAreaValueChangeHandler);
         List<String> leaderboardGroupNames = new ArrayList<>();
-        for(LeaderboardGroupDTO leaderboardGroupDTO: availableLeaderboardGroups) {
+        for (LeaderboardGroupDTO leaderboardGroupDTO: availableLeaderboardGroups) {
             leaderboardGroupNames.add(leaderboardGroupDTO.getName());
         }
         leaderboardGroupList = new StringConstantsListEditorComposite(Collections.<String> emptyList(),
@@ -176,6 +177,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());
+        result.setBaseURL(baseURLEntryField.getText().trim().isEmpty() ? null : baseURLEntryField.getText().trim());
         for (Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
             TextBox sailorsInfoWebsiteURLEntryField = sailorsInfoWebsiteUrlEntry.getValue();
             String sailorsInfoWebsiteURL = sailorsInfoWebsiteURLEntryField.getText().trim();
@@ -204,24 +206,26 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(9 + GWTLocaleUtil.getLanguageCountWithDefault(), 2);
-        formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
-        formGrid.setWidget(0, 1, nameEntryField);
-        formGrid.setWidget(1,  0, new Label(stringMessages.description() + ":"));
-        formGrid.setWidget(1, 1, descriptionEntryField);
-        formGrid.setWidget(2, 0, new Label(stringMessages.venue() + ":"));
-        formGrid.setWidget(2, 1, venueEntryField);
-        formGrid.setWidget(3, 0, new Label(stringMessages.timeZone() + ":"));
-        formGrid.setWidget(3, 1, new Label(DateAndTimeFormatterUtil.getClientTimeZoneAsGMTString()));
-        formGrid.setWidget(4, 0, new Label(stringMessages.startDate() + ":"));
-        formGrid.setWidget(4, 1, startDateBox);
-        formGrid.setWidget(5, 0, new Label(stringMessages.endDate() + ":"));
-        formGrid.setWidget(5, 1, endDateBox);
-        formGrid.setWidget(6, 0, new Label(stringMessages.isPublic() + ":"));
-        formGrid.setWidget(6, 1, isPublicCheckBox);
-        formGrid.setWidget(7, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
-        formGrid.setWidget(7, 1, officialWebsiteURLEntryField);
-        int rowIndex = 8;
+        Grid formGrid = new Grid(10 + GWTLocaleUtil.getLanguageCountWithDefault(), 2);
+        int rowIndex = 0;
+        formGrid.setWidget(rowIndex,  0, new Label(stringMessages.name() + ":"));
+        formGrid.setWidget(rowIndex++, 1, nameEntryField);
+        formGrid.setWidget(rowIndex,  0, new Label(stringMessages.description() + ":"));
+        formGrid.setWidget(rowIndex++, 1, descriptionEntryField);
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.venue() + ":"));
+        formGrid.setWidget(rowIndex++, 1, venueEntryField);
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.timeZone() + ":"));
+        formGrid.setWidget(rowIndex++, 1, new Label(DateAndTimeFormatterUtil.getClientTimeZoneAsGMTString()));
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.startDate() + ":"));
+        formGrid.setWidget(rowIndex++, 1, startDateBox);
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.endDate() + ":"));
+        formGrid.setWidget(rowIndex++, 1, endDateBox);
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isPublic() + ":"));
+        formGrid.setWidget(rowIndex++, 1, isPublicCheckBox);
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
+        formGrid.setWidget(rowIndex++, 1, officialWebsiteURLEntryField);
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
+        formGrid.setWidget(rowIndex++, 1, baseURLEntryField);
         for (Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
             String suffix = " ["+ (sailorsInfoWebsiteUrlEntry.getKey() == null ? stringMessages.defaultLocale() + "*" : sailorsInfoWebsiteUrlEntry.getKey()) + "]";
             formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + suffix + ":"));
@@ -230,13 +234,24 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
         formGrid.setText(rowIndex, 1, "[*] " + stringMessages.defaultSailorsInfoLinkInfoText());
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
+        tabPanel.ensureDebugId("EventDialogTabs");
         tabPanel.setHeight("525px");
         panel.add(tabPanel);
-        tabPanel.add(new ScrollPanel(formGrid), stringMessages.event());
-        tabPanel.add(new ScrollPanel(leaderboardGroupList), stringMessages.leaderboardGroups());
-        tabPanel.add(new ScrollPanel(courseAreaNameList), stringMessages.courseAreas());
-        tabPanel.add(new ScrollPanel(imagesListComposite), stringMessages.images());
-        tabPanel.add(new ScrollPanel(videosListComposite), stringMessages.videos());
+        final ScrollPanel eventTab = new ScrollPanel(formGrid);
+        eventTab.ensureDebugId("EventTab");
+        tabPanel.add(eventTab, stringMessages.event());
+        final ScrollPanel leaderboardGroupTab = new ScrollPanel(leaderboardGroupList);
+        leaderboardGroupTab.ensureDebugId("LeaderboardGroupsTab");
+        tabPanel.add(leaderboardGroupTab, stringMessages.leaderboardGroups());
+        final ScrollPanel courseAreasTab = new ScrollPanel(courseAreaNameList);
+        courseAreasTab.ensureDebugId("CourseAreasTab");
+        tabPanel.add(courseAreasTab, stringMessages.courseAreas());
+        final ScrollPanel imagesTab = new ScrollPanel(imagesListComposite);
+        imagesTab.ensureDebugId("ImagesTab");
+        tabPanel.add(imagesTab, stringMessages.images());
+        final ScrollPanel videosTab = new ScrollPanel(videosListComposite);
+        videosTab.ensureDebugId("VideosTab");
+        tabPanel.add(videosTab, stringMessages.videos());
         return panel;
     }
 

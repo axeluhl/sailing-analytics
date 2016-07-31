@@ -1,22 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.text.TextUtils;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BitmapHelper;
@@ -27,6 +19,10 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderRes
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.domain.base.racegroup.CurrentRaceComparator;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesComparator;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -42,46 +38,63 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.text.TextUtils;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
     private final static String TAG = ManagedRaceListAdapter.class.getName();
     private final Object mLockObject = new Object();
-    private List<RaceListDataType> mAllViewItems;
-    private RaceFilter mFilter;
+    private final RaceFilter mFilter;
     private LayoutInflater mInflater;
     private Resources mResources;
-    private List<RaceListDataType> mShownViewItems;
-    private ImageView marker;
-    private ImageView update_badge;
-    private LinearLayout race_flag;
-    private TextView time;
-    private TextView race_started;
-    private TextView race_finished;
-    private LinearLayout race_scheduled;
-    private TextView race_unscheduled;
-    private TextView depends_on;
-    private ImageView current_flag;
-    private TextView race_name;
-    private TextView flag_timer;
-    private TextView boat_class;
-    private TextView fleet_series;
-    private ImageView protest_image;
-    private ImageView has_dependent_races;
+    private final List<RaceListDataType> mShownViewItems;
+    private final Map<ManagedRace, RaceListDataTypeRace> viewItemsRaces;
+    private final Map<SeriesBase, RaceListDataTypeHeader> viewItemsSeriesHeaders;
     private SimpleDateFormat dateFormat;
     private RaceListDataType mSelectedRace;
-    private ViewGroup panel_left;
-    private ViewGroup panel_right;
     private int flag_size;
+    private DecimalFormat factor_format;
+    private final Set<ManagedRace> mAllRaces;
 
-    public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems) {
+    public ManagedRaceListAdapter(Context context, Set<ManagedRace> allRaces) {
         super(context, 0);
-
-        mAllViewItems = viewItems;
-        mShownViewItems = viewItems;
+        mAllRaces = allRaces;
+        mShownViewItems = new ArrayList<>();
+        this.viewItemsRaces = new HashMap<>();
+        this.viewItemsSeriesHeaders = new HashMap<>();
+        createViewItemsForRacesAndSeries();
+        mFilter = new RaceFilter(allRaces, this);
         mInflater = LayoutInflater.from(getContext());
         mResources = getContext().getResources();
         dateFormat = new SimpleDateFormat("kk:mm", getContext().getResources().getConfiguration().locale);
         flag_size = getContext().getResources().getInteger(R.integer.flag_size);
+        factor_format = new DecimalFormat(context.getString(R.string.race_factor_format));
+    }
+
+    private void createViewItemsForRacesAndSeries() {
+        viewItemsRaces.clear();
+        viewItemsSeriesHeaders.clear();
+        for (final ManagedRace race : mAllRaces) {
+            viewItemsRaces.put(race, new RaceListDataTypeRace(race, mInflater));
+            final SeriesBase series = race.getSeries();
+            if (!viewItemsSeriesHeaders.containsKey(series)) {
+                viewItemsSeriesHeaders.put(series, new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater));
+            }
+        }
     }
 
     @Override
@@ -93,9 +106,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     @Override
     public RaceFilter getFilter() {
-        if (mFilter == null) {
-            mFilter = new RaceFilter(mAllViewItems, this);
-        }
         return mFilter;
     }
 
@@ -112,70 +122,74 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     @Override
     public int getItemViewType(int position) {
-        return (getItem(position) instanceof RaceListDataTypeHeader ? ViewType.HEADER.index :
-                getItem(position) instanceof RaceListDataTypeRace ? ViewType.RACE.index : -1);
+        return (getItem(position) instanceof RaceListDataTypeHeader ?
+            ViewType.HEADER.index :
+            getItem(position) instanceof RaceListDataTypeRace ? ViewType.RACE.index : -1);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        RaceListDataType raceListElement;
-        raceListElement = getItem(position);
+        final RaceListDataType raceListElement = getItem(position);
+
+        ViewHolder holder;
 
         int type = getItemViewType(position);
         TimePoint now = MillisecondsTimePoint.now();
 
         if (convertView == null) {
-            if (type == ViewType.HEADER.index) {
-                convertView = mInflater.inflate(R.layout.race_list_area_header, parent, false);
-            } else if (type == ViewType.RACE.index) {
-                convertView = mInflater.inflate(R.layout.race_list_area_item, parent, false);
-            }
+            convertView = raceListElement.getView(parent);
+            holder = new ViewHolder();
+            holder.findViews(convertView);
+            convertView.setTag(R.id.race_list_holder, holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag(R.id.race_list_holder);
         }
-        findViews(convertView);
-        resetValues(convertView);
+        resetValues(holder);
 
         if (type == ViewType.HEADER.index) {
             final RaceListDataTypeHeader header = (RaceListDataTypeHeader) raceListElement;
             String regatta = header.getRaceGroup().getDisplayName();
-            if (TextUtils.isEmpty(regatta)) {
-                regatta = header.getRaceGroup().getName();
-            }
-            boat_class.setText(regatta);
-            if (header.isFleetVisible()) {
-                fleet_series.setText(RaceHelper.getFleetSeries(header.getFleet(), header.getSeries()));
-            } else {
-                fleet_series.setText(RaceHelper.getSeriesName(header.getSeries(), ""));
-            }
-            if (fleet_series.getText().length() == 0) {
-                fleet_series.setVisibility(View.GONE);
-            } else {
-                fleet_series.setVisibility(View.VISIBLE);
-            }
-            protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
-            protest_image.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
-                    intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, header.toString());
-                    BroadcastManager.getInstance(getContext()).addIntent(intent);
+            String series = RaceHelper.getSeriesName(header.getSeries(), "");
+
+            if (!(raceListElement).equals(convertView.getTag(R.id.race_list_header))) {
+                if (TextUtils.isEmpty(regatta)) {
+                    regatta = header.getRaceGroup().getName();
                 }
-            });
+                holder.boat_class.setText(regatta);
+                holder.fleet_series.setText(series);
+                if (holder.fleet_series.getText().length() == 0) {
+                    holder.fleet_series.setVisibility(View.GONE);
+                } else {
+                    holder.fleet_series.setVisibility(View.VISIBLE);
+                }
+                holder.protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
+                holder.protest_image.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+                        // TODO don't use toString() to convey semantics and perform check; bug 3617
+                        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, new RaceGroupSeries(header.getRaceGroup(), header.getSeries())
+                            .getDisplayName());
+                        BroadcastManager.getInstance(getContext()).addIntent(intent);
+                    }
+                });
+                convertView.setTag(R.id.race_list_header, raceListElement);
+            }
         } else if (type == ViewType.RACE.index) {
             final RaceListDataTypeRace race = (RaceListDataTypeRace) raceListElement;
 
-            if (convertView != null) {
-                if (mSelectedRace != null && mSelectedRace.equals(race)) {
-                    setMarker(1 - getLevel());
-                    if (race.isUpdateIndicatorVisible()) {
-                        race.setUpdateIndicatorVisible(false);
-                    }
-                } else {
-                    if (race.isUpdateIndicatorVisible()) {
-                        update_badge.setVisibility(View.VISIBLE);
-                    }
+            if (mSelectedRace != null && mSelectedRace.equals(race)) {
+                holder.setMarker(1);
+                if (race.isUpdateIndicatorVisible()) {
+                    race.setUpdateIndicatorVisible(false);
+                }
+            } else {
+                holder.setMarker(0);
+                if (race.isUpdateIndicatorVisible()) {
+                    holder.update_badge.setVisibility(View.VISIBLE);
                 }
             }
-            race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
+            holder.race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
             RaceState state = race.getRace().getState();
             if (state != null) {
                 if (state.getStartTime() != null) {
@@ -184,56 +198,62 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         startRes = R.string.race_start;
                     }
                     String startTime = mResources.getString(startRes, dateFormat.format(state.getStartTime().asDate()));
-                    race_started.setText(startTime);
+                    holder.race_started.setText(startTime);
                     if (state.getFinishedTime() == null) {
                         String duration = TimeUtils.formatDuration(now, state.getStartTime());
-                        time.setText(duration);
+                        holder.time.setText(duration);
                         float textSize = getContext().getResources().getDimension(R.dimen.textSize_40);
                         if (!TextUtils.isEmpty(duration) && duration.length() >= 6) {
                             textSize = getContext().getResources().getDimension(R.dimen.textSize_32);
                         }
-                        time.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+                        holder.time.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
                     }
                 }
                 if (state.getFinishedTime() != null) {
-                    time.setVisibility(View.GONE);
-                    race_finished.setVisibility(View.VISIBLE);
-                    race_finished.setText(mResources.getString(R.string.race_finished, dateFormat.format(state.getFinishedTime().asDate())));
+                    holder.time.setVisibility(View.GONE);
+                    holder.race_finished.setVisibility(View.VISIBLE);
+                    holder.race_finished.setText(mResources.getString(R.string.race_finished, dateFormat.format(state.getFinishedTime().asDate())));
                 }
-                setDependingText(race);
+                setDependingText(holder, race);
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
                     switch (race.getRace().getStatus()) {
                         case PRESCHEDULED:
-                            panel_right.setVisibility(View.GONE);
-                            race_scheduled.setVisibility(View.GONE);
-                            race_unscheduled.setVisibility(View.GONE);
+                            holder.panel_right.setVisibility(View.GONE);
+                            holder.race_scheduled.setVisibility(View.GONE);
+                            holder.race_unscheduled.setVisibility(View.GONE);
                             break;
 
                         default:
-                            race_scheduled.setVisibility(View.GONE);
-                            race_unscheduled.setVisibility(View.VISIBLE);
+                            holder.race_scheduled.setVisibility(View.GONE);
+                            holder.race_unscheduled.setVisibility(View.VISIBLE);
                     }
                 } else {
-                    if (race_name != null) {
-                        race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
+                    if (holder.race_name != null) {
+                        holder.race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
                     }
                 }
             }
 
-            updateFlag(race.getRace(), now);
+            Double factor = race.getRace().getExplicitFactor();
+            if (factor != null) {
+                holder.explicit_factor.setText(factor_format.format(factor));
+                holder.explicit_factor.setVisibility(View.VISIBLE);
+            }
+
+            updateFlag(holder, race.getRace(), now);
         }
         return convertView;
     }
 
-    private void setDependingText(RaceListDataTypeRace race) {
-        if (depends_on != null) {
+    private void setDependingText(ViewHolder holder, RaceListDataTypeRace race) {
+        if (holder.depends_on != null) {
             StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
             if (result != null && result.isDependentStartTime()) {
                 SimpleRaceLogIdentifier identifier = Util.get(result.getDependingOnRaces(), 0);
                 ManagedRace depending_race = DataManager.create(getContext()).getDataStore().getRace(identifier);
-                depends_on.setText(getContext().getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper
+                holder.depends_on.setText(getContext().getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper
                     .getShortReverseRaceName(depending_race, " / ", race.getRace())));
-                depends_on.setVisibility(View.VISIBLE);
+                holder.depends_on.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -249,82 +269,130 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     }
 
     @Override
-    public void onResult(List<RaceListDataType> filtered) {
+    public void onResult(List<ManagedRace> filteredRaces) {
         synchronized (mLockObject) {
-            mShownViewItems = filtered;
+            mShownViewItems.clear();
+            if (filteredRaces != null) {
+                mShownViewItems.addAll(getShownViewItems(filteredRaces));
+            }
             notifyDataSetChanged();
         }
+    }
+
+    /**
+     * For the {@code filteredRaces} ensure that exactly the required view items are in {@link #mShownViewItems}. This
+     * encompasses the header items for all non-empty series and the race items for all races in their series.
+     */
+    private List<RaceListDataType> getShownViewItems(List<ManagedRace> races) {
+        final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader = getRaceItemsGroupedBySeriesHeader(races);
+        return serializeItems(raceItemsByHeader);
+    }
+
+    private List<RaceListDataType> serializeItems(final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader) {
+        final List<RaceListDataType> result = new ArrayList<>();
+        final List<RaceListDataTypeHeader> headers = new ArrayList<>(raceItemsByHeader.keySet());
+        Collections.sort(headers, new Comparator<RaceListDataTypeHeader>() {
+            private final RaceGroupSeriesComparator c = new RaceGroupSeriesComparator();
+
+            @Override
+            public int compare(RaceListDataTypeHeader lhs, RaceListDataTypeHeader rhs) {
+                return c.compare(lhs.getRegattaSeries(), rhs.getRegattaSeries());
+            }
+        });
+        for (final RaceListDataTypeHeader header : headers) {
+            result.add(header);
+            final List<RaceListDataTypeRace> raceItems = new ArrayList<>(raceItemsByHeader.get(header));
+            Collections.sort(raceItems, new Comparator<RaceListDataTypeRace>() {
+                final CurrentRaceComparator c = new CurrentRaceComparator();
+
+                @Override
+                public int compare(RaceListDataTypeRace lhs, RaceListDataTypeRace rhs) {
+                    final int result;
+                    if (lhs != null && rhs != null) {
+                        result = c.compare(lhs.getRace(), rhs.getRace());
+                    } else {
+                        Log.e(TAG, "Internal error; found null for NavDrawer item while sorting");
+                        result = 0;
+                    }
+                    return result;
+                }
+            });
+            for (final RaceListDataTypeRace raceItem : raceItems) {
+                result.add(raceItem);
+            }
+        }
+        return result;
+    }
+
+    private Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> getRaceItemsGroupedBySeriesHeader(final List<ManagedRace> filteredRaces) {
+        final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader = new HashMap<>();
+        for (final ManagedRace race : filteredRaces) {
+            final SeriesBase series = race.getSeries();
+            final RaceListDataTypeHeader seriesHeader = viewItemsSeriesHeaders.get(series);
+            List<RaceListDataTypeRace> raceItemsInSeries = raceItemsByHeader.get(seriesHeader);
+            if (raceItemsInSeries == null) {
+                raceItemsInSeries = new ArrayList<>();
+                raceItemsByHeader.put(seriesHeader, raceItemsInSeries);
+            }
+            final RaceListDataTypeRace viewItemForRace = viewItemsRaces.get(race);
+            if (viewItemForRace != null) {
+                raceItemsInSeries.add(viewItemForRace);
+            } else {
+                Log.w(TAG, "A view item for race " + race + " provided by the filter could not be found", new RuntimeException("Here is where it happened"));
+            }
+        }
+        return raceItemsByHeader;
     }
 
     public void setSelectedRace(RaceListDataType id) {
         mSelectedRace = id;
     }
 
-    private void findViews(View layout) {
-        panel_left = ViewHelper.get(layout, R.id.panel_left);
-        panel_right = ViewHelper.get(layout, R.id.panel_right);
-        marker = ViewHelper.get(layout, R.id.race_marker);
-        current_flag = ViewHelper.get(layout, R.id.current_flag);
-        update_badge = ViewHelper.get(layout, R.id.update_badge);
-        race_flag = ViewHelper.get(layout, R.id.race_flag);
-        time = ViewHelper.get(layout, R.id.time);
-        race_name = ViewHelper.get(layout, R.id.race_name);
-        race_finished = ViewHelper.get(layout, R.id.race_finished);
-        race_started = ViewHelper.get(layout, R.id.race_started);
-        race_scheduled = ViewHelper.get(layout, R.id.race_scheduled);
-        race_unscheduled = ViewHelper.get(layout, R.id.race_unscheduled);
-        flag_timer = ViewHelper.get(layout, R.id.flag_timer);
-        protest_image = ViewHelper.get(layout, R.id.protest_image);
-        boat_class = ViewHelper.get(layout, R.id.boat_class);
-        fleet_series = ViewHelper.get(layout, R.id.fleet_series);
-        has_dependent_races = ViewHelper.get(layout, R.id.has_dependent_races);
-        depends_on = ViewHelper.get(layout, R.id.depends_on);
-    }
-
-    private void resetValues(View layout) {
-        if (layout != null) {
-            if (panel_left != null) {
-                panel_left.setVisibility(View.VISIBLE);
-            }
-            if (panel_right != null) {
-                panel_right.setVisibility(View.VISIBLE);
-            }
-            if (update_badge != null) {
-                update_badge.setVisibility(View.GONE);
-            }
-            if (race_flag != null) {
-                race_flag.setVisibility(View.GONE);
-            }
-            if (time != null) {
-                time.setVisibility(View.VISIBLE);
-            }
-            if (race_started != null) {
-                race_started.setText("");
-            }
-            if (race_finished != null) {
-                race_finished.setVisibility(View.GONE);
-            }
-            if (race_scheduled != null) {
-                race_scheduled.setVisibility(View.VISIBLE);
-            }
-            if (race_unscheduled != null) {
-                race_unscheduled.setVisibility(View.GONE);
-            }
-            if (race_name != null) {
-                race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
-            }
-            if (has_dependent_races != null) {
-                has_dependent_races.setVisibility(View.GONE);
-            }
-            if (depends_on != null) {
-                depends_on.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
-                depends_on.setVisibility(View.GONE);
-            }
-            setMarker(0);
+    private void resetValues(ViewHolder holder) {
+        if (holder.panel_left != null) {
+            holder.panel_left.setVisibility(View.VISIBLE);
         }
+        if (holder.panel_right != null) {
+            holder.panel_right.setVisibility(View.VISIBLE);
+        }
+        if (holder.update_badge != null) {
+            holder.update_badge.setVisibility(View.GONE);
+        }
+        if (holder.race_flag != null) {
+            holder.race_flag.setVisibility(View.GONE);
+        }
+        if (holder.time != null) {
+            holder.time.setVisibility(View.VISIBLE);
+        }
+        if (holder.race_started != null) {
+            holder.race_started.setText("");
+        }
+        if (holder.race_finished != null) {
+            holder.race_finished.setVisibility(View.GONE);
+        }
+        if (holder.race_scheduled != null) {
+            holder.race_scheduled.setVisibility(View.VISIBLE);
+        }
+        if (holder.race_unscheduled != null) {
+            holder.race_unscheduled.setVisibility(View.GONE);
+        }
+        if (holder.race_name != null) {
+            holder.race_name.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
+        }
+        if (holder.has_dependent_races != null) {
+            holder.has_dependent_races.setVisibility(View.GONE);
+        }
+        if (holder.depends_on != null) {
+            holder.depends_on.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
+            holder.depends_on.setVisibility(View.GONE);
+        }
+        if (holder.explicit_factor != null) {
+            holder.explicit_factor.setVisibility(View.GONE);
+        }
+        holder.setMarker(0);
     }
 
-    private void updateFlag(ManagedRace race, TimePoint now) {
+    private void updateFlag(ViewHolder holder,ManagedRace race, TimePoint now) {
         RaceState state = race.getState();
         if (state == null || state.getStartTime() == null) {
             return;
@@ -391,40 +459,18 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (timer != null) {
             timer = timer.replace("-", "");
         }
-        showFlag(flag, arrow, timer);
+        holder.showFlag(flag, arrow, timer);
     }
 
     private boolean isNextFlag(Flags flag, FlagPole pole) {
         return pole != null && flag.equals(pole.getUpperFlag());
     }
 
-    private void showFlag(LayerDrawable flag, Drawable arrow, String timer) {
-        if (flag != null && arrow != null && timer != null) {
-            current_flag.setImageDrawable(flag);
-            flag_timer.setText(timer);
-            flag_timer.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);
-            race_flag.setVisibility(View.VISIBLE);
+    public void onRacesChanged() {
+        synchronized (mLockObject) {
+            createViewItemsForRacesAndSeries();
+            getFilter().refreshRegattaStructures();
         }
-    }
-
-    private void setMarker(int level) {
-        if (marker != null) {
-            Drawable drawable = marker.getDrawable();
-            if (drawable != null) {
-                drawable.setLevel(level);
-            }
-        }
-    }
-
-    private int getLevel() {
-        int level = 0;
-        if (marker != null) {
-            Drawable drawable = marker.getDrawable();
-            if (drawable != null) {
-                level = drawable.getLevel();
-            }
-        }
-        return level;
     }
 
     private enum ViewType {
@@ -434,6 +480,69 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
         ViewType(int index) {
             this.index = index;
+        }
+    }
+
+    private static class ViewHolder {
+
+        public ImageView marker;
+        public TextView time;
+        public TextView race_finished;
+        /* package */ ViewGroup panel_left;
+        /* package */ ViewGroup panel_right;
+        /* package */ ImageView current_flag;
+        /* package */ ImageView update_badge;
+        /* package */ LinearLayout race_flag;
+        /* package */ TextView race_name;
+        /* package */ TextView race_started;
+        /* package */ LinearLayout race_scheduled;
+        /* package */ TextView race_unscheduled;
+        /* package */ TextView flag_timer;
+        /* package */ ImageView protest_image;
+        /* package */ TextView boat_class;
+        /* package */ TextView fleet_series;
+        /* package */ ImageView has_dependent_races;
+        /* package */ TextView depends_on;
+        /* package */ TextView explicit_factor;
+
+        /* package */ void findViews(View layout) {
+            panel_left = ViewHelper.get(layout, R.id.panel_left);
+            panel_right = ViewHelper.get(layout, R.id.panel_right);
+            marker = ViewHelper.get(layout, R.id.race_marker);
+            current_flag = ViewHelper.get(layout, R.id.current_flag);
+            update_badge = ViewHelper.get(layout, R.id.update_badge);
+            race_flag = ViewHelper.get(layout, R.id.race_flag);
+            time = ViewHelper.get(layout, R.id.time);
+            race_name = ViewHelper.get(layout, R.id.race_name);
+            race_finished = ViewHelper.get(layout, R.id.race_finished);
+            race_started = ViewHelper.get(layout, R.id.race_started);
+            race_scheduled = ViewHelper.get(layout, R.id.race_scheduled);
+            race_unscheduled = ViewHelper.get(layout, R.id.race_unscheduled);
+            flag_timer = ViewHelper.get(layout, R.id.flag_timer);
+            protest_image = ViewHelper.get(layout, R.id.protest_image);
+            boat_class = ViewHelper.get(layout, R.id.boat_class);
+            fleet_series = ViewHelper.get(layout, R.id.fleet_series);
+            has_dependent_races = ViewHelper.get(layout, R.id.has_dependent_races);
+            depends_on = ViewHelper.get(layout, R.id.depends_on);
+            explicit_factor = ViewHelper.get(layout, R.id.explicit_factor);
+        }
+
+        /* package */ void showFlag(LayerDrawable flag, Drawable arrow, String timer) {
+            if (flag != null && arrow != null && timer != null) {
+                current_flag.setImageDrawable(flag);
+                flag_timer.setText(timer);
+                flag_timer.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);
+                race_flag.setVisibility(View.VISIBLE);
+            }
+        }
+
+        /* package */ void setMarker(int level) {
+            if (marker != null) {
+                Drawable drawable = marker.getDrawable();
+                if (drawable != null) {
+                    drawable.setLevel(level);
+                }
+            }
         }
     }
 }

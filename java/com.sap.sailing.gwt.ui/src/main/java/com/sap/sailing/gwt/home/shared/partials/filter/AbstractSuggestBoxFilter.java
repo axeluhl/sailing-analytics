@@ -14,21 +14,16 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.SuggestBox.SuggestionCallback;
 import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Callback;
+import com.google.gwt.user.client.ui.SuggestOracle.Request;
+import com.google.gwt.user.client.ui.SuggestOracle.Response;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.filter.AbstractListFilter;
 
 public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFilter<T, C> {
 
     private final ContainsSuggestOracle suggestOracle = new ContainsSuggestOracle();
-    private final List<C> suggestionObjectList = new ArrayList<>();
-    protected final AbstractListFilter<C> suggestionMatchingFilter = new AbstractListFilter<C>() {
-        @Override
-        public Iterable<String> getStrings(C value) {
-            return getMatchingStrings(value);
-        }
-    };
     
     protected AbstractSuggestBoxFilter(String placeholderText) {
         final SuggestBox suggestBox = new SuggestBox(suggestOracle, new TextBox(), new CustomSuggestionDisplay());
@@ -36,16 +31,36 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         suggestBox.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<Suggestion> event) {
+                @SuppressWarnings("unchecked")
+                C suggestObject = ((SimpleSuggestion) event.getSelectedItem()).suggestObject;
+                AbstractSuggestBoxFilter.this.onSuggestionSelected(suggestObject);
                 AbstractSuggestBoxFilter.super.update();
             }
         });
     }
     
-    @Override
-    public void setSelectableValues(Collection<C> selectableValues) {
-        suggestionObjectList.clear();
-        suggestionObjectList.addAll(selectableValues);
+    protected final void setSuggestions(Request request, Callback callback, Iterable<C> suggestionObjects,
+            Iterable<String> queryTokens) {
+        List<Suggestion> suggestions = new ArrayList<>();
+        List<String> normalizedQueryTokens = new ArrayList<>();
+        for (String token : queryTokens) {
+            normalizedQueryTokens.add(token.toLowerCase());
+        }
+        int count = 0;
+        for (C match : suggestionObjects) {
+            suggestions.add(new SimpleSuggestion(match, normalizedQueryTokens));
+            if (++count >= request.getLimit()) {
+                break;
+            }
+        }
+        Response response = new Response(suggestions);
+        response.setMoreSuggestionsCount(Util.size(suggestionObjects) - count);
+        callback.onSuggestionsReady(request, response);
     }
+    
+    protected abstract void getSuggestions(Request request, Callback callback, Iterable<String> queryTokens);
+    
+    protected abstract void onSuggestionSelected(C selectedItem);
     
     protected abstract String createSuggestionKeyString(C value);
     
@@ -66,36 +81,23 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         
         @Override
         public void requestDefaultSuggestions(Request request, Callback callback) {
-            setSuggestions(request, callback, suggestionObjectList, Collections.<String>emptyList());
+            getSuggestions(request, callback, Collections.<String>emptyList());
         }
         
         @Override
         public void requestSuggestions(Request request, Callback callback) {
-            Iterable<String> queryTokens = Collections.singleton(request.getQuery().trim());
-            setSuggestions(request, callback, suggestionMatchingFilter.applyFilter(queryTokens, suggestionObjectList), queryTokens);
-        }
-        
-        private void setSuggestions(Request request, Callback callback, Iterable<C> suggestionObjects, Iterable<String> queryTokens) {
-            List<Suggestion> suggestions = new ArrayList<>();
-            List<String> normalizedQueryTokens = new ArrayList<>();
-            for (String token : queryTokens) {
-                normalizedQueryTokens.add(token.toLowerCase());
+            String normalizedQuery = request.getQuery().trim();
+            if (normalizedQuery == null || normalizedQuery.isEmpty()) {
+                requestDefaultSuggestions(request, callback);
+            } else {
+                Iterable<String> queryTokens = Collections.singleton(normalizedQuery);
+                getSuggestions(request, callback, queryTokens);
             }
-            int count = 0;
-            for (C match : suggestionObjects) {
-                suggestions.add(new SimpleSuggestion(match, normalizedQueryTokens));
-                if (++count >= request.getLimit()) {
-                    break;
-                }
-            }
-            Response response = new Response(suggestions);
-            response.setMoreSuggestionsCount(Util.size(suggestionObjects) - count);
-            callback.onSuggestionsReady(request, response);
         }
         
         @Override
         public boolean isDisplayStringHTML() {
-          return true;
+            return true;
         }
     }
     
@@ -115,10 +117,13 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         public String getDisplayString() {
             SafeHtmlBuilder builder = new SafeHtmlBuilder();
             appendHighlighted(builder, createSuggestionKeyString(suggestObject));
-            builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_OPEN));
-            builder.append(SafeHtmlUtils.fromSafeConstant(" - "));
-            appendHighlighted(builder, createSuggestionAdditionalDisplayString(suggestObject));
-            builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_CLOSE));
+            String additionalString = createSuggestionAdditionalDisplayString(suggestObject);
+            if(additionalString != null && !additionalString.isEmpty()) {
+                builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_OPEN));
+                builder.append(SafeHtmlUtils.fromSafeConstant(" - "));
+                appendHighlighted(builder, additionalString);
+                builder.append(SafeHtmlUtils.fromTrustedString(ITALIC_TAG_CLOSE));
+            }
             return builder.toSafeHtml().asString();
         }
         

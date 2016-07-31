@@ -5,7 +5,7 @@
                 android:layout_height="match_parent">
 
     <View
-        android:id="@+id/top_bar"
+        android:id="@+id/toolbar_separator"
         android:layout_width="fill_parent"
         android:layout_height="4dp"
         android:layout_alignParentLeft="true"
@@ -18,7 +18,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@id/start_tracking_box"
-        android:layout_below="@id/top_bar"
+        android:layout_below="@id/toolbar_separator"
         android:baselineAligned="false"
         android:orientation="horizontal">
 
@@ -201,7 +201,7 @@
                     android:id="@+id/change_photo_button"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
-                    android:background="@drawable/stift"/>
+                    android:background="@drawable/edit_pencil"/>
             </LinearLayout>
         </RelativeLayout>
 
@@ -381,8 +381,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_margin="@dimen/regatta_button_margin"
-                        android:layout_marginLeft="@dimen/regatta_button_side_margin"
-                        android:layout_marginRight="@dimen/regatta_button_side_margin"
+                        android:layout_marginLeft="@dimen/fragment_side_margin"
+                        android:layout_marginRight="@dimen/fragment_side_margin"
                         android:padding="@dimen/regatta_button_padding"
                         android:text="@string/show_event"
                         android:background="@drawable/rounded_btn_blue"
@@ -429,8 +429,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_margin="@dimen/regatta_button_margin"
-                android:layout_marginLeft="@dimen/regatta_button_side_margin"
-                android:layout_marginRight="@dimen/regatta_button_side_margin"
+                android:layout_marginLeft="@dimen/fragment_side_margin"
+                android:layout_marginRight="@dimen/fragment_side_margin"
                 android:layout_weight="0.50"
                 android:background="@drawable/rounded_btn_yellow"
                 android:padding="@dimen/regatta_button_padding"
@@ -443,10 +443,10 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_margin="@dimen/regatta_button_margin"
-                android:layout_marginLeft="@dimen/regatta_button_side_margin"
-                android:layout_marginRight="@dimen/regatta_button_side_margin"
+                android:layout_marginLeft="@dimen/fragment_side_margin"
+                android:layout_marginRight="@dimen/fragment_side_margin"
                 android:layout_weight="0.50"
-                android:background="@drawable/rounded_btn_green"
+                android:background="@drawable/normal_btn_green"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/start_tracking"
                 android:textAllCaps="true"

@@ -130,7 +130,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     protected void addColumnsToLeaderboardTableAndSetSelectionModel(final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
             AdminConsoleTableResources tableResources, ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
-                leaderboardList.getList());
+                filteredLeaderboardList.getList());
         SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
                 leaderboardTable, tableResources, leaderboardColumnListHandler, listDataProvider);
         AnchorCell anchorCell = new AnchorCell();
@@ -548,7 +548,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 
                             @Override
                             public void onSuccess(Void arg0) {
-                                loadAndRefreshLeaderboard(selectedLeaderboardName, /* raceColumnNameToSelect */ null);
+                                loadAndRefreshLeaderboard(selectedLeaderboardName);
                             }
                         }));
     }
@@ -572,7 +572,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 
                             @Override
                             public void onSuccess(Void result) {
-                                loadAndRefreshLeaderboard(selectedLeaderboardName, selectedRaceColumnName);
+                                loadAndRefreshLeaderboard(selectedLeaderboardName);
                             }
                         }));
     }
@@ -596,7 +596,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 
                             @Override
                             public void onSuccess(Void result) {
-                                loadAndRefreshLeaderboard(selectedLeaderboardName, selectedRaceColumnName);
+                                loadAndRefreshLeaderboard(selectedLeaderboardName);
                             }
                         }));
     }
@@ -671,7 +671,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         
                     @Override
                     public void onSuccess(Void v) {
-                        loadAndRefreshLeaderboard(leaderboardName, /* nameOfRaceColumnToSelect */ null);
+                        loadAndRefreshLeaderboard(leaderboardName);
                     }
                 }));
     }
@@ -684,7 +684,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
-                    raceColumnTable.getDataProvider().getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet));
+                    raceColumnTable.getDataProvider().getList().add(new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet, getSelectedLeaderboard()));
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);
@@ -778,7 +778,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
 
     private void addLeaderboard(StrippedLeaderboardDTO result) {
-        leaderboardList.getList().add(result);
+        filteredLeaderboardList.getList().add(result);
         availableLeaderboardList.add(result);
         leaderboardSelectionModel.clear();
         leaderboardSelectionModel.setSelected(result, true);
@@ -796,15 +796,15 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void onSuccess(StrippedLeaderboardDTO updatedLeaderboard) {
                 int indexOfLeaderboard = 0;
-                for (int i = 0; i < leaderboardList.getList().size(); i++) {
-                    StrippedLeaderboardDTO dao = leaderboardList.getList().get(i);
+                for (int i = 0; i < filteredLeaderboardList.getList().size(); i++) {
+                    StrippedLeaderboardDTO dao = filteredLeaderboardList.getList().get(i);
                     if (dao.name.equals(oldLeaderboardName)) {
                         indexOfLeaderboard = i;
                         break;
                     }
                 }
-                leaderboardList.getList().set(indexOfLeaderboard, updatedLeaderboard);
-                leaderboardList.refresh();
+                filteredLeaderboardList.getList().set(indexOfLeaderboard, updatedLeaderboard);
+                filteredLeaderboardList.refresh();
             }
         });
     }
@@ -850,7 +850,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
 
     private void removeLeaderboardFromTable(final StrippedLeaderboardDTO leaderBoard) {
-        leaderboardList.getList().remove(leaderBoard);
+        filteredLeaderboardList.getList().remove(leaderBoard);
         availableLeaderboardList.remove(leaderBoard);
         leaderboardSelectionModel.setSelected(leaderBoard, false);
     }

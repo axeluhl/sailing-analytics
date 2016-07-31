@@ -26,6 +26,9 @@ import com.sap.sse.gwt.client.LinkUtil;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationSignOutRequestEvent;
 
+/**
+ * Mobile page header with SAP logo title and a dropdown menu (burger button) on the right.
+ */
 public class Header extends Composite {
 
     // @UiField TextBox searchText;

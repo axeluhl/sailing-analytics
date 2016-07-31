@@ -20,8 +20,6 @@ import com.sap.sse.gwt.resources.Highcharts;
 
 public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
 
-    private final String titleName = "Strategy Simulator";
-
     private final SimulatorServiceAsync simulatorService = GWT.create(SimulatorService.class);
     private int xRes = 40;
     private int yRes = 20;
@@ -184,7 +182,8 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private FlowPanel createLogoAndTitlePanel(SimulatorMainPanel simulatorPanel) {
-        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(titleName, null, getStringMessages(), this, getUserService());
+        LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages().strategySimulatorTitle(), null,
+                getStringMessages(), this, getUserService());
         /*{
             @Override
             public void onResize() {

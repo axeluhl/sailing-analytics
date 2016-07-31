@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base.racegroup;
 
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
@@ -17,7 +18,9 @@ import com.sap.sse.common.Named;
  * 
  * To align with the semantics of the Android application a {@link RaceGroup} consists of race rows rather than race
  * columns. A {@link RaceRow} is a set of races for one {@link Fleet}. A specific "race" of a row is called
- * {@link RaceCell}.
+ * {@link RaceCell}. (Note that as described by bug 3011 this view is by now obsolete. The grouping by fleet is
+ * no longer desired by users; instead, grouping is desired only by regatta / {@link RaceGroup}, whereas <em>ordering</em>
+ * and <em>filtering</em> is based on series and fleet pertinence and {@link RaceState race state}, respectively.)
  * <p>
  * 
  * For example: if you have 2 fleets (blue and yellow) there will be 2 {@link RaceRow}s in your {@link RaceGroup}
@@ -39,7 +42,8 @@ public interface RaceGroup extends Named {
     public BoatClass getBoatClass();
 
     /**
-     * Gets the collection of series.
+     * Gets the collection of series, for a {@link RaceGroup} representing a regatta in the same order as
+     * the {@code Regatta.getSeries()} call returns them.
      */
     public Iterable<SeriesWithRows> getSeries();
     

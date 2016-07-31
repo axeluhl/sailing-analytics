@@ -12,24 +12,28 @@ public class SeriesDTO extends NamedDTO {
     private List<FleetDTO> fleets;
     private List<RaceColumnDTO> raceColumns;
     private boolean isMedal;
+    private boolean isFleetsCanRunInParallel;
     private int[] discardThresholds;
     private Boolean startsWithZeroScore;
     private boolean firstColumnIsNonDiscardableCarryForward;
     private boolean hasSplitFleetContiguousScoring;
+    private Integer maximumNumberOfDiscards;
     
     public SeriesDTO() {}
     
-    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal,
+    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
-            boolean hasSplitFleetContiguousScoring) {
+            boolean hasSplitFleetContiguousScoring, Integer maximumNumberOfDiscards) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
         this.isMedal = isMedal;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.startsWithZeroScore = startsWithZeroScore;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
         this.discardThresholds = discardThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
+        this.maximumNumberOfDiscards = maximumNumberOfDiscards;
     }
     
     /**
@@ -40,16 +44,13 @@ public class SeriesDTO extends NamedDTO {
     public SeriesDTO(SeriesDTO otherSeries) {
         this(otherSeries.getName(), otherSeries.getFleets(),
                 otherSeries.getRaceColumns() == null ? null : new ArrayList<RaceColumnDTO>(otherSeries.getRaceColumns()),
-                otherSeries.isMedal(), otherSeries.getDiscardThresholds(), otherSeries.isStartsWithZeroScore(),
-                otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring());
+                otherSeries.isMedal(), otherSeries.isFleetsCanRunInParallel(), otherSeries.getDiscardThresholds(), otherSeries.isStartsWithZeroScore(),
+                otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring(),
+                otherSeries.getMaximumNumberOfDiscards());
     }
 
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
-    }
-
-    public boolean isMedal() {
-        return isMedal;
     }
 
     public List<FleetDTO> getFleets() {
@@ -60,8 +61,20 @@ public class SeriesDTO extends NamedDTO {
         this.fleets = fleets;
     }
 
+    public boolean isMedal() {
+        return isMedal;
+    }
+
     public void setMedal(boolean isMedal) {
         this.isMedal = isMedal;
+    }
+
+    public boolean isFleetsCanRunInParallel() {
+        return isFleetsCanRunInParallel;
+    }
+
+    public void setFleetsCanRunInParallel(boolean isFleetsCanRunInParallel) {
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
     }
 
     public List<RaceColumnDTO> getRaceColumns() {
@@ -107,5 +120,13 @@ public class SeriesDTO extends NamedDTO {
 
     public void setSplitFleetContiguousScoring(Boolean hasSplitFleetContiguousScoring) {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+    }
+
+    public Integer getMaximumNumberOfDiscards() {
+        return maximumNumberOfDiscards;
+    }
+
+    public void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards) {
+        this.maximumNumberOfDiscards = maximumNumberOfDiscards;
     }
 }

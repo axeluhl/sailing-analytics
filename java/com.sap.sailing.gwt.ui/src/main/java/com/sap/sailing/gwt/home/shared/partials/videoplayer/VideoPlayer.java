@@ -10,6 +10,9 @@ import com.sap.sailing.gwt.ui.client.media.PlayEvent;
 import com.sap.sailing.gwt.ui.client.media.VideoJSPlayer;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
+/**
+ * Video player with custom play button.
+ */
 public class VideoPlayer extends Composite {
     private final VideoPlayerResources.LocalCss style = VideoPlayerResources.INSTANCE.css();
     private VideoJSPlayer videoJSPlayer;

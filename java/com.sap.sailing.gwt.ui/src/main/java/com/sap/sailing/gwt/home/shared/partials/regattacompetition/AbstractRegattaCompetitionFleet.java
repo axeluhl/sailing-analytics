@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.shared.partials.regattacompetition;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
@@ -8,10 +9,10 @@ import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompet
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.RGBColor;
 
-public abstract class AbstractRegattaCompetitionFleet extends Widget implements RegattaCompetitionFleetView {
+public abstract class AbstractRegattaCompetitionFleet extends Composite implements RegattaCompetitionFleetView {
     
     protected AbstractRegattaCompetitionFleet(RaceCompetitionFormatFleetDTO fleet) {
-        setElement(getMainUiElement());
+        initWidget(getMainUiElement());
         getFleetNameUiElement().setInnerText(fleet.getFleet().getFleetName());
         getFleetCornerUiElement().getStyle().setProperty("borderTopColor", fleet.getFleet().getFleetColor());
         if (fleet.getFleet().isDefaultFleet()) {
@@ -33,7 +34,7 @@ public abstract class AbstractRegattaCompetitionFleet extends Widget implements 
     
     protected abstract void onDefaultFleetName();
     
-    protected abstract Element getMainUiElement();
+    protected abstract Widget getMainUiElement();
     
     protected abstract Element getFleetNameUiElement();
 

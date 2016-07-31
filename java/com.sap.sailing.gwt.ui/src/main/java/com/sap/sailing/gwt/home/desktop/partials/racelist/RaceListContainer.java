@@ -47,8 +47,8 @@ public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite i
     }
     
     public void setRaceListData(Collection<T> data) {
-        if(data == null || data.isEmpty()) {
-            if(noContentPlaceholderText == null) {
+        if (data == null || data.isEmpty()) {
+            if (noContentPlaceholderText == null) {
                 getElement().getStyle().setDisplay(Display.NONE);
             } else {
                 noContentPlaceholderUi.setInnerText(noContentPlaceholderText);

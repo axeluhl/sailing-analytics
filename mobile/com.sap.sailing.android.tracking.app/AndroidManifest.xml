@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.sap.sailing.android.tracking.app"
-          android:versionCode="7"
-          android:versionName="1.5">
+          android:versionCode="13"
+          android:versionName="1.11">
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -72,6 +72,13 @@
         <activity
             android:name=".ui.activities.RegattaActivity"
             android:label="@string/title_activity_regatta"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.activities.StartActivity"/>
+        </activity>
+        <activity
+            android:name=".ui.activities.BuoyActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
