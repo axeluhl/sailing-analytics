@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.home.mobile.partials.minileaderboard;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.FontStyle;
-import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -13,6 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
+import com.sap.sailing.gwt.home.mobile.partials.placeholder.PlaceHolderMessage;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -76,11 +75,7 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     }
     
     private Widget getNoResultsInfoWidget() {
-        Label label = new Label(StringMessages.INSTANCE.noResults());
-        label.getElement().getStyle().setPadding(1, Unit.EM);
-        label.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        label.getElement().getStyle().setFontStyle(FontStyle.ITALIC);
-        return label;
+        return new PlaceHolderMessage(StringMessages.INSTANCE.noResults());
     }
     
     private Widget getScoreInformation(GetMiniLeaderboardDTO data) {
