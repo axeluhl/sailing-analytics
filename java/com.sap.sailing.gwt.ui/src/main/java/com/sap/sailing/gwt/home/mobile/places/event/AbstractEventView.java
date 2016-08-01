@@ -97,7 +97,8 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     protected void initRacesNavigation(Panel container) {
         MobileSection mobileSection = new MobileSection();
         SectionHeaderContent header = new SectionHeaderContent();
-        header.setSectionTitle(StringMessages.INSTANCE.racesCount(currentPresenter.getRegatta().getRaceCount()));
+        RegattaMetadataDTO regatta = currentPresenter.getRegatta();
+        header.setSectionTitle(StringMessages.INSTANCE.racesCount(regatta == null ? 0 : regatta.getRaceCount()));
         header.setInfoText(StringMessages.INSTANCE.showAll());
         header.setClickAction(currentPresenter.getRegattaRacesNavigation(getRegattaId()));
         mobileSection.addHeader(header);
