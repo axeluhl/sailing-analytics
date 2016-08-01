@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.communication.event.GetRegattaStatisticsAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
+import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.desktop.partials.eventstage.EventOverviewStage;
@@ -66,7 +67,8 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         liveRacesListUi = new LiveRacesList(currentPresenter, false);
         stageUi = new EventOverviewStage(currentPresenter);
         statisticsBoxUi = new StatisticsBox(false);
-        standingsUi = new StandingsList(currentPresenter.getRegattaMetadata().getState() == RegattaState.FINISHED, currentPresenter.getRegattaLeaderboardNavigation(currentPresenter.getRegattaId()));
+        final HasRegattaMetadata regattaMetadata = currentPresenter.getRegattaMetadata();
+        standingsUi = new StandingsList(regattaMetadata != null && regattaMetadata.getState() == RegattaState.FINISHED, currentPresenter.getRegattaLeaderboardNavigation(currentPresenter.getRegattaId()));
 
         initWidget(ourUiBinder.createAndBindUi(this));
         
