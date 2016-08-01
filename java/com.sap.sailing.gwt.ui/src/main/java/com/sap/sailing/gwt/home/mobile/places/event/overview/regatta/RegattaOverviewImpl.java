@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventSteps;
@@ -62,7 +63,12 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     private void setupMiniLeaderboard(Panel container) {
         MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
         miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
-        refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
+        if(currentPresenter.getRegatta() != null) {
+            refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
+        } else {
+            // This forces the "There are no results available yet" message to show
+            miniLeaderboard.setData(new GetMiniLeaderboardDTO());
+        }
         container.add(miniLeaderboard);
     }
     
