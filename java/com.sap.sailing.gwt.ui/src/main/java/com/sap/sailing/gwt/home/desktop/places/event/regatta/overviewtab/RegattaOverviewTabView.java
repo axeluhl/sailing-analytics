@@ -86,10 +86,11 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         } else {
             stageUi.setupRefresh(refreshManager);
         }
-        refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getEventDTO()
-                .getId(), currentPresenter.getRegattaId()));
-        refreshManager.add(standingsUi, new GetMiniLeaderbordAction(currentPresenter.getEventDTO().getId(), currentPresenter.getRegattaId(), 5));
-        
+        if(currentPresenter.getRegattaMetadata() != null) {
+            refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getEventDTO()
+                    .getId(), currentPresenter.getRegattaId()));
+            refreshManager.add(standingsUi, new GetMiniLeaderbordAction(currentPresenter.getEventDTO().getId(), currentPresenter.getRegattaId(), 5));
+        }
         refreshManager.add(statisticsBoxUi,
                 currentPresenter.getRegattaMetadata() != null
                         ? new GetRegattaStatisticsAction(currentPresenter.getEventDTO().getId(),
