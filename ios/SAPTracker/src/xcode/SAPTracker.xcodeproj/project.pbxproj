@@ -288,7 +288,6 @@
 		7F87CAA21A2CCE8B0076C617 /* OpenSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */; };
 		7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */; };
 		7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */; };
-		7F87DDE01A973C7400704AC4 /* eula-ios.html in Resources */ = {isa = PBXBuildFile; fileRef = 7F87DDE21A973C7400704AC4 /* eula-ios.html */; };
 		7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */; };
 		7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */; };
 		7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D421A373D4400C34B88 /* CourseViewController.swift */; };
@@ -682,8 +681,6 @@
 		7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Light.ttf"; sourceTree = "<group>"; };
 		7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Regular.ttf"; sourceTree = "<group>"; };
 		7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
-		7F87DDE11A973C7400704AC4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = "Base.lproj/eula-ios.html"; sourceTree = "<group>"; };
-		7F87DDE31A973C7900704AC4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = de; path = "de.lproj/eula-ios.html"; sourceTree = "<group>"; };
 		7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingPageViewController.swift; sourceTree = "<group>"; };
 		7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeedViewController.swift; sourceTree = "<group>"; };
 		7F8B8D421A373D4400C34B88 /* CourseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseViewController.swift; sourceTree = "<group>"; };
@@ -1194,14 +1191,6 @@
 			name = Managers;
 			sourceTree = "<group>";
 		};
-		C8739DC51D2A64EF00A89F3C /* EULA */ = {
-			isa = PBXGroup;
-			children = (
-				7F87DDE21A973C7400704AC4 /* eula-ios.html */,
-			);
-			name = EULA;
-			sourceTree = "<group>";
-		};
 		C8739DC71D2A653F00A89F3C /* Classes */ = {
 			isa = PBXGroup;
 			children = (
@@ -1282,7 +1271,6 @@
 		C89C60131D0FF61E002AAAD2 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				C8739DC51D2A64EF00A89F3C /* EULA */,
 				7F14A0031A13B9A6001C1ECB /* Flags */,
 				C89C60141D0FF63C002AAAD2 /* Fonts */,
 			);
@@ -1690,7 +1678,6 @@
 				7F14A12B1A13B9A6001C1ECB /* AW.png in Resources */,
 				7F14A10D1A13B9A6001C1ECB /* _commonwealth.png in Resources */,
 				7F14A1521A13B9A6001C1ECB /* CY.png in Resources */,
-				7F87DDE01A973C7400704AC4 /* eula-ios.html in Resources */,
 				7F14A1391A13B9A6001C1ECB /* BN.png in Resources */,
 				7F14A1231A13B9A6001C1ECB /* AM.png in Resources */,
 				7F14A10F1A13B9A6001C1ECB /* _gosquared.png in Resources */,
@@ -1922,15 +1909,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		7F87DDE21A973C7400704AC4 /* eula-ios.html */ = {
-			isa = PBXVariantGroup;
-			children = (
-				7F87DDE11A973C7400704AC4 /* Base */,
-				7F87DDE31A973C7900704AC4 /* de */,
-			);
-			name = "eula-ios.html";
-			sourceTree = "<group>";
-		};
 		C85291511D48FB91009E9A9D /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
