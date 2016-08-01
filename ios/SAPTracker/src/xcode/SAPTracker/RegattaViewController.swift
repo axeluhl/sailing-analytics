@@ -21,9 +21,6 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         static let TeamImageURL = "teamImageUri"
     }
     
-    //var sourceTypes = [UIImagePickerControllerSourceType]()
-    //var sourceTypeNames = [String]()
-    
     @IBOutlet weak var teamImageView: UIImageView!
     @IBOutlet weak var teamImageAddButton: UIButton!
     @IBOutlet weak var teamImageEditButton: UIButton!
@@ -67,7 +64,6 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         setupCountdownTimer()
         setupLocalization()
         setupNavigationBar()
-        //        setupImageSourceTypes()
         setupTeamImage()
     }
     
@@ -93,17 +89,6 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         )
         refreshCountdown()
     }
-    
-    //    private func setupImageSourceTypes() {
-    //        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-    //            sourceTypes.append(UIImagePickerControllerSourceType.Camera)
-    //            sourceTypeNames.append(Translation.Common.Camera.String)
-    //        }
-    //        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.PhotoLibrary) {
-    //            sourceTypes.append(UIImagePickerControllerSourceType.PhotoLibrary)
-    //            sourceTypeNames.append(Translation.Common.PhotoLibrary.String)
-    //        }
-    //    }
     
     private func setupLocalization() {
         countdownDaysTitleLabel.text = Translation.RegattaView.CountdownDaysTitleLabel.Text.String
@@ -289,10 +274,10 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
                                                     preferredStyle: .Alert
             )
             let cameraAction = UIAlertAction(title: Translation.RegattaView.SelectImageAlert.CameraAction.Title.String, style: .Default) { (action) in
-                self.imagePicker(.Camera)
+                self.showImagePicker(.Camera)
             }
             let photoLibraryAction = UIAlertAction(title: Translation.RegattaView.SelectImageAlert.PhotoLibraryAction.Title.String, style: .Default) { (action) in
-                self.imagePicker(.PhotoLibrary)
+                self.showImagePicker(.PhotoLibrary)
             }
             let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
             alertController.addAction(cameraAction)
@@ -300,9 +285,9 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
             alertController.addAction(cancelAction)
             presentViewController(alertController, animated: true, completion: nil)
         } else if UIImagePickerController.isSourceTypeAvailable(.Camera) {
-            imagePicker(.Camera)
+            showImagePicker(.Camera)
         } else if UIImagePickerController.isSourceTypeAvailable(.PhotoLibrary) {
-            imagePicker(.PhotoLibrary)
+            showImagePicker(.PhotoLibrary)
         }
     }
     
@@ -333,7 +318,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
 
 extension RegattaViewController: UIImagePickerControllerDelegate {
     
-    private func imagePicker(sourceType: UIImagePickerControllerSourceType) {
+    private func showImagePicker(sourceType: UIImagePickerControllerSourceType) {
         let imagePickerController = UIImagePickerController()
         imagePickerController.delegate = self
         imagePickerController.sourceType = sourceType;
@@ -342,8 +327,15 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         presentViewController(imagePickerController, animated: true, completion: nil)
     }
     
-    private func imagePickerController(picker: UIImagePickerController, didFinishPickingImage image: UIImage!, editingInfo: [NSObject : AnyObject]!) {
-        dismissViewControllerAnimated(true, completion: nil)
+    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
+        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            dismissViewControllerAnimated(true, completion: { self.postTeamImage(image)} )
+        } else {
+            dismissViewControllerAnimated(true, completion: nil)
+        }
+    }
+    
+    private func postTeamImage(image: UIImage) {
         teamImageView.image = image
         teamImageAddButton.hidden = true
         teamImageEditButton.hidden = false
@@ -356,11 +348,11 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
     private func postTeamImageData(imageData: NSData!) {
         requestManager.postTeamImageData(imageData,
                                          competitorId: regatta.competitor.competitorID,
-                                         success: { (responseObject) in self.postTeamImageSuccess(responseObject) },
-                                         failure: { (error) in self.postTeamImageFailure(error) })
+                                         success: { (responseObject) in self.postTeamImageDataSuccess(responseObject) },
+                                         failure: { (error) in self.postTeamImageDataFailure(error) })
     }
     
-    private func postTeamImageSuccess(responseObject: AnyObject) {
+    private func postTeamImageDataSuccess(responseObject: AnyObject) {
         
         // Save image URL and upload success
         let teamImageDictionary = responseObject as! [String: AnyObject]
@@ -373,7 +365,7 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         setupTeamImage()
     }
     
-    private func postTeamImageFailure(error: AnyObject) {
+    private func postTeamImageDataFailure(error: AnyObject) {
         
         // Save image upload failure
         regatta.teamImageRetry = true
