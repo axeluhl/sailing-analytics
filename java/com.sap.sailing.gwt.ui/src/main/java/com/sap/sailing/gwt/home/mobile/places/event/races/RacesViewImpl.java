@@ -46,7 +46,7 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
             RacesViewImplFilterPresenter filterPresenter = new RacesViewImplFilterPresenter(competitorFilterUi, competitionPresenter);
             refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(competitionPresenter), new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
         } else {
-            setViewContent(new PlaceHolderMessage(StringMessages.INSTANCE.noDataFound()));
+            setViewContent(new PlaceHolderMessage(StringMessages.INSTANCE.noDataForEvent()));
         }
         competitorFilterUi.removeFromParent();
     }
