@@ -886,7 +886,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setPreference(final String username, final String key, final String value) {
+    public Void setPreference(final String username, final String key, final String value) {
         final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalSetPreference(username, key, value));
@@ -894,12 +894,30 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to set preference for user " + username);
         }
+        return null;
+    }
+
+    @Override
+    public void setPreferenceObject(final String username, final String key, final Object value) {
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
+            final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
+            apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
+        } else {
+            throw new SecurityException("User " + subject.getPrincipal().toString()
+                    + " does not have permission to set preference object for user " + username);
+        }
     }
 
     @Override
     public Void internalSetPreference(final String username, final String key, final String value) {
         store.setPreference(username, key, value);
         return null;
+    }
+    
+    @Override
+    public String internalSetPreferenceObject(final String username, final String key, final Object value) {
+        return store.setPreferenceObject(username, key, value);
     }
     
     @Override

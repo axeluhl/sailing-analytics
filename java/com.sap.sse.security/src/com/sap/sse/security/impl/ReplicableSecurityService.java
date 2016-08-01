@@ -18,6 +18,11 @@ public interface ReplicableSecurityService extends SecurityService {
 
     Void internalSetPreference(String username, String key, String value);
 
+    /**
+     * @return the {@link String}-ified preference object value
+     */
+    String internalSetPreferenceObject(String username, String key, Object value);
+
     Void internalUnsetPreference(String username, String key);
     
     Void internalSetAccessToken(String username, String accessToken);
