@@ -294,7 +294,7 @@ class Translation: NSObject {
                 }
             }
         }
-        struct ImageUploadFailureAlert { static let Key = "\(LeaderboardView.Key).\(ImageUploadFailureAlert.self)"
+        struct ImageUploadFailureAlert { static let Key = "\(RegattaView.Key).\(ImageUploadFailureAlert.self)"
             struct Title { static let Key = "\(ImageUploadFailureAlert.Key).\(Title.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
