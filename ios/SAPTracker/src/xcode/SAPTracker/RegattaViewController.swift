@@ -178,11 +178,11 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     // MARK: - Actions
     
     @IBAction func teamImageAddButtonTapped(sender: AnyObject) {
-        showSelectImageAlertController()
+        showSelectImageAlert()
     }
     
     @IBAction func teamImageEditButtonTapped(sender: AnyObject) {
-        showSelectImageAlertController()
+        showSelectImageAlert()
     }
     
     @IBAction func teamImageRetryButtonTapped(sender: AnyObject) {
@@ -202,13 +202,13 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
             self.performSegueWithIdentifier(Segue.Settings, sender: self)
         }
         let checkOutAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.CheckOutAction.Title.String, style: .Default) { (action) in
-            self.showCheckOutAlertController()
+            self.showCheckOutAlert()
         }
         
         
         // FIXME: Replace or edit or a mix of both?
         let replaceImageAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.ReplaceImageAction.Title.String, style: .Default) { (action) in
-            self.showSelectImageAlertController()
+            self.showSelectImageAlert()
         }
         
         
@@ -244,7 +244,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     
     // MARK: - Alerts
     
-    private func showCheckOutAlertController() {
+    private func showCheckOutAlert() {
         let alertController = UIAlertController(title: Translation.Common.Warning.String,
                                                 message: Translation.RegattaView.CheckOutAlert.Message.String,
                                                 preferredStyle: .Alert
@@ -267,7 +267,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         navigationController!.popViewControllerAnimated(true)
     }
     
-    private func showSelectImageAlertController() {
+    private func showSelectImageAlert() {
         if UIImagePickerController.isSourceTypeAvailable(.Camera) && UIImagePickerController.isSourceTypeAvailable(.PhotoLibrary) {
             let alertController = UIAlertController(title: Translation.RegattaView.SelectImageAlert.Title.String,
                                                     message: Translation.RegattaView.SelectImageAlert.Message.String,
