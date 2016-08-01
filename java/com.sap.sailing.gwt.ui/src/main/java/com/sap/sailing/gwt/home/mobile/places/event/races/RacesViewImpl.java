@@ -15,7 +15,6 @@ import com.sap.sailing.gwt.home.communication.event.GetCompetitionFormatRacesAct
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
-import com.sap.sailing.gwt.home.mobile.partials.placeholder.PlaceHolderMessage;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetition;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
@@ -25,6 +24,7 @@ import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.RacesByCompetitorTextBoxFilter;
+import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionPresenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -46,7 +46,7 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
             RacesViewImplFilterPresenter filterPresenter = new RacesViewImplFilterPresenter(competitorFilterUi, competitionPresenter);
             refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(competitionPresenter), new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
         } else {
-            setViewContent(new PlaceHolderMessage(StringMessages.INSTANCE.noDataForEvent()));
+            setViewContent(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
         }
         competitorFilterUi.removeFromParent();
     }
