@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction
 import com.sap.sailing.gwt.home.communication.event.GetRegattaStatisticsAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
+import com.sap.sailing.gwt.home.communication.event.statistics.GetEventStatisticsAction;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
@@ -88,7 +89,12 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         refreshManager.add(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(currentPresenter.getEventDTO()
                 .getId(), currentPresenter.getRegattaId()));
         refreshManager.add(standingsUi, new GetMiniLeaderbordAction(currentPresenter.getEventDTO().getId(), currentPresenter.getRegattaId(), 5));
-        refreshManager.add(statisticsBoxUi, new GetRegattaStatisticsAction(currentPresenter.getEventDTO().getId(), currentPresenter.getRegattaId()));
+        
+        refreshManager.add(statisticsBoxUi,
+                currentPresenter.getRegattaMetadata() != null
+                        ? new GetRegattaStatisticsAction(currentPresenter.getEventDTO().getId(),
+                                currentPresenter.getRegattaId())
+                        : new GetEventStatisticsAction(currentPresenter.getEventDTO().getId()));
     }
 
     @Override
