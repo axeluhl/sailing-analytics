@@ -50,7 +50,6 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     private final AbstractEventViewLayout layout;
     
     private final SimplePanel contentRoot = new SimplePanel();
-    private final boolean supportsRefresh;
 
     public AbstractEventView(P presenter, boolean showRegattaName, boolean enableLogoNavigation) {
         this(presenter, showRegattaName, enableLogoNavigation, true);
@@ -58,20 +57,20 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     
     public AbstractEventView(P presenter, boolean showRegattaName, boolean enableLogoNavigation, boolean supportsRefresh) {
         this.currentPresenter = presenter;
-        this.supportsRefresh = supportsRefresh;
         String regattaName = showRegattaName ? currentPresenter.getRegatta().getDisplayName() : null;
         PlaceNavigation<?> logoNavigation = enableLogoNavigation ? currentPresenter.getEventNavigation() : null;
         this.layout = new AbstractEventViewLayout(currentPresenter.getEventDTO(), regattaName, logoNavigation);
         initWidget(uiBinder.createAndBindUi(this.layout));
-        this.refreshManager = new RefreshManagerWithErrorAndBusy(contentRoot, layout.viewContentUi, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
+        if(supportsRefresh) {
+            this.refreshManager = new RefreshManagerWithErrorAndBusy(contentRoot, layout.viewContentUi, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
+        } else {
+            this.refreshManager = null;
+            layout.viewContentUi.setWidget(contentRoot);
+        }
     }
     
     protected void setViewContent(Widget contentWidget) {
-        if(supportsRefresh) {
-            contentRoot.setWidget(contentWidget);
-        } else {
-            layout.viewContentUi.setWidget(contentWidget);
-        }
+        contentRoot.setWidget(contentWidget);
     }
     
     protected UUID getEventId() {
