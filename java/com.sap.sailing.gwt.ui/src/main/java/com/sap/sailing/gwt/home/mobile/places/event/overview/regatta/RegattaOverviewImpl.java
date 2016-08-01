@@ -30,8 +30,10 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     public RegattaOverviewImpl(EventViewBase.Presenter presenter) {
         super(presenter, presenter.isMultiRegattaEvent(), presenter.isMultiRegattaEvent());
         FlowPanel container = new FlowPanel();
-        this.setupProgress(container);
-        this.setupLiveRaces(container);
+        if(presenter.getRegatta() != null) {
+            this.setupProgress(container);
+            this.setupLiveRaces(container);
+        }
         if (!isMultiRegattaEvent()) {
             this.setupOverviewStage(container);
         }
