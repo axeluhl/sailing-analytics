@@ -10,6 +10,9 @@ import com.sap.sse.common.WithID;
 /**
  * This is used by the fix tracking mechanism to make fixes available in a track.
  * This makes it possible to e.g. map fixes to another type before adding them to the track.
+ * <p>
+ * 
+ * Implementations need to be registered as OSGi service to be correctly found.
  *
  * @param <FixT> the type of fix this mapper handles
  * @param <TrackT> the type of track this mapper adds the fixes to
