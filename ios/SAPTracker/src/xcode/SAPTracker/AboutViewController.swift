@@ -22,6 +22,7 @@ class AboutViewController: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         partnershipTextView.scrollRectToVisible(CGRect(x: 0, y: 0, width: 1, height: 1), animated: false)
     }
     
@@ -55,8 +56,8 @@ class AboutViewController: UIViewController {
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    @IBAction func eulaButtonTapped(sender: AnyObject) {
-        UIApplication.sharedApplication().openURL(URLs.EULA)
+    @IBAction func termsButtonTapped(sender: AnyObject) {
+        UIApplication.sharedApplication().openURL(URLs.Terms)
     }
     
 }

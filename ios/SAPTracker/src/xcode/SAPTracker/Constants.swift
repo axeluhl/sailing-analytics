@@ -13,7 +13,7 @@ struct Application {
 }
 
 struct URLs {
-    static let EULA =  NSURL(string: "http://www.sapsailing.com/EULA_iOS_SailingBoatTracker.html")!
+    static let Terms = NSURL(string: "http://www.sapsailing.com/EULA_iOS_SailingBoatTracker.html") ?? NSURL()
 }
 
 struct Colors {

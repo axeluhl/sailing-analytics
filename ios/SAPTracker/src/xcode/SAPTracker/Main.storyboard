@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pqQ-jd-OwW">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pqQ-jd-OwW">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -20,6 +20,7 @@
             <string>OpenSans-Light</string>
         </mutableArray>
         <mutableArray key="OpenSans-Regular.ttf">
+            <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
@@ -78,11 +79,11 @@
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="81" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="OXU-ft-TXZ">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="330.5"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                <view key="tableHeaderView" contentMode="scaleToFill" id="mhw-sY-eah" userLabel="Title View">
+                                <view key="tableHeaderView" contentMode="scaleToFill" id="mhw-sY-eah" userLabel="Header View">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="52"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                     <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="lc2-1P-oDt">
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="lc2-1P-oDt" userLabel="Header Title Label">
                                             <rect key="frame" x="20" y="0.0" width="580" height="52"/>
                                             <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="18"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -98,10 +99,24 @@
                                         <constraint firstItem="lc2-1P-oDt" firstAttribute="leading" secondItem="mhw-sY-eah" secondAttribute="leading" constant="20" id="uqT-sU-EdP"/>
                                     </constraints>
                                 </view>
-                                <view key="tableFooterView" contentMode="scaleToFill" id="ntQ-jE-XcH">
-                                    <rect key="frame" x="0.0" y="155" width="600" height="0.0"/>
+                                <view key="tableFooterView" contentMode="scaleToFill" id="ntQ-jE-XcH" userLabel="Footer View">
+                                    <rect key="frame" x="0.0" y="155" width="600" height="52"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <subviews>
+                                        <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" editable="NO" text="Footer Text View" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="FXc-cY-lmX">
+                                            <rect key="frame" x="0.0" y="0.0" width="600" height="52"/>
+                                            <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
+                                            <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                            <dataDetectorType key="dataDetectorTypes" link="YES"/>
+                                        </textView>
+                                    </subviews>
+                                    <color key="backgroundColor" red="0.87058823529411766" green="0.94509803921568625" blue="0.94509803921568625" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <constraints>
+                                        <constraint firstItem="FXc-cY-lmX" firstAttribute="leading" secondItem="ntQ-jE-XcH" secondAttribute="leading" id="Kld-5z-2Jg"/>
+                                        <constraint firstAttribute="bottom" secondItem="FXc-cY-lmX" secondAttribute="bottom" id="TCP-a7-5SI"/>
+                                        <constraint firstItem="FXc-cY-lmX" firstAttribute="top" secondItem="ntQ-jE-XcH" secondAttribute="top" id="pOe-7F-02x"/>
+                                        <constraint firstAttribute="trailing" secondItem="FXc-cY-lmX" secondAttribute="trailing" id="xgc-JL-j1J"/>
+                                    </constraints>
                                 </view>
                                 <prototypes>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Regatta" id="01f-yF-69S" userLabel="Regatta Cell" customClass="HomeViewRegattaTableViewCell" customModule="SAPTracker" customModuleProvider="target">
@@ -319,11 +334,14 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="footerTextView" destination="FXc-cY-lmX" id="DOf-M8-0Mi"/>
+                        <outlet property="footerView" destination="ntQ-jE-XcH" id="yKn-rf-KUB"/>
+                        <outlet property="headerTitleLabel" destination="lc2-1P-oDt" id="ocg-my-9fB"/>
+                        <outlet property="headerView" destination="mhw-sY-eah" id="9fk-BP-QZw"/>
                         <outlet property="infoCodeLabel" destination="OqX-q3-43s" id="Naw-7q-X8D"/>
                         <outlet property="noCodeButton" destination="Fp0-61-7he" id="KZ9-6K-G1M"/>
                         <outlet property="scanCodeButton" destination="Ieu-ch-jeI" id="keL-Mu-e7V"/>
                         <outlet property="tableView" destination="OXU-ft-TXZ" id="1BA-dy-00A"/>
-                        <outlet property="titleLabel" destination="lc2-1P-oDt" id="BJe-wC-1Xz"/>
                         <segue destination="plm-Uw-c62" kind="show" identifier="Scan" id="U8l-If-CrF"/>
                         <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Xxn-jp-xEB"/>
                         <segue destination="dfN-Ch-vpm" kind="presentation" identifier="About" id="QMa-LQ-D8c"/>
@@ -1520,7 +1538,7 @@
                                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                                 </userDefinedRuntimeAttributes>
                                                 <connections>
-                                                    <action selector="eulaButtonTapped:" destination="WMr-pC-C12" eventType="touchUpInside" id="zYu-4g-apZ"/>
+                                                    <action selector="termsButtonTapped:" destination="WMr-pC-C12" eventType="touchUpInside" id="twA-aL-l2e"/>
                                                 </connections>
                                             </button>
                                         </subviews>

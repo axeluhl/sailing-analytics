@@ -31,10 +31,14 @@ class ScanViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        layoutPreviewLayer()
+        layout()
     }
     
-    // MARK: - Layouts
+    // MARK: - Layout
+    
+    private func layout() {
+        layoutPreviewLayer()
+    }
     
     private func layoutPreviewLayer() {
         guard let previewLayer = scanPreviewLayer else { return }

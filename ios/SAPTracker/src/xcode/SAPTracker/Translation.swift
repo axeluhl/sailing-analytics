@@ -147,8 +147,13 @@ class Translation: NSObject {
     // MARK: - HomeView
     
     struct HomeView { static let Key = "\(HomeView.self)"
-        struct TableView { static let Key = "\(HomeView.Key).\(TableView.self)"
-            struct Title { static let Key = "\(TableView.Key).\(Title.self)"
+        struct HeaderTitleLabel { static let Key = "\(HomeView.Key).\(HeaderTitleLabel.self)"
+            struct Text { static let Key = "\(HeaderTitleLabel.Key).\(Text.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
+        }
+        struct FooterTextView { static let Key = "\(HomeView.Key).\(FooterTextView.self)"
+            struct Text { static let Key = "\(FooterTextView.Key).\(Text.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }

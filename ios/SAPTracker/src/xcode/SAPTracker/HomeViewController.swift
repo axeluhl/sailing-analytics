@@ -17,11 +17,14 @@ class HomeViewController: UIViewController {
         static let Settings = "Settings"
     }
     
-    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var headerView: UIView!
+    @IBOutlet weak var headerTitleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var scanCodeButton: UIButton!
     @IBOutlet weak var noCodeButton: UIButton!
     @IBOutlet weak var infoCodeLabel: UILabel!
+    @IBOutlet weak var footerView: UIView!
+    @IBOutlet weak var footerTextView: UITextView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,6 +40,11 @@ class HomeViewController: UIViewController {
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         unsubscribeFromNewCheckInURLNotifications()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        layout()
     }
     
     // MARK: - Setup
@@ -56,10 +64,11 @@ class HomeViewController: UIViewController {
     
     private func setupLocalization() {
         navigationItem.title = Application.Title
-        titleLabel.text = Translation.HomeView.TableView.Title.String
+        headerTitleLabel.text = Translation.HomeView.HeaderTitleLabel.Text.String
         scanCodeButton.setTitle(Translation.ScanView.Title.String, forState: .Normal)
         noCodeButton.setTitle(Translation.HomeView.NoCodeAlert.Title.String, forState: .Normal)
         infoCodeLabel.text = Translation.HomeView.InfoCodeLabel.Text.String
+        footerTextView.text = Translation.HomeView.FooterTextView.Text.String
     }
     
     private func setupNavigationBar() {
@@ -79,7 +88,22 @@ class HomeViewController: UIViewController {
         }
     }
     
-    // MARK: - Reviews
+    // MARK: - Layout
+    
+    private func layout() {
+        self.layoutFooterView()
+    }
+    
+    private func layoutFooterView() {
+        let height = footerTextView.sizeThatFits(CGSizeMake(footerView.frame.width, CGFloat.max)).height
+        footerView.frame = CGRectMake(footerView.frame.origin.x,
+                                      footerView.frame.origin.y,
+                                      footerView.frame.width,
+                                      height
+        )
+    }
+    
+    // MARK: - Review
     
     private func reviews() {
         self.reviewTerms({
@@ -93,7 +117,7 @@ class HomeViewController: UIViewController {
         })
     }
     
-    // MARK: - 1. Review Terms
+    // MARK: 1. Review Terms
     
     private func reviewTerms(completion: () -> Void) {
         guard Preferences.termsAccepted == false else { completion(); return }
@@ -102,7 +126,7 @@ class HomeViewController: UIViewController {
                                                 preferredStyle: .Alert
         )
         let showTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.ShowTermsAction.Title.String, style: .Cancel) { action in
-            UIApplication.sharedApplication().openURL(URLs.EULA)
+            UIApplication.sharedApplication().openURL(URLs.Terms)
             self.reviewTerms(completion) // Review terms until user accepted terms
         }
         let acceptTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.AcceptTermsAction.Title.String, style: .Default) { action in
@@ -259,7 +283,17 @@ class HomeViewController: UIViewController {
 extension HomeViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
+        let numberOfRows = fetchedResultsController.sections?[section].numberOfObjects ?? 0
+        if numberOfRows == 0 {
+            if tableView.tableHeaderView != nil {
+                tableView.tableHeaderView = nil
+            }
+        } else {
+            if tableView.tableHeaderView == nil {
+                tableView.tableHeaderView = headerView
+            }
+        }
+        return numberOfRows
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
