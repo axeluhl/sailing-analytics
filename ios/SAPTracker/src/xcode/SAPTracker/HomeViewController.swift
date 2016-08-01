@@ -17,7 +17,8 @@ class HomeViewController: UIViewController {
         static let Settings = "Settings"
     }
     
-    @IBOutlet weak var headerView: UIView!
+    @IBOutlet var headerView: UIView! // Strong reference needed to avoid deallocation when not attached to table view
+    
     @IBOutlet weak var headerTitleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var scanCodeButton: UIButton!
@@ -55,6 +56,7 @@ class HomeViewController: UIViewController {
         setupNavigationBar()
         setupTableView()
         setupTableViewDataSource()
+        setupTableViewHeader()
     }
     
     private func setupButtons() {
@@ -85,6 +87,14 @@ class HomeViewController: UIViewController {
             try fetchedResultsController.performFetch()
         } catch {
             print(error)
+        }
+    }
+    
+    private func setupTableViewHeader() {
+        if fetchedResultsController.sections?[0].numberOfObjects ?? 0 == 0 {
+            tableView.tableHeaderView = nil
+        } else {
+            tableView.tableHeaderView = headerView
         }
     }
     
@@ -283,17 +293,7 @@ class HomeViewController: UIViewController {
 extension HomeViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let numberOfRows = fetchedResultsController.sections?[section].numberOfObjects ?? 0
-        if numberOfRows == 0 {
-            if tableView.tableHeaderView != nil {
-                tableView.tableHeaderView = nil
-            }
-        } else {
-            if tableView.tableHeaderView == nil {
-                tableView.tableHeaderView = headerView
-            }
-        }
-        return numberOfRows
+        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -353,6 +353,7 @@ extension HomeViewController: NSFetchedResultsControllerDelegate {
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         tableView.endUpdates()
+        setupTableViewHeader()
     }
     
 }
