@@ -346,6 +346,7 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
     }
     
     private func postTeamImageData(imageData: NSData!) {
+        SVProgressHUD.show()
         requestManager.postTeamImageData(imageData,
                                          competitorId: regatta.competitor.competitorID,
                                          success: { (responseObject) in self.postTeamImageDataSuccess(responseObject) },
@@ -353,6 +354,7 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
     }
     
     private func postTeamImageDataSuccess(responseObject: AnyObject) {
+        SVProgressHUD.popActivity()
         
         // Save image URL and upload success
         let teamImageDictionary = responseObject as! [String: AnyObject]
@@ -366,6 +368,7 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
     }
     
     private func postTeamImageDataFailure(error: AnyObject) {
+        SVProgressHUD.popActivity()
         
         // Save image upload failure
         regatta.teamImageRetry = true

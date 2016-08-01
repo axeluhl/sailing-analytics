@@ -57,16 +57,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         setupAFNetworking()
         setupNavigationBarApperance()
         setupPageControlApperance()
+        setupSVProgressHUD()
     }
     
     private func setupAFNetworking() {
         AFNetworkActivityIndicatorManager.sharedManager().enabled = true
         AFNetworkReachabilityManager.sharedManager().startMonitoring()
-
-        // Set up connection logging for debug builds
         #if DEBUG
-            //AFNetworkActivityLogger.sharedLogger().startLogging()
-            //AFNetworkActivityLogger.sharedLogger().level = AFHTTPRequestLoggerLevel.AFLoggerLevelDebug
+            AFNetworkActivityLogger.sharedLogger().startLogging()
+            AFNetworkActivityLogger.sharedLogger().level = AFHTTPRequestLoggerLevel.AFLoggerLevelOff
         #endif
     }
     
@@ -80,6 +79,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     private func setupPageControlApperance() {
         UIPageControl.appearance().pageIndicatorTintColor = UIColor.lightGrayColor()
         UIPageControl.appearance().currentPageIndicatorTintColor = UIColor.blackColor()
+    }
+    
+    private func setupSVProgressHUD() {
+        SVProgressHUD.setDefaultMaskType(.Gradient)
     }
     
     // MARK: - Helper
