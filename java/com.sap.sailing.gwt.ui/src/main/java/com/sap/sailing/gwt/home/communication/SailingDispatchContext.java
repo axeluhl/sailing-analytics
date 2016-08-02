@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.communication;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Locale;
 
@@ -31,5 +30,5 @@ public interface SailingDispatchContext extends DispatchContext {
     
     <T> T getPreferenceForCurrentUser(String preferenceKey);
     
-    void setPreferenceForCurrentUser(String preferenceKey, Serializable preference);
+    void setPreferenceForCurrentUser(String preferenceKey, Object preference);
 }
