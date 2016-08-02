@@ -15,9 +15,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        
-        // Initialize core data, migrate database if needed, or delete if migration needed but not possible
-        CoreDataManager.sharedManager
         setup()
         return true
     }
@@ -55,6 +52,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     private func setup() {
         setupAFNetworking()
+        setupCoreData()
         setupNavigationBarApperance()
         setupPageControlApperance()
         setupSVProgressHUD()
@@ -67,6 +65,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             AFNetworkActivityLogger.sharedLogger().startLogging()
             AFNetworkActivityLogger.sharedLogger().level = AFHTTPRequestLoggerLevel.AFLoggerLevelOff
         #endif
+    }
+    
+    private func setupCoreData() {
+        CoreDataManager.sharedManager // Initialize core data, migrate database if needed, or delete if migration needed but not possible
     }
     
     private func setupNavigationBarApperance() {
