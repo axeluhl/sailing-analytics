@@ -8,8 +8,9 @@
 
 import Foundation
 
-/* Set color to RGB hex value. See http://stackoverflow.com/a/24263296 */
-extension UIColor {
+// MARK: - UIColor
+
+extension UIColor { // Set color to RGB hex value. See http://stackoverflow.com/a/24263296
     
     convenience init(red: Int, green: Int, blue: Int) {
         assert(red >= 0 && red <= 255, "Invalid red component")
@@ -23,6 +24,8 @@ extension UIColor {
     }
     
 }
+
+// MARK: - UIImage
 
 extension UIImage {
 
@@ -38,31 +41,3 @@ extension UIImage {
     }
 
 }
-
-///* Needed for setting border color in Interface Builder. */
-//extension CALayer {
-//    var borderUIColor: UIColor {
-//        get {
-//            return UIColor(CGColor: self.borderColor!)
-//        }
-//        set {
-//            self.borderColor = newValue.CGColor
-//        }
-//    }
-//}
-
-///* Needed for bottom status labels. */
-//class PaddedLabel : UILabel {
-//    override func drawTextInRect(rect: CGRect) {
-//        let insets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
-//        return super.drawTextInRect(UIEdgeInsetsInsetRect(rect, insets))
-//    }
-//}
-
-///* Needed for programmatically setting button heights in iOS 7. */
-//struct ButtonHeight {
-//    static let bigButtonPortrait = CGFloat(75.0)
-//    static let bigButtonLandscape = CGFloat(50.0)
-//    static let smallButtonPortrait = CGFloat(50.0)
-//    static let smallButtonLandscape = CGFloat(50.0)
-//}
