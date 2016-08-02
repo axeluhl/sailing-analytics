@@ -333,7 +333,7 @@ extension HomeViewController: UITableViewDataSource {
     }
     
     func configureCell(cell: UITableViewCell, atIndexPath indexPath: NSIndexPath) {
-        guard let regattaCell = cell as? HomeViewRegattaTableViewCell else { return }
+        guard let regattaCell = cell as? HomeViewRegattaCell else { return }
         guard let regatta = fetchedResultsController.objectAtIndexPath(indexPath) as? Regatta else { return }
         regattaCell.eventLabel.text = regatta.event.name
         regattaCell.leaderboardLabel.text = regatta.leaderboard.name

@@ -306,7 +306,7 @@
 		9E95C3D61C723AB30016632B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95C3D51C723AB30016632B /* Constants.swift */; };
 		9ECBDDAE1C9C4F0300F76AEB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */; };
 		C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936171D40D295000F30E8 /* GPSFixController.swift */; };
-		C84936291D47645F000F30E8 /* HomeViewRegattaTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* HomeViewRegattaTableViewCell.swift */; };
+		C84936291D47645F000F30E8 /* HomeViewRegattaCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */; };
 		C852914F1D48FB91009E9A9D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C85291511D48FB91009E9A9D /* Localizable.strings */; };
 		C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */; };
 		C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAAA1CF736680093B0C5 /* Preferences.swift */; };
@@ -699,7 +699,7 @@
 		9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B1229BB88872CD20C0AE25DE /* libPods-SAPTracker.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SAPTracker.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
-		C84936281D47645F000F30E8 /* HomeViewRegattaTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewRegattaTableViewCell.swift; sourceTree = "<group>"; };
+		C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewRegattaCell.swift; sourceTree = "<group>"; };
 		C85291501D48FB91009E9A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestManager.swift; sourceTree = "<group>"; };
 		C852BAAA1CF736680093B0C5 /* Preferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
@@ -796,7 +796,7 @@
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
 				7F83F15719F154F000C53328 /* HomeViewController.swift */,
-				C84936281D47645F000F30E8 /* HomeViewRegattaTableViewCell.swift */,
+				C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */,
 				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
 				C89C60101D0FF036002AAAD2 /* Regatta */,
 			);
@@ -1859,7 +1859,7 @@
 				C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */,
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
 				7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */,
-				C84936291D47645F000F30E8 /* HomeViewRegattaTableViewCell.swift in Sources */,
+				C84936291D47645F000F30E8 /* HomeViewRegattaCell.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */,
 				C8739E041D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift in Sources */,
