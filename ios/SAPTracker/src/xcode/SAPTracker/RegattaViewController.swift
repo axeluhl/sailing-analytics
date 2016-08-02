@@ -17,10 +17,6 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         static let Tracking = "Tracking"
     }
     
-    private struct TeamImageKeys {
-        static let TeamImageURL = "teamImageUri"
-    }
-    
     @IBOutlet weak var teamImageView: UIImageView!
     @IBOutlet weak var teamImageAddButton: UIButton!
     @IBOutlet weak var teamImageEditButton: UIButton!
@@ -43,13 +39,11 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     @IBOutlet weak var announcementLabel: UILabel!
     
     var regatta: Regatta!
-    var requestManager: RequestManager!
     
     var countdownTimer: NSTimer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        requestManager = RequestManager(baseURLString: regatta.serverURL)
         setup()
         update()
     }
@@ -204,7 +198,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     @IBAction func teamImageRetryButtonTapped(sender: AnyObject) {
-        postTeamImageData(regatta.teamImageData)
+        uploadTeamImageData(regatta.teamImageData)
     }
     
     @IBAction func eventButtonTapped(sender: UIButton) {
@@ -264,7 +258,9 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
                                                 message: Translation.RegattaView.CheckOutAlert.Message.String,
                                                 preferredStyle: .Alert
         )
-        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .Default) { (action) in self.performCheckOut() }
+        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .Default) { (action) in
+            self.performCheckOut()
+        }
         let noAction = UIAlertAction(title: Translation.Common.No.String, style: .Cancel, handler: nil)
         alertController.addAction(yesAction)
         alertController.addAction(noAction)
@@ -272,14 +268,15 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     private func performCheckOut() {
-        requestManager.postCheckOut(regatta.leaderboard.name,
-                                    competitorId: regatta.competitor.competitorID,
-                                    success: { (operation, responseObject) in },
-                                    failure: { (operation, error) in
-        })
-        CoreDataManager.sharedManager.deleteObject(regatta)
+        regattaController.checkOut { (withSuccess) in
+            self.performCheckOutCompleted(withSuccess)
+        }
+    }
+    
+    private func performCheckOutCompleted(withSuccess: Bool) {
+        CoreDataManager.sharedManager.deleteObject(self.regatta)
         CoreDataManager.sharedManager.saveContext()
-        navigationController!.popViewControllerAnimated(true)
+        self.navigationController!.popViewControllerAnimated(true)
     }
     
     private func showSelectImageAlert() {
@@ -358,62 +355,59 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
     
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            dismissViewControllerAnimated(true, completion: { self.postTeamImage(image)} )
+            dismissViewControllerAnimated(true) {
+                self.uploadTeamImage(image)
+            }
         } else {
             dismissViewControllerAnimated(true, completion: nil)
         }
     }
     
-    private func postTeamImage(image: UIImage) {
+    private func uploadTeamImage(image: UIImage) {
         teamImageView.image = image
         teamImageAddButton.hidden = true
         teamImageEditButton.hidden = false
         teamImageRetryButton.hidden = true
         regatta.teamImageData = UIImageJPEGRepresentation(image, 0.8)
         CoreDataManager.sharedManager.saveContext()
-        postTeamImageData(regatta.teamImageData)
+        uploadTeamImageData(regatta.teamImageData)
     }
     
-    private func postTeamImageData(imageData: NSData!) {
+    private func uploadTeamImageData(imageData: NSData!) {
         SVProgressHUD.show()
-        requestManager.postTeamImageData(imageData,
-                                         competitorId: regatta.competitor.competitorID,
-                                         success: { (responseObject) in self.postTeamImageDataSuccess(responseObject) },
-                                         failure: { (error) in self.postTeamImageDataFailure(error) })
+        regattaController.postTeamImageData(imageData,
+                                            success: { (teamImageURL) in
+                                                SVProgressHUD.popActivity()
+                                                self.uploadTeamImageDataSuccess(teamImageURL)
+            },
+                                            failure: { (title, message) in
+                                                SVProgressHUD.popActivity()
+                                                self.uploadTeamImageDataFailure(title, message: message)
+            }
+        )
     }
     
-    private func postTeamImageDataSuccess(responseObject: AnyObject) {
-        SVProgressHUD.popActivity()
-        
-        // Save image URL and upload success
-        let teamImageDictionary = responseObject as! [String: AnyObject]
-        let teamImageURL = (teamImageDictionary[TeamImageKeys.TeamImageURL]) as! String
-        regatta.teamImageURL = teamImageURL
+    private func uploadTeamImageDataSuccess(teamImageURL: String) {
         regatta.teamImageRetry = false
+        regatta.teamImageURL = teamImageURL
         CoreDataManager.sharedManager.saveContext()
-        
-        // Setup team image
         setupTeamImage()
     }
     
-    private func postTeamImageDataFailure(error: AnyObject) {
-        SVProgressHUD.popActivity()
-        
-        // Save image upload failure
+    private func uploadTeamImageDataFailure(title: String, message: String) {
         regatta.teamImageRetry = true
         CoreDataManager.sharedManager.saveContext()
-        
-        // Show alert
-        let alertController = UIAlertController(title: Translation.RegattaView.ImageUploadFailureAlert.Title.String,
-                                                message: error.localizedDescription,
-                                                preferredStyle: .Alert
-        )
+        showUploadTeamImageFailureAlert(title, message: message)
+        setupTeamImage()
+    }
+    
+    // MARK: - Alert
+    
+    private func showUploadTeamImageFailureAlert(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default, handler: nil)
         alertController.addAction(okAction)
         presentViewController(alertController, animated: true, completion: nil)
-        
-        // Setup team image
-        setupTeamImage()
     }
     
 }

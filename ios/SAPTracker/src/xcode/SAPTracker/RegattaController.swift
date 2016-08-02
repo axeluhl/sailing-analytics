@@ -9,7 +9,7 @@
 import UIKit
 
 class RegattaController: NSObject {
-    
+        
     let regatta: Regatta
     
     var sendingBackgroundTask: UIBackgroundTaskIdentifier = UIBackgroundTaskInvalid
@@ -114,7 +114,7 @@ class RegattaController: NSObject {
         completion()
     }
     
-    // MARK: - Methods
+    // MARK: - Tracking
     
     func startTracking() throws {
         isTracking = false
@@ -125,6 +125,29 @@ class RegattaController: NSObject {
     func stopTracking() {
         isTracking = false
         LocationManager.sharedManager.stopTracking()
+    }
+    
+    // MARK: - TeamImage
+    
+    func postTeamImageData(imageData: NSData,
+                           success: (teamImageURL: String) -> Void,
+                           failure: (title: String, message: String) -> Void)
+    {
+        requestManager.postTeamImageData(imageData,
+                                         competitorID: regatta.competitor.competitorID,
+                                         success: success,
+                                         failure: failure
+        )
+    }
+    
+    // MARK: - CheckOut
+    
+    func checkOut(completion: (withSuccess: Bool) -> Void) {
+        requestManager.postCheckOut(regatta.leaderboard.name,
+                                    competitorId: regatta.competitor.competitorID,
+                                    success: { () in completion(withSuccess: true) },
+                                    failure: { (title, message) in completion(withSuccess: false) }
+        )
     }
     
     // MARK: - Properties

@@ -71,12 +71,12 @@ class CheckInController : NSObject {
         requestManager.postCheckIn(regattaData.leaderboardData.name,
                                    competitorID: regattaData.competitorData.competitorID,
                                    success:
-            { (operation, responseObject) -> Void in
+            { () -> Void in
                 SVProgressHUD.popActivity()
                 self.postCheckInSuccess(regattaData, completion: completion)
-            }, failure: { (operation, error) -> Void in
+            }, failure: { (title, message) -> Void in
                 SVProgressHUD.popActivity()
-                self.postCheckInFailure(regattaData, error: error, completion: completion)
+                self.postCheckInFailure(title, message: message, completion: completion)
             }
         )
     }
@@ -94,9 +94,9 @@ class CheckInController : NSObject {
         checkInDidFinish(withSuccess: true, completion: completion)
     }
     
-    private func postCheckInFailure(regattaData: RegattaData, error: AnyObject, completion: (withSuccess: Bool) -> Void) {
-        let alertController = UIAlertController(title: Translation.Common.Error.String,
-                                                message: Translation.CheckInController.PostCheckInFailureAlert.Message.String,
+    private func postCheckInFailure(title: String, message: String, completion: (withSuccess: Bool) -> Void) {
+        let alertController = UIAlertController(title: title,
+                                                message: message,
                                                 preferredStyle: .Alert
         )
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
