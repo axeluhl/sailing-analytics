@@ -74,12 +74,15 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
         initWidget(ourUiBinder.createAndBindUi(this));
         
         RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
-        refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
-            @Override
-            public void setData(RegattaWithProgressDTO data) {
-                regattaInfoContainerUi.setWidget(new MultiRegattaListItem(data, true));
-            }
-        }, new GetRegattaWithProgressAction(currentPresenter.getEventDTO().getId(), currentPresenter.getRegattaId()));
+        if (currentPresenter.getRegattaMetadata() != null) {
+            refreshManager.add(new RefreshableWidget<RegattaWithProgressDTO>() {
+                @Override
+                public void setData(RegattaWithProgressDTO data) {
+                    regattaInfoContainerUi.setWidget(new MultiRegattaListItem(data, true));
+                }
+            }, new GetRegattaWithProgressAction(currentPresenter.getEventDTO().getId(),
+                    currentPresenter.getRegattaId()));
+        }
 
         if (currentPresenter.getEventDTO().getType() == EventType.MULTI_REGATTA) {
             stageUi.removeFromParent();
