@@ -34,10 +34,10 @@ installPlugins http://p2.sapsailing.com/p2/sdbg com.github.sdbg.feature.feature.
 # echo "Installing EasyShell..."
 # installPlugins http://anb0s.github.io/EasyShell com.tetrade.eclipse.plugins.easyshell.feature.feature.group
 
-echo "Installing latest version of Code Recommenders..."
-updatePlugins http://download.eclipse.org/recommenders/updates/stable/ org.eclipse.recommenders.rcp.feature.feature.group,org.eclipse.recommenders.mylyn.rcp.feature.feature.group,org.eclipse.recommenders.snipmatch.rcp.feature.feature.group
+echo "Installing latest version of Code Recommenders (Neon release version has bugs)..."
+updatePlugins http://download.eclipse.org/recommenders/updates/stable/ org.eclipse.recommenders.rcp.feature.feature.group,org.eclipse.recommenders.mylyn.rcp.feature.feature.group,org.eclipse.recommenders.snipmatch.rcp.feature.feature.group,org.eclipse.recommenders.news.rcp.feature.feature.group
 
-echo "Installing latest version of EGit..."
+echo "Installing latest version of EGit (Neon release version has bugs)..."
 updatePlugins http://download.eclipse.org/egit/updates org.eclipse.jgit.feature.group,org.eclipse.jgit.http.apache.feature.group,org.eclipse.egit.feature.group,org.eclipse.egit.mylyn.feature.group
 
 echo "Installation completed!"
