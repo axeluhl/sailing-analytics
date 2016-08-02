@@ -144,7 +144,7 @@ class HomeViewController: UIViewController {
             UIApplication.sharedApplication().openURL(URLs.Terms)
             self.reviewTerms(completion) // Review terms until user accepted terms
         }
-        let acceptTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.AcceptTermsAction.Title.String, style: .Cancel) { action in
+        let acceptTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.AcceptTermsAction.Title.String, style: .Default) { action in
             Preferences.termsAccepted = true
             completion() // Terms accepted
         }
