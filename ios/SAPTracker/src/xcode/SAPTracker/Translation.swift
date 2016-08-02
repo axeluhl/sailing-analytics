@@ -268,8 +268,8 @@ class Translation: NSObject {
                     static let String = NSLocalizedString(Key, comment: "")
                 }
             }
-            struct RefreshAction { static let Key = "\(OptionSheet.Key).\(RefreshAction.self)"
-                struct Title { static let Key = "\(RefreshAction.Key).\(Title.self)"
+            struct UpdateAction { static let Key = "\(OptionSheet.Key).\(UpdateAction.self)"
+                struct Title { static let Key = "\(UpdateAction.Key).\(Title.self)"
                     static let String = NSLocalizedString(Key, comment: "")
                 }
             }

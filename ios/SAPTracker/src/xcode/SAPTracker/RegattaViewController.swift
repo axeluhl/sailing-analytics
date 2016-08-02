@@ -51,16 +51,18 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         super.viewDidLoad()
         requestManager = RequestManager(baseURLString: regatta.serverURL)
         setup()
-        
-        // FIXME: - UI refresh?!
-        regattaController.update()
+        update()
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        refresh()
     }
     
     // MARK: - Setup
     
     private func setup() {
         setupButtons()
-        setupCompetitor()
         setupCountdownTimer()
         setupLocalization()
         setupNavigationBar()
@@ -73,21 +75,15 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         startTrackingButton.setBackgroundImage(Images.GreenHighlighted, forState: .Highlighted)
     }
     
-    private func setupCompetitor() {
-        competitorNameLabel.text = regatta.competitor.name
-        competitorFlagImageView.image = UIImage(named: regatta.competitor.countryCode)
-        competitorSailLabel.text = regatta.competitor.sailID
-    }
-    
     private func setupCountdownTimer() {
         countdownTimer?.invalidate()
-        countdownTimer = NSTimer.scheduledTimerWithTimeInterval(60,
+        countdownTimer = NSTimer.scheduledTimerWithTimeInterval(1,
                                                                 target: self,
-                                                                selector: #selector(RegattaViewController.refreshCountdown),
+                                                                selector: #selector(RegattaViewController.countdownTimerTick),
                                                                 userInfo: nil,
                                                                 repeats: true
         )
-        refreshCountdown()
+        countdownTimerTick()
     }
     
     private func setupLocalization() {
@@ -154,9 +150,31 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         }
     }
     
+    // MARK: - Update
+    
+    private func update() {
+        SVProgressHUD.show()
+        regattaController.update {
+            self.refresh()
+            SVProgressHUD.popActivity()
+        }
+    }
+    
     // MARK: - Refresh
     
-    func refreshCountdown() {
+    private func refresh() {
+        refreshCompetitor()
+    }
+    
+    private func refreshCompetitor() {
+        competitorNameLabel.text = regatta.competitor.name
+        competitorFlagImageView.image = UIImage(named: regatta.competitor.countryCode)
+        competitorSailLabel.text = regatta.competitor.sailID
+    }
+    
+    // MARK: - Timer
+    
+    @objc private func countdownTimerTick() {
         if regatta.event.startDate - NSDate().timeIntervalSince1970 > 0 {
             regattaStartLabel.text = Translation.RegattaView.RegattaStartLabel.Text.BeforeRegattaDidStart.String
             let duration = regatta.event.startDate - NSDate().timeIntervalSince1970
@@ -212,8 +230,8 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         }
         
         
-        let refreshAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.RefreshAction.Title.String, style: .Default) { (action) -> Void in
-            self.regattaController.update()
+        let updateAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.UpdateAction.Title.String, style: .Default) { (action) -> Void in
+            self.update()
         }
         let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .Default) { (action) -> Void in
             self.performSegueWithIdentifier(Segue.About, sender: alertController)
@@ -222,7 +240,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         alertController.addAction(settingsAction)
         alertController.addAction(checkOutAction)
         alertController.addAction(replaceImageAction)
-        alertController.addAction(refreshAction)
+        alertController.addAction(updateAction)
         alertController.addAction(aboutAction)
         alertController.addAction(cancelAction)
         presentViewController(alertController, animated: true, completion: nil)

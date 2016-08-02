@@ -58,7 +58,7 @@ class TrackingViewController : UIViewController {
 			LocationManager.sharedManager.stopTracking()
             SVProgressHUD.show()
             self.regattaController.gpsFixController.sendAll({ (withSuccess) in
-                SVProgressHUD.dismiss()
+                SVProgressHUD.popActivity()
                 self.dismissViewControllerAnimated(true, completion: nil)
             })
 		}

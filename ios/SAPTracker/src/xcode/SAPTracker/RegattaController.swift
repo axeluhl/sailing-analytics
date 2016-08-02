@@ -90,29 +90,28 @@ class RegattaController: NSObject {
     
     // MARK: - Update
     
-    func update() {
-        SVProgressHUD.show()
+    func update(completion: () -> Void) {
         let regattaData = RegattaData(serverURL: regatta.serverURL,
                                       eventID: regatta.event.eventID,
                                       leaderboardName: regatta.leaderboard.name,
                                       competitorID: regatta.competitor.competitorID
         )
         requestManager.getRegattaData(regattaData,
-                                      success: { (regattaData) in self.updateSuccess(regattaData) },
-                                      failure: { (title, error) in self.updateFailure() }
+                                      success: { (regattaData) in self.updateSuccess(regattaData, completion: completion) },
+                                      failure: { (title, error) in self.updateFailure(completion) }
         )
     }
     
-    func updateSuccess(regattaData: RegattaData) {
+    func updateSuccess(regattaData: RegattaData, completion: () -> Void) {
         regatta.event.updateWithEventData(regattaData.eventData)
         regatta.leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
         regatta.competitor.updateWithCompetitorData(regattaData.competitorData)
         CoreDataManager.sharedManager.saveContext()
-        SVProgressHUD.popActivity()
+        completion()
     }
     
-    func updateFailure() {
-        SVProgressHUD.popActivity()
+    func updateFailure(completion: () -> Void) {
+        completion()
     }
     
     // MARK: - Methods
