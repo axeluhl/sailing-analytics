@@ -215,7 +215,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         let refreshAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.RefreshAction.Title.String, style: .Default) { (action) -> Void in
             self.regattaController.update()
         }
-        let aboutAction = UIAlertAction(title: Translation.AboutView.Title.String, style: .Default) { (action) -> Void in
+        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .Default) { (action) -> Void in
             self.performSegueWithIdentifier(Segue.About, sender: alertController)
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
@@ -233,10 +233,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
             try regattaController.startTracking()
             performSegueWithIdentifier(Segue.Tracking, sender: sender)
         } catch let error as LocationManager.LocationManagerError {
-            let alertController = UIAlertController(title: error.description, message: nil, preferredStyle: .Alert)
-            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
-            alertController.addAction(cancelAction)
-            presentViewController(alertController, animated: true, completion: nil)
+            showStartTrackingFailureAlert(error.description)
         } catch {
             print("Unknown error")
         }
@@ -249,14 +246,14 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
                                                 message: Translation.RegattaView.CheckOutAlert.Message.String,
                                                 preferredStyle: .Alert
         )
-        let okAction = UIAlertAction(title: Translation.Common.Yes.String, style: .Default) { (action) in self.preformCheckOut() }
-        let cancelAction = UIAlertAction(title: Translation.Common.No.String, style: .Cancel, handler: nil)
-        alertController.addAction(okAction)
-        alertController.addAction(cancelAction)
+        let yesAction = UIAlertAction(title: Translation.Common.Yes.String, style: .Default) { (action) in self.performCheckOut() }
+        let noAction = UIAlertAction(title: Translation.Common.No.String, style: .Cancel, handler: nil)
+        alertController.addAction(yesAction)
+        alertController.addAction(noAction)
         presentViewController(alertController, animated: true, completion: nil)
     }
     
-    private func preformCheckOut() {
+    private func performCheckOut() {
         requestManager.postCheckOut(regatta.leaderboard.name,
                                     competitorId: regatta.competitor.competitorID,
                                     success: { (operation, responseObject) in },
@@ -289,6 +286,20 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         } else if UIImagePickerController.isSourceTypeAvailable(.PhotoLibrary) {
             showImagePicker(.PhotoLibrary)
         }
+    }
+    
+    private func showStartTrackingFailureAlert(message: String) {
+        let alertController = UIAlertController(title: Translation.Common.Warning.String,
+                                                message: message,
+                                                preferredStyle: .Alert
+        )
+        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .Default) { (action) in
+            UIApplication.sharedApplication().openURL(NSURL(string: "prefs:root=LOCATION_SERVICES") ?? NSURL())
+        }
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Default, handler: nil)
+        alertController.addAction(settingsAction)
+        alertController.addAction(cancelAction)
+        presentViewController(alertController, animated: true, completion: nil)
     }
     
     // MARK: - Segue

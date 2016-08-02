@@ -17,7 +17,10 @@ class Translation: NSObject {
         struct OK { static let Key = "\(Common.Key).\(OK.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
-        struct SystemSettings { static let Key = "\(Common.Key).\(SystemSettings.self)"
+        struct Info { static let Key = "\(Common.Key).\(Info.self)"
+            static let String = NSLocalizedString(Key, comment: "")
+        }
+        struct Settings { static let Key = "\(Common.Key).\(Settings.self)"
             static let String = NSLocalizedString(Key, comment: "")
         }
         struct Warning { static let Key = "\(Common.Key).\(Warning.self)"
@@ -308,7 +311,7 @@ class Translation: NSObject {
             static let String = NSLocalizedString(Key, comment: "")
         }
         struct IncorrectCodeAlert { static let Key = "\(ScanView.Key).\(IncorrectCodeAlert.self)"
-            struct Title { static let Key = "\(IncorrectCodeAlert.Key).\(Title.self)"
+            struct Message { static let Key = "\(IncorrectCodeAlert.Key).\(Message.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
         }

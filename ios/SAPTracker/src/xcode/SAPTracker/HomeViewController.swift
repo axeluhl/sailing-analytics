@@ -216,7 +216,7 @@ class HomeViewController: UIViewController {
         let settingsAction = UIAlertAction(title: Translation.SettingsView.Title.String, style: .Default) { (action) -> Void in
             self.performSegueWithIdentifier(Segue.Settings, sender: alertController)
         }
-        let aboutAction = UIAlertAction(title: Translation.AboutView.Title.String, style: .Default) { (action) -> Void in
+        let aboutAction = UIAlertAction(title: Translation.Common.Info.String, style: .Default) { (action) -> Void in
             self.performSegueWithIdentifier(Segue.About, sender: alertController)
         }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
@@ -245,8 +245,8 @@ class HomeViewController: UIViewController {
                                                 message: Translation.HomeView.NoCameraAlert.Message.String,
                                                 preferredStyle: .Alert
         )
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
-        alertController.addAction(cancelAction)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default, handler: nil)
+        alertController.addAction(okAction)
         presentViewController(alertController, animated: true, completion: nil)
     }
     
@@ -255,8 +255,8 @@ class HomeViewController: UIViewController {
                                                 message: Translation.HomeView.NoCodeAlert.Message.String,
                                                 preferredStyle: .Alert
         )
-        let cancelAction = UIAlertAction(title: Translation.Common.OK.String, style: .Cancel, handler: nil)
-        alertController.addAction(cancelAction)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default, handler: nil)
+        alertController.addAction(okAction)
         presentViewController(alertController, animated: true, completion: nil)
     }
     

@@ -57,10 +57,10 @@ class CheckInController : NSObject {
     
     private func checkInFailure(title: String, error: NSError, completion: (withSuccess: Bool) -> Void) {
         let alertController = UIAlertController(title: title, message: error.localizedDescription, preferredStyle: .Alert)
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel) { (action) in
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
             self.checkInDidFinish(withSuccess: false, completion: completion)
         }
-        alertController.addAction(cancelAction)
+        alertController.addAction(okAction)
         showCheckInAlert(alertController)
     }
     
@@ -99,10 +99,10 @@ class CheckInController : NSObject {
                                                 message: Translation.CheckInController.PostCheckInFailureAlert.Message.String,
                                                 preferredStyle: .Alert
         )
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel) { (action) in
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
             self.checkInDidFinish(withSuccess: false, completion: completion)
         }
-        alertController.addAction(cancelAction)
+        alertController.addAction(okAction)
         showCheckInAlert(alertController)
     }
     

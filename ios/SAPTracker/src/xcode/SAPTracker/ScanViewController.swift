@@ -91,8 +91,11 @@ class ScanViewController: UIViewController {
     private func startScanning() {
         targetImageView.image = UIImage(named: "scan_white")
         if let error = scanError {
-            let alertController = UIAlertController(title: error.localizedDescription, message: error.localizedFailureReason, preferredStyle: .Alert)
-            let settingsAction = UIAlertAction(title: Translation.Common.SystemSettings.String, style: .Default) { (action) in
+            let alertController = UIAlertController(title: error.localizedDescription,
+                                                    message: error.localizedFailureReason,
+                                                    preferredStyle: .Alert
+            )
+            let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .Default) { (action) in
                 UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString) ?? NSURL())
                 self.navigationController?.popViewControllerAnimated(true)
             }
@@ -170,10 +173,9 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
                     self.captureOutputSuccess(regattaData)
                 })
             } else {
-                let alertController = UIAlertController(title: Translation.ScanView.IncorrectCodeAlert.Title.String, message: "", preferredStyle: .Alert)
-                let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
-                alertController.addAction(cancelAction)
-                presentViewController(alertController, animated: true, completion: nil)
+                dispatch_async(dispatch_get_main_queue(), {
+                    self.captureOutputFailure()
+                })
             }
         }
     }
@@ -186,6 +188,22 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
                 self.startScanning()
             }
         })
+    }
+    
+    private func captureOutputFailure() {
+        showIncorrectCodeAlert()
+    }
+    
+    // MARK: - Alerts
+    
+    private func showIncorrectCodeAlert() {
+        let alertController = UIAlertController(title: Translation.Common.Error.String,
+                                                message: Translation.ScanView.IncorrectCodeAlert.Message.String,
+                                                preferredStyle: .Alert
+        )
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default, handler: nil)
+        alertController.addAction(okAction)
+        presentViewController(alertController, animated: true, completion: nil)
     }
     
 }
