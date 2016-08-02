@@ -5,7 +5,7 @@
 //  Created by Raimund Wege on 25.05.16.
 //  Copyright © 2016 com.sap.sailing. All rights reserved.
 //
-// http://wiki.sapsailing.com/wiki/tracking-app/api-v1#Competitor-Information-%28in-general%29
+// See: http://wiki.sapsailing.com/wiki/tracking-app/api-v1#Competitor-Information-%28in-general%29
 
 import UIKit
 

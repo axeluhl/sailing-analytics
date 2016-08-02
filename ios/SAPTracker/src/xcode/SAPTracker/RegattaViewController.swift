@@ -241,6 +241,14 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
+        if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {
+            showStartTrackingWiFiAlert(sender)
+        } else {
+            startTracking(sender)
+        }
+    }
+    
+    private func startTracking(sender: AnyObject) {
         do {
             try regattaController.startTracking()
             performSegueWithIdentifier(Segue.Tracking, sender: sender)
@@ -301,6 +309,24 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         } else if UIImagePickerController.isSourceTypeAvailable(.PhotoLibrary) {
             showImagePicker(.PhotoLibrary)
         }
+    }
+    
+    private func showStartTrackingWiFiAlert(sender: AnyObject) {
+        let alertController = UIAlertController(title: "INFO",
+                                                message: "WIFI IS ON BUT NOT CONNECTED",
+                                                preferredStyle: .Alert
+        )
+        let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .Default) { (action) in
+            UIApplication.sharedApplication().openURL(NSURL(string: "prefs:root=WIFI") ?? NSURL())
+        }
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
+            self.startTracking(sender)
+        }
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
+        alertController.addAction(settingsAction)
+        alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
+        presentViewController(alertController, animated: true, completion: nil)
     }
     
     private func showStartTrackingFailureAlert(message: String) {

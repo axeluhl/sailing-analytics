@@ -334,6 +334,7 @@
 		C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */; };
 		C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C8A4400A1C18153600DF70A0 /* Settings.bundle */; };
 		C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BBAC781C52649E004CA551 /* LicenseViewController.swift */; };
+		C8BFCC1A1D50F10000FC1A27 /* SMTWiFiStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCC191D50F10000FC1A27 /* SMTWiFiStatus.m */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
 		C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8F1B1E01D488B6D004C3379 /* Translation.swift */; };
 		EEB2FC8E79793611ABC022B9 /* libPods-SAPTrackerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CDE153BDE8C83E9A084A24F1 /* libPods-SAPTrackerTests.a */; };
@@ -730,6 +731,8 @@
 		C8A4400A1C18153600DF70A0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
 		C8BBAC781C52649E004CA551 /* LicenseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseViewController.swift; sourceTree = "<group>"; };
+		C8BFCC181D50F10000FC1A27 /* SMTWiFiStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMTWiFiStatus.h; sourceTree = "<group>"; };
+		C8BFCC191D50F10000FC1A27 /* SMTWiFiStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMTWiFiStatus.m; sourceTree = "<group>"; };
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C8F1B1E01D488B6D004C3379 /* Translation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translation.swift; sourceTree = "<group>"; };
 		CDE153BDE8C83E9A084A24F1 /* libPods-SAPTrackerTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SAPTrackerTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1131,6 +1134,7 @@
 				7F03FD3F19FA4D7400FA1327 /* bridge.h */,
 				C8A4400A1C18153600DF70A0 /* Settings.bundle */,
 				C8F1B1E01D488B6D004C3379 /* Translation.swift */,
+				C8BFCC1B1D50F17800FC1A27 /* SMTWiFiStatus */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -1300,6 +1304,15 @@
 				C8603D4F1C528832002B2F28 /* libTSMarkdownParser.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C8BFCC1B1D50F17800FC1A27 /* SMTWiFiStatus */ = {
+			isa = PBXGroup;
+			children = (
+				C8BFCC181D50F10000FC1A27 /* SMTWiFiStatus.h */,
+				C8BFCC191D50F10000FC1A27 /* SMTWiFiStatus.m */,
+			);
+			name = SMTWiFiStatus;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1871,6 +1884,7 @@
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
 				C8739E0D1D2AA2A500A89F3C /* Event.swift in Sources */,
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
+				C8BFCC1A1D50F10000FC1A27 /* SMTWiFiStatus.m in Sources */,
 				9E95C3D61C723AB30016632B /* Constants.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
 				C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */,
