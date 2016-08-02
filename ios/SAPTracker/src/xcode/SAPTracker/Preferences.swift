@@ -21,6 +21,7 @@ class Preferences: NSObject {
     }
     
     struct PreferenceKey {
+        static let CodeConventionRead = "CodeConventionRead"
         static let BatterySaving = "BatterySaving"
         static let NewCheckInURL = "NewCheckInURL"
         static let TermsAccepted = "TermsAccepted"
@@ -28,6 +29,18 @@ class Preferences: NSObject {
     }
     
     private static let preferences = NSUserDefaults.standardUserDefaults()
+    
+    // MARK: - CodeConventionRead
+    
+    class var codeConventionRead: Bool {
+        get {
+            return preferences.boolForKey(PreferenceKey.CodeConventionRead)
+        }
+        set(value) {
+            preferences.setBool(value, forKey:PreferenceKey.CodeConventionRead)
+            preferences.synchronize()
+        }
+    }
     
     // MARK: - NewCheckInURL
     

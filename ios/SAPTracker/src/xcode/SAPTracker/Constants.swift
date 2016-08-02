@@ -13,6 +13,7 @@ struct Application {
 }
 
 struct URLs {
+    static let CodeConvention = NSURL(string: "https://github.com/raywenderlich/swift-style-guide/blob/master/README.markdown") ?? NSURL()
     static let Terms = NSURL(string: "http://www.sapsailing.com/EULA_iOS_SailingBoatTracker.html") ?? NSURL()
 }
 

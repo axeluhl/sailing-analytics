@@ -122,6 +122,11 @@ class HomeViewController: UIViewController {
                 print("Review GPS fixes done.")
                 self.reviewNewCheckIn({
                     print("Review new check-in done.")
+                    #if DEBUG
+                        self.reviewCodeConvention({
+                            print("Review code convention done.")
+                        })
+                    #endif
                 })
             })
         })
@@ -135,11 +140,11 @@ class HomeViewController: UIViewController {
                                                 message: Translation.HomeView.TermsAlert.Message.String,
                                                 preferredStyle: .Alert
         )
-        let showTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.ShowTermsAction.Title.String, style: .Cancel) { action in
+        let showTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.ShowTermsAction.Title.String, style: .Default) { action in
             UIApplication.sharedApplication().openURL(URLs.Terms)
             self.reviewTerms(completion) // Review terms until user accepted terms
         }
-        let acceptTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.AcceptTermsAction.Title.String, style: .Default) { action in
+        let acceptTermsAction = UIAlertAction(title: Translation.HomeView.TermsAlert.AcceptTermsAction.Title.String, style: .Cancel) { action in
             Preferences.termsAccepted = true
             completion() // Terms accepted
         }
@@ -183,6 +188,31 @@ class HomeViewController: UIViewController {
             Preferences.newCheckInURL = nil
             completion()
         })
+    }
+    
+    // MARK: 4. Review Code Convention
+    
+    private func reviewCodeConvention(completion: () -> Void) {
+        #if DEBUG
+            guard Preferences.codeConventionRead == false else { completion(); return }
+            let alertController = UIAlertController(title: "Code Convention",
+                                                    message: "Please try to respect the code convention which is used for this project.",
+                                                    preferredStyle: .Alert
+            )
+            let showCodeConventionAction = UIAlertAction(title: "Code Convention", style: .Default) { action in
+                UIApplication.sharedApplication().openURL(URLs.CodeConvention)
+                self.reviewCodeConvention(completion)
+            }
+            let okAction = UIAlertAction(title: "OK", style: .Default) { action in
+                Preferences.codeConventionRead = true
+                completion()
+            }
+            alertController.addAction(showCodeConventionAction)
+            alertController.addAction(okAction)
+            presentViewController(alertController, animated: true, completion: nil)
+        #else
+            completion()
+        #endif
     }
     
     // MARK: - Notifications
