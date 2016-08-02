@@ -98,7 +98,7 @@ class RegattaController: NSObject {
         )
         requestManager.getRegattaData(regattaData,
                                       success: { (regattaData) in self.updateSuccess(regattaData, completion: completion) },
-                                      failure: { (title, error) in self.updateFailure(completion) }
+                                      failure: { (error) in self.updateFailure(completion) }
         )
     }
     
@@ -131,7 +131,7 @@ class RegattaController: NSObject {
     
     func postTeamImageData(imageData: NSData,
                            success: (teamImageURL: String) -> Void,
-                           failure: (title: String, message: String) -> Void)
+                           failure: (error: RequestManager.Error) -> Void)
     {
         requestManager.postTeamImageData(imageData,
                                          competitorID: regatta.competitor.competitorID,
@@ -146,7 +146,7 @@ class RegattaController: NSObject {
         requestManager.postCheckOut(regatta.leaderboard.name,
                                     competitorId: regatta.competitor.competitorID,
                                     success: { () in completion(withSuccess: true) },
-                                    failure: { (title, message) in completion(withSuccess: false) }
+                                    failure: { (error) in completion(withSuccess: false) }
         )
     }
     

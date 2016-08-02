@@ -380,9 +380,9 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
                                                 SVProgressHUD.popActivity()
                                                 self.uploadTeamImageDataSuccess(teamImageURL)
             },
-                                            failure: { (title, message) in
+                                            failure: { (error) in
                                                 SVProgressHUD.popActivity()
-                                                self.uploadTeamImageDataFailure(title, message: message)
+                                                self.uploadTeamImageDataFailure(error)
             }
         )
     }
@@ -394,17 +394,20 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         setupTeamImage()
     }
     
-    private func uploadTeamImageDataFailure(title: String, message: String) {
+    private func uploadTeamImageDataFailure(error: RequestManager.Error) {
         regatta.teamImageRetry = true
         CoreDataManager.sharedManager.saveContext()
-        showUploadTeamImageFailureAlert(title, message: message)
+        showUploadTeamImageFailureAlert(error)
         setupTeamImage()
     }
     
     // MARK: - Alert
     
-    private func showUploadTeamImageFailureAlert(title: String, message: String) {
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
+    private func showUploadTeamImageFailureAlert(error: RequestManager.Error) {
+        let alertController = UIAlertController(title: error.title,
+                                                message: error.message,
+                                                preferredStyle: .Alert
+        )
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default, handler: nil)
         alertController.addAction(okAction)
         presentViewController(alertController, animated: true, completion: nil)

@@ -32,9 +32,9 @@ class CheckInController : NSObject {
             { (regattaData) in
                 SVProgressHUD.popActivity()
                 self.checkInSuccess(regattaData, completion: completion)
-            }, failure: { (title, error) in
+            }, failure: { (error) in
                 SVProgressHUD.popActivity()
-                self.checkInFailure(title, error: error, completion: completion)
+                self.checkInFailure(error, completion: completion)
             }
         )
     }
@@ -55,8 +55,11 @@ class CheckInController : NSObject {
         showCheckInAlert(alertController)
     }
     
-    private func checkInFailure(title: String, error: NSError, completion: (withSuccess: Bool) -> Void) {
-        let alertController = UIAlertController(title: title, message: error.localizedDescription, preferredStyle: .Alert)
+    private func checkInFailure(error: RequestManager.Error, completion: (withSuccess: Bool) -> Void) {
+        let alertController = UIAlertController(title: error.title,
+                                                message: error.message,
+                                                preferredStyle: .Alert
+        )
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
             self.checkInDidFinish(withSuccess: false, completion: completion)
         }
@@ -74,9 +77,9 @@ class CheckInController : NSObject {
             { () -> Void in
                 SVProgressHUD.popActivity()
                 self.postCheckInSuccess(regattaData, completion: completion)
-            }, failure: { (title, message) -> Void in
+            }, failure: { (error) -> Void in
                 SVProgressHUD.popActivity()
-                self.postCheckInFailure(title, message: message, completion: completion)
+                self.postCheckInFailure(error, completion: completion)
             }
         )
     }
@@ -94,9 +97,9 @@ class CheckInController : NSObject {
         checkInDidFinish(withSuccess: true, completion: completion)
     }
     
-    private func postCheckInFailure(title: String, message: String, completion: (withSuccess: Bool) -> Void) {
-        let alertController = UIAlertController(title: title,
-                                                message: message,
+    private func postCheckInFailure(error: RequestManager.Error, completion: (withSuccess: Bool) -> Void) {
+        let alertController = UIAlertController(title: error.title,
+                                                message: error.message,
                                                 preferredStyle: .Alert
         )
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
