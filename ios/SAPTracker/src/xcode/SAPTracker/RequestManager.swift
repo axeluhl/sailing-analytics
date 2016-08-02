@@ -57,14 +57,14 @@ class RequestManager: NSObject {
     // MARK: - Regatta
     
     func getRegattaData(regattaData: RegattaData,
-                        success: (RegattaData) -> Void,
+                        success: (regattaData: RegattaData) -> Void,
                         failure: (String, NSError) -> Void)
     {
         getEventData(regattaData, success: success, failure: failure)
     }
     
     private func getEventData(regattaData: RegattaData,
-                              success: (RegattaData) -> Void,
+                              success: (regattaData: RegattaData) -> Void,
                               failure: (String, NSError) -> Void)
     {
         getEvent(regattaData.eventID,
@@ -75,7 +75,7 @@ class RequestManager: NSObject {
     
     private func getEventDataSuccess(eventData: EventData,
                                      regattaData: RegattaData,
-                                     success: (RegattaData) -> Void,
+                                     success: (regattaData: RegattaData) -> Void,
                                      failure: (String, NSError) -> Void)
     {
         regattaData.eventData = eventData
@@ -83,7 +83,7 @@ class RequestManager: NSObject {
     }
     
     private func getLeaderboardData(regattaData: RegattaData,
-                                    success: (RegattaData) -> Void,
+                                    success: (regattaData: RegattaData) -> Void,
                                     failure: (String, NSError) -> Void)
     {
         getLeaderboard(regattaData.leaderboardName,
@@ -94,7 +94,7 @@ class RequestManager: NSObject {
     
     private func getLeaderboardDataSuccess(leaderboardData: LeaderboardData,
                                            regattaData: RegattaData,
-                                           success: (RegattaData) -> Void,
+                                           success: (regattaData: RegattaData) -> Void,
                                            failure: (String, NSError) -> Void)
     {
         regattaData.leaderboardData = leaderboardData
@@ -102,7 +102,7 @@ class RequestManager: NSObject {
     }
     
     private func getCompetitorData(regattaData: RegattaData,
-                                   success: (RegattaData) -> Void,
+                                   success: (regattaData: RegattaData) -> Void,
                                    failure: (String, NSError) -> Void)
     {
         getCompetitor(regattaData.competitorID,
@@ -113,20 +113,20 @@ class RequestManager: NSObject {
     
     private func getCompetitorDataSuccess(competitorData: CompetitorData,
                                           regattaData: RegattaData,
-                                          success: (RegattaData) -> Void,
+                                          success: (regattaData: RegattaData) -> Void,
                                           failure: (String, NSError) -> Void)
     {
         regattaData.competitorData = competitorData
         getTeamImageURL(regattaData.competitorID, result: { (imageURL) in
             regattaData.teamImageURL = imageURL
-            success(regattaData)
+            success(regattaData: regattaData)
         })
     }
     
     // MARK: - Event
     
     private func getEvent(eventID: String,
-                          success: (EventData) -> Void,
+                          success: (eventData: EventData) -> Void,
                           failure: (String, NSError) -> Void)
     {
         let encodedEventID = eventID.stringByAddingPercentEncodingWithAllowedCharacters(.URLPathAllowedCharacterSet()) ?? ""
@@ -138,18 +138,23 @@ class RequestManager: NSObject {
         )
     }
     
-    private func getEventSuccess(responseObject: AnyObject, success: (EventData) -> Void) {
-        success(EventData(dictionary: responseObject as? [String: AnyObject]))
+    private func getEventSuccess(responseObject: AnyObject,
+                                 success: (eventData: EventData) -> Void)
+    {
+        success(eventData: EventData(dictionary: responseObject as? [String: AnyObject]))
     }
     
-    private func getEventFailure(eventID: String, error: NSError, failure: (String, NSError) -> Void) -> Void {
+    private func getEventFailure(eventID: String,
+                                 error: NSError,
+                                 failure: (String, NSError) -> Void) -> Void
+    {
         failure(String(format: Translation.RequestManager.EventLoadingFailure.Message.String, eventID), error)
     }
     
     // MARK: - Leaderboard
     
     private func getLeaderboard(leaderboardName: String,
-                                success: (LeaderboardData) -> Void,
+                                success: (leaderboardData: LeaderboardData) -> Void,
                                 failure: (String, NSError) -> Void)
     {
         let encodedLeaderboardName = leaderboardName.stringByAddingPercentEncodingWithAllowedCharacters(.URLPathAllowedCharacterSet()) ?? ""
@@ -161,18 +166,23 @@ class RequestManager: NSObject {
         )
     }
     
-    private func getLeaderboardSuccess(responseObject: AnyObject, success: (LeaderboardData) -> Void) {
-        success(LeaderboardData(dictionary: responseObject as? [String: AnyObject]))
+    private func getLeaderboardSuccess(responseObject: AnyObject,
+                                       success: (leaderboardData: LeaderboardData) -> Void)
+    {
+        success(leaderboardData: LeaderboardData(dictionary: responseObject as? [String: AnyObject]))
     }
     
-    private func getLeaderboardFailure(leaderboardName: String, error: NSError, failure: (String, NSError) -> Void) {
+    private func getLeaderboardFailure(leaderboardName: String,
+                                       error: NSError,
+                                       failure: (String, NSError) -> Void)
+    {
         failure(String(format: Translation.RequestManager.LeaderboardLoadingFailure.Message.String, leaderboardName), error)
     }
     
     // MARK: - Competitor
     
     private func getCompetitor(competitorID: String,
-                               success: (CompetitorData) -> Void,
+                               success: (competitorData: CompetitorData) -> Void,
                                failure: (String, NSError) -> Void)
     {
         let encodedCompetitorID = competitorID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
@@ -184,11 +194,16 @@ class RequestManager: NSObject {
         )
     }
     
-    private func getCompetitorSuccess(responseObject: AnyObject, success: (CompetitorData) -> Void) {
-        success(CompetitorData(dictionary: responseObject as? [String: AnyObject]))
+    private func getCompetitorSuccess(responseObject: AnyObject,
+                                      success: (competitorData: CompetitorData) -> Void)
+    {
+        success(competitorData: CompetitorData(dictionary: responseObject as? [String: AnyObject]))
     }
     
-    private func getCompetitorFailure(competitorID: String, error: NSError, failure: (String, NSError) -> Void) {
+    private func getCompetitorFailure(competitorID: String,
+                                      error: NSError,
+                                      failure: (String, NSError) -> Void)
+    {
         failure(String(format: Translation.RequestManager.CompetitorLoadingFailure.Message.String, competitorID), error)
     }
     
