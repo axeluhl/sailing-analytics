@@ -25,13 +25,13 @@ class TitleView: UIView {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.backgroundColor = .clearColor()
         titleLabel.textAlignment = .Center
-        titleLabel.textColor = Colors.Tint
+        titleLabel.textColor = Colors.NavigationBarTitleColor
         titleLabel.font = Fonts.OpenSansBold13
         subtitleLabel = UILabel(frame: CGRectZero)
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
         subtitleLabel.backgroundColor = .clearColor()
         subtitleLabel.textAlignment = .Center
-        subtitleLabel.textColor = Colors.Tint
+        subtitleLabel.textColor = Colors.NavigationBarTitleColor
         subtitleLabel.font = Fonts.OpenSans10
         super.init(frame: frame)
         translatesAutoresizingMaskIntoConstraints = true

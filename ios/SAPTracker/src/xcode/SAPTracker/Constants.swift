@@ -26,7 +26,8 @@ struct Colors {
     static let GreenHighlighted = UIColor(hex:0x08451e)
     static let Red = UIColor(hex:0xcd201b)
     static let RedHighlighted = UIColor(hex:0x991814)
-    static let Tint = UIColor(hex: 0x009de0)
+    static let NavigationBarTitleColor = UIColor.blackColor()
+    static let NavigationBarTintColor = UIColor(hex: 0x009de0)
 }
 
 struct FontNames {
