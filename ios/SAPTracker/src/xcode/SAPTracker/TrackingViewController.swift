@@ -21,7 +21,7 @@ class TrackingViewController : UIViewController {
         super.viewDidLoad()
         setup()
     }
-	
+    
     override func updateViewConstraints() {
         super.updateViewConstraints()
         tableViewHeight.constant = tableView.contentSize.height
@@ -32,7 +32,7 @@ class TrackingViewController : UIViewController {
     private func setup() {
         setupButtons()
         setupLocalization()
-        setupNavigationBar()    
+        setupNavigationBar()
     }
     
     private func setupButtons() {
@@ -47,33 +47,33 @@ class TrackingViewController : UIViewController {
         navigationItem.title = regatta?.leaderboard.name
     }
     
-	// MARK: - Actions
-	
-	@IBAction func stopTrackingButtonTapped(sender: AnyObject) {
-		let alertController = UIAlertController(title: Translation.TrackingView.StopTrackingAlert.Title.String,
-		                                        message: Translation.TrackingView.StopTrackingAlert.Message.String,
-		                                        preferredStyle: .Alert
+    // MARK: - Actions
+    
+    @IBAction func stopTrackingButtonTapped(sender: AnyObject) {
+        let alertController = UIAlertController(title: Translation.TrackingView.StopTrackingAlert.Title.String,
+                                                message: Translation.TrackingView.StopTrackingAlert.Message.String,
+                                                preferredStyle: .Alert
         )
         let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { action in
-			LocationManager.sharedManager.stopTracking()
+            LocationManager.sharedManager.stopTracking()
             SVProgressHUD.show()
             self.regattaController.gpsFixController.sendAll({ (withSuccess) in
                 SVProgressHUD.popActivity()
                 self.dismissViewControllerAnimated(true, completion: nil)
             })
-		}
+        }
         let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
-		presentViewController(alertController, animated: true, completion: nil)
-	}
-
+        presentViewController(alertController, animated: true, completion: nil)
+    }
+    
 }
 
 // MARK: - UITableViewDataSourceDelegate
-    
-extension TrackingViewController: UITableViewDataSource {
 
+extension TrackingViewController: UITableViewDataSource {
+    
     struct CellIdentifier {
         static let StatusCell = "StatusCell"
         static let ModeCell = "ModeCell"
