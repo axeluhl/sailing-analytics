@@ -35,7 +35,7 @@ public class CoreDataManager: NSObject {
         do {
             regattas = try managedObjectContext.executeFetchRequest(fetchRequest)
         } catch {
-            print(error)
+            logError("\(#function)", error: error)
         }
         return regattas as? [Regatta]
     }
@@ -55,7 +55,7 @@ public class CoreDataManager: NSObject {
                 return regattas[0] as? Regatta
             }
         } catch {
-            print(error)
+            logError("\(#function)", error: error)
         }
         return nil
     }
@@ -125,25 +125,28 @@ public class CoreDataManager: NSObject {
         let url = self.applicationDocumentsDirectory.URLByAppendingPathComponent("CoreData.sqlite")
         let options = [NSMigratePersistentStoresAutomaticallyOption: true, NSInferMappingModelAutomaticallyOption: true]
         do {
-            print("Connecting to database...")
+            logInfo("\(#function)", info: "Connecting to database...")
             try coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: options)
-            print("Database connection established")
+            logInfo("\(#function)", info: "Database connection established")
         } catch {
-            print("Connecting to database failed: \(error)")
+            logInfo("\(#function)", info: "Connecting to database failed")
+            logError("\(#function)", error: error)
             do {
-                print("Removing corrupt database...")
+                logInfo("\(#function)", info: "Removing corrupt database...")
                 try NSFileManager.defaultManager().removeItemAtURL(url)
-                print("Corrupt database removed")
+                logInfo("\(#function)", info: "Corrupt database removed")
                 do {
-                    print("Connecting to new database")
+                    logInfo("\(#function)", info: "Connecting to new database...")
                     try coordinator.addPersistentStoreWithType(NSSQLiteStoreType, configuration: nil, URL: url, options: options)
-                    print("Database connection established")
+                    logInfo("\(#function)", info: "Database connection established")
                 } catch {
-                    print("Connecting to new database failed: \(error)")
+                    logInfo("\(#function)", info: "Connecting to new database failed")
+                    logError("\(#function)", error: error)
                     abort()
                 }
             } catch {
-                print("Removing corrupt database failed: \(error)")
+                logInfo("\(#function)", info: "Removing corrupt database failed")
+                logError("\(#function)", error: error)
                 abort()
             }
         }
@@ -164,7 +167,7 @@ public class CoreDataManager: NSObject {
             do {
                 try managedObjectContext.save()
             } catch {
-                print("Unresolved error: \(error)")
+                logError("\(#function)", error: error)
                 abort()
             }
         }

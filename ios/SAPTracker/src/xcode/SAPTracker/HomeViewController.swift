@@ -89,7 +89,7 @@ class HomeViewController: UIViewController {
         do {
             try fetchedResultsController.performFetch()
         } catch {
-            print(error)
+            logError("\(#function)", error: error)
         }
     }
     
@@ -120,15 +120,15 @@ class HomeViewController: UIViewController {
     
     private func review() {
         self.reviewTerms({
-            print("\(#function): Review terms done.")
+            logInfo("\(#function)", info: "Review terms done.")
             self.reviewCodeConvention({
-                print("\(#function): Review code convention done.")
+                logInfo("\(#function)", info: "Review code convention done.")
                 self.reviewGPSFixes({
-                    print("\(#function): Review GPS fixes done.")
+                    logInfo("\(#function)", info: "Review GPS fixes done.")
                     self.reviewNewCheckIn({
-                        print("\(#function): Review new check-in done.")
+                        logInfo("\(#function)", info: "Review new check-in done.")
                         self.reviewSelectedRegatta({
-                            print("\(#function): Review selected regatta done.")
+                            logInfo("\(#function)", info: "Review selected regatta done.")
                         })
                     })
                 })
@@ -243,9 +243,9 @@ class HomeViewController: UIViewController {
     @objc private func newCheckInURLNotification(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             self.reviewNewCheckIn({
-                print("\(#function): Review new check-in done.")
+                logInfo("\(#function)", info: "Review new check-in done.")
                 self.reviewSelectedRegatta({
-                    print("\(#function): Review selected regatta done.")
+                    logInfo("\(#function)", info: "Review selected regatta done.")
                 })
             })
         })

@@ -258,7 +258,7 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         } catch let error as LocationManager.LocationManagerError {
             showStartTrackingFailureAlert(error.description)
         } catch {
-            print("Unknown error")
+            logError("\(#function)", error: error)
         }
     }
     

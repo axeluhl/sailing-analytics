@@ -151,8 +151,8 @@ class GPSFixController: NSObject {
     
     // MARK: - Helper
     
-    private func log(message: String) {
-        print("[GPSFixController] \(message)")
+    private func log(info: String) {
+        logInfo("\(self.description)", info: info)
     }
     
     private func sliceGPSFixes(gpsFixes: Set<GPSFix>) -> Array<GPSFix> {

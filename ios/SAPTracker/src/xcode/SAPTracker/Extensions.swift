@@ -8,6 +8,20 @@
 
 import Foundation
 
+// MARK: - Logging
+
+func logInfo(name: String, info: String) {
+    #if DEBUG
+        print("\(name): \(info)")
+    #endif
+}
+
+func logError(name: String, error: ErrorType) {
+    #if DEBUG
+        print("\(name): \(error)")
+    #endif
+}
+
 // MARK: - UIColor
 
 extension UIColor { // Set color to RGB hex value. See http://stackoverflow.com/a/24263296
