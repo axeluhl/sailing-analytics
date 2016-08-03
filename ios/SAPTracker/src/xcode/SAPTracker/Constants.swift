@@ -26,6 +26,18 @@ struct Colors {
     static let GreenHighlighted = UIColor(hex:0x08451e)
     static let Red = UIColor(hex:0xcd201b)
     static let RedHighlighted = UIColor(hex:0x991814)
+    static let Tint = UIColor(hex: 0x009de0)
+}
+
+struct FontNames {
+    static let OpenSans = "OpenSans"
+    static let OpenSansBold = "OpenSans-Bold"
+}
+
+struct Fonts {
+    static let OpenSansBold17 = UIFont(name: FontNames.OpenSansBold, size: CGFloat(17.0)) ?? UIFont.systemFontOfSize(17.0)
+    static let OpenSansBold13 = UIFont(name: FontNames.OpenSansBold, size: CGFloat(13.0)) ?? UIFont.systemFontOfSize(13.0)
+    static let OpenSans10 = UIFont(name: FontNames.OpenSans, size: CGFloat(10.0)) ?? UIFont.systemFontOfSize(10.0)
 }
 
 struct Images {

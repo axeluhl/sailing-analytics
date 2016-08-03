@@ -90,7 +90,8 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = regatta.leaderboard.name
+        navigationItem.titleView = TitleView(title: regatta.event.name, subtitle: regatta.leaderboard.name)
+        navigationController?.navigationBar.setNeedsLayout()
     }
     
     // MARK: - Update

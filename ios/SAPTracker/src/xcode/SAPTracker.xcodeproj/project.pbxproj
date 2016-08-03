@@ -336,6 +336,7 @@
 		C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BBAC781C52649E004CA551 /* LicenseViewController.swift */; };
 		C8BFCC1A1D50F10000FC1A27 /* SMTWiFiStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCC191D50F10000FC1A27 /* SMTWiFiStatus.m */; };
 		C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCC31D51C53500FC1A27 /* TeamData.swift */; };
+		C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
 		C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8F1B1E01D488B6D004C3379 /* Translation.swift */; };
 		EEB2FC8E79793611ABC022B9 /* libPods-SAPTrackerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CDE153BDE8C83E9A084A24F1 /* libPods-SAPTrackerTests.a */; };
@@ -735,6 +736,7 @@
 		C8BFCC181D50F10000FC1A27 /* SMTWiFiStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMTWiFiStatus.h; sourceTree = "<group>"; };
 		C8BFCC191D50F10000FC1A27 /* SMTWiFiStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMTWiFiStatus.m; sourceTree = "<group>"; };
 		C8BFCCC31D51C53500FC1A27 /* TeamData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamData.swift; sourceTree = "<group>"; };
+		C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C8F1B1E01D488B6D004C3379 /* Translation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translation.swift; sourceTree = "<group>"; };
 		CDE153BDE8C83E9A084A24F1 /* libPods-SAPTrackerTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SAPTrackerTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1230,6 +1232,7 @@
 			children = (
 				7F193A901A39E54600D71773 /* GPSAccuracyView.swift */,
 				C89C5FC41D06A289002AAAD2 /* GradientView.swift */,
+				C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -1885,6 +1888,7 @@
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
 				C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
+				C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
 				C8739E0D1D2AA2A500A89F3C /* Event.swift in Sources */,
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,

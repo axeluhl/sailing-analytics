@@ -44,8 +44,9 @@ class TrackingViewController : UIViewController {
     }
     
     private func setupNavigationBar() {
-        navigationItem.title = regatta?.leaderboard.name
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+        navigationItem.titleView = TitleView(title: regatta.event.name, subtitle: regatta.leaderboard.name)
+        navigationController?.navigationBar.setNeedsLayout()
     }
     
     // MARK: - Actions

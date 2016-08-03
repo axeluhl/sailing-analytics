@@ -72,10 +72,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     private func setupNavigationBarApperance() {
-        let tintColor = UIColor(hex: 0x009de0)
-        let font = UIFont(name: "OpenSans-Bold", size: CGFloat(17.0)) ?? UIFont.systemFontOfSize(17.0)
-        UINavigationBar.appearance().tintColor = tintColor
-        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: tintColor, NSFontAttributeName: font]
+        UINavigationBar.appearance().tintColor = Colors.Tint
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: Colors.Tint, NSFontAttributeName: Fonts.OpenSansBold17]
     }
     
     private func setupPageControlApperance() {
