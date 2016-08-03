@@ -335,6 +335,7 @@
 		C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C8A4400A1C18153600DF70A0 /* Settings.bundle */; };
 		C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BBAC781C52649E004CA551 /* LicenseViewController.swift */; };
 		C8BFCC1A1D50F10000FC1A27 /* SMTWiFiStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCC191D50F10000FC1A27 /* SMTWiFiStatus.m */; };
+		C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCC31D51C53500FC1A27 /* TeamData.swift */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
 		C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8F1B1E01D488B6D004C3379 /* Translation.swift */; };
 		EEB2FC8E79793611ABC022B9 /* libPods-SAPTrackerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CDE153BDE8C83E9A084A24F1 /* libPods-SAPTrackerTests.a */; };
@@ -733,6 +734,7 @@
 		C8BBAC781C52649E004CA551 /* LicenseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseViewController.swift; sourceTree = "<group>"; };
 		C8BFCC181D50F10000FC1A27 /* SMTWiFiStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMTWiFiStatus.h; sourceTree = "<group>"; };
 		C8BFCC191D50F10000FC1A27 /* SMTWiFiStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMTWiFiStatus.m; sourceTree = "<group>"; };
+		C8BFCCC31D51C53500FC1A27 /* TeamData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamData.swift; sourceTree = "<group>"; };
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		C8F1B1E01D488B6D004C3379 /* Translation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translation.swift; sourceTree = "<group>"; };
 		CDE153BDE8C83E9A084A24F1 /* libPods-SAPTrackerTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SAPTrackerTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1218,6 +1220,7 @@
 				C8739E151D2BF17900A89F3C /* CompetitorData.swift */,
 				C8739E171D2BF2DC00A89F3C /* BaseData.swift */,
 				C8739E1B1D2D5F1700A89F3C /* LocationData.swift */,
+				C8BFCCC31D51C53500FC1A27 /* TeamData.swift */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -1871,6 +1874,7 @@
 				7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */,
 				C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */,
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
+				C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */,
 				7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */,
 				C84936291D47645F000F30E8 /* HomeViewRegattaCell.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,

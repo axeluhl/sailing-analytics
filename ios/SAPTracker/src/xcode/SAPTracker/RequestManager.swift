@@ -47,10 +47,6 @@ class RequestManager: NSObject {
         static let ToMillis = "toMillis"
     }
     
-    private enum TeamKeys {
-        static let ImageURL = "imageUri"
-    }
-    
     private struct TeamImageKeys {
         static let TeamImageURL = "teamImageUri"
     }
@@ -216,32 +212,32 @@ class RequestManager: NSObject {
     
     // MARK: - Team
     
-    private func getTeam(competitorID: String!,
-                         success: (AFHTTPRequestOperation!, AnyObject!) -> Void,
-                         failure: (AFHTTPRequestOperation!, AnyObject!) -> Void)
+    private func getTeam(competitorID: String,
+                         success: (teamData: TeamData) -> Void,
+                         failure: (error: Error) -> Void)
     {
         let encodedCompetitorID = competitorID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
         let urlString = "\(basePathString)/competitors/\(encodedCompetitorID)/team"
-        manager.GET(urlString, parameters: nil, success: success, failure: failure)
-    }
-    
-    private func getTeamImageURL(competitorId: String!, result: (imageURL: String?) -> Void) {
-        getTeam(competitorId,
-                success: { (operation, responseObject) -> Void in self.getTeamImageURLSucceed(responseObject, result: result) },
-                failure: { (operation, error) -> Void in self.getTeamImageURLFailed(result) }
+        manager.GET(urlString,
+                    parameters: nil,
+                    success: { (requestOperation, responseObject) in self.getTeamSuccess(responseObject, success: success) },
+                    failure: { (requestOperation, error) in self.getTeamFailure(failure) }
         )
     }
     
-    private func getTeamImageURLSucceed(responseObject: AnyObject, result: (imageURL: String?) -> Void) {
-        if let team = responseObject as? [String: AnyObject], let imageURL = team[TeamKeys.ImageURL] as? String {
-            result(imageURL: imageURL)
-        } else {
-            result(imageURL: nil)
-        }
+    private func getTeamSuccess(responseObject: AnyObject, success: (teamData: TeamData) -> Void) {
+        success(teamData: TeamData(dictionary: responseObject as? [String: AnyObject]))
     }
     
-    private func getTeamImageURLFailed(result: (imageURL: String?) -> Void) {
-        result(imageURL: nil) // No image but that's ok
+    private func getTeamFailure(failure: (error: Error) -> Void) {
+        failure(error: Error())
+    }
+    
+    private func getTeamImageURL(competitorID: String, result: (imageURL: String?) -> Void) {
+        getTeam(competitorID,
+                success: { (teamData) in result(imageURL: teamData.imageURL) },
+                failure: { (error) in result(imageURL: nil) } // No image but that's ok
+        )
     }
     
     // MARK: CheckIn
