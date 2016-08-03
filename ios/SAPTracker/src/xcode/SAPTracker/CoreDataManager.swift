@@ -62,6 +62,7 @@ public class CoreDataManager: NSObject {
     
     func regattaFetchedResultsController() -> NSFetchedResultsController {
         let fetchRequest = NSFetchRequest(entityName: Entities.Regatta.rawValue)
+        fetchRequest.predicate = NSPredicate(format: "event != nil AND leaderboard != nil AND competitor != nil")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "leaderboard.name", ascending: true)]
         return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedObjectContext, sectionNameKeyPath: nil, cacheName: nil)
     }
