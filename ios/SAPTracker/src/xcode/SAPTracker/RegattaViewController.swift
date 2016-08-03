@@ -216,14 +216,9 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         let checkOutAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.CheckOutAction.Title.String, style: .Default) { (action) in
             self.showCheckOutAlert()
         }
-        
-        
-        // FIXME: Replace or edit or a mix of both?
         let replaceImageAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.ReplaceImageAction.Title.String, style: .Default) { (action) in
             self.showSelectImageAlert()
         }
-        
-        
         let updateAction = UIAlertAction(title: Translation.RegattaView.OptionSheet.UpdateAction.Title.String, style: .Default) { (action) -> Void in
             self.update()
         }
