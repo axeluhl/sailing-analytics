@@ -536,7 +536,7 @@
                                                     <action selector="teamImageAddButtonTapped:" destination="G3a-SV-Maf" eventType="touchUpInside" id="cs9-h3-kj2"/>
                                                 </connections>
                                             </button>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CaR-gy-mOG">
+                                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CaR-gy-mOG">
                                                 <rect key="frame" x="559" y="163.5" width="33" height="33"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="33" id="TQE-Wf-cb0"/>
@@ -1925,8 +1925,8 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="QMa-LQ-D8c"/>
-        <segue reference="Xxn-jp-xEB"/>
+        <segue reference="tzB-PL-31j"/>
+        <segue reference="Irs-ey-Uhs"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="calibratedRGB"/>
 </document>

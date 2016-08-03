@@ -60,7 +60,6 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         setupCountdownTimer()
         setupLocalization()
         setupNavigationBar()
-        setupTeamImage()
     }
     
     private func setupButtons() {
@@ -94,56 +93,6 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
         navigationItem.title = regatta.leaderboard.name
     }
     
-    private func setupTeamImage() {
-        if regatta.teamImageData != nil {
-            setupTeamImageWithImageData(regatta.teamImageData)
-        } else if regatta.teamImageURL != nil {
-            setupTeamImageWithURL(regatta.teamImageURL)
-        } else {
-            setupTeamImageFinished()
-        }
-    }
-    
-    private func setupTeamImageWithImageData(data: NSData!) {
-        teamImageView.image = UIImage(data: data)
-        setupTeamImageFinished()
-    }
-    
-    private func setupTeamImageWithURL(urlString: String!) {
-        if let url = NSURL(string: urlString) {
-            teamImageView.setImageWithURLRequest(NSURLRequest(URL: url),
-                                                 placeholderImage: nil,
-                                                 success: { (request, response, image) in self.setupTeamImageWithURLSuccess(image) },
-                                                 failure: { (request, response, error) in self.setupTeamImageWithURLFailure() })
-        } else {
-            setupTeamImageFinished()
-        }
-    }
-    
-    private func setupTeamImageWithURLSuccess(image: UIImage) {
-        teamImageView.image = image
-        regatta.teamImageData = UIImageJPEGRepresentation(image, 0.8)
-        regatta.teamImageRetry = false
-        CoreDataManager.sharedManager.saveContext()
-        setupTeamImageFinished()
-    }
-    
-    private func setupTeamImageWithURLFailure() {
-        setupTeamImageFinished()
-    }
-    
-    private func setupTeamImageFinished() {
-        if regatta.teamImageData != nil {
-            teamImageAddButton.hidden = true
-            teamImageEditButton.hidden = regatta.teamImageRetry
-            teamImageRetryButton.hidden = !teamImageEditButton.hidden
-        } else {
-            teamImageAddButton.hidden = false
-            teamImageEditButton.hidden = true
-            teamImageRetryButton.hidden = true
-        }
-    }
-    
     // MARK: - Update
     
     private func update() {
@@ -158,12 +107,68 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     
     private func refresh() {
         refreshCompetitor()
+        refreshTeamImage()
     }
     
     private func refreshCompetitor() {
         competitorNameLabel.text = regatta.competitor.name
         competitorFlagImageView.image = UIImage(named: regatta.competitor.countryCode)
         competitorSailLabel.text = regatta.competitor.sailID
+    }
+    
+    private func refreshTeamImage() {
+        teamImageAddButton.hidden = true
+        teamImageEditButton.hidden = true
+        teamImageRetryButton.hidden = true
+        if let imageData = regatta.teamImageData {
+            teamImageView.image = UIImage(data: imageData)
+            if regatta.teamImageRetry {
+                teamImageRetryButton.hidden = false
+            } else {
+                teamImageEditButton.hidden = false
+                setTeamImageWithURLRequest(regatta.teamImageURL) // Reload image
+            }
+        } else {
+            setTeamImageWithURLRequest(regatta.teamImageURL, completion: { (withSuccess) in
+                if withSuccess {
+                    self.teamImageEditButton.hidden = false
+                } else {
+                    self.teamImageAddButton.hidden = false
+                }
+            })
+        }
+    }
+    
+    // MARK: - TeamImage
+
+    private func setTeamImageWithURLRequest(urlString: String?, completion: ((withSuccess: Bool) -> Void)? = nil) {
+        setTeamImageWithURLRequest(urlString, success: { () in
+            completion?(withSuccess: true)
+        }) {
+            completion?(withSuccess: false)
+        }
+    }
+    
+    private func setTeamImageWithURLRequest(urlString: String?, success: () -> Void, failure: () -> Void) {
+        guard let string = urlString else { failure(); return }
+        guard let url = NSURL(string: string) else { failure(); return }
+        teamImageView.setImageWithURLRequest(NSURLRequest(URL: url),
+                                             placeholderImage: nil,
+                                             success: { (request, response, image) in self.setTeamImageWithURLSuccess(image, success: success) },
+                                             failure: { (request, response, error) in self.setTeamImageWithURLFailure(failure) }
+        )
+    }
+    
+    private func setTeamImageWithURLSuccess(image: UIImage, success: () -> Void) {
+        teamImageView.image = image
+        regatta.teamImageRetry = false
+        regatta.teamImageData = UIImageJPEGRepresentation(image, 0.8)
+        CoreDataManager.sharedManager.saveContext()
+        success()
+    }
+    
+    private func setTeamImageWithURLFailure(failure: () -> Void) {
+        failure()
     }
     
     // MARK: - Timer
@@ -413,14 +418,14 @@ extension RegattaViewController: UIImagePickerControllerDelegate {
         regatta.teamImageRetry = false
         regatta.teamImageURL = teamImageURL
         CoreDataManager.sharedManager.saveContext()
-        setupTeamImage()
+        refreshTeamImage()
     }
     
     private func uploadTeamImageDataFailure(error: RequestManager.Error) {
         regatta.teamImageRetry = true
         CoreDataManager.sharedManager.saveContext()
         showUploadTeamImageFailureAlert(error)
-        setupTeamImage()
+        refreshTeamImage()
     }
     
     // MARK: - Alert
