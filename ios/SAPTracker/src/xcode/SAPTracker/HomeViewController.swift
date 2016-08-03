@@ -13,9 +13,12 @@ class HomeViewController: UIViewController {
     
     private struct Segue {
         static let About = "About"
+        static let Regatta = "Regatta"
         static let Scan = "Scan"
         static let Settings = "Settings"
     }
+    
+    private var selectedRegatta: Regatta?
     
     @IBOutlet var headerView: UIView! // Strong reference needed to avoid deallocation when not attached to table view
     
@@ -34,7 +37,7 @@ class HomeViewController: UIViewController {
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        reviews()
+        review()
         subscribeForNewCheckInURLNotifications()
     }
     
@@ -115,18 +118,19 @@ class HomeViewController: UIViewController {
     
     // MARK: - Review
     
-    private func reviews() {
+    private func review() {
         self.reviewTerms({
-            print("Review terms done.")
-            self.reviewGPSFixes({
-                print("Review GPS fixes done.")
-                self.reviewNewCheckIn({
-                    print("Review new check-in done.")
-                    #if DEBUG
-                        self.reviewCodeConvention({
-                            print("Review code convention done.")
+            print("\(#function): Review terms done.")
+            self.reviewCodeConvention({
+                print("\(#function): Review code convention done.")
+                self.reviewGPSFixes({
+                    print("\(#function): Review GPS fixes done.")
+                    self.reviewNewCheckIn({
+                        print("\(#function): Review new check-in done.")
+                        self.reviewSelectedRegatta({
+                            print("\(#function): Review selected regatta done.")
                         })
-                    #endif
+                    })
                 })
             })
         })
@@ -153,44 +157,7 @@ class HomeViewController: UIViewController {
         presentViewController(alertController, animated: true, completion: nil)
     }
     
-    // MARK: 2. Review GPS Fixes
-    
-    private func reviewGPSFixes(completion: () -> Void) {
-        SVProgressHUD.show()
-        fetchedResultsController.delegate = nil
-        var regattas = CoreDataManager.sharedManager.fetchRegattas() ?? []
-        reviewGPSFixes(&regattas) {
-            self.reviewGPSFixesCompleted(completion)
-        }
-    }
-    
-    private func reviewGPSFixes(inout regattas: [Regatta], completion: () -> Void) {
-        guard let regatta = regattas.popLast() else { completion(); return }
-        let gpsFixController = GPSFixController.init(regatta: regatta)
-        gpsFixController.sendAll({ (withSuccess) in
-            self.reviewGPSFixes(&regattas, completion: completion)
-        })
-    }
-    
-    private func reviewGPSFixesCompleted(completion: () -> Void) {
-        SVProgressHUD.popActivity()
-        fetchedResultsController.delegate = self
-        completion()
-    }
-    
-    // MARK: 3. Review New Check-In
-    
-    private func reviewNewCheckIn(completion: () -> Void) {
-        guard Preferences.termsAccepted else { completion(); return }
-        guard let urlString = Preferences.newCheckInURL else { completion(); return }
-        guard let regattaData = RegattaData(urlString: urlString) else { completion(); return }
-        checkInController.checkIn(regattaData, completion: { (withSuccess) in
-            Preferences.newCheckInURL = nil
-            completion()
-        })
-    }
-    
-    // MARK: 4. Review Code Convention
+    // MARK: 2. Review Code Convention
     
     private func reviewCodeConvention(completion: () -> Void) {
         #if DEBUG
@@ -215,6 +182,51 @@ class HomeViewController: UIViewController {
         #endif
     }
     
+    // MARK: 3. Review GPS Fixes
+    
+    private func reviewGPSFixes(completion: () -> Void) {
+        SVProgressHUD.show()
+        fetchedResultsController.delegate = nil
+        var regattas = CoreDataManager.sharedManager.fetchRegattas() ?? []
+        reviewGPSFixes(&regattas) {
+            self.reviewGPSFixesCompleted(completion)
+        }
+    }
+    
+    private func reviewGPSFixes(inout regattas: [Regatta], completion: () -> Void) {
+        guard let regatta = regattas.popLast() else { completion(); return }
+        let gpsFixController = GPSFixController.init(regatta: regatta)
+        gpsFixController.sendAll({ (withSuccess) in
+            self.reviewGPSFixes(&regattas, completion: completion)
+        })
+    }
+    
+    private func reviewGPSFixesCompleted(completion: () -> Void) {
+        SVProgressHUD.popActivity()
+        fetchedResultsController.delegate = self
+        completion()
+    }
+    
+    // MARK: 4. Review New Check-In
+    
+    private func reviewNewCheckIn(completion: () -> Void) {
+        guard let urlString = Preferences.newCheckInURL else { completion(); return }
+        guard let regattaData = RegattaData(urlString: urlString) else { completion(); return }
+        checkInController.checkIn(regattaData, completion: { (withSuccess) in
+            Preferences.newCheckInURL = nil
+            self.selectedRegatta = CoreDataManager.sharedManager.fetchRegatta(regattaData)
+            completion()
+        })
+    }
+    
+    // MARK: 5. Review Selected Regatta
+    
+    private func reviewSelectedRegatta(completion: () -> Void) {
+        guard shouldPerformRegattaSegue() else { completion(); return }
+        performSegueWithIdentifier(Segue.Regatta, sender: self)
+        completion()
+    }
+    
     // MARK: - Notifications
     
     private func subscribeForNewCheckInURLNotifications() {
@@ -231,7 +243,10 @@ class HomeViewController: UIViewController {
     @objc private func newCheckInURLNotification(notification: NSNotification) {
         dispatch_async(dispatch_get_main_queue(), {
             self.reviewNewCheckIn({
-                print("Review new check-in done.")
+                print("\(#function): Review new check-in done.")
+                self.reviewSelectedRegatta({
+                    print("\(#function): Review selected regatta done.")
+                })
             })
         })
     }
@@ -292,13 +307,23 @@ class HomeViewController: UIViewController {
     
     // MARK: - Segues
     
+    override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+        if (identifier == Segue.Regatta) {
+            return shouldPerformRegattaSegue()
+        } else {
+            return true
+        }
+    }
+    
+    private func shouldPerformRegattaSegue() -> Bool {
+        return selectedRegatta != nil
+    }
+    
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if (segue.destinationViewController.isKindOfClass(RegattaViewController)) {
+        if (segue.identifier == Segue.Regatta) {
             guard let regattaVC = segue.destinationViewController as? RegattaViewController else { return }
-            guard let indexPath = tableView.indexPathForSelectedRow else { return }
-            guard let regatta = fetchedResultsController.objectAtIndexPath(indexPath) as? Regatta else { return }
-            regattaVC.regatta = regatta
-            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+            regattaVC.regatta = selectedRegatta
+            selectedRegatta = nil
         }
     }
     
@@ -346,7 +371,14 @@ extension HomeViewController: UITableViewDataSource {
 
 extension HomeViewController: UITableViewDelegate {
     
+    func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+        selectedRegatta = fetchedResultsController.objectAtIndexPath(indexPath) as? Regatta
+        return indexPath
+    }
     
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    }
     
 }
 
