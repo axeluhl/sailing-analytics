@@ -68,7 +68,6 @@ class HomeViewController: UIViewController {
     }
     
     private func setupLocalization() {
-        navigationItem.title = Application.Title
         headerTitleLabel.text = Translation.HomeView.HeaderTitleLabel.Text.String
         scanCodeButton.setTitle(Translation.ScanView.Title.String, forState: .Normal)
         noCodeButton.setTitle(Translation.HomeView.NoCodeAlert.Title.String, forState: .Normal)
@@ -77,6 +76,7 @@ class HomeViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
+        navigationItem.title = Application.Title
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
     }
     
