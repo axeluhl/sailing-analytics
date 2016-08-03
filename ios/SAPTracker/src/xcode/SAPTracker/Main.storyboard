@@ -1033,11 +1033,6 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="300" id="qHw-Z7-Of4"/>
                                 </constraints>
-                                <view key="tableFooterView" contentMode="scaleToFill" id="RPG-PD-kCX">
-                                    <rect key="frame" x="0.0" y="236" width="600" height="0.0"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                </view>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="StatusCell" id="mxc-vv-0mg" customClass="TrackingViewStatusCell" customModule="SAPTracker" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="28" width="600" height="52"/>
@@ -1925,8 +1920,8 @@
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
         <segue reference="Irs-ey-Uhs"/>
+        <segue reference="tzB-PL-31j"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="calibratedRGB"/>
 </document>
