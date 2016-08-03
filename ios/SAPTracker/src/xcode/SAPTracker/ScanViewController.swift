@@ -11,6 +11,8 @@ import AVFoundation
 
 class ScanViewController: UIViewController {
     
+    weak var homeViewController: HomeViewController?
+    
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var targetImageView: UIImageView!
     
@@ -183,6 +185,7 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
     private func captureOutputSuccess(regattaData: RegattaData) {
         checkInController.checkIn(regattaData, completion: { (withSuccess) in
             if withSuccess {
+                self.homeViewController?.selectedRegatta = CoreDataManager.sharedManager.fetchRegatta(regattaData)
                 self.navigationController?.popViewControllerAnimated(true)
             } else {
                 self.startScanning()

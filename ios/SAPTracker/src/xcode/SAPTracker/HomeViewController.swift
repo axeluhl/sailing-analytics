@@ -18,7 +18,7 @@ class HomeViewController: UIViewController {
         static let Settings = "Settings"
     }
     
-    private var selectedRegatta: Regatta?
+    var selectedRegatta: Regatta?
     
     @IBOutlet var headerView: UIView! // Strong reference needed to avoid deallocation when not attached to table view
     
@@ -324,6 +324,9 @@ class HomeViewController: UIViewController {
             guard let regattaVC = segue.destinationViewController as? RegattaViewController else { return }
             regattaVC.regatta = selectedRegatta
             selectedRegatta = nil
+        } else if (segue.identifier == Segue.Scan) {
+            guard let scanVC = segue.destinationViewController as? ScanViewController else { return }
+            scanVC.homeViewController = self
         }
     }
     
