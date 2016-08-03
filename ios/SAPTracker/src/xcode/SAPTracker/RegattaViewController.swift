@@ -241,11 +241,12 @@ class RegattaViewController : UIViewController, UINavigationControllerDelegate {
     }
     
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
-        if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {
-            showStartTrackingWiFiAlert(sender)
-        } else {
-            startTracking(sender)
-        }
+        // TODO: Add or add not WiFi Alert?
+        //if SMTWiFiStatus.wifiStatus() == WiFiStatus.On && !AFNetworkReachabilityManager.sharedManager().reachableViaWiFi {
+        //    showStartTrackingWiFiAlert(sender)
+        //} else {
+        startTracking(sender)
+        //}
     }
     
     private func startTracking(sender: AnyObject) {
