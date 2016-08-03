@@ -41,3 +41,15 @@ extension UIImage {
     }
 
 }
+
+// MARK: - UITableViewCell
+
+extension UITableViewCell {
+
+    func removeSeparatorInset() {
+        preservesSuperviewLayoutMargins = false
+        layoutMargins = UIEdgeInsetsZero
+        separatorInset = UIEdgeInsetsZero
+    }
+    
+}

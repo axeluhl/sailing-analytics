@@ -383,6 +383,10 @@ extension HomeViewController: UITableViewDelegate {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
+    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        cell.removeSeparatorInset()
+    }
+    
 }
 
 // MARK: - NSFetchedResultsControllerDelegate

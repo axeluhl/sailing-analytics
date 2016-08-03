@@ -114,4 +114,8 @@ extension TrackingViewController: UITableViewDelegate {
         return 0
     }
     
+    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        cell.removeSeparatorInset()
+    }
+    
 }
