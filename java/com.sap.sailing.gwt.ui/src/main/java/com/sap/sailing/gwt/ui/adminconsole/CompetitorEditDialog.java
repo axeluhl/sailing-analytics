@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
@@ -87,7 +88,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         this.stringMessages = stringMessages;
         this.competitorToEdit = competitorToEdit;
                 
-        this.boatClassName = createSuggestBox(BoatClassMasterdata.getAllBoatClassNames(/* includeAlternativeNames */ true));
+        this.boatClassName = createSuggestBox(new BoatClassMasterdataSuggestOracle());
         boatClassName.ensureDebugId("BoatClassNameSuggestBox");
         int i=0;
         List<String> boatClassNamesList = new ArrayList<String>();
