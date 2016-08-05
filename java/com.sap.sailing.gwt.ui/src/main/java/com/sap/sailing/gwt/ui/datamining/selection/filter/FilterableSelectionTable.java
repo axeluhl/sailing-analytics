@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -67,12 +68,17 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
         });
         dataProvider.addDataDisplay(table);
         
-        filterPanel = new AbstractFilterablePanel<ContentType>(allData, table, dataProvider) {
+        filterPanel = new AbstractFilterablePanel<ContentType>(allData, dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(ContentType content) {
                 Collection<String> searchableStrings = new ArrayList<String>();
                 searchableStrings.add(getElementAsString(content));
                 return searchableStrings;
+            }
+
+            @Override
+            public AbstractCellTable<ContentType> getCellTable() {
+                return table;
             }
         };
         filterPanel.setSpacing(2);

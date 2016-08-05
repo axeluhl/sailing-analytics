@@ -22,6 +22,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -119,7 +120,7 @@ public class MediaPanel extends FlowPanel {
         buttonAndFilterPanel.add(lblFilterRaces);
         buttonAndFilterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
         this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrack>(lblFilterRaces, allMediaTracks,
-                new CellTable<MediaTrack>(), mediaTrackListDataProvider) {
+                mediaTrackListDataProvider) {
             @Override
             public List<String> getSearchableStrings(MediaTrack t) {
                 List<String> strings = new ArrayList<String>();
@@ -131,9 +132,13 @@ public class MediaPanel extends FlowPanel {
                 }
                 return strings;
             }
+
+            @Override
+            public AbstractCellTable<MediaTrack> getCellTable() {
+                return mediaTracksTable;
+            }
         };
         createMediaTracksTable();
-        filterableMediaTracks.setTable(mediaTracksTable);
         filterableMediaTracks.getTextBox().ensureDebugId("MediaTracksFilterTextBox");
         buttonAndFilterPanel.add(filterableMediaTracks);
     }

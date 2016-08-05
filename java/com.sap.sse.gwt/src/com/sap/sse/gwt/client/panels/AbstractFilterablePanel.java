@@ -38,7 +38,6 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
  */
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected ListDataProvider<T> all;
-    protected AbstractCellTable<T> display;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
     
@@ -55,10 +54,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *            This panel keeps a copy, so modifications to the <code>all</code> object do not reflect in the table
      *            contents. Use {@link #updateAll(Iterable)} instead to update the sequence of available objects.
      */
-    public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
+    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered) {
         setSpacing(5);
         this.all = new ListDataProvider<>();
-        this.display = display;
         this.filtered = filtered;
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
@@ -159,10 +157,12 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         filtered.refresh();
         sort();
     }
+    
+    public abstract AbstractCellTable<T> getCellTable();
    
     private void sort() {
-        if (display != null) {
-            ColumnSortEvent.fire(display, display.getColumnSortList());
+        if (getCellTable() != null) {
+            ColumnSortEvent.fire(getCellTable(), getCellTable().getColumnSortList());
         }
     }
 
@@ -214,7 +214,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * 
      * @param table {@link AbstractCellTable} on which this panel works.
      */
+    /*
     public void setTable(AbstractCellTable<T> table) {
         display = table;
     }
+    */
 }

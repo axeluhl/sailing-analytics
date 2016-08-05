@@ -13,6 +13,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -99,7 +100,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
         
         filterablePanelRegattas = new LabeledAbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
-                new CellTable<RegattaDTO>(), regattaListDataProvider) {
+                regattaListDataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(RegattaDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -109,11 +110,15 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 }
                 return string;
             }
+
+            @Override
+            public AbstractCellTable<RegattaDTO> getCellTable() {
+                return regattaTable;
+            }
         };
         filterablePanelRegattas.getTextBox().ensureDebugId("RegattasFilterTextBox");
         regattaTable = createRegattaTable();
         regattaTable.ensureDebugId("RegattasCellTable");
-        filterablePanelRegattas.setTable(regattaTable);
         refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
         regattaTable.setVisible(false);
         panel.add(filterablePanelRegattas);

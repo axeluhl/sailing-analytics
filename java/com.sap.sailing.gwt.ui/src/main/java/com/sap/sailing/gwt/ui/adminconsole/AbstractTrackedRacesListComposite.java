@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -117,7 +118,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         raceTable = new FlushableCellTable<RaceDTO>(/* pageSize */10000, tableRes);
         raceTable.ensureDebugId("TrackedRacesCellTable");
         
-        filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable,
+        filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces,
                 raceList) {
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
@@ -127,6 +128,11 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 strings.add(t.getRegattaName());
                 strings.add(t.toString());
                 return strings;
+            }
+
+            @Override
+            public AbstractCellTable<RaceDTO> getCellTable() {
+                return raceTable;
             }
         };
         filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
