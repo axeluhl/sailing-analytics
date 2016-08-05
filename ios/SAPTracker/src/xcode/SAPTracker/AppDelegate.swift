@@ -28,8 +28,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 })
             }
         })
-        logInfo("\(#function)", info: "Background fetch completed with result: \(noData ? "NoData" : allSuccess ? "NewData" : "Failed")")
-        completionHandler(noData ? .NoData : allSuccess ? .NewData : .Failed)
+        let fetchResult: UIBackgroundFetchResult = noData ? .NoData : allSuccess ? .NewData : .Failed
+        logInfo("\(#function)", info: "Background fetch completed with result: \(fetchResult.rawValue)")
+        completionHandler(fetchResult)
     }
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
