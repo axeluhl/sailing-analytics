@@ -16,19 +16,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(application: UIApplication, performFetchWithCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
         logInfo("\(#function)", info: "Background fetch started...")
+        var noData = true
         var allSuccess = true
         let regattas = CoreDataManager.sharedManager.fetchRegattas()
         regattas?.forEach({ (regatta) in
             if regatta.gpsFixes?.count > 0 {
+                noData = false
                 let gpsFixController = GPSFixController(regatta: regatta)
                 gpsFixController.sendAll({ (withSuccess) in
                     allSuccess = allSuccess && withSuccess
                 })
             }
         })
-        let fetchResult: UIBackgroundFetchResult = allSuccess ? .NewData : .Failed
-        logInfo("\(#function)", info: "Background fetch completed with result: \(fetchResult)")
-        completionHandler(fetchResult)
+        logInfo("\(#function)", info: "Background fetch completed with result: \(noData ? "NoData" : allSuccess ? "NewData" : "Failed")")
+        completionHandler(noData ? .NoData : allSuccess ? .NewData : .Failed)
     }
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
