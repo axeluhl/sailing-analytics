@@ -352,19 +352,19 @@ Follow these steps to upgrade the AMI:
 
 ### ELB Setup with replication server(s)
 - Remove all Replica's from the ELB and wait at least 2 minutes until no request reaches their Apache webservers anymore. You can check this with looking at `apachetop` on the respective instances. Let only the Master server live inside the ELB.
-- Login to each instance as `sailing`-user and stop the java instance with `~/servers/server/stop;` 
-- As soon as the instance is successfully stopped (verify with `ps -ef |grep "java"`) copy all sailing logs towards `/var/log/old/<event-name>/<instance-public-ipv4/` with following command
+- Login to each server instance as `root`-user and stop the java instance with `/home/sailing/servers/server/stop;` 
+- As soon as the instance is successfully stopped (verify with `ps -ef | grep "java"`) copy all server logs towards `/var/log/old/<event-name>/<instance-public-ipv4/` with following command
 ```
-cp -rf ~/servers/server/logs/* /var/log/old/<event-name>/<instance-public-ipv4>/
+cp -rf /home/sailing/servers/server/logs/* /var/log/old/<event-name>/<instance-public-ipv4>/
 ```
 - Once this is done, make sure all HTTP logs are also copied to the above location
   - Either you wait now for the next day, then the http logrotate script ran through
   - Or you manually force a logrotate run with `logrotate --force /etc/logrotate.d/httpd`, which copies `/var/log/httpd/` towards `/var/log/old/<event-name>/<instance-public-ipv4>`
-- Please verify that there are no left open queues on RabbitMQ for that particular replication server. In case purge the queue of this replica.
-- Once all replica's are terminated and you have only running the Master server inside the ELB, go ahead with a master data import on sapsailing.com for the event, grabbing the data from you Master server
-- Once MDI is done, make sure you track the corresponding races (be careful to also track the smartphone tracked regattas!)
-- Once this is done, remember to remove any entries on sapsailing.com regarding "remote sailing instances", otherwise the event will appear two times on public events list
-- On the same time, you will need to modify or add an entry on the central Apache server to point the event URL towards the Archive server. And remove your `-master` Event URL, as you don't need this one anymore
+- Please verify that there are no open queues left on RabbitMQ for that particular replication server. In case purge the queue of this replica.
+- Once all replica's are terminated and only the Master server is running inside the ELB, go ahead with a master data import on sapsailing.com for the event, grabbing the data from your master server
+- Once the master data import is done, make sure you track the corresponding races (be careful to also track the smartphone tracked regattas)
+- Once this is done, remember to remove any entries on sapsailing.com regarding "remote sailing instances", otherwise the event will appear two times on the public events list
+- at the same time, you need to modify or add an entry on the central Apache server to point the event URL towards the Archive server. Make sure you have removed the `-master` event URL, as you don't need this one anymore
 ```
 # <EVENT> <YEAR>
 Use Event-ARCHIVE-SSL-Redirect <EVENT><YEAR>.sapsailing.com "<EVENT-UUID>"
