@@ -168,7 +168,7 @@ extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
                                                 fromConnection connection: AVCaptureConnection!)
     {
         if metadataObjects.count > 0 {
-            let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
+            let metadataObject = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
             if let regattaData = RegattaData(urlString: metadataObject.stringValue) {
                 stopScanning()
                 dispatch_async(dispatch_get_main_queue(), {
