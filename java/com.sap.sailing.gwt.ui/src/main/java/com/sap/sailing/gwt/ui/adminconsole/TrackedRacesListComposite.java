@@ -28,7 +28,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
  * the {@link AdminConsoleEntryPoint}.
  */
 public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite {
-    private final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
+    final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
     private Button btnUntrack;
     private Button btnRemoveRace;
     private Button btnSetDelayToLive;
@@ -56,7 +56,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         this.raceIsTrackedRaceChangeListener.add(listener);
     }
 
-    private void stopTrackingRaces(final Iterable<RaceDTO> races) {
+    void stopTrackingRaces(final Iterable<RaceDTO> races) {
         final List<RegattaAndRaceIdentifier> racesToStopTracking = new ArrayList<RegattaAndRaceIdentifier>();
         for (RaceDTO race : races) {
             if (race.isTracked) {
@@ -189,6 +189,12 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     @Override
     public String getDependentCssClassName() {
         return "trackedRacesListComposite";
+    }
+
+    @Override
+    public TrackedRacesSettings getSettings() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     

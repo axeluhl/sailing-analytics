@@ -122,6 +122,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
+    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        getRaceColumnListeners().notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
+    }
+
+    @Override
     public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         getRaceColumnListeners().notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
     }
@@ -229,12 +234,22 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
-    public Iterable<Mark> getAllMarks() {
+    public Iterable<Mark> getCourseMarks() {
         return Collections.emptySet();
     }
 
     @Override
-    public Iterable<Mark> getMarks(Fleet fleet) {
+    public Iterable<Mark> getCourseMarks(Fleet fleet) {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Iterable<Mark> getAvailableMarks() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Iterable<Mark> getAvailableMarks(Fleet fleet) {
         return Collections.emptySet();
     }
 

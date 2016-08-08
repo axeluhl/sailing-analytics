@@ -8,11 +8,11 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Installations
 
-1. Eclipse (Eclipse for Eclipse Committers, e.g. version "Mars"), http://www.eclipse.org
+1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.6 "Neon"), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install Google plugin for Eclipse (https://developers.google.com/eclipse/docs/download)
+  * Install GWT Eclipse plugin for Eclipse (http://gwt-plugins.github.io/documentation/gwt-eclipse-plugin/Download.html)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
-3. Git (e.g. msysGit for Windows v1.7.10), http://git-scm.com
+3. Git (e.g. msysGit for Windows v2.9.2), http://git-scm.com
 4. MongoDB (e.g. Production Release 2.6.7), download: http://www.mongodb.org/
 5. RabbitMQ, download from http://www.rabbitmq.com/. Requires Erlang to be installed. RabbitMQ installer will assist in installing Erlang.
 6. JDK 1.7 (Java SE 7), http://jdk7.java.net
@@ -20,6 +20,20 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 8. Maven 3.1.1 (or higher), http://maven.apache.org
 9. GWT SDK 2.7.0 (http://www.gwtproject.org/download.html)
 10. Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/)
+
+#### Automatic Eclipse plugin installation
+
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.6 "Neon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neonr) by using the script "configuration/installPluginsForEclipseNeon.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using our Eclipse installation directory as command line parameter for the script:
+
+    ./installPluginsForEclipseNeon.sh "/some/path/on/my/computer/eclipse"
+
+Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
+
+On Windows you need a Git Bash or Cygwin shell to run the script.
+
+On Mac OS, it's not sufficient to provide the path to the app, instead you need to get the path to the directory inside of the app package hosting the "eclipse" binary (.../Eclipse.app/Contents/MacOS).
+
+Be aware hat the installation may take several minutes depending on your Internet connection. When the script finished running, please check that no errors occurred (the installation process only logs errors but doesn't fail).
 
 #### Further optional but recommended installations
 
@@ -52,6 +66,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Fortmatter)
   * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
   * Install the Google Android SDK from the same Google Plugin for Eclipse update site
+  * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> Google -> Web Toolkit -> Add...)
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
@@ -60,7 +75,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
   * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
-  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder
+  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import as a git project in eclipse)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
@@ -112,6 +127,10 @@ To deploy an Android project (for example com.sap.sailing.racecommittee.app) to 
 3. Select your attached device in the device selection screen
 4. The app should be started after deployment
 
+#### Further hints
+
+If you are working with a linux-system and you get the error message `error while loading shared libraries: libz.so.1: cannot open shared object file: No such file or directory` try to install  lib32z1 and lib32stdc++6.
+
 ####Steps to consider for using other modules
 1. For Eclipse Build
    * MANIFEST.MF , add module names unter dependencies
@@ -153,6 +172,8 @@ The Android Apps can be build in Android Studio or gradle command line. Android 
     * Run (starts the app on a real device or emulator)
     * Debug (starts the app with an attached debugger)
     * Attach Debugger (useful, if the app is currently running and you want to start debugging against the correspond sources)
+
+If git is not in the Path system environment variable, the gradle build will not work.
 
 ##### To enable missing git integration
 

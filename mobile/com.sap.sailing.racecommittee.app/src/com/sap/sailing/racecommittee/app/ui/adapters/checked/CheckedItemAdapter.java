@@ -12,9 +12,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
@@ -48,7 +48,11 @@ public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
         mainTextView.setText(item.getText());
         if (checkedPosition != -1) {
             if (position != checkedPosition) {
-                mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
+                if (item.isEnabled()) {
+                    mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
+                } else {
+                    mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_white_10));
+                }
                 mainTextView.setTypeface(Typeface.DEFAULT);
                 checkImageView.setVisibility(View.GONE);
             } else {
@@ -56,6 +60,10 @@ public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
                 mainTextView.setTypeface(Typeface.DEFAULT_BOLD);
                 checkImageView.setVisibility(View.VISIBLE);
             }
+        } else if (!item.isEnabled()) {
+            mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_white_10));
+        } else {
+            mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
         }
 
         if (!TextUtils.isEmpty(item.getSubtext())) {
@@ -68,6 +76,11 @@ public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
         }
 
         return convertView;
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        return getItem(position).isEnabled();
     }
 
     public void setCheckedPosition(int position) {

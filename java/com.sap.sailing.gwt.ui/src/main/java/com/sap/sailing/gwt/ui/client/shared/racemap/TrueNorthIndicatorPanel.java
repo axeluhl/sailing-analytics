@@ -7,7 +7,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
  * A true north indicator that can be added as a control to the map. Clicking / tapping the control toggles
@@ -26,46 +25,48 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
 
     private Canvas canvas;
     
-    private CombinedWindPanelStyle combinedWindPanelStyle;
+    private RaceMapStyle raceMapStyle;
     private final CoordinateSystem coordinateSystem;
     
-    public TrueNorthIndicatorPanel(final RaceMap map, RaceMapImageManager theRaceMapResources, CombinedWindPanelStyle combinedWindPanelStyle,
+    public TrueNorthIndicatorPanel(final RaceMap map, RaceMapImageManager theRaceMapResources, RaceMapStyle raceMapStyle,
             final StringMessages stringMessages, CoordinateSystem coordinateSystem) {
         this.stringMessages = stringMessages;
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
-        this.combinedWindPanelStyle = combinedWindPanelStyle;
-        addStyleName(combinedWindPanelStyle.combinedWindPanel());
+        this.raceMapStyle = raceMapStyle;
+        addStyleName(raceMapStyle.raceMapIndicatorPanel());
+        addStyleName(raceMapStyle.trueNorthIndicatorPanel());
         transformer = raceMapResources.getTrueNorthIndicatorIconTransformer();
         canvas = transformer.getCanvas();
-        canvas.addStyleName(this.combinedWindPanelStyle.combinedWindPanelCanvas());
+        canvas.addStyleName(this.raceMapStyle.raceMapIndicatorPanelCanvas());
         add(canvas);
         canvas.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                // a bit clumsy, but there is no copy constructor on RaceMapSettings, and the RaceMapSettingsDialogComponent
-                // class has all we need to clone a RaceMapSettings object, without showing it
-                final RaceMapSettingsDialogComponent settingsCloner = new RaceMapSettingsDialogComponent(map.getSettings(), stringMessages, /* showViewSimulation */true);
-                settingsCloner.getAdditionalWidget(new DataEntryDialog<RaceMapSettings>("dummy", "dummy", "OK", "Cancel", /* validator */null, /* callback */null) {
-                    @Override
-                    protected RaceMapSettings getResult() {
-                        return null;
-                    }
-                });
-                final RaceMapSettings newSettings = settingsCloner.getResult();
-                newSettings.setWindUp(!newSettings.isWindUp());
-                map.updateSettings(newSettings);
+                RaceMapSettings oldRaceMapSettings = map.getSettings();
+                boolean newWindUpSettings = !oldRaceMapSettings.isWindUp();
+                
+                final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
+                        oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
+                        oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), newWindUpSettings,
+                        oldRaceMapSettings.getBuoyZoneRadiusInMeters(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
+                        oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
+                        oldRaceMapSettings.isShowWindStreamletOverlay(), oldRaceMapSettings.isShowSimulationOverlay(),
+                        oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
+                        oldRaceMapSettings.isShowDouglasPeuckerPoints());
+                map.updateSettings(newRaceMapSettings);
             }
         });
         textLabel = new Label("");
-        textLabel.addStyleName(this.combinedWindPanelStyle.combinedWindPanelTextLabel());
+        textLabel.addStyleName(this.raceMapStyle.raceMapIndicatorPanelTextLabel());
         add(textLabel);
     }
 
     protected void redraw() {
         final double mappedTrueNorthDeg = coordinateSystem.mapDegreeBearing(0);
         transformer.drawTransformedImage(mappedTrueNorthDeg, 1.0);
-        String title = stringMessages.rotatedFromTrueNorthClickToToggleWindUp(Math.round(mappedTrueNorthDeg));
+        String title = stringMessages.rotatedFromTrueNorth(Math.round(mappedTrueNorthDeg)) + '\n' +
+                stringMessages.clickToToggleWindUp();
         canvas.setTitle(title);
         NumberFormat numberFormat = NumberFormat.getFormat("0.0");
         textLabel.setText(mappedTrueNorthDeg == 0 ? "N" : numberFormat.format(mappedTrueNorthDeg));

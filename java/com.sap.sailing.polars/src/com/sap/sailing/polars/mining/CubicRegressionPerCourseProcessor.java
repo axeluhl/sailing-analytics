@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -42,7 +42,7 @@ public class CubicRegressionPerCourseProcessor implements
     /**
      * FIXME Make sure replication and listeners interact correctly
      */
-    private transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
+    private transient ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners;
 
     @Override
     public boolean canProcessElements() {
@@ -178,7 +178,7 @@ public class CubicRegressionPerCourseProcessor implements
         throw new RuntimeException("Polar Data Miner failed.", failure);
     }
 
-    public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+    public void setListeners(ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners) {
         this.listeners = listeners;
     }
 

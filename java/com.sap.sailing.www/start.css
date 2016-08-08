@@ -1,0 +1,134 @@
+@import url(sailing-fontface-1.0.cache.css);
+
+body {
+	font-family: "Open Sans", sans-serif;
+	margin: 0;
+	background: white;
+}
+
+.logoAndTitlePanel {
+	background: #333 none repeat scroll 0 0;
+	border-bottom: 0.333333em solid #f0ab00;
+	font-size: 1rem;
+	height: 3.33333em;
+	line-height: 3em;
+	overflow: hidden;
+	width: 100%;
+}
+
+.logoAndTitlePanel:after {
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+.sapLogo {
+	float: left;
+	margin: 13px 0 0 12px;
+}
+
+.sapLogoImage {
+	max-height: 2em; 	
+}
+
+.sailingAnalyticsLabelPanel {
+	margin: 10px 0 0 0;
+}
+
+.sailingAnalyticsLabel {
+	float: left;
+	color: #fff;
+	font-size: 16px;
+}
+
+a {
+	color: #008fcc;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+.error-message {
+	font-size: 30px;
+	color: #f0ab00;
+	margin: 0 0 15px 0;
+	font-weight: normal;
+}
+
+.content {
+	margin: 20px;
+	min-height: 100%;
+}
+
+.yield_content {
+	width: 950px;
+	margin: 0 auto;
+	min-height: 100%;
+}
+
+.yield_content .pageHeadline {
+	color: white;
+	margin: 10px 0 10px 0;
+	font-size: 18px;
+}
+
+.yield_content .mainContent {
+	padding: 0 10px 10px 10px;
+	background: white;
+}
+
+.yield_content .mainContent .articleHeadline {
+	font-size: 18px;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-weight: bold;
+	color: #222222;
+	border-bottom: 2px solid #222222;
+	clear: both;
+	padding: 0 0 5px;
+	margin: 0 0 15px;
+}
+
+.yield_content .mainContent .articleSubheadline {
+	font-size: 14px;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-weight: bold;
+	color: #222222;
+	margin: 0 0 6px 0;
+}
+
+.yield_content .mainContent h4 {
+	margin: 0 0 10px;
+	font-size: 12px;
+	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-weight: bold;
+}
+
+.yield_content .spaceBar {
+	height: 80px;
+}
+
+.footer {
+	color: white;
+	width: 940px;
+	height: 20px;
+	margin: -40px auto 0 auto;
+	background: url(../images/bkg-footer1.png);
+	padding: 10px;
+	font-size: 11px;
+}
+
+.footer a {
+	color: white;
+	font-size: 11px;
+}
+.footer .regularNav {
+	margin: 0;
+}
+
+.footer .regularNav li {
+	display: inline;
+}

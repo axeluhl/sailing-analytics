@@ -85,22 +85,21 @@ public class WindHelper {
                 String raceName = raceState.getString("raceName");
                 boolean matchingLeaderboardName = leaderboardName != null && leaderboardName.equals(triple.getA());
                 boolean matchingFleetName = fleetName != null && fleetName.equals(triple.getC());
-                boolean matchingRaceName = raceName != null && raceName.equals(race.getRaceName());
+                boolean matchingRaceName = raceName != null && raceName.equals(race.getRaceColumnName());
                 if (matchingLeaderboardName && matchingFleetName && matchingRaceName){
-                    if (!raceState.isNull("trackedRaceId")){
+                    if (raceState.getBoolean("trackedRaceLinked")){
                         isTracked = true;
                         break;
                     }
                 }
             }
-
         } catch (JSONException e) {
             Log.e(TAG, "Failed to parse contents of the server response: " + e.getMessage());
         }
         return isTracked;
     }
 
-    public static String generateMapURL(Context context, ManagedRace race ,boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls){
+    public static String generateMapURL(Context context, ManagedRace race, boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls) {
         ReadonlyDataManager dataManager = OnlineDataManager.create(context);
         return dataManager.getMapUrl(AppPreferences.on(context).getServerBaseURL(), race, getEventId(context), showWindCharts, showStreamlets, showSimulation, showMapControls);
     }

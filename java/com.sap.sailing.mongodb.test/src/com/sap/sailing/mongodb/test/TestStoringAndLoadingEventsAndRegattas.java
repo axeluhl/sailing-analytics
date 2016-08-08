@@ -72,7 +72,7 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.TimeOnTimeAndDistanceRankingMetric;
@@ -132,7 +132,9 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String venueName = "Venue Name";
         final String[] courseAreaNames = new String[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrott" };
         final URL officialWebsiteURL = new URL("http://official.website.com");
+        final URL baseURL = new URL("http://base.url.com");
         final URL sailorsInfoWebsiteURL = new URL("http://sailorsinfo.website.com");
+        final URL sailorsInfoWebsiteURLDE = new URL("http://sailorsinfo-de.website.com");
         final Venue venue = new VenueImpl(venueName);
         
         for (String courseAreaName : courseAreaNames) {
@@ -147,7 +149,9 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         event.addLeaderboardGroup(lg2);
         event.setDescription(eventDescription);
         event.setOfficialWebsiteURL(officialWebsiteURL);
-        event.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL);
+        event.setBaseURL(baseURL);
+        event.setSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
+        event.setSailorsInfoWebsiteURL(Locale.GERMAN, sailorsInfoWebsiteURLDE);
         mof.storeEvent(event);
         
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
@@ -172,7 +176,10 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(eventName, loadedEvent.getName());
         assertEquals(eventDescription, loadedEvent.getDescription());
         assertEquals(event.getOfficialWebsiteURL(), loadedEvent.getOfficialWebsiteURL());
-        assertEquals(event.getSailorsInfoWebsiteURL(), loadedEvent.getSailorsInfoWebsiteURL());
+        assertEquals(event.getBaseURL(), loadedEvent.getBaseURL());
+        assertEquals(sailorsInfoWebsiteURL, loadedEvent.getSailorsInfoWebsiteURL(null));
+        assertEquals(sailorsInfoWebsiteURLDE, loadedEvent.getSailorsInfoWebsiteURL(Locale.GERMAN));
+        assertEquals(2, loadedEvent.getSailorsInfoWebsiteURLs().size());
         assertEquals(2, Util.size(loadedEvent.getLeaderboardGroups()));
         Iterator<LeaderboardGroup> lgIter = loadedEvent.getLeaderboardGroups().iterator();
         assertSame(lg1, lgIter.next());
@@ -324,7 +331,6 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(3, Util.size(loadedVideo1.getTags()));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     /**
      * We expected that the migration code creates also an image URL for each image we create.
@@ -361,9 +367,9 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final Event loadedEvent = dof.loadEvent(eventName);
         assertEquals(2, Util.size(loadedEvent.getImages()));
         assertEquals(1, Util.size(loadedEvent.getVideos()));
-        assertEquals(1, Util.size(loadedEvent.getImageURLs()));
-        assertEquals(1, Util.size(loadedEvent.getSponsorImageURLs()));
-        assertEquals(1, Util.size(loadedEvent.getVideoURLs()));
+        assertEquals(1, Util.size(loadedEvent.findImagesWithTag(MediaTagConstants.GALLERY)));
+        assertEquals(1, Util.size(loadedEvent.findImagesWithTag(MediaTagConstants.SPONSOR)));
+        assertEquals(1, Util.size(loadedEvent.getVideos()));
     }
     
     
@@ -390,7 +396,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     @Test
     public void testLoadStoreSimpleRegattaLeaderboard() {
         RacingEventService res = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE);
         final int numberOfQualifyingRaces = 5;
         final int numberOfFinalRaces = 7;
         final String regattaBaseName = "Kieler Woche";
@@ -507,7 +513,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
 
     private RacingEventServiceImpl createRacingEventServiceWithOneMockedTrackedRace(final DynamicTrackedRace q2YellowTrackedRace) {
         return new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE) {
+                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE) {
             @Override
             public DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier) {
                 return q2YellowTrackedRace;
@@ -632,6 +638,28 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
         assertFalse(loadedRegatta.getSeriesByName("Qualifying").isStartsWithZeroScore());
         assertTrue(loadedRegatta.getSeriesByName("Medal").isStartsWithZeroScore());
+    }
+
+    @Test
+    public void testLoadStoreRegattaWithSeriesWhereFleetsCanRunInParallel() {
+        final int numberOfQualifyingRaces = 5;
+        final int numberOfFinalRaces = 7;
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        Regatta regatta = createRegattaAndAddRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()),
+                boatClass, regattaStartDate, regattaEndDate, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), OneDesignRankingMetric::new);
+        regatta.getSeriesByName("Qualifying").setIsFleetsCanRunInParallel(true);
+        regatta.getSeriesByName("Final").setIsFleetsCanRunInParallel(false);
+        regatta.getSeriesByName("Medal").setIsFleetsCanRunInParallel(false);
+
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        mof.storeRegatta(regatta);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
+        assertTrue(loadedRegatta.getSeriesByName("Qualifying").isFleetsCanRunInParallel());
+        assertFalse(loadedRegatta.getSeriesByName("Final").isFleetsCanRunInParallel());
+        assertFalse(loadedRegatta.getSeriesByName("Medal").isFleetsCanRunInParallel());
     }
 
     @Test
@@ -784,7 +812,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         List<Fleet> qualifyingFleets = new ArrayList<Fleet>();
         qualifyingFleets.add(new FleetImpl("Yellow"));
         qualifyingFleets.add(new FleetImpl("Blue"));
-        Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, qualifyingFleets,
+        Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualifyingFleets,
                 emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(qualifyingSeries);
         
@@ -792,13 +820,13 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         List<Fleet> finalFleets = new ArrayList<Fleet>();
         finalFleets.add(new FleetImpl("Gold", 1));
         finalFleets.add(new FleetImpl("Silver", 2));
-        Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, finalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
+        Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, finalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(finalSeries);
 
         // ------------ medal --------------
         List<Fleet> medalFleets = new ArrayList<Fleet>();
         medalFleets.add(new FleetImpl("Medal"));
-        Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, medalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
+        Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, medalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(medalSeries);
         Regatta regatta = new RegattaImpl(regattaName, boatClass, startDate, endDate, series, persistent, scoringScheme, "123", courseArea, rankingMetricConstructor);
         return regatta;
@@ -817,7 +845,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 regattaStartDate, regattaEndDate, /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, OneDesignRankingMetric::new);
 
         List<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(new CompetitorImpl("Axel", "Axel Uhl", Color.RED, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+        competitors.add(new CompetitorImpl("Axel", "Axel Uhl", Color.RED, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         Iterable<Waypoint> waypoints = Collections.emptyList();
         Course course = new CourseImpl("Course", waypoints);
         
@@ -825,7 +853,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         regatta.addRace(racedef);
         
         RacingEventServiceImpl evs = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE);
+                .getMongoObjectFactory(getMongoService()), MediaDBFactory.INSTANCE.getMediaDB(getMongoService()), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE);
         assertNull(evs.getRememberedRegattaForRace(racedef.getId()));
         evs.raceAdded(regatta, racedef);
         assertNotNull(evs.getRememberedRegattaForRace(racedef.getId()));

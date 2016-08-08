@@ -20,6 +20,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -36,6 +37,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -76,20 +78,22 @@ public class IgtimiAccountsPanel extends FlowPanel {
         this.stringMessages = stringMessages;
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        allAccounts = new CellTable<String>(/* pageSize */10000, tableRes);
+        allAccounts = new BaseCelltable<String>(/* pageSize */10000, tableRes);
         final ListDataProvider<String> filteredAccounts = new ListDataProvider<String>();
-        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>(null, filteredAccounts);
-        allAccounts.setSelectionModel(refreshableAccountsSelectionModel);
         ListHandler<String> accountColumnListHandler = new ListHandler<String>(filteredAccounts.getList());
         filteredAccounts.addDataDisplay(allAccounts);
         final List<String> emptyList = Collections.emptyList();
-        filterAccountsPanel = new LabeledAbstractFilterablePanel<String>(new Label(stringMessages.igtimiAccounts()), emptyList, allAccounts, filteredAccounts) {
+        filterAccountsPanel = new LabeledAbstractFilterablePanel<String>(new Label(stringMessages.igtimiAccounts()),
+                emptyList, allAccounts, filteredAccounts) {
             @Override
             public Iterable<String> getSearchableStrings(String t) {
                 Set<String> strings = Collections.singleton(t);
                 return strings;
             }
         };
+        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>(null,
+                filterAccountsPanel.getAllListDataProvider());
+        allAccounts.setSelectionModel(refreshableAccountsSelectionModel);
         final Panel controlsPanel = new HorizontalPanel();
         final Button removeAccountButton = new Button(stringMessages.remove());
         removeAccountButton.setEnabled(false);
@@ -242,11 +246,10 @@ public class IgtimiAccountsPanel extends FlowPanel {
         }
         
         @Override
-        public void show() {
-            super.show();
-            eMail.setFocus(true);
+        protected FocusWidget getInitialFocusWidget() {
+            return eMail;
         }
-
+        
         @Override
         protected UserData getResult() {
             return new UserData(eMail.getText(), password.getText());

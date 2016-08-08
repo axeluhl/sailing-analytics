@@ -24,8 +24,9 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 
-public abstract class AbstractQueryDefinitionProvider<SettingsType extends Settings> implements QueryDefinitionProvider<SettingsType> {
+public abstract class AbstractQueryDefinitionProvider<SettingsType extends Settings> extends AbstractComponent<SettingsType> implements QueryDefinitionProvider<SettingsType> {
 
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;

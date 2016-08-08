@@ -85,21 +85,15 @@ table {
 	border-collapse: separate;
 }
 
-.CombinedWindPanelParentDiv {
+.TopLeftControlsWrapperPanelParentDiv {
 	padding-top: 34px;
 	padding-left: 10px;
 }
 
-.TrueNorthIndicatorPanelParentDiv {
-	padding-top: 10px;
-	padding-left: 10px;
-}
-.CombinedWindPanelParentDiv.indentsmall,
-.TrueNorthIndicatorPanelParentDiv.indentsmall {
+.TopLeftControlsWrapperPanel.indentsmall {
 	padding-left: 30px;
 }
-.CombinedWindPanelParentDiv.indentbig,
-.TrueNorthIndicatorPanelParentDiv.indentbig {
+.TopLeftControlsWrapperPanel.indentbig  {
 	padding-left: 45px;
 }
 
@@ -752,4 +746,71 @@ img.openColumn {
 
 .Media-Select-Popup .Caption {
 	padding: 4px 10px;
+}
+
+.EditMarkPositionPopup table {
+	background-color: #fff;
+	border-spacing: 0;
+	border: 1px solid #aaa;
+	
+	-webkit-box-shadow: 2px 2px 2px 0px rgba(0,0,0,0.5);
+	-moz-box-shadow: 2px 2px 2px 0px rgba(0,0,0,0.5);
+	box-shadow: 2px 2px 2px 0px rgba(0,0,0,0.5);
+}
+
+.EditMarkPositionPopup .gwt-MenuItem {
+	padding: 10px 15px;
+}
+
+.EditMarkPositionPopup .gwt-MenuItem-disabled {
+	background-color: #eee;
+}
+
+.EditMarkPositionConfirmCancelButtons .gwt-MenuItem {
+	color: #fff;
+	font-size: 15px;
+	font-weight: bold;
+	padding: 5px 5px;
+	background-color: #efab00;
+	border: 1px solid gray;
+}
+
+.EditMarkPositionConfirmCancelButtons .gwt-MenuItem:hover {
+	background-color: #bf8b00;
+}
+
+.EditMarkPositionConfirmCancelButtons table {
+	border-spacing: 10px;
+	border-collapse: seperate;
+}
+
+.EditMarkPositionNotification > div {
+	margin: 80px;
+	font-size: 15px;
+	padding: 20px;
+	max-width: 500px;
+	text-align: center;
+	background-color: #fff;
+	line-height: 130%;
+}
+
+.EditMarkPositionMarkTable {
+	margin: 10px;
+	min-width: 300px;
+	border-top: 1px solid #e5e5e5;
+	border-left: 1px solid #e5e5e5;
+}
+
+.EditMarkPositionMarkTable button {
+	width: 100%;
+	font-size: 12px;
+	font-weight: bold;
+	border: 1px solid gray;
+	background-color: #efab00;
+	padding: 7px;
+	color: #fff;
+}
+
+.EditMarkPositionMarkTable button:hover {
+	background-color: #bf8b00;
 }

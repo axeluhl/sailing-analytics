@@ -34,7 +34,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -86,7 +85,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")),
-                new BoatImpl(competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */true), /* sailID */ null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
+                new BoatImpl(competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */true), /* sailID */ null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
         Iterable<Competitor> competitors = Collections.singleton(competitor);
         final String raceName = "Test Race";
         RaceDefinition raceDefinition = new RaceDefinitionImpl(raceName, new CourseImpl("Empty Course", emptyWaypointList),
@@ -114,7 +113,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         final String newCompetitorName = "Der Vogel, der mit dem Kiel zieht";
         master.apply(new UpdateCompetitor(competitor.getId().toString(), newCompetitorName, competitor.getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
                 competitor.getTeam().getImage(), competitor.getFlagImage(),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         Thread.sleep(1000);
         assertEquals(newCompetitorName, replicatedCompetitor.getName()); // expect in-place update of existing competitor in replica
         
@@ -122,10 +121,11 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         master.apply(new AllowCompetitorResetToDefaults(Collections.singleton(competitor.getId().toString())));
         // modify the competitor on the master "from below" without an UpdateCompetitor operation, only locally:
         master.getBaseDomainFactory().getCompetitorStore().updateCompetitor(competitor.getId().toString(), competitorName, Color.RED, competitor.getEmail(),
-                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), competitor.getTeam().getImage(), competitor.getFlagImage(), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), competitor.getTeam().getImage(), competitor.getFlagImage(), 
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
-                EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
+                EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 30000l, /* millisecondsOverWhichToAverageSpeed */ 30000l));
         trackedRace.getTrack(competitor).addGPSFix(new GPSFixMovingImpl(new DegreePosition(49.425, 8.293), MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12.3, new DegreeBearingImpl(242.3))));

@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -18,6 +19,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.concurrent.CopyOnWriteHashMap;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
@@ -26,7 +28,7 @@ import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 
 public abstract class EventBaseImpl implements EventBase {
-    private static final long serialVersionUID = -5749964088848611074L;
+    private static final long serialVersionUID = -4055554853909324357L;
 
     private String name;
     private String description;
@@ -36,7 +38,8 @@ public abstract class EventBaseImpl implements EventBase {
     private TimePoint startDate;
     private TimePoint endDate;
     private URL officialWebsiteURL;
-    private URL sailorsInfoWebsiteURL;
+    private URL baseURL;
+    private CopyOnWriteHashMap<Locale, URL> sailorsInfoWebsiteURLs;
     private ConcurrentLinkedQueue<ImageDescriptor> images;
     private ConcurrentLinkedQueue<VideoDescriptor> videos;
 
@@ -57,6 +60,7 @@ public abstract class EventBaseImpl implements EventBase {
         this.isPublic = isPublic;
         this.images = new ConcurrentLinkedQueue<ImageDescriptor>();
         this.videos = new ConcurrentLinkedQueue<VideoDescriptor>();
+        this.sailorsInfoWebsiteURLs = new CopyOnWriteHashMap<>("lock for sailorsInfoWebsiteURLs of event " + id.toString());
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
@@ -66,6 +70,9 @@ public abstract class EventBaseImpl implements EventBase {
         }
         if (videos == null) {
             videos = new ConcurrentLinkedQueue<VideoDescriptor>();
+        }
+        if (sailorsInfoWebsiteURLs == null) {
+            this.sailorsInfoWebsiteURLs = new CopyOnWriteHashMap<>("lock for sailorsInfoWebsiteURLs of event " + id.toString());
         }
     }
 
@@ -135,62 +142,63 @@ public abstract class EventBaseImpl implements EventBase {
     }
 
     @Override
-    public Iterable<URL> getImageURLs() {
-        List<URL> result = new ArrayList<URL>();
-        for (ImageDescriptor image : images) {
-            if (!image.hasTag(MediaTagConstants.SPONSOR) && !image.hasTag(MediaTagConstants.LOGO)) {
-                result.add(image.getURL());
-            }
-        }
-        return result;
-    }
-    
-    @Override
-    public Iterable<URL> getVideoURLs() {
-        List<URL> result = new ArrayList<URL>();
-        for(VideoDescriptor video: videos) {
-            result.add(video.getURL());
-        }
-        return result;
-    }
-
-    @Override
-    public Iterable<URL> getSponsorImageURLs() {
-        List<URL> result = new ArrayList<URL>();
-        for(MediaDescriptor media : findMediaWithTag(images, MediaTagConstants.SPONSOR)) {
-            result.add(media.getURL());
-        }
-        return result;
-    }
-    
-    @Override
-    public URL getLogoImageURL() {
-        URL result = null;
-        ImageDescriptor media = findImageWithTag(MediaTagConstants.LOGO);
-        if(media != null) {
-            result = media.getURL();
-        }
-        return result;
-    }
-
-    @Override
     public URL getOfficialWebsiteURL() {
         return officialWebsiteURL;
     }
-
+    
     @Override
     public void setOfficialWebsiteURL(URL officialWebsiteURL) {
         this.officialWebsiteURL = officialWebsiteURL;
     }
-
+    
     @Override
-    public URL getSailorsInfoWebsiteURL() {
-        return sailorsInfoWebsiteURL;
+    public URL getBaseURL() {
+        return baseURL;
     }
 
     @Override
-    public void setSailorsInfoWebsiteURL(URL sailorsInfoWebsiteURL) {
-        this.sailorsInfoWebsiteURL = sailorsInfoWebsiteURL;
+    public void setBaseURL(URL baseURL) {
+        this.baseURL = baseURL;
+    }
+    
+    @Override
+    public Map<Locale, URL> getSailorsInfoWebsiteURLs() {
+        return Collections.unmodifiableMap(sailorsInfoWebsiteURLs);
+    }
+    
+    @Override
+    public void setSailorsInfoWebsiteURLs(Map<Locale, URL> sailorsInfoWebsiteURLs) {
+        this.sailorsInfoWebsiteURLs.set(sailorsInfoWebsiteURLs);
+    }
+
+    @Override
+    public void setSailorsInfoWebsiteURL(Locale locale, URL sailorsInfoWebsiteURL) {
+        if (sailorsInfoWebsiteURL == null) {
+            this.sailorsInfoWebsiteURLs.remove(locale);
+        } else {
+            this.sailorsInfoWebsiteURLs.put(locale, sailorsInfoWebsiteURL);
+        }
+    }
+
+    @Override
+    public boolean hasSailorsInfoWebsiteURL(Locale locale) {
+        return this.sailorsInfoWebsiteURLs.containsKey(locale);
+    }
+    
+    @Override
+    public URL getSailorsInfoWebsiteURL(Locale locale) {
+        return this.sailorsInfoWebsiteURLs.get(locale);
+    }
+    
+    @Override
+    public URL getSailorsInfoWebsiteURLOrFallback(Locale locale) {
+        final URL result;
+        if (hasSailorsInfoWebsiteURL(locale)) {
+            result = this.sailorsInfoWebsiteURLs.get(locale);
+        } else {
+            result = this.sailorsInfoWebsiteURLs.get(null);
+        }
+        return result;
     }
 
     @Override

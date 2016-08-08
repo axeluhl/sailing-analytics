@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -95,7 +97,11 @@ public class RegattaByKeywordSearchService {
                 return leaderboardStrings;
             }
         };
-        for (Leaderboard matchingLeaderboard : leaderboardFilter.applyFilter(query.getKeywords(), racingEventService.getLeaderboards().values())) {
+        final Set<Leaderboard> leaderboardsToConsider = StreamSupport.stream(racingEventService.getAllEvents().spliterator(), /* parallel */ false).filter(e->e.isPublic()).
+            flatMap(e->StreamSupport.stream(e.getLeaderboardGroups().spliterator(), /* parallel */ false)).
+            flatMap(lg->StreamSupport.stream(lg.getLeaderboards().spliterator(), /* parallel */ false)).
+            collect(Collectors.toSet());
+        for (Leaderboard matchingLeaderboard : leaderboardFilter.applyFilter(query.getKeywords(), leaderboardsToConsider)) {
             result.addHit(new LeaderboardSearchResultImpl(matchingLeaderboard,
                     getEventsForLeaderboard(matchingLeaderboard, leaderboardGroupsForLeaderboard,
                             eventsForLeaderboardGroup, eventForCourseArea), leaderboardGroupsForLeaderboard

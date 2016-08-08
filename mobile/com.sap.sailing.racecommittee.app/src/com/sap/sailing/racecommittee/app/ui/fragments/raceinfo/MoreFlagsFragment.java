@@ -168,8 +168,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
                 case 1: // Race-State: Finishing -> End Finishing
                     ImageView flag = ViewHelper.get(getView(), R.id.header_flag);
                     if (flag != null) {
-                        flag.setImageDrawable(FlagsResources
-                            .getFlagDrawable(getActivity(), Flags.BLUE.name(), getResources().getInteger(R.integer.flag_size)));
+                        flag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), getResources().getInteger(R.integer.flag_size)));
                     }
 
                     TextView headline = ViewHelper.get(getView(), R.id.header_headline);
@@ -251,7 +250,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             }
 
             if (result.hasError()) {
-                Toast.makeText(getActivity(), result.getMessageId(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), result.getMessage(getActivity()), Toast.LENGTH_LONG).show();
             }
         }
     }

@@ -89,7 +89,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public TrackedRace getTrackedRace(Fleet fleet) {
-        return trackedRaces.get(fleet);
+        return trackedRaces == null ? null : trackedRaces.get(fleet);
     }
 
     @Override
@@ -106,6 +106,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 }
             }
             if (trackedRace != null) {
+                RegattaLog regattaLog = getRegattaLog();
+                if(regattaLog != null) {
+                    trackedRace.attachRegattaLog(regattaLog);
+                }
                 final RaceLog raceLog = getRaceLog(fleet);
                 if (raceLog != null) {
                     trackedRace.attachRaceLog(raceLog);
@@ -321,30 +325,16 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
 
     @Override
-    public Iterable<Mark> getAllMarks() {
+    public Iterable<Mark> getCourseMarks() {
         final Set<Mark> result = new HashSet<>();
-        // if the marks from the regatta log are to be used because a slot has no TrackedRace attached,
-        // those regatta log marks only need to be added to the result once
-        boolean regattaLogMarksAlreadyAdded = false;
         for (Fleet fleet : getFleets()) {
-            TrackedRace trackedRace = getTrackedRace(fleet);
-            if (trackedRace != null) {
-                for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
-                    Util.addAll(waypoint.getMarks(), result);
-                }
-            } else if (!regattaLogMarksAlreadyAdded) {
-                // if no tracked race is found, use marks from regatta log
-                RegattaLog regattaLog = getRegattaLog();
-                Collection<Mark> viaRegattaLog = new RegattaLogDefinedMarkAnalyzer(regattaLog).analyze();
-                result.addAll(viaRegattaLog);
-                regattaLogMarksAlreadyAdded = true;
-            }
+            Util.addAll(getCourseMarks(fleet), result);
         }
         return result;
     }
 
     @Override
-    public Iterable<Mark> getMarks(Fleet fleet) {
+    public Iterable<Mark> getCourseMarks(Fleet fleet) {
         final Set<Mark> result = new HashSet<>();
         final TrackedRace trackedRace = getTrackedRace(fleet);
         if (trackedRace != null) {
@@ -353,19 +343,45 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             }
         } else {
             // if no tracked race is found, use marks from race course if present in racelog
-            // if not the marks defined in the regatta log 
-            LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(getRaceLog(fleet));
+            LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(getRaceLog(fleet), /* onlyCoursesWithValidWaypointList */ true);
             final CourseBase courseBase = courseDesginFinder.analyze();
             if (courseBase != null) {
-                // TODO why do we collect the marks from the course definition here but not in getAllMarks()?
                 courseBase.getWaypoints().forEach((waypoint) -> Util.addAll(waypoint.getMarks(), result));
-            } else {
-                Util.addAll(new RegattaLogDefinedMarkAnalyzer(getRegattaLog()).analyze(), result);
             }
         }
         return result;
     }
     
+    @Override
+    public Iterable<Mark> getAvailableMarks() {
+        final Set<Mark> result = new HashSet<>();
+        // add the marks from the regatta log to the result
+        RegattaLog regattaLog = getRegattaLog();
+        Collection<Mark> viaRegattaLog = new RegattaLogDefinedMarkAnalyzer(regattaLog).analyze();
+        result.addAll(viaRegattaLog);
+        for (Fleet fleet : getFleets()) {
+            TrackedRace trackedRace = getTrackedRace(fleet);
+            if (trackedRace != null) {
+                Util.addAll(trackedRace.getMarks(), result);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<Mark> getAvailableMarks(Fleet fleet) {
+        final Set<Mark> result = new HashSet<>();
+        // add the marks from the regatta log to the result
+        RegattaLog regattaLog = getRegattaLog();
+        Collection<Mark> viaRegattaLog = new RegattaLogDefinedMarkAnalyzer(regattaLog).analyze();
+        result.addAll(viaRegattaLog);
+        TrackedRace trackedRace = getTrackedRace(fleet);
+        if (trackedRace != null) {
+            Util.addAll(trackedRace.getMarks(), result);
+        }
+        return result;
+    }
+
     @Override
     public void enableCompetitorRegistrationOnRaceLog(Fleet fleet) {
         TimePoint now = MillisecondsTimePoint.now();

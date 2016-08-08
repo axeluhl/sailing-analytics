@@ -2,7 +2,7 @@
 <resources>
 
     <string name="running_on_course">(Kurs %s)</string>
-    <string name="course_design_number_waypoints">Kurs hat %s Wegpunkte</string>
+    <string name="course_design_number_waypoints">Kurs hat %d Wegpunkte</string>
     <string name="service_text_no_races">Warte auf Rennen&#8230;</string>
     <string name="service_text_num_races">Aktuell %d Rennen verwaltet.</string>
     <string name="set_time">Start</string>
@@ -78,13 +78,14 @@
     <string name="pick_a_rounding_direction">Wenderichtung auswählen</string>
     <string name="select_penalty_reason">Strafe auswählen</string>
 
-    <string-array name="rounding_directions">
-        <item>Backbord</item>
-        <item>Steuerbord</item>
-        <item>Gate</item>
-        <item>Linie</item>
-        <item>Ablauf</item>
-    </string-array>
+    <string name="passing_instruction_none">Leer</string>
+    <string name="passing_instruction_port">Backbord</string>
+    <string name="passing_instruction_starboard">Steuerbord</string>
+    <string name="passing_instruction_single_unknown">Einzel, unbekannt</string>
+    <string name="passing_instruction_gate">Gate</string>
+    <string name="passing_instruction_line">Linie</string>
+    <string name="passing_instruction_offset">Ablauf</string>
+    <string name="passing_instruction_fixed_bearing">Feste Peilung</string>
 
     <string name="publish">Veröffentlichen</string>
     <string name="unpublish">Zurücknehmen</string>
@@ -95,7 +96,8 @@
     <string name="retry">Wiederholen</string>
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
-    <string name="tracking_list">Ergebnisliste</string>
+    <string name="tracking_list_01">Teilnehmerliste</string>
+    <string name="tracking_list_02">Ergebnisliste</string>
     <string name="set_tracking_list">Ergebnisliste füllen</string>
     <string name="confirm_tracking_list">Ergebnisliste bestätigen</string>
     <string name="availableFinishingCompetitors">Segler</string>
@@ -174,8 +176,10 @@
     <string name="nationality">Nationalität</string>
     <string name="number">Nummer</string>
     <string name="snap">Fotos schießen</string>
-    <string name="logout_dialog_title">Möchten Sie sich abmelden?</string>
-    <string name="logout_dialog_message">Wenn Sie sich abmelden, wird kein Rennen mehr verwaltet.</string>
+    <string name="logout_dialog_title">@string/logout</string>
+    <string name="logout_dialog_message">Wollen Sie sich abmelden und als neuer Nutzer anmelden. Ihre Rennen bleiben im Hintergrund erhalten.</string>
+    <string name="change_dialog_title">Ummelden</string>
+    <string name="change_dialog_message">Wenn Sie sich ummelden, wird kein Rennen mehr auf der aktuellen Bahn mehr verwaltet.</string>
     <string name="logout">Abmelden</string>
     <string name="loading_configuration">Lade Konfiguration&#8230;</string>
     <string name="loading_configuration_failed">Fehler beim Laden der Konfiguration.</string>
@@ -196,6 +200,8 @@
     <string name="preference_racing_procedure_classflag_header">Klassenflagge</string>
     <string name="preference_racing_procedure_hasxray_header">Einzelrückruf</string>
     <string name="preference_racing_procedure_hasxray_description">Diese Option aktiviert den Einzelrückruf</string>
+    <string name="preference_racing_procedure_resultentryenabled_header">Rennliste</string>
+    <string name="preference_racing_procedure_resultentryenabled_description">Aktiviere diese Option, um die Rennliste während und nach der Zieleinfahrt bearbeiten zu können</string>
     <string name="preference_racing_procedure_gatestart_haspathfinder_description">Diese Option aktiviert den Pathfinder</string>
     <string name="preference_racing_procedure_gatestart_haspathfinder_header">Pathfinder</string>
     <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">Diese Option aktiviert das Wählen der zusätzlichen Golfflaggenzeit.</string>
@@ -254,7 +260,7 @@
     <string name="preference_allow_demo_summary">Wenn aktiv kann man sich im Demo-Modus anmelden. Im Demo-Modus werden keine Rennänderungen an den Server geschickt.</string>
     <string name="loading_events_succeded">Events geladen.</string>
     <string name="available_races">Verfügbare Rennen</string>
-    <string name="change">ÄNDERN</string>
+    <string name="change">Ändern</string>
     <string name="race_started">Gestartet %s</string>
     <string name="race_finished">Beendet %s</string>
     <string name="wind">Wind</string>
@@ -264,6 +270,7 @@
     <string name="flags_course">Kurs</string>
     <string name="flags_more">Zieleinlauf</string>
     <string name="flags_postpone">Verschieben</string>
+    <string name="flags_dependent_races">von abhängigen Rennen</string>
     <string name="wind_info">%2$s / %1$s kn</string>
     <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
     <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
@@ -394,7 +401,7 @@
     <string name="use_previous_course_dialog_message">Soll das bisherige Kursdesign verwendet werden?</string>
     <string name="please_enter_valid_number">Bitte geben Sie eine gültige Zahl ein.</string>
     <string name="please_enter_valid_pathfinder">Bitte tragen Sie einen gültigen Pathfinder ein.</string>
-    <string name="error_scanning_qr">Fehler beim Scannen des QRCodes (%s)</string>
+    <string name="error_scanning_qr">Fehler beim Scannen des QRCodes (%d)</string>
     <string name="error_scanning_qr_malformed">Ungültige Url</string>
     <string name="marks_w_placeholder">Kursmarkierungen: %s</string>
     <string name="error_no_course_to_copy">Kein Kurs zum Kopieren vorhanden</string>
@@ -409,7 +416,7 @@
     <string name="theme_changed_title">Darstellungsmodus ändern</string>
     <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
     <string name="url_refresh_title">Die Server URL wurde geändert</string>
-    <string name="url_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
+    <string name="app_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
     <string name="until_xray_removed">XRAY wird eingeholt in %s</string>
     <string name="send_photos">Fotos senden</string>
     <string name="error_wrong_degree_value_title">Fehler</string>
@@ -431,6 +438,8 @@
     <string name="preference_allow_dependent_races_header">Relative Startzeit</string>
     <string name="preference_allow_dependent_races_description">Aktiviert relative Startzeiten zwischen Rennen</string>
     <string name="preference_dependent_races_offset_header">Standard Offset der relativen Startzeit (Minuten)</string>
+    <string name="preference_allow_edit_race_factor_header">Rennfaktor ändern</string>
+    <string name="preference_allow_edit_race_factor_description">Rennleiter können den Rennfaktor je Rennen ändern</string>
     <string name="error_finished_time">Die ausgewählte Zielzeit liegt vor der Zeit, der ersten Schiffeinfahrt. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_finishing_time">Die ausgewählte Zeit is vor dem Rennstart. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_time_in_future">Die ausgewählte Zeit liegt in der Zukunft. Bitte überprüfe die Uhrzeit.</string>
@@ -463,7 +472,47 @@
     <string name="onboarding_input">Manuelle Eingabe</string>
     <string name="race_group">Group Race</string>
     <string name="wind_select_race">Select Race</string>
+    <string name="added_to_result_list">\'%1$s\' zur Ergebnisliste hinzugefügt an Position %2$s</string>
     <string name="get_started">Getting Started</string>
-    <string name="get_started_url">http://www.sapsailing.com/gwt/Home.html?locale=de#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
+    <string name="position">Position</string>
+    <string name="server_deeplink_message">Server erfolgreich geändert auf %1$s.</string>
+    <string name="penalty">Strafe</string>
+    <string name="score">Punkte</string>
+    <string name="finishing_time">Zielzeit</string>
+    <string name="finishing_date">Zieldatum</string>
+    <string name="comment">Kommentar</string>
+    <string name="get_started_url">https://www.sapsailing.com/gwt/Home.html?locale=de#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
+    <string name="user_unauthorized">Request fehlgeschlagen. User ist nicht autorisiert.</string>
+    <string name="server_url">Server</string>
+    <string name="username">Nutzername</string>
+    <string name="password">Passwort</string>
+    <string name="wrong_credentials">Nutzername oder Passwort ungültig</string>
+    <string name="unexpected_error">Ein unerwarteter Fehler ist aufgetreten</string>
+    <string name="sending_exception_title">Warnung</string>
+    <string name="sending_exception_message">Sie haben wahrscheinlich nicht die Befugnis Daten an den Server zu schicken. Möchten Sie sich als andere Nutzer anmelden?</string>
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">Ein</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">Aus</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Rechtweisend</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">Missweisend</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">Kursanzeige</string>
+    <string-array name="sort_by_values">
+        <item>nach Segelnummer</item>
+        <item>nach Namen</item>
+    </string-array>
+
+    <string name="preference_non_public_events_header">Zeige nicht öffentliche Events</string>
+    <string name="preference_non_public_events_summary">Lade alle Events, auch die nicht öffentlichen.</string>
+    <string name="race_factor">Faktor</string>
+    <string name="options_menu_role">Rolle wechseln</string>
+    <string name="reload_config">Konfiguration vom Server laden</string>
+
+    <string name="abort_title">Rennen abbrechen</string>
+    <string name="abort_hint">Welche laufenden Rennen möchten Sie abbrechen?</string>
+    <string name="abort_dismiss">Verwerfen</string>
+    <string name="set_column_factor">Setze Faktor</string>
+    <string name="set_factor_error">Beim Setzen des Faktors ist ein Fehler aufgetreten: %s</string>
+    <string name="sync_to_minute">Sync zur Minute</string>
+    <string name="non_public_changed_title">Nicht öffentliche Events</string>
 
 </resources>

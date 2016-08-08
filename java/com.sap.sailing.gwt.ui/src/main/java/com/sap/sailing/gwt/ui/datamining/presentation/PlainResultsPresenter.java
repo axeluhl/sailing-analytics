@@ -77,11 +77,16 @@ public class PlainResultsPresenter extends AbstractResultsPresenterWithDataProvi
 
     @Override
     public void updateSettings(Settings newSettings) {
+        // no-op
     }
 
     @Override
     public String getDependentCssClassName() {
         return "plainResultsPresenter";
     }
-    
+
+    @Override
+    public Settings getSettings() {
+        return null;
+    }
 }

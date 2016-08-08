@@ -160,7 +160,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         String chartDetailParam = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_CHART_DETAIL, null);
         final DetailType chartDetailType;
         if (chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam) || DetailType.OVERALL_RANK.name().equals(chartDetailParam) || 
-                DetailType.REGATTA_TOTAL_POINTS_SUM.name().equals(chartDetailParam))) {
+                DetailType.REGATTA_NET_POINTS_SUM.name().equals(chartDetailParam))) {
             chartDetailType = DetailType.valueOf(chartDetailParam);
         } else {
             chartDetailType = leaderboardType.isMetaLeaderboard() ?  DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;

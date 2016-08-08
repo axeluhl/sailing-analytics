@@ -2,10 +2,67 @@
 <html>
 <body>
 <div id="mainContent">
-	<h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
-	<div class="innerContent">
-        <h5 class="articleSubheadline">February 2016</h5>
+    <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
+    <div class="innerContent">
+        <h5 class="articleSubheadline">July 2016</h5>
+        <ul class="bulletList">
+           <li>The Wind arrow in the top left corner of the race map / player now serves as a toggle button
+               for the wind streamlet overlay which can still also be reached through the map settings.
+           </li>
+           <li>If you want to analyze a race, the navigation slightly changed. The button, which is shown for tracked
+               races won't lead you to the race board directly, but provides a small menu. There you can choose from
+               several pre-defined analysis, which will launch the race board with respective configurations:
+               <ul>
+               <li>Replay/Watch live: Launches race board in play mode starting at race start, if race is already
+                   finished (Replay) or at the actual time, if the race is currently live (Watch live)
+               </li>
+               <li>Race analysis: Shows the race results by setting the timer to the end of the race.
+                   <i>This option is only available, if the race is already finished.</i>
+               </li>
+               <li>Start analysis: Shows the race start 10 sec after start and shows the speed over ground (SOG) of
+                   the best starters within the competitor chart (zoomed to start).
+                   <i>This option is only available, if the race is already started.</i>
+               </li>
+               <li>Winning lanes: Shows the full lanes of the best competitor, if race is already finished or the of
+                   leading competitors if the race is currently live.
+               </li>
+               </ul>
+           </li>
+           <li>On the user profile page you now can maintain a list of you favorite boat classes and competitors.
+               You can also opt in for notification mails about your favorites to stay informed.
+               A requirement for notification mails to work for you is that you entered a valid mail address
+               to your user profile and verified the address by clicking the link that has been sent via email.
+           </li>
+           <li>Users now may choose their preferred language on the user profile page.
+               Currently only the mail notification mechanism will accept this setting to send mails in the preferred
+               language. This also prepares additional language sensitive feature, e.g. automatically switching the
+               website to your preferred language when logged in.
+           </li>
+           <li>The leaderboard now has a new measure value called "Ride height", which shows the ride height on
+               foils of a competitor, if respective data is available (currently ESS only). This information can
+               also be shown in the competitor chart on the RaceBaord page.
+           </li>
+           <li>To visualize multiple information at once, the competitor chart on the RaceBaord page can now be
+               configured to show two Y-axes. 
+           </li>
+        </ul>
 
+        <h5 class="articleSubheadline">May 2016</h5>
+        <ul class="bulletList">
+           <li>It is now possible to follow races on the RaceBoard, even if there's no wind data available.</li>
+        </ul>
+
+        <h5 class="articleSubheadline">April 2016</h5>
+        <ul class="bulletList">
+            <li>The <tt>/gwt/RaceBoard.html</tt> entry point now accepts an optional parameter "t" in the form
+                <tt>[[hh:]mm:]ss</tt>, for example <tt>t=12:34</tt> to place the timer so much after the race start
+                if the viewer comes up in Replay mode. You may also use just seconds, as in <tt>t=1234</tt> which
+                makes specifying a time <em>before</em> the start somewhat easier (<tt>t=-123</tt> instead of
+                <tt>t=-02:-03</tt>).
+            </li>
+        </ul>
+
+        <h5 class="articleSubheadline">February 2016</h5>
         <ul class="bulletList">
             <li>The website now features a user registration and authentication interface.
                 User accounts are currently used to grant special permissions to administrators and moderators.
@@ -15,20 +72,25 @@
                 This parameter was used to allow users to trigger autoplay for live races on non-live points in time.
                 The permission "CAN_REPLAY_DURING_LIVE_RACES" and role "moderator" now grant this functionality to users.
             </li>
+            <li>Mark positions are no longer interpolated between fixes. Instead, when a mark's track is asked for the
+                mark's position, the last known position at or before the time point requested will be used. The
+                "jumping" of marks in the UI that may otherwise be caused by this is ameliorated by introducing
+                the same CSS animation for the marks that is already used for the boats.
+            </li>
+        </ul>
+
+        <h5 class="articleSubheadline">January 2016</h5>
+        <ul class="bulletList">
+            <li>Show maneuver markers on the race board by default
+                (tacks, jibes and penalty circles) with a smaller icon, which
+                shows an info bubble when the marker is clicked. 
+                The icon turns green if the direction change is to starboard
+                and red if to port.
+            </li>
         </ul>
         
-	<h5 class="articleSubheadline">January 2016</h2>
-            <ul class="bulletList">
-                <li>Show maneuver markers on the race board by default
-                    (tacks, jibes and penalty circles) with a smaller icon, which
-                    shows an info bubble when the marker is clicked. 
-                    The icon turns green if the direction change is to starboard
-                    and red if to port.
-                </li>
-            </ul>
-        
         <h5 class="articleSubheadline">December 2015</h5>
-            <ul class="bulletList">
+        <ul class="bulletList">
 	        <li>The advantage line is now animated and moves smoothly with the boats.
                 </li>
 		    <li>New line hover behavior in race map. When the mouse is moved onto a line, for example the start line, a transparent,

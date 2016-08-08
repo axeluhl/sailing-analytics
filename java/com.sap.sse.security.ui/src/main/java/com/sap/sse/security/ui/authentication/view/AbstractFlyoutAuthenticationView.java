@@ -46,6 +46,7 @@ public abstract class AbstractFlyoutAuthenticationView implements FlyoutAuthenti
     public AbstractFlyoutAuthenticationView(CommonSharedResources res) {
         this.res = res;
         LOCAL_CSS.ensureInjected();
+        popupPanel.ensureDebugId("authenticationView");
         popupPanel.addStyleName(LOCAL_CSS.flyover());
         popupPanel.setWidget(uiBinder.createAndBindUi(this));
         

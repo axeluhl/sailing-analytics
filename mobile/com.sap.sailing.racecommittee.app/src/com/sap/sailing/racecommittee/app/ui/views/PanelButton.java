@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -15,18 +16,20 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.utils.TouchEventListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
-public class PanelButton extends FrameLayout implements View.OnClickListener, DialogInterface.OnClickListener {
+public class PanelButton extends FrameLayout implements DialogInterface.OnClickListener {
 
     public final static int LEVEL_UNKNOWN = -1;
     public final static int LEVEL_NORMAL = 0;
     public final static int LEVEL_TOGGLED = 1;
 
     private View mLayer;
-    private TextView mHeader;
     private View mLock;
+    private TextView mHeader;
 
+    private View mContent;
     private TextView mText;
     private ImageView mImage;
     private Switch mSwitch;
@@ -37,6 +40,7 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
     private int mType;
 
     private PanelButtonClick mListener;
+    private TouchEventListener mTouchEventListener;
 
     public PanelButton(Context context) {
         this(context, null);
@@ -51,6 +55,31 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PanelButton);
 
+        Runnable clickRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (mLock != null && mLock.getVisibility() == VISIBLE && isNormal()) {
+                    if (mType == 2 && mSwitch != null) {
+                        mSwitch.setChecked(!mSwitch.isChecked());
+                    }
+                    showChangeDialog(PanelButton.this);
+                } else {
+                    if (mType == 2) {
+                        if (mListener != null && mSwitch != null) {
+                            mListener.onChangedSwitch(PanelButton.this, mSwitch.isChecked());
+                        }
+                    } else {
+                        if (mListener != null) {
+                            mListener.onClick(PanelButton.this);
+                        }
+                    }
+                }
+            }
+        };
+
+        mTouchEventListener = new TouchEventListener(this);
+        mTouchEventListener.setClickRunnable(clickRunnable);
+
         setPanelType(a.getInt(R.styleable.PanelButton_buttonType, 0));
 
         switch (mType) {
@@ -59,6 +88,7 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
         }
 
         mLayer = findViewById(R.id.panel_layer);
+        mContent = findViewById(R.id.panel_content);
 
         mHeader = (TextView) findViewById(R.id.panel_button_header);
         setHeader(a.getString(R.styleable.PanelButton_buttonHeader));
@@ -71,9 +101,6 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
 
         mSwitch = (Switch) findViewById(R.id.panel_switch);
         setPanelSwitch(a.getString(R.styleable.PanelButton_buttonSwitch));
-        if (mSwitch != null) {
-            mSwitch.setOnClickListener(this);
-        }
 
         mLock = findViewById(R.id.panel_lock);
         setLock(a.getBoolean(R.styleable.PanelButton_showLock, false));
@@ -83,6 +110,8 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
         setLinePosition(a.getInt(R.styleable.PanelButton_linePosition, -1));
 
         a.recycle();
+
+        setMarkerLevel(LEVEL_NORMAL);
     }
 
     public void setListener(PanelButtonClick listener) {
@@ -102,9 +131,12 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
     public void setLock(boolean show) {
         if (mLock != null) {
             mLock.setVisibility(show ? VISIBLE : GONE);
-            if (mLayer != null) {
-                mLayer.setAlpha(show ? .5f : 1f);
-            }
+        }
+        if (mHeader != null) {
+            mHeader.setAlpha(show ? .5f : 1f);
+        }
+        if (mContent != null) {
+            mContent.setAlpha(show ? .5f : 1f);
         }
     }
 
@@ -112,11 +144,11 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
         mType = type;
         switch (type) {
             case 2:
-                setOnClickListener(null);
+                mTouchEventListener.setEnabled(false);
                 break;
 
             default:
-                setOnClickListener(this);
+                mTouchEventListener.setEnabled(true);
         }
     }
 
@@ -226,26 +258,6 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
     }
 
     @Override
-    public void onClick(View v) {
-        if (mLock != null && mLock.getVisibility() == VISIBLE && isNormal()) {
-            if (mType == 2 && mSwitch != null) {
-                mSwitch.setChecked(!mSwitch.isChecked());
-            }
-            showChangeDialog(this);
-        } else {
-            if (mType == 2) {
-                if (mListener != null && mSwitch != null) {
-                    mListener.onChangedSwitch(this, mSwitch.isChecked());
-                }
-            } else {
-                if (mListener != null) {
-                    mListener.onClick(this);
-                }
-            }
-        }
-    }
-
-    @Override
     public void onClick(DialogInterface dialog, int which) {
         if (mType == 2) {
             if (mListener != null & mSwitch != null) {
@@ -324,6 +336,11 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
                 setMarkerLevel(getMarkerLevel());
             }
         }, 200);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return mTouchEventListener.onTouchEvent(event);
     }
 
     public interface PanelButtonClick {

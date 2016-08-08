@@ -30,7 +30,7 @@ public class MinileaderboardBoxItem extends Widget {
         competitorNameUi.setInnerText(entry.getCompetitor().getName());
         competitorCountryNameUi.setInnerText(String.valueOf(entry.getCompetitor().getSailID()));
         competitorRankUi.setInnerText(String.valueOf(entry.getRank()) + ".");
-        competitorPointsUi.setInnerText(StringMessages.INSTANCE.pointsValue(entry.getPoints()));
+        competitorPointsUi.setInnerText(StringMessages.INSTANCE.pointsValue(entry.getNetPoints()));
         if (showRaceCount) {
             competitorRacesUi.setInnerText("(" + entry.getRaceCount() + ")");
         }

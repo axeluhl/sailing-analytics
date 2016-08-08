@@ -37,7 +37,7 @@ public class PingMarkViaRegattaLogTest {
     @Test
     public void testPinging() throws DoesNotHaveRegattaLogException {
         service.getMongoObjectFactory().getDatabase().dropDatabase();
-        Series series = new SeriesImpl("series", false, Collections.singletonList(fleet),
+        Series series = new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet),
                 Collections.singletonList(columnName), service);
         Regatta regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", /*startDate*/ null, /*endDate*/ null, 
                 UUID.randomUUID(), Collections.<Series>singletonList(series),
@@ -48,6 +48,6 @@ public class PingMarkViaRegattaLogTest {
         MarkDTO mark = new MarkDTO("mark", "mark");
         Position position = new DegreePosition(30, 40);
         
-        sailingService.pingMark(leaderboard.getName(), mark, position);
+        sailingService.pingMark(leaderboard.getName(), mark, /* time point for fix */ null, position);
     }
 }

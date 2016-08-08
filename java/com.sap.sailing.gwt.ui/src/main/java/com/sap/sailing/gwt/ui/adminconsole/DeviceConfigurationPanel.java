@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationCloneListener {
 
@@ -40,6 +41,7 @@ public abstract class DeviceConfigurationPanel extends SimplePanel implements De
     }
     
     private final SailingServiceAsync sailingService;
+    private final UserService userService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     
@@ -51,8 +53,9 @@ public abstract class DeviceConfigurationPanel extends SimplePanel implements De
     
     private final RefreshableMultiSelectionModel<DeviceConfigurationMatcherDTO> refreshableMultiSelectionModel;
 
-    public DeviceConfigurationPanel(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter reporter) {
+    public DeviceConfigurationPanel(SailingServiceAsync sailingService, UserService userService, StringMessages stringMessages, ErrorReporter reporter) {
         this.sailingService = sailingService;
+        this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = reporter;
         setupUi();
@@ -73,6 +76,10 @@ public abstract class DeviceConfigurationPanel extends SimplePanel implements De
                 removeConfigurationButton.setEnabled(!selectedConfigurations.isEmpty());
             }
         }); 
+    }
+    
+    protected UserService getUserService() {
+        return userService;
     }
 
     private void setupUi() {

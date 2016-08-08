@@ -81,7 +81,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final FlowPanel timePanelInnerWrapper;
 
     /** 
-     * the minimum time the slider extends it's time when the end of the slider is reached
+     * the minimum time the slider extends its time when the end of the slider is reached
      */
     private long MINIMUM_AUTO_ADVANCE_TIME_IN_MS = 5 * 60 * 1000; // 5 minutes
     private boolean advancedModeShown;
@@ -89,17 +89,21 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private static ClientResources resources = GWT.create(ClientResources.class);
     protected static TimePanelCss timePanelCss = TimePanelCssResources.INSTANCE.css();
 
+    private final boolean forcePaddingRightToAlignToCharts;
+
     /**
-     * @param isScreenLargeEnoughToOfferChartSupport
-     *            if <code>true</code>, the right padding will be set such that the time panel lines up with charts such
-     *            as the competitor chart or the wind chart shown above it
+     * @param forcePaddingRightToAlignToCharts
+     *            if <code>true</code>, the right padding will always be set such that the time panel lines up with
+     *            charts such as the competitor chart or the wind chart shown above it, otherwise the padding depends
+     *            on the flag set by {@link #setLiveGenerallyPossible(boolean)}
      */
     public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport) {
+            boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts) {
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
         this.canReplayWhileLiveIsPossible = canReplayWhileLiveIsPossible;
+        this.forcePaddingRightToAlignToCharts = forcePaddingRightToAlignToCharts;
         timer.addTimeListener(this);
         timer.addPlayStateListener(this);
         timeRangeProvider.addTimeRangeChangeListener(this);
@@ -111,9 +115,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timePanelSliderFlowWrapper = new FlowPanel();
         timePanelSlider.setStyleName("timePanelSlider");
         timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
-        if (isScreenLargeEnoughToOfferChartSupport) {
-            timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
-        }
         timePanelSliderFlowWrapper.add(timePanelSlider);
 
         playSpeedImg = resources.timesliderPlaySpeedIcon();
@@ -301,6 +302,10 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         hideControlsPanel();
     }
     
+    public TimeRangeWithZoomProvider getTimeRangeProvider() {
+        return timeRangeProvider;
+    }
+
     private Button createSettingsButton() {
         Button settingsButton = SettingsDialog.<T>createSettingsButton(this, stringMessages);
         settingsButton.setStyleName(timePanelCss.settingsButtonStyle());
@@ -427,10 +432,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         assert min != null && max != null;
                 
         boolean changed = false;
-        if (!max.equals(timeRangeProvider.getToTime()) || !min.equals(timeRangeProvider.getFromTime())) {
-            changed = true;
-            timeSlider.setMinAndMaxValue(new Double(min.getTime()),new Double(max.getTime()), fireEvent);
-        }
+        changed = timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
         if (changed) {
             if (!timeRangeProvider.isZoomed()) {
                 timeRangeProvider.setTimeRange(min, max, this);
@@ -528,6 +530,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
+        setMinMax(fromTime, toTime, true);
     }
 
     protected boolean isLiveModeToBeMadePossible() {
@@ -557,13 +560,23 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
      */
     protected void setLiveGenerallyPossible(boolean possible) {
         backToLivePlayButton.setVisible(possible);
+        updateTimeSliderPadding(possible);
         updatePlayPauseButtonsVisibility(timer.getPlayMode());
+    }
+
+    private void updateTimeSliderPadding(boolean backToLivePlayButtonVisible) {
+        Style timePanelStyle = timePanelSlider.getElement().getStyle();
+        if (backToLivePlayButtonVisible || forcePaddingRightToAlignToCharts) {
+            timePanelStyle.setPaddingRight(66, Unit.PX);
+        } else {
+            timePanelStyle.clearPaddingRight();
+        }
+        timeSlider.onResize();
     }
 
     @SuppressWarnings("unchecked")
     public T getSettings() {
-        TimePanelSettings result = new TimePanelSettings();
-        result.setRefreshInterval(timer.getRefreshInterval());
+        TimePanelSettings result = new TimePanelSettings(timer.getRefreshInterval());
         return (T) result;
     }
 
@@ -626,4 +639,10 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     public Button getBackToLiveButton() {
         return backToLivePlayButton;
     }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
+
 }

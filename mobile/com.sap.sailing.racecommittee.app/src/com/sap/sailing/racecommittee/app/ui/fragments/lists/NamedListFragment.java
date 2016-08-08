@@ -11,12 +11,14 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
@@ -84,7 +86,6 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
-        super.onListItemClick(listView, view, position, id);
         listAdapter.setCheckedPosition(position);
 
         mSelectedIndex = position;
@@ -101,11 +102,19 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
         showProgressBar(false);
 
-        String message = reason.getMessage();
-        if (message == null) {
-            message = reason.toString();
+        if (reason instanceof UnauthorizedException) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            builder.setTitle(R.string.loading_failure);
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.setMessage(getActivity().getString(R.string.user_unauthorized));
+            builder.show();
+        } else {
+            String message = reason.getMessage();
+            if (message == null) {
+                message = reason.toString();
+            }
+            showLoadFailedDialog(message);
         }
-        showLoadFailedDialog(message);
     }
 
     @Override
@@ -116,7 +125,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         //TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
-            Collections.sort(namedList, new NaturalNamedComparator());
+            Collections.sort(namedList, new NaturalNamedComparator<T>());
             for (Named named : namedList) {
                 CheckedItem item = new CheckedItem();
                 item.setText(named.getName());
@@ -164,7 +173,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     public void setupLoader() {
-        getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
+        getLoaderManager().initLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity()))).forceLoad();
     }
 
     private void showLoadFailedDialog(String message) {

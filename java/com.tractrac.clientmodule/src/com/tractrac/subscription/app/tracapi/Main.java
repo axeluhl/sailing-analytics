@@ -57,7 +57,7 @@ public class Main {
 		raceSubscriber.subscribeRaceMessages(eventListener);
 		raceSubscriber.subscribeRaceMessages(eventListener);
 		raceSubscriber.subscribeRaceTimesChanges(eventListener);
-		raceSubscriber.subscribeRouteChanges(eventListener);
+		raceSubscriber.subscribeRouteChanges(eventListener);		
 		raceSubscriber.start();		
 		eventSubscriber.start();			
 		

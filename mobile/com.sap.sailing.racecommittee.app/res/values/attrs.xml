@@ -21,7 +21,9 @@
     <attr name="buttonSolidXSmall" format="reference"/>
     <attr name="buttonSolidSmall" format="reference"/>
     <attr name="buttonSolidNormal" format="reference"/>
+    <attr name="checkedItemBackground" format="reference"/>
     <attr name="round" format="reference"/>
+    <attr name="round_transparent" format="reference"/>
     <attr name="text" format="reference"/>
     <attr name="textXXSmall" format="reference"/>
     <attr name="textXSmall" format="reference"/>
@@ -36,6 +38,8 @@
     <attr name="textPanelCaption" format="reference"/>
     <attr name="editText" format="reference"/>
     <attr name="floatLabel" format="reference"/>
+
+    <attr name="factor_background" format="reference"/>
 
     <!-- drawable -->
     <attr name="add" format="reference"/>
@@ -85,14 +89,18 @@
     <attr name="wind_off" format="reference"/>
 
     <!-- flag drawables -->
-    <attr name="flag_first_blue" format="reference"/>
+    <attr name="flag_blue_first" format="reference"/>
+    <attr name="flag_blue_last" format="reference"/>
+
     <attr name="flag_ap_alpha_96dp" format="reference"/>
     <attr name="flag_ap_hotel_96dp" format="reference"/>
     <attr name="flag_november_alpha_96dp" format="reference"/>
     <attr name="flag_november_hotel_96dp" format="reference"/>
+
     <attr name="flags_abandon" format="reference"/>
+    <attr name="flags_blue_first" format="reference"/>
+    <attr name="flags_blue_last" format="reference"/>
     <attr name="flags_course" format="reference"/>
-    <attr name="flags_more" format="reference"/>
     <attr name="flags_postpone" format="reference"/>
     <attr name="flags_recall" format="reference"/>
 

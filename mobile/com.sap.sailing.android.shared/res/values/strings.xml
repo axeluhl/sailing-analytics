@@ -36,14 +36,14 @@
 
     <!-- QR Code -->
     <string name="notify_user_db_operation_failed">Error: Database operation has failed.</string>
-    <string name="no_qr_code_popup_title">No QR-Code?</string>
-    <string name="no_qr_code_popup_message">Please contact race management if you have not received a QR-Code.</string>
+    <string name="no_qr_code_popup_title">No QR Code?</string>
+    <string name="no_qr_code_popup_message">Please contact race management if you have not received a QR Code.</string>
     <string name="error_play_store_and_scanning_not_available">"PlayStore and Scanning not available."</string>
     <string name="scanning_cancelled">Scanning cancelled</string>
-    <string name="error_scanning_qrcode">Error scanning QR-Code {result-code}</string>
+    <string name="error_scanning_qrcode">Error scanning QR Code {result-code}</string>
     <string name="notify_user_api_call_failed">An error occurred while contacting the server. Please try again.</string>
     <string name="please_wait">Please wait</string>
-    <string name="error_invalid_qr_code">Invalid QR-Code</string>
+    <string name="error_invalid_qr_code">Invalid QR Code</string>
     <string name="checkin_digest" translatable="false">CheckinDigest</string>
     <string name="leaderboard_name" translatable="false">leaderboard_name</string>
     <string name="mark_id" translatable="false">mark_id</string>
@@ -57,6 +57,26 @@
     <!-- About this app -->
     <string name="about_this_app">About this app</string>
     <string name="eula">EULA</string>
-    <string name="licence_information">Licence Information</string>
+    <string name="license_information">License Information</string>
+
+    <!-- HTTP Requests -->
+    <string name="http_request_exception" translatable="false">(Request %1$d) %2$s\nHTTP response code: %3$d.\nHTTP response body: %4$s.</string>
+    <string name="http_request_executed" translatable="false">(Request %d) HTTP request executed.</string>
+    <string name="http_request_aborted" translatable="false">(Request %d) HTTP request aborted.</string>
+    <string name="http_request_failed" translatable="false">(Request %d) HTTP request failed.</string>
+
+    <!-- Dialog -->
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="warning">Warning</string>
+    <string name="enable_gps">GPS is turned off. This app requires GPS positions. Do you want to turn on GPS in the location settings?</string>
+
+    <!-- Message Sending -->
+    <string name="sending_waiting">Currently %1$d events waiting to be sent.\nLast successful sent was at %2$s</string>
+    <string name="sending_no_waiting">Currently no event waiting to be sent.</string>
+
+    <!-- Competitor list footer text -->
+    <string name="footer_text">More information on</string>
+    <string name="footer_text_link">https://www.sapsailing.com</string>
 
 </resources>

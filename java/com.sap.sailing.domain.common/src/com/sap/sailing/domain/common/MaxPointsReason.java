@@ -42,7 +42,9 @@ public enum MaxPointsReason {
     /** Retired */
     RET(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
     /** Uniform Flag Disqualification */
-    UFD(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true);
+    UFD(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true),
+    /** Time limit Expired */
+    TLE(/* discardable */ true, /* advanceCompetitorsTrackedWorse */ true);
     
     private final boolean discardable;
     

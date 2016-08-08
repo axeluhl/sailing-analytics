@@ -110,7 +110,6 @@
         <module>com.sap.sailing.server.gateway</module>
         <module>com.sap.sailing.server.gateway.serialization</module>
         <module>com.sap.sailing.www</module>
-        <module>com.sap.sailing.www.events</module>
         <module>com.sap.sailing.xmlexport</module>
         <module>com.google.gwt.dev</module>
         <module>com.google.gwt.osgi</module>
@@ -135,6 +134,7 @@
         <module>com.sap.sailing.gwt.ui</module>
         <module>com.sap.sailing.domain.test</module>
         <module>com.sap.sse.replication.testsupport</module>
+        <module>com.sap.sailing.server.testsupport</module>
         <!-- The following test fragment doesn't yet do what it should in the Maven context... -->
         <module>com.sap.sse.gwt.test</module>
         <!-- -->
@@ -143,6 +143,7 @@
         <module>com.sap.sse.security.test</module>
         <module>com.sap.sse.operationaltransformation.test</module>
         <module>com.sap.sse.common.test</module>
+        <module>com.sap.sse.shared.android.test</module>
         <module>com.sap.sse.filestorage.test</module>
         <module>com.sap.sailing.datamining.test</module>
         <module>com.sap.sailing.domain.deckmanadapter.test</module>
@@ -176,6 +177,8 @@
         <module>com.sap.sailing.manage2sail</module>
         <module>com.sap.sailing.manage2sail.resultimport</module>
         <module>com.sap.sailing.manage2sail.resultimport.test</module>
+        <module>com.sap.sailing.yachtscoring.resultimport</module>
+        <module>com.sap.sailing.yachtscoring.resultimport.test</module>
         <module>com.sap.sailing.simulator.test</module>
         <module>com.sap.sailing.server.trackfiles.test</module>
         <module>com.sap.sailing.selenium.test</module>

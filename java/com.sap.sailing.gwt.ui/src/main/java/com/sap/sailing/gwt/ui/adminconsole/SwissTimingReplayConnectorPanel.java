@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -159,7 +160,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         // the regatta selection for a tracked race
         HorizontalPanel regattaPanel = new HorizontalPanel();
         racesPanel.add(regattaPanel);
-        Label lblRegattas = new Label("Regatta used for the tracked race:");
+        Label lblRegattas = new Label(stringMessages.regattaUsedForTheTrackedRace());
         lblRegattas.setWordWrap(false);
         regattaPanel.setCellVerticalAlignment(lblRegattas, HasVerticalAlignment.ALIGN_MIDDLE);
         regattaPanel.setSpacing(5);
@@ -184,13 +185,21 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         raceStartTrackingColumn.setSortable(true);
         boatClassNamesColumn.setSortable(true);
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<SwissTimingReplayRaceDTO>(/* pageSize */ 10000, tableRes);
+        raceTable = new BaseCelltable<SwissTimingReplayRaceDTO>(/* pageSize */10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringMessages.race());
         raceTable.addColumn(regattaNameColumn, "RSC");
         raceTable.addColumn(boatClassNamesColumn, stringMessages.boatClass());
         raceTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
         raceTable.setWidth("300px");
         raceList = new ListDataProvider<SwissTimingReplayRaceDTO>();
+        filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents, availableSwissTimingRaces, raceTable, raceList) {
+            @Override
+            public List<String> getSearchableStrings(SwissTimingReplayRaceDTO t) {
+                List<String> strings = new ArrayList<String>();
+                strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.getName(), t.race_id, t.rsc));
+                return strings;
+            }
+        };
         raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingReplayRaceDTO>(
                 new EntityIdentityComparator<SwissTimingReplayRaceDTO>() {
                     @Override
@@ -201,7 +210,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
                     public int hashCode(SwissTimingReplayRaceDTO t) {
                         return t.race_id.hashCode();
                     }
-                }, raceList) {
+                }, filterablePanelEvents.getAllListDataProvider()) {
         });
 
         racesHorizontalPanel.add(raceTable);
@@ -209,16 +218,6 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, boatClassNamesColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
-
-        filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents, availableSwissTimingRaces, raceTable, raceList) {
-            @Override
-            public List<String> getSearchableStrings(SwissTimingReplayRaceDTO t) {
-                List<String> strings = new ArrayList<String>();
-                strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.getName(), t.race_id, t.rsc));
-                return strings;
-            }
-        };
-        
         filterPanel.add(filterablePanelEvents);
         
         Label lblTrackSettings = new Label(stringMessages.trackNewEvent());

@@ -13,6 +13,7 @@ import java.util.Set;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -44,7 +45,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     
     public ResultSelectionAndApplyDialog(EditableLeaderboardPanel leaderboardPanel, Iterable<String> scoreCorrectionProviderNames, 
             SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter) {
-        super(stringMessages.importOfficialResults(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(),
+        super(stringMessages.importOfficialResults(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(stringMessages),
                 new Callback(sailingService, leaderboardPanel, errorReporter, stringMessages));
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -77,7 +78,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
             sortedProviderNames.add(providerName);
         }
         Collections.sort(sortedProviderNames);
-        scoreCorrectionProviderListBox.addItem("Please select a result import provider...");
+        scoreCorrectionProviderListBox.addItem(stringMessages.selectResultImportProvider());
         for(String providerName: sortedProviderNames) {
             scoreCorrectionProviderListBox.addItem(providerName);
         }
@@ -179,11 +180,17 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     }
 
     private static class Validator implements DataEntryDialog.Validator<Util.Triple<String, String, Util.Pair<String, Date>>> {
+        private final StringMessages stringMessages;
+
+        public Validator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+
         @Override
         public String getErrorMessage(Util.Triple<String, String, Util.Pair<String, Date>> valueToValidate) {
             String errorMessage = null;
-            if(valueToValidate == null) {
-                errorMessage = "";
+            if (valueToValidate == null) {
+                errorMessage = stringMessages.pleaseSelectAScoringResult();
             }
             return errorMessage;
         }
@@ -244,12 +251,11 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     }
 
     @Override
-    public void show() {
-        super.show();
-        scoreCorrectionProviderListBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return scoreCorrectionProviderListBox;
     }
 
-     @Override
+    @Override
     protected Util.Triple<String, String, Util.Pair<String, Date>> getResult() {
          Util.Triple<String, String, Util.Pair<String, Date>> result = null; 
 
@@ -257,7 +263,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
          if (selectedProviderIndex > 0) {
              String selectedProviderName = scoreCorrectionProviderListBox.getItemText(selectedProviderIndex);
              int selectedScoreCorrectionIndex = scoreCorrectionListBox.getSelectedIndex();
-             if(selectedScoreCorrectionIndex > 0) {
+             if (selectedScoreCorrectionIndex > 0) {
                  Util.Pair<String, Util.Pair<String, Date>> pair = scoreCorrections.get(scoreCorrectionListBox.getValue(selectedScoreCorrectionIndex));
                  result = new Util.Triple<String, String, Util.Pair<String, Date>>(selectedProviderName, pair.getA(), pair.getB());
              }

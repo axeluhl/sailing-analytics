@@ -7,8 +7,7 @@
     <RelativeLayout
         android:id="@+id/panel_layer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?attr/sap_gray">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/marker_bottom"
@@ -27,6 +26,7 @@
             tools:text="@string/start_mode" />
 
         <RelativeLayout
+            android:id="@+id/panel_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/panel_button_header">
@@ -77,6 +77,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:alpha=".5"
             android:background="@color/lock_background"
             android:padding="@dimen/panel_lock_padding"
             android:visibility="gone"

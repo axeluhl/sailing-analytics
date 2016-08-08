@@ -43,7 +43,7 @@ public class EventDataJsonSerializerWithNullValuesTest {
     protected final TimePoint expectedEndDate = new MillisecondsTimePoint(new Date());
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
     protected final URL expectedOfficialWebsiteURL = null;
-    protected final URL expectedLogoImageURL = null;
+    protected final URL expectedBaseURL = null;
     protected final LeaderboardGroup expectedLeaderbaordGroup = mock(LeaderboardGroup.class);
     
     protected JsonSerializer<Venue> venueSerializer;
@@ -52,7 +52,6 @@ public class EventDataJsonSerializerWithNullValuesTest {
     protected EventBase event;
 
     // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
-    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -61,13 +60,10 @@ public class EventDataJsonSerializerWithNullValuesTest {
         when(event.getName()).thenReturn(expectedName);
         when(event.getDescription()).thenReturn(expectedDescription);
         when(event.getOfficialWebsiteURL()).thenReturn(expectedOfficialWebsiteURL);
-        when(event.getLogoImageURL()).thenReturn(expectedLogoImageURL);
+        when(event.getBaseURL()).thenReturn(expectedBaseURL);
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
-        when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getImages()).thenReturn(Collections.<ImageDescriptor>emptySet());
         when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         // ... and the serializer itself.		
@@ -93,9 +89,6 @@ public class EventDataJsonSerializerWithNullValuesTest {
         assertEquals(expectedOfficialWebsiteURL,
                 result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL) == null ? null :
                     new URL((String) result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL)));
-        assertEquals(expectedLogoImageURL,
-                result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL) == null ? null :
-                    new URL((String) result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL)));
         assertEquals(expectedDescription,
                 result.get(EventBaseJsonSerializer.FIELD_DESCRIPTION));
         assertEquals(expectedStartDate,

@@ -1,7 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.util.Date;
-import java.util.List;
+
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.LicenseHelper;
+import com.sap.sailing.racecommittee.app.R;
 
 import android.content.pm.PackageInfo;
 import android.text.format.DateFormat;
@@ -10,12 +14,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.EulaHelper;
-import com.sap.sailing.android.shared.util.LicenseHelper;
-import com.sap.sailing.racecommittee.app.R;
-
 import de.psdev.licensesdialog.LicensesDialog;
 import de.psdev.licensesdialog.model.Notices;
 
@@ -43,16 +41,20 @@ public class SystemInformationActivityHelper {
             String never = activity.getString(R.string.never);
             statusView.setText(activity.getString(R.string.events_waiting_to_be_sent, activity.sendingService.getDelayedIntentsCount(), lastSuccessfulSend == null ? never : lastSuccessfulSend));
 
-            List<String> delayedIntentsContent = activity.sendingService.getDelayedIntentsContent();
-            String waitingEvents = "";
-            int waitingEventsSize = delayedIntentsContent.size();
-            for (int index = 0; index < waitingEventsSize; index++) {
-                waitingEvents += delayedIntentsContent.get(index);
-                if (!(index == waitingEventsSize - 1)) {
-                    waitingEvents += "\n";
+            Iterable<String> delayedIntentsContent = activity.sendingService.getDelayedIntentsContent();
+            StringBuilder waitingEvents = new StringBuilder();
+            synchronized (delayedIntentsContent) {
+                boolean first = true;
+                for (final String waitingEvent : delayedIntentsContent) {
+                    if (!first) {
+                        waitingEvents.append("\n");
+                    } else {
+                        first = false;
+                    }
+                    waitingEvents.append(waitingEvent);
                 }
             }
-            waitingView.setText(waitingEvents);
+            waitingView.setText(waitingEvents.toString());
         } else {
             statusView.setText(activity.getString(R.string.generic_error));
         }
@@ -107,22 +109,22 @@ public class SystemInformationActivityHelper {
 
     private void setupAboutButtons() {
         Button eulaButton = (Button) activity.findViewById(R.id.eula_button);
-        Button licenceButton = (Button) activity.findViewById(R.id.licence_button);
+        Button licenseButton = (Button) activity.findViewById(R.id.license_button);
         eulaButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 EulaHelper.with(activity).openEulaPage();
             }
         });
-        licenceButton.setOnClickListener(new OnClickListener() {
+        licenseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                showLicenceDialog();
+                showLicenseDialog();
             }
         });
     }
 
-    private void showLicenceDialog() {
+    private void showLicenseDialog() {
         Notices notices = new Notices();
         LicenseHelper licenseHelper = new LicenseHelper();
         notices.addNotice(licenseHelper.getAndroidSupportNotice());
@@ -130,7 +132,7 @@ public class SystemInformationActivityHelper {
         notices.addNotice(licenseHelper.getJsonSimpleNotice());
         notices.addNotice(licenseHelper.getDialogNotice());
         LicensesDialog.Builder builder = new LicensesDialog.Builder(activity);
-        builder.setTitle(activity.getString(R.string.licence_information));
+        builder.setTitle(activity.getString(R.string.license_information));
         builder.setNotices(notices);
         builder.build().show();
     }

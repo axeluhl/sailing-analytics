@@ -48,7 +48,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="8dp"
-                    android:text="@string/application_identifier"
+                    android:text="@string/device_identifier"
                     android:textAppearance="?attr/textSmall"/>
 
                 <TextView
@@ -119,13 +119,13 @@
                         android:text="@string/eula"/>
 
                     <Button
-                        android:id="@+id/licence_button"
+                        android:id="@+id/license_button"
                         style="?buttonSolidSmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="16dp"
-                        android:text="@string/licence_information"/>
+                        android:text="@string/license_information"/>
                 </LinearLayout>
 
                 <TextView

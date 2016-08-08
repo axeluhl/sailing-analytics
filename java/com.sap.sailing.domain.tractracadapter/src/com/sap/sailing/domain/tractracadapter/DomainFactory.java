@@ -27,7 +27,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -52,7 +51,6 @@ import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.impl.event.Race;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -80,7 +78,7 @@ public interface DomainFactory {
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(ICompetitor competitor);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(UUID competitorId, String competitorClassName,
-            String nationalityAsString, String name, String shortName, float timeOnTimeFactor, float timeOnDistanceAllowanceInSecondsPerNauticalMile);
+            String nationalityAsString, String name, String shortName, float timeOnTimeFactor, float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag);
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -143,7 +141,7 @@ public interface DomainFactory {
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
+            WindStore windStore, String tracTracUsername, String tracTracPassword,
             String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException;
 
@@ -157,7 +155,7 @@ public interface DomainFactory {
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
+            WindStore windStore, String tracTracUsername, String tracTracPassword,
             String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
             SubscriberInitializationException;
@@ -186,7 +184,7 @@ public interface DomainFactory {
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm);
 
     /**
-     * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
+     * Creates a {@link RaceDefinition} from a TracTrac {@link IRace} and a domain {@link Course} definition. The
      * resulting {@link RaceDefinition} is added to the {@link com.sap.sailing.domain.base.Regatta} to which
      * <code>trackedRegatta</code> belongs (see {@link TrackedRegatta#getRegatta()}). It is added to the internal race
      * cache. The corresponding {@link TrackedRace} object is also created, and the notification of threads waiting on

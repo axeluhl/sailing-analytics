@@ -1,10 +1,11 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.preference.GeneralPreferenceFragment;
 
@@ -15,9 +16,10 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pref_with_actionbar);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
+            toolbar.hideSubtitle();
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
@@ -31,8 +33,11 @@ public class SettingsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setTitle(R.string.preferences);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
-            toolbar.setPadding(20, 0, 0, 0);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
         }
 
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new GeneralPreferenceFragment()).commit();

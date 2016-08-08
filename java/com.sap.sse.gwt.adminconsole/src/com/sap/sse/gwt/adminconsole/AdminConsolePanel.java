@@ -151,6 +151,12 @@ public class AdminConsolePanel extends DockLayoutPanel {
     public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
             ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
             String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
+        this(userService, permissionsForRoleProvider, buildVersionRetriever, releaseNotesAnchorLabel, releaseNotesURL, errorReporter, loginPanelCss, true);
+    }
+    
+    public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
+            ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
+            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, boolean withLogin) {
         super(Unit.EM);
         this.permissionsForRoleProvider = permissionsForRoleProvider;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
@@ -187,7 +193,9 @@ public class AdminConsolePanel extends DockLayoutPanel {
         final DockPanel informationPanel = new DockPanel();
         informationPanel.setSize("100%", "95%");
         informationPanel.setSpacing(10);
-        informationPanel.add(new LoginPanel(loginPanelCss, getUserService()), DockPanel.WEST);
+        if(withLogin) {
+            informationPanel.add(new LoginPanel(loginPanelCss, getUserService()), DockPanel.WEST);
+        }
         informationPanel.add(errorReporter.getPersistentInformationWidget(), DockPanel.CENTER);
         SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter);
         sysinfoPanel.ensureDebugId("SystemInformation");

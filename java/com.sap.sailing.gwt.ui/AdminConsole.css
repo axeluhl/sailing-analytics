@@ -1,8 +1,17 @@
 /** Add css rules here for your application. */
 
-* {
+.adminConsolePanel, .adminConsolePanel * {
 	font-family: Arial;
 	font-size: 12px;
+}
+
+body, html {
+	font-size: 15px;
+	font-family: 'Open Sans',sans-serif;
+	margin: 0;
+}
+body {
+	font-size: 14px;
 }
 
 /** Example rules used by the template application (remove for your app) */

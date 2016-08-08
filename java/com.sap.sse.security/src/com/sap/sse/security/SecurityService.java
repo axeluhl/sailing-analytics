@@ -1,5 +1,6 @@
 package com.sap.sse.security;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -57,7 +58,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException;
     
-    void updateUserProperties(String username, String fullName, String company) throws UserManagementException;
+    void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
     User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 
@@ -137,7 +138,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @param key must not be <code>null</code>
      * @param value must not be <code>null</code>
      */
-    void setPreference(String username, String key, String value);
+    Void setPreference(String username, String key, String value);
+
+    void setPreferenceObject(String name, String preferenceKey, Object preference);
 
     /**
      * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches
@@ -160,13 +163,26 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     String createAccessToken(String username);
 
     /**
+     * May be invoked by users with role {@link DefaultRoles#ADMIN} or the user identified by {@code username}. Returns
+     * the last access token previously created by {@link #createAccessToken(String)} or {@code null} if no such access
+     * token was created before for user {@code username} or was {@link #removeAccessToken(String)}.
+     */
+    String getAccessToken(String username);
+    
+    /**
+     * Like {@link #getAccessToken(String)} only that instead of returning {@code null}, a new access token will
+     * be created and returned instead (see {@link #createAccessToken(String)}.
+     */
+    String getOrCreateAccessToken(String username);
+
+    /**
      * Looks up a user by an access token that was created before using {@link #createAccessToken(String)} for same user name.
      * 
      * @return <code>null</code> in case the access token is unknown or was deleted / invalidated
      */
     User getUserByAccessToken(String accessToken);
 
-    void removeAccessToken(String username, String accessToken);
+    void removeAccessToken(String username);
 
     User loginByAccessToken(String accessToken);
 

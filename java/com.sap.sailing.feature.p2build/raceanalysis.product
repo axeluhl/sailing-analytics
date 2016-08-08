@@ -47,6 +47,7 @@
       <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.kiworesultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.manage2sail.resultimport" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.yachtscoring.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.monitoring" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sailing.news" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.polars" autoStart="true" startLevel="4" />
@@ -57,7 +58,6 @@
       <plugin id="com.sap.sailing.server.gateway" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.velum.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.www" autoStart="true" startLevel="4" />
-      <plugin id="com.sap.sailing.www.events" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xmlexport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xrr.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sse.filestorage" autoStart="true" startLevel="3" />

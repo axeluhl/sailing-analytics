@@ -31,7 +31,7 @@ public interface UserManagementService extends RemoteService {
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException;
 
-    void updateUserProperties(String username, String fullName, String company) throws UserManagementException;
+    void updateUserProperties(String username, String fullName, String company, String localeName) throws UserManagementException;
 
     void resetPassword(String username, String eMailAddress, String baseURL) throws UserManagementException, MailException;
 
@@ -72,6 +72,10 @@ public interface UserManagementService extends RemoteService {
      * @return <code>null</code> if no preference for the user identified by <code>username</code> is found
      */
     String getPreference(String username, String key);
+
+    String getAccessToken(String username);
+
+    String getOrCreateAccessToken(String username);
 
     // ------------------------------------------------ OAuth Interface --------------------------------------------------------------
 

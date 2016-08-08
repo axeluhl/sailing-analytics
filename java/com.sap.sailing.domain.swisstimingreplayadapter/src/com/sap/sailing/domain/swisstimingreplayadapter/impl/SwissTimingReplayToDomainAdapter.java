@@ -38,7 +38,6 @@ import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
@@ -48,6 +47,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
@@ -70,7 +70,7 @@ import difflib.PatchFailedException;
  * @author Axel Uhl (D043530)
  *
  */
-public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
+public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter implements TrackingDataLoader {
     private static final int THRESHOLD_FOR_EARLIEST_MARK_PASSING_BEFORE_START_IN_MILLIS = 30000;
 
     private static final Logger logger = Logger.getLogger(SwissTimingReplayToDomainAdapter.class.getName());
@@ -318,11 +318,12 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);
         DynamicTrackedRace trackedRace = trackedRegattaRegistry.getOrCreateTrackedRegatta(myRegatta).
-                createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
+                createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
+                        TrackedRace.DEFAULT_LIVE_DELAY_IN_MILLISECONDS,
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, 
                         /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                         /* raceDefinitionSetToUpdate */ null, useInternalMarkPassingAlgorithm, raceLogResolver);
-        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
+        trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0));
         TimePoint bestStartTimeKnownSoFar = bestStartTimePerRaceID.get(currentRaceID);
         if (bestStartTimeKnownSoFar != null) {
             trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);
@@ -392,7 +393,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter {
             } else {
                 newStatus = TrackedRaceStatusEnum.LOADING;
             }
-            trackedRace.setStatus(new TrackedRaceStatusImpl(newStatus, progress));
+            trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(newStatus, progress));
         }
     }
 }

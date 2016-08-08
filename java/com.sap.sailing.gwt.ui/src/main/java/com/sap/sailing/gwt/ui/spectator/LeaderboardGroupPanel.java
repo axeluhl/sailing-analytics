@@ -37,7 +37,8 @@ import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.WelcomeWidget;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -45,6 +46,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -235,7 +237,8 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         };
         
         LeaderboardGroupFullTableResources tableResources = GWT.create(LeaderboardGroupFullTableResources.class);
-        CellTable<StrippedLeaderboardDTO> leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableResources);
+        CellTable<StrippedLeaderboardDTO> leaderboardsTable = new BaseCelltable<StrippedLeaderboardDTO>(10000,
+                tableResources);
         leaderboardsTable.setSelectionModel(new NoSelectionModel<StrippedLeaderboardDTO>());
         leaderboardsTable.addColumn(leaderboardNameColumn, stringMessages.regatta());
         leaderboardsTable.addColumn(overviewColumn, "");
@@ -424,10 +427,10 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         linkParams.put("raceName", raceIdentifier.getRaceName());
         linkParams.put("root", root);
         if (canReplayDuringLiveRaces) {
-            linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
+            linkParams.put(RaceBoardPerspectiveSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         }
-        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, Boolean.toString(showMapControls));
-        linkParams.put(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL,
+        linkParams.put(RaceMapSettings.PARAM_SHOW_MAPCONTROLS, Boolean.toString(showMapControls));
+        linkParams.put(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_NAVIGATION_PANEL,
                 Boolean.toString(showNavigationPanel));
         linkParams.put("regattaName", raceIdentifier.getRegattaName());
         linkParams.put("leaderboardGroupName", leaderboardGroup.getName());

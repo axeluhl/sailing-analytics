@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.dashboards.gwt
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sailing.dashboards.gwt.server.Activator
 Bundle-Vendor: SAP
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server,
  com.google.gwt.osgi;bundle-version="2.6.1",
@@ -25,10 +25,12 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.gwt.adminconsole,
  org.apache.commons.math;bundle-version="2.1.0"
 Bundle-ActivationPolicy: lazy
-Import-Package: com.sap.sse.util,
+Import-Package: com.google.gwt.core.ext.linker;resolution:=optional,
+ com.sap.sse.util,
  javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0",
+ org.apache.commons.io,
  org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker
 Web-ContextPath: /dashboards

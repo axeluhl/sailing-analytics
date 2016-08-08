@@ -1,10 +1,13 @@
 package com.sap.sailing.domain.ranking;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
@@ -28,6 +31,7 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceRankComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public abstract class AbstractRankingMetric implements RankingMetric {
     private static final long serialVersionUID = -3671039530564696392L;
@@ -131,7 +135,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * Helper instance used to encode <code>null</code> values in {@link ConcurrentHashMap} instances which do not accept
      * <code>null</code> as key nor value.
      */
-    private final static Competitor NULL_COMPETITOR = new CompetitorImpl(null, null, null, null, null, null, null, null, null);
+    private final static Competitor NULL_COMPETITOR = new CompetitorImpl(null, null, null, null, null, null, null, null, null, null);
     
     public abstract class AbstractRankingInfo implements RankingMetric.RankingInfo {
         private static final long serialVersionUID = 6845168655725234325L;
@@ -146,7 +150,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
          * <code>null</code> values are encoded as the {@link #NULL_COMPETITOR} and must be translated back to <code>null</code> before returning
          * to a caller outside of this class.
          */
-        private final ConcurrentHashMap<Leg, Competitor> competitorFarthestAheadInLeg;
+        private final ConcurrentMap<Leg, Competitor> competitorFarthestAheadInLeg;
         
         public AbstractRankingInfo(final TimePoint timePoint) {
             this.timePoint = timePoint;
@@ -475,10 +479,12 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         TrackedLegOfCompetitor currentLegWho = getTrackedRace().getCurrentLeg(who, timePoint);
         if (currentLegWho == null) { // already finished or not yet started; if already finished, use last leg
             final Waypoint lastWaypoint = getTrackedRace().getRace().getCourse().getLastWaypoint();
-            final TrackedLeg lastTrackedLeg = getTrackedRace().getTrackedLegFinishingAt(lastWaypoint);
-            TrackedLegOfCompetitor whosLastTrackedLeg = lastTrackedLeg.getTrackedLeg(who);
-            if (whosLastTrackedLeg.hasFinishedLeg(timePoint)) {
-                currentLegWho = whosLastTrackedLeg;
+            if (lastWaypoint != null) { // could be an empty course
+                final TrackedLeg lastTrackedLeg = getTrackedRace().getTrackedLegFinishingAt(lastWaypoint);
+                TrackedLegOfCompetitor whosLastTrackedLeg = lastTrackedLeg.getTrackedLeg(who);
+                if (whosLastTrackedLeg.hasFinishedLeg(timePoint)) {
+                    currentLegWho = whosLastTrackedLeg;
+                }
             }
         }
         return currentLegWho;
@@ -661,24 +667,32 @@ public abstract class AbstractRankingMetric implements RankingMetric {
         if (firstAroundMark != null) {
             result = firstAroundMark;
         } else {
-            Iterable<MarkPassing> markPassingsForLegStart = getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getFrom());
+            List<MarkPassing> copyOfMarkPassingsForLegStart = new ArrayList<>();
+            {   // scope the markPassingsForLegStart, so it is no longer used outside this block
+                final Iterable<MarkPassing> markPassingsForLegStart = getTrackedRace().getMarkPassingsInOrder(trackedLeg.getLeg().getFrom());
+                // See bug 3728: obtaining lock for mark passings in order for a waypoint before code potentially called from here,
+                // e.g., through getWindwardDistanceTraveled(...), tries to obtain the read lock for mark passings for a competitor can
+                // result in a deadlock. Therefore, we copy the mark passings for the leg start under the lock, then release it again
+                // before calling into a deep stack with getWindwardDistanceTraveled(...) which may well obtain a read lock on
+                // the mark passings for a competitor.
+                getTrackedRace().lockForRead(markPassingsForLegStart);
+                try {
+                    Util.addAll(markPassingsForLegStart, copyOfMarkPassingsForLegStart);
+                } finally {
+                    getTrackedRace().unlockAfterRead(markPassingsForLegStart);
+                }
+            }
             Distance maxWindwardDistanceTraveled = new MeterDistance(Double.MIN_VALUE);
             Competitor competitorFarthestAlong = null;
-            getTrackedRace().lockForRead(markPassingsForLegStart);
-            try {
-                for (MarkPassing mp : markPassingsForLegStart) {
-                    if (mp.getTimePoint().after(timePoint)) {
-                        break;
-                    }
-                    final Distance windwardDistanceTraveled = getWindwardDistanceTraveled(mp.getCompetitor(), mp.getWaypoint(),
-                            timePoint, cache);
-                    if (windwardDistanceTraveled.compareTo(maxWindwardDistanceTraveled) > 0) {
-                        maxWindwardDistanceTraveled = windwardDistanceTraveled;
-                        competitorFarthestAlong = mp.getCompetitor();
-                    }
+            for (MarkPassing mp : copyOfMarkPassingsForLegStart) {
+                if (mp.getTimePoint().after(timePoint)) {
+                    break;
                 }
-            } finally {
-                getTrackedRace().unlockAfterRead(markPassingsForLegStart);
+                final Distance windwardDistanceTraveled = getWindwardDistanceTraveled(mp.getCompetitor(), mp.getWaypoint(), timePoint, cache);
+                if (windwardDistanceTraveled.compareTo(maxWindwardDistanceTraveled) > 0) {
+                    maxWindwardDistanceTraveled = windwardDistanceTraveled;
+                    competitorFarthestAlong = mp.getCompetitor();
+                }
             }
             result = competitorFarthestAlong;
         }

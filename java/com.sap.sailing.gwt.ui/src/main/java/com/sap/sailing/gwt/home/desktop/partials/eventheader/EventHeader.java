@@ -15,8 +15,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
@@ -31,6 +31,8 @@ import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -100,29 +102,29 @@ public class EventHeader extends Composite {
         if(presenter.showRegattaMetadata()) {
             HasRegattaMetadata regattaMetadata = presenter.getRegattaMetadata();
             String regattaDisplayName = regattaMetadata.getDisplayName();
-            if(regattaDisplayName.toLowerCase().contains(eventDisplayName.toLowerCase())) {
+            if (regattaDisplayName.toLowerCase().contains(eventDisplayName.toLowerCase())) {
                 nameToShow = regattaDisplayName;
             } else {
                 nameToShow = eventDisplayName + " - " + regattaDisplayName;
             }
             
-            if(regattaMetadata.getCompetitorsCount() > 0) {
+            if (regattaMetadata.getCompetitorsCount() > 0) {
                 competitors.setInnerText((i18n.competitorsCount(regattaMetadata.getCompetitorsCount())));
             } else {
                 hide(competitors);
             }
-            if(regattaMetadata.getRaceCount() > 0) {
+            if (regattaMetadata.getRaceCount() > 0) {
                 races.setInnerText((i18n.racesCount(regattaMetadata.getRaceCount())));
             } else {
                 hide(races);
             }
-            if(regattaMetadata.getDefaultCourseAreaName() != null) {
+            if (regattaMetadata.getDefaultCourseAreaName() != null) {
                 courseAreaUi.setInnerText(i18n.courseAreaName(regattaMetadata.getDefaultCourseAreaName()));
             } else {
                 hide(courseAreaUi);
             }
-            if(regattaMetadata.getBoatCategory() != null) {
-                eventCategory.setInnerText(regattaMetadata.getBoatCategory());
+            if (regattaMetadata.getLeaderboardGroupNames() != null) {
+                eventCategory.setInnerText(Util.joinStrings(", ", regattaMetadata.getLeaderboardGroupNames()));
             } else {
                 hide(eventCategory);
             }
@@ -146,10 +148,8 @@ public class EventHeader extends Composite {
             } else {
                 hide(eventLink);
             }
-            
             hide(competitors, races, courseAreaUi, eventCategory);
         }
-        
         initTitleAndSelection(nameToShow);
     }
 
@@ -157,10 +157,12 @@ public class EventHeader extends Composite {
         if(!presenter.needsSelectionInHeader()) {
             eventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(eventState, event.getState().getStateMarker());
+            UIObject.ensureDebugId(eventState, "EventStateLabelDiv");
             hide(dropdownTitle);
         } else {
             dropdownEventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(dropdownEventState, presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker() : event.getState().getStateMarker());
+            UIObject.ensureDebugId(dropdownEventState, "EventStateLabelDiv");
             hide(staticTitle);
             initDropdown();
         }

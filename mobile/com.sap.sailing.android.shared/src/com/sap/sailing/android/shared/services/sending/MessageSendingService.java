@@ -1,5 +1,21 @@
 package com.sap.sailing.android.shared.services.sending;
 
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import com.sap.sailing.android.shared.R;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
+import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
+import com.sap.sailing.android.shared.util.PrefUtils;
+import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
+
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,24 +27,12 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
-import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
-import com.sap.sailing.android.shared.util.PrefUtils;
-import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
-
-import java.io.InputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.*;
 
 /**
  * Service that handles sending messages to a webservice. Deals with an offline setting
  * by buffering the messages in a file, so that they can be sent when the connection is
  * re-established.<br>
- * 
+ * <p/>
  * <b>Use in the following way:</b> Add the service declaration to your {@code AndroidManifest.xml},
  * and also specify your class implementing the {@link MessagePersistenceManager.MessageRestorer}
  * as a meta-data tag with the key {@code com.sap.sailing.android.shared.services.sending.messageRestorer}.
@@ -42,9 +46,9 @@ import java.util.*;
  *     android:value="com.sap.sailing.racecommittee.app.services.sending.EventRestorer" />
  * </service>
  * }</pre>
- * 
- * 
- * Message sending example: 
+ * <p/>
+ * <p/>
+ * Message sending example:
  * <pre>{@code
  * context.startService(MessageSendingService.createMessageIntent(
  *      context, url, race.getId(), eventId, serializedEventAsJson, callbackClass));
@@ -53,10 +57,15 @@ import java.util.*;
 public class MessageSendingService extends Service implements MessageSendingListener {
     public final static String URL = "url";
     public final static String PAYLOAD = "payload";
+    /**
+     * A boolean property that indicates whether the intent in which this is used as an extra represents
+     * a re-send action ({@code true}) or a first original send attempt ({@code false}).
+     */
+    public final static String RESEND = "resend";
     public final static String CALLBACK_CLASS = "callback";
     public final static String CALLBACK_PAYLOAD = "callbackPayload"; // passed back to callback
     public final static String MESSAGE_ID = "messageId";
-    
+
     public static final String charsetName = "UTF-8";
 
     protected final static String TAG = MessageSendingService.class.getName();
@@ -65,8 +74,16 @@ public class MessageSendingService extends Service implements MessageSendingList
     private Handler handler;
     private final IBinder mBinder = new MessageSendingBinder();
     private MessagePersistenceManager persistenceManager;
-    private boolean isHandlerSet;
     
+    /**
+     * Tells whether a timer has been set to run {@link #handler} to trigger trying sending the delayed messages again
+     */
+    private boolean isHandlerSet;
+
+    /**
+     * Can be used to keep messages from being sent; the race manager app, for example, uses this
+     * to avoid sending messages back to the server that were received from the server in the first place.
+     */
     private Set<Serializable> suppressedMessageIds = new HashSet<Serializable>();
 
     private APIConnectivityListener apiConnectivityListener;
@@ -86,9 +103,9 @@ public class MessageSendingService extends Service implements MessageSendingList
     };
 
     public interface MessageSendingServiceLogger {
-        public void onMessageSentSuccessful();
+        void onMessageSentSuccessful();
 
-        public void onMessageSentFailed();
+        void onMessageSentFailed();
     }
 
     public void setMessageSendingServiceLogger(MessageSendingServiceLogger logger) {
@@ -107,8 +124,11 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     private Date lastSuccessfulSend;
-    
-    public List<String> getDelayedIntentsContent() {
+
+    /**
+     * Callers that want to iterate over the result need to synchronize on the result
+     */
+    public Iterable<String> getDelayedIntentsContent() {
         return persistenceManager.getContent();
     }
 
@@ -119,26 +139,36 @@ public class MessageSendingService extends Service implements MessageSendingList
     public Date getLastSuccessfulSend() {
         return lastSuccessfulSend;
     }
-    
+
     public void clearDelayedIntents() {
         persistenceManager.removeAllMessages();
         // let's fake a successful send!
         serviceLogger.onMessageSentSuccessful();
     }
 
-    public static Intent createMessageIntent(Context context, String url, 
-    		Serializable callbackPayload, Serializable messageId, String payload,
+    /**
+     * Constructs an original message sending intent that is not a "re-send" attempt
+     */
+    public static Intent createMessageIntent(Context context, String url,
+            Serializable callbackPayload, Serializable messageId, String payload,
             Class<? extends ServerReplyCallback> callbackClass) {
+        return createMessageIntent(context, url, callbackPayload, messageId, payload, /* isResend */ false, callbackClass);
+    }
+    
+    public static Intent createMessageIntent(Context context, String url,
+                                             Serializable callbackPayload, Serializable messageId, String payload,
+                                             boolean isResend, Class<? extends ServerReplyCallback> callbackClass) {
         Intent messageIntent = new Intent(context, MessageSendingService.class);
         messageIntent.setAction(context.getString(R.string.intent_send_message));
         messageIntent.putExtra(CALLBACK_PAYLOAD, callbackPayload);
         messageIntent.putExtra(MESSAGE_ID, messageId);
         messageIntent.putExtra(PAYLOAD, payload);
+        messageIntent.putExtra(RESEND, isResend);
         messageIntent.putExtra(URL, url);
         messageIntent.putExtra(CALLBACK_CLASS, callbackClass == null ? null : callbackClass.getName());
         return messageIntent;
     }
-    
+
     public static Intent createSendDelayedIntent(Context context) {
         Intent intent = new Intent(context, MessageSendingService.class);
         intent.setAction(context.getString(R.string.intent_send_saved_intents));
@@ -153,7 +183,7 @@ public class MessageSendingService extends Service implements MessageSendingList
         ExLog.w(this, TAG, "Unable to extract message identifier from message intent.");
         return null;
     }
-    
+
     private MessagePersistenceManager getPersistenceManager() {
         ComponentName thisService = new ComponentName(this, this.getClass());
         MessageRestorer restorer = null;
@@ -172,7 +202,7 @@ public class MessageSendingService extends Service implements MessageSendingList
                 } else {
                     @SuppressWarnings("unchecked")
                     // checked above
-                    Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
+                            Class<MessageRestorer> castedClass = (Class<MessageRestorer>) clazz;
                     restorer = castedClass.getConstructor().newInstance();
                 }
             }
@@ -223,9 +253,9 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     private void handleSendMessages(Intent intent) {
-        ExLog.i(this, TAG, String.format("Trying to send a message..."));
+        ExLog.i(this, TAG, "Trying to send a message...");
         if (!isConnected()) {
-            ExLog.i(this, TAG, String.format("Send aborted because there is no connection."));
+            ExLog.i(this, TAG, "Send aborted because there is no connection.");
             try {
                 persistenceManager.persistIntent(intent);
             } catch (UnsupportedEncodingException e) {
@@ -234,29 +264,30 @@ public class MessageSendingService extends Service implements MessageSendingList
             ConnectivityChangedReceiver.enable(this);
             serviceLogger.onMessageSentFailed();
             reportApiConnectivity(APIConnectivity.notReachable);
+            reportUnsentGPSFixesCount();
         } else {
             sendMessage(intent);
         }
     }
 
     private void handleDelayedMessages() {
-        ExLog.i(this, TAG, String.format("Trying to resend stored messages..."));
+        ExLog.i(this, TAG, "Trying to resend stored messages...");
         isHandlerSet = false;
         if (!isConnected()) {
-            ExLog.i(this, TAG, String.format("Resend aborted because there is no connection."));
+            ExLog.i(this, TAG, "Resend aborted because there is no connection.");
             ConnectivityChangedReceiver.enable(this);
             serviceLogger.onMessageSentFailed();
         } else {
-            sendDelayedMessages();
+            sendNextDelayedMessage();
         }
     }
 
-    private void sendDelayedMessages() {
+    private void sendNextDelayedMessage() {
         try {
-            List<Intent> delayedIntents = persistenceManager.restoreMessages();
-            ExLog.i(this, TAG, String.format("Resending %d messages...", delayedIntents.size()));
-            for (Intent intent : delayedIntents) {
-                sendMessage(intent);
+            final Intent firstDelayedIntent = persistenceManager.restoreFirstDelayedIntentNotUnderwayAndMarkAsUnderway();
+            if (firstDelayedIntent != null) {
+                ExLog.i(this, TAG, String.format("Resending one message..."));
+                sendMessage(firstDelayedIntent);
             }
         } catch (UnsupportedEncodingException e) {
             ExLog.e(this, TAG, "Could not restore messages (unsupported encoding)");
@@ -281,16 +312,15 @@ public class MessageSendingService extends Service implements MessageSendingList
     }
 
     @Override
-    public void onMessageSent(Intent intent, boolean success, InputStream inputStream) {
-        ExLog.i(this, "MS", "on message sent");
-        int resendMillis = PrefUtils.getInt(this, R.string.preference_messageResendIntervalMillis_key,
-                R.integer.preference_messageResendIntervalMillis_default);
-        if (!success) {
-            ExLog.i(this, "MS", "!success");
+    public void onMessageSent(MessageSenderResult result) {
+        ExLog.i(this, TAG, "onMessageSent");
+        int resendMillis = PrefUtils.getInt(this, R.string.preference_messageResendIntervalMillis_key, R.integer.preference_messageResendIntervalMillis_default);
+        if (!result.isSuccessful()) {
+            ExLog.i(this, TAG, "!success");
             reportApiConnectivity(APIConnectivity.transmissionError);
             ExLog.w(this, TAG, "Error while posting intent to server. Will persist intent...");
             try {
-                persistenceManager.persistIntent(intent);
+                persistenceManager.sendFailed(result.getIntent());
             } catch (UnsupportedEncodingException e) {
                 ExLog.e(this, TAG, "Could not store message (unsupported encoding)");
             }
@@ -302,12 +332,13 @@ public class MessageSendingService extends Service implements MessageSendingList
             reportUnsentGPSFixesCount();
             serviceLogger.onMessageSentFailed();
         } else {
-            ExLog.i(this, "MS", "success");
+            ExLog.i(this, TAG, "success");
             reportApiConnectivity(APIConnectivity.transmissionSuccess);
             ExLog.i(this, TAG, "Message successfully sent.");
             if (persistenceManager.areIntentsDelayed()) {
                 try {
-                    persistenceManager.removeIntent(intent);
+                    persistenceManager.sentSuccessfully(result.getIntent());
+                    sendNextDelayedMessage();
                 } catch (UnsupportedEncodingException e) {
                     ExLog.e(this, TAG, "Could not remove message (unsupported encoding)");
                 }
@@ -316,8 +347,8 @@ public class MessageSendingService extends Service implements MessageSendingList
             if (serviceLogger != null) {
                 serviceLogger.onMessageSentSuccessful();
             }
-            
-            String callbackClassString = intent.getStringExtra(CALLBACK_CLASS);
+
+            String callbackClassString = result.getIntent().getStringExtra(CALLBACK_CLASS);
             ServerReplyCallback callback = null;
             if (callbackClassString != null) {
                 try {
@@ -328,51 +359,47 @@ public class MessageSendingService extends Service implements MessageSendingList
                 }
             }
             if (callback != null) {
-                String raceId = intent.getStringExtra(CALLBACK_PAYLOAD);
-                callback.processResponse(this, inputStream, raceId);
+                String raceId = result.getIntent().getStringExtra(CALLBACK_PAYLOAD);
+                callback.processResponse(this, result.getInputStream(), raceId);
             }
-            ExLog.i(this, "MS", "report");
+            ExLog.i(this, TAG, "report");
             reportUnsentGPSFixesCount();
         }
     }
 
     /**
      * checks if there is network connectivity
-     * 
+     *
      * @return connectivity check value
      */
     private boolean isConnected() {
         NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-        if (activeNetwork == null) {
-            return false;
-        }
-        return activeNetwork.isConnected();
+        return activeNetwork != null && activeNetwork.isConnected();
     }
-    
+
     /**
      * a UUID that identifies this client session; can be used, e.g., to let the server identify subsequent requests coming from the same client
      */
     public final static UUID uuid = UUID.randomUUID();
-    
+
     public static String getRaceLogEventSendAndReceiveUrl(Context context, final String raceGroupName,
-            final String raceName, final String fleetName) throws UnsupportedEncodingException {
-        String url = String.format("%s/sailingserver/rc/racelog?"+
-                RaceLogServletConstants.PARAMS_LEADERBOARD_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_RACE_FLEET_NAME+"=%s&"+
-                RaceLogServletConstants.PARAMS_CLIENT_UUID+"=%s",
+                                                          final String raceName, final String fleetName) throws UnsupportedEncodingException {
+        String url = String.format("%s/sailingserver/rc/racelog?" +
+                        RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=%s&" +
+                        RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=%s&" +
+                        RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=%s&" +
+                        RaceLogServletConstants.PARAMS_CLIENT_UUID + "=%s",
                 PrefUtils.getString(context, R.string.preference_server_url_key, R.string.preference_server_url_default),
                 URLEncoder.encode(raceGroupName, charsetName),
-                URLEncoder.encode(raceName, charsetName), 
-				URLEncoder.encode(fleetName, charsetName), uuid);
+                URLEncoder.encode(raceName, charsetName),
+                URLEncoder.encode(fleetName, charsetName), uuid);
         return url;
     }
 
     /**
      * Register listener for API-connectivity
      *
-     * @param listener
-     *            class that wants to be notified of api-connectivity changes
+     * @param listener class that wants to be notified of api-connectivity changes
      */
     public void registerAPIConnectivityListener(APIConnectivityListener listener) {
         apiConnectivityListener = listener;
@@ -424,8 +451,6 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     /**
      * Report the number of currently unsent GPS-fixes
-     *
-     * @param unsentGPSFixesCount
      */
     private void reportUnsentGPSFixesCount() {
         if (apiConnectivityListener != null) {

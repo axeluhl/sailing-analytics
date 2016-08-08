@@ -16,9 +16,11 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -41,13 +43,15 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
+import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RaceLogFixTrackerManager;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -65,17 +69,20 @@ public class CreateAndTrackWithRaceLogTest {
     private RaceLogTrackingAdapter adapter;
     private Regatta regatta;
     private AbstractLogEventAuthor author;
-    private GPSFixStore gpsFixStore;
+    private SensorFixStore sensorFixStore;
 
     private long time = 0;
+
+    @Rule
+    public Timeout CreateAndTrackWithRaceLogTestTimeout = new Timeout(3 * 60 * 1000);
 
     @Before
     public void setup() {
         service = new RacingEventServiceImpl(true, new MockSmartphoneImeiServiceFinderFactory());
-        gpsFixStore = service.getGPSFixStore();
+        sensorFixStore = service.getSensorFixStore();
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         author = service.getServerAuthor();
-        Series series = new SeriesImpl("series", false, Collections.singletonList(fleet), Collections.emptySet(),
+        Series series = new SeriesImpl("series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet), Collections.emptySet(),
                 service);
         regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser",
         /* startDate */null, /* endDate */null, UUID.randomUUID(), Collections.<Series> singletonList(series), false,
@@ -117,9 +124,9 @@ public class CreateAndTrackWithRaceLogTest {
 
     private void addFixes0(DeviceIdentifier dev1) throws TransformationException,
             NoCorrespondingServiceRegisteredException {
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(5), new KnotSpeedWithBearingImpl(
+        sensorFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(5), new KnotSpeedWithBearingImpl(
                 10, new DegreeBearingImpl(5))));
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(15), new KnotSpeedWithBearingImpl(
+        sensorFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(15), new KnotSpeedWithBearingImpl(
                 10, new DegreeBearingImpl(5))));
     }
 
@@ -129,9 +136,9 @@ public class CreateAndTrackWithRaceLogTest {
         testSize(race.getTrack(comp1), 1);
 
         // further fix arrives in race
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(7), new KnotSpeedWithBearingImpl(
+        sensorFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(7), new KnotSpeedWithBearingImpl(
                 10, new DegreeBearingImpl(5))));
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(14), new KnotSpeedWithBearingImpl(
+        sensorFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(14), new KnotSpeedWithBearingImpl(
                 10, new DegreeBearingImpl(5)))); // outside mapping range
         testSize(race.getTrack(comp1), 2);
     }
@@ -142,7 +149,7 @@ public class CreateAndTrackWithRaceLogTest {
         testSize(race.getTrack(comp1), 4);
 
         // add another fix in new mapping range
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(18), new KnotSpeedWithBearingImpl(
+        sensorFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(18), new KnotSpeedWithBearingImpl(
                 10, new DegreeBearingImpl(5))));
         testSize(race.getTrack(comp1), 5);
     }
@@ -150,7 +157,7 @@ public class CreateAndTrackWithRaceLogTest {
     private void addFixes3(TrackedRace race, Competitor comp1, DeviceIdentifier dev1) throws TransformationException,
             NoCorrespondingServiceRegisteredException {
         // stop tracking, then no more fixes arrive at race
-        gpsFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(8), new KnotSpeedWithBearingImpl(
+        sensorFixStore.storeFix(dev1, new GPSFixMovingImpl(new DegreePosition(0, 0), t(8), new KnotSpeedWithBearingImpl(
                 10, new DegreeBearingImpl(5))));
         testSize(race.getTrack(comp1), 5);
     }
@@ -158,7 +165,6 @@ public class CreateAndTrackWithRaceLogTest {
     @Test
     public void canDenote_Add_Track() throws MalformedURLException, FileNotFoundException, URISyntaxException,
             Exception {
-
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
         RegattaLog regattaLog = leaderboard.getRegattaLike().getRegattaLog();
         RaceLog raceLog = column.getRaceLog(fleet);
@@ -170,28 +176,34 @@ public class CreateAndTrackWithRaceLogTest {
 
         // add a mapping and one fix in, one out of mapping
         Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", null, null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, 0, comp1, dev1, t(0), t(10)));
         addFixes0(dev1);
         raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(t(), author, t(), UUID.randomUUID(), 0));
         raceLog.add(new RaceLogRegisterCompetitorEventImpl(t(), author, 0, comp1));
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
         // start tracking
         adapter.startTracking(service, leaderboard, column, fleet);
+        
 
-        // now there is a trackedrace
+        // now there is a tracked race
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
+        
+        RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, null);
 
-        race.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, 0, comp1, dev1, t(11), t(20)));
 
+        race.waitForLoadingToFinish();
         // add another mapping on the fly, other old fixes should be loaded
         addFixes2(race, comp1, dev1);
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(false);
+        raceLogFixTrackerManager.stop(false);
         addFixes3(race, comp1, dev1);
     }
 
@@ -205,12 +217,13 @@ public class CreateAndTrackWithRaceLogTest {
 
         // add a mapping and one fix in, one out of mapping
         Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", null, null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, UUID.randomUUID(), comp1, dev1,
                 t(0), t(10)));
         addFixes0(dev1);
         regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(t(), t(), author, UUID.randomUUID(), comp1));
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
 
         // start tracking
         adapter.startTracking(service, leaderboard, column, fleet);
@@ -218,17 +231,21 @@ public class CreateAndTrackWithRaceLogTest {
         // now there is a trackedrace
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
+        
+        RaceLogFixTrackerManager raceLogFixTrackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) race, sensorFixStore, null);
 
-        race.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
 
         // add another mapping on the fly, other old fixes should be loaded
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, UUID.randomUUID(), comp1, dev1,
                 t(11), t(20)));
+        race.waitForLoadingToFinish();
         addFixes2(race, comp1, dev1);
 
         // stop tracking, then no more fixes arrive at race
         service.getRaceTrackerById(raceLog.getId()).stop(/* preemptive */ false);
+        raceLogFixTrackerManager.stop(false);
         addFixes3(race, comp1, dev1);
     }
 }

@@ -13,6 +13,7 @@ import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.domain.BackPressListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 /**
@@ -22,6 +23,7 @@ public class BaseActivity extends SendingServiceAwareActivity {
     private static final String TAG = BaseActivity.class.getName();
 
     protected AppPreferences preferences;
+    private BackPressListener mBackPressListener;
 
     @Override
     protected int getOptionsMenuResId() {
@@ -35,23 +37,20 @@ public class BaseActivity extends SendingServiceAwareActivity {
         AppUtils.lockOrientation(this);
         ThemeHelper.setTheme(this);
 
-        this.preferences = AppPreferences.on(getApplicationContext());
+        preferences = AppPreferences.on(this);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
         switch (item.getItemId()) {
             case R.id.options_menu_settings:
                 ExLog.i(this, TAG, "Clicked SETTINGS");
-                intent = new Intent(this, PreferenceActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(this, PreferenceActivity.class));
                 return true;
 
             case R.id.options_menu_info:
                 ExLog.i(this, TAG, "Clicked INFO");
-                intent = new Intent(this, SystemInformationActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(this, SystemInformationActivity.class));
                 return true;
 
             default:
@@ -84,10 +83,16 @@ public class BaseActivity extends SendingServiceAwareActivity {
     public void onResume() {
         super.onResume();
 
-        preferences = AppPreferences.on(this);
         if (preferences.wakelockEnabled()) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
+    }
+
+    public AppPreferences getPreferences() {
+        if (preferences == null) {
+            preferences = AppPreferences.on(this);
+        }
+        return preferences;
     }
 
     public void safeClose(Closeable c) {
@@ -97,6 +102,21 @@ public class BaseActivity extends SendingServiceAwareActivity {
             } catch (IOException e) {
                 ExLog.ex(this, TAG, e);
             }
+        }
+    }
+
+    public void setBackPressListener(BackPressListener listener) {
+        mBackPressListener = listener;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mBackPressListener != null) {
+            if (!mBackPressListener.handleBackPress()) {
+                super.onBackPressed();
+            }
+        } else {
+            super.onBackPressed();
         }
     }
 }

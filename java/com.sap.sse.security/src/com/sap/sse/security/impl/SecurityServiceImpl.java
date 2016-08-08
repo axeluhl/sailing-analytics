@@ -11,11 +11,13 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -103,7 +105,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private UserStore store;
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
-    private final ConcurrentHashMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
+    private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
     /**
      * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not currently
@@ -390,17 +392,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void updateUserProperties(String username, String fullName, String company) throws UserManagementException {
+    public void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        updateUserProperties(user, fullName, company);
+        updateUserProperties(user, fullName, company, locale);
     }
 
-    private void updateUserProperties(User user, String fullName, String company) {
+    private void updateUserProperties(User user, String fullName, String company, Locale locale) {
         user.setFullName(fullName);
         user.setCompany(company);
+        user.setLocale(locale);
         apply(s->s.internalStoreUser(user));
     }
 
@@ -883,7 +886,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setPreference(final String username, final String key, final String value) {
+    public Void setPreference(final String username, final String key, final String value) {
         final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalSetPreference(username, key, value));
@@ -891,12 +894,30 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to set preference for user " + username);
         }
+        return null;
+    }
+
+    @Override
+    public void setPreferenceObject(final String username, final String key, final Object value) {
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
+            final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
+            apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
+        } else {
+            throw new SecurityException("User " + subject.getPrincipal().toString()
+                    + " does not have permission to set preference object for user " + username);
+        }
     }
 
     @Override
     public Void internalSetPreference(final String username, final String key, final String value) {
         store.setPreference(username, key, value);
         return null;
+    }
+    
+    @Override
+    public String internalSetPreferenceObject(final String username, final String key, final Object value) {
+        return store.setPreferenceObject(username, key, value);
     }
     
     @Override
@@ -921,10 +942,24 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         store.setAccessToken(username, accessToken);
         return null;
     }
+    
+    @Override
+    public String getAccessToken(String username) {
+        return store.getAccessToken(username);
+    }
 
     @Override
-    public Void internalRemoveAccessToken(String username, String accessToken) {
-        store.removeAccessToken(username, accessToken);
+    public String getOrCreateAccessToken(String username) {
+        String result = store.getAccessToken(username);
+        if (result == null) {
+            result = createAccessToken(username);
+        }
+        return result;
+    }
+
+    @Override
+    public Void internalRemoveAccessToken(String username) {
+        store.removeAccessToken(username);
         return null;
     }
 
@@ -934,7 +969,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             return store.getPreference(username, key);
         } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
+            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
                     + " does not have permission to read preferences of user " + username);
         }
     }
@@ -955,8 +990,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void removeAccessToken(String username, String accessToken) {
-        apply(s -> s.internalRemoveAccessToken(username, accessToken));
+    public void removeAccessToken(String username) {
+        Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
+            apply(s -> s.internalRemoveAccessToken(username));
+        } else {
+            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
+                    + " does not have permission to remove access token of user " + username);
+        }
     }
 
     // ----------------- Replication -------------

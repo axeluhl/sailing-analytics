@@ -32,9 +32,9 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -45,6 +45,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
+import com.sap.sailing.domain.tracking.SensorFixTrack;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -109,6 +110,16 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public TimePoint getStartOfRace() {
         return startTime;
+    }
+
+    @Override
+    public TimePoint getStartOfRace(boolean inferred) {
+        return startTime;
+    }
+
+    @Override
+    public TimePoint getFinishedTime() {
+        return null;
     }
 
     @Override
@@ -447,7 +458,8 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void detachRaceLog(Serializable identifier) {
+    public RaceLog detachRaceLog(Serializable identifier) {
+        return null;
     }
 
     @Override
@@ -550,11 +562,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public GPSFixStore getGPSFixStore() {
-        return null;
-    }
-
-    @Override
     public void addRaceAbortedListener(RaceAbortedListener listener) {
     }
 
@@ -568,7 +575,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+    public void waitForLoadingToFinish() throws InterruptedException {
     }
 
     @Override
@@ -648,5 +655,25 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
+    }
+
+    @Override
+    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) { 
+    }
+    
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
+            Competitor competitor, String trackName) {
+        return null;
+    }
+
+    @Override
+    public Iterable<RegattaLog> getAttachedRegattaLogs() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Iterable<RaceLog> getAttachedRaceLogs() {
+        return Collections.emptySet();
     }
 }

@@ -27,7 +27,7 @@ public class FlagsResources {
 
         case AP:
             flag = "flag_ap_" + size + "dp";
-            outline = outline.replace("XX", "01");
+            outline = outline.replace("XX", "02");
             break;
 
         case BLACK:

@@ -139,7 +139,6 @@ public interface TextMessages extends Messages {
     String latestRaceResultsHeadline();
     String latestRaceResultsIsNew();
     String latestRaceResultsIsUpdated();
-    String latestRaceResultsRaceCountLabel();
     String latestRaceResultsRaceCountUnit();
     String latestRaceResultsRefresh();
     String leaderboardQuickAccessLabel();
@@ -209,6 +208,7 @@ public interface TextMessages extends Messages {
     String solutionsTrainingText();
     String solutionsSimulatorText();
     String sapSailingAnalytics();
+    String autoPlayerConfiguration();
     String contentSapSailingAnalytics1();
     String contentSapSailingAnalytics2();
 
@@ -230,5 +230,6 @@ public interface TextMessages extends Messages {
     String strategySimulatorReadMore();
 
     String impressum();
+
 
 }

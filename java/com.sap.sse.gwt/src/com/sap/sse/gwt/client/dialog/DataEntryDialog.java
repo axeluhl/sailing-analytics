@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.FontWeight;
@@ -22,6 +24,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -45,7 +48,10 @@ import com.sap.sse.gwt.client.controls.IntegerBox;
  * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title and
  * message. Subclasses may override the {@link #show()} method to set the focus on their favorable initial entry field.
  * Subclasses can specify a widget to show in the dialog to capture properties specific to the result type <code>T</code> by
- * overriding the {@link #getAdditionalWidget()} method.
+ * overriding the {@link #getAdditionalWidget()} method.<p>
+ * 
+ * Subclasses can override which elements initially gets the focus by redefining the {@link #getInitialFocusWidget} method.
+ * By default, the OK button will have the focus.
  * 
  * @author Axel Uhl (d043530)
  */
@@ -522,6 +528,10 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.getElement().getStyle().setCursor(cursor);
     }
 
+    public void center() {
+        dateEntryDialog.center();
+    }
+
     public void show() {
         Widget additionalWidget = getAdditionalWidget();
         if (additionalWidget != null) {
@@ -529,6 +539,18 @@ public abstract class DataEntryDialog<T> {
         }
         validate();
         dateEntryDialog.center();
+        final FocusWidget focusWidget = getInitialFocusWidget();
+        if (focusWidget != null) {
+            Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});
+        }
+    }
+
+    /**
+     * Defines the {@link #okButton} as the default initial focus widget. Subclasses may redefine. Return
+     * {@code null} to not set the focus on any widget.
+     */
+    protected FocusWidget getInitialFocusWidget() {
+        return okButton;
     }
 
     protected DialogBox getDialogBox() {

@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -60,7 +62,7 @@ public class TrackedLegImpl implements TrackedLeg {
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private TrackedRaceImpl trackedRace;
-    private transient ConcurrentHashMap<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
+    private transient ConcurrentMap<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
     
     public TrackedLegImpl(DynamicTrackedRaceImpl trackedRace, Leg leg, Iterable<Competitor> competitors) {
         super();
@@ -219,8 +221,9 @@ public class TrackedLegImpl implements TrackedLeg {
         if (middleOfLeg == null) {
             wind = null;
         } else {
-            wind = getWind(middleOfLeg, at,
-                    getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
+            Set<WindSource> windSourcesToExclude = new HashSet<>(getTrackedRace().getWindSourcesToExclude());
+            windSourcesToExclude.addAll(getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
+            wind = getWind(middleOfLeg, at, windSourcesToExclude);
         }
         return wind;
     }

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.getkeepsafe.dexcount'
 
 android {
     buildToolsVersion rootProject.ext.buildTools
@@ -51,7 +52,7 @@ dependencies {
     /* Google Play Services */
     compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
 
-    /* licence dialog */
+    /* license dialog */
     compile("de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}")
 
     /* all local jar-libs */

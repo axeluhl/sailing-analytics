@@ -1,20 +1,29 @@
 package com.sap.sailing.selenium.pages;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.Predicate;
 import com.sap.sailing.selenium.core.AjaxCallsComplete;
 import com.sap.sailing.selenium.core.AjaxCallsExecuted;
 import com.sap.sailing.selenium.core.BySeleniumId;
+import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.FindBys;
 import com.sap.sailing.selenium.core.SeleniumElementLocatorFactory;
@@ -44,12 +53,20 @@ import com.sap.sailing.selenium.core.SeleniumFieldDecorator;
  *   D049941
  */
 public class PageObject {
+    private static final Logger logger = Logger.getLogger(PageObject.class.getName());
+    
     public static final int DEFAULT_WAIT_TIMEOUT_SECONDS = 120;
     
     public static final int DEFAULT_POLLING_INTERVAL = 5;
     
+    private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
+            ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
+    
+    private static final MessageFormat VERTICAL_TAB_EXPRESSION = new MessageFormat(
+            ".//div[contains(@class, \"gwt-VerticalTabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
+    
     /**
-     * </p>The default timeout of 5 seconds for the lookup of other elements.</p>
+     * </p>The default timeout of 10 seconds for the lookup of other elements.</p>
      */
     protected static final int DEFAULT_LOOKUP_TIMEOUT = 5;
     
@@ -389,7 +406,75 @@ public class PageObject {
     
     protected void waitForAjaxRequestsExecuted(String category, int numberOfCalls, int timeout, int polling) {
         FluentWait<WebDriver> wait = createFluentWait(this.driver, timeout, polling);
-        
         wait.until(new AjaxCallsExecuted(category, numberOfCalls));
+    }
+    
+    protected void waitForElement(String seleniumId) {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(new BySeleniumId(seleniumId)));
+    }
+    
+    protected void waitUntil(Predicate<WebDriver> predicate) {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        webDriverWait.until(predicate);
+    }
+    
+    protected void waitUntil(BooleanSupplier supplier) {
+        waitUntil((driver) -> supplier.getAsBoolean());
+    }
+    
+    /**
+     * Returns a {@link PageArea} instance representing the element with the specified selenium id using the
+     * {@link WebDriver} as search context.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(SearchContext, String)
+     */
+    protected <T extends PageArea> T getPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return supplier.get(driver, findElementBySeleniumId(driver, seleniumId));
+    }
+    
+    /**
+     * Returns a {@link PageArea} instance representing the element with the specified selenium id in the search
+     * context of this page area.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(String)
+     */
+    protected <T extends PageArea> T getChildPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return supplier.get(driver, findElementBySeleniumId(seleniumId));
+    }
+    
+    protected interface PageAreaSupplier<T extends PageArea> {
+        T get(WebDriver driver, WebElement element);
+    }
+    
+    protected WebElement goToTab(WebElement tabPanel, String tabName, final String id, boolean isVertical) {
+        final String expression;
+        if (isVertical) {
+            expression = VERTICAL_TAB_EXPRESSION.format(new Object[] {tabName});
+        } else {
+            expression = TAB_EXPRESSION.format(new Object[] {tabName});
+        }
+        WebElement tab = tabPanel.findElement(By.xpath(expression));
+        WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
+        waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
+        tab.click();
+        // Wait for the tab to become visible due to the used animations.
+        FluentWait<WebElement> wait = createFluentWait(tabPanel);
+        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "internal error sleeping for 500ms", e);
+        } // wait for a bit to make sure the UI had a change to trigger any asynchronous background update/refresh
+        waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
+        return content;
     }
 }

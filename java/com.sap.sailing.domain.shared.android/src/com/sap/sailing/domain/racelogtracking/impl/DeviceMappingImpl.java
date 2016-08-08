@@ -19,20 +19,24 @@ public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping
     private final DeviceIdentifier device;
     private final TimeRange timeRange;
     private final List<Serializable> originalRaceLogEventIds = new ArrayList<Serializable>();
-
-    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange) {
+    private final Class<?> eventType;
+    
+    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange, Class<?> eventType) {
         this.mappedTo = mappedTo;
         this.device = device;
         this.timeRange = timeRange;
+        this.eventType = eventType;
     }
 
-    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange, Serializable originalRaceLogEventId) {
-        this(mappedTo, device, timeRange);
+    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange,
+            Serializable originalRaceLogEventId, Class<?> eventType) {
+        this(mappedTo, device, timeRange, eventType);
         if (originalRaceLogEventId != null) originalRaceLogEventIds.add(originalRaceLogEventId);
     }
 
-    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange, List<? extends Serializable> originalRaceLogEventIds) {
-        this(mappedTo, device, timeRange);
+    public DeviceMappingImpl(ItemType mappedTo, DeviceIdentifier device, TimeRange timeRange,
+            List<? extends Serializable> originalRaceLogEventIds, Class<?> eventType) {
+        this(mappedTo, device, timeRange, eventType);
         if (originalRaceLogEventIds != null) this.originalRaceLogEventIds.addAll(originalRaceLogEventIds);
     }
 
@@ -56,9 +60,14 @@ public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping
         return timeRange.from();
     }
     
+    @Override
+    public Class<?> getEventType() {
+        return eventType;
+    }
+    
     public static <T extends WithID> DeviceMapping<T> convertToDeviceMapping(RegattaLogDeviceMappingEvent<T> event) {
         return new DeviceMappingImpl<T>(event.getMappedTo(), event.getDevice(), new TimeRangeImpl(event.getFrom(), event.getTo()),
-                event.getId());
+                event.getId(), event.getClass());
     }
     
     @Override

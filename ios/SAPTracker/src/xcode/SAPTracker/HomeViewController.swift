@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIActionSheetDelegate, NSFetchedResultsControllerDelegate, QRCodeManagerDelegate {
+class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, QRCodeManagerDelegate {
     
     enum AlertView: Int {
         case NoCameraAvailable
@@ -25,12 +25,15 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView!
+	@IBOutlet var vSplashScreen: UIView!
     
     var fetchedResultsController: NSFetchedResultsController?
     private var qrCodeManager: QRCodeManager?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+		
+		loadSplashScreen()		
 
         // set QR manager, needed in case app is being open by custom URL
         qrCodeManager = QRCodeManager(delegate: self)
@@ -61,6 +64,50 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let barButtonItem = UIBarButtonItem(customView: imageView)
         navigationItem.leftBarButtonItem = barButtonItem
     }
+	
+	func loadSplashScreen() {		
+		
+		if let keyWindow = UIApplication.sharedApplication().keyWindow {
+			
+			vSplashScreen.translatesAutoresizingMaskIntoConstraints = false
+			keyWindow.addSubview(vSplashScreen)
+			
+			let lcTop = NSLayoutConstraint(item: vSplashScreen, 
+			                               attribute: NSLayoutAttribute.Top, 
+			                               relatedBy: NSLayoutRelation.Equal, 
+			                               toItem: keyWindow, 
+			                               attribute: NSLayoutAttribute.Top, 
+			                               multiplier: 1.0, 
+			                               constant: 0)
+			let lcBottom = NSLayoutConstraint(item: vSplashScreen, 
+			                                  attribute: NSLayoutAttribute.Bottom, 
+			                                  relatedBy: NSLayoutRelation.Equal, 
+			                                  toItem: keyWindow, 
+			                                  attribute: NSLayoutAttribute.Bottom, 
+			                                  multiplier: 1.0, 
+			                                  constant: 0)
+			let lcLeft = NSLayoutConstraint(item: vSplashScreen, 
+			                                attribute: NSLayoutAttribute.Left, 
+			                                relatedBy: NSLayoutRelation.Equal, 
+			                                toItem: keyWindow, 
+			                                attribute: NSLayoutAttribute.Left, 
+			                                multiplier: 1.0, 
+			                                constant: 0)
+			let lcRight = NSLayoutConstraint(item: vSplashScreen, 
+		                                  attribute: NSLayoutAttribute.Right, 
+		                                  relatedBy: NSLayoutRelation.Equal, 
+		                                  toItem: keyWindow, 
+		                                  attribute: NSLayoutAttribute.Right, 
+		                                  multiplier: 1.0, 
+		                                  constant: 0)
+			keyWindow.addConstraints([lcTop, lcBottom, lcLeft, lcRight])
+			
+			weak var weakself = self
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+				weakself?.vSplashScreen.removeFromSuperview()
+			}
+		}
+	}
 
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
@@ -103,26 +150,39 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let url = notification.userInfo!["url"] as! String
         qrCodeManager!.parseUrl(url)
     }
-    
-    // MARK: - UIActionSheetDelegate
+	
+	func _DEBUG_OPEN_URL() {
+		let url = "http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/tracking/checkin?event_id=71c7b531-fb1b-441c-b2fa-f4e9ff672d60&leaderboard_name=Ubigatta&competitor_id=9df7b4f6-611b-4be0-b028-c7b1bdd434c2"
+		let url2 = "http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/tracking/checkin?event_id=71c7b531-fb1b-441c-b2fa-f4e9ff672d60&leaderboard_name=Ubigatta&competitor_id=a5a00800-daf8-0131-89e6-60a44ce903c3"
+		qrCodeManager!.parseUrl(url2)
+	}
     
     @IBAction func showActionSheet(sender: AnyObject) {
-        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: NSLocalizedString("Settings", comment: ""), NSLocalizedString("About", comment: ""), NSLocalizedString("Cancel", comment: ""))
-        actionSheet.cancelButtonIndex = 3
-        actionSheet.showInView(view)
-    }
-    
-    func actionSheet(actionSheet: UIActionSheet, clickedButtonAtIndex buttonIndex: Int) {
-        switch buttonIndex{
-         case 0:
-            performSegueWithIdentifier("Settings", sender: actionSheet)
-            break
-        case 1:
-            performSegueWithIdentifier("About", sender: actionSheet)
-            break
-        default:
-            break
+
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
+        if let popoverController = actionSheet.popoverPresentationController,
+            let barButtonItem = sender as? UIBarButtonItem {
+            popoverController.barButtonItem = barButtonItem
         }
+
+        let aSettings = UIAlertAction(title: NSLocalizedString("Settings", comment: ""), style: .Default) { (action) -> Void in
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+				self.performSegueWithIdentifier("SettingsFromHome", sender: actionSheet)
+			}
+        }
+        actionSheet.addAction(aSettings)
+
+        let aAbout = UIAlertAction(title: NSLocalizedString("About", comment: ""), style: .Default) { (action) -> Void in
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+				self.performSegueWithIdentifier("AboutFromHome", sender: actionSheet)
+			}
+        }
+        actionSheet.addAction(aAbout)
+
+        let aCancel = UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .Cancel, handler: nil)
+        actionSheet.addAction(aCancel)
+
+        presentViewController(actionSheet, animated: true, completion: nil)
     }
     
     // MARK: - UITableViewDataSource
@@ -208,6 +268,10 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: - Button actions
     
     @IBAction func scanButtonTap(sender: AnyObject) {
+		
+//		_DEBUG_OPEN_URL()
+//		return;
+		
         if !UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
             let alertView = UIAlertView(title: NSLocalizedString("No camera available.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
             alertView.tag = AlertView.NoCameraAvailable.rawValue;

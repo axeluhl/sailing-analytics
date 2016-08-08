@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -94,12 +95,11 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
             public void update(int index, final MarkDTO markDTO, String value) {
                 if (RaceLogTrackingCourseDefinitionDialogMarksImagesBarCell.ACTION_PING.equals(value)) {
                     new PositionEntryDialog(stringMessages.pingPosition(stringMessages.mark()), stringMessages,
-                            new DataEntryDialog.DialogCallback<Position>() {
+                            new DataEntryDialog.DialogCallback<Pair<Position, TimePoint>>() {
                                 @Override
-                                public void ok(Position position) {
-                                    sailingService.pingMark(leaderboardName, markDTO, position,
-                                            new AsyncCallback<Void>() {
-
+                                public void ok(Pair<Position, TimePoint> positionAndTimePoint) {
+                                    sailingService.pingMark(leaderboardName, markDTO,
+                                            positionAndTimePoint.getB(), positionAndTimePoint.getA(), new AsyncCallback<Void>() {
                                                 @Override
                                                 public void onSuccess(Void result) {
                                                     refresh();

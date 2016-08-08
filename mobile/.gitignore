@@ -1,2 +1,4 @@
 com.sap.sailing.android.tracking.app.test-test/bin/
 /target
+build.info
+assets_gen

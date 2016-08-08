@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -63,11 +64,9 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         remoteServersPanel.setContentWidget(remoteServersContentPanel);
         
         serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
-        CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createRemoteServersTable();
-        serverDataProvider.addDataDisplay(remoteServersTable);
-
         filteredServerTablePanel = new LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO>(
-                new Label(stringMessages.filterBy() + ":"), Collections.<RemoteSailingServerReferenceDTO>emptyList(), remoteServersTable, serverDataProvider) {
+                new Label(stringMessages.filterBy() + ":"), Collections.<RemoteSailingServerReferenceDTO> emptyList(),
+                new CellTable<RemoteSailingServerReferenceDTO>(), serverDataProvider) {
             @Override
             public List<String> getSearchableStrings(RemoteSailingServerReferenceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -81,6 +80,9 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                 return strings;
             }
         };
+        CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createRemoteServersTable();
+        filteredServerTablePanel.setTable(remoteServersTable);
+        serverDataProvider.addDataDisplay(remoteServersTable);
 
         remoteServersContentPanel.add(filteredServerTablePanel);
         remoteServersContentPanel.add(remoteServersTable);
@@ -123,7 +125,8 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     }
     
     private CellTable<RemoteSailingServerReferenceDTO> createRemoteServersTable() {
-        CellTable<RemoteSailingServerReferenceDTO> serverTable = new CellTable<RemoteSailingServerReferenceDTO>(10000, tableRes);
+        CellTable<RemoteSailingServerReferenceDTO> serverTable = new BaseCelltable<RemoteSailingServerReferenceDTO>(
+                10000, tableRes);
         TextColumn<RemoteSailingServerReferenceDTO> serverNameColumn = new TextColumn<RemoteSailingServerReferenceDTO>() {
             @Override
             public String getValue(RemoteSailingServerReferenceDTO server) {
@@ -171,7 +174,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                     public int hashCode(RemoteSailingServerReferenceDTO t) {
                         return t.getUrl().hashCode();
                     }
-                }, serverDataProvider);
+                }, filteredServerTablePanel.getAllListDataProvider());
         serverTable.setSelectionModel(refreshableServerSelectionModel);
 
         return serverTable;

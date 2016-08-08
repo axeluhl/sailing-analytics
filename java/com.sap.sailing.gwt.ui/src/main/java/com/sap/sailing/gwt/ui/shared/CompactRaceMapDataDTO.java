@@ -41,7 +41,7 @@ public class CompactRaceMapDataDTO implements IsSerializable {
     
     CompactRaceMapDataDTO() {}
 
-    public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTO>> boatPositions, CoursePositionsDTO coursePositions,
+    public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions, CoursePositionsDTO coursePositions,
            List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, long simulationResultVersion, HashSet<String> raceCompetitorIdsAsStrings) {
         this.boatPositionsByCompetitorIdAsString = new CompactBoatPositionsDTO(boatPositions);
         this.raceCompetitorIdsAsStrings = raceCompetitorIdsAsStrings;

@@ -46,7 +46,6 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -108,7 +107,7 @@ public class ReachingLegTest extends TrackBasedTest {
         Course course = new CourseImpl(raceName, waypoints);
         RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitors);
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
-        		EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0,
+                /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
                 /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));

@@ -1,6 +1,8 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.net.URL;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.server.RacingEventService;
@@ -19,13 +21,14 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     private final String eventName;
     private final String eventDescription;
     private final URL officialWebsiteURL;
-    private final URL sailorsInfoWebsiteURL;
+    private final URL baseURL;
+    private final Map<Locale, URL> sailorsInfoWebsiteURLs;
     private final Iterable<ImageDescriptor> images;
     private final Iterable<VideoDescriptor> videos;
 
     public UpdateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, 
-            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL baseURL, 
+            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         super(id);
         this.eventName = eventName;
         this.eventDescription = eventDescription;
@@ -35,7 +38,8 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
         this.isPublic = isPublic;
         this.leaderboardGroupIds = leaderboardGroupIds;
         this.officialWebsiteURL = officialWebsiteURL;
-        this.sailorsInfoWebsiteURL = sailorsInfoWebsiteURL;
+        this.baseURL = baseURL;
+        this.sailorsInfoWebsiteURLs = sailorsInfoWebsiteURLs;
         this.images = images;
         this.videos = videos;
     }
@@ -55,7 +59,7 @@ public class UpdateEvent extends AbstractEventOperation<Void> {
     @Override
     public Void internalApplyTo(RacingEventService toState) {
         toState.updateEvent(getId(), eventName, eventDescription, startDate, endDate, venueName, isPublic,
-                leaderboardGroupIds, officialWebsiteURL, sailorsInfoWebsiteURL, images, videos);
+                leaderboardGroupIds, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos);
         return null;
     }
 }

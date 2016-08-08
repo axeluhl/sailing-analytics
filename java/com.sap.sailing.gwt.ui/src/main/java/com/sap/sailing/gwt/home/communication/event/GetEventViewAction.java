@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.communication.event;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,16 +15,22 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
+import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
-import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
+import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.shared.media.ImageDescriptor;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load the basic logo, name, state, date and navigation information for a
+ * {@link #GetEventViewAction(UUID) given event-id} to be shown on several pages of this event.
+ * </p>
+ */
 public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClientCacheable {
     private static final Logger logger = Logger.getLogger(GetEventViewAction.class.getName());
 
@@ -34,6 +40,12 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
     private GetEventViewAction() {
     }
 
+    /**
+     * Creates a {@link GetEventViewAction} instance for the given event-id.
+     * 
+     * @param eventId
+     *            {@link UUID} of the {@link Event} to load data for
+     */
     public GetEventViewAction(UUID eventId) {
         this.eventId = eventId;
     }
@@ -51,7 +63,8 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         ImageDescriptor logoImage = event.findImageWithTag(MediaTagConstants.LOGO);
         dto.setLogoImage(logoImage != null ? HomeServiceUtil.convertToImageDTO(logoImage) : null);
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
-        dto.setSailorsInfoWebsiteURL(event.getSailorsInfoWebsiteURL() == null ? null : event.getSailorsInfoWebsiteURL().toString());
+        URL sailorsInfoWebsiteURL = event.getSailorsInfoWebsiteURLOrFallback(context.getClientLocale());
+        dto.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL == null ? null : sailorsInfoWebsiteURL.toString());
 
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
         dto.setState(HomeServiceUtil.calculateEventState(event));
@@ -103,16 +116,6 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
             }
         } else {
             dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
-        }
-        
-        // Special solution for localization of SailorsInfo URL
-        if(dto.getSailorsInfoWebsiteURL() != null && !Locale.GERMAN.equals(context.getClientLocale())) {
-            String localizedURL = dto.getSailorsInfoWebsiteURL();
-            if(!localizedURL.endsWith("/")) {
-                localizedURL += "/";
-            }
-            localizedURL += "en";
-            dto.setSailorsInfoWebsiteURL(localizedURL);
         }
         return dto;
     }

@@ -30,9 +30,7 @@
 	<entry-point class='com.sap.sailing.gwt.autoplay.client.AutoPlayEntryPoint' />
 
 	<!-- Specify the paths for translatable code -->
-	<extend-property name="locale" values="en" />
-	<extend-property name="locale" values="de" />
-	<set-property-fallback name="locale" value="en"/>
+        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
 	
 	<source path="autoplay"/> 
 	

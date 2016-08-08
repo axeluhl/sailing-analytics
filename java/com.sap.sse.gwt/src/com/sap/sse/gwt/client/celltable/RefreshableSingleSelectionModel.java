@@ -27,7 +27,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> implements RefreshableSelectionModel<T> {
     private final EntityIdentityComparator<T> comp;
     private boolean dontcheckSelectionState = false;
-    private final ListDataProvider<T> listDataProvider;
     
     /**
      * @param comp
@@ -44,8 +43,7 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
                     }
                 });
         this.comp = comp;
-        this.listDataProvider = listDataProvider;
-        this.listDataProvider.addDataDisplay(new HasDataAdapter<T>(this, listDataProvider));
+        listDataProvider.addDataDisplay(new HasDataAdapter<T>(this, listDataProvider));
     }
     
     /**
