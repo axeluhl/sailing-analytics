@@ -24,22 +24,21 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Ct1-2l-YCw" userLabel="Center View">
-                                <rect key="frame" x="117" y="215.5" width="365" height="170"/>
+                                <rect key="frame" x="94" y="209" width="411" height="182"/>
                                 <subviews>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="applogo" translatesAutoresizingMaskIntoConstraints="NO" id="XA8-DM-z3j">
-                                        <rect key="frame" x="0.0" y="0.0" width="365" height="96"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="411" height="108"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="XA8-DM-z3j" secondAttribute="height" multiplier="365:96" id="nLx-D5-TPO"/>
                                         </constraints>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SAP Sail InSight" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZGa-Zx-evx">
-                                        <rect key="frame" x="0.0" y="126" width="365" height="44"/>
+                                        <rect key="frame" x="0.0" y="138" width="411" height="44"/>
                                         <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="32"/>
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="ZGa-Zx-evx" secondAttribute="trailing" id="0Fa-bV-8f5"/>
                                     <constraint firstAttribute="bottom" secondItem="ZGa-Zx-evx" secondAttribute="bottom" id="6wg-C8-dYi"/>
@@ -51,7 +50,7 @@
                                 </constraints>
                             </view>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="0.87058823529411766" green="0.94509803921568625" blue="0.94509803921568625" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="Ct1-2l-YCw" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="DXK-sq-IhF"/>
                             <constraint firstItem="Ct1-2l-YCw" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ze5-6b-2t3" secondAttribute="leading" constant="30" id="XG0-fY-A1K"/>
@@ -68,6 +67,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="applogo" width="365" height="96"/>
+        <image name="applogo" width="410" height="108"/>
     </resources>
 </document>
