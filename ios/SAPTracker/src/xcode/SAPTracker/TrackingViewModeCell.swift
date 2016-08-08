@@ -27,7 +27,7 @@ class TrackingViewModeCell: UITableViewCell {
     
     private func setup() {
         setupLocalization()
-        setupModeLabel(GPSFixController.Mode.Offline)
+        setupModeLabel(GPSFixController.Mode.None)
     }
     
     private func setupLocalization() {

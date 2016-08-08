@@ -66,6 +66,9 @@ class Translation: NSObject {
             struct BatterySaving { static let Key = "\(Mode.Key).\(BatterySaving.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }
+            struct None { static let Key = "\(Mode.Key).\(None.self)"
+                static let String = NSLocalizedString(Key, comment: "")
+            }
             struct Online { static let Key = "\(Mode.Key).\(Online.self)"
                 static let String = NSLocalizedString(Key, comment: "")
             }

@@ -25,12 +25,14 @@ class GPSFixController: NSObject {
     enum Mode: String {
         case BatterySaving
         case Error
+        case None
         case Offline
         case Online
         var description: String {
             switch self {
             case .BatterySaving: return Translation.GPSFixController.Mode.BatterySaving.String
             case .Error: return Translation.GPSFixController.Mode.Error.String
+            case .None: return Translation.GPSFixController.Mode.None.String
             case .Offline: return Translation.GPSFixController.Mode.Offline.String
             case .Online: return Translation.GPSFixController.Mode.Online.String
             }
