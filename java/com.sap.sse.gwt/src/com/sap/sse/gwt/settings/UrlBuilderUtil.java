@@ -62,10 +62,10 @@ public class UrlBuilderUtil {
         return urlBuilder;
     }
 
-    public static UrlBuilder createUrlBuilderFromCurrentLocationWithCleanParametersAndPath(String path) {
+    public static UrlBuilder createUrlBuilderFromCurrentLocationWithCleanParametersAndPath(String pathAndHash) {
         final UrlBuilder urlBuilder = createUrlBuilderFromCurrentLocationWithCleanParameters();
-        String[] documentAndFragment = path.split("#", 2);
-        urlBuilder.setPath(path);
+        String[] documentAndFragment = pathAndHash.split("#", 2);
+        urlBuilder.setPath(documentAndFragment[0]);
         if (documentAndFragment.length > 1) {
             urlBuilder.setHash(documentAndFragment[1]);
         }
