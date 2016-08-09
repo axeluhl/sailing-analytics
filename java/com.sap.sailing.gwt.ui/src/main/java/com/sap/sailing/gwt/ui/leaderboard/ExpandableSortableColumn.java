@@ -190,7 +190,7 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                 queuedToggleRequests.add(expand);
             } else {
                 final boolean oldBusyState = getLeaderboardPanel().isBusy(); 
-                getLeaderboardPanel().setBusyState(true);
+                getLeaderboardPanel().addBusyTask();
                 setTogglingInProcess(true);
                 final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
                 if (table == null) {
@@ -248,7 +248,7 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
      * @param busyState the busy state value to set
      */
     private void finishCurrentToggling(boolean busyState) {
-        getLeaderboardPanel().setBusyState(busyState);
+        getLeaderboardPanel().removeBusyTask();
         setTogglingInProcess(false);
         if (!queuedToggleRequests.isEmpty()) {
             changeExpansionState(queuedToggleRequests.remove(0));
