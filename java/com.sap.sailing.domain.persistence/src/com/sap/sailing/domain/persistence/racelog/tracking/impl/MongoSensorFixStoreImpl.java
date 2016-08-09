@@ -232,6 +232,19 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         return ((Number) result.get(FieldNames.NUM_FIXES.name())).longValue();
     }
 
+    /**
+     * Try to find a service implementing specified type of objects interface using the {@link #fixServiceFinder}.
+     * <p>
+     * To support an additional fix type, an implementation of {@link FixMongoHandler} is required, which specifies how to
+     * transform a fix forth to and back from database. This implementation needs to be
+     * registered during OSGi bundle activator startup, providing respective type mapping properties.
+     * </p>
+     * 
+     * @param type type object to find service for
+     * @return the registered {@link FixMongoHandler} implementation
+     * 
+     * @see TypeBasedServiceFinder#findService(String)
+     */
     @SuppressWarnings("unchecked")
     private <FixT extends Timed> FixMongoHandler<FixT> findService(String type) {
         return (FixMongoHandler<FixT>) fixServiceFinder.findService(type);
