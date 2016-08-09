@@ -32,7 +32,7 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     
     private static String createEventRegattaTabLink(String eventId, String regattaId, String tabName) {
         return createEntryPointLink(
-                "/gwt/Home.html#/regatta/" + tabName + "/:eventId=" + eventId + "&regattaId=" + regattaId,
+                "/gwt/Home.html", "/regatta/" + tabName + "/:eventId=" + eventId + "&regattaId=" + regattaId,
                 Collections.<String, String>emptyMap());
     }
     
@@ -41,7 +41,7 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     }
     
     public static String createEventPlaceLink(String eventId, Map<String, String> parameters) {
-        return createEntryPointLink("/gwt/Home.html#/event/:eventId="+eventId, parameters);
+        return createEntryPointLink("/gwt/Home.html", "/event/:eventId="+eventId, parameters);
     }
     
     public static String createDashboardLink(Map<String, String> parameters) {
