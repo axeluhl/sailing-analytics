@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -570,10 +571,13 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     }
 
     private Label computeRaceInformation(RaceColumnDTO raceColumn, FleetDTO fleet) {
+        final Date startDate = raceColumn.getStartDate(fleet);
         Label raceInformationLabel = new Label();
         raceInformationLabel.setStyleName("Race-Time-Label");
-        DateTimeFormat formatter = DateTimeFormat.getFormat("E d/M/y");
-        raceInformationLabel.setText(formatter.format(raceColumn.getStartDate(fleet)));
+        if (startDate != null) {
+            DateTimeFormat formatter = DateTimeFormat.getFormat("E d/M/y");
+            raceInformationLabel.setText(formatter.format(startDate));
+        }
         return raceInformationLabel;
     }
     
