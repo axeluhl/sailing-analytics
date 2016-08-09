@@ -22,15 +22,18 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
         return createEntryPointLink("/gwt/LeaderboardEditing.html", parameters);
     }
     
-    public static String createLeaderboardTabLink(String eventId, String regattaId, Map<String, String> parameters) {
-        return createEntryPointLink("/gwt/Home.html#/regatta/leaderboard/:eventId=" + eventId + "&regattaId=" + regattaId, parameters);
+    public static String createLeaderboardTabLink(String eventId, String regattaId) {
+        return createEventRegattaTabLink(eventId, regattaId, "leaderboard");
     }
     
-    public static String createLeaderboardPlaceLink(String eventId, String leaderboardName) {
-        final Map<String, String> emptyParams = Collections.emptyMap();
-        return createEntryPointLink("/gwt/Home.html#EventPlace:eventId="+eventId+
-                "&navigationTab=Regatta&leaderboardName=" +leaderboardName, emptyParams);
-
+    public static String createRacesTabLink(String eventId, String leaderboardName) {
+        return createEventRegattaTabLink(eventId, leaderboardName, "races");
+    }
+    
+    private static String createEventRegattaTabLink(String eventId, String regattaId, String tabName) {
+        return createEntryPointLink(
+                "/gwt/Home.html#/regatta/" + tabName + "/:eventId=" + eventId + "&regattaId=" + regattaId,
+                Collections.<String, String>emptyMap());
     }
     
     public static String createLeaderboardGroupLink(Map<String, String> parameters) {
