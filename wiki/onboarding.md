@@ -147,7 +147,7 @@ If you are working with a linux-system and you get the error message `error whil
 
 #### Using Android Studio for Development
 
-The Android Apps can be build in Android Studio or gradle command line. Android Studio is build on top of IntelliJ IDEA, so it is possible to use IntelliJ IDEA as well.
+The Android Apps can be built in Android Studio or gradle command line. Android Studio is built on top of IntelliJ IDEA, so it is possible to use IntelliJ IDEA as well.
 
 1. On the "Welcome Screen" choose "Import Project (Eclipse, ADT, Gradle, etc.)" 
 2. Navigate to the project root folder and select the "build.gradle" file (all used modules are defined in "settings.gradle")
