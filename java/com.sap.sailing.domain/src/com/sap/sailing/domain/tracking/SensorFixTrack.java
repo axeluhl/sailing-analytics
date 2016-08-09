@@ -13,7 +13,8 @@ import com.sap.sse.common.WithID;
  * @param <ItemType> the type of item this track is mapped to
  * @param <FixT> the type of fix that is contained in this track
  */
-public interface SensorFixTrack<ItemType extends WithID & Serializable, FixT extends SensorFix> extends Track<FixT> {
+public interface SensorFixTrack<ItemType extends WithID & Serializable, FixT extends SensorFix>
+        extends MappedTrack<ItemType, FixT> {
     
     /**
      * Value names to be used when reading values from {@link SensorFix}es by calling {@link SensorFix#get(String)}.
@@ -25,11 +26,6 @@ public interface SensorFixTrack<ItemType extends WithID & Serializable, FixT ext
     void addListener(SensorFixTrackListener<ItemType, FixT> listener);
     
     void removeListener(SensorFixTrackListener<ItemType, FixT> listener);
-    
-    /**
-     * @return the item this tracked is mapped to.
-     */
-    ItemType getTrackedItem();
     
     /**
      * @return the associated track name by which this track can be obtained from the {@link TrackedRace}.

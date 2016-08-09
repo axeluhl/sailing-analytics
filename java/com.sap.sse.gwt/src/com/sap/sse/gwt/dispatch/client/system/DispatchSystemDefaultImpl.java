@@ -12,7 +12,6 @@ import com.sap.sse.gwt.dispatch.client.transport.DefaultTransport;
 import com.sap.sse.gwt.dispatch.shared.commands.Action;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
-import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 
 /**
  * Base implementation of a client side dispatch executor.
@@ -56,7 +55,7 @@ public abstract class DispatchSystemDefaultImpl<CTX extends DispatchContext> imp
             @Override
             public void onFailure(Throwable caught) {
                 if (caught instanceof DispatchException) {
-                    ServerDispatchException sde = (ServerDispatchException) caught;
+                    DispatchException sde = (DispatchException) caught;
                     LOG.log(Level.SEVERE, "Server exception with id: " + sde.getExceptionId());
                 }
                 callback.onFailure(caught);
