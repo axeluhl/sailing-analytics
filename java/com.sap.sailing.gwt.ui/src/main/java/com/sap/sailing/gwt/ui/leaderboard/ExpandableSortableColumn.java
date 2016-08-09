@@ -201,11 +201,10 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                             for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
                                 getLeaderboardPanel().removeColumn(column); // removes only the children currently displayed
                             }
-                            getLeaderboardPanel().setBusyState(false);
-                            setTogglingInProcess(false);
                             // important: toggle expanded state after asking for all visible children
                             setExpanded(!isExpanded());
                         }
+                        finishCurrentToggling(false);
                     } else { // expand
                         if (!isExpanded()) { // but only if not expanded yet
                             // important: toggle expanded state before asking for all visible children
@@ -228,17 +227,31 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                                             getLeaderboardPanel().getLeaderboardTable().redraw();
                                         }
                                     }
-                                    getLeaderboardPanel().setBusyState(oldBusyState);
-                                    setTogglingInProcess(false);
-                                    if (!queuedToggleRequests.isEmpty()) {
-                                        changeExpansionState(queuedToggleRequests.remove(0));
-                                    }
+                                    finishCurrentToggling(oldBusyState);
                                 }
                             });
+                        } else {
+                            finishCurrentToggling(false);
                         }
                     }
                 }
             }
+        }
+    }
+    
+    /**
+     * Finishes the current toggling by setting the {@link #getLeaderboardPanel() leaderboard panel}'s
+     * {@link LeaderboardPanel#setBusyState(boolean) busy state} to the given value and the
+     * {@link #setTogglingInProcess(boolean) togglingInProcess flag} to <code>false</code>.
+     * Afterwards, {@link #queuedToggleRequests queued toggling requests} are executed, if any. 
+     * 
+     * @param busyState the busy state value to set
+     */
+    private void finishCurrentToggling(boolean busyState) {
+        getLeaderboardPanel().setBusyState(busyState);
+        setTogglingInProcess(false);
+        if (!queuedToggleRequests.isEmpty()) {
+            changeExpansionState(queuedToggleRequests.remove(0));
         }
     }
     
