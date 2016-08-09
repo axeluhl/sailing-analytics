@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
@@ -94,22 +93,16 @@ public class Header extends Composite {
             }
         });
         
-        if (ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_MOBILE) {
-            eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
-                @Override
-                public void onUserChangeEvent(AuthenticationContextEvent event) {
-                    String loggedInStyle = HeaderResources.INSTANCE.css().header_navigation_iconsignedin();
-                    UIObject.setStyleName(dropdownTriggerUi, loggedInStyle, event.getCtx().isLoggedIn());
-                    signInNavigationItem.setVisible(!event.getCtx().isLoggedIn());
-                    userDetailsNavigationItem.setVisible(event.getCtx().isLoggedIn());
-                    signOutNavigationItem.setVisible(event.getCtx().isLoggedIn());
-                }
-            });
-        } else {
-            signInNavigationItem.removeFromParent();
-            userDetailsNavigationItem.removeFromParent();
-            signOutNavigationItem.removeFromParent();
-        }
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
+            @Override
+            public void onUserChangeEvent(AuthenticationContextEvent event) {
+                String loggedInStyle = HeaderResources.INSTANCE.css().header_navigation_iconsignedin();
+                UIObject.setStyleName(dropdownTriggerUi, loggedInStyle, event.getCtx().isLoggedIn());
+                signInNavigationItem.setVisible(!event.getCtx().isLoggedIn());
+                userDetailsNavigationItem.setVisible(event.getCtx().isLoggedIn());
+                signOutNavigationItem.setVisible(event.getCtx().isLoggedIn());
+            }
+        });
     }
     
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {
