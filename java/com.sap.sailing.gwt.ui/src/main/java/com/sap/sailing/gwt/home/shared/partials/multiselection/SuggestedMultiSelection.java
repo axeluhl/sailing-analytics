@@ -107,7 +107,6 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
     }
     
     private static class SuggestedMultiSelectionFilter<T> extends AbstractAsyncSuggestBoxFilter<T, T> {
-        private final SuggestedMultiSelectionDataProvider<T, ?> dataProvider;
         private final SelectionCallback<T> selectionCallback;
 
         private SuggestedMultiSelectionFilter(final SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
@@ -134,7 +133,6 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
                     return dataProvider.createSuggestionAdditionalDisplayString(value);
                 }
             }, placeholderText);
-            this.dataProvider = dataProvider;
             this.selectionCallback = selectionCallback;
         }
         
