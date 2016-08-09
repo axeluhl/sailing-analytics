@@ -185,8 +185,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                 }
                 if (preemptiveColumnResult == 0 && raceColumn.isTotalOrderDefinedByFleet()) {
                     final FleetComparisonResult compareByFleetResult = compareByFleet(raceColumn, o1, o2, fleetWithCorrectOrderingForCompetitorBySeries);
-                    preemptiveColumnResult = compareByFleetResult.getAuthoritativeFleetComparisonResult();
-                    if (defaultFleetBasedComparisonResult == 0) {
+                    if (compareByFleetResult.getAuthoritativeFleetComparisonResult() != null) {
+                        preemptiveColumnResult = compareByFleetResult.getAuthoritativeFleetComparisonResult();
+                        defaultFleetBasedComparisonResult = 0;
+                    } else if (defaultFleetBasedComparisonResult == 0) {
                         defaultFleetBasedComparisonResult = compareByFleetResult.getDefaultFleetComparisonResultBasedOnUnknownFleetAssignment();
                     }
                 }
@@ -241,10 +243,14 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private static class FleetComparisonResult {
         /**
          * Is non-{@code 0} if the two competitors have been identified as having raced in different fleets in
-         * {@code raceColumn} with those fleets having different {@link Fleet#getOrdering() orderings}.
-         * Evaluation of further comparison criteria is not necessary in this case.
+         * {@code raceColumn} with those fleets having different {@link Fleet#getOrdering() orderings}, or {@code 0}
+         * if the two competitors have been identified authoritatively having raced in the same fleet in
+         * {@code raceColumn}. Remains {@code null} if at least one competitor's fleet couldn't be identified.
+         * Evaluation of further comparison criteria is not necessary only if an authoritative non-{@code 0}
+         * answer was found. If fleet comparison has been calculated for all columns and no authoritative answer
+         * was found, the {@link #defaultFleetComparisonResultBasedOnUnknownFleetAssignment} result can be used.
          */
-        private final int authoritativeFleetComparisonResult;
+        private final Integer authoritativeFleetComparisonResult;
         
         /**
          * When for one of the two competitors compared the fleet in which she raced in a race column
@@ -258,14 +264,14 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
          */
         private final int defaultFleetComparisonResultBasedOnUnknownFleetAssignment;
 
-        public FleetComparisonResult(int authoritativeFleetComparisonResult,
+        public FleetComparisonResult(Integer authoritativeFleetComparisonResult,
                 int defaultFleetComparisonResultBasedOnUnknownFleetAssignment) {
             super();
             this.authoritativeFleetComparisonResult = authoritativeFleetComparisonResult;
             this.defaultFleetComparisonResultBasedOnUnknownFleetAssignment = defaultFleetComparisonResultBasedOnUnknownFleetAssignment;
         }
 
-        public int getAuthoritativeFleetComparisonResult() {
+        public Integer getAuthoritativeFleetComparisonResult() {
             return authoritativeFleetComparisonResult;
         }
 
@@ -288,14 +294,14 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             } else {
                 // check if o1's fleet is best or worst in column; in that case, o1's membership in this fleet and the fact
                 // that o2 is not part of that fleet determines the result
-                result = new FleetComparisonResult(0, extremeFleetComparison(raceColumn, o1f));
+                result = new FleetComparisonResult(null, extremeFleetComparison(raceColumn, o1f));
             }
         } else if (o2f != null) {
             // check if o2's fleet is best or worst in column; in that case, o2's membership in this fleet and the fact
             // that o1 is not part of that fleet determines the result
-            result = new FleetComparisonResult(0, -extremeFleetComparison(raceColumn, o2f));
+            result = new FleetComparisonResult(null, -extremeFleetComparison(raceColumn, o2f));
         } else {
-            result = new FleetComparisonResult(0, 0);
+            result = new FleetComparisonResult(null, 0);
         }
         return result;
     }

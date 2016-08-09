@@ -4,9 +4,16 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
+/**
+ * This replicates a whole {@link DynamicSensorFixTrack}. Other tracks like {@link GPSFixTrack} are created on the
+ * replica on the fly when the first fix is replicated. For sensor tracks there could be several different
+ * {@link DynamicSensorFixTrack} implementations for different named tracks. This makes it necessary to serialize the
+ * whole track to the replica to ensure that the track provides the correct functionality.
+ */
 public class RecordCompetitorSensorFixTrack extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = -7092704633177037511L;
     private DynamicSensorFixTrack<Competitor, ?> track;
