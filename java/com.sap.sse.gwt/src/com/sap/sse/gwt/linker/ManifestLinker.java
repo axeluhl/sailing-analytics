@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.client.linker;
+package com.sap.sse.gwt.linker;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,7 +46,7 @@ import com.google.gwt.core.ext.linker.impl.SelectionInformation;
  * 
  */
 @LinkerOrder(LinkerOrder.Order.POST)
-public class ManifestLinker extends AbstractLinker {
+public abstract class ManifestLinker extends AbstractLinker {
 
     private static final String MANIFEST = "appcache.manifest";
     private static final String MANIFESTTEMPLATE = "cache.manifest.template";
@@ -125,9 +125,7 @@ public class ManifestLinker extends AbstractLinker {
      * Also include all files referenced in your root HTML file.
      * See {@link DashboardManifestLinker} as an example.
      * */
-    protected String[] staticCachedFiles() {
-        return null;
-    }
+    abstract protected String[] staticCachedFiles();
 
     protected String appCacheManifestTemplate() {
         return MANIFESTTEMPLATE;

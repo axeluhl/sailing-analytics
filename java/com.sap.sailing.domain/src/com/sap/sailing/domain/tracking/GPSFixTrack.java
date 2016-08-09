@@ -29,7 +29,7 @@ import com.sap.sse.common.Util;
  * 
  * @param <ItemType>
  */
-public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<FixType> {
+public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTrack<ItemType, FixType> {
     static final long DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_SPEED = 10000; // makes for a 5s half-side interval
     static final Speed DEFAULT_MAX_SPEED_FOR_SMOOTHING = new KnotSpeedImpl(40);
 
@@ -40,8 +40,6 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends Track<Fix
     
     void removeListener(GPSTrackListener<ItemType, FixType> listener);
     
-    ItemType getTrackedItem();
-
     /**
      * Computes the distance traveled on the smoothened track between the
      * {@link #getEstimatedPosition(TimePoint, boolean) estimated positions} at <code>from</code> and <code>to</code>.
