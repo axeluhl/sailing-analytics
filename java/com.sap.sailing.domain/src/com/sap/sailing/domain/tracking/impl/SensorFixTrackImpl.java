@@ -17,12 +17,11 @@ import com.sap.sse.common.WithID;
  * @param <FixT> the type of fix this track holds
  */
 public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT extends SensorFix> extends
-        DynamicTrackImpl<FixT> implements DynamicSensorFixTrack<ItemType, FixT> {
+        DynamicMappedTrackImpl<ItemType, FixT> implements DynamicSensorFixTrack<ItemType, FixT> {
 
     private static final long serialVersionUID = 6383421895429843002L;
     
     private final Iterable<String> valueNames;
-    private final ItemType trackedItem;
     private final String trackName;
     private final TrackListenerCollection<ItemType, FixT, SensorFixTrackListener<ItemType, FixT>> listeners;
 
@@ -34,8 +33,7 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
      */
     public SensorFixTrackImpl(ItemType trackedItem, String trackName, Iterable<String> valueNames,
             String nameForReadWriteLock) {
-        super(nameForReadWriteLock);
-        this.trackedItem = trackedItem;
+        super(trackedItem, nameForReadWriteLock);
         this.trackName = trackName;
         this.valueNames = valueNames;
         this.listeners = new TrackListenerCollection<>();
@@ -48,7 +46,7 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
         try {
             final boolean firstFixInTrack = getRawFixes().isEmpty();
             result = addWithoutLocking(fix, replace);
-            this.notifyListeners((listener) -> listener.fixReceived(fix, trackedItem, trackName, firstFixInTrack));
+            this.notifyListeners((listener) -> listener.fixReceived(fix, getTrackedItem(), trackName, firstFixInTrack));
         } finally {
             unlockAfterWrite();
         }
@@ -72,11 +70,6 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
     @Override
     public void removeListener(SensorFixTrackListener<ItemType, FixT> listener) {
         this.listeners.removeListener(listener);
-    }
-
-    @Override
-    public ItemType getTrackedItem() {
-        return trackedItem;
     }
 
     @Override

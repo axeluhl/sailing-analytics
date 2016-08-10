@@ -24,7 +24,9 @@ import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.RacesByCompetitorTextBoxFilter;
+import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionPresenter;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implements RacesView {
 
@@ -37,11 +39,15 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     @UiField RegattaCompetition regattaCompetitionUi;
 
     public RacesViewImpl(final RacesView.Presenter presenter) {
-        super(presenter, presenter.isMultiRegattaEvent(), true);
+        super(presenter, presenter.isMultiRegattaEvent(), true, presenter.getRegatta() != null);
         setViewContent(uiBinder.createAndBindUi(this));
-        RegattaCompetitionPresenter competitionPresenter = new MobileRegattaCompetitionPresenter();
-        RacesViewImplFilterPresenter filterPresenter = new RacesViewImplFilterPresenter(competitorFilterUi, competitionPresenter);
-        refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(competitionPresenter), new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
+        if(presenter.getRegatta() != null) {
+            RegattaCompetitionPresenter competitionPresenter = new MobileRegattaCompetitionPresenter();
+            RacesViewImplFilterPresenter filterPresenter = new RacesViewImplFilterPresenter(competitorFilterUi, competitionPresenter);
+            refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(competitionPresenter), new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
+        } else {
+            setViewContent(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
+        }
         competitorFilterUi.removeFromParent();
     }
     
