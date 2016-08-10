@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.shared.app;
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
@@ -75,6 +76,12 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     public <P extends AbstractSeriesPlace> PlaceNavigation<P> getSeriesNavigation(P place, String baseUrl,
             boolean isOnRemoteServer) {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
+    }
+    
+    public PlaceNavigation<RegattaOverviewPlace> getRegattaNavigation(String eventUuidAsString,
+            String leaderboardIdAsNameString, String baseUrl, boolean isOnRemoteServer) {
+        return getEventNavigation(new RegattaOverviewPlace(eventUuidAsString, leaderboardIdAsNameString), baseUrl,
+                isOnRemoteServer);
     }
 
     public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {
