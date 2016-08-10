@@ -300,9 +300,8 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
             if (locationsForUrl == null) {
                 locationsForUrl = new ArrayList<>();
                 locationsQueuedBasedOnSendingInterval.put(postUrl, locationsForUrl);
-            } else {
-                locationsForUrl.add(location);
             }
+            locationsForUrl.add(location);
         }
     }
 
@@ -317,8 +316,10 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
                         if (!locationsQueuedBasedOnSendingInterval.isEmpty()) {
                             reschedule = true;
                             for (Map.Entry<String, List<Location>> pair : locationsQueuedBasedOnSendingInterval.entrySet()) {
+                                if (!pair.getValue().isEmpty()) {
                                     intentsToSend.add(MessageSendingService.createMessageIntent(TrackingService.this, pair.getKey(), null, UUID.randomUUID(),
                                             createFixesMessage(pair.getValue()).toString(), null));
+                                }
                             }
                             locationsQueuedBasedOnSendingInterval.clear();
                         }
@@ -352,21 +353,17 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     private void updateResendIntervalSetting() {
         float batteryPct = getBatteryPercentage();
         boolean batteryIsCharging = prefs.getBatteryIsCharging();
-
         int updateInterval = UPDATE_INTERVAL_IN_MILLIS_DEFAULT;
-
         if (prefs.getEnergySavingEnabledByUser() || (batteryPct < BATTERY_POWER_SAVE_THRESHOLD && !batteryIsCharging)) {
             if (BuildConfig.DEBUG) {
                 ExLog.i(this, "POWER-LEVELS", "in power saving mode");
             }
-
             updateInterval = UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE;
         } else {
             if (BuildConfig.DEBUG) {
                 ExLog.i(this, "POWER-LEVELS", "in default power mode");
             }
         }
-
         prefs.setMessageResendIntervalInMillis(updateInterval);
     }
 
