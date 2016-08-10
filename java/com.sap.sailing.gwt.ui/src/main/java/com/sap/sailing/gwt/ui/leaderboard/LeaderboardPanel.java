@@ -495,25 +495,28 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
             @Override
             public void run() {
-                setAutoExpandPreSelectedRace(false); // avoid expansion during updateLeaderboard(...); will expand later
-                                                     // if it was expanded before
-                // update leaderboard after settings panel column selection change
-                updateLeaderboard(leaderboard);
-                setAutoExpandPreSelectedRace(newSettings.isAutoExpandPreSelectedRace());
-
-                if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-                    timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
-                }
-                for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
-                    expandableSortableColumn.changeExpansionState(/* expand */ true);
-                }
-                if (newSettings.getNameOfRaceToSort() != null) {
-                    final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(newSettings.getNameOfRaceToSort());
-                    if (raceColumnByRaceName != null) {
-                        getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
+                try {
+                    setAutoExpandPreSelectedRace(false); // avoid expansion during updateLeaderboard(...); will expand later
+                                                         // if it was expanded before
+                    // update leaderboard after settings panel column selection change
+                    updateLeaderboard(leaderboard);
+                    setAutoExpandPreSelectedRace(newSettings.isAutoExpandPreSelectedRace());
+    
+                    if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
+                        timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
                     }
+                    for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
+                        expandableSortableColumn.changeExpansionState(/* expand */ true);
+                    }
+                    if (newSettings.getNameOfRaceToSort() != null) {
+                        final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(newSettings.getNameOfRaceToSort());
+                        if (raceColumnByRaceName != null) {
+                            getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
+                        }
+                    }
+                } finally {
+                    removeBusyTask();
                 }
-                removeBusyTask();
             }
         };
         if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails || getLeaderboard().hasOverallDetails()) {
@@ -2274,9 +2277,12 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         }
     }
 
-    public void loadCompleteLeaderboard(boolean showProgress) {
+    public void loadCompleteLeaderboard(final boolean showProgress) {
         final Date date = getLeaderboardDisplayDate();
         if (needsDataLoading()) {
+            if (showProgress) {
+                addBusyTask();
+            }
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), useNullAsTimePoint() ? null : date,
                     /* namesOfRaceColumnsForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(), shallAddOverallDetails(), /* previousLeaderboard */
@@ -2285,11 +2291,16 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            updateLeaderboard(result);
+                            try {
+                                updateLeaderboard(result);
+                            } finally {
+                                removeBusyTask();
+                            }
                         }
         
                         @Override
                         public void onFailure(Throwable caught) {
+                            removeBusyTask();
                             getErrorReporter()
                                     .reportError("Error trying to obtain leaderboard contents: " + caught.getMessage(),
                                             true /* silentMode */);
