@@ -101,7 +101,8 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         return getOrCreateCompetitorsProvider().getAllCompetitors(raceColumn, fleet);
     }
 
-    private CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+    @Override
+    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
         if (competitorsProvider == null) {
             competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
         }
