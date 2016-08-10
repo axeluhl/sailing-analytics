@@ -21,7 +21,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Tracking App|wiki/tracking-app]]
   * [[Web Services API|wiki/sailing-webservices]]
-  * [[Thesis (Bachelor, Master, ...)|wiki/theses]]
+  * [[Thesis (Bachelor, Master, ...)|wiki/thesis]]
   * [[Google Analytics (Web Page Tracking)|wiki/ganalytics]]
   * [[Polars|wiki/Polars]]
 * Production Environment
