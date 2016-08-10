@@ -100,6 +100,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String windwardDistanceToGoInMeters();
     String windwardDistanceToCompetitorFarthestAheadInMeters();
     String name();
+    String shortName();
     String leaveEmptyForDefault();
     String trackNewEvent();
     String trackableRaces();

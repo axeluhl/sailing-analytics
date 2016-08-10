@@ -40,6 +40,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
     private final CompetitorDTO competitorToEdit;
     private final TextBox name;
+    private final TextBox shortName;
     private final SuggestBox boatClassName;
     private final TextBox displayColorTextBox;
     private final ListBox threeLetterIocCountryCode;
@@ -102,6 +103,8 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         }
         this.name = createTextBox(competitorToEdit.getName());
         name.ensureDebugId("NameTextBox");
+        this.shortName = createTextBox(competitorToEdit.getShortName());
+        shortName.ensureDebugId("ShortNameTextBox");
         this.email = createTextBox(competitorToEdit.getEmail());
         this.searchTag = createTextBox(competitorToEdit.getSearchTag());
         this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
@@ -193,7 +196,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
         }
         BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), 0);
         BoatDTO boat = new BoatDTO(name.getText(), sailId.getText());
-        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color, email.getText(),
+        CompetitorDTO result = new CompetitorDTOImpl(name.getText(), shortName.getText(), color, email.getText(),
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),
                 /* countryName */ null, competitorToEdit.getIdAsString(),
@@ -206,29 +209,31 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
 
     @Override
     protected Widget getAdditionalWidget() {
-        Grid result = new Grid(11, 2);
+        Grid result = new Grid(12, 2);
         result.setWidget(0, 0, new Label(stringMessages.name()));
         result.setWidget(0, 1, name);
-        result.setWidget(1, 0, new Label(stringMessages.sailNumber()));
-        result.setWidget(1, 1, sailId);
-        result.setWidget(2, 0, new Label(stringMessages.nationality()));
-        result.setWidget(2, 1, threeLetterIocCountryCode);
-        result.setWidget(3, 0, new Label(stringMessages.color()));
-        result.setWidget(3, 1, displayColorTextBox);
-        result.setWidget(4, 0, new Label(stringMessages.email()));
-        result.setWidget(4, 1, email);
-        result.setWidget(5, 0, new Label(stringMessages.searchTag()));
-        result.setWidget(5, 1, searchTag);
-        result.setWidget(6, 0, new Label(stringMessages.boatClass()));
-        result.setWidget(6, 1, boatClassName);
-        result.setWidget(7, 0, new Label(stringMessages.flagImageURL()));
-        result.setWidget(7, 1, flagImageURL);
-        result.setWidget(8, 0, new Label(stringMessages.imageURL()));
-        result.setWidget(8, 1, imageUrlAndUploadComposite);
-        result.setWidget(9, 0, new Label(stringMessages.timeOnTimeFactor()));
-        result.setWidget(9, 1, timeOnTimeFactor);
-        result.setWidget(10, 0, new Label(stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile()));
-        result.setWidget(10, 1, timeOnDistanceAllowanceInSecondsPerNauticalMile);
+        result.setWidget(1, 0, new Label(stringMessages.shortName()));
+        result.setWidget(1, 1, shortName);
+        result.setWidget(2, 0, new Label(stringMessages.sailNumber()));
+        result.setWidget(2, 1, sailId);
+        result.setWidget(3, 0, new Label(stringMessages.nationality()));
+        result.setWidget(3, 1, threeLetterIocCountryCode);
+        result.setWidget(4, 0, new Label(stringMessages.color()));
+        result.setWidget(4, 1, displayColorTextBox);
+        result.setWidget(5, 0, new Label(stringMessages.email()));
+        result.setWidget(5, 1, email);
+        result.setWidget(6, 0, new Label(stringMessages.searchTag()));
+        result.setWidget(6, 1, searchTag);
+        result.setWidget(7, 0, new Label(stringMessages.boatClass()));
+        result.setWidget(7, 1, boatClassName);
+        result.setWidget(8, 0, new Label(stringMessages.flagImageURL()));
+        result.setWidget(8, 1, flagImageURL);
+        result.setWidget(9, 0, new Label(stringMessages.imageURL()));
+        result.setWidget(9, 1, imageUrlAndUploadComposite);
+        result.setWidget(10, 0, new Label(stringMessages.timeOnTimeFactor()));
+        result.setWidget(10, 1, timeOnTimeFactor);
+        result.setWidget(11, 0, new Label(stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile()));
+        result.setWidget(11, 1, timeOnDistanceAllowanceInSecondsPerNauticalMile);
         return result;
     }
 

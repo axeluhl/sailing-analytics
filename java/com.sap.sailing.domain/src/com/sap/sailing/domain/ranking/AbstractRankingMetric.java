@@ -135,7 +135,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
      * Helper instance used to encode <code>null</code> values in {@link ConcurrentHashMap} instances which do not accept
      * <code>null</code> as key nor value.
      */
-    private final static Competitor NULL_COMPETITOR = new CompetitorImpl(null, null, null, null, null, null, null, null, null, null);
+    private final static Competitor NULL_COMPETITOR = new CompetitorImpl(null, null, null, null, null, null, null, null, null, null, null);
     
     public abstract class AbstractRankingInfo implements RankingMetric.RankingInfo {
         private static final long serialVersionUID = 6845168655725234325L;

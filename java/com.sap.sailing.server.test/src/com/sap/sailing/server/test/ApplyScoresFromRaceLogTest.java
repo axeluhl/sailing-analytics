@@ -54,7 +54,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         for (int i=0; i<20; i++) {
             final String competitorName = "C"+i;
             competitors.add(service.getBaseDomainFactory().getCompetitorStore().getOrCreateCompetitor(UUID.randomUUID(),
-                    competitorName, /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
+                    competitorName, "c", /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
                     new TeamImpl("STG", Collections.singleton(
                             new PersonImpl(competitorName, new NationalityImpl("GER"),
                             /* dateOfBirth */ null, "This is famous "+competitorName)),

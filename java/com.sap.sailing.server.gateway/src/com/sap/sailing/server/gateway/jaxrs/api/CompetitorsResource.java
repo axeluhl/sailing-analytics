@@ -164,7 +164,8 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                     .entity("Could not store competitor image").type(MediaType.TEXT_PLAIN).build());
         }
 
-        getService().getCompetitorStore().updateCompetitor(competitorId, competitor.getName(), competitor.getColor(), competitor.getEmail(), 
+        getService().getCompetitorStore().updateCompetitor(competitorId, competitor.getName(), competitor.getShortName(), 
+                competitor.getColor(), competitor.getEmail(), 
                 competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, competitor.getSearchTag());
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());

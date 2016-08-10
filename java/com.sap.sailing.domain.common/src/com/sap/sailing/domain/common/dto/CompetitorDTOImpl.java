@@ -20,6 +20,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     private String twoLetterIsoCountryCode;
     private String threeLetterIocCountryCode;
     private Color color;
+    private String shortName;
     private String email;
     private String searchTag;
     private String idAsString;
@@ -32,10 +33,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     
     public CompetitorDTOImpl() {}
     
-    public CompetitorDTOImpl(String name, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
+    public CompetitorDTOImpl(String name, String shortName, Color color, String email, String twoLetterIsoCountryCode, String threeLetterIocCountryCode,
             String countryName, String idAsString, String imageURL, String flagImageURL, 
             BoatDTO boat, BoatClassDTO boatClass, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         super(name);
+        this.shortName = shortName;
         this.color = color;
         this.email = email;
         this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
@@ -60,6 +62,7 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         result = prime * result + ((idAsString == null) ? 0 : idAsString.hashCode());
         result = prime * result + ((color == null) ? 0 : color.hashCode());
         result = prime * result + ((email == null) ? 0 : email.hashCode());
+        result = prime * result + ((shortName == null) ? 0 : shortName.hashCode());
         result = prime * result + ((threeLetterIocCountryCode == null) ? 0 : threeLetterIocCountryCode.hashCode());
         result = prime * result + ((imageURL == null) ? 0 : imageURL.hashCode());
         result = prime * result + ((flagImageURL == null) ? 0 : flagImageURL.hashCode());
@@ -108,6 +111,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
                 return false;
         } else if (!email.equals(other.email))
             return false;
+        if (shortName == null) {
+            if (other.shortName != null)
+                return false;
+        } else if (!shortName.equals(other.shortName))
+            return false;
         if (imageURL == null) {
             if (other.imageURL != null)
                 return false;
@@ -149,6 +157,11 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
     @Override
     public String getCountryName() {
         return countryName;
+    }
+
+    @Override
+    public String getShortName() {
+        return shortName;
     }
 
     @Override

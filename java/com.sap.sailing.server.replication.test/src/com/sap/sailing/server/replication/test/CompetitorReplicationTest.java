@@ -79,8 +79,9 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true, OneDesignRankingMetric::new);
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String competitorName = "Der mit dem Kiel zieht";
+        final String competitorShortName = "DK";
         Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(
-                123, competitorName, Color.RED, "someone@nowhere.de", flagImageURI,
+                123, competitorName, competitorShortName, Color.RED, "someone@nowhere.de", flagImageURI,
                 new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
@@ -104,6 +105,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         assertNotSame(replicatedCompetitor, competitor);
         assertEquals(competitor.getId(), replicatedCompetitor.getId());
         assertEquals(competitor.getName(), replicatedCompetitor.getName());
+        assertEquals(competitor.getShortName(), replicatedCompetitor.getShortName());
         assertEquals(competitor.getColor(), replicatedCompetitor.getColor());
         assertEquals(competitor.getFlagImage(), replicatedCompetitor.getFlagImage());
         assertEquals(competitor.getBoat().getSailID(), replicatedCompetitor.getBoat().getSailID());
@@ -111,16 +113,18 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         
         // now update competitor on master using replicating operation
         final String newCompetitorName = "Der Vogel, der mit dem Kiel zieht";
-        master.apply(new UpdateCompetitor(competitor.getId().toString(), newCompetitorName, competitor.getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
+        final String newCompetitorShortName = "VK";
+        master.apply(new UpdateCompetitor(competitor.getId().toString(), newCompetitorName, newCompetitorShortName, competitor.getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
                 competitor.getTeam().getImage(), competitor.getFlagImage(),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         Thread.sleep(1000);
         assertEquals(newCompetitorName, replicatedCompetitor.getName()); // expect in-place update of existing competitor in replica
+        assertEquals(newCompetitorShortName, replicatedCompetitor.getShortName());
         
         // now allow for resetting to default through some event, such as receiving a GPS position
         master.apply(new AllowCompetitorResetToDefaults(Collections.singleton(competitor.getId().toString())));
         // modify the competitor on the master "from below" without an UpdateCompetitor operation, only locally:
-        master.getBaseDomainFactory().getCompetitorStore().updateCompetitor(competitor.getId().toString(), competitorName, Color.RED, competitor.getEmail(),
+        master.getBaseDomainFactory().getCompetitorStore().updateCompetitor(competitor.getId().toString(), competitorName, competitorShortName, Color.RED, competitor.getEmail(),
                 competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), competitor.getTeam().getImage(), competitor.getFlagImage(), 
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
@@ -134,5 +138,6 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         assertNotNull(replicatedTrackedRace);
         assertNotNull(replicatedTrackedRace.getTrack(replicatedCompetitor).getFirstRawFix());
         assertEquals(competitorName, replicatedCompetitor.getName());
+        assertEquals(competitorShortName, replicatedCompetitor.getShortName());
    }
 }

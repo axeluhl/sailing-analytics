@@ -27,14 +27,14 @@ public class CompetitorsResourceTest extends AbstractJaxRsApiTest {
     private final String sailID = "GER 1";
     private final String nationality = "GER";
     private final String countryCode = "DE";
-
+    private final String shortName = "HK";
 
     @Before
     public void setUp() {
         super.setUp();
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(nationality), null, null)), null);
         DynamicBoat boat = new BoatImpl(null, new BoatClassImpl(boatClassName, false), sailID);
-        racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, null, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, shortName, null, null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     }
 
     @Test

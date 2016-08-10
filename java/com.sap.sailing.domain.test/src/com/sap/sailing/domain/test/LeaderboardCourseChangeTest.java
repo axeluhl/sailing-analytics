@@ -160,7 +160,7 @@ public class LeaderboardCourseChangeTest {
         Set<Competitor> competitors = new HashSet<>();
         DynamicBoat mockedBoat = mock(DynamicBoat.class);
         when(mockedBoat.getBoatClass()).thenReturn(boatClass);
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", Color.BLACK, null, null,
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", "BYC", Color.BLACK, null, null,
                 mock(DynamicTeam.class), mockedBoat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         return competitors;
     }

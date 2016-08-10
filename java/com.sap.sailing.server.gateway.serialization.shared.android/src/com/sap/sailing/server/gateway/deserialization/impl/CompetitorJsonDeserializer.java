@@ -55,6 +55,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
                 competitorId = Helpers.tryUuidConversion(competitorId);
             }
             String name = (String) object.get(CompetitorJsonConstants.FIELD_NAME);
+            String shortName = (String) object.get(CompetitorJsonConstants.FIELD_SHORT_NAME);
             String displayColorAsString = (String) object.get(CompetitorJsonConstants.FIELD_DISPLAY_COLOR);
             String email = (String) object.get(CompetitorJsonConstants.FIELD_EMAIL);
             String searchTag = (String) object.get(CompetitorJsonConstants.FIELD_SEARCHTAG);
@@ -88,7 +89,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
             final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
-            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, email,
+            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
                     flagImageURI, team, boat, timeOnTimeFactor,
                     timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null :
                         new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);

@@ -19,8 +19,10 @@ public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFa
     Color getColor();
     
     String getEmail();
-    
+
     boolean hasEmail();
+
+    String getShortName();
 
     String getSearchTag();
     

@@ -65,6 +65,21 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         });
 
+        TextColumn<CompetitorDTO> competitorShortNameColumn = new TextColumn<CompetitorDTO>() {
+            @Override
+            public String getValue(CompetitorDTO competitor) {
+                return competitor.getShortName();
+            }
+        };
+        competitorShortNameColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(competitorShortNameColumn, new Comparator<CompetitorDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return comparator.compare(o1.getShortName(), o2.getShortName());
+            }
+        });
+
         TextColumn<CompetitorDTO> boatClassColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -249,8 +264,9 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);
-        table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(competitorNameColumn, stringMessages.name());
+        table.addColumn(competitorShortNameColumn, stringMessages.shortName());
+        table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(timeOnTimeFactorColumn, stringMessages.timeOnTimeFactor());
         table.addColumn(timeOnDistanceAllowancePerNauticalMileColumn, stringMessages.timeOnDistanceAllowanceInSecondsPerNauticalMile());

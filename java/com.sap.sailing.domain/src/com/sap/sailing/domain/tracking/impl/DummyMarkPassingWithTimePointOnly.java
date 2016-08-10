@@ -44,6 +44,11 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             }
 
             @Override
+            public String getShortName() {
+                return "Dummy";
+            }
+            
+            @Override
             public String getId() {
                 return "Dummy";
             }

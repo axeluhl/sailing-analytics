@@ -241,7 +241,7 @@ public class RaceLogEventSerializerTest {
         // we use the real event type here because we do not want to re-implement the dispatching.
         RaceLogEvent event = new RaceLogRegisterCompetitorEventImpl(null, author, 0,
             DomainFactory.INSTANCE
-                .getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */
+                .getOrCreateCompetitor("comp", "comp", "c", null, null, null, null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */
                         null, null));
         serializer.serialize(event);
         verify(registerCompetitorEventSerializer).serialize(event);

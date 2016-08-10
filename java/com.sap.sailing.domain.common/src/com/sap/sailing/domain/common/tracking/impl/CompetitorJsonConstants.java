@@ -8,6 +8,7 @@ package com.sap.sailing.domain.common.tracking.impl;
 public class CompetitorJsonConstants {
     public static final String FIELD_ID = "id";
     public static final String FIELD_NAME = "name";
+    public static final String FIELD_SHORT_NAME = "shortName";
     public static final String FIELD_SAIL_ID = "sailID";
     public static final String FIELD_NATIONALITY = "nationality";
     public static final String FIELD_COUNTRY_CODE = "countryCode";

@@ -19,8 +19,8 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CompetitorDeregistrationTest extends AbstractRegattaLogTrackingTest {
-    private final Competitor competitor = new CompetitorImpl("comp", "Comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-    private final Competitor competitor2 = new CompetitorImpl("comp2", "Comp2", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    private final Competitor competitor = new CompetitorImpl("comp", "Comp", "KYC", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    private final Competitor competitor2 = new CompetitorImpl("comp2", "Comp2", "KYC", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     
     @Test
     public void testCompetitorDeregistration() {

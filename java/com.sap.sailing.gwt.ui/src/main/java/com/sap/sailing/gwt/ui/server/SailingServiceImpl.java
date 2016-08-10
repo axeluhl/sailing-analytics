@@ -4749,7 +4749,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	    DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
     	    DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
             result = getBaseDomainFactory().convertToCompetitorDTO(
-                    getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(),
+                    getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(), competitor.getShortName(),
                             competitor.getColor(), competitor.getEmail(), 
                             competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team, boat,
                                     competitor.getTimeOnTimeFactor(),
@@ -4757,7 +4757,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } else {
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getService().apply(
-                            new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
+                            new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor.getShortName(), competitor
                                     .getColor(), competitor.getEmail(), competitor.getSailID(), nationality,
                                     competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),

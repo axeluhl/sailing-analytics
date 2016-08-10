@@ -201,6 +201,7 @@ public class StructureImporter {
                     Person person = (Person) obj;
                     String idAsString = person.getPersonID();
                     String name = person.getGivenName() + " " + person.getFamilyName();
+                    String shortName = null; // Can we get a short name from Manage2Sail?
                     Color color = null;
                     String email = null;
                     URI flagImage = null;
@@ -208,7 +209,7 @@ public class StructureImporter {
                             .toString());
                     BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
                     this.baseDomainFactory.convertToCompetitorDTO(this.baseDomainFactory.getOrCreateCompetitor(
-                            UUID.fromString(idAsString), name, color, email, flagImage, boatAndTeam.getTeam(), boatAndTeam.getBoat(),
+                            UUID.fromString(idAsString), name, shortName, color, email, flagImage, boatAndTeam.getTeam(), boatAndTeam.getBoat(),
                             /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
                 } else {
                     break;

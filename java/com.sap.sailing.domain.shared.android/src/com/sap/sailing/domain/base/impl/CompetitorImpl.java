@@ -20,6 +20,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     private final DynamicBoat boat;
     private final Serializable id;
     private String name;
+    private String shortName;
     private String searchTag;
     private Color color;
     private transient Set<CompetitorChangeListener> listeners;
@@ -28,9 +29,10 @@ public class CompetitorImpl implements DynamicCompetitor {
     private Double timeOnTimeFactor;
     private Duration timeOnDistanceAllowancePerNauticalMile;
     
-    public CompetitorImpl(Serializable id, String name, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
+    public CompetitorImpl(Serializable id, String name, String shortName, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         this.id = id;
         this.name = name;
+        this.shortName = shortName;
         this.team = team;
         this.boat = boat;
         this.color = color;
@@ -51,7 +53,12 @@ public class CompetitorImpl implements DynamicCompetitor {
     public String getName() {
         return name;
     }
-    
+
+    @Override
+    public String getShortName() {
+        return shortName;
+    }
+
     @Override
     public String toString() {
         return getName();
@@ -67,7 +74,19 @@ public class CompetitorImpl implements DynamicCompetitor {
             }
         }
     }
+
+    @Override
+    public void setShortName(String newShortName) {
+        final String oldShortName = this.shortName;
+        if (!Util.equalsWithNull(oldShortName, newShortName)) {
+            this.shortName = newShortName;
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.shortNameChanged(oldShortName, newShortName);
+            }
+        }
+    }
     
+
     @Override
     public Serializable getId() {
         return id;
@@ -86,7 +105,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     @Override
     public Competitor resolve(SharedDomainFactory domainFactory) {
         Competitor result = domainFactory
-                .getOrCreateCompetitor(getId(), getName(), getColor(), getEmail(), getFlagImage(), getTeam(),
+                .getOrCreateCompetitor(getId(), getName(), getShortName(), getColor(), getEmail(), getFlagImage(), getTeam(),
                         getBoat(), getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), searchTag);
         return result;
     }

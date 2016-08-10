@@ -43,6 +43,9 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     private boolean nameChanged;
     private String oldName;
     private String newName;
+    private boolean shortNameChanged;
+    private String oldShortName;
+    private String newShortName;
     private boolean colorChanged;
     private Color oldColor;
     private Color newColor;
@@ -78,6 +81,9 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         nameChanged = false;
         oldName = null;
         newName = null;
+        shortNameChanged = false;
+        oldShortName = null;
+        newShortName = null;
         colorChanged = false;
         oldColor = null;
         newColor = null;
@@ -120,7 +126,14 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
                 CompetitorListenerTest.this.oldName = oldName;
                 CompetitorListenerTest.this.newName = newName;
             }
-            
+
+            @Override
+            public void shortNameChanged(String oldShortName, String newShortName) {
+                shortNameChanged = true;
+                CompetitorListenerTest.this.oldShortName = oldShortName;
+                CompetitorListenerTest.this.newShortName = newShortName;
+            }
+
             @Override
             public void colorChanged(Color oldColor, Color newColor) {
                 colorChanged = true;
@@ -207,6 +220,14 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         assertFalse(nationalityChanged);
     }
 
+    @Test
+    public void testShortNameChange() throws URISyntaxException {
+        competitor.setShortName("Dr. HP");
+        assertTrue(shortNameChanged);
+        assertEquals("HP", oldShortName);
+        assertEquals("Dr. HP", newShortName);
+    }
+    
     @Test
     public void testFlagChange() throws URISyntaxException {
         competitor.setFlagImage(new URI("http://www.something.de/pic.png"));

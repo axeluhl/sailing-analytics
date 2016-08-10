@@ -125,7 +125,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 teamMembers.add(person);
             }
             DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-            result = competitorStore.getOrCreateCompetitor(competitor.getID(), competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat,
+            result = competitorStore.getOrCreateCompetitor(competitor.getID(), competitor.getName(), null /* shortName */, null /*displayColor*/, null /*email*/, null, team, boat,
                     /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         }
         return result;
@@ -142,7 +142,7 @@ public class DomainFactoryImpl implements DomainFactory {
         }
         DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
         result = baseDomainFactory.getCompetitorStore().getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceId, boatClass),
-                competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat,
+                competitor.getName(), null /* short name */, null /*displayColor*/, null /*email*/, null, team, boat,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         return result;
     }
