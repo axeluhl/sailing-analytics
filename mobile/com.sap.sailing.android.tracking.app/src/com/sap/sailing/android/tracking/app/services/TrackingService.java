@@ -77,37 +77,37 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
     /**
      * Must be synchronized upon while modifying the {@link #timerForDelayingSendingMessages} field
-     * and while modifying the {@link #messagesQueuedBasedOnSendingInterval} list.
+     * and while modifying the {@link #locationsQueuedBasedOnSendingInterval} list.
      */
     private final Object messageSendingTimerMonitor = new Object();
 
     /**
      * If {@code null}, no timer is currently active for sending out messages queued in
-     * {@link #messagesQueuedBasedOnSendingInterval} after the send interval, and the next message sending intent
+     * {@link #locationsQueuedBasedOnSendingInterval} after the send interval, and the next message sending intent
      * arriving can be forwarded to the sending service immediately, with the timer being started immediately afterwards
      * to delay the sending of messages arriving later until the resend interval has expired. If not {@code null},
      * messages that arrive in {@link #enqueueForSending(String, JSONObject)} will be appended to
-     * {@link #messagesQueuedBasedOnSendingInterval}.
+     * {@link #locationsQueuedBasedOnSendingInterval}.
      * <p>
      *
      * When the timer "rings" it acquires the {@link #messageSendingTimerMonitor} and checks for messages to send. If
-     * messages are found, they are removed from the {@link #messagesQueuedBasedOnSendingInterval} list, the monitor is
+     * messages are found, they are removed from the {@link #locationsQueuedBasedOnSendingInterval} list, the monitor is
      * released and the messages are then forwarded to the sending service. The timer remains running. Otherwise, the
      * timer stops itself, sets this field to {@code null} and releases the monitor.
      */
     private Timer timerForDelayingSendingMessages;
 
     /**
-     * When a message is added and {@link #timerForDelayingSendingMessages} is {@code null}, a new timer
+     * When a {@link Location} is added and {@link #timerForDelayingSendingMessages} is {@code null}, a new timer
      * will be created and assigned to {@link #timerForDelayingSendingMessages}. Otherwise, we can assume that the
      * existing timer will pick up this new element upon its next turn.
      */
-    private LinkedHashMap<String, JSONObject> messagesQueuedBasedOnSendingInterval;
+    private LinkedHashMap<String, List<Location>> locationsQueuedBasedOnSendingInterval;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        messagesQueuedBasedOnSendingInterval = new LinkedHashMap<>();
+        locationsQueuedBasedOnSendingInterval = new LinkedHashMap<>();
         prefs = new AppPreferences(this);
 
         initialLocation = true;
@@ -238,23 +238,34 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         updateResendIntervalSetting();
         reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
                 location.getLatitude(), location.getLongitude(), location.getAltitude());
-        JSONObject json = new JSONObject();
-        try {
-            JSONArray jsonArray = new JSONArray();
-            JSONObject fixJson = new JSONObject();
-            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.BEARING_DEG, location.getBearing());
-            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, location.getTime());
-            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.SPEED_M_PER_S, location.getSpeed());
-            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
-            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
-            jsonArray.put(fixJson);
-            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.FIXES, jsonArray);
-            json.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.DEVICE_UUID, prefs.getDeviceIdentifier());
-            String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
-            enqueueForSending(postUrlStr, json);
-        } catch (JSONException ex) {
-            ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
+        final String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
+        enqueueForSending(postUrlStr, location);
+    }
+
+    private JSONObject createJsonLocationFix(Location location) throws JSONException {
+        JSONObject fixJson = new JSONObject();
+        fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.BEARING_DEG, location.getBearing());
+        fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, location.getTime());
+        fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.SPEED_M_PER_S, location.getSpeed());
+        fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
+        fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
+        return fixJson;
+    }
+    
+    private JSONArray createJsonLocationFixes(Iterable<Location> locations) throws JSONException {
+        final JSONArray fixesAsJson = new JSONArray();
+        for (final Location location : locations) {
+            fixesAsJson.put(createJsonLocationFix(location));
         }
+        return fixesAsJson;
+    }
+    
+    private JSONObject createFixesMessage(Iterable<Location> locations) throws JSONException {
+        final JSONObject fixesMessage = new JSONObject();
+        final JSONArray fixesJson = createJsonLocationFixes(locations);
+        fixesMessage.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.FIXES, fixesJson);
+        fixesMessage.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.DEVICE_UUID, prefs.getDeviceIdentifier());
+        return fixesMessage;
     }
 
     /**
@@ -263,40 +274,34 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
      * to pick it up in a bulk operation later, after the sending interval has expired.
      *
      * @param postUrl URL to send fixes
-     * @param payload payload to send
+     * @param location the location fix to enqueue for sending to the URL specified by {@code postUrl}
      */
-    private void enqueueForSending(String postUrl, JSONObject payload) {
+    private void enqueueForSending(String postUrl, Location location) {
         synchronized (messageSendingTimerMonitor) {
-            newOrAppendPayload(postUrl, payload);
+            newOrAppendPayload(postUrl, location);
             if (timerForDelayingSendingMessages == null) {
                 timerForDelayingSendingMessages = new Timer("Message collecting timer", /* daemon */ true);
                 final TimerTask timerTask = createTimerTask();
-                timerForDelayingSendingMessages.schedule(timerTask, /* initial delay */ 0);
+                timerForDelayingSendingMessages.schedule(timerTask, /* initial delay 0, send new fix immediately */ 0);
             }
         }
     }
 
     /**
-     * Add the json to the HashMap, if the postUrl isn't included. If the url is included the fixes will be
+     * Add the {@code payload} to the HashMap, if the postUrl isn't included. If the url is included the fixes will be
      * concat to the current waiting data.
      *
      * @param postUrl URL to send fixes
-     * @param payload additional payload for fix (new or append)
+     * @param location the fix to store in {@link #locationsQueuedBasedOnSendingInterval}
      */
-    private void newOrAppendPayload(String postUrl, JSONObject payload) {
-        if (!messagesQueuedBasedOnSendingInterval.containsKey(postUrl)) {
-            messagesQueuedBasedOnSendingInterval.put(postUrl, payload);
-        } else {
-            try {
-                JSONObject data = messagesQueuedBasedOnSendingInterval.get(postUrl);
-                JSONArray currentFixes = data.getJSONArray(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.FIXES);
-                JSONArray fixes = payload.getJSONArray(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.FIXES);
-                for (int index = 0; index < fixes.length(); index++) {
-                    JSONObject fix = fixes.getJSONObject(index);
-                    currentFixes.put(fix);
-                }
-            } catch (JSONException ex) {
-                messagesQueuedBasedOnSendingInterval.put(postUrl, payload);
+    private void newOrAppendPayload(String postUrl, Location location) {
+        synchronized (messageSendingTimerMonitor) {
+            List<Location> locationsForUrl = locationsQueuedBasedOnSendingInterval.get(postUrl);
+            if (locationsForUrl == null) {
+                locationsForUrl = new ArrayList<>();
+                locationsQueuedBasedOnSendingInterval.put(postUrl, locationsForUrl);
+            } else {
+                locationsForUrl.add(location);
             }
         }
     }
@@ -305,25 +310,30 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         return new TimerTask() {
             @Override
             public void run() {
-                final List<Intent> intentsToSend = new ArrayList<>();
-                boolean reschedule = false;
-                synchronized (messageSendingTimerMonitor) {
-                    if (!messagesQueuedBasedOnSendingInterval.isEmpty()) {
-                        reschedule = true;
-                        for (Map.Entry<String, JSONObject> pair : messagesQueuedBasedOnSendingInterval.entrySet()) {
-                            intentsToSend.add(MessageSendingService.createMessageIntent(TrackingService.this, pair.getKey(), null, UUID.randomUUID(), pair.getValue().toString(), null));
+                try {
+                    final List<Intent> intentsToSend = new ArrayList<>();
+                    boolean reschedule = false;
+                    synchronized (messageSendingTimerMonitor) {
+                        if (!locationsQueuedBasedOnSendingInterval.isEmpty()) {
+                            reschedule = true;
+                            for (Map.Entry<String, List<Location>> pair : locationsQueuedBasedOnSendingInterval.entrySet()) {
+                                    intentsToSend.add(MessageSendingService.createMessageIntent(TrackingService.this, pair.getKey(), null, UUID.randomUUID(),
+                                            createFixesMessage(pair.getValue()).toString(), null));
+                            }
+                            locationsQueuedBasedOnSendingInterval.clear();
                         }
-                        messagesQueuedBasedOnSendingInterval.clear();
+                        if (!reschedule) {
+                            timerForDelayingSendingMessages.cancel();
+                            timerForDelayingSendingMessages = null;
+                        } else {
+                            timerForDelayingSendingMessages.schedule(createTimerTask(), prefs.getMessageSendingIntervalInMillis());
+                        }
                     }
-                    if (!reschedule) {
-                        timerForDelayingSendingMessages.cancel();
-                        timerForDelayingSendingMessages = null;
-                    } else {
-                        timerForDelayingSendingMessages.schedule(createTimerTask(), prefs.getMessageSendingIntervalInMillis());
+                    for (final Intent intentToSend : intentsToSend) {
+                        startService(intentToSend);
                     }
-                }
-                for (final Intent intentToSend : intentsToSend) {
-                    startService(intentToSend);
+                } catch (JSONException e) {
+                    ExLog.e(TrackingService.this, TAG, "Internal error converting location fixes to JSON message: "+e.getMessage());
                 }
             }
         };
