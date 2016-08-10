@@ -19,3 +19,10 @@ Usually this step is carried out by the wizard automatically.
 * defined course layouts for these races
 
 ## Pinning Buoys and other race marks
+To map positions of all of the required marks, you need to invite one or multiple people as Buoy Tenders. Do so by navigating to "Connectors->Smartphone Tracking" in the Admin Console and click the Mail Icon under "Actions".
+Those people then need to download the [SAP Sailing Buoy Pinger](https://play.google.com/store/apps/details?id=com.sap.sailing.android.buoy.positioning.app) App - a link is also provided in the mail they received. Once installed, they will see all marks related to this regatta listed within the app, enabling them to pin the exact positions via GPS.
+You can later on adjust the positions within the app or in the Admin Console once Tracking has started.
+
+[SAP Sail InSight](https://play.google.com/store/apps/details?id=com.sap.sailing.android.tracking.app)
+
+_...to be finished..._
