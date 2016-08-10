@@ -20,8 +20,11 @@ public class UrlBuilderUtil {
      * Creates an {@link UrlBuilder} based on the current location but with clean parameters and fragment/hash.
      * <p>
      * 
-     * Example: Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123
-     * Returned UrlBuilder: http://www.sapsailing.com/gwt/Home.html?locale=de
+     * Example:
+     * <ul>
+     * <li>Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123</li>
+     * <li>Returned UrlBuilder: http://www.sapsailing.com/gwt/Home.html?locale=de</li>
+     * </ul>
      */
     public static UrlBuilder createUrlBuilderFromCurrentLocationWithCleanParameters() {
         final UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
@@ -39,9 +42,12 @@ public class UrlBuilderUtil {
      * addition the base URL and path are being set specifically.
      * <p>
      * 
-     * Example: Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123
-     * baseUrl: http://kielerwoche2016.sapsailing.com path: /gwt/Leaderboard.html Returned UrlBuilder:
-     * http://kielerwoche2016.sapsailing.com/gwt/Leaderboard.html?locale=de
+     * Example:
+     * <ul>
+     * <li>Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123</li>
+     * <li>baseUrl: http://kielerwoche2016.sapsailing.com path: /gwt/Leaderboard.html</li>
+     * <li>Returned UrlBuilder: http://kielerwoche2016.sapsailing.com/gwt/Leaderboard.html?locale=de</li>
+     * </ul>
      */
     public static UrlBuilder createUrlBuilderFromBaseURLAndPathWithCleanParameters(String baseUrl, String path) {
         final int colonIndex = baseUrl.indexOf(':');
@@ -89,8 +95,12 @@ public class UrlBuilderUtil {
      * location.
      * <p>
      * 
-     * Example: Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123 path:
-     * /gwt/SomePage.html Returned UrlBuilder: http://www.sapsailing.com/gwt/SomePage.html?locale=de
+     * Example:
+     * <ul>
+     * <li>Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123</li>
+     * <li>path: /gwt/SomePage.html</li>
+     * <li>Returned UrlBuilder: http://www.sapsailing.com/gwt/SomePage.html?locale=de</li>
+     * </ul>
      */
     public static UrlBuilder createUrlBuilderFromCurrentLocationWithCleanParametersAndPath(String path) {
         return createUrlBuilderFromCurrentLocationWithCleanParameters().setPath(path);
@@ -102,9 +112,13 @@ public class UrlBuilderUtil {
      * the current location.
      * <p>
      * 
-     * Example: Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123 path:
-     * /gwt/SomePage.html hash: /some/place/:key=value Returned UrlBuilder:
-     * http://www.sapsailing.com/gwt/SomePage.html?locale=de#/some/place/:key=value
+     * Example:
+     * <ul>
+     * <li>Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123</li>
+     * <li>path: /gwt/SomePage.html</li>
+     * <li>hash: /some/place/:key=value</li>
+     * <li>Returned UrlBuilder: http://www.sapsailing.com/gwt/SomePage.html?locale=de#/some/place/:key=value</li>
+     * </ul>
      */
     public static UrlBuilder createUrlBuilderFromCurrentLocationWithCleanParametersAndPathAndHash(String path,
             String hash) {
@@ -117,9 +131,13 @@ public class UrlBuilderUtil {
      * is the one of the current location.
      * <p>
      * 
-     * Example: Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123 path:
-     * /gwt/SomePage.html parameters: {p1: [abc], p2: [xyz, 123]} Returned UrlBuilder:
-     * http://www.sapsailing.com/gwt/SomePage.html?locale=de&p1=abc&p2=xyz&p2=123
+     * Example:
+     * <ul>
+     * <li>Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123</li>
+     * <li>path: /gwt/SomePage.html</li>
+     * <li>parameters: {p1: [abc], p2: [xyz, 123]}</li>
+     * <li>Returned UrlBuilder: http://www.sapsailing.com/gwt/SomePage.html?locale=de&p1=abc&p2=xyz&p2=123</li>
+     * </ul>
      */
     public static UrlBuilder createUrlBuilderWithPathAndParameters(String path, Map<String, String> parameters) {
         final UrlBuilder urlBuilder = createUrlBuilderFromCurrentLocationWithCleanParametersAndPath(path);
@@ -135,9 +153,13 @@ public class UrlBuilderUtil {
      * (host/port/protocol) is the one of the current location.
      * <p>
      * 
-     * Example: Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123 path:
-     * /gwt/SomePage.html hash: /some/place/:key=value parameters: {p1: [abc]} Returned UrlBuilder:
-     * http://www.sapsailing.com/gwt/SomePage.html?locale=de&p1=abc#/some/place/:key=value
+     * Example:
+     * <ul>
+     * <li>Current location: http://www.sapsailing.com/gwt/Home.html?locale=de&some_param=some_value#abc123</li>
+     * <li>path: /gwt/SomePage.html</li>
+     * <li>hash: /some/place/:key=value parameters: {p1: [abc]}</li>
+     * <li>Returned UrlBuilder: http://www.sapsailing.com/gwt/SomePage.html?locale=de&p1=abc#/some/place/:key=value</li>
+     * </ul>
      */
     public static UrlBuilder createUrlBuilderWithPathAndHashAndParameters(String path, String hash,
             Map<String, String> parameters) {

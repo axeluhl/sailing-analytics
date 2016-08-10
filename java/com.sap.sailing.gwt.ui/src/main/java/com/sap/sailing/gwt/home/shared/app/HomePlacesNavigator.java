@@ -26,7 +26,7 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     protected HomePlacesNavigator(PlaceController placeController, boolean isStandaloneServer) {
         super(placeController, isStandaloneServer);
     }
-    
+
     public PlaceNavigation<StartPlace> getHomeNavigation() {
         return createGlobalPlaceNavigation(new StartPlace());
     }
@@ -50,7 +50,7 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     public PlaceNavigation<ContactPlace> getContactNavigation() {
         return createGlobalPlaceNavigation(new ContactPlace());
     }
-    
+
     public PlaceNavigation<ImprintPlace> getImprintNavigation() {
         return createGlobalPlaceNavigation(new ImprintPlace());
     }
@@ -65,17 +65,18 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
             boolean isOnRemoteServer) {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
-    
-    public PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(String seriesId, String baseUrl, boolean isOnRemoteServer) {
+
+    public PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(String seriesId, String baseUrl,
+            boolean isOnRemoteServer) {
         SeriesDefaultPlace place = new SeriesDefaultPlace(seriesId);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
-    
+
     public <P extends AbstractSeriesPlace> PlaceNavigation<P> getSeriesNavigation(P place, String baseUrl,
             boolean isOnRemoteServer) {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
-    
+
     public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {
         return createLocalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
     }
@@ -83,7 +84,7 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
         return createLocalPlaceNavigation(new ConfirmationPlace(Action.RESET_EXECUTED, username));
     }
-    
+
     public PlaceNavigation<PasswordResetPlace> getPasswordResetNavigation() {
         return createLocalPlaceNavigation(new PasswordResetPlace());
     }
@@ -91,7 +92,7 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
         return createLocalPlaceNavigation(new UserProfileDefaultPlace());
     }
-    
+
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserPreferencesNavigation() {
         return createLocalPlaceNavigation(new UserProfilePreferencesPlace());
     }
