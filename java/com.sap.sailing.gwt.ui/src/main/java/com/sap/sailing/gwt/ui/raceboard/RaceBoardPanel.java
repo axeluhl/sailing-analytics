@@ -534,7 +534,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
             final Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
             regattaNameAnchor.setTitle(raceIdentifier.getRegattaName());
             if (eventId != null) {
-                String link = EntryPointLinkFactory.createLeaderboardPlaceLink(eventId.toString(), leaderboardName);
+                String link = EntryPointLinkFactory.createRacesTabLink(eventId.toString(), leaderboardName);
                 regattaNameAnchor.setHref(link);
             } else {
                 String leaderboardGroupNameParam = Window.Location.getParameter("leaderboardGroupName");

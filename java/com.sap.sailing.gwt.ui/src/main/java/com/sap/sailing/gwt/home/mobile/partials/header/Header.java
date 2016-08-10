@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
@@ -63,7 +64,7 @@ public class Header extends Composite {
         
         addNavigation(placeNavigator.getHomeNavigation(), StringMessages.INSTANCE.home());
         addNavigation(placeNavigator.getEventsNavigation(), StringMessages.INSTANCE.events());
-        addNavigation(placeNavigator.getSolutionsNavigation(), TextMessages.INSTANCE.solutions());
+        addNavigation(placeNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics), TextMessages.INSTANCE.solutions());
         addUrl("https://blog.sapsailing.com", TextMessages.INSTANCE.blog());
         signInNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signIn(), new Runnable() {
             @Override
