@@ -1872,8 +1872,8 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             contentPanel.add(toolbarPanel);
         }
         if (competitorSearchTextBox != null) {
+            competitorSearchTextBox.add(busyIndicator);
             contentPanel.add(competitorSearchTextBox);
-            contentPanel.add(busyIndicator);
             competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
