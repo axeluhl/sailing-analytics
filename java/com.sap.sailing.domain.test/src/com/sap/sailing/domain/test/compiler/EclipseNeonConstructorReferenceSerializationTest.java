@@ -9,6 +9,10 @@ import org.junit.Test;
 
 public class EclipseNeonConstructorReferenceSerializationTest {
     
+    /**
+     * We have serialization problems due to a regression in Eclipse Neon:
+     * https://bugs.eclipse.org/bugs/show_bug.cgi?id=497879
+     */
     @Test
     public void testConstructorReferenceSerializationThatFailsOnEclipseNeon() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
