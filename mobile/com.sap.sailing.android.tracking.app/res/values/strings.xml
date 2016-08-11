@@ -8,8 +8,8 @@
     <string name="options_replace_team_photo">Replace Team Photo</string>
     <string name="settings_category_other">Other Settings</string>
     <string name="device_identifier">Device Identifier</string>
-    <string name="tracker_started">SAP Sail InSight started</string>
-    <string name="tracker_stopped">SAP Sail InSight stopped</string>
+    <string name="tracker_started">Tracking was successfully started</string>
+    <string name="tracker_stopped">Tracking was successfully stopped</string>
     <string name="title_activity_regatta">Regatta</string>
     <string name="title_activity_leaderboard">Leaderboard</string>
     <string name="title_activity_start">Set Up GPS Tracker</string>
