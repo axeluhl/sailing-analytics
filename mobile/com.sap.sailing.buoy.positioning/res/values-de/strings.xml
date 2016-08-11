@@ -25,7 +25,7 @@
     <string name="server">Polling Einstellungen</string>
     <string name="server_sync_settings">Abfrage Intervall (Sekunden)</string>
 
-    <string name="options_menu_checkout">Checkout</string>
+    <string name="options_menu_checkout">Abmelden</string>
     <string name="checkout_warning_message">Möchten Sie sich wirklich ausloggen? Sie müssen sich erneut mit dem QR code einloggen, um ihre Bojen zu sehen!</string>
 
     <string name="no_marks_message">Kein Bojen</string>
