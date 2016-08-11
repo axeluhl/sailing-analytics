@@ -46,7 +46,7 @@ Whichever master is current, we map the main Apache URL http://kielerwoche2015-m
 - http://club.tractrac.com/events/event_20150625_KielerWoch/jsonservice.php for the Silbernes Band
 
 ## Replication
-- RabbitMQ server for replication: 52.16.112.6 (Web: http://52.16.112.6:15672/) or internal host name rabbit.internal.sapsailing.com)
+- RabbitMQ server for replication: rabbit.sapsailing.com (Web: http://rabbit.sapsailing.com:15672/) or internal host name rabbit.internal.sapsailing.com)
 - Replication Exchange Name: KW2015
 
 ## Switching from one Master to Another
@@ -64,7 +64,7 @@ Whichever master is current, we map the main Apache URL http://kielerwoche2015-m
  - upgrade the replicas (including the Cube Replica) to the new master if the new master runs a different release than the old master, using `refreshInstance.sh`
  - adjust the replicas' (including the Cube Replica) `env.sh` to point to the new master with their `REPLICATE_MASTER_SERVLET_HOST` setting
  - restart the Java server instance on the replicas (including the Cube Replica), using the usual `./stop; ./start` sequence. This will automatically re-start the replication
- - when the replicas have finished their initial load (can be verified by looking at the RabbitMQ queues at http://ec2-52-16-112-6.eu-west-1.compute.amazonaws.com:15672/#/queues which should no longer have any "initialLoad" queues), add them again to the load balancer
+ - when the replicas have finished their initial load (can be verified by looking at the RabbitMQ queues at http://rabbit.sapsailing.com:15672/#/queues which should no longer have any "initialLoad" queues), add them again to the load balancer
  - in the Cube server's Apache configuration let http://kielerwoche2015.sapsailing.com point again to the local replica by editing `/etc/apache2/sites-enabled/001-events.conf`, then as user `root` run `service httpd reload`
  - shut down the other master server to avoid confusion with database writes
 

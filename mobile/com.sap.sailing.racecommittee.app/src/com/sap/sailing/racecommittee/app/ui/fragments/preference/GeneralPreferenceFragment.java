@@ -1,13 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
-import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
-import com.sap.sailing.android.shared.ui.views.EditSetPreference;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.BuildConfig;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.QRHelper;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -22,12 +14,18 @@ import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
+import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
+import com.sap.sailing.android.shared.ui.views.EditSetPreference;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.BuildConfig;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
+
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     private static int requestCodeQRCode = 45392;
-
-    private EditTextPreference identifierPreference;
-    private EditTextPreference serverUrlPreference;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,7 +38,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         setupDeveloperOptions();
     }
 
-    protected void setupGeneral() {
+    private void setupGeneral() {
         setupLanguageButton();
         setupCourseAreasList();
 
@@ -59,6 +57,20 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 return true;
             }
         });
+        addOnPreferenceChangeListener(findPreference(R.string.preference_non_public_events_key), new OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
+                if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    builder.setTitle(getString(R.string.non_public_changed_title));
+                    builder.setMessage(getString(R.string.app_refresh_message));
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                }
+                return true;
+            }
+        });
     }
 
     private void setupPolling() {
@@ -68,7 +80,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         bindPreferenceSummaryToInteger(intervalPreference);
     }
 
-    protected void setupDeveloperOptions() {
+    private void setupDeveloperOptions() {
         PreferenceScreen screen = getPreferenceScreen();
         PreferenceCategory category = findPreference(R.string.preference_developer_key);
         if (!BuildConfig.DEBUG) {
@@ -78,7 +90,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         }
     }
 
-    protected void setupConnection() {
+    private void setupConnection() {
         setupIdentifierBox();
         setupServerUrlBox();
         setupSyncQRCodeButton();
@@ -87,7 +99,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     private void setupIdentifierBox() {
         final AppPreferences appPreferences = AppPreferences.on(getActivity());
-        identifierPreference = findPreference(R.string.preference_identifier_key);
+        EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
         identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
         addOnPreferenceChangeListener(identifierPreference, new OnPreferenceChangeListener() {
             @Override
@@ -104,15 +116,18 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
     }
 
     private void setupServerUrlBox() {
-        serverUrlPreference = findPreference(R.string.preference_server_url_key);
+        EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
         addOnPreferenceChangeListener(serverUrlPreference, new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
-                builder.setTitle(getString(R.string.url_refresh_title));
-                builder.setMessage(getString(R.string.url_refresh_message));
-                builder.setPositiveButton(android.R.string.ok, null);
-                builder.create().show();
+                AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
+                if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    builder.setTitle(getString(R.string.url_refresh_title));
+                    builder.setMessage(getString(R.string.app_refresh_message));
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.show();
+                }
                 return true;
             }
         });
@@ -159,7 +174,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         });
     }
 
-    protected boolean requestQRCodeScan() {
+    private boolean requestQRCodeScan() {
         try {
             Intent intent = new Intent("com.google.zxing.client.android.SCAN");
             intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
@@ -182,8 +197,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
         if (resultCode == Activity.RESULT_OK) {
             QRHelper.with(getActivity()).saveData(data.getStringExtra("SCAN_RESULT"));
-
-
+            AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }

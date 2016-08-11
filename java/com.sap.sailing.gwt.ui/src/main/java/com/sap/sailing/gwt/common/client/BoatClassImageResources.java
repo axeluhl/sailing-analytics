@@ -37,11 +37,17 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/505.png")
     ImageResource _505mIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/5.5mR.png")
+    ImageResource _5_5MRIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/A_CAT.png")
     ImageResource A_CatIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ALBIN_EXPRESS.png")
     ImageResource AlbinExpressIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ALBIN_BALLAD.png")
+    ImageResource AlbinBalladIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/B_ONE.png")
     ImageResource BOne();
@@ -130,6 +136,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/LAGO_26.png")
     ImageResource Lago26Icon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/M32.png")
+    ImageResource M32Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/MELGES_20.png")
     ImageResource Melges20Icon();
 
@@ -175,6 +184,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/STREAMLINE.png")
     ImageResource StreamlineIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SUNBEAM22.png")
+    ImageResource Sunbeam22Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SWAN_45.png")
     ImageResource Swan45Icon();
     
@@ -193,8 +205,32 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/OPENBIC.png")
     ImageResource OpenBicIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS100.png")
+    ImageResource RS100Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS200.png")
+    ImageResource RS200Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS400.png")
+    ImageResource RS400Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS500.png")
+    ImageResource RS500Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RS800.png")
     ImageResource RS800Icon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/RSAERO.png")
+    ImageResource RSAEROIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SPLASH_BLUE.png")
+    ImageResource SplashBlueIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SPLASH_RED.png")
+    ImageResource SplashRedIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SPLASH_GREEN.png")
+    ImageResource SplashGreenIcon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/ORC.png")
     ImageResource ORCIcon();

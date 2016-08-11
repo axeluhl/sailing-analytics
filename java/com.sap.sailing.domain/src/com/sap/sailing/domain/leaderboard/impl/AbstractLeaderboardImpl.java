@@ -101,7 +101,8 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         return getOrCreateCompetitorsProvider().getAllCompetitors(raceColumn, fleet);
     }
 
-    private CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+    @Override
+    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
         if (competitorsProvider == null) {
             competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
         }
@@ -128,8 +129,8 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
 
     /**
      * Per competitor disqualified ({@link ScoreCorrection} has a {@link MaxPointsReason} for the competitor that has
-     * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>), all competitors ranked worse by
-     * the tracking system need to have their rank corrected by one.
+     * <code>{@link MaxPointsReason#isAdvanceCompetitorsTrackedWorse()}==true</code>) and those suppressed, all
+     * competitors ranked worse by the tracking system need to have their rank corrected by one.
      * 
      * @param trackedRace
      *            the race to which the rank refers; look for disqualifications / max points reasons in this column
@@ -150,12 +151,13 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         int betterCompetitorRank = 1;
         Iterator<Competitor> ci = competitorsFromBestToWorst.iterator();
         while (betterCompetitorRank < rank && ci.hasNext()) {
-            Competitor betterTrackedCompetitor = ci.next();
+            final Competitor betterTrackedCompetitor = ci.next();
             MaxPointsReason maxPointsReasonForBetterCompetitor = getScoreCorrection().getMaxPointsReason(
                     betterTrackedCompetitor, raceColumn, timePoint);
-            if (maxPointsReasonForBetterCompetitor != null
+            if (isSuppressed(betterTrackedCompetitor) ||
+                    (maxPointsReasonForBetterCompetitor != null
                     && maxPointsReasonForBetterCompetitor != MaxPointsReason.NONE
-                    && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse()) {
+                    && maxPointsReasonForBetterCompetitor.isAdvanceCompetitorsTrackedWorse())) {
                 correctedRank--;
             }
             betterCompetitorRank++;

@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -240,7 +241,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         
         boolean isShowOnlyRacesOfSameDay = showOnlyRacesOfSameDayCheckBox.getValue();
         boolean isShowOnlyCurrentlyRunningRaces = showOnlyCurrentlyRunningRacesCheckBox.getValue();
-        return new RegattaRaceStatesSettings(selectedCourseAreas, selectedRegattas, isShowOnlyRacesOfSameDay, isShowOnlyCurrentlyRunningRaces);
+        return new RegattaRaceStatesSettings(this.courseAreas, selectedCourseAreas, this.raceGroups, selectedRegattas,
+                isShowOnlyRacesOfSameDay, isShowOnlyCurrentlyRunningRaces);
     }
 
     @Override
@@ -263,15 +265,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     }
     
     private void updateLinkUrl(UUID eventId, RegattaRaceStatesSettings settings) {
-        boolean isSetVisibleCourseAreasInUrl = true;
-        boolean isSetVisibleRegattasInUrl = true;
-        if (settings.getVisibleCourseAreas().size() == courseAreas.size()) {
-            isSetVisibleCourseAreasInUrl = false;
-        }
-        if (settings.getVisibleRegattas().size() == raceGroups.size()) {
-            isSetVisibleRegattasInUrl = false;
-        }
-        resultingLink.setHref(RegattaOverviewEntryPoint.getUrl(eventId, settings, isSetVisibleCourseAreasInUrl, isSetVisibleRegattasInUrl));
+        resultingLink.setHref(RegattaOverviewEntryPoint.getUrl(eventId, settings));
     }
 
 }

@@ -12,6 +12,16 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
         return new TimeRangeImpl(new MillisecondsTimePoint(fromMillis), new MillisecondsTimePoint(toMillis));
     }
 
+    /**
+     * @param from
+     *            if {@code null}, the time range is considered open on its "left" end, and all {@link TimePoint}s at or
+     *            after {@link TimePoint#BeginningOfTime} and at or before {@code to} are considered {@link #includes
+     *            included} in this time range.
+     * @param to
+     *            if {@code null}, the time range is considered open on its "right" end, and all {@link TimePoint}s at
+     *            or before {@link TimePoint#EndOfTime} and at or after {@code from} are considered {@link #includes
+     *            included} in this time range.
+     */
     public TimeRangeImpl(TimePoint from, TimePoint to) {
         super(from == null ? TimePoint.BeginningOfTime : from, to == null ? TimePoint.EndOfTime : to);
         if (from().after(to())) {

@@ -3,7 +3,6 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -49,9 +48,11 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEight;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterpolation;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
+import com.sap.sailing.domain.leaderboard.impl.HighPointMatchRacing;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
+import com.sap.sailing.domain.leaderboard.impl.LowPointTieBreakBasedOnLastSeriesOnly;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminationsAndRoundsWinnerGets07;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -115,6 +116,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPointWinnerGetsSix();
         case HIGH_POINT_WINNER_GETS_EIGHT:
             return new HighPointWinnerGetsEight();
+        case HIGH_POINT_MATCH_RACING:
+            return new HighPointMatchRacing();
         case HIGH_POINT_WINNER_GETS_EIGHT_AND_INTERPOLATION:
             return new HighPointWinnerGetsEightAndInterpolation();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
@@ -125,6 +128,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new LowPointWithEliminationsAndRoundsWinnerGets07();
         case LOW_POINT_LEAGUE_OVERALL:
             return new LowPointForLeagueOverallLeaderboard();
+        case LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY:
+            return new LowPointTieBreakBasedOnLastSeriesOnly();
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
@@ -176,7 +181,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
 
     @Override
     public TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Leaderboard leaderboard,
-            RaceColumn raceColumn, Fleet fleet, Collection<MediaTrack> mediaTracks) {
+            RaceColumn raceColumn, Fleet fleet, Iterable<MediaTrack> mediaTracks) {
         TrackedRaceStatisticsDTO statisticsDTO = new TrackedRaceStatisticsDTO();
         // GPS data
         statisticsDTO.hasGPSData = trackedRace.hasGPSData();

@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -22,18 +20,20 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelogtracking.DeviceMapping;
+import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import junit.framework.Assert;
+
 public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
-    private final Competitor competitor = new CompetitorImpl("comp", "Comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
-    private final Competitor competitor2 = new CompetitorImpl("comp2", "Comp2", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+    private final Competitor competitor = new CompetitorImpl("comp", "Comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    private final Competitor competitor2 = new CompetitorImpl("comp2", "Comp2", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     private final DeviceIdentifier device = new SmartphoneImeiIdentifier("imei");
     
     private int time = 0;
     
-    private List<DeviceMapping<Competitor>> getMappings() {
+    private List<DeviceMappingWithRegattaLogEvent<Competitor>> getMappings() {
         return new RegattaLogDeviceCompetitorMappingFinder(log).analyze().get(competitor);
     }
     
@@ -66,24 +66,24 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
         final RegattaLogDeviceCompetitorMappingFinder finder = new RegattaLogDeviceCompetitorMappingFinder(log);
         addMapping(author, device, 100l, 200l, competitor);
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
-            final DeviceMapping<Competitor> mapping = deviceMappings.iterator().next();
+            final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
             assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(150));
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(2, deviceMappings.size());
             boolean found100 = false;
-            for (final DeviceMapping<Competitor> mapping : deviceMappings) {
+            for (final DeviceMappingWithRegattaLogEvent<Competitor> mapping : deviceMappings) {
                 if (mapping.getTimeRange().from().asMillis() == 100) {
                     found100 = true;
                     assertEquals(149, mapping.getTimeRange().to().asMillis());
@@ -102,23 +102,23 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
         final Serializable mappingId = addMapping(author, device, 100l, null, competitor);
         closeMapping(author, device, mappingId, 200);
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
-            final DeviceMapping<Competitor> mapping = deviceMappings.iterator().next();
+            final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
             assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(150));
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(2, deviceMappings.size());
-            for (final DeviceMapping<Competitor> mapping : deviceMappings) {
+            for (final DeviceMappingWithRegattaLogEvent<Competitor> mapping : deviceMappings) {
                 if (mapping.getTimeRange().from().asMillis() == 100) {
                     assertEquals(149, mapping.getTimeRange().to().asMillis());
                 } else {
@@ -134,21 +134,21 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
         final RegattaLogDeviceCompetitorMappingFinder finder = new RegattaLogDeviceCompetitorMappingFinder(log);
         addMapping(author, device, 100l, 200l, competitor);
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
-            final DeviceMapping<Competitor> mapping = deviceMappings.iterator().next();
+            final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
             assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(100));
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
             assertEquals(101, deviceMappings.get(0).getTimeRange().from().asMillis());
             assertEquals(200, deviceMappings.get(0).getTimeRange().to().asMillis());
@@ -161,21 +161,21 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
         final Serializable mappingId = addMapping(author, device, 100l, null, competitor);
         closeMapping(author, device, mappingId, 200);
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
-            final DeviceMapping<Competitor> mapping = deviceMappings.iterator().next();
+            final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
             assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(100));
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
             assertEquals(101, deviceMappings.get(0).getTimeRange().from().asMillis());
             assertEquals(200, deviceMappings.get(0).getTimeRange().to().asMillis());
@@ -187,21 +187,21 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
         final RegattaLogDeviceCompetitorMappingFinder finder = new RegattaLogDeviceCompetitorMappingFinder(log);
         addMapping(author, device, 100l, 200l, competitor);
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
-            final DeviceMapping<Competitor> mapping = deviceMappings.iterator().next();
+            final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
             assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(200));
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
             assertEquals(100, deviceMappings.get(0).getTimeRange().from().asMillis());
             assertEquals(199, deviceMappings.get(0).getTimeRange().to().asMillis());
@@ -214,21 +214,21 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
         final Serializable mappingId = addMapping(author, device, 100l, null, competitor);
         closeMapping(author, device, mappingId, 200);
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
-            final DeviceMapping<Competitor> mapping = deviceMappings.iterator().next();
+            final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
             assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(200));
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
             assertEquals(100, deviceMappings.get(0).getTimeRange().from().asMillis());
             assertEquals(199, deviceMappings.get(0).getTimeRange().to().asMillis());
@@ -240,18 +240,18 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
         final RegattaLogDeviceCompetitorMappingFinder finder = new RegattaLogDeviceCompetitorMappingFinder(log);
         addMapping(author, device, 100l, 100l, competitor);
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
-            final DeviceMapping<Competitor> mapping = deviceMappings.iterator().next();
+            final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(100));
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertTrue(mappings.isEmpty());
         }
     }
@@ -262,18 +262,18 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
         final Serializable mappingId = addMapping(author, device, 100l, null, competitor);
         closeMapping(author, device, mappingId, 100);
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertEquals(1, mappings.size());
             assertTrue(mappings.containsKey(competitor));
-            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
-            final DeviceMapping<Competitor> mapping = deviceMappings.iterator().next();
+            final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(100));
         {
-            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            final Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = finder.analyze();
             assertTrue(mappings.isEmpty());
         }
     }
@@ -297,9 +297,9 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
     	//close one range
     	Serializable id = addMapping(author, device, 10L, null, competitor);
     	closeMapping(author, device, id, 20);
-    	List<DeviceMapping<Competitor>> mappings = getMappings();
+        List<DeviceMappingWithRegattaLogEvent<Competitor>> mappings = getMappings();
     	assertEquals(1, mappings.size());
-    	DeviceMapping<Competitor> mapping = mappings.get(0);
+        DeviceMappingWithRegattaLogEvent<Competitor> mapping = mappings.get(0);
     	assertEquals(10, mapping.getTimeRange().from().asMillis());
     	assertEquals(20, mapping.getTimeRange().to().asMillis());
     	

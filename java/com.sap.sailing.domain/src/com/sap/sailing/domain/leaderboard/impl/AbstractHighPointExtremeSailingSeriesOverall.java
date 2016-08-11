@@ -122,15 +122,15 @@ public abstract class AbstractHighPointExtremeSailingSeriesOverall extends HighP
             List<Leaderboard> randomAccessLeaderboardList = new ArrayList<Leaderboard>(Util.size(overallLeaderboard.getLeaderboards()));
             Util.addAll(overallLeaderboard.getLeaderboards(), randomAccessLeaderboardList);
             for (Leaderboard leaderboardInOverall : overallLeaderboard.getLeaderboards()) {
-                o1PointsInLeaderboardsOfTheGroup.add(leaderboardInOverall.getTotalPoints(o1, timePoint));
-                o2PointsInLeaderboardsOfTheGroup.add(leaderboardInOverall.getTotalPoints(o2, timePoint));
+                o1PointsInLeaderboardsOfTheGroup.add(leaderboardInOverall.getNetPoints(o1, timePoint));
+                o2PointsInLeaderboardsOfTheGroup.add(leaderboardInOverall.getNetPoints(o2, timePoint));
             }
             int localResult = 0;
             for (ListIterator<Leaderboard> reverseLeaderbaordIterator=randomAccessLeaderboardList.listIterator(randomAccessLeaderboardList.size());
                     reverseLeaderbaordIterator.hasPrevious(); ) {
                 Leaderboard leaderboardInOverall = reverseLeaderbaordIterator.previous();
-                final Double o1PointsForLeaderboard = leaderboardInOverall.getTotalPoints(o1, timePoint);
-                final Double o2PointsForLeaderboard = leaderboardInOverall.getTotalPoints(o2, timePoint);
+                final Double o1PointsForLeaderboard = leaderboardInOverall.getNetPoints(o1, timePoint);
+                final Double o2PointsForLeaderboard = leaderboardInOverall.getNetPoints(o2, timePoint);
                 if (o1PointsForLeaderboard != null && o2PointsForLeaderboard != null) {
                     // we're in a scheme where points never get 0 so we can safely assume
                     // that the last total points that are no 0 are the ones that we want to

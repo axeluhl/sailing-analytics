@@ -1,11 +1,14 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sse.common.TimePoint;
@@ -30,10 +33,13 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     private final Iterable<ImageDescriptor> images;
     private final Iterable<VideoDescriptor> videos;
     private final URL officialWebsiteURL;
+    private final URL baseURL;
     private final Map<Locale, URL> sailorsInfoWebsiteURLs;
+    private final Iterable<UUID> leaderboardGroupIds;
     
     public CreateEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
+            boolean isPublic, UUID id, URL officialWebsiteURL, URL baseURL, Map<Locale, URL> sailorsInfoWebsiteURLs,
+            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos, Iterable<UUID> leaderboardGroupIds) {
         super(id);
         this.eventName = eventName;
         this.eventDescription = eventDescription;
@@ -42,9 +48,11 @@ public class CreateEvent extends AbstractEventOperation<Event> {
         this.venue = venue;
         this.isPublic = isPublic;
         this.officialWebsiteURL = officialWebsiteURL;
+        this.baseURL = baseURL;
         this.sailorsInfoWebsiteURLs = sailorsInfoWebsiteURLs;
         this.images = images;
         this.videos = videos;
+        this.leaderboardGroupIds = leaderboardGroupIds;
     }
 
     @Override
@@ -65,8 +73,17 @@ public class CreateEvent extends AbstractEventOperation<Event> {
 
     @Override
     public Event internalApplyTo(RacingEventService toState) {
-        return toState.createEventWithoutReplication(getEventName(), eventDescription, startDate, endDate, venue, isPublic,
-                getId(), officialWebsiteURL, sailorsInfoWebsiteURLs, images, videos);
+        final Event result = toState.createEventWithoutReplication(getEventName(), eventDescription, startDate, endDate, venue, isPublic,
+                getId(), officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos);
+        List<LeaderboardGroup> lgl = new ArrayList<>();
+        for (final UUID lgid : leaderboardGroupIds) {
+            final LeaderboardGroup lg = toState.getLeaderboardGroupByID(lgid);
+            if (lg != null) {
+                lgl.add(lg);
+            }
+        }
+        result.setLeaderboardGroups(lgl);
+        return result;
     }
 
 }

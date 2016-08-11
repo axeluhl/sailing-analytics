@@ -392,7 +392,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     public int hashCode(TracTracRaceRecordDTO t) {
                         return t.id.hashCode();
                     }
-                }, raceList, racesTable);
+                }, racesFilterablePanel.getAllListDataProvider(), racesTable);
         racesTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         racesTable.addColumn(regattaNameColumn, stringMessages.event());
         racesTable.addColumn(raceNameColumn, stringMessages.race());
@@ -401,7 +401,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         racesTable.addColumn(raceStatusColumn, stringMessages.raceStatusColumn());
         racesTable.addColumn(raceVisibilityColumn, stringMessages.raceVisibilityColumn());
         racesTable.addColumnSortHandler(getRaceTableColumnSortHandler(selectionCheckboxColumn, this.raceList.getList(),
-                raceNameColumn, boatClassColumn, raceStartTrackingColumn, raceStatusColumn));
+                raceNameColumn, boatClassColumn, raceStartTrackingColumn, raceStatusColumn, raceVisibilityColumn));
         racesTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
         racesTable.setWidth("100%");
         raceList.addDataDisplay(racesTable);
@@ -441,7 +441,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private ListHandler<TracTracRaceRecordDTO> getRaceTableColumnSortHandler(SelectionCheckboxColumn<TracTracRaceRecordDTO> selectionCheckboxColumn,
             List<TracTracRaceRecordDTO> raceRecords, Column<TracTracRaceRecordDTO, ?> nameColumn,
-            Column<TracTracRaceRecordDTO, ?> boatClassColumn, Column<TracTracRaceRecordDTO, ?> trackingStartColumn, Column<TracTracRaceRecordDTO, ?> raceStatusColumn) {
+            Column<TracTracRaceRecordDTO, ?> boatClassColumn, Column<TracTracRaceRecordDTO, ?> trackingStartColumn, Column<TracTracRaceRecordDTO, ?> raceStatusColumn,
+            Column<TracTracRaceRecordDTO, ?> raceVisibilityColumn) {
         ListHandler<TracTracRaceRecordDTO> result = new ListHandler<TracTracRaceRecordDTO>(raceRecords);
         result.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
         result.setComparator(nameColumn, new Comparator<TracTracRaceRecordDTO>() {
@@ -468,6 +469,13 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
                 return o1.raceStatus == null ? -1 : o2.raceStatus == null ? 1 : o1.raceStatus
                         .compareTo(o2.raceStatus);
+            }
+        });
+        result.setComparator(raceVisibilityColumn, new Comparator<TracTracRaceRecordDTO>() {
+            @Override
+            public int compare(TracTracRaceRecordDTO o1, TracTracRaceRecordDTO o2) {
+                return o1.raceVisibility == null ? -1 : o2.raceVisibility == null ? 1 : o1.raceVisibility
+                        .compareTo(o2.raceVisibility);
             }
         });
         return result;
@@ -515,7 +523,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         });
                         for (TracTracConfigurationDTO config : result) {
                             TracTracEventManagementPanel.this.previousConfigurations.put(config.name, config);
-                            TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name);
+                            TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name, config.name);
                         }
                         
                         if (!result.isEmpty()) {
@@ -575,7 +583,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                                                         liveDataURI, storedDataURI, courseDesignUpdateURI, tractracUsername, tractracPassword);
                                                 
                                                 if (TracTracEventManagementPanel.this.previousConfigurations.put(config.name, config) == null) {
-                                                    TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name);
+                                                    TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name, config.name);
                                                 }
                                             }
                                         }));
@@ -626,19 +634,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private void updatePanelFromSelectedStoredConfiguration() {
         int index = connectionsHistoryListBox.getSelectedIndex();
-
-        if (index == -1)
-            return;
-        
-        String configurationKey = connectionsHistoryListBox.getItemText(index);
-        TracTracConfigurationDTO config = previousConfigurations.get(configurationKey);
-
-        jsonURLTextBox.setValue(config.jsonURL);
-        liveURITextBox.setValue(config.liveDataURI);
-        storedURITextBox.setValue(config.storedDataURI);
-        tracTracUpdateURITextBox.setValue(config.courseDesignUpdateURI);
-        tractracUsernameTextBox.setValue(config.tractracUsername);
-        tractracPasswordTextBox.setValue(config.tractracPassword);
+        if (index != -1) {        
+            String configurationKey = connectionsHistoryListBox.getValue(index);
+            TracTracConfigurationDTO config = previousConfigurations.get(configurationKey);
+            jsonURLTextBox.setValue(config.jsonURL);
+            liveURITextBox.setValue(config.liveDataURI);
+            storedURITextBox.setValue(config.storedDataURI);
+            tracTracUpdateURITextBox.setValue(config.courseDesignUpdateURI);
+            tractracUsernameTextBox.setValue(config.tractracUsername);
+            tractracPasswordTextBox.setValue(config.tractracPassword);
+        }
     }
 
 }

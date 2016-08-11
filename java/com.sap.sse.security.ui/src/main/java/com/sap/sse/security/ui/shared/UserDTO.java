@@ -16,6 +16,7 @@ public class UserDTO implements IsSerializable {
     private String email;
     private String fullName;
     private String company;
+    private String locale;
     private List<AccountDTO> accounts;
     private Set<String> roles;
     private Set<WildcardPermission> permissions;
@@ -23,12 +24,13 @@ public class UserDTO implements IsSerializable {
 
     UserDTO() {} // for serialization only
 
-    public UserDTO(String name, String email, String fullName, String company, boolean emailValidated,
+    public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
             List<AccountDTO> accounts, Iterable<String> roles, Iterable<String> stringPermissions) {
         this.name = name;
         this.email = email;
         this.fullName = fullName;
         this.company = company;
+        this.locale = locale;
         this.emailValidated = emailValidated;
         this.accounts = accounts;
         this.roles = new HashSet<>();
@@ -49,6 +51,10 @@ public class UserDTO implements IsSerializable {
 
     public String getCompany() {
         return company;
+    }
+    
+    public String getLocale() {
+        return locale;
     }
 
     public Iterable<String> getRoles() {

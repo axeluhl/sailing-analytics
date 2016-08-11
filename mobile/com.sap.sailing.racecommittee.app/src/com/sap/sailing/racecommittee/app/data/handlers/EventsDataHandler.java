@@ -12,7 +12,7 @@ public class EventsDataHandler extends DataHandler<Collection<EventBase>> {
     }
 
     @Override
-    public void onResult(Collection<EventBase> data) {
+    public void onResult(Collection<EventBase> data, boolean isCached) {
         manager.addEvents(data);
     }
 

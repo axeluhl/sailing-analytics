@@ -39,6 +39,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
         String name = (String) eventJson.get(EventBaseJsonSerializer.FIELD_NAME);
         String description = (String) eventJson.get(EventBaseJsonSerializer.FIELD_DESCRIPTION);
         String officialWebsiteURLAsString = (String) eventJson.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL);
+        String baseURLAsString = (String) eventJson.get(EventBaseJsonSerializer.FIELD_BASE_URL);
         Number startDate = (Number) eventJson.get(EventBaseJsonSerializer.FIELD_START_DATE);
         Number endDate = (Number) eventJson.get(EventBaseJsonSerializer.FIELD_END_DATE);
         final Venue venue;
@@ -63,6 +64,13 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 result.setOfficialWebsiteURL(new URL(officialWebsiteURLAsString));
             } catch (MalformedURLException e) {
                 throw new JsonDeserializationException("Error deserializing official website URL for event "+name, e);
+            }
+        }
+        if (baseURLAsString != null) {
+            try {
+                result.setBaseURL(new URL(baseURLAsString));
+            } catch (MalformedURLException e) {
+                throw new JsonDeserializationException("Error deserializing base URL for event "+name, e);
             }
         }
         JSONArray imagesJson = (JSONArray) eventJson.get(EventBaseJsonSerializer.FIELD_IMAGES);

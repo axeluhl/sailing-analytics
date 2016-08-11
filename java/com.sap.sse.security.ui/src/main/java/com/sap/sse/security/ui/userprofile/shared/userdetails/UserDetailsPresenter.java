@@ -42,9 +42,9 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
     }
 
     @Override
-    public void handleSaveChangesRequest(String fullName, String company) {
+    public void handleSaveChangesRequest(String fullName, String company, String locale) {
         final String username = authenticationManager.getAuthenticationContext().getCurrentUser().getName();
-        userManagementService.updateUserProperties(username, fullName, company,
+        userManagementService.updateUserProperties(username, fullName, company, locale,
                 new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {

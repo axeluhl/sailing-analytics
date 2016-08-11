@@ -21,6 +21,7 @@ I then did a `yum update` and added the following packages:
  - tigervnc-server
  - WindowMaker
  - xterm
+ - sendmail-cf
 
 Then I created a mount point /home/sailing and copied the following lines from the /etc/fstab file from an existing SL instance:
 
@@ -122,3 +123,6 @@ Adjust the /etc/sysconfig/vncservers settings to something like:
 VNCSERVERS="2:sailing"
 VNCSERVERARGS[2]="-geometry 1600x900"
 ```
+
+## Mail Relaying
+For setting up mail relaying towards central postfix server, have a look [here](https://wiki.sapsailing.com/wiki/mail-relaying)

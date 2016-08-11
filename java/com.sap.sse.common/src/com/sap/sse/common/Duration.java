@@ -47,4 +47,10 @@ public interface Duration extends Serializable, Comparable<Duration> {
     
     Duration plus(long milliseconds);
     Duration plus(Duration duration);
+
+    /**
+     * The "modulo" operation; imagine the operation implemented as this duration's milliseconds
+     * modulo {@code d}'s milliseconds
+     */
+    Duration mod(Duration d);
 }

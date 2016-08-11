@@ -42,10 +42,11 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.leaderboard.impl.CompetitorProviderFromRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
@@ -55,6 +56,7 @@ import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
+import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -65,11 +67,14 @@ import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.SensorFixTrack;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
+import com.sap.sailing.domain.tracking.TrackFactory;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -102,6 +107,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public TimePoint getStartOfRace(boolean inferred) {
+        return null;
+    }
+
+    @Override
+    public TimePoint getFinishedTime() {
         return null;
     }
 
@@ -423,7 +433,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void setStartDate(TimePoint startDate) {
-                        
+
                     }
 
                     @Override
@@ -433,7 +443,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void setEndDate(TimePoint startDate) {
-                        
+
                     }
 
                     @Override
@@ -442,11 +452,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public void addListener(RegattaLikeListener listener) {                        
+                    public void addListener(RegattaLikeListener listener) {
                     }
 
                     @Override
-                    public void removeListener(RegattaLikeListener listener) {                        
+                    public void removeListener(RegattaLikeListener listener) {
                     }
 
                     @Override
@@ -499,7 +509,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public void registerCompetitor(Competitor competitor) {   
+                    public void registerCompetitor(Competitor competitor) {
                     }
 
                     @Override
@@ -512,6 +522,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public void deregisterCompetitors(Iterable<Competitor> competitor) {
+                    }
+
+                    @Override
+                    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+                        return null;
                     }
                 };
             }
@@ -534,7 +549,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+            public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
                 return 0;
             }
 
@@ -554,9 +569,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
             @Override
             public DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines,
-                    WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
+                    WindStore windStore, long delayToLiveInMillis,
                     long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator, RaceLogResolver raceLogResolver) {
+                    DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useMarkPassingcalculator,
+                    RaceLogResolver raceLogResolver) {
                 return null;
             }
 
@@ -637,7 +653,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint, WindPositionMode windPositionMode) {
+    public Distance getWindwardDistanceToCompetitorFarthestAhead(Competitor competitor, TimePoint timePoint,
+            WindPositionMode windPositionMode) {
         return null;
     }
 
@@ -805,11 +822,16 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public void onStatusChanged(TrackingDataLoader loader, TrackedRaceStatus status) {
+    }
+
+    @Override
     public void waitUntilNotLoading() {
     }
 
     @Override
-    public void detachRaceLog(Serializable identifier) {
+    public RaceLog detachRaceLog(Serializable identifier) {
+        return null;
     }
 
     @Override
@@ -909,9 +931,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
         return null;
     }
 
-    public GPSFixStore getGPSFixStore() {
-        return null;
-    }
 
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
@@ -954,7 +973,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+    public void waitForLoadingToFinish() throws InterruptedException {
     }
 
     @Override
@@ -1036,10 +1055,52 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void updateStartAndEndOfTracking() {
+    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
     }
 
     @Override
-    public void onFinishedTimeChangedByRaceCommittee(TimePoint newFinishedTime) {
+    public void setFinishedTime(TimePoint newFinishedTime) {
+    }
+    
+    @Override
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
+            Competitor competitor, String trackName) {
+        return null;
+    }
+
+    @Override
+    public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getDynamicSensorTrack(
+            Competitor competitor, String trackName) {
+        return null;
+    }
+
+    @Override
+    public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
+            Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
+        return null;
+    }
+
+    @Override
+    public boolean isWithinStartAndEndOfTracking(TimePoint timePoint) {
+        return true;
+    }
+
+    @Override
+    public Iterable<RegattaLog> getAttachedRegattaLogs() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public void recordSensorFix(Competitor competitor, String trackName, SensorFix fix,
+            boolean onlyWhenInTrackingTimeInterval) {
+    }
+    
+    @Override
+    public void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
+    }
+
+    @Override
+    public Iterable<RaceLog> getAttachedRaceLogs() {
+        return Collections.emptySet();
     }
 }

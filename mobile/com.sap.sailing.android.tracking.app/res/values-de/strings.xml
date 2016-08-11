@@ -14,8 +14,8 @@
     <string name="device_identifier">Geräte-ID</string>
     <string name="stop_tracking">Stoppe Tracking</string>
     <string name="start_tracking">Starte Tracking</string>
-    <string name="tracker_started">SAP Sail InSight gestartet</string>
-    <string name="tracker_stopped">SAP Sail InSight gestoppt</string>
+    <string name="tracker_started">Tracking wurde erfolgreich gestartet</string>
+    <string name="tracker_stopped">Tracking wurde erfolgreich gestoppt</string>
     <string name="title_activity_regatta">Regatta</string>
     <string name="title_activity_leaderboard">Leaderboard</string>
     <string name="title_activity_start">GPS Tracker einstellen</string>

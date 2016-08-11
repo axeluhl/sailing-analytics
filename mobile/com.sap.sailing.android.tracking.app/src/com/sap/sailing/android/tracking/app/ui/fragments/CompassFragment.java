@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
+import com.sap.sailing.domain.common.Bearing;
 
 public class CompassFragment extends BaseFragment {
 
@@ -19,10 +20,14 @@ public class CompassFragment extends BaseFragment {
         return view;
     }
 
-    public void setBearing(float heading) {
+    public void setBearing(Bearing bearing) {
         if (isAdded()) {
             TextView headingText = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
-            headingText.setText(String.valueOf(Math.round(heading)) + (char) 0x00B0);
+            if (bearing != null) {
+                headingText.setText(getString(R.string.course_over_ground_display, Math.round(bearing.getDegrees())));
+            } else {
+                headingText.setText(R.string.initial_hyphen_degrees);
+            }
 
             TrackingActivity activity = (TrackingActivity) getActivity();
 

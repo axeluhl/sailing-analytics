@@ -7,7 +7,8 @@
 #### Servers
 
 - Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
-- Database and Queue Server: 172.31.25.253
+- Database Server: dbserver.internal.sapsailing.com
+- Database and Queue Server: rabbit.internal.sapsailing.com
 
 #### Starting an instance
 
@@ -40,9 +41,9 @@ BUILD_COMPLETE_NOTIFY=you@email.com
 SERVER_STARTUP_NOTIFY=
 SERVER_NAME=MYSPECIFICEVENT
 MEMORY=2048m
-REPLICATION_HOST=172.31.25.253
+REPLICATION_HOST=rabbit.internal.sapsailing.com
 REPLICATION_CHANNEL=myspecificevent
-MONGODB_HOST=172.31.25.253
+MONGODB_HOST=dbserver.internal.sapsailing.com
 MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 </pre>
@@ -75,7 +76,7 @@ INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
 REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
 REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
-REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl
+REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener
 SERVER_NAME=MYSPECIFICEVENT
 MONGODB_NAME=myspecificevent-replica
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
@@ -206,14 +207,14 @@ BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_STARTUP_NOTIFY=
 SERVER_NAME=LIVE1
 MEMORY=2048m
-REPLICATION_HOST=172.31.25.253
+REPLICATION_HOST=rabbit.internal.sapsailing.com
 REPLICATION_CHANNEL=sapsailinganalytics-live
 TELNET_PORT=14888
 SERVER_PORT=8888
-MONGODB_HOST=172.31.25.253
+MONGODB_HOST=dbserver.internal.sapsailing.com
 MONGODB_PORT=10202
 EXPEDITION_PORT=2010
-REPLICATE_ON_START=False
+REPLICATE_ON_START=
 REPLICATE_MASTER_SERVLET_HOST=
 REPLICATE_MASTER_SERVLET_PORT=
 REPLICATE_MASTER_QUEUE_HOST=
@@ -331,18 +332,70 @@ Follow these steps to upgrade the AMI:
 * Log in as user `root`
 * Run `yum update` to update the operating system
 * Remove any obsolete logs from `/home/sailing/servers/server/logs`
-* Update the git contents (essential for up-to-date versions of `/etc/init.d/sailing` which links to the git, and the `refreshInstance.sh` script used during automatic instance launch), and clean any build artifacts by doing <pre>
-    su - sailing
-    cd code
-    mvn clean
-    git fetch
-    git merge origin/master</pre>
+* Update the git contents (essential for up-to-date versions of `/etc/init.d/sailing` which links to the git, and the `refreshInstance.sh` script used during automatic instance launch), and clean any build artifacts by doing
+```
+    > su - sailing
+    > cd code
+    > mvn clean
+    > git fetch
+    > git merge origin/master
+```
 * Then, still as user `sailing`, edit `~sailing/servers/server/env.sh` and remove everything after the line `# **** Overwritten environment variables ****` as this will then be the place where any downloaded environment and the EC2 user data variables will be appended later during automatic installation upon reboot.
 * Check the sizes of the mounted partitions by doing `df; swapon -s`. These will come in handy after creating the new AMI in order to tag the new volume snapshots accordingly
 * Update any keys in `/root/.ssh/authorized_keys` and `/home/sailing/.ssh/authorized_keys`
+* Remove created http rewrite entries in `/etc/httpd/conf.d/001-events.conf`
 * In the EC2 administration console go to the "Instances" tab, select your running instance and from the "Actions" drop-down select "Create Image". Give the image the name "SAP Sailing Analytics App x.y" where "x.y" is the updated version number of the image. Just make sure it's greater than the previous one. If you feel like it, you may provide a short description telling the most important features of the image.
 * Once the image creation has completed, go to the Snapshots list in the "Elastic Block Store" category and name the new snapshots appropriately. Now the information about the device sizes obtained earlier from the `df` and `swapon` commands will help you to identify which snapshot is which. Usually, the three snapshots would be something like AMI Analytics Home x.y, AMI Analytics System x.y and AMI Analytics Swap x.y with "x.y" being the version number matching that of your image.
 * Now you can remove any earlier Sailing Server AMI version and the corresponding snapshots.
+
+## Terminating AWS Sailing Instances
+
+### ELB Setup with replication server(s)
+- Remove all Replica's from the ELB and wait at least 2 minutes until no request reaches their Apache webservers anymore. You can check this with looking at `apachetop` on the respective instances. Let only the Master server live inside the ELB.
+- Login to each server instance as `root`-user and stop the java instance with `/home/sailing/servers/server/stop;` 
+- As soon as the instance is successfully stopped (verify with `ps -ef | grep "java"`) copy all server logs towards `/var/log/old/<event-name>/<instance-public-ipv4/` with following command
+```
+cp -rf /home/sailing/servers/server/logs/* /var/log/old/<event-name>/<instance-public-ipv4>/
+```
+- Once this is done, make sure all HTTP logs are also copied to the above location
+  - Either you wait now for the next day, then the http logrotate script ran through
+  - Or you manually force a logrotate run with `logrotate --force /etc/logrotate.d/httpd`, which copies `/var/log/httpd/` towards `/var/log/old/<event-name>/<instance-public-ipv4>`
+- Please verify that there are no open queues left on RabbitMQ for that particular replication server. In case purge the queue of this replica.
+- Once all replica's are terminated and only the Master server is running inside the ELB, go ahead with a master data import on sapsailing.com for the event, grabbing the data from your master server
+- Once the master data import is done, make sure you track the corresponding races (be careful to also track the smartphone tracked regattas)
+- Once this is done, remember to remove any entries on sapsailing.com regarding "remote sailing instances", otherwise the event will appear two times on the public events list
+- at the same time, you need to modify or add an entry on the central Apache server to point the event URL towards the Archive server. Make sure you have removed the `-master` event URL, as you don't need this one anymore
+```
+# <EVENT> <YEAR>
+Use Event-ARCHIVE-SSL-Redirect <EVENT><YEAR>.sapsailing.com "<EVENT-UUID>"
+```
+- Check the Apache config is correct before reloading it via `apachtctl configtest`
+- When `SYNTAX OK` go ahead with reload `/etc/init.d/httpd reload`
+- Now let us point the public towards the Archive server with removing the Route53 DNS entry for the event
+- Make sure that you keep running ELB and Master server in it for at least 12 hours, as DNS servers around the world will cache the old entry. If you would already remove ELB and Master, this would result in people may not reaching your event anymore
+- When the 12 hours are over, you can go ahead with the above steps (java instance stop, log savings,..) for the last master instance
+- Afterwards simply terminate ELB + the Master instance, after you made sure all logs are correctly saved to `/var/log/old/<event-name>/<instance-public-ipv4>`
+
+### Single server with central Apache redirection
+- Do a Master Data import of the event towards sapsailing.com 
+- Track all corresponding races (don't forget the smartphone tracked ones)
+- Once verified the event looks ok on sapsailing.com, make sure to remove the "remote server entry" on sapsailing.com, so that the event will not appear twice on the public event list
+- Go ahead and change the central Apache config in regards to point the event URL toward the archive event via
+```
+# <EVENT> <YEAR>
+Use Event-ARCHIVE-SSL-Redirect <EVENT><YEAR>.sapsailing.com "<EVENT-UUID>"
+```
+- Check the Apache config is correct before reloading it via `apachtctl configtest`
+- When `SYNTAX OK` go ahead with reload `/etc/init.d/httpd reload`
+- After that is done, make sure to stop the java instance on your event server
+- As soon as the instance is successfully stopped (verify with `ps -ef |grep "java"`) copy all sailing logs towards `/var/log/old/<event-name>/<instance-public-ipv4/` with following command
+```
+cp -rf ~/servers/server/logs/* /var/log/old/<event-name>/<instance-public-ipv4>/
+```
+- Once this is done, make sure all HTTP logs are also copied to the above location
+  - Either you wait now for the next day, then the http logrotate script ran through
+  - Or you manually force a logrotate run with `logrotate --force /etc/logrotate.d/httpd`, which copies `/var/log/httpd/` towards `/var/log/old/<event-name>/<instance-public-ipv4>`
+- Once all this is done, you can go ahead and terminate the instance via AWS
 
 ## Migration Checklist
 

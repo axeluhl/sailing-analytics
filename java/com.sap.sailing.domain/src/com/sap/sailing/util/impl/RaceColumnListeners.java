@@ -86,6 +86,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutIsFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.isFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
+        }
+    }
+
     public void notifyListenersAboutIsStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.isStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
