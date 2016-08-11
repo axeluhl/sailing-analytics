@@ -19,10 +19,25 @@ Usually this step is carried out by the wizard automatically.
 * defined course layouts for these races
 
 ## Pinning Buoys and other race marks
-To map positions of all of the required marks, you need to invite one or multiple people as Buoy Tenders. Do so by navigating to "Connectors->Smartphone Tracking" in the Admin Console and click the Mail Icon under "Actions".
-Those people then need to download the [SAP Sailing Buoy Pinger](https://play.google.com/store/apps/details?id=com.sap.sailing.android.buoy.positioning.app) App - a link is also provided in the mail they received. Once installed, they will see all marks related to this regatta listed within the app, enabling them to pin the exact positions via GPS.
-You can later on adjust the positions within the app or in the Admin Console once Tracking has started.
+To map positions of all of the required marks, you need to invite one or multiple people as Buoy Tenders. Do so by navigating to "Connectors->Smartphone Tracking" in the Admin Console, selecting your Regatta from the list, and then clicking the Mail Icon under "Actions" within the entry.
 
-[SAP Sail InSight](https://play.google.com/store/apps/details?id=com.sap.sailing.android.tracking.app)
+Those invited people then need to download the [SAP Sailing Buoy Pinger](https://play.google.com/store/apps/details?id=com.sap.sailing.android.buoy.positioning.app) App - a link is also provided in the mail they received. Once installed, they will see all marks related to this regatta listed within the app, enabling them to ping their exact positions via GPS.
+You can later on adjust these positions within the app, or manually in the Admin Console once Tracking has started.
 
-_...to be finished..._
+## Start tracking using an Android phone or tablet
+At the same location where you can invite Buoy Pinners, you'll also find the option to map devices to competitors and marks. It is the small smartphone icon next to the mail icon. Once clicked, you will see a screen with potentially earlier created device mappings.
+
+**To add a new device**
+
+* click "Add" in the top left corner, leading you to another screen
+* Within that screen, you can select a mark or a competitor you'd like to track
+* You possibly have to select the correct event if there is more than one
+* you will then be provided with a QR code which you will be asked for in the [SAP Sail InSight](https://play.google.com/store/apps/details?id=com.sap.sailing.android.tracking.app) App
+* get the app, scan the code and hit "Start Tracking".
+
+Once tracking has started, you should see a running timer.
+
+## Follow trackers on the web interface
+Back in the Admin Console, you can click on the race you just started tracking. This will open a new tab showing the map of the course.
+
+In the bottom right corner, you can edit mark positions and (possibly missed) passings manually, on the left hand side, there is the option to select the competitors you want to see on the map.
