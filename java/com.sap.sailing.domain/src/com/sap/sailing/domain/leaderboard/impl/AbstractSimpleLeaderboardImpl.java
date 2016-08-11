@@ -20,7 +20,6 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -150,19 +149,27 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private transient Map<com.sap.sse.common.Util.Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>> raceDetailsAtEndOfTrackingCache;
 
     /**
+     * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
+     */
+    private transient Set<CacheInvalidationListener> cacheInvalidationListeners;
+
+    private final static int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
+    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
+            /* maximumPoolSize */ THREAD_POOL_SIZE,
+            /* keepAliveTime */ 60, TimeUnit.SECONDS,
+            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
+    /**
      * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
      * can depend on the results of the tasks run by {@link #raceDetailsExecutor}, and an {@link Executor} doesn't
      * move a task that is blocked by waiting for another {@link FutureTask} to the side but blocks permanently,
      * ending in a deadlock (one that cannot easily be detected by the Eclipse debugger either).
      */
-    private transient Executor raceDetailsExecutor;
+    private final static Executor raceDetailsExecutor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
+            /* maximumPoolSize */ THREAD_POOL_SIZE,
+            /* keepAliveTime */ 60, TimeUnit.SECONDS,
+            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
 
-    /**
-     * Used to remove all these listeners from their tracked races when this servlet is {@link #destroy() destroyed}.
-     */
-    private transient Set<CacheInvalidationListener> cacheInvalidationListeners;
 
-    private transient ThreadPoolExecutor executor;
 
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
 
@@ -343,16 +350,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     private void initTransientFields() {
         this.raceDetailsAtEndOfTrackingCache = new HashMap<com.sap.sse.common.Util.Pair<TrackedRace,Competitor>, RunnableFuture<RaceDetails>>();
-        this.raceDetailsExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
         this.cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
-        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
-        executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-                /* maximumPoolSize */ THREAD_POOL_SIZE,
-                /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
     }
 
     @Override

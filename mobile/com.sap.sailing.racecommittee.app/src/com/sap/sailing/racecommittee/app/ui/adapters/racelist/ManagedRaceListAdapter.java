@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesComparator;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
@@ -392,7 +393,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         holder.setMarker(0);
     }
 
-    private void updateFlag(ViewHolder holder,ManagedRace race, TimePoint now) {
+    private void updateFlag(ViewHolder holder, ManagedRace race, TimePoint now) {
         RaceState state = race.getState();
         if (state == null || state.getStartTime() == null) {
             return;
@@ -447,6 +448,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         timer = TimeUtils.formatDuration(now, poleState.getNextStateValidFrom());
                     }
                 }
+            } else if (state.getStatus() == RaceLogRaceStatus.FINISHING) {
+                flag = FlagsResources.getFlagDrawable(getContext(), currentState.get(0).getUpperFlag().name(), flag_size);
+                arrow = null;
+                timer = TimeUtils.formatDurationSince(now.minus(state.getFinishingTime().asMillis()).asMillis());
             }
         } else {
             TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
@@ -528,7 +533,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         }
 
         /* package */ void showFlag(LayerDrawable flag, Drawable arrow, String timer) {
-            if (flag != null && arrow != null && timer != null) {
+            if (flag != null && timer != null) {
                 current_flag.setImageDrawable(flag);
                 flag_timer.setText(timer);
                 flag_timer.setCompoundDrawablesWithIntrinsicBounds(arrow, null, null, null);

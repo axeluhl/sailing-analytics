@@ -7,11 +7,14 @@ import java.util.List;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.DrawableRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -33,6 +36,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
+import com.sap.sailing.racecommittee.app.ui.activities.PasswordActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.CourseDesignerPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
@@ -93,6 +97,24 @@ public class MainPreferenceFragment extends LoggableFragment {
                     getLoaderManager().initLoader(0, null, configurationLoader).forceLoad();
                 }
             }));
+            items.add(new PreferenceItem(getString(R.string.logout), R.drawable.ic_logout_yellow_24dp, new Runnable() {
+                @Override
+                public void run() {
+                    new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
+                        .setTitle(R.string.logout_dialog_title)
+                        .setMessage(getString(R.string.logout_dialog_message))
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                AppPreferences.on(getActivity()).setAccessToken(null);
+                                startActivity(new Intent(getActivity(), PasswordActivity.class));
+                                getActivity().finish();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
+                }
+            }));
             recyclerView.addItemDecoration(new PreferenceMarginItemDecoration(getActivity(), getResources().getDimensionPixelSize(R.dimen.preference_margin)));
             recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.preference_columns)));
             recyclerView.setAdapter(new PreferenceAdapter(getActivity(), items));
@@ -122,7 +144,10 @@ public class MainPreferenceFragment extends LoggableFragment {
             holder.item = mItems.get(position);
             holder.textView.setText(holder.item.title);
             holder.textView.setCompoundDrawablesWithIntrinsicBounds(holder.item.drawable, null, null, null);
-            holder.line.setVisibility(TextUtils.isEmpty(holder.item.clazz) ? View.GONE : View.VISIBLE);
+
+            int count = mItems.size() - 1;
+            int columns = getResources().getInteger(R.integer.preference_columns);
+            holder.line.setVisibility((position > count - columns) ? View.GONE : View.VISIBLE);
         }
 
         @Override

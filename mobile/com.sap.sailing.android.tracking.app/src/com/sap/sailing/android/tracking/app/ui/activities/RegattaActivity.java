@@ -24,6 +24,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.internal.view.ContextThemeWrapper;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -602,7 +603,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            dialog = new ProgressDialog(bmImage.getContext(), R.style.Base_Theme_AppCompat_Dialog);
+            dialog = new ProgressDialog(new ContextThemeWrapper(RegattaActivity.this, R.style.AppTheme_AlertDialog));
             dialog.setCancelable(false);
             dialog.setMessage(getString(R.string.download_team_image_message));
             dialog.show();

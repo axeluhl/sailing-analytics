@@ -119,6 +119,7 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -298,6 +299,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private final ConcurrentMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
 
+    /**
+     * Mapping of {@link Competitor} to generic {@link DynamicTrack} implementation. Because the same competitor could
+     * be mapped to several different tracks, a combined key of competitor object and track name identifier string is
+     * used. This identifier is usually defined within the track interface (e.g. see {@link BravoFixTrack#TRACK_NAME}).
+     */
     private final Map<Pair<Competitor, String>, DynamicTrack<?>> sensorTracks;
     
     private final Map<String, Sideline> courseSidelines;
