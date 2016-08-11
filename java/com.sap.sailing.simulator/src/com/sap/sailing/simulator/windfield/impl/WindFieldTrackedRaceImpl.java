@@ -1,6 +1,7 @@
 package com.sap.sailing.simulator.windfield.impl;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
@@ -27,7 +28,7 @@ public class WindFieldTrackedRaceImpl extends WindFieldGeneratorImpl implements 
     private static final double EPSILON_DISTANCE_METER = 20;
     private static final long EPSILON_TIME_MILLIS = 5000;
     private TrackedRace race;
-    private final ConcurrentHashMap<TimedPosition, Wind> cache;
+    private final ConcurrentMap<TimedPosition, Wind> cache;
     private TimePoint startSimulationTime = null;
 
     

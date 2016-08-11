@@ -6,19 +6,30 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.R;
 
 public class TrackingTimeFragment extends BaseFragment {
 
     private final static String SIS_TRACKING_TIMER = "savedInstanceTrackingTimer";
     private TextView timerView;
+    private TextView noGPSView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_time, container, false);
         timerView = (TextView) view.findViewById(R.id.tracking_time_label);
+        noGPSView = (TextView) view.findViewById(R.id.wait_for_gps);
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (LocationHelper.isGPSEnabled(getActivity())) {
+            noGPSView.setVisibility(View.GONE);
+        }
     }
 
     @Override

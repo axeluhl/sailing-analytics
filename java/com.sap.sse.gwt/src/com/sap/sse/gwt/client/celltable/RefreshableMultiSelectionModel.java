@@ -30,7 +30,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         implements RefreshableSelectionModel<T> {
     final EntityIdentityComparator<T> comp;
-    private boolean dontcheckSelectionState = false;
+    private boolean dontCheckSelectionState = false;
     private final ListDataProvider<T> listDataProvider;
 
     /**
@@ -72,7 +72,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      */
     @Override
     public void setSelected(T item, boolean selected) {
-        if (comp == null || dontcheckSelectionState || item == null || getSelectedSet().isEmpty()) {
+        if (comp == null || dontCheckSelectionState || item == null || getSelectedSet().isEmpty()) {
             super.setSelected(item, selected);
         } else {
             T wasSelectedBefore = null;
@@ -94,9 +94,9 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
     }
 
     /**
-     * Refreshes the {@link RefreshableMultiSelectionModel} with the <code>newObjects</code>.All objects from the
+     * Refreshes the {@link RefreshableMultiSelectionModel} with the <code>newObjects</code>. All objects from the
      * current selection that {@link EntityIdentityComparator#representSameEntity(Object, Object) represent the same
-     * entity} as an object from <code>newObjects</code> will be reselected. All others are de-selected. That means a
+     * entity} as an object from <code>newObjects</code> will be reselected. All others are de-selected. That means if a
      * selected object is not contained in <code>newObjects</code> the object wouldn't be selected anymore. If this
      * selection model has no {@link EntityIdentityComparator} set, this method will use the {@link #equals(Object)}
      * method to compare. If an object is reselected it will be replaced with the new version of it.
@@ -111,8 +111,8 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
      */
     @Override
     public void refreshSelectionModel(Iterable<T> newObjects) {
-        if (!dontcheckSelectionState) { // avoid endless recursions
-            dontcheckSelectionState = true;
+        if (!dontCheckSelectionState) { // avoid endless recursions
+            dontCheckSelectionState = true;
             try {
                 final Set<T> selectedSet = getSelectedSet(); // gets the selected set as a non-live copy, so later
                                                              // changes to the selection won't change this set anymore
@@ -141,7 +141,7 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
                     SelectionChangeEvent.fire(this);
                 }
             } finally {
-                dontcheckSelectionState = false;
+                dontCheckSelectionState = false;
             }
         }
     }

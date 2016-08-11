@@ -47,6 +47,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
@@ -55,7 +56,6 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrac
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogRaceTrackerExistsException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -194,7 +194,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
             RacingEventService service) {
-        CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog).analyze();
+        CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog, /* onlyCoursesWithValidWaypointList */ true).analyze();
         final Set<Mark> marks = new HashSet<>();
         if (course != null) {
             course.getWaypoints().forEach(wp -> Util.addAll(wp.getMarks(), marks));
@@ -212,7 +212,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
                     int passId = toRaceLog.getCurrentPassId();
                     RaceLogEvent newCourseEvent = new RaceLogCourseDesignChangedEventImpl(now,
-                            service.getServerAuthor(), passId, newCourse);
+                            service.getServerAuthor(), passId, newCourse, CourseDesignerMode.ADMIN_CONSOLE);
                     toRaceLog.add(newCourseEvent);
                 }
 
@@ -249,8 +249,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 now, service.getServerAuthor(), UUID.randomUUID(), mark, device, timePoint, timePoint);
         log.add(mapping);
         try {
-            service.getGPSFixStore().storeFix(device, gpsFix);
-        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+            service.getSensorFixStore().storeFix(device, gpsFix);
+        } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not ping mark " + mark);
         }
     }
@@ -287,10 +287,10 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         for (Competitor competitor : competitors) {
             final String toAddress = competitor.getEmail();
             if (toAddress != null) {
-                String leaderboardName = leaderboard.getName();
+                String leaderboardDisplayName = leaderboard.getDisplayName() == null ? leaderboard.getName() : leaderboard.getDisplayName();
                 String competitorName = competitor.getName();
                 String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(serverUrlWithoutTrailingSlash,
-                        event.getId().toString(), leaderboardName, DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
+                        event.getId().toString(), leaderboard.getName(), DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                         competitor.getId().toString(), NonGwtUrlHelper.INSTANCE);
                 String logoUrl = null;
                 final List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
@@ -298,8 +298,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                     logoUrl = imagesWithTag.get(0).getURL().toString();
                 }
                 try {
-                    sendInvitationEmail(locale, toAddress, leaderboardName, competitorName, url, iOSAppUrl,
-                            androidAppUrl, logoUrl);
+                    final ResourceBundleStringMessages B = RaceLogTrackingI18n.STRING_MESSAGES;
+                    sendInvitationEmail(locale, toAddress, leaderboardDisplayName, event.getName(), competitorName, url,
+                            B.get(locale, "sailInSightAppName"), iOSAppUrl, androidAppUrl, logoUrl);
                 } catch (MailException e) {
                     occuredExceptions.append(e.getMessage() + "\r\n");
                 }
@@ -310,8 +311,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         }
     }
 
-    private void sendInvitationEmail(Locale locale, final String toAddress, String leaderboardName, String invitee,
-            String url, String iOSAppUrl, String androidAppUrl, String logoUrl) throws MailException {
+    private void sendInvitationEmail(Locale locale, final String toAddress, String leaderboardName, String eventName,
+            String invitee, String url, String appName, String iOSAppUrl, String androidAppUrl, String logoUrl) throws MailException {
         final ResourceBundleStringMessages B = RaceLogTrackingI18n.STRING_MESSAGES;
         String subject = String.format("%s %s", B.get(locale, "trackingInvitationFor"), invitee);
 
@@ -324,10 +325,10 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         StringBuilder htmlText = new StringBuilder();
         htmlText.append("<!doctype html>\n");
         htmlText.append("<html>");
-        htmlText.append("<head><title>");
-        htmlText.append(B.get(locale, "welcomeTo")).append(" ").append(leaderboardName).append("</title>");
+        final String welcomeText = B.get(locale, "welcomeTo")+" "+eventName+", "+leaderboardName;
+        htmlText.append("<head><title>").append(welcomeText).append("</title>");
         htmlText.append("<style type=\"text/css\">\n");
-        htmlText.append(".b,.b:active,b:visited {padding:15px;margin:10px;width:200px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;}\n");
+        htmlText.append(".b,.b:active,.b:visited {padding:15px;margin:10px;width:200px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;}\n");
         htmlText.append(".b:hover {background-color:#2b618e;border:1px solid #204d74;}\n");
         htmlText.append(".qr {margin: 10px;height:250px; width: auto;}\n");
         htmlText.append(".spacer {margin-top: 50px;}\n");
@@ -337,8 +338,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         if (hasLogoUrl) {
             htmlText.append("<p><img src=\"").append(logoUrl).append("\" /></p> ");
         }
-        htmlText.append("<h1>").append(B.get(locale, "welcomeTo")).append(" ").append(leaderboardName).append("</h1> ");
-        htmlText.append("<p>").append(B.get(locale, "scanQRCodeOrVisitUrlToRegisterAs")).append(" <b>").append(invitee)
+        htmlText.append("<h1>").append(welcomeText).append("</h1> ");
+        htmlText.append("<p>").append(B.get(locale, "scanQRCodeOrVisitUrlToRegisterAs", appName)).append(" <b>").append(invitee)
                 .append("</b></p> ");
         htmlText.append("<p class=\"qr\"><img src=\"cid:image\"  title=\"").append(url).append("\" /></p> ");
         htmlText.append("<p class=\"spacer\">").append(B.get(locale, "alternativelyVisitThisLink")).append("</p> ");
@@ -389,32 +390,28 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
             String emails, String iOSAppUrl, String androidAppUrl, Locale locale) throws MailException {
-
         StringBuilder occuredExceptions = new StringBuilder();
-
         String[] emailArray = emails.split(",");
-        String leaderboardName = leaderboard.getName();
-
+        String leaderboardDisplayName = leaderboard.getDisplayName() == null ? leaderboard.getName() : leaderboard.getDisplayName();
         String eventId = event.getId().toString();
-
         String logoUrl = null;
         List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
         if (imagesWithTag != null && !imagesWithTag.isEmpty()) {
             logoUrl = imagesWithTag.get(0).getURL().toString();
         }
         // http://<host>/buoy-tender/checkin?event_id=<event-id>&leaderboard_name=<leaderboard-name>
-        String url = DeviceMappingConstants.getBuoyTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboardName,
+        String url = DeviceMappingConstants.getBuoyTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboard.getName(),
                 eventId, NonGwtUrlHelper.INSTANCE);
         for (String toAddress : emailArray) {
             try {
-                sendInvitationEmail(locale, toAddress, leaderboardName,
-                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "buoyTender"), url, iOSAppUrl, androidAppUrl,
-                        logoUrl);
+                final ResourceBundleStringMessages B = RaceLogTrackingI18n.STRING_MESSAGES;
+                sendInvitationEmail(locale, toAddress, leaderboardDisplayName,
+                        event.getName(), RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "buoyTender"), url, B.get(locale, "buoyPingerAppName"),
+                        iOSAppUrl, androidAppUrl, logoUrl);
             } catch (MailException e) {
                 occuredExceptions.append(e.getMessage() + "\r\n");
             }
         }
-
         if (!(occuredExceptions.length() == 0)) {
             throw new MailException(occuredExceptions.toString());
         }

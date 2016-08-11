@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -35,12 +36,14 @@ public class AutoUpdater {
     }
 
     public void checkForUpdate(boolean forceUpdate) {
-        String serverUrl = preferences.getServerBaseURL();
-        try {
-            new AutoUpdaterChecker(context, this, forceUpdate).check(new URL(serverUrl));
-        } catch (MalformedURLException e) {
-            // ServerBaseURL in preferences is defect? App will crash...
-            ExLog.ex(context, TAG, e);
+        if (AppUtils.with(context).isSideLoaded()) {
+            String serverUrl = preferences.getServerBaseURL();
+            try {
+                new AutoUpdaterChecker(context, this, forceUpdate).check(new URL(serverUrl));
+            } catch (MalformedURLException e) {
+                // ServerBaseURL in preferences is defect? App will crash...
+                ExLog.ex(context, TAG, e);
+            }
         }
     }
 

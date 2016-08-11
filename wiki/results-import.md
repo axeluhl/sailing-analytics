@@ -10,19 +10,24 @@ Although a XRR-Format-export does exist (which would be the best solution) we us
 
 How to use the .csv export:
 Before we can start the .csv export we must change some settings to export the data in the right format:
-###1. Select data columns to export
+
+## 1. Select data columns to export
 
 <img src="/wiki/images/sailwave/columns.jpg" width="100%" height="100%" alt="" />
 
-###2. Set points/discard format
+## 2. Set points/discard format
+
+Make sure to press Tools > Rescore so that the penalty fields are correctly filled in the format `p,c`. If you see just the penalty and not the points it will _not_ work. The CSV needs to containt points and penalty codes.
 
 <img src="/wiki/images/sailwave/discard_format.jpg" width="100%" height="100%" alt="" />
  
-###3. Set ranking format
+## 3. Set ranking format
+
+Make sure the highlighted checkbox is **UNCHECKED**
 
 <img src="/wiki/images/sailwave/general_options.jpg" width="100%" height="100%" alt="" />
 
-###4. Set column separator and export the data...
+## 4. Set column separator and export the data...
 In the file menu use the 'Export series summary to windows clipboard...' menu item.
 
 <img src="/wiki/images/sailwave/clipboard_options.jpg" width="100%" height="100%" alt="" />
@@ -32,3 +37,5 @@ In the file menu use the 'Export series summary to windows clipboard...' menu it
 tbd.
 
 ## WinRegatta
+
+tbd.

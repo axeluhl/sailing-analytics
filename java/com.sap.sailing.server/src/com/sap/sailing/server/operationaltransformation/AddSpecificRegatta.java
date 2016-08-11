@@ -56,7 +56,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
         List<Series> result = new ArrayList<Series>();
         for (Map.Entry<String, SeriesCreationParametersDTO> e : seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds.getSeriesCreationParameters().entrySet()) {
             final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-            Series s = new SeriesImpl(e.getKey(), e.getValue().isMedal(), createFleets(e.getValue().getFleets()),
+            Series s = new SeriesImpl(e.getKey(), e.getValue().isMedal(), e.getValue().isFleetsCanRunInParallel(), createFleets(e.getValue().getFleets()),
                     emptyRaceColumnNamesList, trackedRegattaRegistry);
             if (e.getValue().getDiscardingThresholds() != null) {
                 s.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(e.getValue().getDiscardingThresholds()));
@@ -64,6 +64,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
             s.setStartsWithZeroScore(e.getValue().isStartsWithZero());
             s.setSplitFleetContiguousScoring(e.getValue().hasSplitFleetContiguousScoring());
             s.setFirstColumnIsNonDiscardableCarryForward(e.getValue().isFirstColumnIsNonDiscardableCarryForward());
+            s.setMaximumNumberOfDiscards(e.getValue().getMaximumNumberOfDiscards());
             result.add(s);
         }
         return result;

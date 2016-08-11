@@ -16,12 +16,13 @@ import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 public abstract class AbstractStartActivity extends CheckinDataActivity {
 
     private final static String TAG = AbstractStartActivity.class.getName();
+    protected OpenSansToolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_container);
-        OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
+        toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
             toolbar.hideSubtitle();

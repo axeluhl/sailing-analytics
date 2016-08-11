@@ -93,7 +93,7 @@ public class ReplicationReceiver implements Runnable {
      * providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
      * core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
      */
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()-1, 3);
+    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
 
     /**
      * If permitted by the security manager, this is the <code>_queue</code> field accessor for the {@link QueueingConsumer}

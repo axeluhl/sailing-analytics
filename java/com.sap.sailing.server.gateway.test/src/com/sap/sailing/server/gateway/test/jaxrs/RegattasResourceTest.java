@@ -45,7 +45,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         final TimePoint startDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint endDate = new MillisecondsTimePoint(cal.getTime());
-        Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, fleets, raceColumnNames, /* trackedRegattaRegistry */null);
+        Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, /* isFleetsCanRunInParallel */ true, fleets, raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
         racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaName, boatClassName), boatClassName, 
                 startDate, endDate, UUID.randomUUID(), series, /*persistent*/ true,

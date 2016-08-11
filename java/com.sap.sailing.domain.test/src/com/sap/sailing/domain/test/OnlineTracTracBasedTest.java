@@ -34,6 +34,7 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -63,7 +64,7 @@ import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
  * @author Axel Uhl (d043530)
  * 
  */
-public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
+public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest implements TrackingDataLoader {
     private final Logger logger = Logger.getLogger(OnlineTracTracBasedTest.class.getName());
     private DomainFactoryImpl domainFactory;
     private Regatta domainEvent;
@@ -137,20 +138,20 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
                     logger.info("Stored data begin");
                     lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0);
                     if (getTrackedRace() != null) {
-                        getTrackedRace().setStatus(lastStatus);
+                        getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
                     }
                     break;
                 case End:
                     logger.info("Stored data end");
                     lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
                     if (getTrackedRace() != null) {
-                        getTrackedRace().setStatus(lastStatus);
+                        getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
                     }
                     break;
                 case Progress:
                     lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, storedDataEvent.getProgress());
                     if (getTrackedRace() != null) {
-                        getTrackedRace().setStatus(lastStatus);
+                        getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
                     }
                     break;
                 default:

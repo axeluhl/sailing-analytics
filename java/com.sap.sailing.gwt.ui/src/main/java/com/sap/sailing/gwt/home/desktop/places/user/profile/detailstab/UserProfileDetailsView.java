@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.detailstab;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
+import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 import com.sap.sse.security.ui.userprofile.shared.userdetails.UserDetailsView;
 
 public interface UserProfileDetailsView extends IsWidget {
@@ -13,7 +14,7 @@ public interface UserProfileDetailsView extends IsWidget {
     
     NeedsAuthenticationContext getDecorator();
 
-    public interface Presenter {
+    public interface Presenter extends NotLoggedInPresenter {
         void setAuthenticationContext(AuthenticationContext userManagementContext);
     }
 }

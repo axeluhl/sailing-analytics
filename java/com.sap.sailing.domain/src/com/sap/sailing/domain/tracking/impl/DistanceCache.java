@@ -220,4 +220,18 @@ public class DistanceCache {
     private Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>> createDummy(TimePoint to) {
         return new Util.Pair<TimePoint, NavigableSet<Util.Pair<TimePoint, Distance>>>(to, null);
     }
+
+    /**
+     * Removes all contents from this cache
+     */
+    public void clear() {
+        LockUtil.lockForWrite(lock);
+        try {
+            distanceCache.clear();
+            lruCache.clear();
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+
+    }
 }
