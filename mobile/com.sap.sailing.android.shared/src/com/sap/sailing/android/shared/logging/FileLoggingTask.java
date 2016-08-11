@@ -14,13 +14,14 @@ import java.util.concurrent.BlockingQueue;
 import android.content.Context;
 import android.util.Log;
 
+import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
 
 public class FileLoggingTask implements Runnable {
 
     private final static String TAG = FileLoggingTask.class.getName();
 
-    private final static String logFileTemplate = "sap_rc_log_%s.txt";
+    private static String logFileTemplate;
     private final static String logFileDateFormat = "yyyyMMdd";
 
     private final BlockingQueue<String> queue;
@@ -34,6 +35,7 @@ public class FileLoggingTask implements Runnable {
     public FileLoggingTask(BlockingQueue<String> queue, Context context) {
         this.queue = queue;
         this.context = context.getApplicationContext();
+        logFileTemplate = this.context.getString(R.string.log_file_template);
     }
 
     public FileLoggingTask(Context context) {

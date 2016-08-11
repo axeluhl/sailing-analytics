@@ -4,7 +4,7 @@
 # http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neonr
 
 if [[ $1 == "" ]]; then
-    echo "You need to specify the Eclipse intallation directory"
+    echo "You need to specify the Eclipse installation directory"
     exit 1
 fi
 
