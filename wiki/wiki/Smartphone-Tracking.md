@@ -11,7 +11,7 @@ After completing these steps up until the point "Add Device Mappings" or by simp
 * a Regatta linked to your event
 * A Leaderboard linked to your Leaderboard Group
 
-_Hint:_ You can link Leaderboards to a Leaderboarg Group by selecting your group under the tab "Leaderboards" on the left hand side and then selecting one or multiple Leaderboards on the right hand side and adding them by using the "<-" arrow.
+_Hint:_ You can link Leaderboards to a Leaderboard Group by selecting your group under the tab "Leaderboards" on the left hand side and then selecting one or multiple Leaderboards on the right hand side and adding them by using the "<-" arrow.
 Usually this step is carried out by the wizard automatically.
 
 * Competitors in your Regatta
