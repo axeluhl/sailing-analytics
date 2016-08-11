@@ -189,23 +189,21 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
             if (isTogglingInProcess()) {
                 queuedToggleRequests.add(expand);
             } else {
-                final boolean oldBusyState = getLeaderboardPanel().isBusy(); 
-                getLeaderboardPanel().setBusyState(true);
-                setTogglingInProcess(true);
                 final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
                 if (table == null) {
                     GWT.log("WARNING: leaderborad table is null");
                 } else {
+                    getLeaderboardPanel().addBusyTask();
+                    setTogglingInProcess(true);
                     if (!expand) { // collapse
                         if (isExpanded()) { // but only if currently expanded
                             for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : getAllVisibleChildren()) {
                                 getLeaderboardPanel().removeColumn(column); // removes only the children currently displayed
                             }
-                            getLeaderboardPanel().setBusyState(false);
-                            setTogglingInProcess(false);
                             // important: toggle expanded state after asking for all visible children
                             setExpanded(!isExpanded());
                         }
+                        finishCurrentToggling();
                     } else { // expand
                         if (!isExpanded()) { // but only if not expanded yet
                             // important: toggle expanded state before asking for all visible children
@@ -228,17 +226,29 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
                                             getLeaderboardPanel().getLeaderboardTable().redraw();
                                         }
                                     }
-                                    getLeaderboardPanel().setBusyState(oldBusyState);
-                                    setTogglingInProcess(false);
-                                    if (!queuedToggleRequests.isEmpty()) {
-                                        changeExpansionState(queuedToggleRequests.remove(0));
-                                    }
+                                    finishCurrentToggling();
                                 }
                             });
+                        } else {
+                            finishCurrentToggling();
                         }
                     }
                 }
             }
+        }
+    }
+    /**
+     * Finishes the current toggling by removing the
+     * {@link LeaderboardPanel#removeBusyTask() busy task} from the {@link #getLeaderboardPanel() leaderboard panel} and setting the
+     * {@link #setTogglingInProcess(boolean) togglingInProcess flag} to <code>false</code>.
+     * Afterwards, {@link #queuedToggleRequests queued toggling requests} are executed, if any.
+     * Make sure that this method is called only once, and only after {@link LeaderboardPanel#addBusyTask()} has been called.
+     */
+    private void finishCurrentToggling() {
+        getLeaderboardPanel().removeBusyTask();
+        setTogglingInProcess(false);
+        if (!queuedToggleRequests.isEmpty()) {
+            changeExpansionState(queuedToggleRequests.remove(0));
         }
     }
     
