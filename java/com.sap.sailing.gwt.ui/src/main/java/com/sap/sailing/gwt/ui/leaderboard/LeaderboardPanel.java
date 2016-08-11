@@ -2294,13 +2294,17 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                             try {
                                 updateLeaderboard(result);
                             } finally {
-                                removeBusyTask();
+                                if (showProgress) {
+                                    removeBusyTask();
+                                }
                             }
                         }
         
                         @Override
                         public void onFailure(Throwable caught) {
-                            removeBusyTask();
+                            if (showProgress) {
+                                removeBusyTask();
+                            }
                             getErrorReporter()
                                     .reportError("Error trying to obtain leaderboard contents: " + caught.getMessage(),
                                             true /* silentMode */);
