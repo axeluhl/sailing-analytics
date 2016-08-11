@@ -8,7 +8,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Installations
 
-1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.6 "Neon"), http://www.eclipse.org
+1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.5.2 "Mars SR2"), http://www.eclipse.org
 2. Eclipse Extensions
   * Install GWT Eclipse plugin for Eclipse (http://gwt-plugins.github.io/documentation/gwt-eclipse-plugin/Download.html)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
@@ -23,9 +23,9 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.6 "Neon"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neonr) by using the script "configuration/installPluginsForEclipseNeon.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using our Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.5.2 "Mars SR2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers-452/mars2) by using the script "configuration/installPluginsForEclipseMars.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
-    ./installPluginsForEclipseNeon.sh "/some/path/on/my/computer/eclipse"
+    ./installPluginsForEclipseMars.sh "/some/path/on/my/computer/eclipse"
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
@@ -34,6 +34,9 @@ On Windows you need a Git Bash or Cygwin shell to run the script.
 On Mac OS, it's not sufficient to provide the path to the app, instead you need to get the path to the directory inside of the app package hosting the "eclipse" binary (.../Eclipse.app/Contents/MacOS).
 
 Be aware hat the installation may take several minutes depending on your Internet connection. When the script finished running, please check that no errors occurred (the installation process only logs errors but doesn't fail).
+
+__NOTE:__
+Beside the installation script for Eclipse Mars, there is also one for the new Eclipse Neon release (4.6.0). Due to a ECJ/JDT regression, this version will brake project functionality. If you've already installed Eclipse Neon, you can easily downgrade to Mars SR2, reusing your existing workspace. You just have to accept the warning you'll get during first startup and perform a workspace cleanup (`Project > Clean... > Clean all projects`). In rare cases, the target platform must be set again.
 
 #### Further optional but recommended installations
 
@@ -55,12 +58,12 @@ Be aware hat the installation may take several minutes depending on your Interne
   * Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: http://www.sha1-online.com/.
 4. Hudson
   * Request a Hudson user by sending e-mail to Axel Uhl, Frank Mittag or Simon Marcel Pamies.
- 
-#### Steps to build and run the Race Analysis Suite 
- 
+
+#### Steps to build and run the Race Analysis Suite
+
 1. Get the content of the git repository
   * Generate SSH Keys with "ssh-keygen -t rsa -C "" " command in Cygwin Terminal (Not with Putty!!!)
-  * Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`  User "trac" has all public ssh keys. 
+  * Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`  User "trac" has all public ssh keys.
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 3. Setup and configure Eclipse
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Fortmatter)
@@ -100,7 +103,7 @@ Copy the settings.xml from the top-level git folder to your ~/.m2 directory and 
 - Install the GWT Browser Plugin (Chrome or Firefox; as of this writing (2013-11-05), Firefox is the only platform where the plug-in runs stably) for the GWT Development mode
 
 #### Additional steps required for Android projects
-      
+
 To ensure that all components of the Analysis Suite are working, you should also import all Android projects (mobile/) into your workspace. There are some additional requirements to enable the build process of these projects.
 
 1. Add the Android Development Tools (ADT) plugin to your Eclipse IDE
@@ -149,7 +152,7 @@ If you are working with a linux-system and you get the error message `error whil
 
 The Android Apps can be built in Android Studio or gradle command line. Android Studio is built on top of IntelliJ IDEA, so it is possible to use IntelliJ IDEA as well.
 
-1. On the "Welcome Screen" choose "Import Project (Eclipse, ADT, Gradle, etc.)" 
+1. On the "Welcome Screen" choose "Import Project (Eclipse, ADT, Gradle, etc.)"
 2. Navigate to the project root folder and select the "build.gradle" file (all used modules are defined in "settings.gradle")
     * it will download all necessary gradle runtime files
     * you will see floating messages at the top right

@@ -27,6 +27,10 @@
   </modules>
 
   <properties>
+    <!-- Please ensure that serialization/replication works correctly, when updating the tycho version.
+         Due to ECJ/JDT bugs it may fail depending on the Eclipse version tycho is based on 
+         (see Bugzilla: https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3859). -->
+    <!-- Most likely, serialization/replication will fail with tycho versions based on Eclipse Neon R (4.6.0). -->
     <tycho-version>0.21.0</tycho-version>
     <gwt.version>2.7.0</gwt.version>
     <gwt.minVersion>2.7.0</gwt.minVersion>
