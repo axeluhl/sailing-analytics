@@ -1,5 +1,6 @@
 package com.sap.sse.security;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -57,7 +58,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException;
     
-    void updateUserProperties(String username, String fullName, String company) throws UserManagementException;
+    void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
     User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 
@@ -137,7 +138,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @param key must not be <code>null</code>
      * @param value must not be <code>null</code>
      */
-    void setPreference(String username, String key, String value);
+    Void setPreference(String username, String key, String value);
+
+    void setPreferenceObject(String name, String preferenceKey, Object preference);
 
     /**
      * Permitted only for users with role {@link DefaultRoles#ADMIN} or when the subject's user name matches

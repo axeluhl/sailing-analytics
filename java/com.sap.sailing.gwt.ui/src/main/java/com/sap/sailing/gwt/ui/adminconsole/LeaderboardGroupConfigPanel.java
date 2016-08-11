@@ -44,7 +44,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -191,6 +191,16 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         ListHandler<StrippedLeaderboardDTO> leaderboardsListHandler = new ListHandler<StrippedLeaderboardDTO>(leaderboardsProvider.getList());
         leaderboardsTable = new FlushableCellTable<StrippedLeaderboardDTO>(10000, tableRes);
         leaderboardsTable.ensureDebugId("LeaderboardsCellTable");
+        leaderboardsFilterablePanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(
+                filterLeaderboardsLabel, availableLeaderboards, leaderboardsTable, leaderboardsProvider) {
+            @Override
+            public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
+                List<String> strings = new ArrayList<String>();
+                strings.add(t.name);
+                strings.add(t.displayName);
+                return strings;
+            }
+        };
         SelectionCheckboxColumn<StrippedLeaderboardDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<StrippedLeaderboardDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
@@ -205,18 +215,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     public int hashCode(StrippedLeaderboardDTO t) {
                         return t.name.hashCode();
                     }
-                }, leaderboardsProvider, leaderboardsTable);
+                }, leaderboardsFilterablePanel.getAllListDataProvider(), leaderboardsTable);
         refreshableLeaderboardsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
         leaderboardsTable.setSelectionModel(refreshableLeaderboardsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
-        leaderboardsFilterablePanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(filterLeaderboardsLabel, availableLeaderboards, leaderboardsTable, leaderboardsProvider) {
-            @Override
-            public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
-                List<String> strings = new ArrayList<String>();
-                strings.add(t.name);
-                strings.add(t.displayName);
-                return strings;
-            }
-        };
         leaderboardsFilterablePanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
         leaderboardsFunctionPanel.add(leaderboardsFilterablePanel);
         
@@ -506,7 +507,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.getName()
-                        + "&showRaceDetails=true&"+RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true"
+                        + "&showRaceDetails=true&"+RaceBoardPerspectiveSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true"
                         + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(link, group.getName());
             }
@@ -588,7 +589,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     public int hashCode(LeaderboardGroupDTO t) {
                         return t.getId().hashCode();
                     }
-                }, groupsProvider);
+                }, groupsFilterablePanel.getAllListDataProvider());
         refreshableGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {

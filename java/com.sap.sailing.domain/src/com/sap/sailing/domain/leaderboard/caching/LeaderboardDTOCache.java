@@ -66,7 +66,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
      */
     private final boolean waitForLatestAnalyses;
     
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
     /**
      * A multi-threaded executor for the currently running leaderboard requests, executing the {@link Future}s currently
      * pending.
@@ -166,7 +166,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
                     try {
                         LeaderboardDTO result = leaderboard.computeDTO(adjustedTimePoint,
                                 namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
-                                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, /* fillNetPointsUncorrected */ false);
+                                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
                         return result;
                     } finally {
                         LockUtil.unpropagateLockSetFrom(callerThread);

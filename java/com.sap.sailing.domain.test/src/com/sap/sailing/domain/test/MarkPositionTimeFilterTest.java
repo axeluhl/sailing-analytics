@@ -3,6 +3,7 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -36,7 +37,8 @@ public class MarkPositionTimeFilterTest {
         m = new MarkImpl("Test Mark");
         track = new DynamicGPSFixTrackImpl<Mark>(m, /* millisecondsOverWhichToAverage */ 5000);
         when(trackedRace.getOrCreateTrack(m)).thenReturn(track);
-        doCallRealMethod().when(trackedRace).recordFix(same(m), (GPSFixMoving) anyObject());
+        doCallRealMethod().when(trackedRace).recordFix(same(m), (GPSFixMoving) anyObject(), anyBoolean());
+        doCallRealMethod().when(trackedRace).isWithinStartAndEndOfTracking(anyObject());
     }
     
     @Test
@@ -47,7 +49,7 @@ public class MarkPositionTimeFilterTest {
     @Test
     public void testAddFixForMark() {
         trackedRace.recordFix(m, new GPSFixMovingImpl(new DegreePosition(12, 13), MillisecondsTimePoint.now(),
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))), /* onlyWhenInTrackingInterval */ true);
         track.lockForRead();
         try {
             assertEquals(1, track.getRawFixes().size());
@@ -64,7 +66,7 @@ public class MarkPositionTimeFilterTest {
         when(trackedRace.getStartOfTracking()).thenReturn(start);
         when(trackedRace.getEndOfTracking()).thenReturn(end);
         trackedRace.recordFix(m, new GPSFixMovingImpl(new DegreePosition(12, 13), fix,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))), /* onlyWhenInTrackingInterval */ true);
         track.lockForRead();
         try {
             assertEquals(1, track.getRawFixes().size());
@@ -81,7 +83,7 @@ public class MarkPositionTimeFilterTest {
         when(trackedRace.getStartOfTracking()).thenReturn(start);
         when(trackedRace.getEndOfTracking()).thenReturn(end);
         trackedRace.recordFix(m, new GPSFixMovingImpl(new DegreePosition(12, 13), fix,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))), /* onlyWhenInTrackingInterval */ true);
         track.lockForRead();
         try {
             assertTrue(track.getRawFixes().isEmpty());
@@ -98,7 +100,7 @@ public class MarkPositionTimeFilterTest {
         when(trackedRace.getStartOfTracking()).thenReturn(start);
         when(trackedRace.getEndOfTracking()).thenReturn(end);
         trackedRace.recordFix(m, new GPSFixMovingImpl(new DegreePosition(12, 13), fix,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))), /* onlyWhenInTrackingInterval */ true);
         track.lockForRead();
         try {
             assertTrue(track.getRawFixes().isEmpty());
@@ -107,7 +109,7 @@ public class MarkPositionTimeFilterTest {
         }
         when(trackedRace.getEndOfTracking()).thenReturn(fix.plus(10000));
         trackedRace.recordFix(m, new GPSFixMovingImpl(new DegreePosition(12, 13), fix,
-                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))));
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))), /* onlyWhenInTrackingInterval */ true);
         track.lockForRead();
         try {
             assertEquals(1, track.getRawFixes().size());

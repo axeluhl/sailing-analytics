@@ -82,7 +82,7 @@ public class LoginActivity extends BaseActivity
 
     // FIXME weird data redundancy by using different field for setting values makes everything so complex and buggy
     private String eventName = null;
-    private String courseName = null;
+    private String courseAreaName = null;
     private String positionName = null;
 
     private Serializable mSelectedEventId;
@@ -147,7 +147,7 @@ public class LoginActivity extends BaseActivity
             sign_in.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseName + " - " + positionName);
+                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
                     login();
                 }
             });
@@ -197,19 +197,19 @@ public class LoginActivity extends BaseActivity
     }
 
     private void selectCourseArea(CourseArea courseArea) {
-        courseName = courseArea.getName();
+        courseAreaName = courseArea.getName();
         mSelectedCourseAreaUUID = courseArea.getId();
-        loginListViews.getAreaContainer().setHeaderText(courseName);
+        loginListViews.getCourseAreaContainer().setHeaderText(courseAreaName);
     }
 
     private boolean isCourseAreaSelected() {
-        return (courseName != null && mSelectedCourseAreaUUID != null);
+        return (courseAreaName != null && mSelectedCourseAreaUUID != null);
     }
 
     private void resetCourseArea() {
-        courseName = null;
+        courseAreaName = null;
         mSelectedCourseAreaUUID = null;
-        loginListViews.getAreaContainer().setHeaderText("");
+        loginListViews.getCourseAreaContainer().setHeaderText("");
         resetPosition();
     }
 
@@ -360,17 +360,19 @@ public class LoginActivity extends BaseActivity
     public void onResume() {
         super.onResume();
 
+        if (preferences.needConfigRefresh()) {
+            preferences.setNeedConfigRefresh(false);
+            Intent intent = new Intent(this, getClass());
+            startActivity(intent);
+            finish();
+        }
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_RESET);
         filter.addAction(AppConstants.INTENT_ACTION_VALID_DATA);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
         BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
-//        if (!TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
-//            resetData();
-//        } else {
-//            BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
-//        }
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
@@ -379,7 +381,6 @@ public class LoginActivity extends BaseActivity
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1).show();
             }
         }
-
     }
 
     @Override
@@ -429,8 +430,8 @@ public class LoginActivity extends BaseActivity
             }
         });
 
-        if (!AppPreferences.on(this).isOfflineMode()) {
-            // always reload the configuration...
+        if (!preferences.isOfflineMode()) {
+            // reload the configuration if needed...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
             dismissProgressSpinner();
@@ -520,7 +521,16 @@ public class LoginActivity extends BaseActivity
         return ObjectAnimator.ofFloat(target, "alpha", 1f, 0f);
     }
 
-    private void resetData() {
+    /**
+     * Reset the data (reload from server)
+     *
+     * @param force Reload data, even if the backdrop is moved up
+     */
+    private void resetData(boolean force) {
+        if (!force && backdrop.getY() != 0) {
+            return;
+        }
+
         setupDataManager();
 
         addEventListFragment();
@@ -538,9 +548,9 @@ public class LoginActivity extends BaseActivity
             String action = intent.getAction();
 
             if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
-                resetData();
+                resetData(intent.getBooleanExtra(AppConstants.EXTRA_FORCE_REFRESH, false));
             } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
-                resetData();
+                resetData(false);
             }
         }
     }
@@ -567,7 +577,7 @@ public class LoginActivity extends BaseActivity
 
         @Override
         public void onAnimationCancel(Animator animation) {
-
+            // no op
         }
 
         @Override

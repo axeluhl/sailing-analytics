@@ -8,10 +8,8 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
 public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES extends UserProfileView.Presenter> extends IsWidget, NeedsAuthenticationContext {
 
@@ -24,10 +22,7 @@ public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES ex
         PlaceNavigation<StartPlace> getHomeNavigation();
         PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation();
 
-        AuthenticationManager getAuthenticationManager();
-
-        UserManagementServiceAsync getUserManagementService();
-
+        UserProfileClientFactory getClientFactory();
         String getMailVerifiedUrl();
     }
     

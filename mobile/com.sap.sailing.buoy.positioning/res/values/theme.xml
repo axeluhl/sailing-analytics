@@ -4,7 +4,7 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="AppTheme.Base"/>
 
-    <style name="AppTheme.Base" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
 
         <!-- Customize your theme here. -->
 
@@ -19,13 +19,20 @@
 
         <!-- You can also set colorControlNormal, colorControlActivated colorControlHighlight & colorSwitchThumbNormal. -->
 
+        <item name="buttonStyle">@style/buttonStyle</item>
+
         <item name="windowActionBar">false</item>
     </style>
 
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
-        <item name="android:background">?android:attr/listDivider</item>
+        <item name="android:background">@color/separator_color</item>
+    </style>
+
+    <style name="buttonStyle" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@drawable/button_text_colors</item>
     </style>
 
 </resources>

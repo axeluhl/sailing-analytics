@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable.Cell;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.StringMessages;
@@ -108,7 +107,10 @@ public abstract class ExpandedListEditorUi<ValueType> extends ListEditorUi<Value
         onRowRemoved();
     }
     
-    protected void setValueFromValueWidget(ValueBoxBase<ValueType> valueWidget, ValueType newValue, boolean fireEvents) {
+    /**
+     * @param valueWidget a widget returned previously from {@link #createValueWidget(int, Object)}
+     */
+    protected void setValueFromValueWidget(Widget valueWidget, ValueType newValue, boolean fireEvents) {
         for (int i = 0; i < expandedValuesGrid.getRowCount(); i++) {
             Widget gridWidget = expandedValuesGrid.getWidget(i, 0);
             if (gridWidget.getElement() == valueWidget.getElement()) {

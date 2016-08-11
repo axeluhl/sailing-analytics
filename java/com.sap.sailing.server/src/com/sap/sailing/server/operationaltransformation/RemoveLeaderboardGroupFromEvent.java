@@ -22,7 +22,7 @@ public class RemoveLeaderboardGroupFromEvent extends AbstractRacingEventServiceO
     }
 
     @Override
-    public Boolean internalApplyTo(RacingEventService toState) throws Exception {
+    public Boolean internalApplyTo(RacingEventService toState) {
         boolean updated = false;
         Event event = toState.getEvent(eventId);
         if (event != null) {

@@ -71,7 +71,7 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
         // -------- qualifying series ------------
         List<String> emptyRaceColumnNames = Collections.emptyList();
         List<Fleet> qualifyingFleets = createQualifyingFleets();
-        Series qualifyingSeries = new SeriesImpl(seriesName, /* isMedal */false, qualifyingFleets,
+        Series qualifyingSeries = new SeriesImpl(seriesName, /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualifyingFleets,
                 emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(qualifyingSeries);
         return series;

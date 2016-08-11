@@ -1,12 +1,15 @@
 package com.sap.sailing.gwt.home.mobile.places.event.overview.regatta;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.eventsteps.EventSteps;
@@ -28,8 +31,10 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     public RegattaOverviewImpl(EventViewBase.Presenter presenter) {
         super(presenter, presenter.isMultiRegattaEvent(), presenter.isMultiRegattaEvent());
         FlowPanel container = new FlowPanel();
-        this.setupProgress(container);
-        this.setupLiveRaces(container);
+        if(presenter.getRegatta() != null) {
+            this.setupProgress(container);
+            this.setupLiveRaces(container);
+        }
         if (!isMultiRegattaEvent()) {
             this.setupOverviewStage(container);
         }
@@ -58,13 +63,18 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     private void setupMiniLeaderboard(Panel container) {
         MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
         miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
-        refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
+        if(currentPresenter.getRegatta() != null) {
+            refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
+        } else {
+            // This forces the "There are no results available yet" message to show
+            miniLeaderboard.setData(new GetMiniLeaderboardDTO());
+        }
         container.add(miniLeaderboard);
     }
     
     @Override
-    protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {
-        QuickfinderPresenter.getForRegattaOverview(quickfinder, currentPresenter, regattaMetadatas);
+    protected void setQuickFinderValues(Quickfinder quickfinder, Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
+        QuickfinderPresenter.getForRegattaOverview(quickfinder, currentPresenter, regattasByLeaderboardGroupName);
     }
     
     @Override

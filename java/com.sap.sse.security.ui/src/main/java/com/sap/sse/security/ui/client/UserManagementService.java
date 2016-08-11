@@ -31,7 +31,7 @@ public interface UserManagementService extends RemoteService {
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException;
 
-    void updateUserProperties(String username, String fullName, String company) throws UserManagementException;
+    void updateUserProperties(String username, String fullName, String company, String localeName) throws UserManagementException;
 
     void resetPassword(String username, String eMailAddress, String baseURL) throws UserManagementException, MailException;
 

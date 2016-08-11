@@ -33,13 +33,14 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
             @Override
             public boolean representSameEntity(RaceColumnDTOAndFleetDTOWithNameBasedEquality dto1,
                     RaceColumnDTOAndFleetDTOWithNameBasedEquality dto2) {
-                return dto1.getA().getName().toString().equals(dto2.getA().getName().toString()) &&
-                        dto1.getB().getName().toString().equals(dto2.getB().getName().toString());
+                return dto1.getC().name.equals(dto2.getC().name) &&
+                        dto1.getA().getName().equals(dto2.getA().getName()) &&
+                        dto1.getB().getName().equals(dto2.getB().getName());
             }
 
             @Override
             public int hashCode(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
-                return t.getA().getName().toString().concat(t.getB().getName().toString()).hashCode();
+                return t.getA().getName().concat(t.getB().getName()).concat(t.getC().name).hashCode();
             }
         });
         Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> raceNameColumn =

@@ -36,6 +36,16 @@ public class DateAndTimeFormatterUtil {
         return defaultDateFormatter.render(startDate) + " - " + defaultDateFormatter.render(endDate);
     }
 
+    /**
+     * Formats a duration in a compact format so that hours and minutes are only shown if the duration is >1h to avoid
+     * unnecessary 00:yy or 00:xx:yy values.
+     * 
+     * Be aware that this method doesn't work for durations >= 24h.
+     * 
+     * @param timeInMilliseconds
+     *            the duration in milliseconds to format
+     * @return the formatted duration
+     */
     public static String formatElapsedTime(long timeInMilliseconds) {
         String result = "";
         int seconds = (int) (timeInMilliseconds / 1000) % 60 ;

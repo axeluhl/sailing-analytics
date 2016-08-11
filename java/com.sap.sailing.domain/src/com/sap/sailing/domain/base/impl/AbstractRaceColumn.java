@@ -89,7 +89,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public TrackedRace getTrackedRace(Fleet fleet) {
-        return trackedRaces.get(fleet);
+        return trackedRaces == null ? null : trackedRaces.get(fleet);
     }
 
     @Override
@@ -106,6 +106,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 }
             }
             if (trackedRace != null) {
+                RegattaLog regattaLog = getRegattaLog();
+                if(regattaLog != null) {
+                    trackedRace.attachRegattaLog(regattaLog);
+                }
                 final RaceLog raceLog = getRaceLog(fleet);
                 if (raceLog != null) {
                     trackedRace.attachRaceLog(raceLog);
@@ -339,7 +343,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             }
         } else {
             // if no tracked race is found, use marks from race course if present in racelog
-            LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(getRaceLog(fleet));
+            LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(getRaceLog(fleet), /* onlyCoursesWithValidWaypointList */ true);
             final CourseBase courseBase = courseDesginFinder.analyze();
             if (courseBase != null) {
                 courseBase.getWaypoints().forEach((waypoint) -> Util.addAll(waypoint.getMarks(), result));

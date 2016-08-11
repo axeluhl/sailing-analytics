@@ -80,7 +80,7 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
     private List<DetailType> getAvailableDetailsTypes() {
         List<DetailType> availableDetailsTypes = new ArrayList<DetailType>();
         availableDetailsTypes.add(DetailType.OVERALL_RANK);
-        availableDetailsTypes.add(DetailType.REGATTA_TOTAL_POINTS_SUM);
+        availableDetailsTypes.add(DetailType.REGATTA_NET_POINTS_SUM);
         return availableDetailsTypes;
     }
 

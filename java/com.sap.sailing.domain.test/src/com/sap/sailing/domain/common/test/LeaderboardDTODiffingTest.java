@@ -235,7 +235,7 @@ public class LeaderboardDTODiffingTest {
         newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
         CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
                 /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("LSC", "GER 1234"), new BoatClassDTO("505", 5.05), /* timeOnTimeFactor */ null,
-                /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         newVersion.competitors.add(13, somebodyNew); // insert a competitor; this should mess up all others' indexes; check if this works
         CompetitorDTO wolfgang = getPreviousCompetitorByName("HUNGER +JESS");
         newVersion.competitors.remove(wolfgang);
@@ -256,7 +256,7 @@ public class LeaderboardDTODiffingTest {
         newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
         CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
                 /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("LSC", "GER 1234"), new BoatClassDTO("505", 5.05), /* timeOnTimeFactor */ null,
-                /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         newVersion.setSuppressed(newVersion.competitors.get(13), true); // suppress an existing competitor; compaction should reduce this to a single number only
         newVersion.setSuppressed(somebodyNew, true); // check that mixed mode with existing and new competitors works as well
         List<CompetitorDTO> newSuppressedCompetitorsBeforeStripping = new ArrayList<CompetitorDTO>();
@@ -279,7 +279,7 @@ public class LeaderboardDTODiffingTest {
         newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
         CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
                 /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("LSC", "GER 1234"), new BoatClassDTO("505", 5.05), /* timeOnTimeFactor */ null,
-                /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         newVersion.competitors.add(somebodyNew);
         newVersion.competitorDisplayNames = new HashMap<CompetitorDTO, String>(newVersion.competitorDisplayNames);
         newVersion.competitorDisplayNames.put(newVersion.competitors.get(13), "Humba");
@@ -309,7 +309,7 @@ public class LeaderboardDTODiffingTest {
         newVersion.competitors = new ArrayList<CompetitorDTO>(newVersion.competitors); // clone competitor list so it's not identical to that of previous version
         CompetitorDTO somebodyNew = new CompetitorDTOImpl("Someone New", Color.RED, "someone@nobody.de", "DE", "GER", "Germany", "912p09871203987",
                 /* imageURL */ null, /* flagImageURL */ null, new BoatDTO("LSC", "GER 1234"), new BoatClassDTO("505", 5.05), /* timeOnTimeFactor */ null,
-                /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         newVersion.competitors.add(somebodyNew);
         newOrdering.add(somebodyNew);
         CompetitorDTO formerRank13 = newOrdering.remove(13);
