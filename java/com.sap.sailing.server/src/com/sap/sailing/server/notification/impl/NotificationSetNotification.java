@@ -99,7 +99,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
                 mailService.sendMail(user.getEmail(), mailTemplate.getSubject(), multipart);
             } catch (Exception e) {
                 logger.log(Level.SEVERE,
-                        "Could not send mail notification for \"" + objectToNotifyAbout + "\" to user \" + user + \"", e);
+                        "Could not send mail notification for \"" + objectToNotifyAbout + "\" to user \"" + user + "\"", e);
             }
         });
     }
