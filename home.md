@@ -35,6 +35,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
 * [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
+* [[Webdesign|wiki/info/landscape/webdesign]]
 
 ### Mobile
 
@@ -79,6 +80,9 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ## HowTo
 
+* [[Onboarding|wiki/howto/onboarding]]
+
+
 ### Development
 
 * [[Create boat graphics for the 2D race viewer|wiki/howto/development/boatgraphicssvg]]
@@ -94,67 +98,58 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Typical Development Scenarios|wiki/howto/development/typical-development-scenarios]]
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
 
-* [[Racecommittee App|wiki/racecommittee-app]]
-  * [[Tracking App|wiki/tracking-app]]
+### For Event Managers
 
-  * [[Thesis (Bachelor, Master, ...)|wiki/thesis]]
+* [[Set up local network with replication server|wiki/howto/eventmanagers/event-network-with-replica]]
+* [[Operating Igtimi WindBots|wiki/howto/eventmanagers/windbot-operations]]
+* [[Linking Race Videos|wiki/howto/eventmanagers/linking-race-videos]]
+* [[Import official results|wiki/howto/eventmanagers/results-import]]
 
-  * [[Polars|wiki/Polars]]
-* Production Environment
+### Setup
 
-  * [[TracTrac|wiki/tractrac-lifecycle]]
-  * [[Analytics on a stick|wiki/analytics-on-a-stick]]
-  * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
-  
-  
-* Information for Developers
-  * [[OnBoarding Information|wiki/onboarding]]
-  * [[Cook Book|wiki/cook-book]]
-  
+* [[Configure Races on Server|wiki/howto/setup/results-import]]
+* [[Setting up internal Jenkins on SAP Monsoon|wiki/howto/setup/setting-up-jenkins-on-sap-monsoon]]
 
-  
-  * [[Typical Data Mining Scenarios|wiki/typical-data-mining-scenarios]]
-  * [[Load Tests|wiki/server-load-tests]]
-  * [[Server Replication|wiki/server-replication]]
-  * [[Configure Races on Server|wiki/configure-races-on-server]]
+### Miscellanious
 
-  
-  
-  * [[Mobile Development|wiki/mobile-development]]
-  * [[Security|wiki/security]]
-  * [[Fortify Security Scans|wiki/fortify]]
-  
-* Information for Webdesigners
-  * [[Layout repository|wiki/webdesign]]
+* [[Cook Book|wiki/howto/misc/cook-book]]
+* [[Event Tracking|wiki/howto/misc/event-tracking]]
+* [[POlars|wiki/howto/misc/polars]]
+* [[Server Replication|wiki/howto/misc/server-replication]]
+* [[Smartphone Tracking General|wiki/howto/misc/smartphone-tracking-general]]
+* [[Smartphone Tracking|wiki/howto/misc/smartphone-tracking]]
+* [[TracTrac|wiki/howto/misc/tractrac-lifecycle]]
+* [[UI Tests|wiki/howto/misc/ui-tests-tutorial]]
+* [[Uploading Media Content|wiki/howto/misc/uploading-media-content]]
 
-  * [[Uploading Media Content|wiki/uploading-media-content]]
-* Information for Event Managers
-  * [[Set up local network with replication server|wiki/event-network-with-replica]]
-  * [[Operating Igtimi WindBots|wiki/windbot-operations]]
-  * [[Linking Race Videos|wiki/linking-race-videos]]
-  * [[Import official results|wiki/results-import]]
-* Information for League operators
-  
-* Planning and Event Information
-  * [[Project Planning (bigger development)|wiki/planning]]
-  * [[General Event Planning|wiki/general-event-planning]]
-  * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
-  * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
-  * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
-  * [[Kieler Woche event page|wiki/kieler-woche-2015]]
-  * [[Charleston Race Week 2016|wiki/Charleston-Race-Week-2016]]
-  * [[Sailing Leagues 2016|wiki/Sailing-Leagues-2016]]
-* Lean DI Support
-  * [[Setting up internal Jenkins on SAP Monsoon|wiki/setting-up-jenkins-on-sap-monsoon]]
+## Events
+
+* [[Analytics on a stick|wiki/analytics-on-a-stick]]
+
+## Links
+* [[Monitoring Apache and RabbitMQ|wiki/links/monitoring-apache-and-rabbitmq]]
+
+## Projects
+* [[Analytics on a stick|wiki/projects/analytics-on-a-stick]]
+
+## Planning
+* [[Overview|https://wiki.sapsailing.com/pages/wiki/planning/]]
+
+## Miscellanious
+* [[Project Planning (bigger development)|wiki/events/planning]]
+* [[General Event Planning|wiki/events/general-event-planning]]
+* [[Information about Extreme Sailing Series|wiki/events/extreme-sailing-series]]
+* [[Travem&uuml;nder Woche 2014 event page|wiki/events/tw2014]]
+* [[505 worlds Kiel 2014 event page|wiki/events/505-worlds-kiel-2014]]
+* [[Kieler Woche event page|wiki/events/kieler-woche-2015]]
+* [[Charleston Race Week 2016|wiki/events/Charleston-Race-Week-2016]]
+* [[Sailing Leagues 2016|wiki/Sevents/ailing-Leagues-2016]]
+
 
 ### Internal services (not related to wiki but useful)
 
 * [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
 * [GIT Repository (SAP)](ssh://git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git)
-* [Maven Repository Browser](http://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/racecommittee-app-environment]])
+* [Maven Repository Browser](http://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/info/mobile/racecommittee-app-environment]])
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
-
-### TracTrac Workshop in Kopenhagen
-
-* [[TracTrac Workshop in October 2013 in Kopenhagen|wiki/TracTracWorkshop2013]]
