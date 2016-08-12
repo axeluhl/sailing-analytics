@@ -12,7 +12,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ## Information
 
-* [[Information about this Wiki and HowTo|wiki/howto/wiki/howto]]
+* [[Information about this Wiki and HowTo|wiki/howto/wiki]]
 * [[General Project Information|wiki/general-information]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
