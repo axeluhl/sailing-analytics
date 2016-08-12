@@ -22,24 +22,29 @@ public class RaceStateEventImplParcel implements Parcelable {
             return new RaceStateEventImplParcel[size];
         }
     };
-    private RaceStateEvent raceStateEvent;
+    private long timePoint;
+    private String eventName;
 
     public RaceStateEventImplParcel(RaceStateEvent raceStateEvent) {
-        this.raceStateEvent = raceStateEvent;
+        this.timePoint = raceStateEvent.getTimePoint().asMillis();
+        this.eventName = raceStateEvent.getEventName().name();
     }
 
     protected RaceStateEventImplParcel(Parcel in) {
-        TimePoint timePoint = new MillisecondsTimePoint(in.readLong());
-        RaceStateEvents eventName = RaceStateEvents.valueOf(in.readString());
-        raceStateEvent = new RaceStateEventImpl(timePoint, eventName);
+        timePoint = in.readLong();
+        eventName = in.readString();
     }
 
     public TimePoint getTimePoint() {
-        return raceStateEvent.getTimePoint();
+        return new MillisecondsTimePoint(timePoint);
     }
 
     public RaceStateEvents getEventName() {
-        return raceStateEvent.getEventName();
+        return RaceStateEvents.valueOf(eventName);
+    }
+
+    public RaceStateEvent getRaceStateEvent() {
+        return new RaceStateEventImpl(getTimePoint(), getEventName());
     }
 
     @Override
@@ -49,7 +54,13 @@ public class RaceStateEventImplParcel implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(raceStateEvent.getTimePoint().asMillis());
-        dest.writeString(raceStateEvent.getEventName().name());
+        dest.writeLong(timePoint);
+        dest.writeString(eventName);
     }
+
+    @Override
+    public String toString() {
+        return "RaceStateEventImpl [timePoint=" + getTimePoint() + ", eventName=" + getEventName() + "]";
+    }
+
 }
