@@ -34,7 +34,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
-
 * [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 
 ### Miscellanious
@@ -48,7 +47,9 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Prionet related information|wiki/info/misc/prionet-related-information]]
 * [[TracTrac Workshop 2013|wiki/info/misc/tractracworkshop2013]]
 
-  * [[Racecommittee App|wiki/racecommittee-app]]
+
+
+* [[Racecommittee App|wiki/racecommittee-app]]
   * [[Tracking App|wiki/tracking-app]]
   * [[Web Services API|wiki/sailing-webservices]]
   * [[Thesis (Bachelor, Master, ...)|wiki/thesis]]
