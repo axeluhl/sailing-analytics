@@ -58,7 +58,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Web Services API|wiki/info/api/sailing-webservices]]
 * [[API v1|wiki/info/api/api-v1]]
 * [[Tracking App API|wiki/info/api/tracking-app-api]]
-* [[Tracking App API v1 draft|wiki/info/api/tracking-app-api-v1-draft]]
 * [[Training API v1 draft|wiki/info/api/training-api-v1-draft]]
 
 ### Samples
