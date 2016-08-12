@@ -2,12 +2,12 @@
 
 ### Table of Contents
 
-* [[Runtime Environment|wiki/runtime-environment]]
-* [[Basic Architectural Principles|wiki/basic-architectural-principles]]
-* [[User Management|wiki/usermanagement]]
-* [[Development Environment|wiki/development-environment]]
-* [[Production Environment|wiki/production-environment]]
-* [[Typical Development Scenarios|wiki/typical-development-scenarios]]
+* [[Runtime Environment|wiki/info/landscape/runtime-environment]]
+* [[Basic Architectural Principles|wiki/info/landscape/basic-architectural-principles]]
+* [[User Management|wiki/info/security/usermanagement]]
+* [[Development Environment|wiki/info/landscape/development-environment]]
+* [[Production Environment|wiki/info/landscape/production-environment]]
+* [[Typical Development Scenarios|wiki/info/howto/development/typical-development-scenarios]]
 
 ## Introduction, Project Background and History
 
