@@ -111,6 +111,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEv
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogSetCompetitorTimeOnTimeFactorEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -204,6 +205,7 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.DeviceConfigurationJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
@@ -231,6 +233,7 @@ import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private static final Logger logger = Logger.getLogger(DomainObjectFactoryImpl.class.getName());
     private final CompetitorJsonDeserializer competitorDeserializer;
+    private final BoatJsonDeserializer boatDeserializer;
 
     private final DB database;
    
@@ -257,6 +260,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         this.baseDomainFactory = baseDomainFactory;
         this.competitorDeserializer = CompetitorJsonDeserializer.create(baseDomainFactory);
+        this.boatDeserializer = BoatJsonDeserializer.create(baseDomainFactory);
         this.database = db;
     }
     
@@ -2021,6 +2025,23 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load competitors.");
             logger.log(Level.SEVERE, "loadCompetitors", e);
+        }
+        return result;
+    }
+
+    @Override
+    public Collection<Boat> loadAllBoats() {
+        ArrayList<Boat> result = new ArrayList<Boat>();
+        DBCollection collection = database.getCollection(CollectionNames.BOATS.name());
+        try {
+            for (DBObject o : collection.find()) {
+                JSONObject json = Helpers.toJSONObjectSafe(new JSONParser().parse(JSON.serialize(o)));
+                Boat b = boatDeserializer.deserialize(json);
+                result.add(b);
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load boats.");
+            logger.log(Level.SEVERE, "loadBoats", e);
         }
         return result;
     }

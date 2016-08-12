@@ -69,7 +69,7 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
 
     @Before
     public void setUp() {
-        DomainFactory.INSTANCE.getCompetitorStore().clear();
+        DomainFactory.INSTANCE.getCompetitorStore().clearCompetitors();
         mongoObjectFactory = new MongoObjectFactoryImpl(db);
         domainObjectFactory = new DomainObjectFactoryImpl(db, DomainFactory.INSTANCE);
     }
@@ -116,12 +116,12 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                         new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                                                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("123", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", "KYC", Color.RED, null, null,
                                 new TeamImpl("STG", Collections.singleton(
                                         new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                                                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
-                                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("456", "Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         final String raceColumnName1 = "My First Race 1";
         MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgang, /* rank */ 1, /* started */ true);
         raceWithTwoCompetitors.addCompetitor(hasso);
@@ -172,12 +172,12 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                         new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                                                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("123", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", "KYC", Color.RED, null, null, 
                                 new TeamImpl("STG", Collections.singleton(
                                         new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                                                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
-                                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("456", "Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         final String raceColumnName1 = "My First Race 1";
         MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgang, /* rank */ 1, /* started */ true);
         raceWithTwoCompetitors.addCompetitor(hasso);
@@ -228,12 +228,12 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         Competitor wolfgang = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                         new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                                                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("123", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", "KYC", Color.RED, null,null, 
                                 new TeamImpl("STG", Collections.singleton(
                                         new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                                                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
-                                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("456", "Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         final String raceColumnName1 = "My First Race 1";
         MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgang, /* rank */ 1, /* started */ true);
         raceWithTwoCompetitors.addCompetitor(hasso);

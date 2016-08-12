@@ -5,6 +5,7 @@ import java.net.URL;
 
 import com.mongodb.DB;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -128,6 +129,18 @@ public interface MongoObjectFactory {
     void removeAllCompetitors();
 
     void removeCompetitor(Competitor competitor);
+
+    /**
+     * Stores a boat. This should not be done for boats for which
+     * the master data is supplied by other systems, such as TracTrac, but rather for smartphone tracking,
+     * where this data is otherwise not recoverable.
+     * @param boat the boat to store/update in the database
+     */
+    void storeBoat(Boat boat);
+
+    void removeAllBoats();
+
+    void removeBoat(Boat boat);
 
     DB getDatabase();
 

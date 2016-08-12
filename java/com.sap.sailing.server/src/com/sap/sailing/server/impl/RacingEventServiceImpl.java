@@ -693,7 +693,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             mediaTrackDeleted(mediaTrack);
         }
         // TODO clear user store? See bug 2430.
-        this.competitorStore.clear();
+        this.competitorStore.clearCompetitors();
     }
 
     @Override
@@ -2672,7 +2672,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         logger.info("Serializing persisted competitors...");
         oos.writeObject(competitorStore);
-        logoutput.append("Serialized " + competitorStore.size() + " persisted competitors\n");
+        logoutput.append("Serialized " + competitorStore.getCompetitorsCount() + " persisted competitors\n");
 
         logger.info("Serializing configuration map...");
         oos.writeObject(configurationMap);
@@ -2772,7 +2772,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat(), dynamicCompetitor.getTimeOnTimeFactor(),
                     dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), dynamicCompetitor.getSearchTag());
         }
-        logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
+        logoutput.append("Received " + competitorStore.getCompetitorsCount() + " NEW competitors\n");
 
         logger.info("Reading device configurations...");
         configurationMap.putAll((DeviceConfigurationMapImpl) ois.readObject());
@@ -2857,7 +2857,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         eventsById.clear();
         mediaLibrary.clear();
-        competitorStore.clear();
+        competitorStore.clearCompetitors();
         remoteSailingServerSet.clear();
         if (notificationService != null) {
             notificationService.stop();

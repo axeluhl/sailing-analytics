@@ -261,7 +261,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 logger.log(Level.SEVERE, "Unknown nationality "+nationalityAsString+" for competitor "+name+"; leaving null", iae);
             }
             DynamicTeam team = createTeam(name, nationality, competitorId);
-            DynamicBoat boat = new BoatImpl(shortName, boatClass, shortName);
+            DynamicBoat boat = new BoatImpl(competitorId, shortName, boatClass, shortName);
             result = competitorStore.getOrCreateCompetitor(competitorId, name, shortName, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, boat, (double) timeOnTimeFactor,
                     new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
@@ -576,8 +576,8 @@ public class DomainFactoryImpl implements DomainFactory {
             Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
             Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
             if (existingCompetitor != null && competitorBoatInfo != null) {
-                Boat boatOfCompetitor = new BoatImpl(competitorBoatInfo.getA(), defaultBoatClass, 
-                        competitorBoatInfo.getB(), AbstractColor.getCssColor(competitorBoatInfo.getC()));
+                Boat boatOfCompetitor = new BoatImpl(existingCompetitor.getId(), competitorBoatInfo.getA(), 
+                        defaultBoatClass, competitorBoatInfo.getB(), AbstractColor.getCssColor(competitorBoatInfo.getC()));
                 competitorBoatInfos.put(existingCompetitor, boatOfCompetitor);
             }
         }

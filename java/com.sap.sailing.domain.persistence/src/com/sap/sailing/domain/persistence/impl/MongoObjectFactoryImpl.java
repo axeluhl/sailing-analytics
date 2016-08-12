@@ -60,6 +60,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -108,6 +109,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceConfigurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
@@ -126,6 +128,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private static Logger logger = Logger.getLogger(MongoObjectFactoryImpl.class.getName());
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
+    private final BoatJsonSerializer boatSerializer = BoatJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
 
     /**
@@ -1233,6 +1236,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         }
         return passing;
     }
+    
     @Override
     public void storeCompetitor(Competitor competitor) {
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
@@ -1244,7 +1248,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void removeAllCompetitors() {
-        logger.info("Removing all persistent competitor info");
+        logger.info("Removing all persistent competitors");
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         collection.drop();
     }
@@ -1256,7 +1260,31 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
         collection.remove(query, WriteConcern.SAFE);
     }
-    
+
+    @Override
+    public void storeBoat(Boat boat) {
+        DBCollection collection = database.getCollection(CollectionNames.BOATS.name());
+        JSONObject json = boatSerializer.serialize(boat);
+        DBObject query = (DBObject) JSON.parse(BoatJsonSerializer.getBoatIdQuery(boat).toString());
+        DBObject entry = (DBObject) JSON.parse(json.toString());
+        collection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void removeAllBoats() {
+        logger.info("Removing all persistent boats");
+        DBCollection collection = database.getCollection(CollectionNames.BOATS.name());
+        collection.drop();
+    }
+
+    @Override
+    public void removeBoat(Boat boat) {
+        logger.info("Removing persistent boat "+boat.getName()+" with ID "+boat.getId());
+        DBCollection collection = database.getCollection(CollectionNames.BOATS.name());
+        DBObject query = (DBObject) JSON.parse(BoatJsonSerializer.getBoatIdQuery(boat).toString());
+        collection.remove(query, WriteConcern.SAFE);
+    }
+
     @Override
     public void storeDeviceConfiguration(DeviceConfigurationMatcher matcher, DeviceConfiguration configuration) {
         DBCollection configurationsCollections = database.getCollection(CollectionNames.CONFIGURATIONS.name());

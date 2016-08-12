@@ -192,8 +192,8 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
                         new PersonImpl(competitorName, senderDomainFactory.getOrCreateNationality("GER"),
                         /* dateOfBirth */ null, "This is famous "+competitorName)),
                         new PersonImpl("Rigo van Maas", senderDomainFactory.getOrCreateNationality("GER"),
-                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                        senderDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("123",
+                        competitorName + "'s boat", senderDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Competitor receiversCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         Competitor receiversSecondCopyOfCompetitor1 = cloneBySerialization(sendersCompetitor1, receiverDomainFactory);
         assertSame(receiversCompetitor1, receiversSecondCopyOfCompetitor1);

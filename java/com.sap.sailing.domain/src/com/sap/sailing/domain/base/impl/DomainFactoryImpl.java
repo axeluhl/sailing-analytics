@@ -136,7 +136,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
 
     @Override
     public CompetitorDTO convertToCompetitorDTO(Competitor c) {
-        return competitorStore.convertToCompetitorDTO(c);
+        return competitorAndBoatStore.convertToCompetitorDTO(c);
     }
 
     @Override

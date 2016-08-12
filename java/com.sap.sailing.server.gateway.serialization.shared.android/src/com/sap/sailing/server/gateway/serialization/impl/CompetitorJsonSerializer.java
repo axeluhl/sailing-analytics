@@ -37,7 +37,8 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
     
     public static JSONObject getCompetitorIdQuery(Competitor competitor) {
         JSONObject result = new JSONObject();
-        result.put(FIELD_ID, getPersistentCompetitorId(competitor));
+        Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor.getId();
+        result.put(FIELD_ID, competitorId);
         return result;
     }
 
@@ -79,11 +80,6 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
                 competitor.getTimeOnDistanceAllowancePerNauticalMile() == null ? null :
                     competitor.getTimeOnDistanceAllowancePerNauticalMile().asSeconds());
         return result;
-    }
-
-    private static Serializable getPersistentCompetitorId(Competitor competitor) {
-        Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor.getId();
-        return competitorId;
     }
 
     protected Color getColor(Competitor competitor ) {

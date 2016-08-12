@@ -4744,12 +4744,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     	final CompetitorDTO result;
     	// new competitor
     	if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
+    	    UUID competitorUUID = UUID.randomUUID();
     	    BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitor.getBoatClass().getName());
     	    DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
     	    DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
-    	    DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
+    	    DynamicBoat boat = new BoatImpl(competitorUUID, competitor.getName() + " boat", boatClass, competitor.getSailID());
             result = getBaseDomainFactory().convertToCompetitorDTO(
-                    getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(), competitor.getShortName(),
+                    getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(), competitor.getShortName(),
                             competitor.getColor(), competitor.getEmail(), 
                             competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team, boat,
                                     competitor.getTimeOnTimeFactor(),

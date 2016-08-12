@@ -39,8 +39,8 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
                                 new PersonImpl("Wolfgang Hunger", new NationalityImpl("GER"),
                                 /* dateOfBirth */null, "This is famous Wolfgang Hunger")), new PersonImpl("Rigo van Maas",
                                         new NationalityImpl("NED"),
-                                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                        /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("123",
+                "Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", Collections.singleton(competitor),
                 new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()), /* useMarkPassingCalculator */ false));
     }

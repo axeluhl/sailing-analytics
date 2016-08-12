@@ -9,6 +9,7 @@ import java.util.Set;
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -126,9 +127,13 @@ public interface DomainObjectFactory {
     
     /**
      * Loads all competitors, and resolves them via the domain factory.
-     * @return
      */
     Collection<Competitor> loadAllCompetitors();
+
+    /**
+     * Loads all boats, and resolves them via the domain factory.
+     */
+    Collection<Boat> loadAllBoats();
 
     DomainFactory getBaseDomainFactory();
 

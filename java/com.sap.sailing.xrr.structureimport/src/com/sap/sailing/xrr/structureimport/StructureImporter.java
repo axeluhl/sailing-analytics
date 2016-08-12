@@ -272,7 +272,7 @@ public class StructureImporter {
     }
 
     private DynamicBoat createBoat(String name, Boat boat, BoatClass boatClass) {
-        DynamicBoat boat1 = new BoatImpl(name + " boat", boatClass, boat.getSailNumber());
+        DynamicBoat boat1 = new BoatImpl(name + " boat", name + " boat", boatClass, boat.getSailNumber());
         return boat1;
     }
 

@@ -45,9 +45,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class AbstractMockedRaceMarkPassingTest {
     final BoatClassImpl boatClass = new BoatClassImpl("boat", true, "boat", new MeterDistance(10), new MeterDistance(5), null);
-    protected Competitor ron = new CompetitorImpl("Ron", "Ron", "KYC", null, null, null, null, new BoatImpl("boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-    protected Competitor tom = new CompetitorImpl("Tom", "Tom", "KYC", null, null, null, null, new BoatImpl("boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-    protected Competitor ben = new CompetitorImpl("Ben", "Ben", "KYC", null, null, null, null, new BoatImpl("boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    protected Competitor ron = new CompetitorImpl("Ron", "Ron", "KYC", null, null, null, null, new BoatImpl("123", "boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    protected Competitor tom = new CompetitorImpl("Tom", "Tom", "KYC", null, null, null, null, new BoatImpl("123", "boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    protected Competitor ben = new CompetitorImpl("Ben", "Ben", "KYC", null, null, null, null, new BoatImpl("123", "boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
 
     protected Mark m = new MarkImpl("Mark");
     protected Mark gate1 = new MarkImpl("Gate1");

@@ -58,7 +58,7 @@ public class LeaderboardStorageTest extends TestCase {
         List<DynamicPerson> sailorList = new ArrayList<DynamicPerson>();
         sailorList.add(new PersonImpl("sailor", new NationalityImpl("GER"), null, ""));
         DynamicTeam team = new TeamImpl("team", sailorList, null);
-        DynamicBoat boat = new BoatImpl("woot", service.getBaseDomainFactory().getOrCreateBoatClass("H16"), "70155");
+        DynamicBoat boat = new BoatImpl("123", "woot", service.getBaseDomainFactory().getOrCreateBoatClass("H16"), "70155");
         String competitorId = "testC";
         Competitor competitor = service.getBaseDomainFactory().getOrCreateCompetitor(competitorId, "Test C", null, null,
                 null, null, team, boat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);

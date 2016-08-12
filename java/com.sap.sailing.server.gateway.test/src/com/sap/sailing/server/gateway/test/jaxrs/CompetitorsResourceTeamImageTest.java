@@ -53,7 +53,7 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
         doReturn(storageService).when(fsmsMock).getActiveFileStorageService();
         DynamicTeam team = new TeamImpl(null, Collections.singleton(new PersonImpl(null, new NationalityImpl(
                 nationality), null, null)), null);
-        DynamicBoat boat = new BoatImpl(null, new BoatClassImpl(boatClassName, false), sailID);
+        DynamicBoat boat = new BoatImpl("123", "My boat", new BoatClassImpl(boatClassName, false), sailID);
         racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, null, null, null, null, team, boat,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     }

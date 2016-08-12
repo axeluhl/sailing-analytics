@@ -14,8 +14,11 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
@@ -32,7 +35,10 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     private static final long serialVersionUID = -4198298775476586931L;
     private final Map<Serializable, Competitor> competitorCache;
     private final Map<String, Competitor> competitorsByIdAsString;
-    private transient Set<CompetitorUpdateListener> listeners;
+    private transient Set<CompetitorUpdateListener> competitorUpdateListeners;
+    private final Map<Serializable, Boat> boatCache;
+    private final Map<String, Boat> boatsByIdAsString;
+    private transient Set<BoatUpdateListener> boatUpdateListeners;
     
     /**
      * The competitors contained in this map will have their changeable properties
@@ -42,7 +48,11 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     private final Set<Competitor> competitorsToUpdateDuringGetOrCreate;
     
     private transient WeakHashMap<Competitor, CompetitorDTO> weakCompetitorDTOCache;
+
+    private final Set<Boat> boatsToUpdateDuringGetOrCreate;
     
+    private transient WeakHashMap<Boat, BoatDTO> weakBoatDTOCache;
+
     private final NamedReentrantReadWriteLock lock;
 
     public TransientCompetitorStoreImpl() {
@@ -51,23 +61,30 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         competitorsByIdAsString = new HashMap<String, Competitor>();
         competitorsToUpdateDuringGetOrCreate = new HashSet<Competitor>();
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
-        listeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
+        competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
+        boatCache = new HashMap<Serializable, Boat>();
+        boatsByIdAsString = new HashMap<String, Boat>();
+        boatsToUpdateDuringGetOrCreate = new HashSet<Boat>();
+        weakBoatDTOCache = new WeakHashMap<Boat, BoatDTO>();
+        boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.BoatUpdateListener>());
     }
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         weakCompetitorDTOCache = new WeakHashMap<Competitor, CompetitorDTO>();
-        listeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
+        competitorUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.CompetitorUpdateListener>());
+        weakBoatDTOCache = new WeakHashMap<Boat, BoatDTO>();
+        boatUpdateListeners = Collections.synchronizedSet(new HashSet<CompetitorStore.BoatUpdateListener>());
     }
     
     @Override
     public void addCompetitorUpdateListener(CompetitorUpdateListener listener) {
-        listeners.add(listener);
+        competitorUpdateListeners.add(listener);
     }
 
     @Override
     public void removeCompetitorUpdateListener(CompetitorUpdateListener listener) {
-        listeners.remove(listener);
+        competitorUpdateListeners.remove(listener);
     }
 
     private Competitor createCompetitor(Serializable id, String name, String shortName, Color displayColor, String email, URI flagImage,
@@ -120,13 +137,13 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         return result;
     }
     
-    private void competitorNoLongerToUpdateDuringGetOrCreate(Competitor result) {
-        competitorsToUpdateDuringGetOrCreate.remove(result);
+    private void competitorNoLongerToUpdateDuringGetOrCreate(Competitor competitor) {
+        competitorsToUpdateDuringGetOrCreate.remove(competitor);
     }
 
     @Override
-    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor result) {
-        return competitorsToUpdateDuringGetOrCreate.contains(result);
+    public boolean isCompetitorToUpdateDuringGetOrCreate(Competitor competitor) {
+        return competitorsToUpdateDuringGetOrCreate.contains(competitor);
     }
 
     @Override
@@ -150,7 +167,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public int size() {
+    public int getCompetitorsCount() {
         LockUtil.lockForRead(lock);
         try {
              return competitorCache.size();
@@ -160,7 +177,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
     }
 
     @Override
-    public void clear() {
+    public void clearCompetitors() {
         LockUtil.lockForWrite(lock);
         try {
             competitorCache.clear();
@@ -221,8 +238,8 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 LockUtil.unlockAfterWrite(lock);
             }
         }
-        synchronized (listeners) {
-            for (CompetitorUpdateListener listener : listeners) {
+        synchronized (competitorUpdateListeners) {
+            for (CompetitorUpdateListener listener : competitorUpdateListeners) {
                 listener.competitorUpdated(competitor);
             }
         }
@@ -271,6 +288,208 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
         LockUtil.lockForWrite(lock);
         try {
             competitorsToUpdateDuringGetOrCreate.add(competitor);
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+
+    /** Boat stuff starts here */
+    
+    @Override
+    public void addBoatUpdateListener(BoatUpdateListener listener) {
+        boatUpdateListeners.add(listener);
+    }
+
+    @Override
+    public void removeBoatUpdateListener(BoatUpdateListener listener) {
+        boatUpdateListeners.remove(listener);
+    }
+
+    private Boat createBoat(Serializable id, String name, BoatClass boatClass, String sailID, Color color) {
+        Boat result = new BoatImpl(id, name, boatClass, sailID, color);
+        addNewBoat(result.getId(), result);
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "Created boat "+name+" with ID "+id, new Exception("Here is where it happened"));
+        }
+        return result;
+    }
+
+    /**
+     * Adds the <code>boat</code> to this transient boat collection so that it is available in
+     * {@link #getExistingBoatById(Serializable)}. Subclasses may override in case they need to take additional
+     * measures such as durably storing the boat. Overriding implementations must call this implementation.
+     */
+    protected void addNewBoat(Serializable id, Boat boat) {
+        LockUtil.lockForWrite(lock);
+        try {
+            boatCache.put(id, boat);
+            boatsByIdAsString.put(id.toString(), boat);
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+
+    @Override
+    public Boat getOrCreateBoat(Serializable id, String name, BoatClass boatClass, String sailId, Color color) {
+        // create compound boat ID here?
+        Boat result = getExistingBoatById(id); // avoid synchronization for successful read access
+        if (result == null) {
+            LockUtil.lockForWrite(lock);
+            try {
+                result = getExistingBoatById(id); // try again, now while holding the write lock
+                if (result == null) {
+                    result = createBoat(id, name, boatClass, sailId, color);
+                }
+            } finally {
+                LockUtil.unlockAfterWrite(lock);
+            }
+        } else if (isBoatToUpdateDuringGetOrCreate(result)) {
+            updateBoat(result.getId().toString(), name, color, sailId);
+            boatNoLongerToUpdateDuringGetOrCreate(result);
+        }
+        return result;
+    }
+
+    @Override
+    public Boat getOrCreateBoat(LeaderboardGroupBase leaderboardGroup, String name, BoatClass boatClass, String sailId, Color color) {
+        return getOrCreateBoat(leaderboardGroup.getId(), name, boatClass, sailId, color);
+    }
+    
+    @Override
+    public Boat getOrCreateBoat(Competitor competitor, String name, BoatClass boatClass, String sailId, Color color) {
+        return getOrCreateBoat(competitor.getId(), name, boatClass, sailId, color);
+    }
+    
+    private void boatNoLongerToUpdateDuringGetOrCreate(Boat boat) {
+        boatsToUpdateDuringGetOrCreate.remove(boat);
+    }
+
+    @Override
+    public boolean isBoatToUpdateDuringGetOrCreate(Boat boat) {
+        return boatsToUpdateDuringGetOrCreate.contains(boat);
+    }
+
+    @Override
+    public Boat getExistingBoatById(Serializable boatId) {
+        LockUtil.lockForRead(lock);
+        try {
+            return boatCache.get(boatId);
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+    }
+
+    @Override
+    public Boat getExistingBoatByIdAsString(String boatIdAsString) {
+        LockUtil.lockForRead(lock);
+        try {
+            return boatsByIdAsString.get(boatIdAsString);
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+    }
+
+    @Override
+    public int getBoatsCount() {
+        LockUtil.lockForRead(lock);
+        try {
+             return boatCache.size();
+       } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+    }
+
+    @Override
+    public void clearBoats() {
+        LockUtil.lockForWrite(lock);
+        try {
+            boatCache.clear();
+            boatsByIdAsString.clear();
+            boatsToUpdateDuringGetOrCreate.clear();
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "Clearing boat store "+this, new Exception("here is where it happened"));
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+    
+    @Override
+    public Iterable<Boat> getBoats() {
+        LockUtil.lockForRead(lock);
+        try {
+            return new ArrayList<Boat>(boatCache.values());
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
+    }
+
+    @Override
+    public void removeBoat(Boat boat) {
+        LockUtil.lockForWrite(lock);
+        try {
+            logger.fine("Removing boat "+boat+" from boat store "+this);
+            boatCache.remove(boat.getId());
+            boatsByIdAsString.remove(boat.getId().toString());  
+            weakBoatDTOCache.remove(boat);
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
+
+    @Override
+    public Boat updateBoat(String idAsString, String newName, Color newColor, String newSailId) {
+        DynamicBoat boat = (DynamicBoat) getExistingBoatByIdAsString(idAsString);
+        if (boat != null) {
+            LockUtil.lockForWrite(lock);
+            try {
+                boat.setName(newName);
+                boat.setSailId(newSailId);
+                boat.setColor(newColor);
+                weakBoatDTOCache.remove(boat);
+            } finally {
+                LockUtil.unlockAfterWrite(lock);
+            }
+        }
+        synchronized (boatUpdateListeners) {
+            for (BoatUpdateListener listener : boatUpdateListeners) {
+                listener.boatUpdated(boat);
+            }
+        }
+        return boat;
+    }
+
+    @Override
+    public BoatDTO convertToBoatDTO(Boat b) {
+        LockUtil.lockForRead(lock);
+        boolean needToUnlockReadLock = true;
+        try {
+            BoatDTO boatDTO = weakBoatDTOCache.get(b);
+            if (boatDTO == null) {
+                LockUtil.unlockAfterRead(lock);
+                needToUnlockReadLock = false;
+                LockUtil.lockForWrite(lock);
+                boatDTO = weakBoatDTOCache.get(b);
+                if (boatDTO == null) {
+                    boatDTO = new BoatDTO(b.getName(), b.getSailID(), b.getColor());
+                    weakBoatDTOCache.put(b, boatDTO);
+                }
+            }
+            return boatDTO;
+        } finally {
+            if (needToUnlockReadLock) {
+                LockUtil.unlockAfterRead(lock);
+            } else {
+                LockUtil.unlockAfterWrite(lock);
+            }
+        }
+    }
+
+    @Override
+    public void allowBoatResetToDefaults(Boat boat) {
+        LockUtil.lockForWrite(lock);
+        try {
+            boatsToUpdateDuringGetOrCreate.add(boat);
         } finally {
             LockUtil.unlockAfterWrite(lock);
         }

@@ -49,7 +49,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
     
     @Before
     public void clearCompetitorStore() {
-        DomainFactory.INSTANCE.getCompetitorStore().clear();
+        DomainFactory.INSTANCE.getCompetitorStore().clearCompetitors();
     }
 
     @Test
@@ -81,7 +81,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
                         new TeamImpl("STG", Collections.singleton(
                                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
                                 /* dateOfBirth */ null, "This is famous Dr. Hasso Plattner")), new PersonImpl("Lutz Patrunky", new NationalityImpl("GER"),
-                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                        /* dateOfBirth */ null, "This is Patty, the coach")), new BoatImpl("123", "Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         final String raceColumnName1 = "My First Race 1";
         MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgang, /* rank */ 1, /* started */ true);
         raceWithTwoCompetitors.addCompetitor(hasso);
@@ -354,7 +354,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         Competitor competitor = domainFactory.getOrCreateCompetitor(123, "$$$Dr. Wolfgang+Hunger$$$", "WH", Color.RED, "someone@nowhere.de", null, new TeamImpl("STG", Collections.singleton(
                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null),
+                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("123", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null),
                         /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         TrackedRace raceWithOneCompetitor1 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 1, /* started */ true);
         TrackedRace raceWithOneCompetitor2 = new MockedTrackedRaceWithFixedRank(competitor, /* rank */ 2, /* started */ true);
@@ -382,7 +382,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         Competitor competitor = new CompetitorImpl(123, "$$$Dr. Wolfgang+Hunger$$$", "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                 new PersonImpl("$$$Dr. Wolfgang+Hunger$$$", new NationalityImpl("GER"),
                                 /* dateOfBirth */ null, "This is famous Dr. Wolfgang Hunger")), new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                                        /* dateOfBirth */ null, "This is Rigo, the coach")), new BoatImpl("123", "Dr. Wolfgang Hunger's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         return competitor;
     }
 

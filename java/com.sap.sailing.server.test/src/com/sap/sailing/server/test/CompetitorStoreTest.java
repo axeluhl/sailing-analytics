@@ -7,9 +7,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.TransientCompetitorStoreImpl;
@@ -17,10 +21,11 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sailing.server.impl.PersistentCompetitorStore;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.RGBColor;
 
 public class CompetitorStoreTest {
     @Test
-    public void testAddingToTransientStore() {
+    public void testAddingCompetitorsToTransientStore() {
         CompetitorStore transientStore = new TransientCompetitorStoreImpl();
         DynamicCompetitor template = AbstractLeaderboardTest.createCompetitor("Test Competitor");
         Competitor competitor = transientStore.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(), template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(), template.getBoat(),
@@ -66,6 +71,7 @@ public class CompetitorStoreTest {
         assertEquals(template.getTeam().getNationality(), competitor2.getTeam().getNationality());
         assertEquals(1.234, competitor2.getTimeOnTimeFactor(), 0.0000001);
         assertEquals(730, competitor2.getTimeOnDistanceAllowancePerNauticalMile().asSeconds(), 0.0000001);
+
         DynamicTeam differentTeam = AbstractLeaderboardTest.createCompetitor("Test Competitor").getTeam();
         differentTeam.setNationality(DomainFactory.INSTANCE.getOrCreateNationality("GHA")); // Ghana
         Competitor competitor3 = persistentStore2.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(),
@@ -82,5 +88,34 @@ public class CompetitorStoreTest {
                 null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */null, null);
         assertSame(competitor2, competitor4); // expecting an in-place update
         assertEquals(differentTeam.getNationality(), competitor4.getTeam().getNationality());
+    }
+    
+    @Test
+    public void testPersistentBoatStore() {
+        CompetitorStore persistentStore1 = new PersistentCompetitorStore(
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ (srlid)->null);
+        DynamicBoat template = new BoatImpl("id-12345", "Morning Glory", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), 
+                "GER 1234", new RGBColor(255, 0, 0));
+        DynamicBoat boat = (DynamicBoat) persistentStore1.getOrCreateBoat(template.getId(), template.getName(), template.getBoatClass(), 
+                template.getSailID(), template.getColor());
+
+        CompetitorStore persistentStore2 = new PersistentCompetitorStore(
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */false, null, /* raceLogResolver */ (srlid)->null);
+        Boat boat2 = persistentStore2.getExistingBoatById(template.getId());
+        assertNotSame(boat2, template); // the new store loads new instances from the database
+        assertEquals(template.getId(), boat2.getId());
+
+        String differentSailId = "USA 1234";
+        Boat boat3 = persistentStore2.getOrCreateBoat(template.getId(), template.getName(), template.getBoatClass(), 
+                differentSailId, template.getColor());
+        assertSame(boat2, boat3); // use existing boat despite the different sailID
+        assertNotSame(differentSailId, boat2.getSailID()); // sailID expected to remain unchanged
+
+        // now mark the boat as to update from defaults
+        persistentStore2.allowBoatResetToDefaults(boat2);
+        Boat boat4 = persistentStore2.getOrCreateBoat(template.getId(), template.getName(), template.getBoatClass(), 
+                differentSailId, template.getColor());
+        assertSame(boat2, boat4); // expecting an in-place update
+        assertEquals(differentSailId, boat4.getSailID());
     }
 }

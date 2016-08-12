@@ -248,7 +248,9 @@ public class OnlineDataManager extends DataManager {
             @Override
             public Loader<DataLoaderResult<Collection<Competitor>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, "Creating Competitor-OnlineDataLoader " + id);
-                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(), new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))), new BoatJsonDeserializer(new BoatClassJsonDeserializer(domainFactory)));
+                JsonDeserializer<Competitor> competitorDeserializer = new CompetitorJsonDeserializer(domainFactory.getCompetitorStore(), 
+                        new TeamJsonDeserializer(new PersonJsonDeserializer(new NationalityJsonDeserializer(domainFactory))),
+                        new BoatJsonDeserializer(domainFactory, new BoatClassJsonDeserializer(domainFactory)));
                 DataParser<Collection<Competitor>> parser = new CompetitorsDataParser(competitorDeserializer);
                 DataHandler<Collection<Competitor>> handler = new CompetitorsDataHandler(OnlineDataManager.this, managedRace);
 

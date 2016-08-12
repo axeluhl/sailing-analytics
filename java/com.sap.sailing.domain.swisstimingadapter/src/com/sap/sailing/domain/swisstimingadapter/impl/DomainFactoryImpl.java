@@ -117,7 +117,7 @@ public class DomainFactoryImpl implements DomainFactory {
         CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
         Competitor result = competitorStore.getExistingCompetitorByIdAsString(competitor.getID());
         if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
-            DynamicBoat boat = new BoatImpl(competitor.getName(), boatClass, competitor.getBoatID());
+            DynamicBoat boat = new BoatImpl(result.getId(), competitor.getName(), boatClass, competitor.getBoatID());
             List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
             for (CrewMember crewMember: competitor.getCrew()) {
             	DynamicPerson person = new PersonImpl(crewMember.getName().trim(), getOrCreateNationality(crewMember.getNationality()),
@@ -134,14 +134,15 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public Competitor createCompetitorWithoutID(com.sap.sailing.domain.swisstimingadapter.Competitor competitor, String raceId, BoatClass boatClass) {
     	Competitor result = null;
-        DynamicBoat boat = new BoatImpl(competitor.getName(), boatClass, competitor.getBoatID());
         List<DynamicPerson> teamMembers = new ArrayList<DynamicPerson>();
         for (String teamMemberName : competitor.getName().split("[-+&]")) {
             teamMembers.add(new PersonImpl(teamMemberName.trim(), getOrCreateNationality(competitor.getThreeLetterIOCCode()),
                     /* dateOfBirth */ null, teamMemberName.trim()));
         }
         DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
-        result = baseDomainFactory.getCompetitorStore().getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceId, boatClass),
+        String competitorID = getCompetitorID(competitor.getBoatID(), raceId, boatClass);
+        DynamicBoat boat = new BoatImpl(competitorID, competitor.getName(), boatClass, competitor.getBoatID());
+        result = baseDomainFactory.getCompetitorStore().getOrCreateCompetitor(competitorID,
                 competitor.getName(), null /* short name */, null /*displayColor*/, null /*email*/, null, team, boat,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         return result;

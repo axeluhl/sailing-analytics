@@ -139,7 +139,7 @@ public class CompetitorImpl implements DynamicCompetitor {
         synchronized (listeners) {
             listeners.remove(listener);
         }
-        getBoat().removeCompetitorChangeListener(listener);
+        getBoat().removeBoatChangeListener(listener);
         getTeam().removeNationalityChangeListener(listener);
     }
     

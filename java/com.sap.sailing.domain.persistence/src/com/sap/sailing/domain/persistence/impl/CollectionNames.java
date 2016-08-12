@@ -67,16 +67,21 @@ public enum CollectionNames {
      */
     REGATTA_FOR_RACE_ID, 
     
-    /**
-     * Stores the race log events for a tracked race.
-     */
 
     
     /**
-     * Stores competitors for smartphone tracking.
+     * Stores competitors.
      */
     COMPETITORS,
-    
+
+    /**
+     * Stores boats.
+     */
+    BOATS,
+
+    /**
+     * Stores the race log events for a tracked race.
+     */
     RACE_LOGS,
     
     REGATTA_LOGS,

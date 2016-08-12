@@ -10,7 +10,6 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorFactory;
-import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
@@ -23,22 +22,22 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.RGBColor;
 
 public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> {
-    protected final CompetitorFactory competitorStore;
+    protected final CompetitorFactory competitorFactory;
     protected final JsonDeserializer<DynamicTeam> teamJsonDeserializer;
     protected final JsonDeserializer<DynamicBoat> boatJsonDeserializer;
     private static final Logger logger = Logger.getLogger(CompetitorJsonDeserializer.class.getName());
 
     public static CompetitorJsonDeserializer create(SharedDomainFactory baseDomainFactory) {
         return new CompetitorJsonDeserializer(baseDomainFactory, new TeamJsonDeserializer(new PersonJsonDeserializer(
-                new NationalityJsonDeserializer(baseDomainFactory))), new BoatJsonDeserializer(new BoatClassJsonDeserializer(baseDomainFactory)));
+                new NationalityJsonDeserializer(baseDomainFactory))), new BoatJsonDeserializer(baseDomainFactory, new BoatClassJsonDeserializer(baseDomainFactory)));
     }
 
-    public CompetitorJsonDeserializer(CompetitorStore store) {
-        this(store, null, /* boatDeserializer */ null);
+    public CompetitorJsonDeserializer(CompetitorFactory competitorFactory) {
+        this(competitorFactory, null, /* boatDeserializer */ null);
     }
 
-    public CompetitorJsonDeserializer(CompetitorFactory competitorStore, JsonDeserializer<DynamicTeam> teamJsonDeserializer, JsonDeserializer<DynamicBoat> boatDeserializer) {
-        this.competitorStore = competitorStore;
+    public CompetitorJsonDeserializer(CompetitorFactory competitorFactory, JsonDeserializer<DynamicTeam> teamJsonDeserializer, JsonDeserializer<DynamicBoat> boatDeserializer) {
+        this.competitorFactory = competitorFactory;
         this.teamJsonDeserializer = teamJsonDeserializer;
         this.boatJsonDeserializer = boatDeserializer;
     }
@@ -89,7 +88,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
             final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
             final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
-            Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
+            Competitor competitor = competitorFactory.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
                     flagImageURI, team, boat, timeOnTimeFactor,
                     timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null :
                         new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);

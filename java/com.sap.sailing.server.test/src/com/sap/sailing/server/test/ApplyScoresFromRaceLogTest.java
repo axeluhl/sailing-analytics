@@ -59,8 +59,8 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
                             new PersonImpl(competitorName, new NationalityImpl("GER"),
                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                    new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null),
+                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("123",
+                    competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null),
                     /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         }
         final Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
