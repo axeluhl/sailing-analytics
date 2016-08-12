@@ -107,7 +107,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ### Setup
 
-* [[Configure Races on Server|wiki/howto/setup/results-import]]
+* [[Configure Races on Server|wiki/howto/setup/configure-races-on-server]]
 * [[Setting up internal Jenkins on SAP Monsoon|wiki/howto/setup/setting-up-jenkins-on-sap-monsoon]]
 
 ### Miscellanious
