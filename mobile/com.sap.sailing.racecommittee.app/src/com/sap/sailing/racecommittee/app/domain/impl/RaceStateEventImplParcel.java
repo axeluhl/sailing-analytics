@@ -30,12 +30,12 @@ public class RaceStateEventImplParcel implements Parcelable {
         this.eventName = raceStateEvent.getEventName().name();
     }
 
-    protected RaceStateEventImplParcel(Parcel in) {
+    private RaceStateEventImplParcel(Parcel in) {
         timePoint = in.readLong();
         eventName = in.readString();
     }
 
-    public TimePoint getTimePoint() {
+    private TimePoint getTimePoint() {
         return new MillisecondsTimePoint(timePoint);
     }
 

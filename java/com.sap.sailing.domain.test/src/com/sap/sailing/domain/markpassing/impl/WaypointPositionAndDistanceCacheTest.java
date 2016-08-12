@@ -31,7 +31,6 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.WaypointPositionAndDistanceCache;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -76,7 +75,7 @@ public class WaypointPositionAndDistanceCacheTest {
         final Regatta regatta = mock(Regatta.class);
         when(regatta.getName()).thenReturn("Regatta name");
         when(trackedRegatta.getRegatta()).thenReturn(regatta);
-        trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
+        trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.emptyList(), EmptyWindStore.INSTANCE,
                 /* delayToLiveInMillis */ 8000, /* millisecondsOverWhichToAverageWind */ 30000,
                 /* millisecondsOverWhichToAverageSpeed */ 15000, /* delayForCacheInvalidationOfWindEstimation */ 10000,
                 /* useInternalMarkPassingAlgorithm */ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));

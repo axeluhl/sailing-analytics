@@ -24,7 +24,6 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
@@ -97,9 +96,6 @@ public class Header extends Composite {
         });
         
         authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(), HeaderResources.INSTANCE.css().open());
-        if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_DESKTOP) {
-            usermenu.removeFromParent();
-        }
     }
 
     @UiHandler("startPageLink")

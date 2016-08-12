@@ -54,7 +54,8 @@ public class BarbadosResultSpreadsheet {
             String crew = row.getCell(4).getStringCellValue();
             Iterable<String> names = Arrays.asList(new String[] { helm, crew });
             double scoreAfterDiscarding = row.getCell(columnNumberOfNetScore).getNumericCellValue();
-            double totalPointsBeforeDiscarding = row.getCell(columnNumberOfTotalScore).getNumericCellValue();
+            final Cell cellValue = row.getCell(columnNumberOfTotalScore);
+            double totalPointsBeforeDiscarding = cellValue == null ? null : cellValue.getNumericCellValue();
             List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded = new ArrayList<>();
             for (int raceNumber=0; raceNumber<numberOfRaces; raceNumber++) {
                 final Cell rankOrMaxPointReasonCell = row.getCell(COLUMN_NUMBER_OF_FIRST_RACE_RANK+raceNumber);
@@ -68,7 +69,8 @@ public class BarbadosResultSpreadsheet {
                     rank = null;
                     maxPointsReason = rankOrMaxPointReasonCell.getStringCellValue();
                 }
-                double score = row.getCell(columnNumberOfFirstRaceScore+raceNumber).getNumericCellValue();
+                final Cell scoreCellContents = row.getCell(columnNumberOfFirstRaceScore+raceNumber);
+                double score = scoreCellContents == null ? 0.0 : scoreCellContents.getNumericCellValue();
                 if (score != 0.0) {
                     CompetitorEntry entry = new DefaultCompetitorEntryImpl(rank,
                             maxPointsReason, score, /* discarded */ false);

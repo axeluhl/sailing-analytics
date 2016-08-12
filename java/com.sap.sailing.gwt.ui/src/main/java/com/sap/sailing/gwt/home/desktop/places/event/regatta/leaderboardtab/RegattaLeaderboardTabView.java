@@ -17,8 +17,10 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
+import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
 /**
@@ -58,6 +60,11 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
 
     @Override
     public void start(final RegattaLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
+        if(currentPresenter.getRegattaMetadata() == null) {
+            contentArea.setWidget(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
+            return;
+        }
+        
         contentArea.setWidget(new Placeholder());
         String regattaId = currentPresenter.getRegattaId();
         if (regattaId != null && !regattaId.isEmpty()) {

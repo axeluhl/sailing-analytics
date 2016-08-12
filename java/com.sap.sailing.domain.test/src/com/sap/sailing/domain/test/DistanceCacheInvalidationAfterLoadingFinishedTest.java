@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.common.Duration;
@@ -43,10 +44,11 @@ public class DistanceCacheInvalidationAfterLoadingFinishedTest extends TrackBase
     @Test
     public void testDistanceCalculationWhileLoading() {
         final TimePoint now = MillisecondsTimePoint.now();
+        final TrackingDataLoader tdl = new TrackingDataLoader() {};
         trackedRace.updateMarkPassings(competitor, Collections.singleton(new MarkPassingImpl(now, trackedRace.getRace().getCourse().getFirstWaypoint(), competitor)));
         // no distance traveled yet because there is no fix yet; this may be cached for now
         assertEquals(Distance.NULL, trackedRace.getDistanceTraveled(competitor, now));
-        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, /* progress */ 0.1));
+        trackedRace.onStatusChanged(tdl, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, /* progress */ 0.1));
         assertEquals(Distance.NULL, trackedRace.getDistanceTraveled(competitor, now.plus(Duration.ONE_SECOND.times(2))));
         final Position startPos = new DegreePosition(0, 0);
         final DegreeBearingImpl bearing = new DegreeBearingImpl(10);
@@ -54,7 +56,7 @@ public class DistanceCacheInvalidationAfterLoadingFinishedTest extends TrackBase
         trackedRace.recordFix(competitor, new GPSFixMovingImpl(startPos, now, speed));
         final Distance distance = speed.travel(Duration.ONE_SECOND);
         trackedRace.recordFix(competitor, new GPSFixMovingImpl(startPos.translateGreatCircle(bearing, distance), now.plus(Duration.ONE_SECOND), speed));
-        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, /* progress */ 1.0));
+        trackedRace.onStatusChanged(tdl, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, /* progress */ 1.0));
         assertEquals(distance.getMeters(), trackedRace.getDistanceTraveled(competitor, now.plus(Duration.ONE_SECOND.times(2))).getMeters(), 0.000001); // ask 1s after the second fix
     }
 }

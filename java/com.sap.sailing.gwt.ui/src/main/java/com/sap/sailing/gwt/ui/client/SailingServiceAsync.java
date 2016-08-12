@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
+import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
@@ -66,6 +67,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
+import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
@@ -78,10 +80,12 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
+import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -404,13 +408,14 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void removeEvents(Collection<UUID> eventIds, AsyncCallback<Void> asyncCallback);
 
     void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName,
-            Iterable<ImageDTO> images, Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIDs, AsyncCallback<EventDTO> callback);
+            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, String baseURL,
+            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
+            Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIDs, AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL,
-            Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos,
-            AsyncCallback<EventDTO> callback);
+            String baseURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
+            Iterable<VideoDTO> videos, AsyncCallback<EventDTO> callback);
 
     void resolveImageDimensions(String imageUrlAsString, AsyncCallback<Pair<Integer, Integer>> callback);
 
@@ -444,8 +449,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
             boolean isFleetsCanRunInParallel, int[] resultDiscardingThresholds, boolean startsWithZeroScore,
-            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, List<FleetDTO> fleets,
-            AsyncCallback<Void> callback);
+            boolean firstRaceIsNonDiscardableCarryForward, boolean hasSplitFleetScore, Integer maximumNumberOfDiscards,
+            List<FleetDTO> fleets, AsyncCallback<Void> callback);
 
     void removeRaceColumnsFromSeries(RegattaIdentifier regattaIdentifier, String seriesName, List<String> columnNames,
             AsyncCallback<Void> callback);
@@ -498,6 +503,12 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void listSwissTiminigReplayRaces(String swissTimingUrl, AsyncCallback<List<SwissTimingReplayRaceDTO>> asyncCallback);
 
+    /**
+     * Callers will be able to obtain at most {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} fixes using
+     * this method. If a finer resolution is requested based on {@code from}, {@code to}, and {@code stepSize}, the
+     * resolution will automatically be lowered so that no more than
+     * {@link SailingServiceConstants#MAX_NUMBER_OF_FIXES_TO_QUERY} are returned per competitor.
+     */
     void getCompetitorsRaceData(RegattaAndRaceIdentifier race, List<CompetitorDTO> competitors, Date from, Date to,
             long stepSize, DetailType detailType, String leaderboarGroupName, String leaderboardName,
             AsyncCallback<CompetitorsRaceDataDTO> callback);
@@ -649,7 +660,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<RaceCourseDTO> callback);
 
     void pingMark(String leaderboardName, MarkDTO mark,
-            Position position, AsyncCallback<Void> callback);
+            TimePoint timePoint, Position position, AsyncCallback<Void> callback);
 
     void getDeserializableDeviceIdentifierTypes(AsyncCallback<List<String>> callback);
 
@@ -662,6 +673,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Void> callback);
 
     void getGPSFixImporterTypes(AsyncCallback<Collection<String>> callback);
+    
+    void getSensorDataImporterTypes(AsyncCallback<Collection<String>> callback);
 
     void getTrackFileImportDeviceIds(List<String> uuids,
             AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>> callback);
@@ -717,6 +730,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Void> asyncCallback);
 
     void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto, AsyncCallback<Void> callback);
+    
+    void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto, AsyncCallback<Void> callback);
 
     void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean> regattaLogCallBack);
 
@@ -778,9 +793,16 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void canRemoveMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
             GPSFixDTO fix, AsyncCallback<Boolean> callback);
+    
+    void getMarksInTrackedRace(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<Iterable<MarkDTO>> callback);
 
     void getMarkTracks(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<MarkTracksDTO> callback);
+    
+    void getMarkTrack(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, 
+            AsyncCallback<MarkTrackDTO> callback);
+    
     void getTrackingTimes(Collection<Triple<String, String, String>> raceColumnsAndFleets,
             AsyncCallback<Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>>> asyncCallback);
 }

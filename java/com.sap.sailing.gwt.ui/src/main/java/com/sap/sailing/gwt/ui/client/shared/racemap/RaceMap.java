@@ -99,6 +99,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
 import com.sap.sailing.gwt.ui.client.shared.filter.QuickRankProvider;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceCompetitorSet.CompetitorsForRaceDefinedListener;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -329,7 +330,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private RaceMapImageManager raceMapImageManager; 
 
-    private final RaceMapSettings settings;
+    private RaceMapSettings settings;
     private final RaceMapLifecycle raceMapLifecycle;
     
     private final StringMessages stringMessages;
@@ -354,8 +355,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
 
     private final CombinedWindPanel combinedWindPanel;
-    
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
+    private final FlowPanel topLeftControlsWrapperPanel;
     
     private final AsyncActionsExecutor asyncActionsExecutor;
 
@@ -410,7 +411,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public RaceMap(RaceMapLifecycle raceMapLifecycle, RaceMapSettings raceMapSettings, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, 
-            boolean isSimulationEnabled, boolean showHeaderPanel) {
+            boolean showHeaderPanel) {
         this.raceMapLifecycle = raceMapLifecycle;
         this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
@@ -419,7 +420,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
-        this.isSimulationEnabled = isSimulationEnabled;
+        this.isSimulationEnabled = true;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
@@ -446,10 +447,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(settings.isShowMapControls(), showHeaderPanel);
-        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
+        RaceMapStyle raceMapStyle = raceMapResources.raceMapStyle();
+        raceMapStyle.ensureInjected();
+        combinedWindPanel = new CombinedWindPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
-        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
+        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapStyle, stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(true);
+        topLeftControlsWrapperPanel = new FlowPanel();
+        topLeftControlsWrapperPanel.add(combinedWindPanel);
+        topLeftControlsWrapperPanel.add(trueNorthIndicatorPanel);
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
@@ -473,7 +479,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return null;
     }
     
-    private void updateCoordinateSystemFromSettings() {
+    /**
+     * @return {@code true} if the map was redrawn by the call to this method
+     */
+    private boolean updateCoordinateSystemFromSettings() {
+        boolean redrawn = false;
         final MapOptions mapOptions;
         orientationChangeInProgress = true;
         if (getSettings().isWindUp()) {
@@ -511,6 +521,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (mapOptions != null) { // if no coordinate system change happened that affects an existing map, don't redraw 
             fixesAndTails.clearTails();
             redraw();
+            redrawn = true;
             // zooming and setting options while the event loop is still working doesn't work reliably; defer until event loop returns
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
@@ -525,6 +536,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 }
             });
         }
+        return redrawn;
     }
 
     private void loadMapsAPIV3(final boolean showMapControls, final boolean showHeaderPanel) {
@@ -545,8 +557,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   Image sapLogo = createSAPLogo();
                   RaceMap.this.add(sapLogo);
               }
-              map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
-              map.setControls(ControlPosition.LEFT_TOP, trueNorthIndicatorPanel);
+              
+              map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
               adjustLeftControlsIndent();
 
               RaceMap.this.raceMapImageManager.loadMapIcons(map);
@@ -557,7 +569,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
                           // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
                           final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                          settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                          RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors());
+                          settings = new RaceMapSettings(settings, clearedZoomSettings);
                       }
                       // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed out too far
                   }
@@ -569,7 +582,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       autoZoomIn = false;
                       autoZoomOut = false;
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                      settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                      RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors());
+                      settings = new RaceMapSettings(settings, clearedZoomSettings);
                   }
               });
               map.addIdleHandler(new IdleMapHandler() {
@@ -650,7 +664,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     protected void showAdditionalControls(MapWidget map) {
     }
-    
+
     private void setHasPolar() {
         GetPolarAction getPolar = new GetPolarAction(sailingService, raceIdentifier);
         asyncActionsExecutor.execute(getPolar, GET_POLAR_CATEGORY,
@@ -741,6 +755,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     public MapWidget getMap() {
         return map;
+    }
+    
+    public RaceSimulationOverlay getSimulationOverlay() {
+        return simulationOverlay;
     }
     
     /**
@@ -1023,7 +1041,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData, boolean updateTailsOnly) {
         final Map<CompetitorDTO, Runnable> tailPreparersPerCompetitor =
                 fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
-        showBoatsOnMap(newTime, transitionTimeInMillis, competitorsToShow, updateTailsOnly, tailPreparersPerCompetitor);
+        showBoatsOnMap(newTime, transitionTimeInMillis,
+                /* re-calculate; it could have changed since the asynchronous request was made: */ getCompetitorsToShow(),
+                updateTailsOnly, tailPreparersPerCompetitor);
         if (!updateTailsOnly) {
             showCompetitorInfoOnMap(newTime, transitionTimeInMillis, competitorSelection.getSelectedFilteredCompetitors());
             // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
@@ -1799,7 +1819,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     || !BoundsUtil.contains((currentMapBounds = map.getBounds()), newBounds)
                     || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
-                Iterable<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
+                Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
                 autoZoomLatLngBounds = newBounds;
                 int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
@@ -1821,7 +1841,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 } else {
                     map.panTo(autoZoomLatLngBounds.getCenter());
                 }
-                settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
+                RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings, settings.getZoomSettings().isZoomToSelectedCompetitors());
+                settings = new RaceMapSettings(settings, restoredZoomSettings);
                 setAutoZoomInProgress(false);
             }
         }
@@ -2445,11 +2466,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     @Override
     public void updateSettings(RaceMapSettings newSettings) {
         boolean maneuverTypeSelectionChanged = false;
-        boolean requiredRedraw = false;
+        boolean requiresRedraw = false;
+        boolean requiresUpdateCoordinateSystem = false;
+        
         for (ManeuverType maneuverType : ManeuverType.values()) {
             if (newSettings.isShowManeuverType(maneuverType) != settings.isShowManeuverType(maneuverType)) {
                 maneuverTypeSelectionChanged = true;
-                settings.showManeuverType(maneuverType, newSettings.isShowManeuverType(maneuverType));
             }
         }
         if (maneuverTypeSelectionChanged) {
@@ -2460,65 +2482,52 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         if (newSettings.isShowDouglasPeuckerPoints() != settings.isShowDouglasPeuckerPoints()) {
             if (!(timer.getPlayState() == PlayStates.Playing) && lastDouglasPeuckerResult != null && newSettings.isShowDouglasPeuckerPoints()) {
-                settings.setShowDouglasPeuckerPoints(true);
                 removeAllMarkDouglasPeuckerpoints();
                 showMarkDouglasPeuckerPoints(lastDouglasPeuckerResult);
             } else if (!newSettings.isShowDouglasPeuckerPoints()) {
-                settings.setShowDouglasPeuckerPoints(false);
                 removeAllMarkDouglasPeuckerpoints();
             }
         }
         if (newSettings.getTailLengthInMilliseconds() != settings.getTailLengthInMilliseconds()) {
-            settings.setTailLengthInMilliseconds(newSettings.getTailLengthInMilliseconds());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.getBuoyZoneRadiusInMeters() != settings.getBuoyZoneRadiusInMeters()) {
-            settings.setBuoyZoneRadiusInMeters(newSettings.getBuoyZoneRadiusInMeters());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.isShowOnlySelectedCompetitors() != settings.isShowOnlySelectedCompetitors()) {
-            settings.setShowOnlySelectedCompetitors(newSettings.isShowOnlySelectedCompetitors());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.isShowSelectedCompetitorsInfo() != settings.isShowSelectedCompetitorsInfo()) {
-            settings.setShowSelectedCompetitorsInfo(newSettings.isShowSelectedCompetitorsInfo());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (!newSettings.getZoomSettings().equals(settings.getZoomSettings())) {
-            settings.setZoomSettings(newSettings.getZoomSettings());                    
-            if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
+            if (!newSettings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
                 removeTransitions();
-                zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(this));
+                zoomMapToNewBounds(newSettings.getZoomSettings().getNewBounds(this));
             }
         }
         if (!newSettings.getHelpLinesSettings().equals(settings.getHelpLinesSettings())) {
-            settings.setHelpLinesSettings(newSettings.getHelpLinesSettings());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
-            settings.setShowWindStreamletOverlay(newSettings.isShowWindStreamletOverlay());
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
         }
         if (newSettings.isShowWindStreamletColors() != settings.isShowWindStreamletColors()) {
-            settings.setShowWindStreamletColors(newSettings.isShowWindStreamletColors());
             streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
         }
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
-            settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
             showSimulationOverlay(newSettings.isShowSimulationOverlay());
         }
         if (newSettings.isWindUp() != settings.isWindUp()) {
-            settings.setWindUp(newSettings.isWindUp());
+            requiresUpdateCoordinateSystem = true;
+            requiresRedraw = true;
+        }
+        this.settings = newSettings;
+        
+        if (requiresUpdateCoordinateSystem) {
             updateCoordinateSystemFromSettings();
-            requiredRedraw = true;
         }
-        if (newSettings.getTransparentHoverlines() != settings.getTransparentHoverlines()) {
-            settings.setTransparentHoverlines(newSettings.getTransparentHoverlines());
-        }
-        if (newSettings.getHoverlineStrokeWeight() != settings.getHoverlineStrokeWeight()) {
-            settings.setHoverlineStrokeWeight(newSettings.getHoverlineStrokeWeight());
-        }
-        if (requiredRedraw) {
+        if (requiresRedraw) {
             redraw();
         }
     }
@@ -2652,18 +2661,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         getRightHeaderPanel().setStyleName(COMPACT_HEADER_STYLE, isCompactHeader);
         
         // Adjust combined wind and true north indicator panel indent, based on the RaceMap height
-        if (combinedWindPanel.getParent() != null && trueNorthIndicatorPanel.getParent() != null) {
+        if (topLeftControlsWrapperPanel.getParent() != null) {
             this.adjustLeftControlsIndent();
         }
     }
     
     private void adjustLeftControlsIndent() {
-        combinedWindPanel.getParent().setStyleName("CombinedWindPanelParentDiv");
-        trueNorthIndicatorPanel.getParent().setStyleName("TrueNorthIndicatorPanelParentDiv");
+        topLeftControlsWrapperPanel.getParent().setStyleName("TopLeftControlsWrapperPanelParentDiv");
         String leftControlsIndentStyle = getLeftControlsIndentStyle();
         if (leftControlsIndentStyle != null) {
-            combinedWindPanel.getParent().addStyleName(leftControlsIndentStyle);
-            trueNorthIndicatorPanel.getParent().addStyleName(leftControlsIndentStyle);
+            topLeftControlsWrapperPanel.getParent().addStyleName(leftControlsIndentStyle);
         }
     }
 
@@ -2894,6 +2901,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     @Override
     public String getId() {
         return getLocalizedShortName();
+    }
+
+    public void addCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
+        raceCompetitorSet.addCompetitorsForRaceDefinedListener(listener);
+    }
+
+    public void removeCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {
+        raceCompetitorSet.removeCompetitorsForRaceDefinedListener(listener);
     }
 
 }

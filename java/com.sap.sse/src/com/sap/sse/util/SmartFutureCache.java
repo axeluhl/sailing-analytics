@@ -92,7 +92,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
      * core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
      */
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()-1, 3);
+    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
     
     /**
      * Note that this needs to have more than one thread because there may be calculations used for cache updates that

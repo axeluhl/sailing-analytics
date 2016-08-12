@@ -164,6 +164,14 @@
 		<url-pattern>/trackfiles/import</url-pattern>
 	</servlet-mapping>
 	<servlet>
+		<servlet-name>SensorDataImportServlet</servlet-name>
+		<servlet-class>com.sap.sailing.server.gateway.trackfiles.impl.SensorDataImportServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SensorDataImportServlet</servlet-name>
+		<url-pattern>/sensordata/import</url-pattern>
+	</servlet-mapping>
+	<servlet>
 		<servlet-name>FileUploadServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.FileUploadServlet</servlet-class>
 	</servlet>

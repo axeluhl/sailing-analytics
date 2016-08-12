@@ -1,0 +1,12 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources" />
+	<g:HTMLPanel addStyleNames="{local_res.css.suggestionsSelectedItem}">
+	   <g:SimplePanel addStyleNames="{local_res.css.suggestionsItemDescription}" ui:field="itemDescriptionContainerUi"/>
+	   <g:Button addStyleNames="{local_res.css.suggestionsRemoveButton} {res.mainCss.button} {res.mainCss.buttonred}" ui:field="removeItemButtonUi">
+	       <ui:text from="{i18n.remove}" />
+	   </g:Button>
+	</g:HTMLPanel>
+</ui:UiBinder> 

@@ -27,12 +27,15 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
  */
 public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> implements IsWidget {
     protected final FlushableCellTable<T> table;
-    private final S selectionModel;
-    protected final ListDataProvider<T> dataProvider;
+    private S selectionModel;
+    protected ListDataProvider<T> dataProvider;
     protected VerticalPanel mainPanel;
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
+    private final boolean multiSelection;
+    private SelectionCheckboxColumn<T> selectionCheckboxColumn;
+    private final EntityIdentityComparator<T> entityIdentityComparator;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final ListHandler<T> columnSortHandler;
@@ -49,6 +52,8 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
 
     public TableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, EntityIdentityComparator<T> entityIdentityComparator) {
+        this.entityIdentityComparator = entityIdentityComparator;
+        this.multiSelection = multiSelection;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -57,23 +62,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
         this.dataProvider = new ListDataProvider<T>();
         this.columnSortHandler = new ListHandler<T>(dataProvider.getList());
         table.addColumnSortHandler(this.columnSortHandler);
-        if (multiSelection) {
-            SelectionCheckboxColumn<T> selectionCheckboxColumn = new SelectionCheckboxColumn<T>(
-                    tableRes.cellTableStyle().cellTableCheckboxSelected(),
-                    tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                    tableRes.cellTableStyle().cellTableCheckboxColumnCell(), entityIdentityComparator, dataProvider, table);
-            columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
-            @SuppressWarnings("unchecked")
-            S typedSelectionModel = (S) selectionCheckboxColumn.getSelectionModel();
-            selectionModel = typedSelectionModel;
-            table.setSelectionModel(selectionModel, selectionCheckboxColumn.getSelectionManager());
-            table.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
-        } else {
-            @SuppressWarnings("unchecked")
-            S typedSelectionModel = (S) new RefreshableSingleSelectionModel<T>(entityIdentityComparator, dataProvider);
-            selectionModel = typedSelectionModel;
-            table.setSelectionModel(selectionModel);
-        }
+        registerSelectionModelOnNewDataProvider(dataProvider);
         mainPanel = new VerticalPanel();
         dataProvider.addDataDisplay(table);
         mainPanel.add(table);
@@ -117,5 +106,37 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
         dataProvider.getList().clear();
         Util.addAll(newItems, dataProvider.getList());
         dataProvider.flush();
+    }
+    
+    /**
+     * This method allows you to change the data base for the {@link RefreshableSelectionModel}. Therefore a new
+     * {@link ListDataProvider} is needed.
+     * 
+     * @param dataProvider
+     *            {@link ListDataProvider} as data base for the {@link RefreshableSelectionModel}.
+     */
+    public void registerSelectionModelOnNewDataProvider(ListDataProvider<T> dataProvider) {
+        this.dataProvider = dataProvider;
+        if (multiSelection) {
+            if (selectionCheckboxColumn != null) {
+                table.removeColumn(selectionCheckboxColumn);
+            }
+            selectionCheckboxColumn = new SelectionCheckboxColumn<T>(
+                    tableRes.cellTableStyle().cellTableCheckboxSelected(),
+                    tableRes.cellTableStyle().cellTableCheckboxDeselected(),
+                    tableRes.cellTableStyle().cellTableCheckboxColumnCell(), entityIdentityComparator, dataProvider,
+                    table);
+            columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
+            @SuppressWarnings("unchecked")
+            S typedSelectionModel = (S) selectionCheckboxColumn.getSelectionModel();
+            selectionModel = typedSelectionModel;
+            table.setSelectionModel(selectionModel, selectionCheckboxColumn.getSelectionManager());
+            table.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
+        } else {
+            @SuppressWarnings("unchecked")
+            S typedSelectionModel = (S) new RefreshableSingleSelectionModel<T>(entityIdentityComparator, dataProvider);
+            selectionModel = typedSelectionModel;
+            table.setSelectionModel(selectionModel);
+        }
     }
 }

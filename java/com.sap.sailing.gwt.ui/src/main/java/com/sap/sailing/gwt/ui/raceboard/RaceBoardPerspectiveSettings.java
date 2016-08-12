@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
-import com.google.gwt.dom.client.Document;
-import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -16,27 +14,16 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     private final boolean showLeaderboard;
     private final boolean showWindChart;
     private final boolean showCompetitorsChart;
-    
-    // Determine if the charts, such as the competitor chart or the wind chart, the edit marks
-    // panels, such as mark passing and mark position editors and manage media buttons should be shown. 
-    // Automatic selection of attached video (if any) also depends on this flag.
-    // The decision is made once during initial page load based on the device type (mobile or not).
-    private final boolean showChartMarkEditMediaButtonsAndVideo;
     private final String activeCompetitorsFilterSetName;
     private final boolean canReplayDuringLiveRaces;
-    private final boolean simulationEnabled;
     private final Duration initialDurationAfterRaceStartInReplay;
     
-    /** indicates whether it's enabled to display charts or not */
-    private final boolean chartSupportEnabled;
-
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
     public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
     public static final String PARAM_VIEW_SHOW_WINDCHART = "viewShowWindChart";
     public static final String PARAM_VIEW_SHOW_COMPETITORSCHART = "viewShowCompetitorsChart";
     public static final String PARAM_VIEW_SHOW_MAPCONTROLS = "viewShowMapControls";
-    public static final String PARAM_VIEW_SIMULATION_ENABLED = "viewSimulationEnabled";
     public static final String PARAM_VIEW_COMPETITOR_FILTER = "viewCompetitorFilter";
     public static final String PARAM_VIEW_CHART_SUPPORT_ENABLED = "viewChartSupportEnabled";
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
@@ -45,23 +32,17 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     public RaceBoardPerspectiveSettings() {
         this(/* activeCompetitorsFilterSetName */null, /* showLeaderboard */true,
         /* showWindChart */false, /* showCompetitorsChart */false, 
-        /* simulationEnabled */true, /* canReplayDuringLiveRaces */false, /* chartSupportEnabled */ true, 
-        /* showChartMarkEditMediaButtonsAndVideo */ !DeviceDetector.isMobile(),
-        /* initialDurationAfterRaceStartInReplay */ null);
+        /* canReplayDuringLiveRaces */false, /* initialDurationAfterRaceStartInReplay */ null);
     }
 
     public RaceBoardPerspectiveSettings(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean simulationEnabled, boolean canReplayDuringLiveRaces,
-            boolean chartSupportEnabled, boolean showChartMarkEditMediaButtonsAndVideo, 
+            boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces,
             Duration initialDurationAfterRaceStartInReplay) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
         this.showCompetitorsChart = showCompetitorsChart;
-        this.simulationEnabled = simulationEnabled;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
-        this.chartSupportEnabled = chartSupportEnabled;
-        this.showChartMarkEditMediaButtonsAndVideo = showChartMarkEditMediaButtonsAndVideo;
         this.initialDurationAfterRaceStartInReplay = initialDurationAfterRaceStartInReplay;
     }
 
@@ -71,10 +52,6 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
 
     public boolean isShowWindChart() {
         return showWindChart;
-    }
-
-    public boolean isSimulationEnabled() {
-        return simulationEnabled;
     }
 
     public boolean isShowCompetitorsChart() {
@@ -89,34 +66,18 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
         return canReplayDuringLiveRaces;
     }
 
-    public boolean isChartSupportEnabled() {
-        return chartSupportEnabled;
-    }
-
-    public static RaceBoardPerspectiveSettings readSettingsFromURL() {
-        final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
-        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, false /* default */);
-        final boolean simulationEnabled = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SIMULATION_ENABLED, false /* default */);
-        final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
-        String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(PARAM_VIEW_COMPETITOR_FILTER, null /* default */);
-        final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(PARAM_CAN_REPLAY_DURING_LIVE_RACES, false /* default */);
-        
-        // Determine if the screen is large enough to display charts such as the competitor chart or the wind chart.
-        // This decision is made once based on the initial screen height. Resizing the window afterwards will have
-        // no impact on the chart support, i.e. they are available/unavailable based on the initial decision.
-        boolean isScreenLargeEnoughToOfferChartSupport = Document.get().getClientHeight() >= 600;
-        final boolean chartSupportEnabled = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_CHART_SUPPORT_ENABLED, isScreenLargeEnoughToOfferChartSupport);
-
+    public static RaceBoardPerspectiveSettings readSettingsFromURL(boolean defaultForViewShowLeaderboard,
+            boolean defaultForViewShowWindchart, boolean defaultForViewShowCompetitorsChart,
+            String defaultForViewCompetitorFilter, boolean defaultForCanReplayDuringLiveRaces) {
+        final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, defaultForViewShowLeaderboard /* default */);
+        final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, defaultForViewShowWindchart /* default */);
+        final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_COMPETITORSCHART, defaultForViewShowCompetitorsChart /* default */);
+        final String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(PARAM_VIEW_COMPETITOR_FILTER, defaultForViewCompetitorFilter /* default */);
+        final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(PARAM_CAN_REPLAY_DURING_LIVE_RACES, defaultForCanReplayDuringLiveRaces /* default */);
         final Duration initialDurationAfterRaceStartInReplay = parseDuration(GwtHttpRequestUtils.getStringParameter(
                 PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, null /* default */));
-
         return new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
-                showCompetitorsChart, simulationEnabled, canReplayWhileLiveIsPossible, chartSupportEnabled, 
-                !DeviceDetector.isMobile(), initialDurationAfterRaceStartInReplay);
-    }
-
-    public boolean isShowChartMarkEditMediaButtonsAndVideo() {
-        return showChartMarkEditMediaButtonsAndVideo;
+                showCompetitorsChart, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay);
     }
 
     public Duration getInitialDurationAfterRaceStartInReplay() {

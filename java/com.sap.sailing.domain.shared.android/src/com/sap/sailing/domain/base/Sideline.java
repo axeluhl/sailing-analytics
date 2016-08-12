@@ -1,13 +1,13 @@
 package com.sap.sailing.domain.base;
 
-import com.sap.sse.common.Named;
-import com.sap.sse.common.WithID;
+import com.sap.sse.common.NamedWithID;
 
 /**
  * A side line in a race course
- * @author Frank (C5163874)
+ * 
+ * @author Frank Mittag (C5163874)
  *
  */
-public interface Sideline extends Named, WithID {
+public interface Sideline extends NamedWithID {
     Iterable<Mark> getMarks();
 }

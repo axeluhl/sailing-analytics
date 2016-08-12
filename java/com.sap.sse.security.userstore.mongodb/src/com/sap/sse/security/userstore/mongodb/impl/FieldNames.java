@@ -6,6 +6,7 @@ public class FieldNames {
         NAME,
         FULLNAME,
         COMPANY,
+        LOCALE,
         EMAIL,
         ACCOUNTS,
         ROLES, PERMISSIONS,

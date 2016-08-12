@@ -13,15 +13,25 @@ import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
-import com.sap.sailing.gwt.home.server.LeaderboardContext;
-import com.sap.sailing.gwt.home.server.RaceContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
+import com.sap.sailing.gwt.home.server.LeaderboardContext;
+import com.sap.sailing.gwt.home.server.RaceContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load data to be shown on the mobile event overview page for the
+ * {@link #GetRegattasAndLiveRacesForEventAction(UUID) given event-id}, preparing the appropriate data structure.
+ * </p>
+ * <p>
+ * The {@link ResultWithTTL result's} time to live is <i>2 minutes</i> for upcoming and currently running events,
+ * otherwise it {@link EventActionUtil#calculateTtlForNonLiveEvent(Event, EventState) depends on the event's state}.
+ * </p>
+ */
 public class GetRegattasAndLiveRacesForEventAction implements SailingAction<ResultWithTTL<RegattasAndLiveRacesDTO>>,
         IsClientCacheable {
     private UUID eventId;
@@ -30,6 +40,12 @@ public class GetRegattasAndLiveRacesForEventAction implements SailingAction<Resu
     private GetRegattasAndLiveRacesForEventAction() {
     }
 
+    /**
+     * Creates a {@link GetRegattasAndLiveRacesForEventAction} instance for the given event-id.
+     * 
+     * @param eventId
+     *            {@link UUID} of the event to load regattas and live races for
+     */
     public GetRegattasAndLiveRacesForEventAction(UUID eventId) {
         this.eventId = eventId;
     }

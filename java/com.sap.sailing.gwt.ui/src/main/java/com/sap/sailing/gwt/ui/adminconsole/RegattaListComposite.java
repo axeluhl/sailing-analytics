@@ -97,13 +97,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         panel.add(noRegattasLabel);
 
         regattaListDataProvider = new ListDataProvider<RegattaDTO>();
-        regattaTable = createRegattaTable();
-        regattaTable.ensureDebugId("RegattasCellTable");
-        refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
-        regattaTable.setVisible(false);
         
         filterablePanelRegattas = new LabeledAbstractFilterablePanel<RegattaDTO>(filterRegattasLabel, allRegattas,
-                regattaTable, regattaListDataProvider) {
+                new CellTable<RegattaDTO>(), regattaListDataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(RegattaDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -115,6 +111,11 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         };
         filterablePanelRegattas.getTextBox().ensureDebugId("RegattasFilterTextBox");
+        regattaTable = createRegattaTable();
+        regattaTable.ensureDebugId("RegattasCellTable");
+        filterablePanelRegattas.setTable(regattaTable);
+        refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
+        regattaTable.setVisible(false);
         panel.add(filterablePanelRegattas);
 
         panel.add(regattaTable);
@@ -142,7 +143,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                     public int hashCode(RegattaDTO t) {
                         return t.getRegattaIdentifier().hashCode();
                     }
-                },regattaListDataProvider, table);
+                }, filterablePanelRegattas.getAllListDataProvider(), table);
         
         ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
@@ -311,7 +312,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                     sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
                         series.isFleetsCanRunInParallel(), series.getDiscardThresholds(), series.isStartsWithZeroScore(),
                         series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
-                        series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                        series.getMaximumNumberOfDiscards(), series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName()

@@ -1,13 +1,14 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,7 +22,7 @@ import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.util.MarkerUtils;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
@@ -56,14 +57,15 @@ public class RegattaActivity extends AbstractRegattaActivity {
             toolbar.hideSubtitle();
             toolbar.setTitleSize(20);
             setSupportActionBar(toolbar);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
         }
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             getSupportActionBar().setTitle(leaderboardName);
         }
         RegattaFragment regattaFragment = new RegattaFragment();
@@ -144,7 +146,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
     }
 
     @Override
-    public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
+    public void onCheckinDataAvailable(BaseCheckinData checkinData) {
         if (checkinData != null) {
             CheckinData data = (CheckinData) checkinData;
             try {
@@ -165,16 +167,16 @@ public class RegattaActivity extends AbstractRegattaActivity {
     }
 
     private void displayCheckoutConfirmationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
         builder.setTitle(R.string.warning);
         builder.setMessage(R.string.checkout_warning_message);
-        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 checkOut();
             }
         });
-        builder.setNegativeButton(R.string.no, null);
+        builder.setNegativeButton(android.R.string.no, null);
         builder.show();
     }
 

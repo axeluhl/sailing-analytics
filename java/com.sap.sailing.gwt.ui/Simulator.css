@@ -494,13 +494,8 @@ table {
 	border-collapse: separate;
 }
 
-.CombinedWindPanelParentDiv {
+.TopLeftControlsWrapperPanelParentDiv {
 	padding-top: 34px;
-	padding-left: 10px;
-}
-
-.TrueNorthIndicatorPanelParentDiv {
-	padding-top: 10px;
 	padding-left: 10px;
 }
 
@@ -837,13 +832,10 @@ img.openColumn {
 }
 
 .busyIndicator-Simple {
-	position: absolute;
-	top: 0.7em;
-	right: 7.4em;
+	padding-right: 10px; 
 }
 
 .busyIndicator-Circle {
-	
 }
 
 .raceBoard-TitlePanel {

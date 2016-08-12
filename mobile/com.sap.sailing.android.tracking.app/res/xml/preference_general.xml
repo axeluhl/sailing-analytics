@@ -8,8 +8,8 @@
             android:key="@string/preference_energy_saving_enabled_key"
             android:switchTextOn="@string/preference_energy_saving_is_enabled"
             android:switchTextOff="@string/preference_energy_saving_is_disabled"
-            android:summaryOn="@string/prefrence_energy_saving_summary_is_enabled"
-            android:summaryOff="@string/prefrence_energy_saving_summary_is_disabled"
+            android:summaryOn="@string/preference_energy_saving_summary_is_enabled"
+            android:summaryOff="@string/preference_energy_saving_summary_is_disabled"
             android:title="@string/energy_saving_enabled"/>
     </PreferenceCategory>
 

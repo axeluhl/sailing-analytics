@@ -54,10 +54,15 @@ public class PasswordActivity extends BaseActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Intent start = new Intent(PasswordActivity.this, RacingActivity.class);
             DataStore dataStore = DataManager.create(PasswordActivity.this).getDataStore();
-            start.putExtra(AppConstants.COURSE_AREA_UUID_KEY, dataStore.getCourseUUID());
-            start.putExtra(AppConstants.EventIdTag, dataStore.getEventUUID());
+            Intent start;
+            if (dataStore.getCourseUUID() != null) {
+                start = new Intent(PasswordActivity.this, RacingActivity.class);
+                start.putExtra(AppConstants.COURSE_AREA_UUID_KEY, dataStore.getCourseUUID());
+                start.putExtra(AppConstants.EventIdTag, dataStore.getEventUUID());
+            } else {
+                start = new Intent(PasswordActivity.this, LoginActivity.class);
+            }
             startActivity(start);
             finish();
         }

@@ -29,7 +29,8 @@ public class MovingAveragesCache {
         if (averagesForStringKeys.containsKey(key)) {
             MovingAverage movingAverage = averagesForStringKeys.get(key);
             movingAverage.add(value);
-            averagesForStringKeys.replace(key, movingAverage);
+            averagesForStringKeys.remove(key);
+            averagesForStringKeys.put(key, movingAverage);
         }
     }
     

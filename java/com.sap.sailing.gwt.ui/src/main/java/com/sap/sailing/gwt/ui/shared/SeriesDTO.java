@@ -17,12 +17,13 @@ public class SeriesDTO extends NamedDTO {
     private Boolean startsWithZeroScore;
     private boolean firstColumnIsNonDiscardableCarryForward;
     private boolean hasSplitFleetContiguousScoring;
+    private Integer maximumNumberOfDiscards;
     
     public SeriesDTO() {}
     
     public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
-            boolean hasSplitFleetContiguousScoring) {
+            boolean hasSplitFleetContiguousScoring, Integer maximumNumberOfDiscards) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
@@ -32,6 +33,7 @@ public class SeriesDTO extends NamedDTO {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
         this.discardThresholds = discardThresholds;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
+        this.maximumNumberOfDiscards = maximumNumberOfDiscards;
     }
     
     /**
@@ -43,7 +45,8 @@ public class SeriesDTO extends NamedDTO {
         this(otherSeries.getName(), otherSeries.getFleets(),
                 otherSeries.getRaceColumns() == null ? null : new ArrayList<RaceColumnDTO>(otherSeries.getRaceColumns()),
                 otherSeries.isMedal(), otherSeries.isFleetsCanRunInParallel(), otherSeries.getDiscardThresholds(), otherSeries.isStartsWithZeroScore(),
-                otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring());
+                otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring(),
+                otherSeries.getMaximumNumberOfDiscards());
     }
 
     public boolean hasSplitFleetContiguousScoring() {
@@ -117,5 +120,13 @@ public class SeriesDTO extends NamedDTO {
 
     public void setSplitFleetContiguousScoring(Boolean hasSplitFleetContiguousScoring) {
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
+    }
+
+    public Integer getMaximumNumberOfDiscards() {
+        return maximumNumberOfDiscards;
+    }
+
+    public void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards) {
+        this.maximumNumberOfDiscards = maximumNumberOfDiscards;
     }
 }

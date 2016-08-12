@@ -505,7 +505,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
             invalidateCache();
         } else {
             final Timer cacheInvalidationTimer = new Timer(
-                    "TrackBasedEstimationWindTrackImpl cache invalidation timer for race " + getTrackedRace().getRace());
+                    "TrackBasedEstimationWindTrackImpl cache invalidation timer for race " + getTrackedRace().getRace(), /* isDaemon */ true);
             cacheInvalidationTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {

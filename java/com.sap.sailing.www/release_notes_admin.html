@@ -22,6 +22,46 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+
+                    <h2 class="articleSubheadline">July 2016</h2>
+                    <ul class="bulletList">
+                        <li>According to some change in a tracked races lifecycle, fix-tracking no longer depends
+                            on tracking races via racelog event but is bound to denotation only. So fix-tracking
+                            via smartphone apps or uploading tracking files can also be used in combination with
+                            e.g. TracTrac.
+                        </li>
+                        <li>Because fix-tracking is now more flexible (see above), it is no longer restricted to
+                            GPS-fixes. 
+                        </li>
+                        <li>It is now possible to track fixes from Bravo foiling sensor devices, currently used in
+                            Extreme Sailing Series events only. This kind of data can be uploaded via a new dialog
+                            within the AdminConsole (Connectors > Smartphone Tracking)  
+                        </li>
+			<li>When a competitor is suppressed in a leaderboard, now the other competitors ranking
+			    worse will be "promoted" by one rank per better suppressed competitor. This way, live
+			    ranks will be correct if, e.g., a "Flexible Leaderboard" is used for a separate scoring
+			    scheme for only a subset of the competitor.
+			</li>
+			<li>When entering a fixed position for a mark in the "Smartphone Tracking" environment it is
+			    now possible to enter a time stamp for the fix. This way it is also possible to adjust
+			    a mark's position to a fixed lat/lng for some time point in the past.
+			</li>
+			<li>A series within a regatta can now define a maximum number of discards applied in that
+			    series. When combined with leaderboard-wide discards, generally discards can be distributed
+			    across the leaderboard as needed, but restricted by the maximum specified for each series.
+			    Leave the maximum empty to not provide any maximum. Setting to 0 will cause no scores to
+			    be discarded in that series.
+			</li>
+			<li>An event now has a "Base URL" which should be used to enable useful e-mail notifications with
+			    links embedded in them that lead to the correct server. If a notification is to contain
+			    a link to a dedicated event server, the event cannot be reached through www.sapsailing.com,
+			    and so if this generic link is used as a default, users will end up not finding the page
+			    linked to by the notification.
+			</li>
+			<li>The checkboxes "Track Wind" and "Correct by Declination" are now switched on by default
+			    for smartphone-tracked races
+			</li>
+                    </ul>
 			
                     <h2 class="articleSubheadline">June 2016</h2>
                     <ul class="bulletList">
@@ -40,7 +80,23 @@
 			    an overall leaderboard ("series scoring"), the leaderboard group with the overall
 			    leaderboard must be provided as the first of the overlapping leaderboard groups in
 			    the scope of the event.
-			</li> 
+			</li>
+			<li>Earlier releases have introduced an issue with leaderboard configuration and with binding
+			    tracked races to their leaderboard slots. When a filter is set for the tracked races list,
+			    changing the leaderboard selection or changing the race column selection such that the
+			    tracked race for a selected race column is not visible due to the filter, the connection
+			    between the race column and the tracked race is removed.<p>
+			    In order to reduce chances for failure, now at least changing the leaderboard selection
+			    will de-select any selected race column, making sure that nothing needs to be selected
+			    in the potentially filtered list of tracked races.<p>
+			    However, trouble remains: changing the tracked races filter while having a race column
+			    with a tracked race connected selected in the table on the left will unlink the race
+			    column's tracked race. As a workaround, you'll have to either de-select the race column
+			    in the left table before changing the filter, e.g., by Ctrl-clicking the race column
+			    selected. Or you remove any filter text for the tracked races list before you change
+			    the selection in the race column table. This will make sure that the race connected
+			    to the race column that you may select next will be available for automatic selection.
+			 </li>
                     </ul>
 
                     <h2 class="articleSubheadline">May 2016</h2>
@@ -90,6 +146,11 @@
                             There is a default value that can be overwritten on a per locale base.
                             No sailors info link is shown for UI languages if there is neither a default link nor one for the specific locale,
                             even if there is one for another locale configured.
+                        </li>
+                        <li>The mechanism to handle RegattaOverview settings has been changed to a more generic approach.
+                            This leads to slightly changed URL parameter names so that old bookmarks could be broken in a way
+                            so that the actual shown set of races is different using the new version because the old parameters aren't correctly recognized.
+                            All automatically generated links to this page in Home and AdminConsole have been updated to use the new parameter names.
                         </li>
                     </ul>
                     
