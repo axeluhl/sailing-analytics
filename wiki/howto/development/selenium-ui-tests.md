@@ -103,7 +103,7 @@ After the build, Tycho will start a server instance and runs all tests against t
 
 Since a full Maven build needs some time, you can also execute the tests in the Eclipse IDE. Here you have to start a server manually via an appropriated launch configuration (e.g. _SailingServer (Proxy, winddbTest)_). From there you can either run all UI-Tests with the JUnit launch configuration _com.sap.sailing.selenium.test_ (with/without proxy) which expects the configuration file under the name _local-test-environment.xml_ or you can run a single test by selecting _Run As -> JUnit Test_ for your test class and specifying the configuration file in the _VM Arguments_ section of the run configuration.
 
-For a more practical example of how to write page objects and test you should take a look at the [[tutorial|wiki/ui-tests-tutorial]].
+For a more practical example of how to write page objects and test you should take a look at the [[tutorial|wiki/howto/misc/ui-tests-tutorial]].
 
 ## Updating Selenium
 
