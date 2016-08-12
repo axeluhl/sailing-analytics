@@ -66,7 +66,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[User Management|wiki/info/security/usermanagement]]
   * [[SSL / HTTPS Support|wiki/info/security/ssl-support]]
 
-### Miscellanious
+### Miscellaneous
 
 * [[Big Data - Numbers|wiki/info/misc/big-data-numbers]]
 * [[Data Quality|wiki/info/misc/data-quality]]
