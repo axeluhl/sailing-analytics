@@ -7,7 +7,7 @@
 * [[User Management|wiki/info/security/usermanagement]]
 * [[Development Environment|wiki/info/landscape/development-environment]]
 * [[Production Environment|wiki/info/landscape/production-environment]]
-* [[Typical Development Scenarios|wiki/info/howto/development/typical-development-scenarios]]
+* [[Typical Development Scenarios|wiki/howto/development/typical-development-scenarios]]
 
 ## Introduction, Project Background and History
 
