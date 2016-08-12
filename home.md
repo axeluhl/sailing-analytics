@@ -109,7 +109,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Configure Races on Server|wiki/howto/setup/configure-races-on-server]]
 * [[Setting up internal Jenkins on SAP Monsoon|wiki/howto/setup/setting-up-jenkins-on-sap-monsoon]]
 
-### Miscellanious
+### Miscellaneous
 
 * [[Cook Book|wiki/howto/misc/cook-book]]
 * [[Event Tracking|wiki/howto/misc/event-tracking/event-tracking]]
