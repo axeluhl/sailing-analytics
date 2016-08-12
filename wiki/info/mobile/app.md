@@ -9,7 +9,7 @@ Development is currently underway on the following branches:
 
 # Project and Build structure
 ## Projects
-* ``com.sap.sailing.android.shared`` contains shared code and resources between the Android apps (tracking and [[RCApp|wiki/racecommittee-app]])
+* ``com.sap.sailing.android.shared`` contains shared code and resources between the Android apps (tracking and [[RCApp|wiki/info/mobile/racecommittee-app]])
 * ``com.sap.sailing.android.tracking.app`` is the main project for the app
 
 ## Maven

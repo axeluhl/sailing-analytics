@@ -34,7 +34,7 @@ When thinking about smartphone tracking, it would of course be a good idea to al
 
 ## Steps for setting up a racelog-tracked race in the AdminConsole
 
-[[Walkthrough with screenshots|wiki/racelog-tracking/walkthrough]]
+[[Walkthrough with screenshots|wiki/howto/misc/event-tracking]]
 
 ## Reloading a race that has already been tracked
 

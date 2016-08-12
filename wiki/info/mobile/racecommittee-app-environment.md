@@ -1,6 +1,6 @@
 # RaceCommittee App (Server Build Environment)
 
-**This is the build description for building on the server. For your local build see the [[onboarding document|wiki/onboarding]]!**
+**This is the build description for building on the server. For your local build see the [[onboarding document|wiki/howto/onboarding]]!**
 
 Building the RaceCommittee App has been integrated into the maven build process of the project. This document outlines how this environment is setup. Use this description whenever you need to set it up again (build-server, Maven repo, ...)
 
