@@ -2104,6 +2104,92 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
     }
 
     /**
+     * See bug 3752 comment #6: when in an earlier race a competitor does not have a fleet assigned and the other one does, but in
+     * a later race in the same series both competitors are assigned to the same fleet, the authoritative answer based on the fleets
+     * must be that they compare equal; an earlier default based on "extreme fleet" considerations must be discarded if fleet equality
+     * is definitely established.
+     */
+    @Test
+    public void testTotalRankComparatorForOrderedSplitFleetsWithUnknownFleetInPreviousRaceAndSameFleetInLaterRace() throws NoWindException {
+        series = new ArrayList<Series>();
+        // -------- qualification series ------------
+        {
+            List<Fleet> qualificationFleets = new ArrayList<Fleet>();
+            for (String qualificationFleetName : new String[] { "Yellow", "Blue" }) {
+                qualificationFleets.add(new FleetImpl(qualificationFleetName));
+            }
+            List<String> qualificationRaceColumnNames = new ArrayList<String>();
+            qualificationRaceColumnNames.add("Q");
+            Series qualificationSeries = new SeriesImpl("Qualification", /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualificationFleets, qualificationRaceColumnNames, /* trackedRegattaRegistry */ null);
+            // discard the one and only qualification race; it doesn't score
+            qualificationSeries.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(new int[] { 1 }));
+            series.add(qualificationSeries);
+        }
+
+        // -------- final series ------------
+        {
+            List<Fleet> finalFleets = new ArrayList<Fleet>();
+            int fleetOrdering = 1;
+            for (String finalFleetName : new String[] { "Gold", "Silver" }) {
+                finalFleets.add(new FleetImpl(finalFleetName, fleetOrdering++));
+            }
+            List<String> finalRaceColumnNames = Arrays.asList("F1", "F2");
+            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, /* isFleetsCanRunInParallel */ true, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            series.add(finalSeries);
+        }
+        final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null,
+                series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* course area */null, OneDesignRankingMetric::new);
+        List<Competitor> competitors = createCompetitors(12);
+        final int firstYellowCompetitorIndex = 3;
+        List<Competitor> yellow = new ArrayList<>(competitors.subList(firstYellowCompetitorIndex, firstYellowCompetitorIndex+6));
+        List<Competitor> blue = new ArrayList<>(competitors);
+        blue.removeAll(yellow);
+        Collections.shuffle(yellow);
+        Collections.shuffle(blue);
+        final int firstGoldCompetitorIndex = 5;
+        List<Competitor> gold = new ArrayList<>(competitors.subList(firstGoldCompetitorIndex, firstGoldCompetitorIndex+6));
+        List<Competitor> silver = new ArrayList<>(competitors);
+        silver.removeAll(gold);
+        Collections.shuffle(gold);
+        Collections.shuffle(silver);
+        List<Competitor> lastRaceSilver = new ArrayList<>(silver);
+        final Competitor theUntrackedCompetitorInLastRace = lastRaceSilver.get(lastRaceSilver.size()-1);
+        lastRaceSilver.remove(theUntrackedCompetitorInLastRace); // one participant accidentally not tracked; expected to end up between silver and gold
+        List<Competitor> medal = new ArrayList<>(gold.subList(0, 2)); // take two gold race participants as medal race participants
+        List<Competitor> lastRaceGold = new ArrayList<>(gold);
+        lastRaceGold.removeAll(medal); // no medal race participant participates in the last race's gold fleet
+        
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        RaceColumn qColumn = series.get(0).getRaceColumnByName("Q");
+        TrackedRace qYellow = new MockedTrackedRaceWithStartTimeAndRanks(now, yellow);
+        qColumn.setTrackedRace(qColumn.getFleetByName("Yellow"), qYellow);
+        TrackedRace qBlue = new MockedTrackedRaceWithStartTimeAndRanks(now, blue);
+        qColumn.setTrackedRace(qColumn.getFleetByName("Blue"), qBlue);
+        RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
+        TrackedRace f1Gold = new MockedTrackedRaceWithStartTimeAndRanks(now, gold);
+        f1Column.setTrackedRace(f1Column.getFleetByName("Gold"), f1Gold);
+        final List<Competitor> f1SilverWithOneMissing = new ArrayList<>(silver);
+        final Competitor missing = silver.get(silver.size()-1); // this competitor is not assigned to a fleet for F1, but for F2
+        f1SilverWithOneMissing.remove(missing);
+        TrackedRace f1Silver = new MockedTrackedRaceWithStartTimeAndRanks(now, f1SilverWithOneMissing);
+        f1Column.setTrackedRace(f1Column.getFleetByName("Silver"), f1Silver);
+        leaderboard.getScoreCorrection().correctScore(missing, f1Column, silver.size()); // set score to what it would have been
+        RaceColumn f2Column = series.get(1).getRaceColumnByName("F2");
+        TrackedRace f2Gold = new MockedTrackedRaceWithStartTimeAndRanks(now, gold);
+        f2Column.setTrackedRace(f2Column.getFleetByName("Gold"), f2Gold);
+        TrackedRace f2Silver = new MockedTrackedRaceWithStartTimeAndRanks(now, silver);
+        f2Column.setTrackedRace(f2Column.getFleetByName("Silver"), f2Silver);
+
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        // the competitor missing from F1 Silver has worst score in both Silver fleet races and must rank last;
+        // with the bug still present, she would have ranked between Gold and Silver
+        assertEquals(missing, rankedCompetitors.get(rankedCompetitors.size()-1));
+    }
+
+    /**
      * See bug 3798: special discarding rule that limits the number of discards for the final series; configured
      * by {@link Series#getMaximumNumberOfDiscards()}.
      */

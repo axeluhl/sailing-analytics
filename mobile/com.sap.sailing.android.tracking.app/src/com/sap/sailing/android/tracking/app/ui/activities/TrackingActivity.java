@@ -253,7 +253,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     @Override
-    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing bearing, Speed speed) {
+    public void gpsQualityAndAccuracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing bearing, Speed speed) {
         if (trackingFragment.isAdded()) {
             trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
         }

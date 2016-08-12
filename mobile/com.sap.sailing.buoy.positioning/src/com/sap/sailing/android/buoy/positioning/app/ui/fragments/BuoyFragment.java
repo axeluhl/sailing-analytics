@@ -1,21 +1,16 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
-import java.text.DecimalFormat;
-
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.location.GpsStatus;
+import android.content.IntentSender;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +20,17 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -43,25 +49,31 @@ import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
-public class BuoyFragment extends BaseFragment implements LocationListener {
+public class BuoyFragment extends BaseFragment
+    implements GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
+
     private static final String TAG = BuoyFragment.class.getName();
-    private static final int GPS_MIN_DISTANCE = 1;
+
     private static final int GPS_MIN_TIME = 1000;
     private static final String N_A = "n/a";
+    private static final int REQUEST_CHECK_SETTINGS = 1 << 16;
+
     private TextView accuracyTextView;
     private TextView distanceTextView;
     private Button setPositionButton;
     private MapFragment mapFragment;
     private Location lastKnownLocation;
     private LatLng savedPosition;
-    private LocationManager locationManager;
     private pingListener pingListener;
     private SignalQualityIndicatorView signalQualityIndicatorView;
     private boolean initialLocationUpdate;
     private IntentReceiver mReceiver;
     private PositioningActivity positioningActivity;
     private LocalBroadcastManager mBroadcastManager;
-    private GPSListener mGpsListener;
+
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    private LocationSettingsRequest mSettingsRequest;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -78,9 +90,18 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
 
         mReceiver = new IntentReceiver();
-        mGpsListener = new GPSListener();
         mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
         initMapFragment();
+
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(GPS_MIN_TIME);
+        mLocationRequest.setFastestInterval(GPS_MIN_TIME);
+
+        mSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest).build();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).addConnectionCallbacks(this)
+            .addOnConnectionFailedListener(this).build();
 
         return layout;
     }
@@ -92,7 +113,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         positioningActivity = (PositioningActivity) getActivity();
         mapFragment.getMap().setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         initialLocationUpdate = true;
-        initLocationProvider();
         MarkInfo mark = positioningActivity.getMarkInfo();
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
         if (mark != null) {
@@ -106,7 +126,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             }
         }
         initMarkerReceiver();
-        checkGPS();
     }
 
     private void initMapFragment() {
@@ -125,26 +144,63 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
 
     private void disablePositionButton() {
         setPositionButton.setEnabled(false);
-        boolean gpsEnabled = LocationHelper.isGPSEnabled(getActivity());
-        int buttonTextId = gpsEnabled ? R.string.set_position_no_gps_yet : R.string.set_position_disabled_gps;
-        String text = getString(buttonTextId);
-        setPositionButton.setText(text);
+        int resId = LocationHelper.isGPSEnabled(getActivity()) ? R.string.set_position_no_gps_yet : R.string.set_position_disabled_gps;
+        setPositionButton.setText(resId);
     }
 
     private void checkGPS() {
-        if (lastKnownLocation == null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
-                .setMessage(R.string.error_message_no_position)
-                .setPositiveButton(android.R.string.ok, null);
-            if (!LocationHelper.isGPSEnabled(getActivity())) {
-                builder.setNegativeButton(R.string.settings, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        LocationHelper.openLocationSettings(getActivity());
-                    }
-                });
+        PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mSettingsRequest);
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult settingsResult) {
+                final Status status = settingsResult.getStatus();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        // All location settings are satisfied. The client can initialize location
+                        // requests here.
+                        startLocationUpdates();
+                        break;
+
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the user
+                        // a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(getActivity(), REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                        }
+                        break;
+
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+                        break;
+                }
             }
-            builder.show();
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        int code = (requestCode + 1) << 16;
+        switch (code) {
+            case REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case Activity.RESULT_OK:
+                        // All required changes were successfully made
+                        mGoogleApiClient.connect();
+                        break;
+
+                    case Activity.RESULT_CANCELED:
+                        // The user was asked to change settings, but chose not to
+                        break;
+
+                    default:
+                        break;
+                }
+                break;
         }
     }
 
@@ -156,32 +212,37 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        mGoogleApiClient.connect();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
-        // Unsubscribe from location updates for power saving
-        locationManager.removeUpdates(this);
-        locationManager.removeGpsStatusListener(mGpsListener);
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        }
+        mGoogleApiClient.disconnect();
+
         mBroadcastManager.unregisterReceiver(mReceiver);
     }
 
-    public void setUpTextUI(Location location) {
+    private void setUpTextUI(Location location) {
         String accuracyText = N_A;
         String distanceText = N_A;
-        DecimalFormat accuracyFormatter = new DecimalFormat("#.##");
-        String accuracyString = getString(R.string.buoy_detail_accuracy_ca);
-        String distanceString = getString(R.string.buoy_detail_distance);
         if (location != null) {
-            accuracyText = String.format(accuracyString, accuracyFormatter.format(location.getAccuracy()));
+            accuracyText = getString(R.string.buoy_detail_accuracy_ca, location.getAccuracy());
             MarkPingInfo markPing = positioningActivity.getMarkPing();
             if (markPing != null) {
                 double savedLatitude = Double.parseDouble(markPing.getLatitude());
                 double savedLongitude = Double.parseDouble(markPing.getLongitude());
                 savedPosition = new LatLng(savedLatitude, savedLongitude);
                 float[] results = new float[1];
-                Location.distanceBetween(location.getLatitude(), location.getLongitude(), savedLatitude, savedLongitude,
-                        results);
+                Location.distanceBetween(location.getLatitude(), location.getLongitude(), savedLatitude, savedLongitude, results);
                 float distance = results[0];
-                distanceText = String.format(distanceString, accuracyFormatter.format(distance));
+                distanceText = getString(R.string.buoy_detail_distance, distance);
             }
         }
 
@@ -212,7 +273,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
             initialLocationUpdate = false;
         }
-
     }
 
     private void configureMap(GoogleMap map) {
@@ -221,55 +281,19 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         }
     }
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        if (getActivity() instanceof PositioningActivity) {
-            initLocationProvider();
-        }
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        if (getActivity() instanceof PositioningActivity) {
-            initLocationProvider();
-        }
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        if (getActivity() instanceof PositioningActivity) {
-            initLocationProvider();
-        }
-    }
-
-    private void initLocationProvider() {
-        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        locationManager.removeUpdates(this);
-        locationManager.removeGpsStatusListener(mGpsListener);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, GPS_MIN_DISTANCE, this);
-        locationManager.addGpsStatusListener(mGpsListener);
-        
-        Location initialLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        
-        if (initialLocation != null) {
-            onLocationChanged(initialLocation);
-        }
-    }
-
-    public void updateMap() {
+    private void updateMap() {
         GoogleMap map = mapFragment.getMap();
         map.clear();
 
         if (savedPosition != null) {
-            MarkerOptions savedLocactionOptions = new MarkerOptions();
-            savedLocactionOptions.position(savedPosition);
-            savedLocactionOptions.visible(true);
-            map.addMarker(savedLocactionOptions);
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(savedPosition);
+            markerOptions.visible(true);
+            map.addMarker(markerOptions);
         }
-
     }
 
-    public void reportGPSQuality(float gpsAccuracy) {
+    private void reportGPSQuality(float gpsAccuracy) {
         GPSQuality quality = GPSQuality.noSignal;
 
         if (gpsAccuracy > 48) {
@@ -280,10 +304,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             quality = GPSQuality.great;
         }
         signalQualityIndicatorView.setSignalQuality(quality.toInt());
-
     }
 
-    public void handleSuccessfulResponse(){
+    private void handleSuccessfulResponse() {
         Toast.makeText(getActivity(), getString(R.string.position_set), Toast.LENGTH_SHORT).show();
     }
 
@@ -291,7 +314,27 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         pingListener = listener;
     }
 
-    public enum GPSQuality {
+    @Override
+    public void onConnected(Bundle bundle) {
+        checkGPS();
+    }
+
+    private void startLocationUpdates() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        // no-op
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        ExLog.e(getActivity(), TAG, "Failed to connect to Google Play Services for location updates");
+    }
+
+    private enum GPSQuality {
         noSignal(0), poor(2), good(3), great(4);
 
         private final int gpsQuality;
@@ -343,28 +386,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                 setUpTextUI(lastKnownLocation);
                 updateMap();
             }
-            if (action.equals(getString(R.string.ping_reached_server))){
+            if (action.equals(getString(R.string.ping_reached_server))) {
                 Log.d(TAG, "Response reached Buoy Fragment");
                 handleSuccessfulResponse();
-            }
-        }
-    }
-
-    private class GPSListener implements GpsStatus.Listener {
-
-        @Override
-        public void onGpsStatusChanged(int event) {
-            switch (event) {
-                case GpsStatus.GPS_EVENT_STOPPED: {
-                    if (isAdded()) {
-                        disablePositionButton();
-                        distanceTextView.setText(N_A);
-                        accuracyTextView.setText(N_A);
-                        mapFragment.getMap().setMyLocationEnabled(false);
-                        reportGPSQuality(0);
-                        break;
-                    }
-                }
             }
         }
     }

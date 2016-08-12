@@ -31,7 +31,7 @@ import com.sap.sse.common.settings.value.Value;
  *         super(name, parentSettings);
  *     }
  *     
- *     @Override
+ *     &commat;Override
  *     protected void addChildSettings() {
  *         myString = new UUIDSetting("myString", this)
  *         myBoolean = new BooleanSetting("myBoolean", this);

@@ -488,7 +488,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     public StringBuilder buildURL(String baseURL, Map<String, String> urlParameters) {
         StringBuilder url = new StringBuilder(baseURL);
-        boolean first = !baseURL.contains("?");
+        // Potentially contained hash is checked to support place-based mail verification
+        boolean first = !baseURL.contains("?") || baseURL.contains("#");
         for (Map.Entry<String, String> e : urlParameters.entrySet()) {
             if (first) {
                 url.append('?');
