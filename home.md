@@ -36,6 +36,36 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
 * [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 
+### Mobile
+
+* [[Mobile Development|wiki/info/mobile/mobile-development]]
+* [[App|wiki/info/mobile/app]]
+* [[App Specification|wiki/info/mobile/app-spec]]
+* [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
+* [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
+* [[Push Notifications|wiki/info/mobile/push-notifications]]
+* Racecommittee App
+  * [[Racecommittee App|wiki/info/mobile/racecommittee-app]]
+  * [[Environment|wiki/info/mobile/racecommittee-app-environment]]
+  * [[Administrator|wiki/info/mobile/racecommittee-app-administrator]]
+  * [[User|wiki/info/mobile/racecommittee-app-user]]
+
+### API
+
+* [[Web Services API|wiki/info/api/sailing-webservices]]
+* [[API v1|wiki/info/api/api-v1]]
+* [[Tracking App API|wiki/info/api/tracking-app-api]]
+* [[Tracking App API v1 draft|wiki/info/api/tracking-app-api-v1-draft]]
+* [[Training API v1 draft|wiki/info/api/training-api-v1-draft]]
+
+### Samples
+  * [[S3 Sample|wiki/info/samples/s3-sample]]
+
+### Security
+  * [[Fortify Tests|wiki/info/security/fortify]]
+  * [[User Management|wiki/info/security/usermanagement]]
+  * [[SSL / HTTPS Support|wiki/info/security/ssl-support]]
+
 ### Miscellanious
 
 * [[Big Data - Numbers|wiki/info/misc/big-data-numbers]]
@@ -47,46 +77,56 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Prionet related information|wiki/info/misc/prionet-related-information]]
 * [[TracTrac Workshop 2013|wiki/info/misc/tractracworkshop2013]]
 
+## HowTo
 
+### Development
+
+* [[Create boat graphics for the 2D race viewer|wiki/howto/development/boatgraphicssvg]]
+* [[Continuous Integration with Hudson/Jenkins|wiki/howto/development/ci]]
+* [[Dispatch|wiki/howto/development/dispatch]]
+* [[Working with GWT UI Binder|wiki/howto/development/gwt-ui-binder]]
+* [[Java De(Serialization) and Circular Dependencies|wiki/howto/development/java-de-serialization-and-circular-dependencies]]
+* [[JMX Support|wiki/howto/development/jmx]]
+* [[Working with GWT Locally|wiki/howto/development/local-gwt]]
+* [[Log File Analysis|wiki/howto/development/log-file-analysis]]
+* [[UI Tests with Selenium|wiki/howto/development/selenium-ui-tests]]
+* [[Profiling|wiki/howto/development/profiling]]
+* [[Typical Development Scenarios|wiki/howto/development/typical-development-scenarios]]
+* [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
 
 * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Tracking App|wiki/tracking-app]]
-  * [[Web Services API|wiki/sailing-webservices]]
+
   * [[Thesis (Bachelor, Master, ...)|wiki/thesis]]
 
   * [[Polars|wiki/Polars]]
 * Production Environment
-    * [[SSL / HTTPS Support|wiki/ssl-support]]
 
   * [[TracTrac|wiki/tractrac-lifecycle]]
   * [[Analytics on a stick|wiki/analytics-on-a-stick]]
   * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
-  * [[JMX Support|wiki/jmx]]
-  * [[Log File Analysis|wiki/log-file-analysis]]
+  
+  
 * Information for Developers
   * [[OnBoarding Information|wiki/onboarding]]
   * [[Cook Book|wiki/cook-book]]
   
-  * [[Continuous Integration with Hudson/Jenkins|wiki/ci]]
-  * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
-  * [[Profiling|wiki/profiling]]
-  * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
+
   
   * [[Typical Data Mining Scenarios|wiki/typical-data-mining-scenarios]]
   * [[Load Tests|wiki/server-load-tests]]
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/configure-races-on-server]]
+
   
-  * [[Working with GWT UI Binder|wiki/gwt-ui-binder]]
-  * [[Working with GWT Locally|wiki/local-gwt]]
-  * [[Working with GWT Super Dev Mode|wiki/super-dev-mode]]
+  
   * [[Mobile Development|wiki/mobile-development]]
   * [[Security|wiki/security]]
   * [[Fortify Security Scans|wiki/fortify]]
-  * [[Java De(Serialization) and Circular Dependencies|wiki/java-de-serialization-and-circular-dependencies]]
+  
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]
-  * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
+
   * [[Uploading Media Content|wiki/uploading-media-content]]
 * Information for Event Managers
   * [[Set up local network with replication server|wiki/event-network-with-replica]]
