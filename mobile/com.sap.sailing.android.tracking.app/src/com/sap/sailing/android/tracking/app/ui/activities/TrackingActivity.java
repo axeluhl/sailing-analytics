@@ -191,12 +191,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     @Override
-    protected void onDestroy() {
-        ServiceHelper.getInstance().stopTrackingService(this);
-        super.onDestroy();
-    }
-
-    @Override
     public void onStop() {
         super.onStop();
         if (trackingServiceBound) {
