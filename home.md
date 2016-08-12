@@ -121,21 +121,12 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[TracTrac|wiki/howto/misc/tractrac-lifecycle]]
 * [[UI Tests|wiki/howto/misc/ui-tests-tutorial]]
 * [[Uploading Media Content|wiki/howto/misc/uploading-media-content]]
-
-## Events
-
-* [[Analytics on a stick|wiki/analytics-on-a-stick]]
-
-## Links
-* [[Monitoring Apache and RabbitMQ|wiki/links/monitoring-apache-and-rabbitmq]]
+* [[Monitoring Apache and RabbitMQ|wiki/misc/monitoring-apache-and-rabbitmq]]
 
 ## Projects
 * [[Analytics on a stick|wiki/projects/analytics-on-a-stick]]
 
-## Planning
-* [[Overview|https://wiki.sapsailing.com/pages/wiki/planning/]]
-
-## Miscellanious
+## Events and Planning
 * [[Project Planning (bigger development)|wiki/events/planning]]
 * [[General Event Planning|wiki/events/general-event-planning]]
 * [[Information about Extreme Sailing Series|wiki/events/extreme-sailing-series]]
@@ -143,10 +134,12 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[505 worlds Kiel 2014 event page|wiki/events/505-worlds-kiel-2014]]
 * [[Kieler Woche event page|wiki/events/kieler-woche-2015]]
 * [[Charleston Race Week 2016|wiki/events/Charleston-Race-Week-2016]]
-* [[Sailing Leagues 2016|wiki/Sevents/ailing-Leagues-2016]]
+* [[Sailing Leagues 2016|wiki/events/sailing-Leagues-2016]]
 
+## Planning
+* [[Overview|https://wiki.sapsailing.com/pages/wiki/planning/]]
 
-### Internal services (not related to wiki but useful)
+## Internal services (not related to wiki but useful)
 
 * [Bugzilla Issue Tracking System](http://bugzilla.sapsailing.com/bugzilla/)
 * [GIT Repository (SAP)](ssh://git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git)
