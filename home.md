@@ -43,7 +43,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 * [[Mobile Development|wiki/info/mobile/mobile-development]]
 * [[App|wiki/info/mobile/app]]
-* [[App Specification|wiki/info/mobile/app-spec]]
+* [[App Specification|wiki/info/mobile/app-spec/app-spec]]
 * [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
 * [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
 * [[Push Notifications|wiki/info/mobile/push-notifications]]
