@@ -1,5 +1,7 @@
 # Welcome to the SAP Sailing Wiki
 
+<span style="color: red; font-size: 120%;">Attention: the wiki is currently under reconstruction, meaning that not all links may be working correctly and as expected.</span>
+
 This is the <img src="https://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
 ### The Pitch
