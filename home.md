@@ -18,8 +18,24 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[General Project Information|wiki/info/general/general-information]]
 * [[Inventory|wiki/info/general/inventar-liste]]
 
+### Landscape and Development
+
+* [[Architecture and Infrastructure|wiki/info/landscape/architecture-and-infrastructure]]
+* [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
+* [[Server|wiki/info/landscape/server]]
+* Amazon
+  * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
+  * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
+  * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
+  * [[EC2 mail relaying|wiki/info/landscape/mail-relaying]]
+* [[Development Environment|wiki/info/landscape/development-environment]]
+* [[Production Environment|wiki/info/landscape/production-environment]]
+* [[Runtime Environment|wiki/info/landscape/runtime-environment]]
+* [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
+* [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
+* [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
+
 * General Information
-  * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Big Data - Numbers|wiki/big-data-numbers]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
 
@@ -31,10 +47,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Google Analytics (Web Page Tracking)|wiki/ganalytics]]
   * [[Polars|wiki/Polars]]
 * Production Environment
-  * [[Amazon EC2|wiki/amazon-ec2]]
-  * [[SSL / HTTPS Support|wiki/ssl-support]]
-  * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
-  * [[EC2 mail relaying|wiki/mail-relaying]]
+    * [[SSL / HTTPS Support|wiki/ssl-support]]
+
   * [[TracTrac|wiki/tractrac-lifecycle]]
   * [[Analytics on a stick|wiki/analytics-on-a-stick]]
   * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
@@ -43,17 +57,17 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * Information for Developers
   * [[OnBoarding Information|wiki/onboarding]]
   * [[Cook Book|wiki/cook-book]]
-  * [[Building and Deploying|wiki/building-and-deploying]]
+  
   * [[Continuous Integration with Hudson/Jenkins|wiki/ci]]
   * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
   * [[Profiling|wiki/profiling]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
-  * [[Data Mining Architecture|wiki/data-mining-architecture]]
+  
   * [[Typical Data Mining Scenarios|wiki/typical-data-mining-scenarios]]
   * [[Load Tests|wiki/server-load-tests]]
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/configure-races-on-server]]
-  * [[Development Environment|wiki/development-environment]]
+  
   * [[Working with GWT UI Binder|wiki/gwt-ui-binder]]
   * [[Working with GWT Locally|wiki/local-gwt]]
   * [[Working with GWT Super Dev Mode|wiki/super-dev-mode]]
