@@ -12,13 +12,17 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ## Information
 
-* [[Information about this Wiki and HowTo|wiki/howto/wiki]]
-* [[General Project Information|wiki/general-information]]
+### General
+
+* [[Information about this Wiki and HowTo|wiki/info/general/wiki]]
+* [[General Project Information|wiki/info/general/general-information]]
+* [[Inventory|wiki/info/general/inventar-liste]]
+
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
   * [[Big Data - Numbers|wiki/big-data-numbers]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
-  * [[Inventory|wiki/inventar-liste]]
+
   * [[RaceLog / Smartphone tracking|wiki/racelog-tracking]]
   * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Tracking App|wiki/tracking-app]]
