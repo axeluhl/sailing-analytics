@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This user guide is intended for race officers and other users of the RaceCommittee App. The document assumes that you have been handed a fully configured device (see [[guide for device administrators|wiki/racecommittee-app-administrator]]).
+This user guide is intended for race officers and other users of the RaceCommittee App. The document assumes that you have been handed a fully configured device (see [[guide for device administrators|racecommittee-app-administrator]]).
 
 ## Logon
 
@@ -144,7 +144,7 @@ Use the Basic Countdown racing procedure whenever all the other procedures do no
 ## Signaling a course change
 <a name="coursechange"></a>
 
-There are different ways to signal a course change. Your device has been configured by the [[administration team|wiki/racecommittee-app-administrator]] to select the best method for you.
+There are different ways to signal a course change. Your device has been configured by the [[administration team|racecommittee-app-administrator]] to select the best method for you.
 
 ### By-Name
 
@@ -172,7 +172,7 @@ In the top right corner three dots indicate the connectivity status. If there is
 
 ![Connectivity ok](/wiki/images/rcapp/app_conn_ok.jpg) **versus * ![Connectivity bad](/wiki/images/rcapp/app_conn_bad.jpg)
 
-If the dots stay red contact the administration team or see the [[administration wiki|wiki/racecommittee-app-administrator]].
+If the dots stay red contact the administration team or see the [[administration wiki|racecommittee-app-administrator]].
 
 ### Reload all data
 
@@ -182,4 +182,4 @@ If the available course areas/regattas/races on your device aren't up to date an
 
 If the app crashes it will try to restart. You'll have to re-logon onto your course area. The previous state of your managed race will be restored, including unsent changes and data.
 
-If the app crashes over and over again contact the [[administration team|wiki/racecommittee-app-administrator]].
+If the app crashes over and over again contact the [[administration team|racecommittee-app-administrator]].
