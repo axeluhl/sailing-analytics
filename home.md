@@ -114,8 +114,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Miscellanious
 
 * [[Cook Book|wiki/howto/misc/cook-book]]
-* [[Event Tracking|wiki/howto/misc/event-tracking]]
-* [[POlars|wiki/howto/misc/polars]]
+* [[Event Tracking|wiki/howto/misc/event-tracking/event-tracking]]
+* [[Polars|wiki/howto/misc/polars]]
 * [[Server Replication|wiki/howto/misc/server-replication]]
 * [[Smartphone Tracking General|wiki/howto/misc/smartphone-tracking-general]]
 * [[Smartphone Tracking|wiki/howto/misc/smartphone-tracking]]
