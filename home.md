@@ -1,6 +1,6 @@
 # Welcome to the SAP Sailing Wiki
 
-<font color="red" font-size="120%">Attention: the wiki is currently under reconstruction, meaning that not all links may be working correctly and as expected.</font>
+<font color="red">**Attention:** the wiki is currently under reconstruction, meaning that not all links may be working correctly and as expected.</font>
 
 This is the <img src="https://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
