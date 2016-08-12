@@ -35,16 +35,24 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
 
-* General Information
-  * [[Big Data - Numbers|wiki/big-data-numbers]]
-  * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
+* [[Create clickable UI prototypes with Axure|wiki/info/landscape/ui-clickable-prototypes]]
 
-  * [[RaceLog / Smartphone tracking|wiki/racelog-tracking]]
+### Miscellanious
+
+* [[Big Data - Numbers|wiki/info/misc/big-data-numbers]]
+* [[Data Quality|wiki/info/misc/data-quality]]
+* [[Sailing Domain Algorithms|wiki/info/misc/sailing-domain-algorithms]]
+* [[Google Analytics (Web Page Tracking)|wiki/info/misc/ganalytics]]
+
+* [[FAQ for League Operators|wiki/info/misc/league-operators-faq]]
+* [[Prionet related information|wiki/info/misc/prionet-related-information]]
+* [[TracTrac Workshop 2013|wiki/info/misc/tractracworkshop2013]]
+
   * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Tracking App|wiki/tracking-app]]
   * [[Web Services API|wiki/sailing-webservices]]
   * [[Thesis (Bachelor, Master, ...)|wiki/thesis]]
-  * [[Google Analytics (Web Page Tracking)|wiki/ganalytics]]
+
   * [[Polars|wiki/Polars]]
 * Production Environment
     * [[SSL / HTTPS Support|wiki/ssl-support]]
@@ -78,7 +86,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
-  * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
   * [[Uploading Media Content|wiki/uploading-media-content]]
 * Information for Event Managers
   * [[Set up local network with replication server|wiki/event-network-with-replica]]
@@ -86,7 +93,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Linking Race Videos|wiki/linking-race-videos]]
   * [[Import official results|wiki/results-import]]
 * Information for League operators
-  * [[FAQ|wiki/league-operators-faq]]
+  
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
