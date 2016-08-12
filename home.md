@@ -8,9 +8,11 @@ Like businesses, sailors need the latest information to make strategic decisions
 
 SAP is at the center of today’s technology revolution, developing innovations that not only help businesses run like never before, but also improve the lives of people everywhere. As market leader in enterprise application software, SAP SE (NYSE: SAP) helps companies of all sizes and industries run better. From back office to boardroom, warehouse to storefront, desktop to mobile device – SAP empowers people and organizations to work together more efficiently and use business insight more effectively to stay ahead of the competition. SAP applications and services enable more than 258,000 customers to operate profitably, adapt continuously, and grow sustainably.
 
-### Table of Contents
+# Table of Contents
 
-* [[Information about this Wiki and HowTo|wiki/howto]]
+## Information
+
+* [[Information about this Wiki and HowTo|wiki/howto/wiki/howto]]
 * [[General Project Information|wiki/general-information]]
 * General Information
   * [[Architecture and Infrastructure|wiki/architecture-and-infrastructure]]
