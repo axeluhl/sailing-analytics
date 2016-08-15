@@ -21,16 +21,18 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Landscape and Development
 
 * [[Architecture and Infrastructure|wiki/info/landscape/architecture-and-infrastructure]]
-* [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
+  * [[Runtime Environment|wiki/info/landscape/runtime-environment]]
+  * [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
+  * [[User Management|wiki/info/security/usermanagement]]
+  * [[Development Environment|wiki/info/landscape/development-environment]]
+  * [[Production Environment|wiki/info/landscape/production-environment]]
+  * [[Typical Development Scenarios|wiki/howto/development/typical-development-scenarios]]
 * [[Server|wiki/info/landscape/server]]
 * Amazon
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
   * [[EC2 mail relaying|wiki/info/landscape/mail-relaying]]
-* [[Development Environment|wiki/info/landscape/development-environment]]
-* [[Production Environment|wiki/info/landscape/production-environment]]
-* [[Runtime Environment|wiki/info/landscape/runtime-environment]]
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
@@ -63,7 +65,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ### Security
   * [[Fortify Tests|wiki/info/security/fortify]]
-  * [[User Management|wiki/info/security/usermanagement]]
   * [[SSL / HTTPS Support|wiki/info/security/ssl-support]]
 
 ### Miscellaneous
@@ -94,7 +95,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Log File Analysis|wiki/howto/development/log-file-analysis]]
 * [[UI Tests with Selenium|wiki/howto/development/selenium-ui-tests]]
 * [[Profiling|wiki/howto/development/profiling]]
-* [[Typical Development Scenarios|wiki/howto/development/typical-development-scenarios]]
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
 
 ### For Event Managers
