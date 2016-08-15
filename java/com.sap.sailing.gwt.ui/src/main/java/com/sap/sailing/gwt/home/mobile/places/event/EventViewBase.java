@@ -58,5 +58,7 @@ public interface EventViewBase extends IsWidget {
         EventViewDTO getEventDTO();
 
         boolean isMultiRegattaEvent();
+
+        boolean isSingleRegattaEvent();
     }
 }
