@@ -15,6 +15,10 @@ public interface SuggestedMultiSelectionDataProvider<T, D extends Display<T>> ex
     
     void getSuggestionItems(Iterable<String> queryTokens, int limit, final SuggestionItemsCallback<T> callback);
     
+    String createSuggestionKeyString(T value);
+
+    String createSuggestionAdditionalDisplayString(T value);
+    
     void addDisplay(D display);
     
     void persist();

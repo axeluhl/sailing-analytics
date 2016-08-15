@@ -29,7 +29,7 @@ public class SearchResultItem extends AbstractSearchResultItem {
         init(anchorUi = uiBinder.createAndBindUi(this), item);
         SearchResultEventInfoDTO event = item.getEvents().iterator().next();
         String eventId = String.valueOf(event.getId()), leaderboardName = item.getLeaderboardName(), baseUrl = item.getBaseUrl();
-        PlaceNavigation<?> regattaNavigation = navigator.getRegattaOverviewNavigation(eventId, leaderboardName, baseUrl, item.isOnRemoteServer());
+        PlaceNavigation<?> regattaNavigation = navigator.getRegattaNavigation(eventId, leaderboardName, baseUrl, item.isOnRemoteServer());
         regattaNavigation.configureAnchorElement(anchorUi);
     }
 

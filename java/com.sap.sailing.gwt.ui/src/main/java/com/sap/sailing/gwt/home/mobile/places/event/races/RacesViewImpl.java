@@ -19,7 +19,6 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.partials.regattacompetition.RegattaCompetition;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.AbstractEventView;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
@@ -68,8 +67,7 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         
         @Override
         protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
-            return ExperimentalFeatures.ENABLE_RACE_VIEWER_LINK_ON_MOBILE
-                    ? currentPresenter.getRaceViewerURL(raceMetadata, mode) : null;
+            return currentPresenter.getRaceViewerURL(raceMetadata, mode);
         }
     }
     

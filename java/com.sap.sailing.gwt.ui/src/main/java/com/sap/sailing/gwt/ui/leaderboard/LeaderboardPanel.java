@@ -302,6 +302,12 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
     private ImageResource pauseIcon;
     private ImageResource playIcon;
 
+    /**
+     * For a leaderboard, zero or more tasks may be currently busy. The counter keeps track. If it goes
+     * to {@code 0}, the {@link #busyIndicator} is set to non-busy. If it goes from {@code 0} to {@code 1}
+     * the {@link #busyIndicator} is set to busy.
+     */
+    private int busyTaskCounter;
     private final BusyIndicator busyIndicator;
     private final Set<BusyStateChangeListener> busyStateChangeListeners;
 
@@ -485,31 +491,32 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             break;
         }
         
-        final boolean oldBusyState = isBusy(); 
-        setBusyState(true);
+        addBusyTask();
         Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
             @Override
             public void run() {
-                setAutoExpandPreSelectedRace(false); // avoid expansion during updateLeaderboard(...); will expand later
-                                                     // if it was expanded before
-                // update leaderboard after settings panel column selection change
-                updateLeaderboard(leaderboard);
-                setAutoExpandPreSelectedRace(newSettings.isAutoExpandPreSelectedRace());
-
-                if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-                    timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
-                }
-                for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
-                    expandableSortableColumn.changeExpansionState(/* expand */ true);
-                }
-                if (newSettings.getNameOfRaceToSort() != null) {
-                    final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(newSettings
-                            .getNameOfRaceToSort());
-                    if (raceColumnByRaceName != null) {
-                        getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
+                try {
+                    setAutoExpandPreSelectedRace(false); // avoid expansion during updateLeaderboard(...); will expand later
+                                                         // if it was expanded before
+                    // update leaderboard after settings panel column selection change
+                    updateLeaderboard(leaderboard);
+                    setAutoExpandPreSelectedRace(newSettings.isAutoExpandPreSelectedRace());
+    
+                    if (newSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
+                        timer.setRefreshInterval(newSettings.getDelayBetweenAutoAdvancesInMilliseconds());
                     }
+                    for (ExpandableSortableColumn<?> expandableSortableColumn : columnsToExpandAgain) {
+                        expandableSortableColumn.changeExpansionState(/* expand */ true);
+                    }
+                    if (newSettings.getNameOfRaceToSort() != null) {
+                        final RaceColumn<?> raceColumnByRaceName = getRaceColumnByRaceName(newSettings.getNameOfRaceToSort());
+                        if (raceColumnByRaceName != null) {
+                            getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
+                        }
+                    }
+                } finally {
+                    removeBusyTask();
                 }
-                setBusyState(oldBusyState);
             }
         };
         if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails || getLeaderboard().hasOverallDetails()) {
@@ -1872,8 +1879,8 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             contentPanel.add(toolbarPanel);
         }
         if (competitorSearchTextBox != null) {
+            competitorSearchTextBox.add(busyIndicator);
             contentPanel.add(competitorSearchTextBox);
-            contentPanel.add(busyIndicator);
             competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -1894,7 +1901,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         mainPanel.setWidget(contentPanel);
         this.setTitle(stringMessages.leaderboard());
         if (timer.isInitialized()) {
-            loadCompleteLeaderboard(getLeaderboardDisplayDate());
+            loadCompleteLeaderboard(/* showProgress */ false);
         }
 
     }
@@ -1965,9 +1972,8 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         filterClearButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                setBusyState(true);
                 competitorFilterPanel.clearAllActiveFilters();
-                timeChanged(new Date(), null);
+                loadCompleteLeaderboard(/* showProgress */ true);
             }
         });
         filterControlPanel.add(filterClearButton);
@@ -2271,8 +2277,12 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         }
     }
 
-    private void loadCompleteLeaderboard(Date date) {
+    public void loadCompleteLeaderboard(final boolean showProgress) {
+        final Date date = getLeaderboardDisplayDate();
         if (needsDataLoading()) {
+            if (showProgress) {
+                addBusyTask();
+            }
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), useNullAsTimePoint() ? null : date,
                     /* namesOfRaceColumnsForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(), shallAddOverallDetails(), /* previousLeaderboard */
@@ -2281,20 +2291,25 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
-                            updateLeaderboard(result);
-                            setBusyState(false);
+                            try {
+                                updateLeaderboard(result);
+                            } finally {
+                                if (showProgress) {
+                                    removeBusyTask();
+                                }
+                            }
                         }
         
                         @Override
                         public void onFailure(Throwable caught) {
-                            setBusyState(false);
+                            if (showProgress) {
+                                removeBusyTask();
+                            }
                             getErrorReporter()
                                     .reportError("Error trying to obtain leaderboard contents: " + caught.getMessage(),
                                             true /* silentMode */);
                         }
                     });
-        } else {
-            setBusyState(false);
         }
     }
 
@@ -2303,9 +2318,9 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
     }
 
     /**
-     * In {@link PlayModes#Live live mode}, when {@link #loadCompleteLeaderboard(Date) loading the leaderboard contents}, <code>null</code>
+     * In {@link PlayModes#Live live mode}, when {@link #loadCompleteLeaderboard(boolean) loading the leaderboard contents}, <code>null</code>
      * is used as time point. The condition for this is encapsulated in this method so others can find out. For example, when a time change
-     * is signaled due to local offset / delay adjustments, no additional call to {@link #loadCompleteLeaderboard(Date)} would be required
+     * is signaled due to local offset / delay adjustments, no additional call to {@link #loadCompleteLeaderboard(boolean)} would be required
      * as <code>null</code> will be passed in any case, not being affected by local time offsets.
      */
     private boolean useNullAsTimePoint() {
@@ -2450,7 +2465,6 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                 liveRaceLabel.setVisible(hasLiveRace);
             }
             informLeaderboardUpdateListenersAboutLeaderboardUpdated(leaderboard);
-            setBusyState(false);
         }
     }
 
@@ -3079,7 +3093,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
      */
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
-        loadCompleteLeaderboard(getLeaderboardDisplayDate());
+        loadCompleteLeaderboard(/* showProgress */ false);
     }
 
     @Override
@@ -3336,13 +3350,28 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         return busyIndicator.isBusy();
     }
 
-    @Override
-    public void setBusyState(boolean isBusy) {
+    private void setBusyState(boolean isBusy) {
         if (busyIndicator.isBusy() != isBusy) {
             busyIndicator.setBusy(isBusy);
             for (BusyStateChangeListener listener : busyStateChangeListeners) {
                 listener.onBusyStateChange(isBusy);
             }
+        }
+    }
+    
+    @Override
+    public void addBusyTask() {
+        busyTaskCounter++;
+        if (busyTaskCounter == 1) {
+            setBusyState(true);
+        }
+    }
+
+    @Override
+    public void removeBusyTask() {
+        busyTaskCounter--;
+        if (busyTaskCounter == 0) {
+            setBusyState(false);
         }
     }
 

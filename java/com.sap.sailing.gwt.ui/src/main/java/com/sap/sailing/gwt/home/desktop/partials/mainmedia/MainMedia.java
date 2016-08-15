@@ -46,5 +46,6 @@ public class MainMedia extends Composite {
         for (SailingImageDTO image : photos) {
             imageCarousel.addImage(image);
         }
+        imageCarousel.setInfiniteScrolling(true);
     }
 }

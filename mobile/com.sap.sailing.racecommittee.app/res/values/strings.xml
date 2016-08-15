@@ -3,6 +3,8 @@
 
     <string-array name="empty_array" tools:ignore="UnusedResources"/>
     <string name="empty"></string>
+    <string name="log_file_template" translatable="false">sap_rc_log_%s.txt</string>
+    <string name="crash_file_name" translatable="false">sap_rc_crash_%s.txt</string>
 
     <string name="intent_update_ui" translatable="false">com.sap.sailing.racecommittee.intent.update-ui</string>
     <string name="intent_update_ui_data" translatable="false">com.sap.sailing.racecommittee.intent.update-ui.data</string>

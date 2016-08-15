@@ -133,7 +133,6 @@ public class TrackingFragment extends BaseFragment {
                 @Override
                 public void run() {
                     TextView textView = (TextView) getActivity().findViewById(R.id.mode);
-
                     if (apiConnectivity == APIConnectivity.transmissionSuccess) {
                         if (prefs.getEnergySavingEnabledByUser()) {
                             textView.setText(getString(R.string.tracking_mode_battery_saving));
@@ -201,12 +200,9 @@ public class TrackingFragment extends BaseFragment {
             Activity activity = getActivity();
             SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) activity.findViewById(R.id.gps_quality_indicator);
             indicatorView.setSignalQuality(quality.toInt());
-
             TextView accuracyTextView = (TextView) getActivity().findViewById(R.id.gps_accuracy_label);
             accuracyTextView.setText("~ " + String.valueOf(Math.round(gpsAccurracy)) + " m");
-
             updateTrackingStatus(quality);
-
             lastGPSQualityUpdate = System.currentTimeMillis();
         }
     }

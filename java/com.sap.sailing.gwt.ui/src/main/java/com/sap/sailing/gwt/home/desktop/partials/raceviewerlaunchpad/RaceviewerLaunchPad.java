@@ -36,8 +36,8 @@ public abstract class RaceviewerLaunchPad extends Composite {
         }
         if (data.isRunning() || data.isFinished()) {
             addItem(data, RaceviewerLaunchPadMenuItem.START_ANALYSIS);
+            addItem(data, RaceviewerLaunchPadMenuItem.WINNING_LANES);
         }
-        addItem(data, RaceviewerLaunchPadMenuItem.WINNING_LANES);
         sinkEvents(Event.ONCLICK);
     }
     
