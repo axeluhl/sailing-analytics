@@ -46,7 +46,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Mobile Development|wiki/info/mobile/mobile-development]]
 * Tracking App
   * [[Tracking App Specification|wiki/info/mobile/app-spec/app-spec]]
-  * [[Environment overview|wiki/info/mobile/event-tracking/architecture.pdf]]
+  * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
   * [[Event Tracking|wiki/info/mobile/event-tracking/event-tracking]]
   * [[Smartphone Tracking|wiki/info/mobile/smartphone-tracking-general]]
   * [[Steps for setting up Smartphone Tracking|wiki/info/mobile/smartphone-tracking-steps]]
