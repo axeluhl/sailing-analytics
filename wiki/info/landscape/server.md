@@ -10,7 +10,7 @@ RaceLog tracking has been merged into the master branch with commit 4b4b61b6c518
 # Architectural Overview
 The basic architecture of Racelog-tracking is presented in this diagram (download as [[PDF|/wiki/racelog-tracking/architecture.pdf]]):
 
-[[/wiki/racelog-tracking/architecture.svg]]
+[[/wiki/howto/misc/event-tracking/racelog-tracking/architecture.svg]]
 
 Following the numbers in the diagram, this is a possible race log tracking scenario:
 
@@ -34,7 +34,7 @@ When thinking about smartphone tracking, it would of course be a good idea to al
 
 ## Steps for setting up a racelog-tracked race in the AdminConsole
 
-[[Walkthrough with screenshots|wiki/howto/misc/event-tracking]]
+[[Walkthrough with screenshots|wiki/howto/misc/event-tracking/howto/misc/event-tracking]]
 
 ## Reloading a race that has already been tracked
 
