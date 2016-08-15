@@ -1,3 +1,5 @@
+# Steps to setup Smartphone TRacking
+
 ## prerequisitites
 First of all, you need either an online server landscape which is accessible from outside, or a local one with a working setup allowing your smartphone or tablet to establish a connection to.
 
