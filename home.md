@@ -48,7 +48,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Tracking App Specification|wiki/info/mobile/app-spec/app-spec]]
   * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
   * [[Event Tracking|wiki/info/mobile/event-tracking/event-tracking]]
-  * [[Smartphone Tracking|wiki/info/mobile/smartphone-tracking-general]]
   * [[Steps for setting up Smartphone Tracking|wiki/info/mobile/smartphone-tracking-steps]]
   * [[Tracking App Prototype Architecture|wiki/info/mobile/app]]
 * Racecommittee App
