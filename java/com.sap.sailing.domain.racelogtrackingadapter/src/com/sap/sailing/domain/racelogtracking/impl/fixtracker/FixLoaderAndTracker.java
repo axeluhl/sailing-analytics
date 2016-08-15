@@ -43,8 +43,6 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.concurrent.LockUtil;
-import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * This class listens to RaceLog Events, changes to the race and fix loading events and properly handles mappings and
@@ -60,7 +58,6 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 public class FixLoaderAndTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(FixLoaderAndTracker.class.getName());
     protected final DynamicTrackedRace trackedRace;
-    private final NamedReentrantReadWriteLock loadingFromFixStoreLock;
     private final SensorFixStore sensorFixStore;
     private final GPSFixStore gpsFixStore;
     private RegattaLogDeviceMappings<WithID> deviceMappings;
@@ -158,8 +155,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         this.gpsFixStore = new GPSFixStoreImpl(sensorFixStore);
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.trackedRace = trackedRace;
-        loadingFromFixStoreLock = new NamedReentrantReadWriteLock(
-                "Loading from SensorFix store lock for tracked race " + trackedRace.getRace().getName(), false);
         
         startTracking();
     }
@@ -291,14 +286,12 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     if (!preemptiveStopRequested.get()) {
                         trackedRace.lockForSerializationRead();
                         setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
-                        LockUtil.lockForWrite(loadingFromFixStoreLock);
                         synchronized (FixLoaderAndTracker.this) {
                             FixLoaderAndTracker.this.notifyAll();
                         }
                         updateCallback.run();
                     }
                 } finally {
-                    LockUtil.unlockAfterWrite(loadingFromFixStoreLock);
                     synchronized (FixLoaderAndTracker.this) {
                         int currentActiveLoaders;
                         currentActiveLoaders = activeLoaders.decrementAndGet();
