@@ -244,7 +244,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
     protected void startTracking() {
         trackedRace.addListener(raceChangeListener);
-        this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs());
+        this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs(),
+                "DeviceMapping lock for race " + trackedRace.getRace().getName());
     }
 
     private synchronized void waitForLoadingToFinishRunning() {
@@ -328,8 +329,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
     
     private class FixLoaderDeviceMappings extends RegattaLogDeviceMappings<WithID> {
-        public FixLoaderDeviceMappings(Iterable<RegattaLog> initialRegattaLogs) {
-            super(initialRegattaLogs);
+        public FixLoaderDeviceMappings(Iterable<RegattaLog> initialRegattaLogs, String lockName) {
+            super(initialRegattaLogs, lockName);
         }
         
         @Override
