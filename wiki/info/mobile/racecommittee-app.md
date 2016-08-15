@@ -6,16 +6,16 @@
 
 The RaceCommittee App is an Android 3.2 Tablet application. This document serves as the main information hub about the App and how to develop for it.
 
-* See the [[OnBoarding Information|wiki/onboarding]] on how to setup your local environment for building the app
-* See [[Mobile Development|wiki/mobile-development]] for general tipps on mobile development.
-* See [[Server Environment|wiki/racecommittee-app-environment]] on how the server's build environment is configured for building the RaceCommittee App.
+* See the [[OnBoarding Information|wiki/howto/onboarding]] on how to setup your local environment for building the app
+* See [[Mobile Development|mobile-development]] for general tipps on mobile development.
+* See [[Server Environment|racecommittee-app-environment]] on how the server's build environment is configured for building the RaceCommittee App.
 
 ## User Guide
 
 Have a look at the following user guides to get an idea how to work with the RaceCommittee App.
 
-* [[RaceCommittee App as an administrator|wiki/racecommittee-app-administrator]]
-* [[RaceCommittee App as a race officer|wiki/racecommittee-app-user]]
+* [[RaceCommittee App as an administrator|racecommittee-app-administrator]]
+* [[RaceCommittee App as a race officer|racecommittee-app-user]]
 
 ## Features
 A Feature List collected in September 2013 at the Testevent in Santander can be seen here:
@@ -114,7 +114,7 @@ This leads to the following situations, in which one should bump the **versionCo
 
 ## Configuration (or Preferences)
 
-Configuration of the app is crucial for the app to function properly. See the [[administration guide|wiki/racecommittee-app-administrator]] on how to it is done. The main idea is, that all configuration options are editable on the app via the Android standard preferences interfaces. Still most of the configuration should be configurable on the server.
+Configuration of the app is crucial for the app to function properly. See the [[administration guide|racecommittee-app-administrator]] on how to it is done. The main idea is, that all configuration options are editable on the app via the Android standard preferences interfaces. Still most of the configuration should be configurable on the server.
 
 The app fetches its **DeviceConfiguration** on logon. This overall **DeviceConfiguration** is merged with configuration that is stored on device. Additionally each regatta can have a specific **RegattaConfiguration** attached to it. A regata-specific RegattaConfiguration is merged with the overall **DeviceConfiguration**.
 

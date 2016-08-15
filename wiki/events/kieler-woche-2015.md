@@ -73,6 +73,6 @@ Whichever master is current, we map the main Apache URL http://kielerwoche2015-m
 - Manage2Sail Event URL: http://manage2sail.com/api/public/links/event/d56f7fea-0ca1-4972-83a4-d71d79f26b93?accesstoken=bDAv8CwsTM94ujZ&mediaType=json
 
 ## Local network setup
-basically see [[Set up local network with replication server|wiki/event-network-with-replica]] operating with a Meraki and a local replica server using 1 physical WAN interface on the Meraki. Meraki network config for this event can be found under [[Meraki Dashboard|https://n142.meraki.com/KiWo-TraWo/n/Rzu9tdoc]]
+basically see [[Set up local network with replication server|wiki/howto/eventmanagers/event-network-with-replica]] operating with a Meraki and a local replica server using 1 physical WAN interface on the Meraki. Meraki network config for this event can be found under [[Meraki Dashboard|https://n142.meraki.com/KiWo-TraWo/n/Rzu9tdoc]]
 
 - Accessing replica server from `sailing-demo.sapsailing.com` via ssh or http from `ADMIN` network
