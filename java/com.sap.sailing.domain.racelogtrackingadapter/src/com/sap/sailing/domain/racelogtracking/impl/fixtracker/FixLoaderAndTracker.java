@@ -334,9 +334,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         
         @Override
         protected void updateMappings() {
-            updateConcurrent(() -> {
-                FixLoaderDeviceMappings.super.updateMappings();
-            });
+            updateConcurrent(FixLoaderDeviceMappings.super::updateMappings);
         }
 
         @Override
