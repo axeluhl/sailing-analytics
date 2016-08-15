@@ -1,5 +1,7 @@
 # Tracking a Race using the RaceLog
-###Event Setup
+
+### Event Setup
+
 [[walkthrough/01_regatta.png]]
 
 ***
