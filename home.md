@@ -29,7 +29,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Development Environment|wiki/info/landscape/development-environment]]
   * [[Production Environment|wiki/info/landscape/production-environment]]
   * [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
-* [[Server|wiki/info/landscape/server]]
+* [[RaceLog Tracking Server Architecture|wiki/info/landscape/server]]
+  * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
 * Amazon
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
@@ -46,7 +47,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Mobile Development|wiki/info/mobile/mobile-development]]
 * Tracking App
   * [[Tracking App Specification|wiki/info/mobile/app-spec/app-spec]]
-  * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
   * [[Event Tracking|wiki/info/mobile/event-tracking/event-tracking]]
   * [[Steps for setting up Smartphone Tracking|wiki/info/mobile/smartphone-tracking-steps]]
   * [[Tracking App Prototype Architecture|wiki/info/mobile/app]]
