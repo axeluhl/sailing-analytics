@@ -50,6 +50,11 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
     
     /**
+     * Lock object to be used when accessing {@link #knownRegattaLogs}.
+     */
+    private final NamedReentrantReadWriteLock knownRegattaLogsLock;
+    
+    /**
      * Lock object to be used when accessing {@link #mappings} or {@link #mappingsByDevice}.
      */
     private final NamedReentrantReadWriteLock mappingsLock;
@@ -91,12 +96,16 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         };
     };
     
-    public RegattaLogDeviceMappings(Iterable<RegattaLog> initialRegattaLogs, String lockName) {
-        mappingsLock = new NamedReentrantReadWriteLock(lockName, false);
+    public RegattaLogDeviceMappings(Iterable<RegattaLog> initialRegattaLogs, String raceNameForLock) {
+        mappingsLock = new NamedReentrantReadWriteLock("DeviceMapping lock for race " + raceNameForLock, false);
+        knownRegattaLogsLock = new NamedReentrantReadWriteLock("Lock for known RegattaLogs of race " + raceNameForLock, false);
         final boolean hasRegattaLogs;
-        synchronized (knownRegattaLogs) {
+        LockUtil.lockForWrite(knownRegattaLogsLock);
+        try {
             initialRegattaLogs.forEach(this::addRegattaLogUnlocked);
             hasRegattaLogs = !knownRegattaLogs.isEmpty();
+        } finally {
+            LockUtil.unlockAfterWrite(knownRegattaLogsLock);
         }
         if (hasRegattaLogs) {
             updateMappings();
@@ -104,9 +113,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     }
     
     public void addRegattaLog(RegattaLog regattaLog) {
-        synchronized (knownRegattaLogs) {
-            addRegattaLogUnlocked(regattaLog);
-        }
+        LockUtil.executeWithWriteLock(knownRegattaLogsLock, () -> addRegattaLogUnlocked(regattaLog));
         updateMappings();
     }
 
@@ -116,10 +123,10 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     }
     
     public void stop() {
-        synchronized (knownRegattaLogs) {
+        LockUtil.executeWithWriteLock(knownRegattaLogsLock, () -> {
             knownRegattaLogs.forEach((log) -> log.removeListener(regattaLogEventVisitor));
             knownRegattaLogs.clear();
-        }
+        });
     }
     
     protected void updateMappings() {
@@ -145,7 +152,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * @param callback the callback to call for every mapped device
      */
     public void forEachDevice(Consumer<DeviceIdentifier> callback) {
-        doWithMappingReadLock(() -> mappingsByDevice.keySet().forEach(callback::accept));
+        LockUtil.executeWithReadLock(mappingsLock, () -> mappingsByDevice.keySet().forEach(callback::accept));
     }
     
     /**
@@ -154,7 +161,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * @param callback the callback to call for every known mapping
      */
     public void forEachMapping(BiConsumer<ItemT, DeviceMappingWithRegattaLogEvent<ItemT>> callback) {
-        doWithMappingReadLock(() -> {
+        LockUtil.executeWithReadLock(mappingsLock, () -> {
             for (Map.Entry<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> entry : mappings.entrySet()) {
                 ItemT item = entry.getKey();
                 for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : entry.getValue()) {
@@ -162,18 +169,6 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
                 }
             }
         });
-    }
-    
-    /**
-     * Used internally to execute code with an active read lock for {@link #mappingsLock}.
-     */
-    private void doWithMappingReadLock(Runnable runnable) {
-        LockUtil.lockForRead(mappingsLock);
-        try {
-            runnable.run();
-        } finally {
-            LockUtil.unlockAfterRead(mappingsLock);
-        }
     }
     
     /**
@@ -190,7 +185,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      */
     public void forEachMappingOfDeviceIncludingTimePoint(DeviceIdentifier device, TimePoint timePoint,
             Consumer<DeviceMappingWithRegattaLogEvent<ItemT>> callback) {
-        doWithMappingReadLock(() -> {
+        LockUtil.executeWithReadLock(mappingsLock, () -> {
             List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForDevice = mappingsByDevice.get(device);
             if (mappingsForDevice != null) {
                 for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : mappingsForDevice) {
@@ -215,9 +210,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     }
 
     protected void forEachRegattaLog(Consumer<RegattaLog> regattaLogConsumer) {
-        synchronized (knownRegattaLogs) {
-            knownRegattaLogs.forEach(regattaLogConsumer);
-        }
+        LockUtil.executeWithReadLock(knownRegattaLogsLock, () -> knownRegattaLogs.forEach(regattaLogConsumer));
     }
 
     /**
