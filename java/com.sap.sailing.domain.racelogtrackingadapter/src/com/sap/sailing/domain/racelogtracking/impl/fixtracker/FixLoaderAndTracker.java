@@ -336,8 +336,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         protected void updateMappings() {
             updateConcurrent(() -> {
                 FixLoaderDeviceMappings.super.updateMappings();
-                // add listeners for devices in mappings already present
-                forEachDevice((device) -> sensorFixStore.addListener(listener, device));
             });
         }
 
@@ -349,6 +347,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
         @Override
         protected void mappingAdded(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
+            // The listener is first added to not lose any fix after loading the initial fixes and adding the listener.
+            sensorFixStore.addListener(listener, mapping.getDevice());
             loadFixes(getTrackingTimeRange().intersection(mapping.getTimeRange()), mapping);
         }
 
