@@ -50,7 +50,7 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
- * The standard implemantation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
+ * The standard implementation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
  * every time a competitor passes the crossing-bearing of a waypoint, a candidate is created using linear interpolation
  * to estimate the exact time the bearing was crossed. Secondly, all local distance minima to a waypoint are candidates.
  * The probability of a candidate depends on its distance, whether it is on the right side and if it passes in the right
