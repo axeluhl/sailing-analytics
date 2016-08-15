@@ -49,6 +49,9 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      */
     private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
     
+    /**
+     * Lock object to be used when accessing {@link #mappings} or {@link #mappingsByDevice}.
+     */
     private final NamedReentrantReadWriteLock mappingsLock;
 
     private final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> mappings = new HashMap<>();
@@ -161,6 +164,9 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         });
     }
     
+    /**
+     * Used internally to execute code with an active read lock for {@link #mappingsLock}.
+     */
     private void doWithMappingReadLock(Runnable runnable) {
         LockUtil.lockForRead(mappingsLock);
         try {
