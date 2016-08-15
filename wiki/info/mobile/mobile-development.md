@@ -1,6 +1,6 @@
 # Mobile Development
 
-See [On Boarding](onboarding#Additional-steps-required-for-Android-projects) how to set up your build environment for mobile development.
+See [Onboarding](/wiki/howto/onboarding#Additional-steps-required-for-Android-projects) how to set up your build environment for mobile development.
 
 ## Emulation
 
