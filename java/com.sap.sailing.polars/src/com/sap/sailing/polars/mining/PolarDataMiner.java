@@ -54,6 +54,7 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelFilteringProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.functions.SimpleParameterizedFunction;
+import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
@@ -70,8 +71,7 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 public class PolarDataMiner {
 
     private static final int EXECUTOR_QUEUE_SIZE = 100;
-    private static final int THREAD_POOL_SIZE = Math.max(
-            (int) (Runtime.getRuntime().availableProcessors() * (3.0 / 4.0)), 3);
+    private static final int THREAD_POOL_SIZE = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
     private final ThreadPoolExecutor executor = createExecutor();
     private final ConcurrentMap<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new ConcurrentHashMap<>();
 

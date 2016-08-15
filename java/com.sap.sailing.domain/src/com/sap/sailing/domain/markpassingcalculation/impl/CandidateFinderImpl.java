@@ -17,9 +17,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,7 +47,7 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * The standard implemantation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
@@ -149,11 +146,7 @@ public class CandidateFinderImpl implements CandidateFinder {
      * Like {@link #CandidateFinderImpl(DynamicTrackedRace, ExecutorService)} but creates a default executor service
      */
     public CandidateFinderImpl(DynamicTrackedRace race) {
-        this(race, new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime
-                .getRuntime().availableProcessors()/2, 3),
-                /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors()/2, 3),
-                /* keepAliveTime */60, TimeUnit.SECONDS,
-                /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1, /* daemon */ true)));
+        this(race, ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
     }
 
     public CandidateFinderImpl(DynamicTrackedRace race, ExecutorService executor) {
