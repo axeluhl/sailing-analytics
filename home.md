@@ -51,14 +51,14 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Smartphone Tracking|wiki/info/mobile/smartphone-tracking-general]]
   * [[Steps for setting up Smartphone Tracking|wiki/info/mobile/smartphone-tracking-steps]]
   * [[Tracking App Prototype Architecture|wiki/info/mobile/app]]
-* [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
-* [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
-* [[Push Notifications|wiki/info/mobile/push-notifications]]
 * Racecommittee App
   * [[Racecommittee App|wiki/info/mobile/racecommittee-app]]
   * [[Environment|wiki/info/mobile/racecommittee-app-environment]]
   * [[Administrator|wiki/info/mobile/racecommittee-app-administrator]]
   * [[User|wiki/info/mobile/racecommittee-app-user]]
+* [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
+* [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
+* [[Push Notifications|wiki/info/mobile/push-notifications]]
 
 ### API
 
