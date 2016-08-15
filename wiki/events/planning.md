@@ -22,7 +22,7 @@ The links above lead to short write-ups of the respective business case behind t
 
 ## Project Candidates
 
-[[Smartphone Tracking|wiki/smartphone-tracking]]
+[[Smartphone Tracking|wiki/howto/misc/smartphone-tracking-general]]
 
 [[User Management|wiki/planning/usermanagement]]
 
@@ -34,7 +34,7 @@ The links above lead to short write-ups of the respective business case behind t
 
 [[GPS Import|wiki/planning/gps-import]]
 
-[[Monitoring and Improving Data Quality|wiki/data-quality]]
+[[Monitoring and Improving Data Quality|wiki/info/misc/data-quality]]
 
 [[Usability of the Administration Interface|wiki/planning/usability-of-the-administration-interface]]
 

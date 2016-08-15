@@ -1,7 +1,5 @@
 # Welcome to the SAP Sailing Wiki
 
-<font color="red"><b>Attention:</b> the wiki is currently under reconstruction, meaning that not all links may be working correctly and as expected.</font>
-
 This is the <img src="https://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
 ### The Pitch
@@ -23,16 +21,18 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Landscape and Development
 
 * [[Architecture and Infrastructure|wiki/info/landscape/architecture-and-infrastructure]]
-* [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
+  * [[Runtime Environment|wiki/info/landscape/runtime-environment]]
+  * [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
+  * [[User Management|wiki/info/landscape/usermanagement]]
+  * [[Development Environment|wiki/info/landscape/development-environment]]
+  * [[Production Environment|wiki/info/landscape/production-environment]]
+  * [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
 * [[Server|wiki/info/landscape/server]]
 * Amazon
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
   * [[EC2 mail relaying|wiki/info/landscape/mail-relaying]]
-* [[Development Environment|wiki/info/landscape/development-environment]]
-* [[Production Environment|wiki/info/landscape/production-environment]]
-* [[Runtime Environment|wiki/info/landscape/runtime-environment]]
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
@@ -65,10 +65,9 @@ SAP is at the center of today’s technology revolution, developing innovations 
 
 ### Security
   * [[Fortify Tests|wiki/info/security/fortify]]
-  * [[User Management|wiki/info/security/usermanagement]]
   * [[SSL / HTTPS Support|wiki/info/security/ssl-support]]
 
-### Miscellanious
+### Miscellaneous
 
 * [[Big Data - Numbers|wiki/info/misc/big-data-numbers]]
 * [[Data Quality|wiki/info/misc/data-quality]]
@@ -96,7 +95,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Log File Analysis|wiki/howto/development/log-file-analysis]]
 * [[UI Tests with Selenium|wiki/howto/development/selenium-ui-tests]]
 * [[Profiling|wiki/howto/development/profiling]]
-* [[Typical Development Scenarios|wiki/howto/development/typical-development-scenarios]]
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
 
 ### For Event Managers
@@ -111,14 +109,14 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Configure Races on Server|wiki/howto/setup/configure-races-on-server]]
 * [[Setting up internal Jenkins on SAP Monsoon|wiki/howto/setup/setting-up-jenkins-on-sap-monsoon]]
 
-### Miscellanious
+### Miscellaneous
 
 * [[Cook Book|wiki/howto/misc/cook-book]]
-* [[Event Tracking|wiki/howto/misc/event-tracking]]
-* [[POlars|wiki/howto/misc/polars]]
+* [[Event Tracking|wiki/howto/misc/event-tracking/event-tracking]]
+* [[Polars|wiki/howto/misc/polars]]
 * [[Server Replication|wiki/howto/misc/server-replication]]
-* [[Smartphone Tracking General|wiki/howto/misc/smartphone-tracking-general]]
-* [[Smartphone Tracking|wiki/howto/misc/smartphone-tracking]]
+* [[Smartphone Tracking|wiki/howto/misc/smartphone-tracking-general]]
+* [[Steps for setting up Smartphone Tracking|wiki/howto/misc/smartphone-tracking-steps]]
 * [[TracTrac|wiki/howto/misc/tractrac-lifecycle]]
 * [[UI Tests|wiki/howto/misc/ui-tests-tutorial]]
 * [[Uploading Media Content|wiki/howto/misc/uploading-media-content]]
