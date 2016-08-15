@@ -4,10 +4,10 @@
 
 * [[Runtime Environment|wiki/info/landscape/runtime-environment]]
 * [[Basic Architectural Principles|wiki/info/landscape/basic-architectural-principles]]
-* [[User Management|wiki/info/security/usermanagement]]
+* [[User Management|wiki/info/landscape/usermanagement]]
 * [[Development Environment|wiki/info/landscape/development-environment]]
 * [[Production Environment|wiki/info/landscape/production-environment]]
-* [[Typical Development Scenarios|wiki/howto/development/typical-development-scenarios]]
+* [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
 
 ## Introduction, Project Background and History
 
