@@ -3,7 +3,7 @@ First of all, you need either an online server landscape which is accessible fro
 
 ## event setup
 Log on to the Administration Console and make sure you have a working Event setup.
-For further information on how to achieve this, have a look at [this walkthrough](./wiki/racelog-tracking/walkthrough).
+For further information on how to achieve this, have a look at [this walkthrough](\wiki\info\mobile\event-tracking\event-tracking).
 After completing these steps up until the point "Add Device Mappings" or by simply following the step-by-step wizard, you should have the following setup:
 
 * an Event
