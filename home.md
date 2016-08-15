@@ -44,8 +44,13 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Mobile
 
 * [[Mobile Development|wiki/info/mobile/mobile-development]]
-* [[App|wiki/info/mobile/app]]
-* [[Tracking App Specification|wiki/info/mobile/app-spec/app-spec]]
+* Tracking App
+  * [[Tracking App Specification|wiki/info/mobile/app-spec/app-spec]]
+  * [[Environment overview|wiki/info/mobile/event-tracking/architecture.pdf]]
+  * [[Event Tracking|wiki/info/mobile/event-tracking/event-tracking]]
+  * [[Smartphone Tracking|wiki/info/mobile/smartphone-tracking-general]]
+  * [[Steps for setting up Smartphone Tracking|wiki/info/mobile/smartphone-tracking-steps]]
+  * [[Tracking App Prototype Architecture|wiki/info/mobile/app]]
 * [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
 * [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
 * [[Push Notifications|wiki/info/mobile/push-notifications]]
@@ -114,11 +119,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Miscellaneous
 
 * [[Cook Book|wiki/howto/misc/cook-book]]
-* [[Event Tracking|wiki/howto/misc/event-tracking/event-tracking]]
 * [[Polars|wiki/howto/misc/polars]]
 * [[Server Replication|wiki/howto/misc/server-replication]]
-* [[Smartphone Tracking|wiki/howto/misc/smartphone-tracking-general]]
-* [[Steps for setting up Smartphone Tracking|wiki/howto/misc/smartphone-tracking-steps]]
 * [[TracTrac|wiki/howto/misc/tractrac-lifecycle]]
 * [[UI Tests|wiki/howto/misc/ui-tests-tutorial]]
 * [[Uploading Media Content|wiki/howto/misc/uploading-media-content]]
