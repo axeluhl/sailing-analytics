@@ -26,7 +26,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[User Management|wiki/info/landscape/usermanagement]]
   * [[Development Environment|wiki/info/landscape/development-environment]]
   * [[Production Environment|wiki/info/landscape/production-environment]]
-  * [[Typical Development Scenarios|wiki/howto/development/typical-development-scenarios]]
+  * [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
 * [[Server|wiki/info/landscape/server]]
 * Amazon
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
