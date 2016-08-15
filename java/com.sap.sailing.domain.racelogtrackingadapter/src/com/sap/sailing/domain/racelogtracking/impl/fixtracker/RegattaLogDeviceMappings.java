@@ -198,6 +198,18 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     }
     
     /**
+     * @return true if there is at least one mapping for the given {@link DeviceIdentifier}, false otherwise
+     */
+    public boolean hasMappingForDevice(DeviceIdentifier device) {
+        LockUtil.lockForRead(mappingsLock);
+        try {
+            return mappingsByDevice.containsKey(device);
+        } finally {
+            LockUtil.unlockAfterRead(mappingsLock);
+        }
+    }
+    
+    /**
      * To be implemented by subclasses to calculate the current {@link DeviceMapping}s.
      * 
      * @return All currently known DeviceMappings

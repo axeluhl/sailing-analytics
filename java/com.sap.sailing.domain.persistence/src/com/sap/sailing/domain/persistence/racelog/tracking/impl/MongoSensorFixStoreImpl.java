@@ -193,9 +193,12 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
 
     @Override
     public synchronized void removeListener(FixReceivedListener<? extends Timed> listener) {
-        for (Set<FixReceivedListener<? extends Timed>> set : listeners.values()) {
-            set.remove(listener);
-        }
+        Util.removeFromAllValueSets(listeners, listener);
+    }
+    
+    @Override
+    public synchronized void removeListener(FixReceivedListener<? extends Timed> listener, DeviceIdentifier device) {
+        Util.removeFromValueSet(listeners, device, listener);
     }
 
     private DBObject getDeviceQuery(DeviceIdentifier device)

@@ -333,8 +333,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
         @Override
         protected void mappingRemoved(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
+            final DeviceIdentifier device = mapping.getDevice();
+            if(!hasMappingForDevice(device)) {
+                sensorFixStore.removeListener(listener, device);
+            }
             // TODO if tracks are always associated to only one device mapping, we could remove tracks here
-            // TODO remove listener from store if there is no mapping left for the DeviceIdentifier
         }
 
         @Override
