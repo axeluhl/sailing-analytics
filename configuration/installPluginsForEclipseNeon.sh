@@ -37,8 +37,8 @@ installPlugins http://p2.sapsailing.com/p2/sdbg com.github.sdbg.feature.feature.
 # echo "Installing EasyShell..."
 # installPlugins http://anb0s.github.io/EasyShell com.tetrade.eclipse.plugins.easyshell.feature.feature.group
 
-echo "Installing BIRT (requirement for MAT charts)..."
-installPlugins http://download.eclipse.org/releases/neon org.eclipse.birt.feature.group
+echo "Installing BIRT charts (requirement for MAT)..."
+installPlugins http://download.eclipse.org/birt/update-site/4.6 org.eclipse.birt.chart.feature.group
 
 echo "Installing Memory Analyzer..."
 installPlugins http://download.eclipse.org/mat/1.6/update-site/ org.eclipse.mat.feature.feature.group,org.eclipse.mat.chart.feature.feature.group
