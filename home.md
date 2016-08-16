@@ -29,7 +29,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Development Environment|wiki/info/landscape/development-environment]]
   * [[Production Environment|wiki/info/landscape/production-environment]]
   * [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
-* [[Server|wiki/info/landscape/server]]
+* [[RaceLog Tracking Server Architecture|wiki/info/landscape/server]]
+  * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
 * Amazon
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
@@ -46,9 +47,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Mobile Development|wiki/info/mobile/mobile-development]]
 * Tracking App
   * [[Tracking App Specification|wiki/info/mobile/app-spec/app-spec]]
-  * [[Environment overview|wiki/info/mobile/event-tracking/architecture.pdf]]
   * [[Event Tracking|wiki/info/mobile/event-tracking/event-tracking]]
-  * [[Smartphone Tracking|wiki/info/mobile/smartphone-tracking-general]]
   * [[Steps for setting up Smartphone Tracking|wiki/info/mobile/smartphone-tracking-steps]]
   * [[Tracking App Prototype Architecture|wiki/info/mobile/app]]
 * Racecommittee App
@@ -67,9 +66,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Tracking App API|wiki/info/api/tracking-app-api]]
 * [[Training API v1 draft|wiki/info/api/training-api-v1-draft]]
 
-### Samples
-  * [[S3 Sample|wiki/info/samples/s3-sample]]
-
 ### Security
   * [[Fortify Tests|wiki/info/security/fortify]]
   * [[SSL / HTTPS Support|wiki/info/security/ssl-support]]
@@ -80,6 +76,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Data Quality|wiki/info/misc/data-quality]]
 * [[Sailing Domain Algorithms|wiki/info/misc/sailing-domain-algorithms]]
 * [[Google Analytics (Web Page Tracking)|wiki/info/misc/ganalytics]]
+* [[S3 Development Sample|wiki/info/misc/s3-sample]]
 
 * [[FAQ for League Operators|wiki/info/misc/league-operators-faq]]
 * [[Prionet related information|wiki/info/misc/prionet-related-information]]

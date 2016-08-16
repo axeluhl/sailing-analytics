@@ -175,25 +175,35 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 SensorFixMapper<Timed, DynamicTrack<Timed>, Competitor> mapper = sensorFixMapperFactory
                         .createCompetitorMapper(event.getClass());
                 DynamicTrack<Timed> track = mapper.getTrack(trackedRace, event.getMappedTo());
-                try {
-                    sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(),
-                            timeRangeToLoad.from(), timeRangeToLoad.to(), true);
-                } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
-                    logger.log(Level.WARNING, "Could not load track for competitor: " + mapping.getMappedTo()
-                            + "; device: " + mapping.getDevice());
+                if (track != null) {
+                    // for split-fleet racing, device mappings coming from the regatta log may not be relevant
+                    // for the trackedRace because the competitors may not compete in it; in this case, the
+                    // competitor retrieved from the mapping event does not have a track in trackedRace
+                    try {
+                        sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(),
+                                timeRangeToLoad.from(), timeRangeToLoad.to(), true);
+                    } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
+                        logger.log(Level.WARNING, "Could not load track for competitor: " + mapping.getMappedTo()
+                                + "; device: " + mapping.getDevice());
+                    }
                 }
             }
 
             @Override
             public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
                 DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(event.getMappedTo());
-                try {
-                    @SuppressWarnings({ "unchecked" })
-                    DeviceMapping<Competitor> competitorMapping = (DeviceMapping<Competitor>) mapping;
-                    gpsFixStore.loadCompetitorTrack(track, competitorMapping, getStartOfTracking(),
-                            getEndOfTracking());
-                } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                    logger.log(Level.WARNING, "Could not load competitor track " + mapping.getMappedTo());
+                if (track != null) {
+                    // for split-fleet racing, device mappings coming from the regatta log may not be relevant
+                    // for the trackedRace because the competitors may not compete in it; in this case, the
+                    // competitor retrieved from the mapping event does not have a track in trackedRace
+                    try {
+                        @SuppressWarnings({ "unchecked" })
+                        DeviceMapping<Competitor> competitorMapping = (DeviceMapping<Competitor>) mapping;
+                        gpsFixStore.loadCompetitorTrack(track, competitorMapping, getStartOfTracking(),
+                                getEndOfTracking());
+                    } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                        logger.log(Level.WARNING, "Could not load competitor track " + mapping.getMappedTo());
+                    }
                 }
             }
 
