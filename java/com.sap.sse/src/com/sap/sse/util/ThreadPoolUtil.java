@@ -25,6 +25,24 @@ public interface ThreadPoolUtil {
     ExecutorService getDefaultBackgroundTaskThreadPoolExecutor();
     
     /**
+     * Returns a central, default thread pool executor that can be used to schedule foreground tasks. Using this
+     * centralized copy ensures that when several application modules require such an executor they get a single one
+     * whose dimensions are chosen such that it does not outperform other system-critical tasks such as garbage
+     * collection and JITting.
+     * <p>
+     * 
+     * The executor will have {@link Thread#NORM_PRIORITY} as its priority, therefore slightly superseding the priority
+     * of {@link #getDefaultBackgroundTaskThreadPoolExecutor()}, and its threads will all be {@link Thread#setDaemon
+     * daemon threads}. The task queue is limited by {@link Integer#MAX_VALUE}, so is virtually unbounded, and therefore
+     * no specific rejection handler is configured.
+     * <p>
+     * 
+     * The thread pool uses constant size, so the core size equals the maximum size, and threads will not be terminated
+     * once created. Its size is calculated using {@link #getReasonableThreadPoolSize()}.
+     */
+    ExecutorService getDefaultForegroundTaskThreadPoolExecutor();
+    
+    /**
      * Returns a new thread pool executor that can be used to schedule background tasks. Normally, clients should use
      * {@link #getDefaultBackgroundTaskThreadPoolExecutor()} instead. However, under certain rare circumstances it may
      * be necessary or advisable to create a separate thread pool, e.g., when the computations of tasks submitted to the

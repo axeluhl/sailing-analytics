@@ -152,13 +152,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private transient Set<CacheInvalidationListener> cacheInvalidationListeners;
 
     private static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
+    
     /**
      * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
      * can depend on the results of the tasks run by {@link #raceDetailsExecutor}, and an {@link Executor} doesn't
      * move a task that is blocked by waiting for another {@link FutureTask} to the side but blocks permanently,
-     * ending in a deadlock (one that cannot easily be detected by the Eclipse debugger either).
+     * ending in a deadlock (one that cannot easily be detected by the Eclipse debugger either). Using the default
+     * foreground executor ensures slightly higher priority than for the {@link #executor}, ensuring that these tasks
+     * are preferred over the {@link #executor} tasks which may be waiting for the completion of the tasks submitted
+     * to this excutor.
      */
-    private final static ExecutorService raceDetailsExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor();
+    private final static ExecutorService raceDetailsExecutor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
 
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
 
