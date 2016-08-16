@@ -72,8 +72,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
     }
     
     private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {
-        // boolean isUntrackedRace = trackingState != RaceTrackingState.TRACKED_VALID_DATA;
-        boolean isUntrackedRace = isUntrackedRace(trackingState);
+        boolean isUntrackedRace = trackingState != RaceTrackingState.TRACKED_VALID_DATA;
         if (viewState == RaceViewState.RUNNING) {
             mainElement.addClassName(getRaceLiveStyleName());
             getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.live() : I18N.actionWatch());
@@ -109,9 +108,4 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
     
     protected abstract String getRaceUntrackedStyleName();
     
-    // TODO: As long as there is no mobile race viewer, show all races as untracked
-    //       This is a temporary method to be able to fulfill this requirement
-    protected boolean isUntrackedRace(RaceTrackingState trackingState) {
-        return trackingState != RaceTrackingState.TRACKED_VALID_DATA;
-    }
 }
