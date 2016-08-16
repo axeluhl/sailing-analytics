@@ -56,11 +56,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     
     @Override
     public TabView.State getState() {
-        if (currentPresenter.getEventDTO().getType() == EventType.MULTI_REGATTA) {
-            return State.VISIBLE;
-        } else {
-            return State.VISIBLE;
-        }
+        return State.VISIBLE;
     }
 
     @Override

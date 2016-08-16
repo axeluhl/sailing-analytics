@@ -41,6 +41,7 @@ public class RegattaCompetitionFleet extends AbstractRegattaCompetitionFleet {
     public void setNumberOfFleetsInSeries(int fleetCount) {
         getElement().getStyle().setWidth(100.0 / fleetCount, Unit.PCT);
         setStyleName(local_res.css().regattacompetition_phase_fleetfullwidth(), fleetCount < 2);
+        setStyleName(local_res.css().regattacompetition_phase_fleetcompact(), fleetCount > 4);
     }
 
     @Override
