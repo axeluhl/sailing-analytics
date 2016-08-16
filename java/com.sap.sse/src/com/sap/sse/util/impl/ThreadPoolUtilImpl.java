@@ -1,45 +1,37 @@
 package com.sap.sse.util.impl;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class ThreadPoolUtilImpl implements ThreadPoolUtil {
     private static final int REASONABLE_THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
 
-    private final ExecutorService defaultBackgroundTaskThreadPoolExecutor;
-    private final ExecutorService defaultForegroundTaskThreadPoolExecutor;
+    private final ScheduledExecutorService defaultBackgroundTaskThreadPoolExecutor;
+    private final ScheduledExecutorService defaultForegroundTaskThreadPoolExecutor;
     
     public ThreadPoolUtilImpl() {
-        defaultBackgroundTaskThreadPoolExecutor = new ThreadPoolExecutor(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
-                /* maximumPoolSize */ REASONABLE_THREAD_POOL_SIZE,
-                /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
-        defaultForegroundTaskThreadPoolExecutor = new ThreadPoolExecutor(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
-                /* maximumPoolSize */ REASONABLE_THREAD_POOL_SIZE,
-                /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+        defaultBackgroundTaskThreadPoolExecutor = Executors.newScheduledThreadPool(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
+                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
+        defaultForegroundTaskThreadPoolExecutor = Executors.newScheduledThreadPool(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
+                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
     }
     
     @Override
-    public ExecutorService getDefaultBackgroundTaskThreadPoolExecutor() {
+    public ScheduledExecutorService getDefaultBackgroundTaskThreadPoolExecutor() {
         return defaultBackgroundTaskThreadPoolExecutor;
     }
 
     @Override
-    public ExecutorService getDefaultForegroundTaskThreadPoolExecutor() {
+    public ScheduledExecutorService getDefaultForegroundTaskThreadPoolExecutor() {
         return defaultForegroundTaskThreadPoolExecutor;
     }
 
     @Override
-    public ExecutorService createBackgroundTaskThreadPoolExecutor() {
-        return new ThreadPoolExecutor(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
-                /* maximumPoolSize */ REASONABLE_THREAD_POOL_SIZE,
-                /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
+    public ScheduledExecutorService createBackgroundTaskThreadPoolExecutor() {
+        return Executors.newScheduledThreadPool(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
+                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
     }
 
     @Override
