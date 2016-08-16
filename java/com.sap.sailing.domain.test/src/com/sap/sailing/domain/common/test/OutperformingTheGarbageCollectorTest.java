@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public class OutperformingTheGarbageCollectorTest {
     private static final Logger logger = Logger.getLogger(OutperformingTheGarbageCollectorTest.class.getName());
-    private static final int MAX_THREADPOOL_SIZE = 500;
+    private static final int MAX_THREADPOOL_SIZE = 5;
     private static final int BATCH_SIZE = 100000;
     private static final int NUMBER_OF_OBJECTS_TO_CREATE_INITIALLY = 50000000;
     private static final int NUMBER_OF_FOLLOW_UP_OBJECTS_TO_CREATE = 100000000;
