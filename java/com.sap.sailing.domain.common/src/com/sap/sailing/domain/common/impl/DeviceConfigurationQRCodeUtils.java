@@ -1,19 +1,14 @@
 package com.sap.sailing.domain.common.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
  * {@link URLEncoder} to help us with the encoding.
  */
 public class DeviceConfigurationQRCodeUtils {
-    private static final Logger logger = Logger.getLogger(DeviceConfigurationQRCodeUtils.class.getName());
     public static final String deviceIdentifierKey = "identifier";
     public static final String accessTokenKey = "token";
     
@@ -37,12 +32,16 @@ public class DeviceConfigurationQRCodeUtils {
             return accessToken;
         }
     }
+    
+    public static interface URLDecoder {
+        String decode(String encodedURL);
+    }
 
     public static String composeQRContent(String urlEncodedDeviceIdentifier, String apkUrl, String accessToken) {
         return apkUrl + "#" + deviceIdentifierKey + "=" + urlEncodedDeviceIdentifier + "&"+accessTokenKey + "=" + accessToken;
     }
 
-    public static DeviceConfigurationDetails splitQRContent(String qrCodeContent) {
+    public static DeviceConfigurationDetails splitQRContent(String qrCodeContent, URLDecoder urlDecoder) {
         int fragmentIndex = qrCodeContent.lastIndexOf('#');
         if (fragmentIndex == -1 || fragmentIndex == 0 || qrCodeContent.length() == fragmentIndex + 1) {
             throw new IllegalArgumentException("There is no server or identifier.");
@@ -53,11 +52,7 @@ public class DeviceConfigurationQRCodeUtils {
         for (String param : params) {
             final String[] keyValue = param.split("=", 2);
             if (keyValue.length == 2) {
-                try {
-                    paramMap.put(keyValue[0], URLDecoder.decode(keyValue[1], "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    logger.log(Level.WARNING, "UTF-8 encoding not found", e);
-                }
+                paramMap.put(keyValue[0], urlDecoder.decode(keyValue[1]));
             }
         }
         if (!paramMap.containsKey(deviceIdentifierKey)) {
