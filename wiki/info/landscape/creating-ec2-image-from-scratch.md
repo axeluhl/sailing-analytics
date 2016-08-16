@@ -96,7 +96,7 @@ Copied the httpd configuration files `/etc/httpd/conf/httpd.conf`, `/etc/httpd/c
   CustomLog logs/access_log first_forwarded_for_ip env=original_client_ip
 </pre>
 
-They ensure that the original client IPs are logged also if the Apache server runs behind a reverse proxy or an ELB. See also [the section on log file analysis](/wiki/log-file-analysis#log-file-analysis_log-file-types_apache-log-files).
+They ensure that the original client IPs are logged also if the Apache server runs behind a reverse proxy or an ELB. See also [the section on log file analysis](/wiki/howto/development/log-file-analysis#log-file-analysis_log-file-types_apache-log-files).
 
 Copied /etc/logrotate.conf from an existing SL instance so that `/var/log/logrotate-target` is used to rotate logs to.
 

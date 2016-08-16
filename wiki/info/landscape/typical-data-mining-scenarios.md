@@ -6,13 +6,13 @@
 
 The following points describe the steps to create a new data mining bundle. An example for a data mining bundle is `com.sap.sailing.datamining`.
 
-* Add a new java project bundle according to the [Typical Development Scenarios](/wiki/typical-development-scenarios#Adding-a-Java-Project-Bundle)
+* Add a new java project bundle according to the [Typical Development Scenarios](/wiki/info/landscape/typical-development-scenarios#Adding-a-Java-Project-Bundle)
 * Add the necessary dependencies to the `MANIFEST.MF`
 	* `com.sap.sse` (for the string messages)
     * `com.sap.sse.datamining`
     * `com.sap.sse.datamining.shared`
     * `com.sap.sse.datamining.annotations`
-* Create an `Activator` for the new data mining bundle and provide a `DataMiningBundleService` to the OSGi-Context (see [Registration and Deregistration of Data Mining Bundles](data-mining-architecture#Registration-and-Deregistration-of-Data-Mining-Bundles) for detailed information)
+* Create an `Activator` for the new data mining bundle and provide a `DataMiningBundleService` to the OSGi-Context (see [Registration and Deregistration of Data Mining Bundles](/wiki/info/landscape/data-mining-architecture#Registration-and-Deregistration-of-Data-Mining-Bundles) for detailed information)
 	* This can be done by extending the `AbstractDataMiningActivator` and implementing it's abstract methods. (Recommended)
 	* Or by implementing your own `DataMiningBundleService` and register it as OSGi-Service
 * Prepare the string messages
@@ -66,7 +66,7 @@ The main task to integrate the data mining bundle is to define the Fact (with it
 
 The following sections describe how to implement the different components.
 
-Note that the process described above is a very specific process to calculate aggregations from a collection of Facts (in the code referred as Statistic Query) and that the data mining framework is capable to execute many other processes. For general and more detailed information about the framework and its architecture see [Data Mining Architecture](data-mining-architecture).
+Note that the process described above is a very specific process to calculate aggregations from a collection of Facts (in the code referred as Statistic Query) and that the data mining framework is capable to execute many other processes. For general and more detailed information about the framework and its architecture see [Data Mining Architecture](/wiki/info/landscape/data-mining-architecture).
 
 ### Implement the Fact and the Data Retrieval
 
@@ -86,7 +86,7 @@ The data retrieval process can be separated in multiple levels. Each level is pe
 
 * The standard criterion that is used, checks if the dimensional value of the given element (provided via a Dimension) matches a specific value.
 * For example if you want to analyze races of a specific regatta, but a retriever would provide races of many regattas the Filter can be used to exclude the unwanted races.
-* Filter Criteria can also be defined in a more general way. See the [Data Mining Architecture](/wiki/data-mining-architecture#Filter-Criteria) for detailed information.
+* Filter Criteria can also be defined in a more general way. See the [Data Mining Architecture](/wiki/info/landscape/data-mining-architecture#Filter-Criteria) for detailed information.
 
 Splitting the data retrieval into multiple levels provides several benefits for the whole data mining process:
 
@@ -126,7 +126,7 @@ Note that the Fact and Intermediate Types are separated in an Interface and a Cl
 	* Create the Interfaces in the data mining bundle you want to edit.
 	* The current naming convention for such Interfaces is `Has<Name>Context`. If the Fact/Intermediate Type is close to the domain element, could the name be equal to the name of the domain element. For example the name of the Fact that represents `TrackedLegOfCompetitor` would be `HasTrackedLegOfCompetitorContext`.
 	* Add the methods that provide the contextual information
-		* Such methods are called Dimensions and have to be marked with the [Annotation `@Dimension`](/wiki/data-mining-architecture#Dimensions).
+		* Such methods are called Dimensions and have to be marked with the [Annotation `@Dimension`](/wiki/info/landscape/data-mining-architecture#Dimensions).
 		* These methods should return values that
 			* are a primitive type or wrapper class
 			* or classes that implement `equals()`, `hashCode()` and `toString()`. Otherwhise the grouping could fail and the result presentation will be unreadable.
@@ -145,12 +145,12 @@ Note that the Fact and Intermediate Types are separated in an Interface and a Cl
 					* `getRegatta()` returns a `Regatta` that implements `Named` that has the method `getName()`, which is annotated as Dimension.
 					* `getCompetitor` returns a `Competitor` that implements `Named` and contains multiple annotated methods. For example `getBoat()` that has the method `getSailID()`, which is annotated as Dimension. This results in multiple Dimensions (e.g. the competitor name and sail ID) starting with the method `getCompetitor()`.
 				* An inderict Dimension can be seen as a concatenation of method calls. For example `getCompetitor().getBoat().getSailID()`, where `getCompetitor()` and `getBoat()` are annotated with `@Connector` and `getSailID()` is annotated with `@Dimension`.
-		* Short information about `@Dimension` and `@Connector`. For detailed information see their Javadoc or [Data Mining Annotations](/wiki/data-mining-architecture#Connectors).
+		* Short information about `@Dimension` and `@Connector`. For detailed information see their Javadoc or [Data Mining Annotations](/wiki/info/landscape/data-mining-architecture#Connectors).
 			* **@Dimension**
 				* Has the mandatory member `messageKey` that is used for internationalization, which has to be added to the `stringMessages*.properties` of the data mining bundle.
 				* And an optional member `ordinal` that is used for the natural order of Dimensions.
 			* **@Connector**
-				* Has the optional members `messageKey` and `ordinal`, that work like the corresponding members of `@Dimension`. See [Compound Functions](/wiki/data-mining-architecture#Compound-Functions) for information about how these members are used in indirect Dimensions.
+				* Has the optional members `messageKey` and `ordinal`, that work like the corresponding members of `@Dimension`. See [Compound Functions](/wiki/info/landscape/data-mining-architecture#Compound-Functions) for information about how these members are used in indirect Dimensions.
 			* Methods marked with data mining annotations mustn't have parameters except
 				* the first method of an indirect Dimension
 				* direct Dimensions
@@ -211,7 +211,7 @@ The following points should be considered during the Retriever implementation:
 		* `(ExecutorService, Collection<Processor<OutputType, ?>>, int)`
 		* `(ExecutorService, Collection<Processor<OutputType, ?>>, <? extends SerializableSettings>, int)`
 		* Otherwhise the framework will throw an `IllegalArgumentException` when an instance of the Retriever is constructed.
-	* For general information about Processors see [Data Mining Architecture](/wiki/data-mining-architecture#Processors).
+	* For general information about Processors see [Data Mining Architecture](/wiki/info/landscape/data-mining-architecture#Processors).
 
 The next step is put the Retrievers together in a `DataRetrieverChainDefinition`. Such a definition is used by the framework to create the Data Retrieval part of the [Data Mining Process](#Implementing-the-Data-Mining-Components). It tells the framework which components are used to retrieve the data and in which order. The following points have to be considered to create a new `DataRetrieverChainDefinition`:
 
@@ -226,7 +226,7 @@ The next step is put the Retrievers together in a `DataRetrieverChainDefinition`
 	* Note that every Retriever needs a constructor that has a parameter list like the ones described above or an `IllegalArgumentException` will be thrown.
 * **Don't forget** to to register the new `DataRetrieverChainDefinition` to the data mining framework. This is done by adding the new one to the ones returned by `getDataRetrieverChainDefinitions()` of the `DataMiningBundleService` of the data mining bundle.
 * An example for a `DataRetrieverChainDefinition` creation can be found in `SailingDataRetrievalChainDefinitions` in the package `com.sap.sailing.datamining`.
-* For detailed information about `DataRetrieverChainDefinition` see its Javadoc or [Data Mining Architecture](/wiki/data-mining-architecture#Defining-and-building-a-Data-Retriever-Chain).
+* For detailed information about `DataRetrieverChainDefinition` see its Javadoc or [Data Mining Architecture](/wiki/info/landscape/data-mining-architecture#Defining-and-building-a-Data-Retriever-Chain).
 
 The last step is to implement a `DataSourceProvider`. In most cases you'll be able to reuse existing `DataSourceProviders` (for example the `RacingEventServiceProvider` located in `com.sap.sailing.datamining`), but if you have to implement a new one this is how it's done:
 
@@ -279,7 +279,7 @@ trackedLegRetrieverChain.endWith(TrackedLegOfCompetitorRetrievalProcessor.class)
 
 ### Implement domain specific Aggregators
 
-It may be necessary, that your data mining bundle needs domain specific [Aggregators](/wiki/data-mining-architecture#Aggregators). For example to compute the aggregations for domain specific Key Figures (like `Distance`), that can't be done by the domain independent Aggregators (for example the Aggregators for numerical values located in `com.sap.sse.datamining.impl.components.aggregators`). Examples for domain specific aggregators can be found in the package `com.sap.sailing.datamining.impl.components.aggregators`.
+It may be necessary, that your data mining bundle needs domain specific [Aggregators](/wiki/info/landscape/data-mining-architecture#Aggregators). For example to compute the aggregations for domain specific Key Figures (like `Distance`), that can't be done by the domain independent Aggregators (for example the Aggregators for numerical values located in `com.sap.sse.datamining.impl.components.aggregators`). Examples for domain specific aggregators can be found in the package `com.sap.sailing.datamining.impl.components.aggregators`.
 
 There are several base classes for Aggregators that should be used for different purposes:
 
@@ -296,7 +296,7 @@ There are several base classes for Aggregators that should be used for different
 * If the aggregation is of the kind, that a single value is picked from the collection of input elements use `AbstractParallelSingleGroupedValueAggregationProcessor`. For example to calculate the minimum or maximum.
 	* This base class is special, because it has only the generic type attribute `ValueType`. This means that the `ExtractedType` is equal to the `AggregatedType`.
 	* The abstract method `ValueType compareValuesAndReturnNewResult(ValueType currentResult, ValueType newValue)` has to compare the current result with the new value and return the new result.
-* For detailed information about Aggregators see [Data Mining Architecture](/wiki/data-mining-architecture#Aggregators).
+* For detailed information about Aggregators see [Data Mining Architecture](/wiki/info/landscape/data-mining-architecture#Aggregators).
 
 The next step is to define a `AggregationProcessorDefinition` for the new Aggregator.
 
