@@ -28,7 +28,7 @@ echo "Installing GWT plugin..."
 installPlugins http://storage.googleapis.com/gwt-eclipse-plugin/release com.google.gdt.eclipse.suite.e44.feature.feature.group
 
 echo "Installing Android Tools..."
-installPlugins https://dl.google.com/eclipse/plugin/4.6 com.android.ide.eclipse.adt.feature.feature.group
+installPlugins https://dl-ssl.google.com/android/eclipse com.android.ide.eclipse.adt.feature.feature.group
 
 echo "Installing GWT SDM debug bridge..."
 installPlugins http://p2.sapsailing.com/p2/sdbg com.github.sdbg.feature.feature.group

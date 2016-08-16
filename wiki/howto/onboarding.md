@@ -29,7 +29,7 @@ The necessary Eclipse plugins described above can be automatically be installed 
 
 Be aware that with this script it's not possible to update the plugins to newer versions. Instead you can install a new version by unpacking the base package and executing the script.
 
-On Windows you need a Git Bash or Cygwin shell to run the script.
+On Windows you need a Git Bash or Cygwin shell to run the script. In addition you need to replace all backslashes with forward slashes.
 
 On Mac OS, it's not sufficient to provide the path to the app, instead you need to get the path to the directory inside of the app package hosting the "eclipse" binary (.../Eclipse.app/Contents/MacOS).
 
