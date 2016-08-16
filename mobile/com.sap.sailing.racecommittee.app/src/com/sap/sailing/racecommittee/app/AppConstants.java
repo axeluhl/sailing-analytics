@@ -8,6 +8,8 @@ public class AppConstants {
     // Intent extra fields
     public final static String COURSE_AREA_UUID_KEY = "courseUuid";
     public final static String RACE_ID_KEY = "raceUuid";
+    public final static String INTENT_EXTRA_LONG = "intent.extra.long";
+    public final static String INTENT_EXTRA_STRING = "intent.extra.string";
     public final static String SERVICE_UNIQUE_ID = "serviceUID";
     public final static String STARTPROCEDURE_SPECIFIC_EVENT_ID = "startProcedureSpecificEventId";
     public final static String EXTRAS_RACE_STATE_EVENT = "raceStateEvent";

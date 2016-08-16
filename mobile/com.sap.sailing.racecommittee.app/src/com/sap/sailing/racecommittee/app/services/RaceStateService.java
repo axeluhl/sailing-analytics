@@ -31,6 +31,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -38,13 +39,13 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceStateEventImplParcel;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollingService;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceStateService extends Service {
 
@@ -208,11 +209,6 @@ public class RaceStateService extends Service {
                     break;
 
                 default:
-                    if (intent.getIntExtra(Intent.EXTRA_ALARM_COUNT, -1) != -1) {
-                        ExLog.w(this, TAG, "Unexpected ALARM_COUNT extra found.");
-                        return;
-                    }
-
                     String id = intent.getStringExtra(AppConstants.RACE_ID_KEY);
                     ManagedRace race = dataManager.getDataStore().getRace(id);
                     if (race == null) {
@@ -222,10 +218,12 @@ public class RaceStateService extends Service {
 
                     switch (action) {
                         case AppConstants.INTENT_ACTION_ALARM_ACTION:
-                            RaceStateEventImplParcel stateEvent = intent.getParcelableExtra(AppConstants.EXTRAS_RACE_STATE_EVENT);
-                            ExLog.i(this, TAG, String.format("Processing %s", stateEvent.toString()));
-                            race.getState().processStateEvent(stateEvent.getRaceStateEvent());
-                            clearAlarmByName(race, stateEvent.getEventName());
+                            long timePoint = intent.getLongExtra(AppConstants.INTENT_EXTRA_LONG, 0);
+                            String eventName = intent.getStringExtra(AppConstants.INTENT_EXTRA_STRING);
+                            RaceStateEvent event = new RaceStateEventImpl(new MillisecondsTimePoint(timePoint), RaceStateEvents.valueOf(eventName));
+                            ExLog.i(this, TAG, String.format("Processing %s", event.toString()));
+                            race.getState().processStateEvent(event);
+                            clearAlarmByName(race, event.getEventName());
                             break;
                     }
             }
@@ -327,10 +325,11 @@ public class RaceStateService extends Service {
     }
 
     private PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
-        Intent intent = new Intent(this, RaceStateService.class);
+        Intent intent = new Intent().setClass(this, RaceStateService.class);
         intent.setAction(AppConstants.INTENT_ACTION_ALARM_ACTION);
         intent.putExtra(AppConstants.RACE_ID_KEY, managedRace.getId());
-        intent.putExtra(AppConstants.EXTRAS_RACE_STATE_EVENT, new RaceStateEventImplParcel(event));
+        intent.putExtra(AppConstants.INTENT_EXTRA_LONG, event.getTimePoint().asMillis());
+        intent.putExtra(AppConstants.INTENT_EXTRA_STRING, event.getEventName().name());
         return PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
