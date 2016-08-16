@@ -1,14 +1,19 @@
 package com.sap.sailing.domain.common.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
  * {@link URLEncoder} to help us with the encoding.
  */
 public class DeviceConfigurationQRCodeUtils {
+    private static final Logger logger = Logger.getLogger(DeviceConfigurationQRCodeUtils.class.getName());
     public static final String deviceIdentifierKey = "identifier";
     public static final String accessTokenKey = "token";
     
@@ -33,10 +38,8 @@ public class DeviceConfigurationQRCodeUtils {
         }
     }
 
-    public static String composeQRContent(String deviceIdentifier, String apkUrl, String accessToken) {
-        // poor man's uri fragment encoding: ' ' as '%20'
-        String encodedIdentifier = deviceIdentifier.replaceAll(" ", "%20");
-        return apkUrl + "#" + deviceIdentifierKey + "=" + encodedIdentifier+"&"+accessTokenKey + "=" + accessToken;
+    public static String composeQRContent(String urlEncodedDeviceIdentifier, String apkUrl, String accessToken) {
+        return apkUrl + "#" + deviceIdentifierKey + "=" + urlEncodedDeviceIdentifier + "&"+accessTokenKey + "=" + accessToken;
     }
 
     public static DeviceConfigurationDetails splitQRContent(String qrCodeContent) {
@@ -50,7 +53,11 @@ public class DeviceConfigurationQRCodeUtils {
         for (String param : params) {
             final String[] keyValue = param.split("=", 2);
             if (keyValue.length == 2) {
-                paramMap.put(keyValue[0], keyValue[1].replaceAll("%20", " "));
+                try {
+                    paramMap.put(keyValue[0], URLDecoder.decode(keyValue[1], "UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    logger.log(Level.WARNING, "UTF-8 encoding not found", e);
+                }
             }
         }
         if (!paramMap.containsKey(deviceIdentifierKey)) {
