@@ -133,7 +133,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         try {
             updateMappings(true);
         } catch (Exception e) {
-            logger.warning("Could not update device mappings");
+            logger.log(Level.WARNING, "Could not update device mappings", e);
         }
     }
 
