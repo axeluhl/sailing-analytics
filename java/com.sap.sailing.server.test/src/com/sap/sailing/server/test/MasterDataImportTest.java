@@ -1283,7 +1283,7 @@ public class MasterDataImportTest {
                     645487200000L), "Der Lennart halt");
             DynamicTeam teamToOverride = new TeamImpl("Pros", sailorsToOverride, coachToOverride);
             BoatClass boatClassToOverride = new BoatClassImpl("H16", true);
-            DynamicBoat boatToOverride = new BoatImpl(null, "Wingy", boatClassToOverride, "GER70133");
+            DynamicBoat boatToOverride = new BoatImpl("123", "Wingy", boatClassToOverride, "GER70133");
             String competitorOldName = "oldName";
             Competitor competitorToOverride = domainFactory.getOrCreateCompetitor(competitorUUID, competitorOldName, "c",
                     Color.BLUE, "noone@nowhere.de", null, teamToOverride, boatToOverride, /* timeOnTimeFactor */null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */
