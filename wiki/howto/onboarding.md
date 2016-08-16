@@ -184,4 +184,4 @@ If git is not in the Path system environment variable, the gradle build will not
 2. choose git in the drop down
 3. if everything is correct, you'll see the current branch at the bottom line
 
-See [RaceCommittee App](racecommittee-app) for more information regarding the mobile app.
+See [RaceCommittee App](/wiki/info/mobile/racecommittee-app) for more information regarding the mobile app.
