@@ -11,11 +11,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+/**
+ * Used to force specific garbage collection properties together with the G1GC implementation. By adjusting the
+ * {@link #MAX_THREADPOOL_SIZE} to, say, 500, it is possible to generate a lot of garbage and hold on to it while they
+ * are executing slowly in the massively oversized thread pool. This will cause the temporary objects to get promoted
+ * into the GC's old generation where the mixed GC runs are too slow to keep up, ultimately forcing a Full GC.
+ * See bug 3864 for more details. Use the launch configuration {@code OutperformingTheGarbageCollectorTest.launch}
+ * in this project.<p>
+ * 
+ * The configuration is pretty chaotic, with fairly unpredictable impact of changing the constants
+ * {@link #NUMBER_OF_OBJECTS_TO_CREATE_INITIALLY} and {@link #NUMBER_OF_FOLLOW_UP_OBJECTS_TO_CREATE}. On a four-core
+ * machine, 100 threads with 50,000,000 initial objects to create and 100,000,000 follow-up objects to create
+ * we reach a state where Full GC strikes.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
+@Ignore("Unignore if you want to run GC tests")
 public class OutperformingTheGarbageCollectorTest {
     private static final Logger logger = Logger.getLogger(OutperformingTheGarbageCollectorTest.class.getName());
-    private static final int MAX_THREADPOOL_SIZE = 5;
+    private static final int MAX_THREADPOOL_SIZE = 100;
     private static final int BATCH_SIZE = 100000;
     private static final int NUMBER_OF_OBJECTS_TO_CREATE_INITIALLY = 50000000;
     private static final int NUMBER_OF_FOLLOW_UP_OBJECTS_TO_CREATE = 100000000;
