@@ -1,6 +1,6 @@
 #Smartphone Tracking
 
-With the development of [RaceLogTracking](racelog-tracking) and the [Tracking App](tracking-app) it is now possible to track races using only smartphones. This can be set up following the following steps.
+It is now possible to track races using only smartphones. This can be set up following the following steps.
 
 1. Create Event, Regatta, Leaderboard,... as always. Make sure to make a LeaderboardGroup and attach it to the event.
  

@@ -21,7 +21,7 @@ To register/deregister a data mining bundle, you just have to register/deregiste
 
 ### String Messages
 
-A data mining bundle needs string messages, that are created server-side (for example to internationalize the display name of a function). To create string messages for the bundle do the steps described in [Typical Data Mining Scenarios](/wiki/typical-data-mining-scenarios#Adding-a-new-Data-Mining-Bundle).
+A data mining bundle needs string messages, that are created server-side (for example to internationalize the display name of a function). To create string messages for the bundle do the steps described in [Typical Data Mining Scenarios](/wiki/info/landscape/typical-data-mining-scenarios#Adding-a-new-Data-Mining-Bundle).
 
 The provided `ResourceBundleStringMessages` will be added to the string messages of the framework, when the data mining bundle is registered. The framework string messages are an instance of `CompoundResourceBundleStringMessages`, that logs message keys that occur multiple times with the log level `INFO`.
 
