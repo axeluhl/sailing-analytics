@@ -166,7 +166,7 @@ To not be dependent on a shaky power source that can be restored by "wiggling pi
 ### DNS Server Setup
 The DNS Server acts as a gateway/router, caching proxy and nameserver. 
 
-#### Gateway
+### Gateway
 All traffic to and from the internet is going through this server. To achieve that goal it routes all internal connections by default to an interface called `em2`. This interface is in most cases connected to an external router and must be configured according to the specifications sent over by the ISP. The routing is achieved by first having the right configuration for the interface (example from Cardiff ISP):
 
 <pre>
@@ -291,7 +291,7 @@ ip route flush table main
 sh /root/restart_firewall.sh
 </pre>
 
-#### Nameserver
+### Nameserver
 The nameserver makes sure to redirect some urls to the local server. In the current configuration it will redirect all ess40-2014.sapsailing.com requests to local servers unless disabled. The basic configuration can be found in `/etc/named.conf`
 
 <pre>
@@ -429,7 +429,7 @@ www.sapsailing.com.	        A	192.168.1.201
 
 The tool to show configuration and manage entries at runtime is called `rndc`. If you want to see stats then you have to dump them using `rndc stats`. They will then get dumped to `/var/named/data/named_stats.txt`.
 
-#### Caching Proxy
+### Caching Proxy
 The transparent caching proxy (Squid) intercepts all connections on port 80 (configured by the firewall script that forwards all connections on port 80 to port 3128 where the proxy runs) and caches some information bits like images or stylesheets. This helps reducing the bandwith. The configuration can be found at `/etc/squid/squid.conf`. The configuration is optimized for high traffic - make sure you understand what you're doing before changing anything.
 
 <pre>
