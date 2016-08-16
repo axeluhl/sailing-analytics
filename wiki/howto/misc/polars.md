@@ -60,7 +60,7 @@ The PolarDataService is an OSGi service. Above all it is retrieved by the Racing
 
 ## Polar Datamining Architecture
 
-For general information about the Datamining Architecture please see [this wikipage](/wiki/data-mining-architecture).
+For general information about the Datamining Architecture please see [this wikipage](/wiki/info/landscape/data-mining-architecture).
 
 This section will focus on the polar specific datamining functionality.
 
@@ -70,7 +70,7 @@ Most of the classes are for custom polar datamining. In this section we will con
 
 ### File Locations / Project Structure
 
-The project structure sticks to the best practices described [here](/wiki/typical-data-mining-scenarios). There are two bundles:
+The project structure sticks to the best practices described [here](/wiki/info/landscape/typical-data-mining-scenarios). There are two bundles:
 com.sap.sailing.polars.datamining and com.sap.sailing.polars.datamining.shared; the latter containing classes that are serializable by the GWT engine.
 
 An Activator registeres the polar datamining functionality with the main datamining server. The data package contains the retrieval data classes, the component package contains retrieval processors and the aggregators package contains the two aggregators.
@@ -82,7 +82,7 @@ The UI classes live in the gwt.ui bundle; more precisely in the com.sap.sailing.
 The feature can be extended by adding dimensions to the types in the polar.datamining bundle.
 This dimensions then serve as a new option in filtering and grouping.
 
-How that works is displayed [here](/wiki/typical-data-mining-scenarios).
+How that works is displayed [here](/wiki/info/landscape/typical-data-mining-scenarios).
 
 ### Known Issues
 

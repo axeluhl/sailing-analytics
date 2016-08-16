@@ -81,4 +81,4 @@ If one of these problems occur then you have to safely remove the race and re-ad
 
 ### Screenshot(s)
 
-[Screenshot of Kieler Woche Proxy 2012 Races selection](wiki/images/RacesKielerWocheProxy2012.jpg)
+[Screenshot of Kieler Woche Proxy 2012 Races selection](/wiki/images/RacesKielerWocheProxy2012.jpg)
