@@ -25,8 +25,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -42,6 +45,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -540,6 +544,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             @Override
             public void onSuccess(Void result) {
                 loadAndRefreshLeaderboard(leaderboard.name);
+                updateRegattaConfigDesignerModeToByMarks(leaderboard.regattaName);
                 raceColumnTableSelectionModel.clear();
             }
 
@@ -548,6 +553,40 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 errorReporter.reportError("Could not denote for RaceLog tracking: " + caught.getMessage());
             }
         });
+    }
+
+    private void updateRegattaConfigDesignerModeToByMarks(final String regattaName) {
+        sailingService.getRegattaByName(regattaName,new MarkedAsyncCallback<RegattaDTO>(
+                new AsyncCallback<RegattaDTO>() {
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError("Error trying to get ragatta with name " + regattaName + " : "
+                                + t.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(RegattaDTO regatta) {
+                        DeviceConfigurationDTO.RegattaConfigurationDTO configuration =  regatta.configuration;
+                        if (configuration == null) {
+                            configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO();
+                            configuration.defaultCourseDesignerMode = CourseDesignerMode.BY_MARKS;
+                        } //TODO: Show message if regatta has configuration with design mode not equal "By marks"
+
+                        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName()); 
+                        sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate, regatta.defaultCourseAreaUuid,
+                                configuration, regatta.useStartTimeInference, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError("Error trying to update regatta " + regattaName + ": "
+                                                + caught.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                    }
+                        }));
+                    }
+           }));
     }
 
     private void denoteForRaceLogTracking(final RaceColumnDTO raceColumn, final FleetDTO fleet) {
