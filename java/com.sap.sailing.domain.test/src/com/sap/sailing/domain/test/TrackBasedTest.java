@@ -7,10 +7,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -65,6 +68,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -72,6 +76,7 @@ public abstract class TrackBasedTest {
     private DynamicTrackedRaceImpl trackedRace;
     
     final static Fleet regattaFleet = new FleetImpl("fleet name");
+    final static BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */true);
     
     protected DynamicTrackedRaceImpl getTrackedRace() {
         return trackedRace;
@@ -81,15 +86,26 @@ public abstract class TrackBasedTest {
         this.trackedRace = trackedRace;
     }
 
-    public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(UUID.randomUUID(), competitorName, "HP", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+    @SafeVarargs
+    public static Map<Competitor,Boat> createCompetitorAndBoatsMap(Pair<Competitor,Boat>... competitorsAndBoats) {
+        Map<Competitor,Boat> result = new LinkedHashMap<>(); 
+        for (Pair<Competitor,Boat> competitorAndBoat: competitorsAndBoats) {
+            result.put(competitorAndBoat.getA(), competitorAndBoat.getB());
+        }
+        return result;
+    }
+
+    public static Pair<Competitor,Boat> createCompetitorAndBoat(String competitorName) {
+        Competitor c = new CompetitorImpl(UUID.randomUUID(), competitorName, "HP", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
                         /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("123",
-                competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+                competitorName + "'s boat", boatClass, null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat b = new BoatImpl(c.getId(), competitorName + "'s boat", boatClass, null, null);
+        return new Pair<>(c, b);
     }
-    
+
     /**
      * For {@link #trackedRace}'s race course, creates a list of mark passings using the time points specified, in order
      * for the waypoints.
@@ -119,8 +135,8 @@ public abstract class TrackBasedTest {
      * @param useMarkPassingCalculator whether or not to use the internal mark passing calculator
      */
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName, String boatClassName,
-            Iterable<Competitor> competitors, TimePoint timePointForFixes, boolean useMarkPassingCalculator) {
-        return createTestTrackedRace(regattaName, raceName, boatClassName, competitors, timePointForFixes, useMarkPassingCalculator,
+            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator) {
+        return createTestTrackedRace(regattaName, raceName, boatClassName, competitorsAndBoats, timePointForFixes, useMarkPassingCalculator,
                 mock(RaceLogResolver.class));
     }
     /**
@@ -139,7 +155,7 @@ public abstract class TrackBasedTest {
      * @param useMarkPassingCalculator whether or not to use the internal mark passing calculator
      */
     public static DynamicTrackedRaceImpl createTestTrackedRace(String regattaName, String raceName, String boatClassName,
-            Iterable<Competitor> competitors, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
+            Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
@@ -157,7 +173,7 @@ public abstract class TrackBasedTest {
         waypoints.add(new WaypointImpl(windwardMark));
         waypoints.add(new WaypointImpl(leeGate));
         Course course = new CourseImpl(raceName, waypoints);
-        RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitors);
+        RaceDefinition race = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats);
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
                 /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,

@@ -4,10 +4,13 @@ import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.Course;
@@ -48,7 +51,10 @@ public class AbstractMockedRaceMarkPassingTest {
     protected Competitor ron = new CompetitorImpl("Ron", "Ron", "KYC", null, null, null, null, new BoatImpl("123", "boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     protected Competitor tom = new CompetitorImpl("Tom", "Tom", "KYC", null, null, null, null, new BoatImpl("123", "boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     protected Competitor ben = new CompetitorImpl("Ben", "Ben", "KYC", null, null, null, null, new BoatImpl("123", "boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-
+    protected Boat boatRon = new BoatImpl("123", "boat1", boatClass, "GER 123");
+    protected Boat boatTom = new BoatImpl("456", "boat2", boatClass, "GER 456");
+    protected Boat boatBen = new BoatImpl("789", "boat3", boatClass, "GER 789");
+    
     protected Mark m = new MarkImpl("Mark");
     protected Mark gate1 = new MarkImpl("Gate1");
     protected Mark gate2 = new MarkImpl("Gate2");
@@ -70,7 +76,11 @@ public class AbstractMockedRaceMarkPassingTest {
                 /*startDate*/ null, /*endDate*/ null, Arrays.asList(new SeriesImpl("Series", true, /* isFleetsCanRunInParallel */ true, Arrays.asList(new FleetImpl("fleet")),
                 new ArrayList<String>(), null)), true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)), OneDesignRankingMetric::new);
         Course course = new CourseImpl("course", waypoints);
-        RaceDefinition raceDef = new RaceDefinitionImpl("Performance Race", course, boatClass, Arrays.asList(ron, tom, ben));
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(ron, boatRon);
+        competitorsAndBoats.put(tom, boatTom);
+        competitorsAndBoats.put(ben, boatBen);
+        RaceDefinition raceDef = new RaceDefinitionImpl("Performance Race", course, boatClass, competitorsAndBoats);
         race = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(r), raceDef, new ArrayList<Sideline>(),
                 new EmptyWindStore(), 0, 10000, 10000, /* useMarkPassingCalculator */ false,
                 OneDesignRankingMetric::new,

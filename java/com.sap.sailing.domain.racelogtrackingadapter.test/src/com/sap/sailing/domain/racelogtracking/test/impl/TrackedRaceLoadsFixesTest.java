@@ -5,6 +5,8 @@ import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,7 +14,7 @@ import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
-import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -42,7 +44,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
-    private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
 
     @Rule
     public Timeout TrackedRaceLoadsFixesTestTimeout = new Timeout(3 * 60 * 1000);
@@ -52,13 +53,17 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             NoCorrespondingServiceRegisteredException, InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(comp, boat);
+        competitorsAndBoats.put(comp2, boat2);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         DeviceIdentifier markDevice = new SmartphoneImeiIdentifier("imei2");
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
                 new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         map(comp, device, 0, 10000);
         map(mark, markDevice, 0, 10000);
 
@@ -100,6 +105,10 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             InterruptedException {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", "c2", null, null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "boat2", boatClass, "USA 123", null);
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(comp, boat);
+        competitorsAndBoats.put(comp2, boat2);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
         regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
@@ -107,7 +116,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         DeviceIdentifier device3 = new SmartphoneImeiIdentifier("imei3");
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
                 new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp, comp2));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
 
         map(comp, device, 0, 20000);
         map(comp2, device2, 0, 600);

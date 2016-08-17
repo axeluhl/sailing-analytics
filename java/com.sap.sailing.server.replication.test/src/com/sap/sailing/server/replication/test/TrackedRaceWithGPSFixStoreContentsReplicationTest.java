@@ -7,13 +7,15 @@ import static org.junit.Assert.assertNotSame;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -37,6 +39,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -74,19 +77,23 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
         final String boatClassName = "49er";
         final DomainFactory masterDomainFactory = testSetUp.getMaster().getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
+        BoatClass boatClass470 = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
         competitor = masterDomainFactory.getCompetitorStore().getOrCreateCompetitor("GER 61", "Tina Lutz", "TL", Color.RED, "someone@nowhere.de", null, new TeamImpl("Tina Lutz + Susann Beucke",
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null),
                 new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null) }),
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
-                new BoatImpl("123", "GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"),
+                new BoatImpl("123", "GER 61", boatClass470, "GER 61"),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        Boat boat = masterDomainFactory.getCompetitorStore().getOrCreateBoat(competitor, "GER 61", boatClass470, "GER 61", null);
         final String baseEventName = "Test Event";
         AddDefaultRegatta addEventOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID());
         Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
-        RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Collections.singletonList(competitor));
+        final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(competitor, boat);
+        RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, competitorsAndBoats);
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1"), /*passingInstruction*/ null));

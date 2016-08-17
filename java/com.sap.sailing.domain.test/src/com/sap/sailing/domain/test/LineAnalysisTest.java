@@ -3,11 +3,11 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -28,9 +28,8 @@ public class LineAnalysisTest extends TrackBasedTest {
 
     @Before
     public void setUp() {
-        final List<Competitor> emptyCompetitorList = Collections.emptyList();
         now = MillisecondsTimePoint.now();
-        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", emptyCompetitorList, now, /* useMarkPassingCalculator */ false);
+        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", Collections.<Competitor,Boat>emptyMap(), now, /* useMarkPassingCalculator */ false);
     }
     
     @Test

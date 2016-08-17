@@ -9,9 +9,13 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -80,17 +84,20 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
         Iterable<Waypoint> emptyWaypointList = Collections.emptyList();
         final String competitorName = "Der mit dem Kiel zieht";
         final String competitorShortName = "DK";
+        final BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */true);
         Competitor competitor = master.getBaseDomainFactory().getOrCreateCompetitor(
                 123, competitorName, competitorShortName, Color.RED, "someone@nowhere.de", flagImageURI,
                 new TeamImpl("STG", Collections.singleton(new PersonImpl(competitorName, new NationalityImpl("GER"),
                 /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")),
-                new BoatImpl("123", competitorName + "'s boat", new BoatClassImpl("505", /* typicallyStartsUpwind */true), /* sailID */ null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-        Iterable<Competitor> competitors = Collections.singleton(competitor);
+                new BoatImpl("123", competitorName + "'s boat", boatClass, /* sailID */ null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        Boat boat = new BoatImpl(competitor.getId(), competitorName + "'s boat", boatClass, /* sailID */ null);
+        Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(competitor, boat);
         final String raceName = "Test Race";
         RaceDefinition raceDefinition = new RaceDefinitionImpl(raceName, new CourseImpl("Empty Course", emptyWaypointList),
-                masterRegatta.getBoatClass(), competitors);
+                masterRegatta.getBoatClass(), competitorsAndBoats);
         master.apply(new AddRaceDefinition(masterRegatta.getRegattaIdentifier(), raceDefinition));
         Thread.sleep(1000);
         Regatta replicatedRegatta = replica.getRegatta(new RegattaName(masterRegatta.getName()));

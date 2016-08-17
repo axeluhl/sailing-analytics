@@ -11,9 +11,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,6 +27,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -131,7 +134,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         
         /* RaceDefinition and DynamicTrackedRace */
         RaceDefinition masterRace = new RaceDefinitionImpl("Test Race", new CourseImpl("Test Course", Collections.<Waypoint>emptyList()),
-                masterRegatta.getBoatClass(), Collections.<Competitor>emptyList());
+                masterRegatta.getBoatClass(), Collections.<Competitor,Boat>emptyMap());
         masterRegatta.addRace(masterRace);
         DynamicTrackedRace masterTrackedRace = master.createTrackedRace(new RegattaNameAndRaceName(masterRegatta.getName(), masterRace.getName()),
                 master.getWindStore(), /* delayToLiveInMillis */ 3000,
@@ -252,10 +255,10 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         Regatta regatta = master.apply(addEventOperation);
         final String raceName1 = "Test Race 1";
         final String raceName2 = "Test Race 2";
-        Competitor competitor = TrackBasedTest.createCompetitor("The Same Competitor");
+        Pair<Competitor, Boat> competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("The Same Competitor");
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
-        final ArrayList<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(competitor);
+        final Map<Competitor,Boat> competitors = new HashMap<>();
+        competitors.put(competitorAndBoat.getA(), competitorAndBoat.getB());
         RaceDefinition race1 = new RaceDefinitionImpl(raceName1, masterCourse, boatClass, competitors);
         AddRaceDefinition addRaceOperation1 = new AddRaceDefinition(new RegattaName(regatta.getName()), race1);
         master.apply(addRaceOperation1);

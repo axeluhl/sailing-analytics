@@ -7,14 +7,16 @@ import static org.junit.Assert.assertNotSame;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -77,13 +79,17 @@ public class TrackedRaceContentsReplicationTest extends AbstractServerReplicatio
                 new PersonImpl("Rigo de Mas", masterDomainFactory.getOrCreateNationality("NED"), null, null)),
                 new BoatImpl("123", "GER 61", masterDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"),
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+        Boat boat = masterDomainFactory.getCompetitorStore().getOrCreateBoat(competitor, "boat123",
+                masterDomainFactory.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61", null);
+        Map<Competitor, Boat> competitorAndBoats = new HashMap<>();
+        competitorAndBoats.put(competitor, boat);
         final String baseEventName = "Test Event";
         AddDefaultRegatta addEventOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID());
         Regatta regatta = master.apply(addEventOperation);
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
-        RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, Collections.singletonList(competitor));
+        RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, competitorAndBoats);
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         master.apply(addRaceOperation);
         masterCourse.addWaypoint(0, masterDomainFactory.createWaypoint(masterDomainFactory.getOrCreateMark("Mark1"), /*passingInstruction*/ null));

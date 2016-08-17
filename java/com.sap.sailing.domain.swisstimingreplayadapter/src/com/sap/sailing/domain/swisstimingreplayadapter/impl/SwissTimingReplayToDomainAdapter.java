@@ -5,17 +5,16 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -92,11 +91,11 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     private TimePoint referenceTimePoint;
 
     /**
-     * feference location for location / lat/lng specifications
+     * reference location for location / lat/lng specifications
      */
     private Position referenceLocation;
 
-    private final Map<String, Set<Competitor>> competitorsPerRaceID;
+    private final Map<String, Map<Competitor, Boat>> competitorsAndBoatsPerRaceID;
 
     private final Map<String, Map<String, Mark>> marksPerRaceIDPerMarkID;
 
@@ -155,7 +154,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         trackedRacePerRaceID = new HashMap<>();
         bestStartTimePerRaceID = new HashMap<>();
         raceTimePerRaceID = new HashMap<>();
-        competitorsPerRaceID = new HashMap<>();
+        competitorsAndBoatsPerRaceID = new HashMap<>();
         marksPerRaceIDPerMarkID = new HashMap<>();
         markByHashValue = new HashMap<>();
         competitorByHashValue = new HashMap<>();
@@ -242,15 +241,15 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
             CompetitorStatus competitorStatus, BoatType boatType, short cRank_Bracket, short cnPoints_x10_Bracket,
             short ctPoints_x10_Winner) {
         if (boatType == BoatType.Competitor) {
-            Competitor competitor = domainFactory.createCompetitorWithoutID(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
+            Pair<Competitor,Boat> competitorAndBoat = domainFactory.createCompetitorWithoutID(sailNumberOrTrackerID, threeLetterIOCCode.trim(), name.trim(),
                     currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass());
-            Set<Competitor> competitorsOfCurrentRace = competitorsPerRaceID.get(currentRaceID);
-            if (competitorsOfCurrentRace == null) {
-                competitorsOfCurrentRace = new HashSet<>();
-                competitorsPerRaceID.put(currentRaceID, competitorsOfCurrentRace);
+            Map<Competitor, Boat> competitorAndBoatsOfCurrentRace = competitorsAndBoatsPerRaceID.get(currentRaceID);
+            if (competitorAndBoatsOfCurrentRace == null) {
+                competitorAndBoatsOfCurrentRace = new HashMap<>();
+                competitorsAndBoatsPerRaceID.put(currentRaceID, competitorAndBoatsOfCurrentRace);
             }
-            competitorsOfCurrentRace.add(competitor);
-            competitorByHashValue.put(hashValue, competitor);
+            competitorAndBoatsOfCurrentRace.put(competitorAndBoat.getA(), competitorAndBoat.getB());
+            competitorByHashValue.put(hashValue, competitorAndBoat.getA());
         } else {
             // consider it a mark
             Mark mark = domainFactory.getOrCreateMark(sailNumberOrTrackerID.trim());
@@ -315,7 +314,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
                 EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 currentRaceID, domainFactory.getRaceTypeFromRaceID(currentRaceID).getBoatClass(), trackedRegattaRegistry);
         RaceDefinition race = domainFactory.createRaceDefinition(myRegatta,
-                currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
+                currentRaceID, competitorsAndBoatsPerRaceID.get(currentRaceID), currentCourseDefinition);
         racePerRaceID.put(currentRaceID, race);
         DynamicTrackedRace trackedRace = trackedRegattaRegistry.getOrCreateTrackedRegatta(myRegatta).
                 createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,

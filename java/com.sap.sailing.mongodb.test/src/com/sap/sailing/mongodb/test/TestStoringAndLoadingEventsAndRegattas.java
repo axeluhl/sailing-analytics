@@ -17,14 +17,17 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.junit.Test;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -40,6 +43,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.EventImpl;
@@ -844,12 +848,14 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Regatta regatta = createRegatta(RegattaImpl.getDefaultName("Cologne Masters", boatClass.getName()), boatClass, 
                 regattaStartDate, regattaEndDate, /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, OneDesignRankingMetric::new);
 
-        List<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(new CompetitorImpl("Axel", "Axel Uhl", "KYC", Color.RED, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+        Map<Competitor, Boat> competitorsAndBoats = new LinkedHashMap<>();
+        Competitor c = new CompetitorImpl("Axel", "Axel Uhl", "KYC", Color.RED, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Boat b = new BoatImpl("123", "boat", boatClass, "GER 124");
+        competitorsAndBoats.put(c, b);
         Iterable<Waypoint> waypoints = Collections.emptyList();
         Course course = new CourseImpl("Course", waypoints);
         
-        RaceDefinition racedef = new RaceDefinitionImpl("M1", course, boatClass, competitors);
+        RaceDefinition racedef = new RaceDefinitionImpl("M1", course, boatClass, competitorsAndBoats);
         regatta.addRace(racedef);
         
         RacingEventServiceImpl evs = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE), PersistenceFactory.INSTANCE

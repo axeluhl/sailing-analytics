@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -73,6 +74,7 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -505,7 +507,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Map<Competitor, Boat> competitorBoats, Course course,
+            String raceName, BoatClass boatClass, Map<Competitor, Boat> competitorsAndBoats, Course course,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver) {
@@ -513,7 +515,7 @@ public class DomainFactoryImpl implements DomainFactory {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
                 logger.info("Creating RaceDefinitionImpl for race "+raceName);
-                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, competitorBoats, raceId);
+                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats, raceId);
             } else {
                 logger.info("Already found RaceDefinitionImpl for race "+raceName);
             }
@@ -570,37 +572,40 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public Map<Competitor, Boat> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass) {
-        final Map<Competitor, Boat> competitorBoatInfos = new HashMap<>();
+    public Util.Pair<Map<Competitor, Boat>, BoatClass> getCompetitorsAndTheirBoatsAndDominantBoatClass(IRace race) {
+        final Map<Competitor, Boat> competitorsAndBoats = new LinkedHashMap<Competitor, Boat>();
+        final List<ICompetitorClass> competitorClasses = new ArrayList<ICompetitorClass>();
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
-            Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
-            Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
-            if (existingCompetitor != null && competitorBoatInfo != null) {
-                Boat boatOfCompetitor = new BoatImpl(existingCompetitor.getId(), competitorBoatInfo.getA(), 
-                        defaultBoatClass, competitorBoatInfo.getB(), AbstractColor.getCssColor(competitorBoatInfo.getC()));
-                competitorBoatInfos.put(existingCompetitor, boatOfCompetitor);
-            }
-        }
-        return competitorBoatInfos;
-    }
-
-    
-    @Override
-    public Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {
-        List<ICompetitorClass> competitorClasses = new ArrayList<ICompetitorClass>();
-        final List<Competitor> competitors = new ArrayList<Competitor>();
-        for (IRaceCompetitor rc : race.getRaceCompetitors()) {
-            // also add those whose race class doesn't match the dominant one (such as camera boats)
-            // because they may still send data that we would like to record in some tracks
-            competitors.add(getOrCreateCompetitor(rc.getCompetitor()));
             competitorClasses.add(rc.getCompetitor().getCompetitorClass());
         }
         BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
-        Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass>(
-                competitors, dominantBoatClass);
-        return competitorsAndDominantBoatClass;
+        for (IRaceCompetitor rc : race.getRaceCompetitors()) {
+            // also add those whose race class doesn't match the dominant one (such as camera boats)
+            // because they may still send data that we would like to record in some tracks
+            Competitor competitor = getOrCreateCompetitor(rc.getCompetitor());
+            Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
+            Boat boatOfCompetitor;
+            if (competitorBoatInfo != null) {
+                boatOfCompetitor = getOrCreateBoat(competitor, competitorBoatInfo.getA(), 
+                        dominantBoatClass, competitorBoatInfo.getB(), AbstractColor.getCssColor(competitorBoatInfo.getC()));
+            } else {
+                boatOfCompetitor = getOrCreateBoat(competitor, competitor.getShortName(), dominantBoatClass, competitor.getShortName(), null); 
+            }
+            
+            competitorsAndBoats.put(competitor, boatOfCompetitor);
+        }
+        return new Util.Pair<Map<Competitor, Boat>, BoatClass>(competitorsAndBoats, dominantBoatClass);
     }
 
+    private Boat getOrCreateBoat(Competitor competitor, String name, BoatClass boatClass, String sailId, Color color) {
+        CompetitorStore competitorAndBoatStore = baseDomainFactory.getCompetitorStore();
+        Boat boat = competitorAndBoatStore.getExistingBoatById(competitor.getId());
+        if (boat == null) {
+            boat = competitorAndBoatStore.getOrCreateBoat(competitor, name, boatClass, sailId, color);
+        }
+        return boat;
+    }
+    
     private BoatClass getDominantBoatClass(Collection<ICompetitorClass> competitorClasses) {
         List<String> competitorClassNames = new ArrayList<>();
         for (ICompetitorClass competitorClass : competitorClasses) {

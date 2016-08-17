@@ -202,7 +202,7 @@ public interface DomainFactory {
      * @param raceLogResolver TODO
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass, Map<Competitor, Boat> competitorBoats,
+            String raceName, BoatClass boatClass, Map<Competitor, Boat> competitorsAndBoats,
             Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver);
@@ -257,9 +257,7 @@ public interface DomainFactory {
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
-    Map<Competitor, Boat> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass);
-
-    Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race);
+    Util.Pair<Map<Competitor, Boat>, BoatClass> getCompetitorsAndTheirBoatsAndDominantBoatClass(IRace race);
     
     /**
      * @param offsetToStartTimeOfSimulatedRace

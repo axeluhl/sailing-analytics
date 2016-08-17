@@ -4,12 +4,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
@@ -20,7 +25,15 @@ public class StoredTrackBasedTestWithTrackedRace extends StoredTrackBasedTest {
     @Before
     public void setUp() throws FileNotFoundException, IOException {
         Map<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> tracks = loadTracks();
-        setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", tracks.keySet(),
+        
+        final BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        int i = 1;
+        for(Competitor c: tracks.keySet()) {
+            Boat b = new BoatImpl("Boat" + i++, c.getName(), boatClass, null);
+            competitorsAndBoats.put(c, b);
+        }
+        setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", competitorsAndBoats,
                 new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()), /* useMarkPassingCalculator */ false));
         copyTracks(tracks);
     }

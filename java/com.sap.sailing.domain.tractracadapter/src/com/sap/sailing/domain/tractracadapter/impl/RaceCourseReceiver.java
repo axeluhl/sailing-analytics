@@ -155,11 +155,10 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         } else {
             logger.log(Level.INFO, "Received course for non-existing race "+tractracRace.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
-            com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(tractracRace);
-            Map<Competitor, Boat> competitorBoats = getDomainFactory().getBoatsInfoForCompetitors(tractracRace, competitorsAndDominantBoatClass.getB());
+            com.sap.sse.common.Util.Pair<Map<Competitor,Boat>, BoatClass> competitorsAndBoatsAndDominantBoatClass = getDomainFactory().getCompetitorsAndTheirBoatsAndDominantBoatClass(tractracRace);
             trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
-                    getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(), competitorsAndDominantBoatClass.getA(),
-                    competitorsAndDominantBoatClass.getB(), competitorBoats, course, sidelines, windStore, delayToLiveInMillis,
+                    getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(),
+                    competitorsAndBoatsAndDominantBoatClass.getB(), competitorsAndBoatsAndDominantBoatClass.getA(), course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
                     getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm, raceLogResolver);
             needToUpdateRaceTimes = true;

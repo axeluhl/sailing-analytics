@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
@@ -114,11 +115,12 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
     protected Map<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> loadTracks() throws FileNotFoundException, IOException {
         Map<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> tracks = new HashMap<Competitor, DynamicGPSFixTrack<Competitor,GPSFixMoving>>();
         final String KIELER_WOCHE = "Kieler Woche";
+        final BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
         for (String competitorName : getCompetitorNamesOfStoredTracks(KIELER_WOCHE)) {
             DynamicPerson p = new PersonImpl(competitorName, /* nationality */ null, /* dateOfBirth */ null, /* description */ null);
             DynamicTeam t = new TeamImpl(competitorName, Collections.singleton(p), /* coach */ null);
-            Competitor c = new CompetitorImpl(competitorName, competitorName, "KYC", Color.RED, null, null, t, new BoatImpl("123",
-                    competitorName, new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+            Competitor c = new CompetitorImpl(competitorName, competitorName, "KYC", Color.RED, null, null, t, 
+                    new BoatImpl("123", competitorName, boatClass, null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = readTrack(c, KIELER_WOCHE);
             if (track != null) {
                 tracks.put(c, track);

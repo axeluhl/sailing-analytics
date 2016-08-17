@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Collections;
 
 import org.junit.Test;
 
@@ -19,17 +18,19 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEve
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedRaceStartTimeUpdateForDependentStartTimeTest extends TrackBasedTest {
     @Test
     public void testStartTimeUpdateForRaceWithDependentStartTime() {
-        final Competitor hasso = createCompetitor("Hasso");
+        final Pair<Competitor, Boat> hasso = createCompetitorAndBoat("Hasso");
         final RaceLog r1RaceLog = new RaceLogImpl("r1RaceLog");
         final RaceLog r2RaceLog = new RaceLogImpl("r2RaceLog");
         final RaceLogResolver raceLogResolver = new RaceLogResolver() {
@@ -43,9 +44,9 @@ public class TrackedRaceStartTimeUpdateForDependentStartTimeTest extends TrackBa
                 return null;
             }
         };
-        final TrackedRace r1 = createTestTrackedRace("Regatta", "R1", "J/70", Collections.singleton(hasso),
+        final TrackedRace r1 = createTestTrackedRace("Regatta", "R1", "J/70", createCompetitorAndBoatsMap(hasso),
                 MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false, raceLogResolver);
-        final TrackedRace r2 = createTestTrackedRace("Regatta", "R2", "J/70", Collections.singleton(hasso),
+        final TrackedRace r2 = createTestTrackedRace("Regatta", "R2", "J/70", createCompetitorAndBoatsMap(hasso),
                 MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false, raceLogResolver);
         r1.attachRaceLog(r1RaceLog);
         r2.attachRaceLog(r2RaceLog);

@@ -16,6 +16,8 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
@@ -46,7 +48,9 @@ public class AbstractGPSFixStoreTest {
     protected RaceLog raceLog;
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
+    protected final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+    protected final Boat boat = DomainFactory.INSTANCE.getOrCreateBoat(comp, "boat", boatClass, "GER 234", null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
     protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);

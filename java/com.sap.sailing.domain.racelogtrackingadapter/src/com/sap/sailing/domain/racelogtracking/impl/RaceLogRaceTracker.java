@@ -35,6 +35,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -46,6 +47,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -290,7 +292,15 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         }
         Iterable<Competitor> competitors = raceColumn.getAllCompetitors(params.getFleet());
         Serializable raceId = denoteEvent.getRaceId();
-        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
+        // TODO: How do we retrieve the boats for the competitors of this raceColumn
+        // For now we create the boats here which MUST be corrected later on
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        for (Competitor c: competitors) {
+            Boat theWrongBoat = c.getBoat();
+            Boat b = new BoatImpl(c.getId(), theWrongBoat.getName(), boatClass, theWrongBoat.getSailID(), theWrongBoat.getColor());
+            competitorsAndBoats.put(c, b);
+        }
+        final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats, raceId);
         Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
         // set race definition, so race is linked to leaderboard automatically
         regatta.getRegatta().addRace(raceDef);

@@ -21,6 +21,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -78,7 +79,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
                 new BoatClassImpl("505", BoatClassMasterdata._5O5), /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);
-        RaceDefinition race = new RaceDefinitionImpl("Test Race", course, regatta.getBoatClass(), Collections.<Competitor>emptySet());
+        RaceDefinition race = new RaceDefinitionImpl("Test Race", course, regatta.getBoatClass(), Collections.<Competitor,Boat>emptyMap());
         trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptySet(),
                 EmptyWindStore.INSTANCE, 
                 /* delayToLiveInMillis */10000, /* millisecondsOverWhichToAverageWind */30000, /* millisecondsOverWhichToAverageSpeed */

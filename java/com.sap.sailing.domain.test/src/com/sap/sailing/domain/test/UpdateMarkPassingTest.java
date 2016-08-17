@@ -11,6 +11,7 @@ import java.util.HashSet;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -30,6 +31,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class UpdateMarkPassingTest {
@@ -40,7 +42,8 @@ public class UpdateMarkPassingTest {
         when(race.getName()).thenReturn("Test Race");
         Course c = new CourseImpl("Test Course", Collections.singleton(waypoint));
         when(race.getCourse()).thenReturn(c);
-        Competitor competitor = TrackBasedTest.createCompetitor("Test Competitor");
+        Pair<Competitor, Boat> competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("Test Competitor");
+        Competitor competitor = competitorAndBoat.getA();
         when(race.getBoatClass()).thenReturn(new BoatClassImpl("49er", /* typicallyStartsUpwind */ true));
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(
