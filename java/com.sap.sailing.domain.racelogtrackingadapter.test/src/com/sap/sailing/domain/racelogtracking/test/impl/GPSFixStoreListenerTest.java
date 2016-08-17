@@ -1,5 +1,9 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -12,37 +16,31 @@ import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 
 public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
     @Rule
-    public Timeout TrackedRaceLoadsFixesTestTimeout = new Timeout(3 * 60 * 1000);
+    public Timeout GPSFixStoreListenerTestTimeout = new Timeout(3 * 1000);
 
     /**
      * {@link MongoSensorFixStoreImpl} had broken synchronization of the listeners collection (add/removeListener
      * methods were synchronized but notifyListeners was not synchronized).
      */
-    @Test
+    @Test(expected = TimoutRuntimeException.class)
     public void lockingOfGPSFixStoreListenersIsWorkingCorrectly() throws InterruptedException {
-        // The first listener will take an extended amount of time
-        store.addListener(new ListenerWithDefinedHashCode(1) {
-            @Override
-            public void fixReceived(DeviceIdentifier device, GPSFixMoving fix) {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }, device);
-        // This ensures, that there is another listener so that the iterator isn't directly finished which would prevent
-        // the exception to occur
-        store.addListener(new ListenerWithDefinedHashCode(2), device);
+        CyclicBarrier barrier = new CyclicBarrier(2);
+        // We need 3 listener instances to guarantee that the iterator isn't finished
+        // when adding another listener in the thread below.
+        store.addListener(new ListenerAwaitingBarier(barrier), device);
+        store.addListener(new ListenerAwaitingBarier(barrier), device);
+        store.addListener(new ListenerAwaitingBarier(barrier), device);
 
         Thread thread = new Thread() {
             public void run() {
                 try {
-                    Thread.sleep(100);
+                    barrier.await(100, TimeUnit.MILLISECONDS);
                     // During iteration in the main thread this causes a modification that makes the iterator throw a
                     // ConcurrentModificationException on next()
-                    store.addListener(new ListenerWithDefinedHashCode(3), device);
-                } catch (InterruptedException e) {
+                    store.addListener((DeviceIdentifier device, GPSFixMoving fix) -> {}, device);
+                    barrier.await(100, TimeUnit.MILLISECONDS);
+                    barrier.await(100, TimeUnit.MILLISECONDS);
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             };
@@ -51,35 +49,37 @@ public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
         try {
             store.storeFix(device, createFix(100, 10, 20, 30, 40));
         } finally {
-            thread.join(1000);
+            // This ensures that the thread is terminated when the test finishes
+            // JUnit may behave crazy if there are additional tests running after the test finished
+            thread.join(500);
         }
     }
 
-    /**
-     * Explicitly setting the hashcode makes the iteration order deterministic.
-     */
-    private static class ListenerWithDefinedHashCode implements FixReceivedListener<GPSFixMoving> {
-        private final int hashCode;
+    private static class ListenerAwaitingBarier implements FixReceivedListener<GPSFixMoving> {
 
-        public ListenerWithDefinedHashCode(int hashCode) {
-            this.hashCode = hashCode;
+        private final CyclicBarrier barrier;
+
+        public ListenerAwaitingBarier(CyclicBarrier barrier) {
+            this.barrier = barrier;
         }
 
         @Override
         public void fixReceived(DeviceIdentifier device, GPSFixMoving fix) {
-        }
-
-        @Override
-        public int hashCode() {
-            return hashCode;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (!(other instanceof ListenerWithDefinedHashCode)) {
-                return false;
+            try {
+                barrier.await(100, TimeUnit.MILLISECONDS);
+            } catch (TimeoutException e) {
+                throw new TimoutRuntimeException(e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            return hashCode == ((ListenerWithDefinedHashCode) other).hashCode;
+        }
+    }
+    
+    private static class TimoutRuntimeException extends RuntimeException {
+        private static final long serialVersionUID = 6349762933223278846L;
+
+        public TimoutRuntimeException(TimeoutException e) {
+            super(e);
         }
     }
 }
