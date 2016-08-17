@@ -67,7 +67,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
      * A multi-threaded executor for the currently running leaderboard requests, executing the {@link Future}s currently
      * pending.
      */
-    private static final Executor computeLeadearboardByNameExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
+    private static final Executor computeLeadearboardByNameExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor();
 
     private final LeaderboardCacheManager leaderboardCacheManager;
     
