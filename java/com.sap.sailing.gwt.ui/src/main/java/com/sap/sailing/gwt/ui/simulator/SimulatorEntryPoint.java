@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.simulator;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -188,7 +187,9 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void createSimulatorPanel() {
-        SAPHeaderWithAuthentication header = initHeader();
+        SAPHeaderWithAuthentication header  = new SAPHeaderWithAuthentication(getStringMessages()
+                .sapSailingAnalytics(), getStringMessages().strategySimulatorTitle());
+        
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
@@ -199,7 +200,7 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
                 return simulatorPanel;
             }
         });
-
+        
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         DockLayoutPanel panel = new DockLayoutPanel(Unit.PX);
         panel.addNorth(header, 75);
@@ -207,14 +208,5 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
         panel.addStyleName("dockLayoutPanel");
         rootPanel.add(panel);
     }
-
-    private SAPHeaderWithAuthentication initHeader() {
-        SAPHeaderWithAuthentication header = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(),
-                getStringMessages().strategySimulatorTitle());
-        header.getElement().getStyle().setPosition(Position.FIXED);
-        header.getElement().getStyle().setTop(0, Unit.PX);
-        header.getElement().getStyle().setWidth(100, Unit.PCT);
-        return header;
-    }
-
+    
 }
