@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
 
 import org.junit.After;
 import org.junit.Before;
@@ -22,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
@@ -180,6 +182,34 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.waitForLoadingToFinish();
         
         assertNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
+        
+        fixLoaderAndTracker.stop(true);
+    }
+    
+    @Test
+    public void testLoadFixesWhenClosingEventIsRevoked() throws InterruptedException {
+        UUID mappingEventId = UUID.randomUUID();
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(MillisecondsTimePoint.now(), new MillisecondsTimePoint(3), author, mappingEventId, comp, device, new MillisecondsTimePoint(100), null));
+        RegattaLogCloseOpenEndedDeviceMappingEventImpl closeEvent = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(new MillisecondsTimePoint(4), author, mappingEventId, new MillisecondsTimePoint(200));
+        regattaLog.add(closeEvent);
+        
+        addFixes();
+        
+        FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        
+        trackedRace.waitForLoadingToFinish();
+        
+        BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
+        
+        testNumberOfRawFixes(bravoFixTrack, 2);
+        
+        regattaLog.add(new RegattaLogRevokeEventImpl(author, closeEvent, "Test purposes"));
+
+        trackedRace.waitForLoadingToFinish();
+        testNumberOfRawFixes(bravoFixTrack, 3);
         
         fixLoaderAndTracker.stop(true);
     }
