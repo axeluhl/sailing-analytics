@@ -403,6 +403,9 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Methods implemented through LocationListener
+     */ 
     @Override
     public void onLocationChanged(Location location) {
         if (initialLocation) {
@@ -417,20 +420,18 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-      //do nothing
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-      //do nothing
+      //Status Update by the provider (GPS)
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-      //do nothing
+      //provider (GPS) disabled by the user while tracking
     }
-
-    // Useful code for Bug 3048. Will stay commented for now.
+    
+    @Override
+    public void onProviderEnabled(String provider) {
+      //provider (GPS) (re)enabled by the user while tracking
+    }
 
      private void showNotification() {
      Intent intent = new Intent(this, TrackingActivity.class);
