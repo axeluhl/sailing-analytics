@@ -142,6 +142,12 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         MediaConstants.imageTagSuggestions, "Enter tags for the image", 30));
+        tagsListEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
+                validate();
+            }
+        });
     }
 
     @Override

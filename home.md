@@ -1,5 +1,7 @@
 # Welcome to the SAP Sailing Wiki
 
+<font color="crimson"><b>Info</b> - wiki currently under reconstruction. Some links might still be broken as of yet.</font>
+
 This is the <img src="https://www.sapsailing.com/images/sap-logo_grey.png"/> Wiki where useful information regarding this project can be found.
 
 ### The Pitch
@@ -27,7 +29,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Development Environment|wiki/info/landscape/development-environment]]
   * [[Production Environment|wiki/info/landscape/production-environment]]
   * [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
-* [[Server|wiki/info/landscape/server]]
+* [[RaceLog Tracking Server Architecture|wiki/info/landscape/server]]
+  * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
 * Amazon
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
@@ -42,16 +45,19 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Mobile
 
 * [[Mobile Development|wiki/info/mobile/mobile-development]]
-* [[App|wiki/info/mobile/app]]
-* [[App Specification|wiki/info/mobile/app-spec/app-spec]]
-* [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
-* [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
-* [[Push Notifications|wiki/info/mobile/push-notifications]]
+* Tracking App
+  * [[Tracking App Specification|wiki/info/mobile/app-spec/app-spec]]
+  * [[Event Tracking|wiki/info/mobile/event-tracking/event-tracking]]
+  * [[Steps for setting up Smartphone Tracking|wiki/info/mobile/smartphone-tracking-steps]]
+  * [[Tracking App Prototype Architecture|wiki/info/mobile/app]]
 * Racecommittee App
   * [[Racecommittee App|wiki/info/mobile/racecommittee-app]]
   * [[Environment|wiki/info/mobile/racecommittee-app-environment]]
   * [[Administrator|wiki/info/mobile/racecommittee-app-administrator]]
   * [[User|wiki/info/mobile/racecommittee-app-user]]
+* [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
+* [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
+* [[Push Notifications|wiki/info/mobile/push-notifications]]
 
 ### API
 
@@ -59,9 +65,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[API v1|wiki/info/api/api-v1]]
 * [[Tracking App API|wiki/info/api/tracking-app-api]]
 * [[Training API v1 draft|wiki/info/api/training-api-v1-draft]]
-
-### Samples
-  * [[S3 Sample|wiki/info/samples/s3-sample]]
 
 ### Security
   * [[Fortify Tests|wiki/info/security/fortify]]
@@ -73,6 +76,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Data Quality|wiki/info/misc/data-quality]]
 * [[Sailing Domain Algorithms|wiki/info/misc/sailing-domain-algorithms]]
 * [[Google Analytics (Web Page Tracking)|wiki/info/misc/ganalytics]]
+* [[S3 Development Sample|wiki/info/misc/s3-sample]]
 
 * [[FAQ for League Operators|wiki/info/misc/league-operators-faq]]
 * [[Prionet related information|wiki/info/misc/prionet-related-information]]
@@ -112,11 +116,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Miscellaneous
 
 * [[Cook Book|wiki/howto/misc/cook-book]]
-* [[Event Tracking|wiki/howto/misc/event-tracking/event-tracking]]
 * [[Polars|wiki/howto/misc/polars]]
 * [[Server Replication|wiki/howto/misc/server-replication]]
-* [[Smartphone Tracking|wiki/howto/misc/smartphone-tracking-general]]
-* [[Steps for setting up Smartphone Tracking|wiki/howto/misc/smartphone-tracking-steps]]
 * [[TracTrac|wiki/howto/misc/tractrac-lifecycle]]
 * [[UI Tests|wiki/howto/misc/ui-tests-tutorial]]
 * [[Uploading Media Content|wiki/howto/misc/uploading-media-content]]
