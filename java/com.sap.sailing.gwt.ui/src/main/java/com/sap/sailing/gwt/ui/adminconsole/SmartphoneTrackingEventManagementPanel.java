@@ -556,37 +556,28 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
 
     private void updateRegattaConfigDesignerModeToByMarks(final String regattaName) {
-        sailingService.getRegattaByName(regattaName,new MarkedAsyncCallback<RegattaDTO>(
-                new AsyncCallback<RegattaDTO>() {
-                    @Override
-                    public void onFailure(Throwable t) {
-                        errorReporter.reportError("Error trying to get ragatta with name " + regattaName + " : "
-                                + t.getMessage());
-                    }
+        final RegattaDTO regatta = getRegattaByName(regattaName);
+        if (regatta != null) {
+            DeviceConfigurationDTO.RegattaConfigurationDTO configuration =  regatta.configuration;
+            if (configuration == null) {
+                configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO();
+                configuration.defaultCourseDesignerMode = CourseDesignerMode.BY_MARKS;
+            } //TODO: Show message if regatta has configuration with design mode not equal "By marks"
 
-                    @Override
-                    public void onSuccess(RegattaDTO regatta) {
-                        DeviceConfigurationDTO.RegattaConfigurationDTO configuration =  regatta.configuration;
-                        if (configuration == null) {
-                            configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO();
-                            configuration.defaultCourseDesignerMode = CourseDesignerMode.BY_MARKS;
-                        } //TODO: Show message if regatta has configuration with design mode not equal "By marks"
+            final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName()); 
+            sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate, regatta.defaultCourseAreaUuid,
+                    configuration, regatta.useStartTimeInference, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error trying to update regatta " + regattaName + ": "
+                                    + caught.getMessage());
+                        }
 
-                        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName()); 
-                        sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate, regatta.defaultCourseAreaUuid,
-                                configuration, regatta.useStartTimeInference, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        errorReporter.reportError("Error trying to update regatta " + regattaName + ": "
-                                                + caught.getMessage());
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                    }
-                        }));
-                    }
-           }));
+                        @Override
+                        public void onSuccess(Void result) {
+                        }
+            }));
+        }
     }
 
     private void denoteForRaceLogTracking(final RaceColumnDTO raceColumn, final FleetDTO fleet) {
@@ -754,17 +745,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     
     private void searchBoatClass(final ShowWithBoatClass showWithBoatClass) {
         final String result;
-        RegattaDTO regatta = null;
-        if (getSelectedLeaderboard().regattaName != null) {
-            if (allRegattas != null) {
-                for (RegattaDTO i : allRegattas) {
-                    if (getSelectedLeaderboard().regattaName.equals(i.getName())) {
-                        regatta = i;
-                        break;
-                    }
-                }
-            }
-        }
+        RegattaDTO regatta = getSelectedRegatta();
         if (regatta != null) {
             result = regatta.boatClass.getName();
             showWithBoatClass.showWithBoatClass(result);
