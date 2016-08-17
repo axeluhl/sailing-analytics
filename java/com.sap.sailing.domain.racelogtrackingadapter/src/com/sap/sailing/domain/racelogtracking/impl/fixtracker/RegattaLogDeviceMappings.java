@@ -261,7 +261,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
                                 oldMappings);
                         if (oldMapping == null) {
                             mappingAdded(newMapping);
-                        } else if (newMapping.getTimeRange().equals(oldMapping.getTimeRange())) {
+                        } else if (!newMapping.getTimeRange().equals(oldMapping.getTimeRange())) {
                             mappingChanged(oldMapping, newMapping);
                         }
                     }
