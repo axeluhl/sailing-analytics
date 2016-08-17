@@ -365,8 +365,22 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         protected void mappingChanged(DeviceMappingWithRegattaLogEvent<WithID> oldMapping,
                 DeviceMappingWithRegattaLogEvent<WithID> newMapping) {
-            // TODO can the new time range be bigger than the old one? In this case we would need to load the
-            // additional time range.
+            final TimeRange newTimeRange = newMapping.getTimeRange();
+            final TimeRange oldTimeRange = oldMapping.getTimeRange();
+            if(newTimeRange.endsAfter(oldTimeRange)) {
+                final TimePoint oldTo= oldTimeRange.to();
+                final TimePoint newFrom = newTimeRange.from();
+                final TimePoint from = oldTo.after(newFrom) ? oldTo : newFrom;
+                final TimeRange rangeToLoad = new TimeRangeImpl(from, newTimeRange.to());
+                loadFixes(rangeToLoad, newMapping);
+            }
+            if(newTimeRange.startsBefore(oldTimeRange)) {
+                final TimePoint oldFrom= oldTimeRange.from();
+                final TimePoint newTo = newTimeRange.to();
+                final TimePoint to = oldFrom.after(newTo) ? oldFrom : newTo;
+                final TimeRange rangeToLoad = new TimeRangeImpl(newTimeRange.from(), to);
+                loadFixes(rangeToLoad, newMapping);
+            }
         }
     }
 }
