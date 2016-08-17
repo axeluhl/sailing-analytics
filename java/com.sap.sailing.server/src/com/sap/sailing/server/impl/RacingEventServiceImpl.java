@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -246,7 +245,6 @@ import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.ThreadPoolUtil;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
         LeaderboardRegistry, Replicator, EventFetcher {
@@ -256,7 +254,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s with static
      * position information otherwise not available through <code>MarkPassingReceiver</code>'s events.
      */
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+    private static final ScheduledExecutorService scheduler = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
