@@ -107,7 +107,7 @@
       -ms-flex-align: center;
           align-items: center;
   height: 3em;
-  min-width: 11em;
+  min-width: 15em;
   padding: 0 1.333333333333333em 0 0.666666666666667em;
   background: #fff;
   color: #008fcc;
