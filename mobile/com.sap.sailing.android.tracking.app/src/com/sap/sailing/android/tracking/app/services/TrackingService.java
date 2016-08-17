@@ -70,7 +70,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
     private final static int UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE = 30000;
-    private float UPDATE_INTERVAL_IN_METERS = 0f;
+    private float UPDATE_INTERVAL_IN_METERS = 0.2f;
     private final static float BATTERY_POWER_SAVE_THRESHOLD = 0.2f;
     private boolean initialLocation;
 
@@ -201,14 +201,14 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     @Override
     public void onConnected(Bundle arg0) {
         if (locationUpdateRequested) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL_IN_MILLIS_DEFAULT, UPDATE_INTERVAL_IN_METERS, this);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, prefs.getGPSFixInterval(), UPDATE_INTERVAL_IN_METERS, this);
         }
     }
 
 
     @Override
     public void onConnectionSuspended(int cause) {
-        //just nothing
+        //do nothing
     }
 
     private void reportGPSQualityBearingAndSpeed(float gpsAccuracy, float bearing, float speed, double latitude,
@@ -417,17 +417,17 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-
+      //do nothing
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-
+      //do nothing
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
+      //do nothing
     }
 
     // Useful code for Bug 3048. Will stay commented for now.
