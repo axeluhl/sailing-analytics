@@ -34,7 +34,6 @@
 /*   float: left; */
   display: inline-block;
   width: calc(100% - 4em);
-  white-space: nowrap;
   overflow: hidden;
   border-left: 1px solid #ccc;
   margin-left: 0.666666666666667em;
@@ -43,7 +42,6 @@
 .regattaheader_content_title {
   font-size: 1.466666666666667em;
   font-weight: 700;
-  height: 1.363636363636364em;
   line-height: 1.363636363636364em;
   overflow: hidden;
 }
