@@ -18,6 +18,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -58,7 +59,6 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ReachingLegTest extends TrackBasedTest {
@@ -75,15 +75,15 @@ public class ReachingLegTest extends TrackBasedTest {
     @Before
     public void setUp() {
         competitorsAndBoats = new LinkedHashMap<>();
-        Pair<Competitor, Boat> hungerWithBoat = createCompetitorAndBoat("Wolfgang Hunger");
-        hunger = hungerWithBoat.getA();
-        competitorsAndBoats.put(hungerWithBoat.getA(), hungerWithBoat.getB());
-        Pair<Competitor, Boat> plattnerWithBoat = createCompetitorAndBoat("Dr. Hasso Plattner");
-        plattner = plattnerWithBoat.getA();
-        competitorsAndBoats.put(plattnerWithBoat.getA(), plattnerWithBoat.getB());
-        Pair<Competitor, Boat> schomaekerWithBoat = createCompetitorAndBoat("Meike Schom�ker");
-        schomaeker = schomaekerWithBoat.getA();
-        competitorsAndBoats.put(schomaekerWithBoat.getA(), schomaekerWithBoat.getB());
+        CompetitorWithBoat hungerWithBoat = createCompetitorAndBoat("Wolfgang Hunger");
+        hunger = hungerWithBoat.getCompetitor();
+        competitorsAndBoats.put(hungerWithBoat.getCompetitor(), hungerWithBoat.getBoat());
+        CompetitorWithBoat plattnerWithBoat = createCompetitorAndBoat("Dr. Hasso Plattner");
+        plattner = plattnerWithBoat.getCompetitor();
+        competitorsAndBoats.put(plattnerWithBoat.getCompetitor(), plattnerWithBoat.getBoat());
+        CompetitorWithBoat schomaekerWithBoat = createCompetitorAndBoat("Meike Schom�ker");
+        schomaeker = schomaekerWithBoat.getCompetitor();
+        competitorsAndBoats.put(schomaekerWithBoat.getCompetitor(), schomaekerWithBoat.getBoat());
         start = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
         setTrackedRace(createTrackedRace("Kieler Woche", "505 Race 2", "505", competitorsAndBoats, start));
         List<MarkPassing> hungersMarkPassings = createMarkPassings(hunger, start);

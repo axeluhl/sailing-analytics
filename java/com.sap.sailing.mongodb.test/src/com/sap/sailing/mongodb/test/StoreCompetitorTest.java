@@ -57,7 +57,7 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
         
-        DynamicCompetitor c = AbstractLeaderboardTest.createCompetitor(competitorName1);
+        DynamicCompetitor c = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat(competitorName1).getCompetitor();
         c.setFlagImage(flagImageURI1);
         mongoObjectFactory.storeCompetitor(c);
         
@@ -84,7 +84,7 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
 
-        DynamicCompetitor c = AbstractLeaderboardTest.createCompetitor("Hasso", UUID.randomUUID());
+        DynamicCompetitor c = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat("Hasso", UUID.randomUUID()).getCompetitor();
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
         c.setName("Hasso Plattner");
@@ -98,7 +98,7 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
         
-        DynamicCompetitor c = AbstractLeaderboardTest.createCompetitor("Hasso");
+        DynamicCompetitor c = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat("Hasso").getCompetitor();
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
 
@@ -112,7 +112,7 @@ public class StoreCompetitorTest extends AbstractMongoDBTest {
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), domainFactory);
         dropCompetitorCollection();
         
-        DynamicCompetitor c = AbstractLeaderboardTest.createCompetitor("Hasso", UUID.randomUUID());
+        DynamicCompetitor c = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat("Hasso", UUID.randomUUID()).getCompetitor();
         mongoObjectFactory.storeCompetitor(c);
         assertEquals(1, Util.size(domainObjectFactory.loadAllCompetitors()));
 

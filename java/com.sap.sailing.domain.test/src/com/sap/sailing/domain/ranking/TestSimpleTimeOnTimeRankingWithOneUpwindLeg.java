@@ -17,6 +17,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -54,7 +55,6 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -64,10 +64,10 @@ public class TestSimpleTimeOnTimeRankingWithOneUpwindLeg {
     private Competitor c1, c2;
     
     private void setUp(TimeOnTimeFactorMapping timeOnTimeFactors, Function<Competitor, Double> timeOnDistanceFactors) {
-        Pair<Competitor, Boat> fastCompetitorAndBoat = TrackBasedTest.createCompetitorAndBoat("FastBoat");
-        c1 = fastCompetitorAndBoat.getA();
-        Pair<Competitor, Boat> slowCompetitorAndBoat = TrackBasedTest.createCompetitorAndBoat("SlowBoat");
-        c2 = slowCompetitorAndBoat.getA();
+        CompetitorWithBoat fastCompetitorAndBoat = TrackBasedTest.createCompetitorAndBoat("FastBoat");
+        c1 = fastCompetitorAndBoat.getCompetitor();
+        CompetitorWithBoat slowCompetitorAndBoat = TrackBasedTest.createCompetitorAndBoat("SlowBoat");
+        c2 = slowCompetitorAndBoat.getCompetitor();
         trackedRace = createTrackedRace(TrackBasedTest.createCompetitorAndBoatsMap(fastCompetitorAndBoat, slowCompetitorAndBoat), timeOnTimeFactors, timeOnDistanceFactors);
         tot = trackedRace.getRankingMetric();
         assertEquals(60, trackedRace.getCourseLength().getNauticalMiles(), 0.01);

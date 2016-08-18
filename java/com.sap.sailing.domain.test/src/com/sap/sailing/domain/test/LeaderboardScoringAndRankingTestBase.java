@@ -106,7 +106,7 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
     public static List<Competitor> createCompetitors(int numberOfCompetitorsToCreate) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (int i=1; i<=numberOfCompetitorsToCreate; i++) {
-            result.add(createCompetitor("C"+i));
+            result.add(createCompetitorAndBoat("C"+i).getCompetitor());
         }
         return result;
     }

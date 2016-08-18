@@ -30,6 +30,7 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -430,7 +431,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         // for some reason the dropping of collections doesn't work reliably on Linux... explicitly drop those collections that we depend on
         getMongoService().getDB().getCollection(CollectionNames.LEADERBOARDS.name()).drop();
         getMongoService().getDB().getCollection(CollectionNames.REGATTAS.name()).drop();
-        Competitor hasso = AbstractLeaderboardTest.createCompetitor("Dr. Hasso Plattner");
+        CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorAndBoat("Dr. Hasso Plattner");
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
         final DynamicTrackedRegatta[] trackedRegatta = new DynamicTrackedRegatta[1];
         final DynamicTrackedRace q2YellowTrackedRace = new MockedTrackedRaceWithFixedRank(hasso, /* rank */ 1, /* started */ false, boatClass) {
@@ -464,7 +465,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertNotNull(regattaLeaderboard.getRaceColumnByName(q2.getName()));
         res.apply(new ConnectTrackedRaceToLeaderboardColumn(regattaLeaderboard.getName(), q2.getName(), yellow
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
-        res.apply(new UpdateLeaderboardMaxPointsReason(regattaLeaderboard.getName(), q2.getName(), hasso.getId().toString(),
+        res.apply(new UpdateLeaderboardMaxPointsReason(regattaLeaderboard.getName(), q2.getName(), hasso.getCompetitor().getId().toString(),
                 MaxPointsReason.DNF, MillisecondsTimePoint.now()));
         
         // load new RacingEventService including regatta and leaderboard
@@ -489,7 +490,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         trackedRegatta[0] = new DynamicTrackedRegattaImpl(loadedRegatta);
         resForLoading.apply(new ConnectTrackedRaceToLeaderboardColumn(loadedLeaderboard.getName(), loadedQ2.getName(), loadedYellow
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
-        MaxPointsReason hassosLoadedMaxPointsReason = loadedLeaderboard.getScoreCorrection().getMaxPointsReason(hasso, loadedQ2, MillisecondsTimePoint.now());
+        MaxPointsReason hassosLoadedMaxPointsReason = loadedLeaderboard.getScoreCorrection().getMaxPointsReason(hasso.getCompetitor(), loadedQ2, MillisecondsTimePoint.now());
         assertEquals(MaxPointsReason.DNF, hassosLoadedMaxPointsReason);
     }
 

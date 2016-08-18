@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -23,7 +24,6 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -40,9 +40,9 @@ public class DistanceCacheInvalidationAfterLoadingFinishedTest extends TrackBase
     
     @Before
     public void setUp() {
-        Pair<Competitor, Boat> competitorAndBoat = createCompetitorAndBoat("Test Competitor");
+        CompetitorWithBoat competitorAndBoat = createCompetitorAndBoat("Test Competitor");
         Map<Competitor, Boat> competitorsAndBoats = TrackBasedTest.createCompetitorAndBoatsMap(competitorAndBoat);
-        competitor = competitorAndBoat.getA();
+        competitor = competitorAndBoat.getCompetitor();
         trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", competitorsAndBoats, MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false);
     }
     

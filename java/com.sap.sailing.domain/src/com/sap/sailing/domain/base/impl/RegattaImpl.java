@@ -28,6 +28,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorDeregistrator;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -404,6 +405,21 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         for (RaceDefinition race : getAllRaces()) {
             for (Competitor c : race.getCompetitors()) {
                 result.add(c);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Iterable<Boat> getAllBoats() {
+        Set<Boat> result = new HashSet<Boat>();
+//        if (boatsProvider == null) {
+//            boatsProvider = new BoatsProviderFromRaceColumnsAndRegattaLike(this);
+//        }
+//        Util.addAll(boatsProvider.getAllBoats(), result);
+        for (RaceDefinition race : getAllRaces()) {
+            for (Boat b: race.getBoats()) {
+                result.add(b);
             }
         }
         return result;

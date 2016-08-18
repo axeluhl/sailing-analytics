@@ -103,7 +103,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
 
     private RegattaLogRegisterCompetitorEventImpl createRegattaLogEvent() {
         final RegattaLogRegisterCompetitorEventImpl event = new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), /* author */ null,
-                AbstractTracTracLiveTest.createCompetitorAndBoat("Someone").getA());
+                AbstractTracTracLiveTest.createCompetitorAndBoat("Someone").getCompetitor());
         return event;
     }
 

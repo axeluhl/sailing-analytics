@@ -24,6 +24,8 @@ public interface RaceDefinition extends NamedWithID {
 
     Iterable<Competitor> getCompetitors();
 
+    Iterable<Boat> getBoats();
+
     Competitor getCompetitorById(Serializable competitorID);
 
     /**

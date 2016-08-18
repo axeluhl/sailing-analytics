@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
@@ -45,12 +46,11 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest {
     private List<Competitor> competitors;
-    private List<Pair<Competitor, Boat>> competitorsWithBoats;
+    private List<CompetitorWithBoat> competitorsWithBoats;
     private static final String[] competitorNames = new String[] { "Wolfgang Hunger", "Dr. Hasso Plattner",  "Robert Stanjek", "Simon Grotelueschen" };
     
     @Before
@@ -58,17 +58,17 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         competitorsWithBoats = new ArrayList<>();
         competitors = new ArrayList<>();
         for (String name : competitorNames) {
-            Pair<Competitor, Boat> competitorAndBoat = createCompetitorAndBoat(name);
+            CompetitorWithBoat competitorAndBoat = createCompetitorAndBoat(name);
             competitorsWithBoats.add(competitorAndBoat);
-            competitors.add(competitorAndBoat.getA());
+            competitors.add(competitorAndBoat.getCompetitor());
         }
     }
     
     private void initRace(int numberOfCompetitorsToUse, int[] numberOfMarksPassed, TimePoint timePointForFixes) {
-        List<Pair<Competitor, Boat>> subList = competitorsWithBoats.subList(0, numberOfCompetitorsToUse);
+        List<CompetitorWithBoat> subList = competitorsWithBoats.subList(0, numberOfCompetitorsToUse);
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
-        for (Pair<Competitor, Boat> competitorAndBoat: subList) {
-            competitorsAndBoats.put(competitorAndBoat.getA(), competitorAndBoat.getB());
+        for (CompetitorWithBoat competitorAndBoat: subList) {
+            competitorsAndBoats.put(competitorAndBoat.getCompetitor(), competitorAndBoat.getBoat());
         }
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505",
                 competitorsAndBoats, timePointForFixes, /* useMarkPassingCalculator */ false));

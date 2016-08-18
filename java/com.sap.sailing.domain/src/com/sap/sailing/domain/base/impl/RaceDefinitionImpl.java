@@ -78,7 +78,12 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     public Iterable<Competitor> getCompetitors() {
         return Collections.unmodifiableSet(competitorsAndTheirBoats.keySet());
     }
-    
+
+    @Override
+    public Iterable<Boat> getBoats() {
+        return Collections.unmodifiableCollection(competitorsAndTheirBoats.values());
+    }
+
     @Override
     public byte[] getCompetitorMD5() {
         return raceCompetitorsMD5Hash.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID();

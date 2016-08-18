@@ -11,15 +11,13 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
-import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RegattaLogReplicationTest extends
@@ -35,8 +33,8 @@ public class RegattaLogReplicationTest extends
     
     @Before
     public void createEvent() throws Exception {
-        final Pair<Competitor, Boat> competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("Test Competitor");
-        regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), t(0), author, 0, competitorAndBoat.getA());
+        final CompetitorWithBoat competitorAndBoat = TrackBasedTest.createCompetitorAndBoat("Test Competitor");
+        regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), t(0), author, 0, competitorAndBoat.getCompetitor());
 //        anotherRegattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(1), author, t(1), 1, null);
     }
     

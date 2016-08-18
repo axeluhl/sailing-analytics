@@ -21,6 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -28,6 +29,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatImpl;
+import com.sap.sailing.domain.base.impl.CompetitorWithBoatImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
@@ -60,7 +62,6 @@ import com.sap.sailing.server.operationaltransformation.TrackRegatta;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class WindByRaceLogTest {
@@ -82,7 +83,7 @@ public class WindByRaceLogTest {
         // FIXME use master DomainFactory; see bug 592
         final DomainFactory masterDomainFactory = service.getBaseDomainFactory();
         BoatClass boatClass = masterDomainFactory.getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */true);
-        Pair<Competitor, Boat> competitorAndBoat = createCompetitorAndBoat(masterDomainFactory, boatClass);
+        CompetitorWithBoat competitorAndBoat = createCompetitorAndBoat(masterDomainFactory, boatClass);
         int[] discardThreshold = {1, 2};
         CreateFlexibleLeaderboard createLeaderboardOperation = new CreateFlexibleLeaderboard("Test Leaderboard", "Test", discardThreshold, new LowPoint(), null);
         service.apply(createLeaderboardOperation);
@@ -96,7 +97,7 @@ public class WindByRaceLogTest {
         final String raceName = "Test Race";
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
         final Map<Competitor, Boat> competitorsAndBoats = new HashMap<>(); 
-        competitorsAndBoats.put(competitorAndBoat.getA(), competitorAndBoat.getB());
+        competitorsAndBoats.put(competitorAndBoat.getCompetitor(), competitorAndBoat.getBoat());
         RaceDefinition race = new RaceDefinitionImpl(raceName, masterCourse, boatClass, competitorsAndBoats);
         AddRaceDefinition addRaceOperation = new AddRaceDefinition(new RegattaName(regatta.getName()), race);
         service.apply(addRaceOperation);
@@ -109,13 +110,13 @@ public class WindByRaceLogTest {
         defaultFleet = Util.get(raceColumn.getFleets(), 0);
     }
 
-    private Pair<Competitor,Boat> createCompetitorAndBoat(final DomainFactory masterDomainFactory, final BoatClass boatClass) {
+    private CompetitorWithBoat createCompetitorAndBoat(final DomainFactory masterDomainFactory, final BoatClass boatClass) {
         Competitor competitor = masterDomainFactory.getOrCreateCompetitor("GER 61", "Sailor", "S", Color.RED, "noone@nowhere.de", null, new TeamImpl("Sailor",
                 (List<PersonImpl>) Arrays.asList(new PersonImpl[] { new PersonImpl("Sailor 1", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null)}),
                 new PersonImpl("Sailor 2", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
                 new BoatImpl("123", "GER 61", boatClass, "GER 61"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
         Boat boat = masterDomainFactory.getOrCreateBoat(competitor, "GER 61", boatClass, "GER 61", null);
-        return new Pair<Competitor,Boat>(competitor, boat);
+        return new CompetitorWithBoatImpl(competitor, boat);
     }
     
     private void attachTrackedRaceToRaceColumn() {

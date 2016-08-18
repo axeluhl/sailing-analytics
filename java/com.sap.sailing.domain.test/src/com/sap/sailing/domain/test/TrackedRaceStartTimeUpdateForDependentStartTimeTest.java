@@ -18,19 +18,17 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEve
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
-import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedRaceStartTimeUpdateForDependentStartTimeTest extends TrackBasedTest {
     @Test
     public void testStartTimeUpdateForRaceWithDependentStartTime() {
-        final Pair<Competitor, Boat> hasso = createCompetitorAndBoat("Hasso");
+        final CompetitorWithBoat hasso = createCompetitorAndBoat("Hasso");
         final RaceLog r1RaceLog = new RaceLogImpl("r1RaceLog");
         final RaceLog r2RaceLog = new RaceLogImpl("r2RaceLog");
         final RaceLogResolver raceLogResolver = new RaceLogResolver() {

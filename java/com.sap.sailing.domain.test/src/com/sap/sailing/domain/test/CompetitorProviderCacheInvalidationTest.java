@@ -83,7 +83,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         for (int l = 0; l < NUMBER_OF_COMP_LISTS; l++) {
             compLists[l] = new ArrayList<Competitor>();
             for (int i = 0; i < 10; i++) {
-                compLists[l].add(createCompetitor("" + l + "/" + i));
+                compLists[l].add(createCompetitorAndBoat("" + l + "/" + i).getCompetitor());
             }
         }
         competitorProviderRegattaLeaderboard = new CompetitorProviderFromRaceColumnsAndRegattaLike(regattaLeaderboard);

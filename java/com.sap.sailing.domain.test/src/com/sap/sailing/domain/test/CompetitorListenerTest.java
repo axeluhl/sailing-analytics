@@ -70,7 +70,7 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     @Before
     public void setUp() {
         baseDomainFactory = new DomainFactoryImpl((srlid)->null);
-        competitor = (DynamicCompetitor) TrackBasedTest.createCompetitorAndBoat("Hasso").getA();
+        competitor = (DynamicCompetitor) TrackBasedTest.createCompetitorAndBoat("Hasso").getCompetitor();
         nationalityChanged = false;
         whatChangedNationality = null;
         oldNationality = null;

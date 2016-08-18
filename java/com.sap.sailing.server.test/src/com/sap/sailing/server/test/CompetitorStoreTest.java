@@ -27,7 +27,7 @@ public class CompetitorStoreTest {
     @Test
     public void testAddingCompetitorsToTransientStore() {
         CompetitorStore transientStore = new TransientCompetitorStoreImpl();
-        DynamicCompetitor template = AbstractLeaderboardTest.createCompetitor("Test Competitor");
+        DynamicCompetitor template = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat("Test Competitor").getCompetitor();
         Competitor competitor = transientStore.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(), template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(), template.getBoat(),
                 /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730), null);
         assertTrue(competitor != template);
@@ -37,7 +37,7 @@ public class CompetitorStoreTest {
                 /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(750.2), null);
         assertSame(competitor, competitor2);
         assertEquals(DomainFactory.INSTANCE.getOrCreateNationality("GER"), competitor.getTeam().getNationality());
-        DynamicTeam differentTeam = AbstractLeaderboardTest.createCompetitor("Test Competitor").getTeam();
+        DynamicTeam differentTeam = (DynamicTeam) AbstractLeaderboardTest.createCompetitorAndBoat("Test Competitor").getCompetitor().getTeam();
         differentTeam.setNationality(DomainFactory.INSTANCE.getOrCreateNationality("GHA")); // Ghana
         Competitor competitor3 = transientStore.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(), 
                 template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, template.getBoat(), /* timeOnTimeFactor */
@@ -58,7 +58,7 @@ public class CompetitorStoreTest {
     public void testPersistentCompetitorStore() {
         CompetitorStore persistentStore1 = new PersistentCompetitorStore(
                 PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), /* clearStore */true, null, /* raceLogResolver */ (srlid)->null);
-        DynamicCompetitor template = AbstractLeaderboardTest.createCompetitor("Test Competitor");
+        DynamicCompetitor template = (DynamicCompetitor) AbstractLeaderboardTest.createCompetitorAndBoat("Test Competitor").getCompetitor();
         Competitor competitor = persistentStore1.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), template.getTeam(),
                 template.getBoat(), /* timeOnTimeFactor */ 1.234, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ Duration.ONE_SECOND.times(730), null);
@@ -72,7 +72,7 @@ public class CompetitorStoreTest {
         assertEquals(1.234, competitor2.getTimeOnTimeFactor(), 0.0000001);
         assertEquals(730, competitor2.getTimeOnDistanceAllowancePerNauticalMile().asSeconds(), 0.0000001);
 
-        DynamicTeam differentTeam = AbstractLeaderboardTest.createCompetitor("Test Competitor").getTeam();
+        DynamicTeam differentTeam = (DynamicTeam) AbstractLeaderboardTest.createCompetitorAndBoat("Test Competitor").getCompetitor().getTeam();
         differentTeam.setNationality(DomainFactory.INSTANCE.getOrCreateNationality("GHA")); // Ghana
         Competitor competitor3 = persistentStore2.getOrCreateCompetitor(template.getId(), template.getName(), template.getShortName(),
                 template.getColor(), template.getEmail(), template.getFlagImage(), differentTeam, template.getBoat(), /* timeOnTimeFactor */
