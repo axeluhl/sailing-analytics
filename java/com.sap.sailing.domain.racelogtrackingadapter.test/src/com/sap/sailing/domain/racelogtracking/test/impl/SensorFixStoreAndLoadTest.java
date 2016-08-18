@@ -188,7 +188,7 @@ public class SensorFixStoreAndLoadTest {
     }
 
     @Test
-    public void testFixesNotInMappedTiomeRangeAreIgnoredWhileTracking() throws InterruptedException {
+    public void testFixesNotInMappedTimeRangeAreIgnoredWhileTracking() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(300), new MillisecondsTimePoint(400)));
 
@@ -287,6 +287,34 @@ public class SensorFixStoreAndLoadTest {
 
         assertNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
 
+        fixLoaderAndTracker.stop(true);
+    }
+    
+    @Test
+    public void testFixesAreLoadedIfThereIsOneRevokedAndOneNonRevokedMapping() throws InterruptedException {
+        // revoked mapping timestamp 100-300
+        RegattaLogDeviceCompetitorBravoMappingEventImpl mappingEvent = new RegattaLogDeviceCompetitorBravoMappingEventImpl(
+                new MillisecondsTimePoint(3), author, comp, device, new MillisecondsTimePoint(100),
+                new MillisecondsTimePoint(300));
+        regattaLog.add(mappingEvent);
+        regattaLog.add(new RegattaLogRevokeEventImpl(author, mappingEvent, "Test purposes"));
+        
+        // non-revoked mapping timestamp 100-200
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+        
+        FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        
+        addFixes();
+        
+        trackedRace.waitForLoadingToFinish();
+        
+        // Only Fixes from 100 to 200 may be included
+        testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
+        
         fixLoaderAndTracker.stop(true);
     }
 
