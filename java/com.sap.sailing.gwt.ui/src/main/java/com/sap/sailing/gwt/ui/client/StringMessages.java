@@ -1635,4 +1635,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String favoriteBoatClasses();
     String notificationAboutNewResults();
     String notificationAboutUpcomingRaces();
+    String defineLanguageSpecificURLs();
+    String eventLocaleSailorsInfoWebsiteURL(String language);
+    String externalLinks();
+    String unspecified();
+    String english();
+    String german();
+    String russian();
+    String japanese();
+    String сhinese();
 }
