@@ -296,8 +296,12 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         // For now we create the boats here which MUST be corrected later on
         Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
         for (Competitor c: competitors) {
-            Boat theWrongBoat = c.getBoat();
-            Boat b = new BoatImpl(c.getId(), theWrongBoat.getName(), boatClass, theWrongBoat.getSailID(), theWrongBoat.getColor());
+            Boat b;
+            if (c.getBoat() != null) {
+                b = new BoatImpl(c.getId(), c.getBoat().getName(), boatClass, c.getBoat().getSailID(), c.getBoat().getColor());
+            } else {
+                b = new BoatImpl(c.getId(), c.getShortName(), boatClass, c.getShortName(), null);
+            }
             competitorsAndBoats.put(c, b);
         }
         final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitorsAndBoats, raceId);
