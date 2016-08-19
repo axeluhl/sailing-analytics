@@ -14,15 +14,16 @@
 INSTALL_FROM_RELEASE=build-201608091706
 USE_ENVIRONMENT=live-replica-server
 REPLICATE_MASTER_SERVLET_HOST=172.31.19.178
-REPLICATE_MASTER_EXCHANGE_NAME=germanleague2016
-REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener
-SERVER_NAME=germanleague2016
-MONGODB_NAME=germanleague2016-replica
+REPLICATE_MASTER_EXCHANGE_NAME=bundesliga2016
+REPLICATION_CHANNEL=bundesliga2016
+SERVER_NAME=bundesliga2016
+MONGODB_NAME=bundesliga2016-replica
 EVENT_ID=9e6e8e93-94fe-46b4-8fa7-cca3d77bd50a
-HTTP_SEC_EVENT=bundesliga2-2016.sapsailing.com
+HTTP_SEC_EVENT=bundesliga2-2016
 HTTP_SEC_EVENT_ID=cef66bf6-ef37-49ae-9f1d-cd595f41893f
 SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
-ADDITIONAL_JAVA_ARGS="-Digtimi.enableWorkaroundForSingleDigitLatitudes=true -Dpersistentcompetitors.clear=false -XX:+UseG1GC -XX:MaxGCPauseMillis=500 -verbose:gc -XX:+PrintGCTimeStamps -XX:+GCHistory -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -Dorg.eclipse.jetty.LEVEL=OFF -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StdErrLog" 
+BUILD_COMPLETE_NOTIFY=steffen.tobias.wagner@sap.com
+ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:+UseG1GC -XX:MaxGCPauseMillis=500 -verbose:gc -XX:+PrintGCTimeStamps -XX:+GCHistory -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -Dorg.eclipse.jetty.LEVEL=OFF -Dorg.eclipse.jetty.util.log.class=org.eclipse.jetty.util.log.StdErrLog"
 ```
 
 ## danishleague2016
