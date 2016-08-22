@@ -303,8 +303,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     }
                 } finally {
                     synchronized (FixLoaderAndTracker.this) {
-                        int currentActiveLoaders;
-                        currentActiveLoaders = activeLoaders.decrementAndGet();
+                        int currentActiveLoaders = activeLoaders.decrementAndGet();
                         FixLoaderAndTracker.this.notifyAll();
                         if (currentActiveLoaders == 0) {
                             setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
