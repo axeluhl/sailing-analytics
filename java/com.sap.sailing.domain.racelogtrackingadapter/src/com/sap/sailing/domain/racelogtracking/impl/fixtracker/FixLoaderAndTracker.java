@@ -283,7 +283,16 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         });
     }
 
-    private void updateConcurrent(final Runnable updateCallback) {
+    /**
+     * This method runs the given update callback in a separate {@link Thread} by handling technical concurrency aspects
+     * and potential {@link #preemptiveStopRequested preemptive stop requests} internally. Thus, it separates the
+     * functional updating process from technical aspects.
+     * 
+     * @param updateCallback
+     *            the {@link Runnable} callback used to run the update
+     */
+    // TODO Consider using a thread pool here, after merging bug3864 into master
+    private void updateAsyncInternal(final Runnable updateCallback) {
         synchronized (FixLoaderAndTracker.this) {
             activeLoaders.incrementAndGet();
             setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
@@ -337,7 +346,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         
         @Override
         protected void updateMappings() {
-            updateConcurrent(FixLoaderDeviceMappings.super::updateMappings);
+            updateAsyncInternal(FixLoaderDeviceMappings.super::updateMappings);
         }
 
         @Override
