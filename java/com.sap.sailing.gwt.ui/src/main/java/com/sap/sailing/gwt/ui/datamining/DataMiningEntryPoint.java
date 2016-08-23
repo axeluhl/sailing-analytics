@@ -77,7 +77,6 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         DockLayoutPanel panel = new DockLayoutPanel(Unit.PX);
         panel.addNorth(header, 75);
         panel.add(authorizedContentDecorator);
-        panel.addStyleName("dockLayoutPanel");
         rootPanel.add(panel);
     }
 
