@@ -1,6 +1,11 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -108,7 +113,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     protected ListBox createSailingEventListBox() {
         ListBox eventListBox = createListBox(false);
         eventListBox.addItem("Please select a sailing event...");
-        for (EventDTO event: existingEvents) {
+        for (EventDTO event: makeSortedEvents(existingEvents)) {
             eventListBox.addItem(event.getName());
         }
         eventListBox.addChangeHandler(new ChangeHandler() {
@@ -118,6 +123,22 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
             }
         });
         return eventListBox;
+    }
+    
+    /**
+     * Sort collection of events alphabetically
+     * @param events - collection that is going to be sorted
+     * @return sorted list
+     */
+    private List<EventDTO> makeSortedEvents(Collection<EventDTO> events) {
+    	List<EventDTO> sortedEvents = Arrays.asList(events.toArray(new EventDTO[events.size()]));
+    	Collections.sort(sortedEvents, new Comparator<EventDTO>() {
+        	@Override
+        	public int compare(EventDTO firstEvent, EventDTO secondEvent) {
+        		return firstEvent.getName().compareTo(secondEvent.getName());
+        	}
+        });
+    	return sortedEvents;
     }
 
     protected void onEventSelectionChanged() {

@@ -1,6 +1,10 @@
 package com.sap.sailing.gwt.autoplay.client.place.start;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -139,12 +143,27 @@ public class DesktopStartView extends Composite implements StartView {
     @Override
     public void setEvents(List<EventDTO> events) {
         this.events.clear();
-        this.events.addAll(events);
-        
+        this.events.addAll(makeSortedEvents(events));
         eventSelectionBox.addItem(StringMessages.INSTANCE.pleaseSelectAnEvent());
-        for(EventDTO event: events) {
+        for(EventDTO event: this.events) {
             eventSelectionBox.addItem(event.getName());
         }
+    }
+   
+    /**
+     * Sort collection of events alphabetically
+     * @param events - collection that is going to be sorted
+     * @return sorted list
+     */
+    private List<EventDTO> makeSortedEvents(List<EventDTO> events) {
+    	List<EventDTO> sortedEvents = Arrays.asList(events.toArray(new EventDTO[events.size()]));
+    	Collections.sort(sortedEvents, new Comparator<EventDTO>() {
+        	@Override
+        	public int compare(EventDTO firstEvent, EventDTO secondEvent) {
+        		return firstEvent.getName().compareTo(secondEvent.getName());
+        	}
+        });
+    	return sortedEvents;
     }
     
     @UiHandler("eventSelectionBox")
