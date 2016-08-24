@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 import com.sap.sse.common.Util;
 
 public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends AbstractCell<T> {
@@ -28,6 +29,9 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
         
         @Template("<div class=\"{0}\"><div>{2}</div><div class=\"{1}\"><img src=\"images/home/launch-loupe.svg\"/></div>")
         SafeHtml raceviewerLaunchPad(String styleNames, String iconStyleNames, String text);
+        
+        @Template("<a href=\"{4}\" class=\"{0}\"><div>{2}</div> <div class=\"{1}\"><img src=\"{3}\"/></div></a> ")
+        SafeHtml standaloneButton(String styleNames, String iconStyleNames, String text, String icon, String link);
     }
     
     private static final CellTemplates TEMPLATE = GWT.create(CellTemplates.class);
@@ -52,6 +56,11 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     @Override
     public void onBrowserEvent(Context context, final Element parent, T data, NativeEvent event,
             ValueUpdater<T> valueUpdater) {
+        //If direct button we should not add any handlers
+        if (!data.isFinished() && !data.isRunning()) {
+            return;
+        }
+        
         if (data.hasValidTrackingData() && BrowserEvents.CLICK.equals(event.getType())
                 && parent.getFirstChildElement().isOrHasChild(Element.as(event.getEventTarget()))) {
             panel.setWidget(new RaceviewerLaunchPad(data, panel) {
@@ -63,9 +72,12 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
             panel.setPopupPositionAndShow(new PositionCallback() {
                 @Override
                 public void setPosition(int offsetWidth, int offsetHeight) {
+                    //Popup width is max to td size
+                    int width = parent.getClientWidth();
                     int alignBottom = parent.getAbsoluteTop() + parent.getOffsetHeight() - offsetHeight;
                     int top = (alignBottom - Window.getScrollTop() < 0 ? parent.getAbsoluteTop() - 1 : alignBottom + 1);
-                    panel.setPopupPosition(parent.getAbsoluteRight() + 1 - offsetWidth, top);
+                    panel.setPopupPosition(parent.getAbsoluteRight() + 1 - width, top);
+                    panel.setWidth(width + "px");
                     panel.getElement().scrollIntoView();
                 }
             });
@@ -77,8 +89,13 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     @Override
     public void render(Context context, T data, SafeHtmlBuilder sb) {
         if (data.hasValidTrackingData()) {
-            String styleNames = data.isFinished() ? analyzeStyleNames : liveStyleNames;
-            sb.append(TEMPLATE.raceviewerLaunchPad(styleNames, iconStyleNames, I18N.raceDetailsToShow()));
+            //If race is live then draw direct button instead of popup
+            if (!data.isFinished() && !data.isRunning()) {
+                sb.append(TEMPLATE.standaloneButton(liveStyleNames, iconStyleNames, I18N.watchLive(), 
+                        "images/home/play.png", presenter.getRaceViewerURL(data, RaceBoardModes.PLAYER.name())));
+            } else {
+                sb.append(TEMPLATE.raceviewerLaunchPad(analyzeStyleNames, iconStyleNames, I18N.raceDetailsToShow()));
+            }
         } else {
             sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, I18N_UBI.eventRegattaRaceNotTracked()));
         }
