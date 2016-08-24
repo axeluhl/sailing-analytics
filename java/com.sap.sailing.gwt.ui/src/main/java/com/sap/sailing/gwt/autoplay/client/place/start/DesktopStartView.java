@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.start;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -36,7 +37,6 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.util.NullSafeComparatorWrapper;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
@@ -54,36 +54,50 @@ public class DesktopStartView extends Composite implements StartView {
     interface StartPageViewUiBinder extends UiBinder<Widget, DesktopStartView> {
     }
 
-    @UiField(provided=true) SAPHeader sapHeader;
-    @UiField(provided=true) ListBox localeSelectionBox;
-    @UiField(provided=true) ListBox eventSelectionBox;
-    @UiField(provided=true) ListBox leaderboardSelectionBox;
-    @UiField CheckBox startInFullscreenModeBox;
-    @UiField Button startAutoPlayButton;
-    @UiField DivElement leaderboardSelectionUi;
-    @UiField DivElement screenConfigurationUi;
-    @UiField FlowPanel leaderboardPerspectiveSettingsPanel;
-    @UiField FlowPanel raceboardPerspectiveSettingsPanel;
-    
-    @UiField CheckBox autoSwitchToRaceboard;
-    @UiField IntegerBox timeToRaceStartInSeconds;
-    
+    @UiField(provided = true)
+    SAPHeader sapHeader;
+    @UiField(provided = true)
+    ListBox localeSelectionBox;
+    @UiField(provided = true)
+    ListBox eventSelectionBox;
+    @UiField(provided = true)
+    ListBox leaderboardSelectionBox;
+    @UiField
+    CheckBox startInFullscreenModeBox;
+    @UiField
+    Button startAutoPlayButton;
+    @UiField
+    DivElement leaderboardSelectionUi;
+    @UiField
+    DivElement screenConfigurationUi;
+    @UiField
+    FlowPanel leaderboardPerspectiveSettingsPanel;
+    @UiField
+    FlowPanel raceboardPerspectiveSettingsPanel;
+
+    @UiField
+    CheckBox autoSwitchToRaceboard;
+    @UiField
+    IntegerBox timeToRaceStartInSeconds;
+
     private final PlaceNavigator navigator;
     private final EventBus eventBus;
     private final List<EventDTO> events;
-    
+
     private PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecyclesAndSettings;
     private PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings;
-    
+
     private final int defaultTimeToRaceStartTimeInSeconds = 180;
-    
+
     public DesktopStartView(PlaceNavigator navigator, EventBus eventBus) {
         super();
         this.navigator = navigator;
         this.eventBus = eventBus;
         this.events = new ArrayList<EventDTO>();
-        
-//        sapHeader = new SAPHeaderWithAuthentication(StringMessages.INSTANCE.sapSailingAnalytics(), StringMessages.INSTANCE.autoplayConfiguration());
+
+        // sapHeader = new
+        // SAPHeaderWithAuthentication(StringMessages.INSTANCE.sapSailingAnalytics(),
+        // StringMessages.INSTANCE.autoplayConfiguration());
         sapHeader = new SAPHeader(StringMessages.INSTANCE.sapSailingAnalytics());
         sapHeader.setHeaderTitle(StringMessages.INSTANCE.autoplayConfiguration());
         eventSelectionBox = new ListBox();
@@ -92,7 +106,7 @@ public class DesktopStartView extends Composite implements StartView {
         leaderboardSelectionBox.setMultipleSelect(false);
         localeSelectionBox = new ListBox();
         localeSelectionBox.setMultipleSelect(false);
-        
+
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
         for (String localeName : GWTLocaleUtil.getAvailableLocales()) {
@@ -113,67 +127,76 @@ public class DesktopStartView extends Composite implements StartView {
 
         leaderboardSelectionUi.getStyle().setVisibility(Visibility.HIDDEN);
         screenConfigurationUi.getStyle().setVisibility(Visibility.HIDDEN);
-        
+
         startAutoPlayButton.setEnabled(false);
         startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
     }
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
-        LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifecycle = new LeaderboardWithHeaderPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
-        leaderboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(leaderboardPerspectiveLifecycle, leaderboardPerspectiveLifecycle.createDefaultSettings());
-        RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
-        raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle, raceboardPerspectiveLifecycle.createDefaultSettings());
+        LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifecycle = new LeaderboardWithHeaderPerspectiveLifecycle(
+                leaderboard, StringMessages.INSTANCE);
+        leaderboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(
+                leaderboardPerspectiveLifecycle, leaderboardPerspectiveLifecycle.createDefaultSettings());
+        RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard,
+                StringMessages.INSTANCE);
+        raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(
+                raceboardPerspectiveLifecycle, raceboardPerspectiveLifecycle.createDefaultSettings());
     }
 
-    private <PL extends PerspectiveLifecycle<PS>, PS extends Settings> void openPerspectiveSettingsDialog(final PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleAndSettings) {
-        PerspectiveCompositeLifecycleTabbedSettingsDialog<PL,PS> dialog = new PerspectiveCompositeLifecycleTabbedSettingsDialog<>(StringMessages.INSTANCE,
-                perspectiveLifecycleAndSettings, perspectiveLifecycleAndSettings.getPerspectiveLifecycle().getLocalizedShortName(), new DialogCallback<PerspectiveCompositeSettings<PS>>() {
-            @Override
-            public void ok(PerspectiveCompositeSettings<PS> newSettings) {
-                perspectiveLifecycleAndSettings.setAllSettings(newSettings);
-            };
+    private <PL extends PerspectiveLifecycle<PS>, PS extends Settings> void openPerspectiveSettingsDialog(
+            final PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleAndSettings) {
+        PerspectiveCompositeLifecycleTabbedSettingsDialog<PL, PS> dialog = new PerspectiveCompositeLifecycleTabbedSettingsDialog<>(
+                StringMessages.INSTANCE, perspectiveLifecycleAndSettings,
+                perspectiveLifecycleAndSettings.getPerspectiveLifecycle().getLocalizedShortName(),
+                new DialogCallback<PerspectiveCompositeSettings<PS>>() {
+                    @Override
+                    public void ok(PerspectiveCompositeSettings<PS> newSettings) {
+                        perspectiveLifecycleAndSettings.setAllSettings(newSettings);
+                    };
 
-            @Override
-            public void cancel() {
-            }
-        });
+                    @Override
+                    public void cancel() {
+                    }
+                });
         dialog.show();
     }
-    
+
     @Override
     public void setEvents(List<EventDTO> events) {
         this.events.clear();
         this.events.addAll(events);
         eventSelectionBox.addItem(StringMessages.INSTANCE.pleaseSelectAnEvent());
-        for(EventDTO event: sortEvents(events)) {
+        for (EventDTO event : sortEvents(events)) {
             eventSelectionBox.addItem(event.getName());
         }
     }
-   
+
     /**
-     * Sort list of events alphabetically
-     * @param events - collection that is going to be sorted
+     * Sort collection of events alphabetically
+     * 
+     * @param events
+     *            - collection that is going to be sorted
      * @return sorted list
      */
-    private List<EventDTO> sortEvents(List<EventDTO> events) {
-    	List<EventDTO> sortedEvents = new ArrayList<>(events);
-    	Collections.sort(sortedEvents, new NullSafeComparatorWrapper<EventDTO>(new Comparator<EventDTO>() {
-    		@Override
-    		public int compare(EventDTO event1, EventDTO event2) {
-    			return new NaturalComparator().compare(event1.getName(), event2.getName());
-    		}
-		}));
-    	return sortedEvents;
+    private List<EventDTO> sortEvents(Collection<EventDTO> events) {
+        List<EventDTO> sortedEvents = new ArrayList<>(events);
+        Collections.sort(sortedEvents, new Comparator<EventDTO>() {
+            @Override
+            public int compare(EventDTO event1, EventDTO event2) {
+                return new NaturalComparator().compare(event1.getName(), event2.getName());
+            }
+        });
+        return sortedEvents;
     }
-    
+
     @UiHandler("eventSelectionBox")
     void onEventSelectionChange(ChangeEvent event) {
         EventDTO selectedEvent = getSelectedEvent();
-        if(selectedEvent != null) {
+        if (selectedEvent != null) {
             leaderboardSelectionBox.clear();
             leaderboardSelectionBox.addItem(StringMessages.INSTANCE.selectALeaderboard());
-            for(LeaderboardGroupDTO leaderboardGroup: selectedEvent.getLeaderboardGroups()) {
-                for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
+            for (LeaderboardGroupDTO leaderboardGroup : selectedEvent.getLeaderboardGroups()) {
+                for (StrippedLeaderboardDTO leaderboard : leaderboardGroup.getLeaderboards()) {
                     leaderboardSelectionBox.addItem(leaderboard.name);
                 }
             }
@@ -184,25 +207,27 @@ public class DesktopStartView extends Composite implements StartView {
     @UiHandler("leaderboardSelectionBox")
     void onLeaderboardSelectionChange(ChangeEvent event) {
         String selectedLeaderboardName = getSelectedLeaderboardName();
-        if(selectedLeaderboardName != null) {
+        if (selectedLeaderboardName != null) {
             startAutoPlayButton.setEnabled(true);
             startAutoPlayButton.removeStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
 
             StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
             this.updatePerspectives(selectedLeaderboard);
 
-            createPerspectiveSettingsUI(leaderboardPerspectiveLifecyclesAndSettings, leaderboardPerspectiveSettingsPanel);
+            createPerspectiveSettingsUI(leaderboardPerspectiveLifecyclesAndSettings,
+                    leaderboardPerspectiveSettingsPanel);
             createPerspectiveSettingsUI(raceboardPerspectiveLifecyclesAndSettings, raceboardPerspectiveSettingsPanel);
         } else {
             startAutoPlayButton.setEnabled(false);
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
         }
-        screenConfigurationUi.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
+        screenConfigurationUi.getStyle()
+                .setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
 
     private <PL extends PerspectiveLifecycle<PS>, PS extends Settings> void createPerspectiveSettingsUI(
-            final PerspectiveLifecycleWithAllSettings<PL,PS> perspectiveLifecycleWithAllSettings,
-            FlowPanel perspectiveSettingsPanel) { 
+            final PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings,
+            FlowPanel perspectiveSettingsPanel) {
         perspectiveSettingsPanel.clear();
 
         Button perspectiveSettingsButton = new Button(StringMessages.INSTANCE.settings());
@@ -216,22 +241,23 @@ public class DesktopStartView extends Composite implements StartView {
             }
         });
     }
-    
-    @UiHandler("localeSelectionBox") 
+
+    @UiHandler("localeSelectionBox")
     void onLocaleSelectionChange(ChangeEvent event) {
         String selectedLocale = getSelectedLocale();
         LocaleChangeEvent localeChangeEvent = new LocaleChangeEvent(selectedLocale);
         eventBus.fireEvent(localeChangeEvent);
     }
-    
+
     @UiHandler("startAutoPlayButton")
     void startAutoPlayClicked(ClickEvent event) {
         EventDTO selectedEvent = getSelectedEvent();
         String selectedLeaderboardName = getSelectedLeaderboardName();
-        
-        if(selectedEvent != null && selectedLeaderboardName != null) {
-            navigator.goToPlayer(new AutoPlayerConfiguration(selectedEvent.id.toString(), selectedLeaderboardName,
-                    startInFullscreenModeBox.getValue(), timeToRaceStartInSeconds.getValue()), 
+
+        if (selectedEvent != null && selectedLeaderboardName != null) {
+            navigator.goToPlayer(
+                    new AutoPlayerConfiguration(selectedEvent.id.toString(), selectedLeaderboardName,
+                            startInFullscreenModeBox.getValue(), timeToRaceStartInSeconds.getValue()),
                     leaderboardPerspectiveLifecyclesAndSettings, raceboardPerspectiveLifecyclesAndSettings);
         }
     }
@@ -276,10 +302,10 @@ public class DesktopStartView extends Composite implements StartView {
     private EventDTO getSelectedEvent() {
         EventDTO result = null;
         int selectedIndex = eventSelectionBox.getSelectedIndex();
-        if(events != null && selectedIndex > 0) {
+        if (events != null && selectedIndex > 0) {
             String selectedItemText = eventSelectionBox.getItemText(selectedIndex);
-            for(EventDTO event: events) {
-                if(event.getName().equals(selectedItemText)) {
+            for (EventDTO event : events) {
+                if (event.getName().equals(selectedItemText)) {
                     result = event;
                     break;
                 }
