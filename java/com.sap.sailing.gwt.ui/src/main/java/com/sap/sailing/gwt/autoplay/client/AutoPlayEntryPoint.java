@@ -12,9 +12,6 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
-import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
-import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
-import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class AutoPlayEntryPoint extends AbstractMvpEntryPoint<StringMessages, AutoPlayAppClientFactory> {
