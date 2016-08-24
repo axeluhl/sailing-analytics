@@ -26,10 +26,8 @@ public class AutoPlayEntryPoint extends AbstractMvpEntryPoint<StringMessages, Au
         initMvp(clientFactory, applicationHistoryMapper, new AutoPlayAppActivityMapper(clientFactory));
         
         SAPHeaderWithAuthentication header = initHeader();
-        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(clientFactory.getUserService(), header.getAuthenticationMenuView());
-        AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
+		new FixedSailingAuthentication(clientFactory.getUserService(), header.getAuthenticationMenuView());
         
-        RootPanel.get().add(authorizedContentDecorator);
         RootPanel.get().add(header);
 
         SharedResources.INSTANCE.mediaCss().ensureInjected();
