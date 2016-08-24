@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.place.start;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -38,7 +36,9 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.util.NullSafeComparatorWrapper;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
@@ -143,26 +143,26 @@ public class DesktopStartView extends Composite implements StartView {
     @Override
     public void setEvents(List<EventDTO> events) {
         this.events.clear();
-        this.events.addAll(makeSortedEvents(events));
+        this.events.addAll(events);
         eventSelectionBox.addItem(StringMessages.INSTANCE.pleaseSelectAnEvent());
-        for(EventDTO event: this.events) {
+        for(EventDTO event: sortEvents(events)) {
             eventSelectionBox.addItem(event.getName());
         }
     }
    
     /**
-     * Sort collection of events alphabetically
+     * Sort list of events alphabetically
      * @param events - collection that is going to be sorted
      * @return sorted list
      */
-    private List<EventDTO> makeSortedEvents(List<EventDTO> events) {
-    	List<EventDTO> sortedEvents = Arrays.asList(events.toArray(new EventDTO[events.size()]));
-    	Collections.sort(sortedEvents, new Comparator<EventDTO>() {
-        	@Override
-        	public int compare(EventDTO firstEvent, EventDTO secondEvent) {
-        		return firstEvent.getName().compareTo(secondEvent.getName());
-        	}
-        });
+    private List<EventDTO> sortEvents(List<EventDTO> events) {
+    	List<EventDTO> sortedEvents = new ArrayList<>(events);
+    	Collections.sort(sortedEvents, new NullSafeComparatorWrapper<EventDTO>(new Comparator<EventDTO>() {
+    		@Override
+    		public int compare(EventDTO event1, EventDTO event2) {
+    			return new NaturalComparator().compare(event1.getName(), event2.getName());
+    		}
+		}));
     	return sortedEvents;
     }
     

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,6 +17,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.util.NullSafeComparatorWrapper;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialog {
@@ -113,7 +114,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     protected ListBox createSailingEventListBox() {
         ListBox eventListBox = createListBox(false);
         eventListBox.addItem("Please select a sailing event...");
-        for (EventDTO event: makeSortedEvents(existingEvents)) {
+        for (EventDTO event: sortEvents(existingEvents)) {
             eventListBox.addItem(event.getName());
         }
         eventListBox.addChangeHandler(new ChangeHandler() {
@@ -130,14 +131,14 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
      * @param events - collection that is going to be sorted
      * @return sorted list
      */
-    private List<EventDTO> makeSortedEvents(Collection<EventDTO> events) {
-    	List<EventDTO> sortedEvents = Arrays.asList(events.toArray(new EventDTO[events.size()]));
-    	Collections.sort(sortedEvents, new Comparator<EventDTO>() {
-        	@Override
-        	public int compare(EventDTO firstEvent, EventDTO secondEvent) {
-        		return firstEvent.getName().compareTo(secondEvent.getName());
-        	}
-        });
+    private List<EventDTO> sortEvents(Collection<EventDTO> events) {
+    	List<EventDTO> sortedEvents = new ArrayList<>(events);
+    	Collections.sort(sortedEvents, new NullSafeComparatorWrapper<EventDTO>(new Comparator<EventDTO>() {
+    		@Override
+    		public int compare(EventDTO event1, EventDTO event2) {
+    			return new NaturalComparator().compare(event1.getName(), event2.getName());
+    		}
+		}));
     	return sortedEvents;
     }
 
