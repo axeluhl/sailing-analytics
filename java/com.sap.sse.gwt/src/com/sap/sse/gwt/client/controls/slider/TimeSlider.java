@@ -97,34 +97,6 @@ public class TimeSlider extends SliderBar {
     }
 
     /**
-     * Override parent version because event don't fire when we set value which is in multiples of stepSize
-     */
-    @Override
-    public synchronized void setCurrentValue(Double curValue, boolean fireEvent) {
-        // Confine the value to the range
-        if (!isMinMaxInitialized() || curValue == null) {
-            return;
-        }
-
-        Double newValue = Math.max(minValue, Math.min(maxValue, curValue));
-        double remainder = (newValue - minValue) % stepSize;
-        newValue -= remainder;
-        // Go to next step if more than halfway there
-        if ((remainder > (stepSize / 2)) && ((newValue + stepSize) <= maxValue)) {
-            newValue += stepSize;
-        }
-
-        boolean isValueChanged = !newValue.equals(this.curValue) && this.curValue != null;
-        this.curValue = newValue;
-        // Redraw the knob
-        drawKnob();
-        // Fire the ValueChangeEvent if the value actually changed
-        if (fireEvent && isValueChanged) {
-            ValueChangeEvent.fire(this, this.curValue);
-        }
-    }
-
-    /**
      * Draw the labels along the line.
      */
     protected void drawTickLabels() {
