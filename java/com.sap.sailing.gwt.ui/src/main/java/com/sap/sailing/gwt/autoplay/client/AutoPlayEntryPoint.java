@@ -18,13 +18,13 @@ public class AutoPlayEntryPoint extends AbstractMvpEntryPoint<StringMessages, Au
     @Override
     public void doOnModuleLoad() {
         AutoPlayAppClientFactory clientFactory = GWT.create(AutoPlayAppClientFactory.class);
-        
+
         AutoPlayAppHistoryMapper applicationHistoryMapper = GWT.create(AutoPlayAppHistoryMapper.class);
         initMvp(clientFactory, applicationHistoryMapper, new AutoPlayAppActivityMapper(clientFactory));
-        
+
         SAPHeaderWithAuthentication header = initHeader();
-		new FixedSailingAuthentication(clientFactory.getUserService(), header.getAuthenticationMenuView());
-        
+        new FixedSailingAuthentication(clientFactory.getUserService(), header.getAuthenticationMenuView());
+
         RootPanel.get().add(header);
 
         SharedResources.INSTANCE.mediaCss().ensureInjected();
