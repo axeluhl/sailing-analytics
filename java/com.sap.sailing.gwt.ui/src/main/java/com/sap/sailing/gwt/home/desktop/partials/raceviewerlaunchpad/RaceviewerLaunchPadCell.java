@@ -6,6 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -69,11 +70,19 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
                     return presenter.getRaceViewerURL(data, mode);
                 }
             });
+            
             panel.setPopupPositionAndShow(new PositionCallback() {
                 @Override
                 public void setPosition(int offsetWidth, int offsetHeight) {
-                    //Popup width is max to td size
-                    int width = parent.getClientWidth();
+                    //Popup width is max between btn and actual popup size
+                    int buttonWidth = 0;
+                    if (parent.getChild(0) != null && parent.getChild(0).getNodeType() == Node.ELEMENT_NODE) {
+                        Element button = (Element) parent.getChild(0);
+                        //Adding 1px as button width is double value like 153.87 floated down to 153
+                        buttonWidth = button.getOffsetWidth() + 1;
+                    };
+                    
+                    int width = offsetWidth > buttonWidth ? offsetWidth : buttonWidth;
                     int alignBottom = parent.getAbsoluteTop() + parent.getOffsetHeight() - offsetHeight;
                     int top = (alignBottom - Window.getScrollTop() < 0 ? parent.getAbsoluteTop() - 1 : alignBottom + 1);
                     panel.setPopupPosition(parent.getAbsoluteRight() + 1 - width, top);
