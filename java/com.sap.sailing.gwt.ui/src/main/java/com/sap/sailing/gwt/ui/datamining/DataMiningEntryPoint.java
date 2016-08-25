@@ -45,18 +45,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     }
     
     private void createDataminingPanel() {
-        DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(getStringMessages());
-        final ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(getStringMessages());
-        
-        final DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
-        BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls =
-                new BufferingQueryDefinitionProviderWithControls(session, getStringMessages(), dataMiningService, this, settingsControl, resultsPresenter);
-        queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
-        selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
-        
-        final QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService, this, queryDefinitionProviderWithControls, resultsPresenter);
-        queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
-        settingsControl.addSettingsComponent(queryRunner);
+        final DataMiningEntryPoint that = this;
         
         SAPHeaderWithAuthentication header  = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(), getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
@@ -64,6 +53,19 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             @Override
             public Widget get() {
+                DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(getStringMessages());
+                final ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(getStringMessages());
+                
+                final DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
+                BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls =
+                        new BufferingQueryDefinitionProviderWithControls(session, getStringMessages(), dataMiningService, that, settingsControl, resultsPresenter);
+                queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
+                selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
+                
+                final QueryRunner queryRunner = new SimpleQueryRunner(session, getStringMessages(), dataMiningService, that, queryDefinitionProviderWithControls, resultsPresenter);
+                queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
+                settingsControl.addSettingsComponent(queryRunner);
+                
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(15);
                 
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
