@@ -8,8 +8,6 @@ import java.util.Set;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionModel.AbstractSelectionModel;
-import com.google.gwt.view.client.SetSelectionModel;
 
 /**
  * A multi selection model, that allows to block the selection change notifications.<br>
@@ -17,8 +15,7 @@ import com.google.gwt.view.client.SetSelectionModel;
  * wasn't open enough.
  * @author Lennart Hensler (D054527)
  */
-public class ControllableMultiSelectionModel<T> extends AbstractSelectionModel<T>
-                                                implements SetSelectionModel<T> {
+public class ControllableMultiSelectionModel<T> extends MultiSelectionModel<T> {
 
     // Ensure one value per key
     private final Map<Object, T> selectedSet;
