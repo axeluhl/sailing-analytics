@@ -74,14 +74,13 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
             panel.setPopupPositionAndShow(new PositionCallback() {
                 @Override
                 public void setPosition(int offsetWidth, int offsetHeight) {
-                    //Popup width is max between btn and actual popup size
                     int buttonWidth = 0;
                     if (parent.getChild(0) != null && parent.getChild(0).getNodeType() == Node.ELEMENT_NODE) {
                         Element button = (Element) parent.getChild(0);
                         //Adding 1px as button width is double value like 153.87 floated down to 153
                         buttonWidth = button.getOffsetWidth() + 1;
                     };
-                    
+                    //Popup width is max between btn and actual popup size
                     int width = offsetWidth > buttonWidth ? offsetWidth : buttonWidth;
                     int alignBottom = parent.getAbsoluteTop() + parent.getOffsetHeight() - offsetHeight;
                     int top = (alignBottom - Window.getScrollTop() < 0 ? parent.getAbsoluteTop() - 1 : alignBottom + 1);
