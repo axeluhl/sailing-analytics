@@ -52,7 +52,7 @@ import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 /**
  * Uses a custom datamining pipeline to aggregate incoming fixes in two regression based polar containers.
  * 
- * For more information on polars in SAP Sailing Analytics, please see: http://wiki.sapsailing.com/wiki/Polars
+ * For more information on polars in SAP Sailing Analytics, please see: http://wiki.sapsailing.com/wiki/howto/misc/polars
  * 
  * @author Frederik Petersen (D054528)
  * @author Axel Uhl

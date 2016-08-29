@@ -59,6 +59,11 @@ public interface SensorFixStore {
      */
     void removeListener(FixReceivedListener<? extends Timed> listener);
     
+    /**
+     * Remove the registrations of the listener for the given device.
+     */
+    void removeListener(FixReceivedListener<? extends Timed> listener, DeviceIdentifier device);
+    
     TimeRange getTimeRangeCoveredByFixes(DeviceIdentifier device) throws TransformationException,
     NoCorrespondingServiceRegisteredException;
     

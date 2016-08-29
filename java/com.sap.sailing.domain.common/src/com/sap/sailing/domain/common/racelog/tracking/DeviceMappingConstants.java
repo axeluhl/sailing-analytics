@@ -10,7 +10,7 @@ import com.sap.sse.common.util.UrlHelper;
  * {@link DeviceMappingOnRaceQRCodeWidget}).
  * <p>
  * The structure of the URL is documented in the <a
- * href="http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft">Wiki</a>.
+ * href="http://wiki.sapsailing.com/wiki/info/api/api-v1">Wiki</a>.
  * {@code http://<host>/tracking/checkin?event_id=<e>&leaderboard_name=<l>&competitor_id=<c>}
  * 
  * @author Fredrik Teschke
