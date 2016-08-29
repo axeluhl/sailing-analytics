@@ -191,7 +191,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
             }
         }
         BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), 0);
-        BoatDTO boat = new BoatDTO(name.getText(), sailId.getText());
+        BoatDTO boat = new BoatDTO(competitorToEdit.getBoat().getIdAsString(), name.getText(), boatClass, sailId.getText());
         CompetitorDTO result = new CompetitorDTOImpl(name.getText(), shortName.getText(), color, email.getText(),
                 /* twoLetterIsoCountryCode */ null,
                 threeLetterIocCountryCode.getValue(threeLetterIocCountryCode.getSelectedIndex()),

@@ -260,15 +260,16 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 if (competitorDTO == null) {
                     final Nationality nationality = c.getTeam().getNationality();
                     CountryCode countryCode = nationality == null ? null : nationality.getCountryCode();
+                    BoatClassDTO boatClassDTO = new BoatClassDTO(c.getBoat().getBoatClass()
+                            .getName(), c.getBoat().getBoatClass().getDisplayName(), c.getBoat().getBoatClass().getHullLength().getMeters());
                     competitorDTO = new CompetitorDTOImpl(c.getName(), c.getShortName(), c.getColor(), c.getEmail(), countryCode == null ? ""
                             : countryCode.getTwoLetterISOCode(), countryCode == null ? ""
                             : countryCode.getThreeLetterIOCCode(), countryCode == null ? "" : countryCode.getName(),
                               c.getId().toString(),
                               c.getTeam().getImage() == null ? null : c.getTeam().getImage().toString(),
                               c.getFlagImage() == null ? null : c.getFlagImage().toString(),
-                            new BoatDTO(c.getBoat().getName(), c.getBoat().getSailID(), c.getBoat().getColor()),  
-                            new BoatClassDTO(c.getBoat().getBoatClass()
-                            .getName(), c.getBoat().getBoatClass().getDisplayName(), c.getBoat().getBoatClass().getHullLength().getMeters()),
+                            new BoatDTO(c.getBoat().getId().toString(), c.getBoat().getName(), boatClassDTO, c.getBoat().getSailID(), c.getBoat().getColor()),  
+                            boatClassDTO,
                             c.getTimeOnTimeFactor(), c.getTimeOnDistanceAllowancePerNauticalMile(), c.getSearchTag());
                     weakCompetitorDTOCache.put(c, competitorDTO);
                 }
@@ -471,7 +472,9 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                 LockUtil.lockForWrite(lock);
                 boatDTO = weakBoatDTOCache.get(b);
                 if (boatDTO == null) {
-                    boatDTO = new BoatDTO(b.getName(), b.getSailID(), b.getColor());
+                    BoatClassDTO boatClassDTO = new BoatClassDTO(b.getBoatClass().getName(), 
+                            b.getBoatClass().getDisplayName(), b.getBoatClass().getHullLength().getMeters());
+                    boatDTO = new BoatDTO(b.getId().toString(), b.getName(), boatClassDTO, b.getSailID(), b.getColor());
                     weakBoatDTOCache.put(b, boatDTO);
                 }
             }
