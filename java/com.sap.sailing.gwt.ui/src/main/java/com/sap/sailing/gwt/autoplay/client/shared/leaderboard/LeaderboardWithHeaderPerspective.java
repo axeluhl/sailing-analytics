@@ -30,6 +30,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * A perspective managing a header with a single leaderboard filling the rest of the screen.
@@ -47,7 +48,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     private final PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> componentLifecyclesAndSettings;
     
     public LeaderboardWithHeaderPerspective(PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveLifecycleWithAllSettings,
-            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            SailingServiceAsync sailingService, UserService userService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, boolean startInFullScreenMode) {
@@ -62,9 +63,8 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
                 }
             }
         });
-
         SAPHeaderComponentLifecycle sapHeaderLifecycle = getPerspectiveLifecycle().getSapHeaderLifecycle();
-        SAPHeaderComponent sapHeader = createSAPHeader(sapHeaderLifecycle, 
+        SAPHeaderComponent sapHeader = createSAPHeader(sapHeaderLifecycle, userService,
                 perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(sapHeaderLifecycle),
                 stringMessages, startInFullScreenMode);
         leaderboardPanel = createLeaderboardPanel(sailingService, asyncActionsExecutor,
@@ -183,9 +183,9 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         leaderboardPanel.removeLeaderboardUpdateListener(listener);
     }
     
-    private SAPHeaderComponent createSAPHeader(SAPHeaderComponentLifecycle componentLifecycle, SAPHeaderComponentSettings settings, 
+    private SAPHeaderComponent createSAPHeader(SAPHeaderComponentLifecycle componentLifecycle, UserService userService, SAPHeaderComponentSettings settings, 
             final StringMessages stringMessages, boolean withFullscreenButton) {
-        return new SAPHeaderComponent(componentLifecycle, settings, stringMessages, withFullscreenButton);
+        return new SAPHeaderComponent(componentLifecycle, userService, settings, stringMessages, withFullscreenButton);
     }
 
     private LeaderboardPanel createLeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
