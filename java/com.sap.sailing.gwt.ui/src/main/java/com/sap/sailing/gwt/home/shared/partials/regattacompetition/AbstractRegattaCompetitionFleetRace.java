@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceVie
 import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPad;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 
 public abstract class AbstractRegattaCompetitionFleetRace extends Widget implements RegattaCompetitionRaceView {
     
@@ -46,7 +47,15 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
     
     @Override
     public void onBrowserEvent(Event event) {
-        if (race.hasValidTrackingData() && event.getTypeInt() == Event.ONCLICK) {
+        boolean isUntrackedRace = race.getTrackingState() != RaceTrackingState.TRACKED_VALID_DATA;
+        if (event.getTypeInt() != Event.ONCLICK || isUntrackedRace) {
+            return;
+        }
+                
+        if (!race.isFinished() && !race.isRunning()) {
+            Window.open(presenter.getRaceViewerURL(race, RaceBoardModes.PLAYER.name()), "_blank", "");
+            return;
+        } else {
             this.getElement().scrollIntoView();
             panel.setWidget(new RaceviewerLaunchPad(race, panel) {
                 @Override

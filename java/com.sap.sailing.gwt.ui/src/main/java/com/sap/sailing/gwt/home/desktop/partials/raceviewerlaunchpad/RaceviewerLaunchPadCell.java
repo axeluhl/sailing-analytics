@@ -31,7 +31,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
         @Template("<div class=\"{0}\"><div>{2}</div><div class=\"{1}\"><img src=\"images/home/launch-loupe.svg\"/></div>")
         SafeHtml raceviewerLaunchPad(String styleNames, String iconStyleNames, String text);
         
-        @Template("<a href=\"{4}\" class=\"{0}\"><div>{2}</div> <div class=\"{1}\"><img src=\"{3}\"/></div></a> ")
+        @Template("<a href=\"{4}\" target=\"_blank\" class=\"{0}\"><div>{2}</div> <div class=\"{1}\"><svg> <use xlink:href=\"#{3}\"></svg></div></a> ")
         SafeHtml standaloneButton(String styleNames, String iconStyleNames, String text, String icon, String link);
     }
     
@@ -100,9 +100,10 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
             //If race is live then draw direct button instead of popup
             if (!data.isFinished() && !data.isRunning()) {
                 sb.append(TEMPLATE.standaloneButton(liveStyleNames, iconStyleNames, I18N.watchLive(), 
-                        "images/home/play.png", presenter.getRaceViewerURL(data, RaceBoardModes.PLAYER.name())));
+                        "launch-play", presenter.getRaceViewerURL(data, RaceBoardModes.PLAYER.name())));
             } else {
-                sb.append(TEMPLATE.raceviewerLaunchPad(analyzeStyleNames, iconStyleNames, I18N.raceDetailsToShow()));
+                String styleNames = data.isFinished() ? analyzeStyleNames : liveStyleNames;
+                sb.append(TEMPLATE.raceviewerLaunchPad(styleNames, iconStyleNames, I18N.raceDetailsToShow()));
             }
         } else {
             sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, I18N_UBI.eventRegattaRaceNotTracked()));
