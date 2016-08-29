@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -23,6 +24,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
@@ -137,6 +139,11 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     @Override
     public CompetitorDTO convertToCompetitorDTO(Competitor c) {
         return competitorAndBoatStore.convertToCompetitorDTO(c);
+    }
+
+    @Override
+    public BoatDTO convertToBoatDTO(Boat boat) {
+        return competitorAndBoatStore.convertToBoatDTO(boat);
     }
 
     @Override

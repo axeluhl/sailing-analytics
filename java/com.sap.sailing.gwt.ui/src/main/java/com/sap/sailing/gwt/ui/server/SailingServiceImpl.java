@@ -420,6 +420,7 @@ import com.sap.sailing.server.operationaltransformation.SetSuppressedFlagForComp
 import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRegatta;
+import com.sap.sailing.server.operationaltransformation.UpdateBoat;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
@@ -1016,6 +1017,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (Competitor c : iterable) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(c);
             result.add(competitorDTO);
+        }
+        return result;
+    }
+
+    private List<BoatDTO> convertToBoatDTOs(Iterable<? extends Boat> iterable) {
+        List<BoatDTO> result = new ArrayList<BoatDTO>();
+        for (Boat b : iterable) {
+            BoatDTO boatDTO = baseDomainFactory.convertToBoatDTO(b);
+            result.add(boatDTO);
         }
         return result;
     }
@@ -4779,7 +4789,45 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         getService().apply(new AllowCompetitorResetToDefaults(competitorIdsAsStrings));
     }
-    
+
+    @Override
+    public Iterable<BoatDTO> getBoats() {
+        return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorStore().getBoats());
+    }
+
+    @Override
+    public Iterable<BoatDTO> getBoatsOfLeaderboard(String leaderboardName) {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        return Collections.emptyList(); //convertToBoatDTOs(leaderboard.getAllBoats());
+    }
+
+    @Override
+    public BoatDTO addOrUpdateBoat(BoatDTO boat) {
+        Boat existingBoat = getService().getCompetitorStore().getExistingBoatByIdAsString(boat.getIdAsString());
+        final BoatDTO result;
+        // new boat
+        if (boat.getIdAsString() == null || boat.getIdAsString().isEmpty() || existingBoat == null) {
+            UUID boatUUID = UUID.randomUUID();
+            BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(boat.getBoatClass().getName());
+            result = getBaseDomainFactory().convertToBoatDTO(
+                    getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass, boat.getSailId(), boat.getColor()));
+        } else {
+            result = getBaseDomainFactory().convertToBoatDTO(
+                    getService().apply(
+                            new UpdateBoat(boat.getIdAsString(), boat.getName(), boat.getColor(), boat.getSailId())));
+        }
+        return result;
+    }
+
+    @Override
+    public void allowBoatResetToDefaults(Iterable<BoatDTO> boats) {
+        List<String> boatIdsAsStrings = new ArrayList<String>();
+        for (BoatDTO boat : boats) {
+            boatIdsAsStrings.add(boat.getIdAsString());
+        }
+//        getService().apply(new AllowBoatResetToDefaults(boatIdsAsStrings));
+    }
+
     @Override
     public List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers() {
         List<DeviceConfigurationMatcherDTO> configs = new ArrayList<DeviceConfigurationMatcherDTO>();

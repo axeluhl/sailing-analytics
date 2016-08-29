@@ -436,7 +436,15 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws Exception;
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
+
+    Iterable<BoatDTO> getBoats();
     
+    Iterable<BoatDTO> getBoatsOfLeaderboard(String leaderboardName);
+
+    BoatDTO addOrUpdateBoat(BoatDTO boat) throws Exception;
+
+    void allowBoatResetToDefaults(Iterable<BoatDTO> boats);
+
     List<DeviceConfigurationMatcherDTO> getDeviceConfigurationMatchers();
     
     DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcher);

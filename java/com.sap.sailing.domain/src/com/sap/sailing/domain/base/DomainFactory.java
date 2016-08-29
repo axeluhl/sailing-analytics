@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.common.Placemark;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
@@ -56,6 +57,8 @@ public interface DomainFactory extends SharedDomainFactory {
     ScoringScheme createScoringScheme(ScoringSchemeType scoringSchemeType);
 
     CompetitorDTO convertToCompetitorDTO(Competitor c);
+
+    BoatDTO convertToBoatDTO(Boat boat);
 
     FleetDTO convertToFleetDTO(Fleet fleet);
 
