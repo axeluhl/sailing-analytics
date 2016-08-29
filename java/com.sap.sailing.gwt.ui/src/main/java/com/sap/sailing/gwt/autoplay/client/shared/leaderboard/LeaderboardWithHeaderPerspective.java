@@ -41,7 +41,7 @@ import com.sap.sse.security.ui.client.UserService;
 public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle,
     LeaderboardWithHeaderPerspectiveSettings> implements LeaderboardUpdateProvider {
     private final DockLayoutPanel dockPanel;
-    private final static int SAP_HEADER_HEIGHT = 70;
+    private final static int SAP_HEADER_HEIGHT = 75;
     private final Widget currentContentWidget;
     private final LeaderboardPanel leaderboardPanel;
     private final StringMessages stringMessages;
