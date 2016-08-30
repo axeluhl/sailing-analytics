@@ -79,7 +79,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         final int[] discardIndexResultsStartingWithHowManyRaces = new int[] { 5, 8 };
         FlexibleLeaderboardImpl leaderboard = new FlexibleLeaderboardImpl(leaderboardName, new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces),
                 new LowPoint(), null);
-        CompetitorWithBoat wolfgang = createCompetitorAndBoat();
+        CompetitorWithBoat wolfgangWithBoat = createCompetitorAndBoat();
         Competitor hasso = new CompetitorImpl(234, "Hasso Plattner", "KYC", Color.RED, null, null,
                         new TeamImpl("STG", Collections.singleton(
                                 new PersonImpl("Hasso Plattner", new NationalityImpl("GER"),
@@ -88,18 +88,18 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         Boat hassosBoat = new BoatImpl("123", "Dr. Hasso Plattner's boat", new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null);
         CompetitorWithBoat hassoWithBoat = new CompetitorWithBoatImpl(hasso, hassosBoat);
         final String raceColumnName1 = "My First Race 1";
-        MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgang, /* rank */ 1, /* started */ true);
+        MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgangWithBoat, /* rank */ 1, /* started */ true);
         raceWithTwoCompetitors.addCompetitorAndBoat(hassoWithBoat);
         leaderboard.addRace(raceWithTwoCompetitors, raceColumnName1, /* medalRace */ false);
-        leaderboard.setSuppressed(wolfgang.getCompetitor(), true);
-        assertTrue(Util.contains(leaderboard.getSuppressedCompetitors(), wolfgang));
+        leaderboard.setSuppressed(wolfgangWithBoat.getCompetitor(), true);
+        assertTrue(Util.contains(leaderboard.getSuppressedCompetitors(), wolfgangWithBoat.getCompetitor()));
         assertFalse(Util.contains(leaderboard.getSuppressedCompetitors(), hasso));
         new MongoObjectFactoryImpl(db).storeLeaderboard(leaderboard);
         Leaderboard loadedLeaderboard = new DomainObjectFactoryImpl(db, DomainFactory.INSTANCE).loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
-        MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors2 = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgang, /* rank */ 1, /* started */ true);
+        MockedTrackedRaceWithFixedRankAndManyCompetitors raceWithTwoCompetitors2 = new MockedTrackedRaceWithFixedRankAndManyCompetitors(wolfgangWithBoat, /* rank */ 1, /* started */ true);
         raceWithTwoCompetitors2.addCompetitorAndBoat(hassoWithBoat);
         loadedLeaderboard.getRaceColumnByName(raceColumnName1).setTrackedRace(loadedLeaderboard.getFleet(null), raceWithTwoCompetitors2);
-        assertTrue(Util.contains(loadedLeaderboard.getSuppressedCompetitors(), wolfgang));
+        assertTrue(Util.contains(loadedLeaderboard.getSuppressedCompetitors(), wolfgangWithBoat.getCompetitor()));
         assertFalse(Util.contains(loadedLeaderboard.getSuppressedCompetitors(), hasso));
     }
     
@@ -184,7 +184,7 @@ public class TestStoringAndRetrievingLeaderboards extends AbstractMongoDBTest {
         assertTrue(Arrays.equals(discardIndexResultsStartingWithHowManyRaces,
                 ((ThresholdBasedResultDiscardingRule) loadedLeaderboard.getResultDiscardingRule()).getDiscardIndexResultsStartingWithHowManyRaces()));
         assertEquals(1, Util.size(loadedLeaderboard.getCompetitors()));
-        assertEquals(competitorWithBoat, loadedLeaderboard.getCompetitors().iterator().next());
+        assertEquals(competitorWithBoat.getCompetitor(), loadedLeaderboard.getCompetitors().iterator().next());
         assertEquals(carriedPointsForWolfgangHunger, loadedLeaderboard.getCarriedPoints(competitorWithBoat.getCompetitor()), 0.000000001);
     }
 
