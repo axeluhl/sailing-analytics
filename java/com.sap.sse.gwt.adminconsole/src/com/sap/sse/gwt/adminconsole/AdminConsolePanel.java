@@ -66,7 +66,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * @author Axel Uhl (D043530)
  *
  */
-public class AdminConsolePanel extends DockLayoutPanel {
+public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelectable{
     private final UserService userService;
     
     /**
@@ -137,7 +137,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
          * If the <code>widgetMaybeWrappedByScrollPanel</code> is a scroll panel, returns the content widget,
          * otherwise <code>widgetMaybeWrappedByScrollPanel</code> is returned.
          */
-        private Widget unwrapScrollPanel(Widget widgetMaybeWrappedByScrollPanel) {
+        public Widget unwrapScrollPanel(Widget widgetMaybeWrappedByScrollPanel) {
             final Widget target;
             if (widgetMaybeWrappedByScrollPanel instanceof ScrollPanel) {
                 target = ((ScrollPanel) widgetMaybeWrappedByScrollPanel).getWidget();
@@ -189,6 +189,17 @@ public class AdminConsolePanel extends DockLayoutPanel {
             public Widget getPanel() {
                 return topLevelTabPanel;
             }
+
+            @Override
+            public void selectTab(int index) {
+                topLevelTabPanel.selectTab(index);
+                
+            }
+
+            @Override
+            public int getWidgetIndex(Widget child) {
+                return topLevelTabPanel.getWidgetIndex(child);
+            }
         };
         final DockPanel informationPanel = new DockPanel();
         informationPanel.setSize("100%", "95%");
@@ -232,6 +243,10 @@ public class AdminConsolePanel extends DockLayoutPanel {
         void remove(Widget child);
         
         Widget getPanel();
+        
+        void selectTab(int index);
+        
+        int getWidgetIndex(Widget child);
     }
 
     /**
@@ -281,6 +296,17 @@ public class AdminConsolePanel extends DockLayoutPanel {
             @Override
             public Widget getPanel() {
                 return tabPanel;
+            }
+
+            @Override
+            public void selectTab(int index) {
+               tabPanel.selectTab(index);
+                
+            }
+
+            @Override
+            public int getWidgetIndex(Widget child) {
+                return tabPanel.getWidgetIndex(child);
             }
         };
         addToTabPanel(wrapper, panelToAdd, tabTitle, requiresAnyOfThesePermissions);
@@ -334,6 +360,32 @@ public class AdminConsolePanel extends DockLayoutPanel {
                 e.getA().remove(widgetToAdd);
             }
         }
+    }
+
+    @Override
+    public void selectTabByNames(String verticalTabName, String horizontalTabName, Map<String, String> params) {
+        if (verticalTabName == null) {
+            return;
+        }
+
+        Widget widgetForSetup = null; //Remember widget for set up
+        for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
+            VerticalOrHorizontalTabLayoutPanel panel = e.getA();
+            Widget currentWidget = e.getB();
+            if (panel == topLevelTabPanelWrapper && verticalTabName.equals(e.getC())) { // for vertical panel
+                int index = panel.getWidgetIndex(currentWidget);
+                panel.selectTab(index);
+                if (horizontalTabName == null) {//If we don't have horizontal tab will setup vertical tab.
+                    widgetForSetup = currentWidget;
+                }
+            } else if (horizontalTabName != null && horizontalTabName.equals(e.getC())) { // for horizontal panel
+                int index = panel.getWidgetIndex(currentWidget);
+                panel.selectTab(index);
+                widgetForSetup = currentWidget;
+            }
+        }
+
+        panelsByWidget.get((new TabSelectionHandler()).unwrapScrollPanel(widgetForSetup)).setupWidgetByParams(params);;
     }
 
     /**
