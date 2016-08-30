@@ -218,9 +218,9 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         assertEquals(51., leaderboard.getNetPoints(c2.getCompetitor(), now), 0.00000001);
         assertEquals(26., leaderboard.getNetPoints(c3.getCompetitor(), now), 0.00000001);
         List<Competitor> sortedCompetitors = leaderboard.getCompetitorsFromBestToWorst(now);
-        assertSame(c3, sortedCompetitors.get(0));
-        assertSame(c2, sortedCompetitors.get(1));
-        assertSame(competitorWithBoat, sortedCompetitors.get(2));
+        assertSame(c3.getCompetitor(), sortedCompetitors.get(0));
+        assertSame(c2.getCompetitor(), sortedCompetitors.get(1));
+        assertSame(competitorWithBoat.getCompetitor(), sortedCompetitors.get(2));
     }
 
     @Test

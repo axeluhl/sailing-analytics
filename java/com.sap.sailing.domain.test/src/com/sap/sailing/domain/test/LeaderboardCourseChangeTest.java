@@ -29,10 +29,10 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
-import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
@@ -158,10 +158,10 @@ public class LeaderboardCourseChangeTest {
 
     private Iterable<Competitor> createCompetitorSet(BoatClass boatClass) {
         Set<Competitor> competitors = new HashSet<>();
-        DynamicBoat mockedBoat = mock(DynamicBoat.class);
-        when(mockedBoat.getBoatClass()).thenReturn(boatClass);
+        
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", "BYC", Color.BLACK, null, null,
-                mock(DynamicTeam.class), mockedBoat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+                mock(DynamicTeam.class), new BoatImpl("123", "boat", boatClass, "GER 124"),
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         return competitors;
     }
 
