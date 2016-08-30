@@ -23,6 +23,10 @@
   top: -1000px;
 }
 
+html {
+  font-size: 15px;
+}
+
 .titleLabelWrapper {
   position: relative;
     margin-left: auto;
