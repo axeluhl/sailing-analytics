@@ -71,7 +71,7 @@ public class Solutions extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
-        raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceCommiteeApp);
+        raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);
         simulatorAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator);
         
         sailingAnalyticsDetailsAnchor.setHref(sailingAnalyticsDetailsNavigation.getTargetUrl());
@@ -80,7 +80,7 @@ public class Solutions extends Composite {
 
         sapInSailingNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
         sailingAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
-        raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceCommitteeApp);
+        raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceManagerApp);
         postRaceAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.PostRaceAnalytics);
         trainingDiaryNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.TrainingDiary);
         sailingSimulatorNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingSimulator);
@@ -115,7 +115,7 @@ public class Solutions extends Composite {
     
     @UiHandler("raceAnchor")
     public void scrollToRace(ClickEvent e) {
-        scrollToView(SolutionsNavigationTabs.RaceCommitteeApp);
+        scrollToView(SolutionsNavigationTabs.RaceManagerApp);
         handleClickEventWithLocalNavigation(e, raceCommitteeAppNavigation);
     }
 
@@ -158,7 +158,7 @@ public class Solutions extends Composite {
             case SailingAnalytics:
                 sailingAnalyticsDiv.scrollIntoView();
                 break;
-            case RaceCommitteeApp:
+            case RaceManagerApp:
                 raceDiv.scrollIntoView();
                 break;
             case PostRaceAnalytics:
