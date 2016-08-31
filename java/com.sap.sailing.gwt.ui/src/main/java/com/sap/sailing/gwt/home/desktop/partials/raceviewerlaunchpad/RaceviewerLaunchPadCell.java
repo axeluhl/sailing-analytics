@@ -6,7 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -57,38 +57,20 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     @Override
     public void onBrowserEvent(Context context, final Element parent, T data, NativeEvent event,
             ValueUpdater<T> valueUpdater) {
-        //If direct button we should not add any handlers
-        if (!data.isFinished() && !data.isRunning()) {
-            return;
-        }
-        
-        if (data.hasValidTrackingData() && BrowserEvents.CLICK.equals(event.getType())
-                && parent.getFirstChildElement().isOrHasChild(Element.as(event.getEventTarget()))) {
-            panel.setWidget(new RaceviewerLaunchPad(data, panel) {
-                @Override
-                protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String mode) {
-                    return presenter.getRaceViewerURL(data, mode);
-                }
-            });
-            
-            panel.setPopupPositionAndShow(new PositionCallback() {
-                @Override
-                public void setPosition(int offsetWidth, int offsetHeight) {
-                    int buttonWidth = 0;
-                    if (parent.getChild(0) != null && parent.getChild(0).getNodeType() == Node.ELEMENT_NODE) {
-                        Element button = (Element) parent.getChild(0);
-                        //Adding 1px as button width is double value like 153.87 floated down to 153
-                        buttonWidth = button.getOffsetWidth() + 1;
-                    };
-                    //Popup width is max between btn and actual popup size
-                    int width = offsetWidth > buttonWidth ? offsetWidth : buttonWidth;
-                    int alignBottom = parent.getAbsoluteTop() + parent.getOffsetHeight() - offsetHeight;
-                    int top = (alignBottom - Window.getScrollTop() < 0 ? parent.getAbsoluteTop() - 1 : alignBottom + 1);
-                    panel.setPopupPosition(parent.getAbsoluteRight() + 1 - width, top);
-                    panel.setWidth(width + "px");
-                    panel.getElement().scrollIntoView();
-                }
-            });
+        if (!renderAsDirectLinkButton(data)) {
+            if (data.hasValidTrackingData() && BrowserEvents.CLICK.equals(event.getType())
+                    && parent.getFirstChildElement().isOrHasChild(Element.as(event.getEventTarget()))) {
+                panel.setWidget(createLaunchPad(parent.getFirstChildElement(), data));
+                panel.setPopupPositionAndShow(new PositionCallback() {
+                    @Override
+                    public void setPosition(int offsetWidth, int offsetHeight) {
+                        int alignBottom = parent.getAbsoluteTop() + parent.getOffsetHeight() - offsetHeight;
+                        int top = (alignBottom - Window.getScrollTop() < 0 ? parent.getAbsoluteTop() - 1 : alignBottom + 1);
+                        panel.setPopupPosition(parent.getAbsoluteRight() + 1 - offsetWidth, top);
+                        panel.getElement().scrollIntoView();
+                    }
+                });
+            }
             return;
         }
         super.onBrowserEvent(context, parent, data, event, valueUpdater);
@@ -97,8 +79,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     @Override
     public void render(Context context, T data, SafeHtmlBuilder sb) {
         if (data.hasValidTrackingData()) {
-            //If race is live then draw direct button instead of popup
-            if (!data.isFinished() && !data.isRunning()) {
+            if (renderAsDirectLinkButton(data)) {
                 sb.append(TEMPLATE.standaloneButton(liveStyleNames, iconStyleNames, I18N.watchLive(), 
                         "launch-play", presenter.getRaceViewerURL(data, RaceBoardModes.PLAYER.name())));
             } else {
@@ -108,6 +89,24 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
         } else {
             sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, I18N_UBI.eventRegattaRaceNotTracked()));
         }
+    }
+    
+    /** Creates a {@link RaceviewerLaunchPad} for the given data object with a <code>min-width</code> depending 
+     *  on the {@link Element#getOffsetWidth() offset width} of the provided button element.*/
+    private RaceviewerLaunchPad createLaunchPad(Element button, T data) {
+        RaceviewerLaunchPad launchPad = new RaceviewerLaunchPad(data, panel) {
+            @Override
+            protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String raceBoardMode) {
+                return presenter.getRaceViewerURL(data, raceBoardMode);
+            }
+        };
+        launchPad.getElement().getStyle().setProperty("minWidth", button.getOffsetWidth() + 1, Unit.PX);
+        return launchPad;
+    }
+    
+    /** Determine whether a direct link button should be/is rendered instead of a menu popup. */
+    private boolean renderAsDirectLinkButton(T data) {
+        return !data.isFinished() && !data.isRunning();
     }
 
 }
