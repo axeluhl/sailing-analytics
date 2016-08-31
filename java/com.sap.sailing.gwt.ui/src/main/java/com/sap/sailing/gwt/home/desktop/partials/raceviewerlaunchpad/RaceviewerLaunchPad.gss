@@ -63,6 +63,7 @@
 .raceviewerlaunchpad:hover {
   cursor: pointer;
   background: #0081b8;
+  text-decoration: none;
 }
 .raceviewerlaunchpadlive {
   background: #e94a1b;
@@ -79,13 +80,27 @@
 .raceviewerlaunchpadlive .raceviewerlaunchpad_content_item_icon svg {
   fill: #e94a1b;
 }
+.raceviewerlaunchpadplanned {
+  background: #999999;
+}
+.raceviewerlaunchpadplanned:hover {
+  background: #8a8a8a;
+}
+.raceviewerlaunchpadplanned .raceviewerlaunchpad_content_item {
+  color: #999999;
+}
+.raceviewerlaunchpadplanned .raceviewerlaunchpad_content_item:hover {
+  background: #999999;
+}
+.raceviewerlaunchpadplanned .raceviewerlaunchpad_content_item_icon svg {
+  fill: #999999;
+}
 .raceviewerlaunchpad_icon {
   margin-left: 0.666666666666667em;
   width: 1.666666666666667em;
   height: 1.333333333333333em;
 }
 .raceviewerlaunchpad_icon img {
-  max-width: 100%;
   height: 100%;
 }
 .raceviewerlaunchpad_icon svg {

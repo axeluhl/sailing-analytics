@@ -47,37 +47,39 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
     
     @Override
     public void onBrowserEvent(Event event) {
-        boolean isUntrackedRace = race.getTrackingState() != RaceTrackingState.TRACKED_VALID_DATA;
-        if (event.getTypeInt() != Event.ONCLICK || isUntrackedRace) {
-            return;
+        // Only handle click events if valid tracking data is available
+        if (!race.hasValidTrackingData() || event.getTypeInt() != Event.ONCLICK) {
+            return; 
         }
-                
+
+        // If rendered as direct link button, open link in new tab directly instead of showing the menu popup
         if (!race.isFinished() && !race.isRunning()) {
             Window.open(presenter.getRaceViewerURL(race, RaceBoardModes.PLAYER.name()), "_blank", "");
             return;
-        } else {
-            this.getElement().scrollIntoView();
-            panel.setWidget(new RaceviewerLaunchPad(race, panel) {
-                @Override
-                protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String mode) {
-                    return presenter.getRaceViewerURL(data, mode);
-                }
-            });
-            panel.setVisible(false);
-            panel.show();
-            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                @Override
-                public void execute() {
-                    Widget button = AbstractRegattaCompetitionFleetRace.this, panelContent = panel.getWidget();
-                    int alignRight = button.getAbsoluteLeft() + button.getOffsetWidth() - panelContent.getOffsetWidth();
-                    int left = (alignRight - Window.getScrollLeft() < 0 ? button.getAbsoluteLeft() - 1 : alignRight + 1);
-                    int alignBottom = button.getAbsoluteTop() + button.getOffsetHeight() - panelContent.getOffsetHeight();
-                    int top = (alignBottom - Window.getScrollTop() < 0 ? button.getAbsoluteTop() - 1 : alignBottom + 1);
-                    panel.setPopupPosition(left, top);
-                    panel.setVisible(true);
-                }
-            });
         }
+        
+        // Show menu popup relative to button by ensuring it stays with the viewport
+        this.getElement().scrollIntoView();
+        panel.setWidget(new RaceviewerLaunchPad(race, panel) {
+            @Override
+            protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String mode) {
+                return presenter.getRaceViewerURL(data, mode);
+            }
+        });
+        panel.setVisible(false);
+        panel.show();
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                Widget button = AbstractRegattaCompetitionFleetRace.this, panelContent = panel.getWidget();
+                int alignRight = button.getAbsoluteLeft() + button.getOffsetWidth() - panelContent.getOffsetWidth();
+                int left = (alignRight - Window.getScrollLeft() < 0 ? button.getAbsoluteLeft() - 1 : alignRight + 1);
+                int alignBottom = button.getAbsoluteTop() + button.getOffsetHeight() - panelContent.getOffsetHeight();
+                int top = (alignBottom - Window.getScrollTop() < 0 ? button.getAbsoluteTop() - 1 : alignBottom + 1);
+                panel.setPopupPosition(left, top);
+                panel.setVisible(true);
+            }
+        });
     }
     
     private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {

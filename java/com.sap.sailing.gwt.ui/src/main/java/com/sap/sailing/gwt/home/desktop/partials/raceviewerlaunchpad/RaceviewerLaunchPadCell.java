@@ -31,7 +31,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
         @Template("<div class=\"{0}\"><div>{2}</div><div class=\"{1}\"><img src=\"images/home/launch-loupe.svg\"/></div>")
         SafeHtml raceviewerLaunchPad(String styleNames, String iconStyleNames, String text);
         
-        @Template("<a href=\"{4}\" target=\"_blank\" class=\"{0}\"><div>{2}</div> <div class=\"{1}\"><svg> <use xlink:href=\"#{3}\"></svg></div></a> ")
+        @Template("<a href=\"{4}\" target=\"_blank\" class=\"{0}\"><div>{2}</div><div class=\"{1}\"><img src=\"images/home/{3}.svg\"/></div></a> ")
         SafeHtml standaloneButton(String styleNames, String iconStyleNames, String text, String icon, String link);
     }
     
@@ -42,6 +42,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     private final RaceviewerLaunchPadResources local_res = RaceviewerLaunchPadResources.INSTANCE;
     private final String notTrackedStyleNames = local_res.css().raceviewerlaunchpad_not_tracked();
     private final String analyzeStyleNames = local_res.css().raceviewerlaunchpad();
+    private final String plannedStyleNames = Util.join(" ", analyzeStyleNames, local_res.css().raceviewerlaunchpadplanned());
     private final String liveStyleNames = Util.join(" ", analyzeStyleNames, local_res.css().raceviewerlaunchpadlive());
     private final String iconStyleNames = local_res.css().raceviewerlaunchpad_icon();
 
@@ -80,7 +81,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     public void render(Context context, T data, SafeHtmlBuilder sb) {
         if (data.hasValidTrackingData()) {
             if (renderAsDirectLinkButton(data)) {
-                sb.append(TEMPLATE.standaloneButton(liveStyleNames, iconStyleNames, I18N.watchLive(), 
+                sb.append(TEMPLATE.standaloneButton(plannedStyleNames, iconStyleNames, I18N.watchLive(), 
                         "launch-play", presenter.getRaceViewerURL(data, RaceBoardModes.PLAYER.name())));
             } else {
                 String styleNames = data.isFinished() ? analyzeStyleNames : liveStyleNames;
