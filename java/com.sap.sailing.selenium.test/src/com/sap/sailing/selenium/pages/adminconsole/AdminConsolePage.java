@@ -15,6 +15,7 @@ import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanel
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesBoatsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
@@ -59,7 +60,10 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private static final String COMPETITOR_PANEL_TAB_LABEL = "Competitors"; //$NON-NLS-1$
     private static final String COMPETITOR_PANEL_TAB_IDENTIFIER = "CompetitorPanel"; //$NON-NLS-1$
-    
+
+    private static final String BOAT_PANEL_TAB_LABEL = "Boats"; //$NON-NLS-1$
+    private static final String BOAT_PANEL_TAB_IDENTIFIER = "BoatPanel"; //$NON-NLS-1$
+
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL = "Smartphone Tracking"; //$NON-NLS-1$
     private static final String SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER = "SmartphoneTrackingPanel"; //$NON-NLS-1$
     /**
@@ -128,7 +132,13 @@ public class AdminConsolePage extends HostPageWithAuthentication {
         return new TrackedRacesCompetitorsPanelPO(this.driver, goToTab(COMPETITOR_PANEL_TAB_LABEL,
                 COMPETITOR_PANEL_TAB_IDENTIFIER, false));
     }
-    
+
+    public TrackedRacesBoatsPanelPO goToTrackedRacesBoats() {
+        goToTab(TRACKED_RACES_TAB_PARENT_LABEL, TRACKED_RACES_TAB_PARENT_IDENTIFIER, true);
+        return new TrackedRacesBoatsPanelPO(this.driver, goToTab(BOAT_PANEL_TAB_LABEL,
+                BOAT_PANEL_TAB_IDENTIFIER, false));
+    }
+
     public SmartphoneTrackingEventManagementPanelPO goToSmartphoneTrackingPanel() {
         goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER, true);
         return new SmartphoneTrackingEventManagementPanelPO(this.driver, goToTab(SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL,

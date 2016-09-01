@@ -47,6 +47,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String competitor();
     String competitors();
     String competitorsSelected(int selectedCompetitorsCount, int competitorsCount);
+    String boat();
+    String boats();
     String noSuchLeaderboard();
     String leaderboardConfiguration();
     String newDotDotDot();
