@@ -13,7 +13,7 @@ public class AutoPlayEntryPoint extends AbstractMvpEntryPoint<StringMessages, Au
     @Override
     public void doOnModuleLoad() {
         AutoPlayAppClientFactory clientFactory = GWT.create(AutoPlayAppClientFactory.class);
-        
+
         AutoPlayAppHistoryMapper applicationHistoryMapper = GWT.create(AutoPlayAppHistoryMapper.class);
         initMvp(clientFactory, applicationHistoryMapper, new AutoPlayAppActivityMapper(clientFactory));
 
