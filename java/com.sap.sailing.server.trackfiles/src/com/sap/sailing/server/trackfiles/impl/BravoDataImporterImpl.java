@@ -46,10 +46,10 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
     private static final int BATCH_SIZE = 5000;
 
-    public void importFixes(InputStream inputStream, Callback callback, String sourceName)
+    public void importFixes(InputStream inputStream, Callback callback, String filename, String sourceName)
             throws FormatNotSupportedException, IOException {
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
-                UUID.randomUUID(), sourceName, sourceName + "_Imu", MillisecondsTimePoint.now());
+                UUID.randomUUID(), filename, sourceName + "_Imu", MillisecondsTimePoint.now());
         try {
             LOG.fine("Import CSV from " + sourceName);
             final InputStreamReader isr;

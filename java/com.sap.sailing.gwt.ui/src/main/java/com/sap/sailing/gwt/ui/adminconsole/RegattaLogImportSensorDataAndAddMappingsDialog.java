@@ -2,9 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -31,11 +29,8 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
     protected final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
     private final StringMessages stringMessages;
 
-    private final Map<TrackFileImportDeviceIdentifierDTO, CompetitorDTO> mappings = new HashMap<>();
 
     private TrackFileImportDeviceIdentifierDTO deviceToSelect;
-    private CompetitorDTO compToSelect;
-    private boolean inInstableTransitionState = false;
 
     public RegattaLogImportSensorDataAndAddMappingsDialog(SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
@@ -50,11 +45,16 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
                 }, true, callback);
         this.stringMessages = stringMessages;
         deviceIdTable = new TrackFileImportDeviceIdentifierTableWrapper(sailingService, stringMessages, errorReporter);
+        deviceIdTable.removeTrackNameColumn();
+
         importWidget = new SensorDataImportWidget(deviceIdTable, stringMessages, sailingService, errorReporter);
         deviceIdTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                deviceSelectionChanged(deviceIdTable.getSelectionModel().getSelectedObject());
+                CompetitorDTO mappedComp = deviceIdTable.getMappedCompetitorForCurrentSelection();
+                if (mappedComp != null) {
+                    competitorTable.getSelectionModel().setSelected(mappedComp, true);
+                }
             }
         });
         competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
@@ -63,7 +63,8 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                mappedToSelectionChanged(competitorTable.getSelectionModel().getSelectedObject());
+                deviceIdTable.didSelectCompetitorForMapping(competitorTable.getSelectionModel().getSelectedObject());
+                validate();
             }
         });
 
@@ -95,42 +96,6 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
         }
     }
 
-    /**
-     * Avoid programmatic deselections that re-trigger the selection listeners and lead to a loop.
-     */
-    private void select() {
-        if (inInstableTransitionState) {
-            if (deviceIdTable.getSelectionModel().getSelectedObject() == deviceToSelect
-                    && competitorTable.getSelectionModel().getSelectedObject() == compToSelect) {
-                inInstableTransitionState = false;
-            }
-        } else {
-            inInstableTransitionState = true;
-            selectOrClear(deviceIdTable.getSelectionModel(), deviceToSelect);
-            selectOrClear(competitorTable.getSelectionModel(), compToSelect);
-        }
-    }
-
-    private void mappedToSelectionChanged(CompetitorDTO mappedTo) {
-        if (!inInstableTransitionState) {
-            TrackFileImportDeviceIdentifierDTO device = deviceIdTable.getSelectionModel().getSelectedObject();
-            if (device != null) {
-                mappings.put(device, mappedTo);
-            }
-            compToSelect = mappedTo;
-        }
-        select();
-        validate();
-    }
-
-    private void deviceSelectionChanged(TrackFileImportDeviceIdentifierDTO deviceId) {
-        if (!inInstableTransitionState) {
-            deviceToSelect = deviceId;
-            compToSelect = deviceId != null ? mappings.get(deviceId) : null;
-        }
-        select();
-    }
-
     @Override
     protected Widget getAdditionalWidget() {
         HorizontalPanel panel = new HorizontalPanel();
@@ -150,9 +115,9 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
     protected Collection<TypedDeviceMappingDTO> getResult() {
         List<TypedDeviceMappingDTO> result = new ArrayList<>();
         String dataType = importWidget.getSelectedImporterType();
-        for (TrackFileImportDeviceIdentifierDTO device : mappings.keySet()) {
+        for (TrackFileImportDeviceIdentifierDTO device : deviceIdTable.getMappings().keySet()) {
             DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
-            MappableToDevice mappedTo = mappings.get(device);
+            MappableToDevice mappedTo = deviceIdTable.getMappings().get(device);
             result.add(new TypedDeviceMappingDTO(deviceIdDto, device.from, device.to, mappedTo, null, dataType));
         }
         return result;

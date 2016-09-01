@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,16 +53,17 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * 
      * @throws IOException
      */
-    private Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, InputStream>> files)
+    private Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, FileItem>> files)
             throws IOException {
         final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
         final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
         final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
         final Collection<DoubleVectorFixImporter> availableImporters = new LinkedHashSet<>();
         availableImporters.addAll(getOSGiRegisteredImporters());
-        for (Pair<String, InputStream> file : files) {
+        for (Pair<String, FileItem> file : files) {
             final String requestedImporterName = file.getA();
-            BufferedInputStream in = new BufferedInputStream(file.getB()) {
+            final FileItem fi = file.getB();
+            BufferedInputStream in = new BufferedInputStream(fi.getInputStream()) {
                 @Override
                 public void close() throws IOException {
                     // prevent importers from closing this stream
@@ -109,7 +109,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                             }
                         }
                     }
-                }, requestedImporterName);
+                }, fi.getName(), requestedImporterName);
                 logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
             } catch (FormatNotSupportedException e) {
                 logger.log(Level.INFO, "Failed to import file " + requestedImporterName);
@@ -124,7 +124,6 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        List<Pair<String, InputStream>> files = new ArrayList<>();
         String importerName = null;
         searchForPrefferedImporter: for (FileItem fi : fileItems) {
             if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
@@ -135,9 +134,10 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
         if (importerName == null) {
             importerName = "BRAVO";
         }
+        List<Pair<String, FileItem>> files = new ArrayList<>();
         for (FileItem fi : fileItems) {
             if ("file".equalsIgnoreCase(fi.getFieldName())) {
-                files.add(new Pair<>(importerName, fi.getInputStream()));
+                files.add(new Pair<>(importerName, fi));
             }
         }
         final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(files);
