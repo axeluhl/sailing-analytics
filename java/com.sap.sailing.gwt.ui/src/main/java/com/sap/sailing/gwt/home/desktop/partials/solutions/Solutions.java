@@ -31,6 +31,8 @@ public class Solutions extends Composite {
 
     @UiField Anchor sailingAnalyticsAnchor;
     @UiField Anchor raceAnchor;
+    @UiField Anchor inSightAnchor;
+    @UiField Anchor buoyPingerAnchor;
     @UiField Anchor postRaceAnchor;
     @UiField Anchor trainingDiaryAnchor;
     @UiField Anchor simulatorAnchor;
@@ -38,6 +40,8 @@ public class Solutions extends Composite {
     @UiField DivElement sapInSailingDiv;
     @UiField DivElement sailingAnalyticsDiv;
     @UiField DivElement raceDiv;
+    @UiField DivElement inSightDiv;
+    @UiField DivElement buoyPingerDiv;
     @UiField DivElement postRaceDiv;
     @UiField DivElement trainingDiaryDiv;
     @UiField DivElement simulatorDiv;
@@ -46,12 +50,16 @@ public class Solutions extends Composite {
     Anchor sapInSailingAnchor;
     @UiField Anchor sailingAnalyticsDetailsAnchor;
     @UiField Anchor raceCommitteeAppDetailsAnchor;
+    @UiField Anchor inSightAppDetailsAnchor;
+    @UiField Anchor buoyPingerAppDetailsAnchor;
     @UiField Anchor simulatorAppDetailsAnchor;
 
     private final PlaceNavigation<SolutionsPlace> sapInSailingNavigation;
     private final PlaceNavigation<SolutionsPlace> sailingAnalyticsNavigation; 
     private final PlaceNavigation<SolutionsPlace> raceCommitteeAppNavigation; 
-    private final PlaceNavigation<SolutionsPlace> postRaceAnalyticsNavigation; 
+    private final PlaceNavigation<SolutionsPlace> inSightAppNavigation;
+    private final PlaceNavigation<SolutionsPlace> buoyPingerAppNavigation;
+    private final PlaceNavigation<SolutionsPlace> postRaceAnalyticsNavigation;
     private final PlaceNavigation<SolutionsPlace> trainingDiaryNavigation; 
     private final PlaceNavigation<SolutionsPlace> sailingSimulatorNavigation; 
     
@@ -59,6 +67,8 @@ public class Solutions extends Composite {
     
     private final PlaceNavigation<WhatsNewPlace> sailingAnalyticsDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> raceCommitteeAppDetailsNavigation;
+    private final PlaceNavigation<WhatsNewPlace> inSightAppDetailsNavigation;
+    private final PlaceNavigation<WhatsNewPlace> buoyPingerAppDetailsNavigation;
     private final PlaceNavigation<WhatsNewPlace> simulatorAppDetailsNavigation;
     private final DesktopPlacesNavigator placesNavigator;
     
@@ -72,15 +82,21 @@ public class Solutions extends Composite {
         
         sailingAnalyticsDetailsNavigation = placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
         raceCommitteeAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.RaceManagerApp);
+        inSightAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.InSightApp);
+        buoyPingerAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.BuoyPingerApp);
         simulatorAppDetailsNavigation =  placesNavigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingSimulator);
         
         sailingAnalyticsDetailsAnchor.setHref(sailingAnalyticsDetailsNavigation.getTargetUrl());
         raceCommitteeAppDetailsAnchor.setHref(raceCommitteeAppDetailsNavigation.getTargetUrl());
+        inSightAppDetailsAnchor.setHref(inSightAppDetailsNavigation.getTargetUrl());
+        buoyPingerAppDetailsAnchor.setHref(buoyPingerAppDetailsNavigation.getTargetUrl());
         simulatorAppDetailsAnchor.setHref(simulatorAppDetailsNavigation.getTargetUrl());
 
         sapInSailingNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
         sailingAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
         raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceManagerApp);
+        inSightAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.InSightApp);
+        buoyPingerAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.BuoyPingerApp);
         postRaceAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.PostRaceAnalytics);
         trainingDiaryNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.TrainingDiary);
         sailingSimulatorNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingSimulator);
@@ -88,6 +104,8 @@ public class Solutions extends Composite {
         sapInSailingAnchor.setHref(sapInSailingNavigation.getTargetUrl());
         sailingAnalyticsAnchor.setHref(sailingAnalyticsNavigation.getTargetUrl());
         raceAnchor.setHref(raceCommitteeAppNavigation.getTargetUrl());
+        inSightAnchor.setHref(inSightAppNavigation.getTargetUrl());
+        buoyPingerAnchor.setHref(buoyPingerAppNavigation.getTargetUrl());
         postRaceAnchor.setHref(postRaceAnalyticsNavigation.getTargetUrl());
         trainingDiaryAnchor.setHref(trainingDiaryNavigation.getTargetUrl());
         simulatorAnchor.setHref(sailingSimulatorNavigation.getTargetUrl());
@@ -117,6 +135,18 @@ public class Solutions extends Composite {
     public void scrollToRace(ClickEvent e) {
         scrollToView(SolutionsNavigationTabs.RaceManagerApp);
         handleClickEventWithLocalNavigation(e, raceCommitteeAppNavigation);
+    }
+
+    @UiHandler("inSightAnchor")
+    public void scrollToInSight(ClickEvent e) {
+        scrollToView(SolutionsNavigationTabs.InSightApp);
+        handleClickEventWithLocalNavigation(e, inSightAppNavigation);
+    }
+
+    @UiHandler("buoyPingerAnchor")
+    public void scrollToBuoyPinger(ClickEvent e) {
+        scrollToView(SolutionsNavigationTabs.BuoyPingerApp);
+        handleClickEventWithLocalNavigation(e, buoyPingerAppNavigation);
     }
 
     @UiHandler("postRaceAnchor")
@@ -152,6 +182,12 @@ public class Solutions extends Composite {
             sapInSailingDiv.scrollIntoView();
         } else {
             switch (navigationTab) {
+            case BuoyPingerApp:
+                buoyPingerDiv.scrollIntoView();
+                break;
+            case InSightApp:
+                inSightDiv.scrollIntoView();
+                break;
             case SapInSailing:
                 sapInSailingDiv.scrollIntoView();
                 break;

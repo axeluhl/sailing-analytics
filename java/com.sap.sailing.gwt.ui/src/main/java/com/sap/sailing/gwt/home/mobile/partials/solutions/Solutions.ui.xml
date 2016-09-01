@@ -118,6 +118,62 @@
                         </div>
 					</div>
 				</div>
+				<div ui:field="inSightAppUi"
+					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+						<h2 class="{local_res.css.solutions_item_header_title}">
+							<ui:text from='{i18n.sapSailingInSight}' />
+						</h2>
+						<img src="images/mobile/arrow-down-grey.png" alt=""
+							class="{local_res.css.solutions_item_header_arrow}"></img>
+					</div>
+					<div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+						<img src="images/mobile/solutions-sap-sailing-insight.png" alt="{i18n.sapSailingInSight}"></img>
+						<p>
+							<ui:text from='{i18n.contentSapSailingInSight}' />
+						</p>
+                        <div
+                            class="{style.storeBadgesContainer}"
+                            >
+                            <a  ui:field="inSightPlayStoreLinkUi"
+                                href="{smI18n.playstoreTrackingApp}"
+                                target="_blank"
+                                ><img
+                                    ui:field="inSightPlayStoreImgUi"
+                                    alt="Get it on Google Play"
+                                    src="{smI18n.playstoreBadge}"
+                                    /></a>
+                        </div>
+					</div>
+				</div>
+				<div ui:field="buoyPingerAppUi"
+					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+						<h2 class="{local_res.css.solutions_item_header_title}">
+							<ui:text from='{i18n.sapSailingBuoyPinger}' />
+						</h2>
+						<img src="images/mobile/arrow-down-grey.png" alt=""
+							class="{local_res.css.solutions_item_header_arrow}"></img>
+					</div>
+					<div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+						<img src="images/mobile/solutions-sap-sailing-buoy-pinger.png" alt="{i18n.sapSailingBuoyPinger}"></img>
+						<p>
+							<ui:text from='{i18n.contentSapSailingBuoyPinger}' />
+						</p>
+                        <div
+                            class="{style.storeBadgesContainer}"
+                            >
+                            <a  ui:field="buoyPingerPlayStoreLinkUi"
+                                href="{smI18n.playStoreBuoypositioningApp}"
+                                target="_blank"
+                                ><img
+                                    ui:field="buoyPingerPlayStoreImgUi"
+                                    alt="Get it on Google Play"
+                                    src="{smI18n.playstoreBadge}"
+                                    /></a>
+                        </div>
+					</div>
+				</div>
 				<div ui:field="postRaceAnalyticsUi"
 					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
 					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">

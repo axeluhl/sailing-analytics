@@ -22,6 +22,8 @@ public class Solutions extends Composite {
     @UiField DivElement sapInSailingDiv;
     @UiField DivElement sapSailingAnalyticsUi;
     @UiField DivElement raceCommitteeAppUi;
+    @UiField DivElement inSightAppUi;
+    @UiField DivElement buoyPingerAppUi;
     @UiField DivElement postRaceAnalyticsUi;
     @UiField DivElement stgTrainingDiaryUi;
     @UiField DivElement strategySimulatorUi;
@@ -33,6 +35,8 @@ public class Solutions extends Composite {
         initAnimation(sapInSailingDiv, true);
         initAnimation(sapSailingAnalyticsUi, false);
         initAnimation(raceCommitteeAppUi, false);
+        initAnimation(inSightAppUi, false);
+        initAnimation(buoyPingerAppUi, false);
         initAnimation(postRaceAnalyticsUi, false);
         initAnimation(stgTrainingDiaryUi, false);
         initAnimation(strategySimulatorUi, false);

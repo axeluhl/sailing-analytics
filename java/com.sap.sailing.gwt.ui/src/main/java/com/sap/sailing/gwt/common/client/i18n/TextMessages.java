@@ -212,12 +212,19 @@ public interface TextMessages extends Messages {
     String autoPlayerConfiguration();
     String contentSapSailingAnalytics1();
     String contentSapSailingAnalytics2();
-
     String sapSailingAnalyticsReadMore();
+
     String sapSailingRaceManager();
     String contentSapSailingRaceManager();
-
     String sapSailingRaceManagerReadMore();
+
+    String sapSailingInSight();
+    String contentSapSailingInSight();
+    String sapSailingInSightReadMore();
+
+    String sapSailingBuoyPinger();
+    String contentSapSailingBuoyPinger();
+    String sapSailingBuoyPingerReadMore();
 
     String postRaceAnalytics();
     String contentPostRaceAnalytics1();
