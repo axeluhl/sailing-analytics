@@ -1,10 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -17,7 +13,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialog {
@@ -113,7 +109,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     protected ListBox createSailingEventListBox() {
         ListBox eventListBox = createListBox(false);
         eventListBox.addItem("Please select a sailing event...");
-        for (EventDTO event : sortEvents(existingEvents)) {
+        for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
             eventListBox.addItem(event.getName());
         }
         eventListBox.addChangeHandler(new ChangeHandler() {
@@ -123,24 +119,6 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
             }
         });
         return eventListBox;
-    }
-
-    /**
-     * Sort collection of events alphabetically
-     * 
-     * @param events
-     *            - collection that is going to be sorted
-     * @return sorted list
-     */
-    private List<EventDTO> sortEvents(Collection<EventDTO> events) {
-        List<EventDTO> sortedEvents = new ArrayList<>(events);
-        Collections.sort(sortedEvents, new Comparator<EventDTO>() {
-            @Override
-            public int compare(EventDTO event1, EventDTO event2) {
-                return new NaturalComparator().compare(event1.getName(), event2.getName());
-            }
-        });
-        return sortedEvents;
     }
 
     protected void onEventSelectionChanged() {

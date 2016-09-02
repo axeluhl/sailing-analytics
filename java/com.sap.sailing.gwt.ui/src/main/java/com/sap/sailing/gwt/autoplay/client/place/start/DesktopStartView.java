@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.autoplay.client.place.start;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -36,8 +34,8 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
@@ -144,27 +142,9 @@ public class DesktopStartView extends Composite implements StartView {
         this.events.clear();
         this.events.addAll(events);
         eventSelectionBox.addItem(StringMessages.INSTANCE.pleaseSelectAnEvent());
-        for (EventDTO event : sortEvents(events)) {
+        for (EventDTO event : Util.sortNamedCollection(events)) {
             eventSelectionBox.addItem(event.getName());
         }
-    }
-
-    /**
-     * Sort list of events alphabetically
-     * 
-     * @param events
-     *            - collection that is going to be sorted
-     * @return sorted list
-     */
-    private List<EventDTO> sortEvents(List<EventDTO> events) {
-        List<EventDTO> sortedEvents = new ArrayList<>(events);
-        Collections.sort(sortedEvents, new Comparator<EventDTO>() {
-            @Override
-            public int compare(EventDTO event1, EventDTO event2) {
-                return new NaturalComparator().compare(event1.getName(), event2.getName());
-            }
-        });
-        return sortedEvents;
     }
 
     @UiHandler("eventSelectionBox")
