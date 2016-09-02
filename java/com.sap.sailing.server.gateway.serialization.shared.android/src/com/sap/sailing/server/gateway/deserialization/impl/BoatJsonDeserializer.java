@@ -33,14 +33,18 @@ public class BoatJsonDeserializer implements JsonDeserializer<DynamicBoat> {
     public DynamicBoat deserialize(JSONObject object) throws JsonDeserializationException {
         Serializable boatId = (Serializable) object.get(BoatJsonSerializer.FIELD_ID);
         try {
-            Class<?> idClass = Class.forName((String) object.get(BoatJsonSerializer.FIELD_ID_TYPE));
-            if (Number.class.isAssignableFrom(idClass)) {
-                Constructor<?> constructorFromString = idClass.getConstructor(String.class);
-                boatId = (Serializable) constructorFromString.newInstance(boatId.toString());
-            } else if (UUID.class.isAssignableFrom(idClass)) {
-                boatId = Helpers.tryUuidConversion(boatId);
+            if (boatId == null) {
+                // no boatId - probably a legacy boat -> create an UUID
+                boatId = UUID.randomUUID();
+            } else {
+                Class<?> idClass = Class.forName((String) object.get(BoatJsonSerializer.FIELD_ID_TYPE));
+                if (Number.class.isAssignableFrom(idClass)) {
+                    Constructor<?> constructorFromString = idClass.getConstructor(String.class);
+                    boatId = (Serializable) constructorFromString.newInstance(boatId.toString());
+                } else if (UUID.class.isAssignableFrom(idClass)) {
+                    boatId = Helpers.tryUuidConversion(boatId);
+                }
             }
-        
             String name = (String) object.get(BoatJsonSerializer.FIELD_NAME);
             final Object sailID = object.get(BoatJsonSerializer.FIELD_SAIL_ID);
             String sailId = sailID == null ? null : sailID.toString();
