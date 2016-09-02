@@ -35,6 +35,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -143,13 +144,12 @@ public class DesktopStartView extends Composite implements StartView {
     public void setEvents(List<EventDTO> events) {
         this.events.clear();
         this.events.addAll(events);
-        
         eventSelectionBox.addItem(StringMessages.INSTANCE.pleaseSelectAnEvent());
-        for(EventDTO event: events) {
+        for (EventDTO event : Util.sortNamedCollection(events)) {
             eventSelectionBox.addItem(event.getName());
         }
     }
-    
+
     @UiHandler("eventSelectionBox")
     void onEventSelectionChange(ChangeEvent event) {
         EventDTO selectedEvent = getSelectedEvent();
