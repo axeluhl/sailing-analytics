@@ -42,7 +42,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
     
-    private final AbstractListFilter<T> filterer = new AbstractListFilter<T>(){
+    protected final AbstractListFilter<T> filterer = new AbstractListFilter<T>(){
         @Override
         public Iterable<String> getStrings(T t) {
             return getSearchableStrings(t);
@@ -160,7 +160,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         sort();
     }
    
-    private void sort() {
+    protected void sort() {
         if (display != null) {
             ColumnSortEvent.fire(display, display.getColumnSortList());
         }
@@ -184,7 +184,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *            model}
      * @param multiselection
      *            set <code>true</code> when the {@link RefreshableSelectionModel selection model} should be a
-     *            {@link RefreshableMultiSelectionModel}. When it´s set <code>false</code> the
+     *            {@link RefreshableMultiSelectionModel}. When itï¿½s set <code>false</code> the
      *            {@link RefreshableSelectionModel selection model} will be a {@link RefreshableSingleSelectionModel}.
      */
     public RefreshableSelectionModel<T> registerSelectionModelOnAllElements(EntityIdentityComparator<T> comp,

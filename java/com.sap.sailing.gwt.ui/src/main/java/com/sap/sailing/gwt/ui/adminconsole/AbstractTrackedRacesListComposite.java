@@ -86,12 +86,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
     private ListBox listBoxRegattas;
 
-    private Label lblFilterRacesByRegatta;
-
-    private Label lblFilterRacesByName;
-
-    private TextBox textBoxFilter;
-
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -139,7 +133,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 return strings;
             }
         };
-        lblFilterRacesByRegatta = new Label(stringMessages.filterRacesByRegatta() + ":");
+        Label lblFilterRacesByRegatta = new Label(stringMessages.filterRacesByRegatta() + ":");
         lblFilterRacesByRegatta.setWordWrap(false);
         listBoxRegattas = new ListBox();
         listBoxRegattas.addChangeHandler(new ChangeHandler() {
@@ -150,9 +144,9 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         });
         filterablePanelRaces.add(lblFilterRacesByRegatta, listBoxRegattas);
         
-        lblFilterRacesByName = new Label(stringMessages.filterRacesByName() + ":");
+        Label lblFilterRacesByName = new Label(stringMessages.filterRacesByName() + ":");
         lblFilterRacesByName.setWordWrap(false);
-        textBoxFilter = new TextBox();
+        final TextBox textBoxFilter = new TextBox();
         textBoxFilter.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {

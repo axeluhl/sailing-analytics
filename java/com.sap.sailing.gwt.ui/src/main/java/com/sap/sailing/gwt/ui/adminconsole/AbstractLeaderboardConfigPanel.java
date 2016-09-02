@@ -104,13 +104,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     
     private final LeaderboardsRefresher leaderboardsRefresher;
 
-    private Label lblFilterRacesByRegatta;
-
     private ListBox listBoxRegattas;
-
-    private Label lblFilterRacesByName;
-
-    private TextBox textBoxFilter;
     
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
@@ -190,7 +184,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 return strings;
             }
         };
-        lblFilterRacesByRegatta = new Label(stringMessages.filterRacesByRegatta() + ":");
+        Label lblFilterRacesByRegatta = new Label(stringMessages.filterRacesByRegatta() + ":");
         lblFilterRacesByRegatta.setWordWrap(false);
         listBoxRegattas = new ListBox();
         listBoxRegattas.addChangeHandler(new ChangeHandler() {
@@ -202,9 +196,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         });
         filterLeaderboardPanel.add(lblFilterRacesByRegatta, listBoxRegattas);
         
-        lblFilterRacesByName = new Label(stringMessages.filterRacesByName() + ":");
+        Label lblFilterRacesByName = new Label(stringMessages.filterRacesByName() + ":");
         lblFilterRacesByName.setWordWrap(false);
-        textBoxFilter = new TextBox();
+        final TextBox textBoxFilter = new TextBox();
         textBoxFilter.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
