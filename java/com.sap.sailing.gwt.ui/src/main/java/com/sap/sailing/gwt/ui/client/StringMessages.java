@@ -206,6 +206,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String otherManeuver();
     String douglasPeuckerPoints();
     String filterRacesByName();
+    String filterRacesByRegatta();
     String filterMediaByName();
     String actionEdit();
     String actionEditScores();

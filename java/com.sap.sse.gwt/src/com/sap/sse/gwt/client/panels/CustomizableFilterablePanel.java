@@ -1,0 +1,78 @@
+package com.sap.sse.gwt.client.panels;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.google.gwt.user.cellview.client.AbstractCellTable;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.AbstractListFilter;
+
+/**
+ * Customizable filter panel which allows to create a flexible filter panel with
+ * various number of filter inputs (e.g. combo box & text box).
+ */
+public abstract class CustomizableFilterablePanel<T> extends AbstractFilterablePanel<T> {
+
+    private List<Widget> widgets;
+    private Map<Widget, String> values;
+    private final AbstractListFilter<T> filterer = new AbstractListFilter<T>(){
+        @Override
+        public Iterable<String> getStrings(T t) {
+            return getSearchableStrings(t);
+        }
+    };
+    
+    public CustomizableFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, ListDataProvider<T> filtered) {
+        super(all, display, filtered);
+        this.widgets = new ArrayList<>();
+        this.values = new HashMap<>();
+        remove(getTextBox());
+    }
+    
+    public String getFilterValue(Widget widget) {
+        return values.containsKey(widget) ? values.get(widget) : "";
+    }
+    
+    public void setFilterValue(String value, Widget widget) {
+        values.put(widget, value);
+    }
+    
+    public void add(Label label, Widget widget) {
+        widgets.add(widget);
+        add(label);
+        add(widget);
+        setCellVerticalAlignment(label, HasVerticalAlignment.ALIGN_MIDDLE);
+    }
+    
+    @Override
+    public void filter() {
+        filtered.getList().clear();
+        List<String> keywords = new ArrayList<>();
+        for (Widget widget: widgets) {
+            keywords.addAll(Arrays.asList(getFilterValue(widget).split(" ")));
+        }
+        Util.addAll(filterer.applyFilter(keywords, all.getList()), filtered.getList());
+        filtered.refresh();
+        sort();
+    }
+    
+    public void clearFilter() {
+        filtered.getList().clear();
+        Util.addAll(all.getList(), filtered.getList());
+    }
+    
+    private void sort() {
+        if (display != null) {
+            ColumnSortEvent.fire(display, display.getColumnSortList());
+        }
+    }
+
+}
