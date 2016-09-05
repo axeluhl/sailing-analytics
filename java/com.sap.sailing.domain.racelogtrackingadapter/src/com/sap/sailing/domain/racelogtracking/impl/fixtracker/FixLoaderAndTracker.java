@@ -43,8 +43,6 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.concurrent.LockUtil;
-import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * This class listens to RaceLog Events, changes to the race and fix loading events and properly handles mappings and
@@ -60,7 +58,6 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 public class FixLoaderAndTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(FixLoaderAndTracker.class.getName());
     protected final DynamicTrackedRace trackedRace;
-    private final NamedReentrantReadWriteLock loadingFromFixStoreLock;
     private final SensorFixStore sensorFixStore;
     private final GPSFixStore gpsFixStore;
     private RegattaLogDeviceMappings<WithID> deviceMappings;
@@ -158,8 +155,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         this.gpsFixStore = new GPSFixStoreImpl(sensorFixStore);
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.trackedRace = trackedRace;
-        loadingFromFixStoreLock = new NamedReentrantReadWriteLock(
-                "Loading from SensorFix store lock for tracked race " + trackedRace.getRace().getName(), false);
         
         startTracking();
     }
@@ -254,7 +249,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
     protected void startTracking() {
         trackedRace.addListener(raceChangeListener);
-        this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs());
+        this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs(),
+                trackedRace.getRace().getName());
     }
 
     private synchronized void waitForLoadingToFinishRunning() {
@@ -287,7 +283,16 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         });
     }
 
-    private void updateConcurrent(final Runnable updateCallback) {
+    /**
+     * This method runs the given update callback in a separate {@link Thread} by handling technical concurrency aspects
+     * and potential {@link #preemptiveStopRequested preemptive stop requests} internally. Thus, it separates the
+     * functional updating process from technical aspects.
+     * 
+     * @param updateCallback
+     *            the {@link Runnable} callback used to run the update
+     */
+    // TODO Consider using a thread pool here, after merging bug3864 into master
+    private void updateAsyncInternal(final Runnable updateCallback) {
         synchronized (FixLoaderAndTracker.this) {
             activeLoaders.incrementAndGet();
             setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
@@ -300,17 +305,14 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     if (!preemptiveStopRequested.get()) {
                         trackedRace.lockForSerializationRead();
                         setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
-                        LockUtil.lockForWrite(loadingFromFixStoreLock);
                         synchronized (FixLoaderAndTracker.this) {
                             FixLoaderAndTracker.this.notifyAll();
                         }
                         updateCallback.run();
                     }
                 } finally {
-                    LockUtil.unlockAfterWrite(loadingFromFixStoreLock);
                     synchronized (FixLoaderAndTracker.this) {
-                        int currentActiveLoaders;
-                        currentActiveLoaders = activeLoaders.decrementAndGet();
+                        int currentActiveLoaders = activeLoaders.decrementAndGet();
                         FixLoaderAndTracker.this.notifyAll();
                         if (currentActiveLoaders == 0) {
                             setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
@@ -338,27 +340,28 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
     
     private class FixLoaderDeviceMappings extends RegattaLogDeviceMappings<WithID> {
-        public FixLoaderDeviceMappings(Iterable<RegattaLog> initialRegattaLogs) {
-            super(initialRegattaLogs);
+        public FixLoaderDeviceMappings(Iterable<RegattaLog> initialRegattaLogs, String raceNameForLock) {
+            super(initialRegattaLogs, raceNameForLock);
         }
         
         @Override
         protected void updateMappings() {
-            updateConcurrent(() -> {
-                FixLoaderDeviceMappings.super.updateMappings();
-                // add listeners for devices in mappings already present
-                forEachDevice((device) -> sensorFixStore.addListener(listener, device));
-            });
+            updateAsyncInternal(FixLoaderDeviceMappings.super::updateMappings);
         }
 
         @Override
         protected void mappingRemoved(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
+            final DeviceIdentifier device = mapping.getDevice();
+            if(!hasMappingForDevice(device)) {
+                sensorFixStore.removeListener(listener, device);
+            }
             // TODO if tracks are always associated to only one device mapping, we could remove tracks here
-            // TODO remove listener from store if there is no mapping left for the DeviceIdentifier
         }
 
         @Override
         protected void mappingAdded(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
+            // The listener is first added to not lose any fix after loading the initial fixes and adding the listener.
+            sensorFixStore.addListener(listener, mapping.getDevice());
             loadFixes(getTrackingTimeRange().intersection(mapping.getTimeRange()), mapping);
         }
 

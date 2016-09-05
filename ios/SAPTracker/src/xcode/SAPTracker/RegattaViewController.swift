@@ -282,7 +282,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         APIManager.sharedManager.postTeamImage(DataManager.sharedManager.selectedCheckIn!.competitorId,
             imageData: jpegData,
             success: { (responseObject) -> Void in
-                // http://wiki.sapsailing.com/wiki/tracking-app/api-v1#Competitor-Information-%28in-general%29
+                // https://wiki.sapsailing.com/wiki/info/api/api-v1#tracking-app-api-v1_check-in-information_competitor-information-in-general
                 // "Additional Notes: Competitor profile image left out for now."
                 let responseDictionary = responseObject as![String: AnyObject]
                 let imageUrl = (responseDictionary["teamImageUri"]) as! String;
