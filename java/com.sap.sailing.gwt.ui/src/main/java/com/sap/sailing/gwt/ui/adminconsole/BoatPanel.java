@@ -99,7 +99,7 @@ public class BoatPanel extends SimplePanel {
     }
 
     private void openAddBoatDialog() {
-        // boatTable.openEditBoatDialog(new CompetitorDTOImpl(), /* boat class to be used from CompetitorDTO */ null);
+        boatTable.openEditBoatDialog(new BoatDTO());
     }
     
     public void refreshBoatList() {

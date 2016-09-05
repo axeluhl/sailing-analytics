@@ -13,7 +13,7 @@ public class BoatDTO extends NamedDTO implements Serializable {
     private Color color;
 
     // for GWT
-    BoatDTO() {}
+    public BoatDTO() {}
 
     public BoatDTO(String idAsString, String name, BoatClassDTO boatClass, String sailId) {
         this(idAsString, name, boatClass, sailId, null);

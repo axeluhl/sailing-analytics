@@ -29,15 +29,12 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
     /**
      * The class creates the UI-dialog to type in the Data about a competitor.
      * 
-     * @param competitorToEdit
-     *            The 'competitorToEdit' parameter contains the competitor which should be changed or initialized.
-     * @param boatClass
-     *            The boat class is the default shown boat class for new competitors. Set <code>null</code> if your competitor is
-     *            already initialized or you don�t want a default boat class.
+     * @param boatToEdit
+     *            The 'boatToEdit' parameter contains the boat which should be changed or initialized.
      */
-    public BoatEditDialog(final StringMessages stringMessages, BoatDTO competitorToEdit,
-            DialogCallback<BoatDTO> callback, String boatClass) {
-        super(stringMessages.editCompetitor(), null, stringMessages.ok(), stringMessages
+    public BoatEditDialog(final StringMessages stringMessages, BoatDTO boatToEdit,
+            DialogCallback<BoatDTO> callback) {
+        super(stringMessages.edit() + " " + stringMessages.boat(), null, stringMessages.ok(), stringMessages
                 .cancel(), new Validator<BoatDTO>() {
                     @Override
                     public String getErrorMessage(BoatDTO valueToValidate) {
@@ -59,20 +56,20 @@ public class BoatEditDialog extends DataEntryDialog<BoatDTO> {
                 }, /* animationEnabled */true, callback);
         this.ensureDebugId("BoatEditDialog");
         this.stringMessages = stringMessages;
-        this.boatToEdit = competitorToEdit;
+        this.boatToEdit = boatToEdit;
                 
         this.boatClassName = createSuggestBox(new BoatClassMasterdataSuggestOracle());
         boatClassName.ensureDebugId("BoatClassNameSuggestBox");
-        if (competitorToEdit.getBoatClass() != null) {
-            boatClassName.setValue(competitorToEdit.getBoatClass().getName());
+        if (boatToEdit.getBoatClass() != null) {
+            boatClassName.setValue(boatToEdit.getBoatClass().getName());
             boatClassName.setEnabled(false);
         } else {
-            boatClassName.setValue(boatClass); // widgets have to accept null values here
+            boatClassName.setValue(null); // widgets have to accept null values here
         }
-        this.name = createTextBox(competitorToEdit.getName());
+        this.name = createTextBox(boatToEdit.getName());
         name.ensureDebugId("NameTextBox");
-        this.displayColorTextBox = createTextBox(competitorToEdit.getColor() == null ? "" : competitorToEdit.getColor().getAsHtml()); 
-        this.sailId = createTextBox(competitorToEdit.getSailId());
+        this.displayColorTextBox = createTextBox(boatToEdit.getColor() == null ? "" : boatToEdit.getColor().getAsHtml()); 
+        this.sailId = createTextBox(boatToEdit.getSailId());
         sailId.ensureDebugId("SailIdTextBox");
     }
 
