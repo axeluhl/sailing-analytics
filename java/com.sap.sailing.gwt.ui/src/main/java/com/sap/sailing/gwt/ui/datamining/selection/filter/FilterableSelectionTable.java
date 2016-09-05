@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -43,7 +44,8 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
         
         allData = new ArrayList<ContentType>();
         
-        table = new BaseCelltable<>(Integer.MAX_VALUE);
+        FilterTableResources tableRes = GWT.create(FilterTableResources.class);
+        table = new BaseCelltable<>(Integer.MAX_VALUE, tableRes);
         table.setWidth("100%");
         table.setAutoHeaderRefreshDisabled(true);
         table.setAutoFooterRefreshDisabled(true);
@@ -72,7 +74,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
             }
         });
         dataProvider.addDataDisplay(table);
-   
+        
         table.addColumn(checkColumn);
         table.addColumn(contentColumn);
         

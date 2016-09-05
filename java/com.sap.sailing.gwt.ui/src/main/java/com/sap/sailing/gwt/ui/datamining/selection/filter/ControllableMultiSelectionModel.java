@@ -10,9 +10,7 @@ import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
- * A multi selection model, that allows to block the selection change notifications.<br>
- * This is a copy of {@link MultiSelectionModel}, because the implementation of <code>MultiSelectionModel</code>
- * wasn't open enough.
+ * A multi selection model, that allows to block the selection change notifications.
  * @author Lennart Hensler (D054527)
  */
 public class ControllableMultiSelectionModel<T> extends MultiSelectionModel<T> {
@@ -77,13 +75,13 @@ public class ControllableMultiSelectionModel<T> extends MultiSelectionModel<T> {
      */
     @Override
     public Set<T> getSelectedSet() {
-        resolveChanges();
+        determineChanges();
         return new HashSet<T>(selectedSet.values());
     }
 
     @Override
     public boolean isSelected(T item) {
-        resolveChanges();
+        determineChanges();
         return selectedSet.containsKey(getKey(item));
     }
 
@@ -98,7 +96,7 @@ public class ControllableMultiSelectionModel<T> extends MultiSelectionModel<T> {
         if (!blockNotifications) {
             super.scheduleSelectionChangeEvent();
         } else {
-            resolveChanges();
+            determineChanges();
         }
     }
 
@@ -107,10 +105,10 @@ public class ControllableMultiSelectionModel<T> extends MultiSelectionModel<T> {
         if (isEventScheduled()) {
             setEventCancelled(true);
         }
-        resolveChanges();
+        determineChanges();
     }
 
-    private void resolveChanges() {
+    private void determineChanges() {
         if (selectionChanges.isEmpty()) {
             return;
         }
