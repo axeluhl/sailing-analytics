@@ -7,8 +7,8 @@ public abstract class AbstractEntryPointWithSettingsLinkFactory {
     
     private static final SettingsToUrlSerializer serializer = new SettingsToUrlSerializer();
 
-    protected static String createEntryPointLink(String baseLink, GenericSerializableSettings... settings) {
-        UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters(baseLink);
+    protected static String createEntryPointLink(String path, GenericSerializableSettings... settings) {
+        UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParametersAndPath(path);
         for (GenericSerializableSettings setting : settings) {
             serializer.serializeToUrlBuilder(setting, urlBuilder);
         }

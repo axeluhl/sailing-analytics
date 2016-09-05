@@ -47,9 +47,8 @@ public class DashboardLiveRaceProvider {
     
     private void setLiveRaceForLeaderboardName(String leaderboardName, TrackedRace liveRace) {
         if (liveRaceForLeaderboardNames.containsKey(leaderboardName)) {
-            liveRaceForLeaderboardNames.replace(leaderboardName, liveRace);
-        } else {
-            liveRaceForLeaderboardNames.put(leaderboardName, liveRace);
+            liveRaceForLeaderboardNames.remove(leaderboardName);
         }
+        liveRaceForLeaderboardNames.put(leaderboardName, liveRace);
     }
 }

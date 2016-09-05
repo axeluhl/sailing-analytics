@@ -46,6 +46,16 @@ public abstract class AbstractSuggestedMultiSelectionBoatClassDataProvider exten
     }
     
     @Override
+    public final String createSuggestionKeyString(BoatClassDTO value) {
+        return value.getName();
+    }
+    
+    @Override
+    public final String createSuggestionAdditionalDisplayString(BoatClassDTO value) {
+        return null;
+    }
+    
+    @Override
     public void initNotifications(boolean notifyAboutUpcomingRaces, boolean notifyAboutResults) {
         this.notifyAboutUpcomingRaces = notifyAboutUpcomingRaces;
         this.notifyAboutResults = notifyAboutResults;

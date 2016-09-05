@@ -9,7 +9,7 @@ import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
 public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     
     public static final String createUserProfileLink() {
-        return createEntryPointLink("/gwt/Home.html#/user/profile/:", new HashMap<String, String>());
+        return createEntryPointLink("/gwt/Home.html", "/user/profile/:", new HashMap<String, String>());
     }
     
     public static final String createEmailValidationLink() {

@@ -14,7 +14,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -53,7 +52,6 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -76,7 +74,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private LabeledAbstractFilterablePanel<LeaderboardGroupDTO> groupsFilterablePanel;
     private Button removeButton;
-    private CellTable<LeaderboardGroupDTO> groupsTable;
+    private FlushableCellTable<LeaderboardGroupDTO> groupsTable;
     private RefreshableMultiSelectionModel<LeaderboardGroupDTO> refreshableGroupsSelectionModel;
     /**
      * True, if only one group is selected in the {@link #groupsSelectionModel}.
@@ -451,7 +449,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         //Create table for leaderboard groups
         groupsProvider = new ListDataProvider<LeaderboardGroupDTO>();
         ListHandler<LeaderboardGroupDTO> leaderboardGroupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsProvider.getList());
-        groupsTable = new BaseCelltable<LeaderboardGroupDTO>(10000, tableRes);
+        groupsTable = new FlushableCellTable<LeaderboardGroupDTO>(10000, tableRes);
         groupsTable.ensureDebugId("LeaderboardGroupsCellTable");
         groupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(filterLeaderboardGroupsLbl, availableLeaderboardGroups, groupsTable, groupsProvider) {
             @Override
@@ -571,15 +569,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
         });
 
-        groupsTable.setWidth("100%");
-        groupsTable.addColumn(groupNameColumn, stringMessages.name());
-        groupsTable.addColumn(groupDescriptionColumn, stringMessages.description());
-        groupsTable.addColumn(groupDisplayNameColumn, stringMessages.displayName());
-        groupsTable.addColumn(hasOverallLeaderboardColumn, stringMessages.useOverallLeaderboard());
-        groupsTable.addColumn(groupActionsColumn, stringMessages.actions());
-        groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
-
-        refreshableGroupsSelectionModel = new RefreshableMultiSelectionModel<>(
+        SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
+                new SelectionCheckboxColumn<LeaderboardGroupDTO>(
+                tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(),
+                tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
                 new EntityIdentityComparator<LeaderboardGroupDTO>() {
                     @Override
                     public boolean representSameEntity(LeaderboardGroupDTO dto1, LeaderboardGroupDTO dto2) {
@@ -589,15 +583,26 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     public int hashCode(LeaderboardGroupDTO t) {
                         return t.getId().hashCode();
                     }
-                }, groupsFilterablePanel.getAllListDataProvider());
+                }, groupsFilterablePanel.getAllListDataProvider(), groupsTable);
+        
+        groupsTable.setWidth("100%");
+        groupsTable.addColumn(leaderboardTableSelectionColumn, leaderboardTableSelectionColumn.getHeader());
+        groupsTable.addColumn(groupNameColumn, stringMessages.name());
+        groupsTable.addColumn(groupDescriptionColumn, stringMessages.description());
+        groupsTable.addColumn(groupDisplayNameColumn, stringMessages.displayName());
+        groupsTable.addColumn(hasOverallLeaderboardColumn, stringMessages.useOverallLeaderboard());
+        groupsTable.addColumn(groupActionsColumn, stringMessages.actions());
+        groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
+
+        refreshableGroupsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
         refreshableGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 groupSelectionChanged();
             }
         });
-        groupsTable.setSelectionModel(refreshableGroupsSelectionModel);
 
+        groupsTable.setSelectionModel(refreshableGroupsSelectionModel, leaderboardTableSelectionColumn.getSelectionManager());
         groupsProvider.addDataDisplay(groupsTable);
         leaderboardGroupsContentPanel.add(groupsTable);
 

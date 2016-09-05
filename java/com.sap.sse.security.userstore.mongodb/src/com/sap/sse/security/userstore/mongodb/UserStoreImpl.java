@@ -156,7 +156,6 @@ public class UserStoreImpl implements UserStore {
     @Override
     public void clear() {
         preferences.clear();
-        preferenceConverters.clear();
         clearAllPreferenceObjects();
         emailForUsername.clear();
         settings.clear();
@@ -657,18 +656,19 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public void setPreferenceObject(String username, String key, Object preferenceObject)
+    public String setPreferenceObject(String username, String key, Object preferenceObject)
             throws IllegalArgumentException {
         @SuppressWarnings("unchecked")
         PreferenceConverter<Object> preferenceConverter = (PreferenceConverter<Object>) preferenceConverters.get(key);
         if (preferenceConverter == null) {
             throw new IllegalArgumentException("Setting preference for key "+key+" but there is no converter associated!");
         }
+        String stringPreference = null;
         if (preferenceObject == null) {
             unsetPreference(username, key);
         } else {
             try {
-                String stringPreference = preferenceConverter.toPreferenceString(preferenceObject);
+                stringPreference = preferenceConverter.toPreferenceString(preferenceObject);
                 setPreferenceInternal(username, key, stringPreference);
                 setPreferenceObjectInternal(username, key, preferenceObject);
             } catch (Throwable t) {
@@ -676,6 +676,7 @@ public class UserStoreImpl implements UserStore {
                         + preferenceObject + "\"", t);
             }
         }
+        return stringPreference;
     }
 
     private void notifyListenersOnPreferenceObjectChange(String username, String key, Object oldPreference,

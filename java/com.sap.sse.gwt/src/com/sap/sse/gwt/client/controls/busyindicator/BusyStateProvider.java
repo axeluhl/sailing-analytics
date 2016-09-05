@@ -7,7 +7,15 @@ public interface BusyStateProvider {
 
     void removeBusyStateChangeListener(BusyStateChangeListener listener);
     
-    void setBusyState(boolean isBusy);
-
     boolean isBusy();
+
+    /**
+     * A new task has begun that keeps us busy
+     */
+    void addBusyTask();
+
+    /**
+     * A task that kept us busy has finished
+     */
+    void removeBusyTask();
 }

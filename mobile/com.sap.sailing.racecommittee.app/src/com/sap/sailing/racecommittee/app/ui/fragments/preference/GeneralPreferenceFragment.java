@@ -27,9 +27,6 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     private static int requestCodeQRCode = 45392;
 
-    private EditTextPreference identifierPreference;
-    private EditTextPreference serverUrlPreference;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +38,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         setupDeveloperOptions();
     }
 
-    protected void setupGeneral() {
+    private void setupGeneral() {
         setupLanguageButton();
         setupCourseAreasList();
 
@@ -83,7 +80,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         bindPreferenceSummaryToInteger(intervalPreference);
     }
 
-    protected void setupDeveloperOptions() {
+    private void setupDeveloperOptions() {
         PreferenceScreen screen = getPreferenceScreen();
         PreferenceCategory category = findPreference(R.string.preference_developer_key);
         if (!BuildConfig.DEBUG) {
@@ -93,7 +90,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         }
     }
 
-    protected void setupConnection() {
+    private void setupConnection() {
         setupIdentifierBox();
         setupServerUrlBox();
         setupSyncQRCodeButton();
@@ -102,7 +99,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     private void setupIdentifierBox() {
         final AppPreferences appPreferences = AppPreferences.on(getActivity());
-        identifierPreference = findPreference(R.string.preference_identifier_key);
+        EditTextPreference identifierPreference = findPreference(R.string.preference_identifier_key);
         identifierPreference.setSummary(appPreferences.getDeviceIdentifier());
         addOnPreferenceChangeListener(identifierPreference, new OnPreferenceChangeListener() {
             @Override
@@ -119,7 +116,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
     }
 
     private void setupServerUrlBox() {
-        serverUrlPreference = findPreference(R.string.preference_server_url_key);
+        EditTextPreference serverUrlPreference = findPreference(R.string.preference_server_url_key);
         addOnPreferenceChangeListener(serverUrlPreference, new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -177,7 +174,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         });
     }
 
-    protected boolean requestQRCodeScan() {
+    private boolean requestQRCodeScan() {
         try {
             Intent intent = new Intent("com.google.zxing.client.android.SCAN");
             intent.putExtra("SCAN_MODE", "QR_CODE_MODE");

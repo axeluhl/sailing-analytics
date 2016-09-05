@@ -44,10 +44,13 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_TIME_TRAVELED);
         raceDetailsToShow.remove(DetailType.DISPLAY_LEGS);
-        final LeaderboardSettings newSettings = new LeaderboardSettings(existingSettings.getManeuverDetailsToShow(),
-                existingSettings.getLegDetailsToShow(),
-                raceDetailsToShow, existingSettings.getOverallDetailsToShow(), existingSettings.getNamesOfRaceColumnsToShow(),
-                existingSettings.getNamesOfRacesToShow(),
+        final LeaderboardSettings newSettings = new LeaderboardSettings(
+                Util.cloneListOrNull(existingSettings.getManeuverDetailsToShow()),
+                Util.cloneListOrNull(existingSettings.getLegDetailsToShow()),
+                raceDetailsToShow,
+                Util.cloneListOrNull(existingSettings.getOverallDetailsToShow()),
+                Util.cloneListOrNull(existingSettings.getNamesOfRaceColumnsToShow()),
+                Util.cloneListOrNull(existingSettings.getNamesOfRacesToShow()),
                 existingSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,
                 existingSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 existingSettings.getNameOfRaceToSort(), existingSettings.isSortAscending(),

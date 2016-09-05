@@ -45,12 +45,12 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
-public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
+public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTrackImpl<ItemType, FixType>
+        implements GPSFixTrack<ItemType, FixType> {
     private static final Logger logger = Logger.getLogger(GPSFixTrackImpl.class.getName());
     private static final long serialVersionUID = 2115321069242514378L;
     protected final Speed maxSpeedForSmoothing;
     
-    private final ItemType trackedItem;
     private long millisecondsOverWhichToAverage;
     
     private final TrackListenerCollection<ItemType, FixType, GPSTrackListener<ItemType, FixType>> listeners;
@@ -131,8 +131,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      *            inferred speed can be matched.
      */
     public GPSFixTrackImpl(ItemType trackedItem, long millisecondsOverWhichToAverage, Speed maxSpeedForSmoothening) {
-        super(/* nameForReadWriteLock */ GPSFixTrackImpl.class.getSimpleName()+(trackedItem==null?"":(" for "+trackedItem.toString())));
-        this.trackedItem = trackedItem;
+        super(trackedItem, /* nameForReadWriteLock */ GPSFixTrackImpl.class.getSimpleName()
+                + (trackedItem == null ? "" : (" for " + trackedItem.toString())));
         this.millisecondsOverWhichToAverage = millisecondsOverWhichToAverage;
         this.maxSpeedForSmoothing = maxSpeedForSmoothening;
         this.listeners = new TrackListenerCollection<ItemType, FixType, GPSTrackListener<ItemType,FixType>>();
@@ -166,7 +166,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
-        distanceCache = new DistanceCache(trackedItem.toString());
+        distanceCache = new DistanceCache(getTrackedItem().toString());
         maxSpeedCache = createMaxSpeedCache();
     }
     
@@ -246,11 +246,6 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         @SuppressWarnings("unchecked")
         FixType result = (FixType) new DummyGPSFix(timePoint);
         return result;
-    }
-
-    @Override
-    public ItemType getTrackedItem() {
-        return trackedItem;
     }
     
     @Override

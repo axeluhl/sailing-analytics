@@ -287,10 +287,10 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         for (Competitor competitor : competitors) {
             final String toAddress = competitor.getEmail();
             if (toAddress != null) {
-                String leaderboardName = leaderboard.getDisplayName() == null ? leaderboard.getName() : leaderboard.getDisplayName();
+                String leaderboardDisplayName = leaderboard.getDisplayName() == null ? leaderboard.getName() : leaderboard.getDisplayName();
                 String competitorName = competitor.getName();
                 String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(serverUrlWithoutTrailingSlash,
-                        event.getId().toString(), leaderboardName, DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
+                        event.getId().toString(), leaderboard.getName(), DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                         competitor.getId().toString(), NonGwtUrlHelper.INSTANCE);
                 String logoUrl = null;
                 final List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
@@ -299,7 +299,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 }
                 try {
                     final ResourceBundleStringMessages B = RaceLogTrackingI18n.STRING_MESSAGES;
-                    sendInvitationEmail(locale, toAddress, leaderboardName, event.getName(), competitorName, url,
+                    sendInvitationEmail(locale, toAddress, leaderboardDisplayName, event.getName(), competitorName, url,
                             B.get(locale, "sailInSightAppName"), iOSAppUrl, androidAppUrl, logoUrl);
                 } catch (MailException e) {
                     occuredExceptions.append(e.getMessage() + "\r\n");
@@ -392,7 +392,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             String emails, String iOSAppUrl, String androidAppUrl, Locale locale) throws MailException {
         StringBuilder occuredExceptions = new StringBuilder();
         String[] emailArray = emails.split(",");
-        String leaderboardName = leaderboard.getDisplayName() == null ? leaderboard.getName() : leaderboard.getDisplayName();
+        String leaderboardDisplayName = leaderboard.getDisplayName() == null ? leaderboard.getName() : leaderboard.getDisplayName();
         String eventId = event.getId().toString();
         String logoUrl = null;
         List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
@@ -400,12 +400,12 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             logoUrl = imagesWithTag.get(0).getURL().toString();
         }
         // http://<host>/buoy-tender/checkin?event_id=<event-id>&leaderboard_name=<leaderboard-name>
-        String url = DeviceMappingConstants.getBuoyTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboardName,
+        String url = DeviceMappingConstants.getBuoyTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboard.getName(),
                 eventId, NonGwtUrlHelper.INSTANCE);
         for (String toAddress : emailArray) {
             try {
                 final ResourceBundleStringMessages B = RaceLogTrackingI18n.STRING_MESSAGES;
-                sendInvitationEmail(locale, toAddress, leaderboardName,
+                sendInvitationEmail(locale, toAddress, leaderboardDisplayName,
                         event.getName(), RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "buoyTender"), url, B.get(locale, "buoyPingerAppName"),
                         iOSAppUrl, androidAppUrl, logoUrl);
             } catch (MailException e) {

@@ -24,6 +24,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.internal.view.ContextThemeWrapper;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -118,6 +119,7 @@ public class RegattaActivity extends AbstractRegattaActivity
             ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
         }
+        // FIXME bug 3823: a RegattaFragment must only be created if a competitor, not a mark, is being tracked
         RegattaFragment regattaFragment = new RegattaFragment();
         regattaFragment.setFragmentWatcher(this);
         replaceFragment(R.id.content_frame, regattaFragment);
@@ -187,7 +189,6 @@ public class RegattaActivity extends AbstractRegattaActivity
                 hasPicture = true;
                 LinearLayout addTeamPhotoTextView = (LinearLayout) findViewById(R.id.add_photo);
                 addTeamPhotoTextView.setVisibility(View.INVISIBLE);
-
                 getRegattaFragment().setChangePhotoButtonHidden(false);
             }
         });
@@ -237,25 +238,29 @@ public class RegattaActivity extends AbstractRegattaActivity
     }
 
     private void setTeamImage(ImageView imageView, int width, int height) {
-        String fileName = getCompetitorImageFileName(competitor.id);
-        Bitmap storedImage = getStoredImage(fileName, width, height);
-        if (storedImage == null) {
-            askServerAboutTeamImageUrl(imageView);
-        } else {
-            imageView.setImageBitmap(storedImage);
-            userImageUpdated();
+        if (competitor != null && competitor.id != null) {
+            String fileName = getCompetitorImageFileName(competitor.id);
+            Bitmap storedImage = getStoredImage(fileName, width, height);
+            if (storedImage == null) {
+                askServerAboutTeamImageUrl(imageView);
+            } else {
+                imageView.setImageBitmap(storedImage);
+                userImageUpdated();
+            }
         }
     }
 
     private void setFlagImage(ImageView imageView, int width, int height) {
-        String flagFileName = getFlagImageFileName(competitor.countryCode.toLowerCase(Locale.getDefault()));
-        Bitmap storedFlagImage = getStoredImage(flagFileName, width, height);
-        if (storedFlagImage == null) {
-            String urlStr = String.format("%s/gwt/images/flags/%s.png", event.server,
-                    competitor.countryCode.toLowerCase(Locale.getDefault()));
-            new DownloadFlagImageTask(imageView, competitor.countryCode).execute(urlStr);
-        } else {
-            imageView.setImageBitmap(storedFlagImage);
+        if (competitor != null && competitor.countryCode != null) {
+            String flagFileName = getFlagImageFileName(competitor.countryCode.toLowerCase(Locale.getDefault()));
+            Bitmap storedFlagImage = getStoredImage(flagFileName, width, height);
+            if (storedFlagImage == null) {
+                String urlStr = String.format("%s/gwt/images/flags/%s.png", event.server,
+                        competitor.countryCode.toLowerCase(Locale.getDefault()));
+                new DownloadFlagImageTask(imageView, competitor.countryCode).execute(urlStr);
+            } else {
+                imageView.setImageBitmap(storedFlagImage);
+            }
         }
     }
 
@@ -269,7 +274,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         sb.append(":");
         //get given port by check-in url or standard http(s) protocol port by defaultPort
         sb.append((url.getPort() == -1) ? url.getDefaultPort() : url.getPort());
-        sb.append(prefs.getServerCompetiorTeamPath(competitorId));
+        sb.append(prefs.getServerCompetitorTeamPath(competitorId));
 
         return new URL(sb.toString());
     }
@@ -431,6 +436,7 @@ public class RegattaActivity extends AbstractRegattaActivity
                     regattaFragment.setFragmentWatcher(this);
                     replaceFragment(R.id.content_frame, regattaFragment);
                 }
+                // FIXME bug3823: what about MarkCheckinData? Which fragment shall be shown?
             } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                 ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                 displayDatabaseError();
@@ -471,9 +477,7 @@ public class RegattaActivity extends AbstractRegattaActivity
     public void checkout() {
         final String checkoutURLStr = event.server
                 + prefs.getServerCheckoutPath().replace("{leaderboard-name}", Uri.encode(leaderboard.name));
-
         showProgressDialog(R.string.please_wait, R.string.checking_out);
-
         JSONObject checkoutData = new JSONObject();
         try {
             checkoutData.put("competitorId", competitor.id);
@@ -484,12 +488,10 @@ public class RegattaActivity extends AbstractRegattaActivity
             ExLog.e(this, TAG, "Error populating checkout-data: " + e.getMessage());
             return;
         }
-
         try {
             HttpJsonPostRequest request = new HttpJsonPostRequest(this, new URL(checkoutURLStr), checkoutData.toString());
             NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(request,
                     new NetworkHelperSuccessListener() {
-
                         @Override
                         public void performAction(JSONObject response) {
                             DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this,
@@ -499,7 +501,6 @@ public class RegattaActivity extends AbstractRegattaActivity
                             finish();
                         }
                     }, new NetworkHelperFailureListener() {
-
                         @Override
                         public void performAction(NetworkHelperError e) {
                             dismissProgressDialog();
@@ -507,7 +508,6 @@ public class RegattaActivity extends AbstractRegattaActivity
                                     R.string.error_could_not_complete_operation_on_server_try_again);
                         }
                     });
-
         } catch (MalformedURLException e) {
             ExLog.w(this, TAG, "Error, can't check out, MalformedURLException: " + e.getMessage());
         }
@@ -603,7 +603,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            dialog = new ProgressDialog(bmImage.getContext(), R.style.Base_Theme_AppCompat_Dialog);
+            dialog = new ProgressDialog(new ContextThemeWrapper(RegattaActivity.this, R.style.AppTheme_AlertDialog));
             dialog.setCancelable(false);
             dialog.setMessage(getString(R.string.download_team_image_message));
             dialog.show();

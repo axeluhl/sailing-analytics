@@ -6,6 +6,10 @@ import com.sap.sse.security.ui.authentication.generic.sapheader.GenericFlyoutAut
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.client.UserService;
 
+/**
+ * Sailing-specific extension of {@link GenericAuthentication} using a {@link GenericFlyoutAuthenticationView}, which is
+ * suitable in cases where the header scrolls with the page.
+ */
 public class GenericSailingAuthentication extends GenericAuthentication {
     private static final CommonSharedResources res = CommonSharedResources.INSTANCE;
     

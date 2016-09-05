@@ -89,7 +89,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public TrackedRace getTrackedRace(Fleet fleet) {
-        return trackedRaces.get(fleet);
+        return trackedRaces == null ? null : trackedRaces.get(fleet);
     }
 
     @Override

@@ -68,7 +68,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     protected final SailingServiceAsync sailingService;
 
-    protected final ListDataProvider<StrippedLeaderboardDTO> leaderboardList;
+    protected final ListDataProvider<StrippedLeaderboardDTO> filteredLeaderboardList;
 
     protected final ErrorReporter errorReporter;
 
@@ -139,7 +139,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             StringMessages theStringConstants, boolean multiSelection) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
-        leaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
+        filteredLeaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
         allRegattas = new ArrayList<RegattaDTO>();
         this.errorReporter = errorReporter;
         this.leaderboardsRefresher = leaderboardsRefresher;
@@ -165,7 +165,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
         filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents,
-                availableLeaderboardList, leaderboardTable, leaderboardList) {
+                availableLeaderboardList, leaderboardTable, filteredLeaderboardList) {
             @Override
             public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -191,7 +191,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
             }
         });
-        leaderboardList.addDataDisplay(leaderboardTable);
+        filteredLeaderboardList.addDataDisplay(leaderboardTable);
         leaderboardsPanel.add(leaderboardTable);
         mainPanel.add(new Grid(1, 1));
 
@@ -351,7 +351,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                             filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList provider
                             leaderboardSelectionModel.setSelected(leaderboard, true);
                             leaderboardSelectionChanged();
-                            getLeaderboardsRefresher().updateLeaderboards(leaderboardList.getList(), AbstractLeaderboardConfigPanel.this);
+                            getLeaderboardsRefresher().updateLeaderboards(filteredLeaderboardList.getList(), AbstractLeaderboardConfigPanel.this);
                         }
             
                         @Override
@@ -499,7 +499,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     @Override
     public void racesRemoved(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
         for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
-            for (StrippedLeaderboardDTO leaderboard : leaderboardList.getList()) {
+            for (StrippedLeaderboardDTO leaderboard : filteredLeaderboardList.getList()) {
                 for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
                     for (FleetDTO fleet : raceColumn.getFleets()) {
                         if (Util.equalsWithNull(raceColumn.getRaceIdentifier(fleet), regattaAndRaceIdentifier)) {
@@ -700,5 +700,31 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                         .addSelectionChangeHandler(trackedRaceListHandler);
             }
         });
+    }
+
+    /**
+     * Looks up the regatta for the selected leaderboard by name in {@link #allRegattas}
+     */
+    protected RegattaDTO getSelectedRegatta() {
+        final String regattaName = getSelectedLeaderboard().regattaName;
+        return getRegattaByName(regattaName);
+    }
+
+    /**
+     * Looks up a regatta with name {@code regattaName} in {@link #allRegattas}
+     */
+    protected RegattaDTO getRegattaByName(final String regattaName) {
+        RegattaDTO regatta = null;
+        if (regattaName != null) {
+            if (allRegattas != null) {
+                for (RegattaDTO i : allRegattas) {
+                    if (regattaName.equals(i.getName())) {
+                        regatta = i;
+                        break;
+                    }
+                }
+            }
+        }
+        return regatta;
     }
 }

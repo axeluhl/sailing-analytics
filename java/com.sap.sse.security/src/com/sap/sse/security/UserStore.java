@@ -102,13 +102,17 @@ public interface UserStore extends Named {
     <T> T getPreferenceObject(String username, String key);
     
     /**
-     * Sets a preference as Object. This converts the given Object to a preference String using a
+     * Sets a preference as Object. This converts the given Object to a preference {@link String} using a
      * {@link PreferenceConverter} that was registered through
      * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
      * 
-     * @throws IllegalArgumentException if there is no {@link PreferenceConverter} registered with the given key.
+     * @return the {@link String}-converted value of the preference object, as internally passed to
+     *         {@link #setPreference(String, String, String)}
+     * 
+     * @throws IllegalArgumentException
+     *             if there is no {@link PreferenceConverter} registered with the given key.
      */
-    void setPreferenceObject(String username, String key, Object preferenceObject) throws IllegalArgumentException;
+    String setPreferenceObject(String username, String key, Object preferenceObject) throws IllegalArgumentException;
 
     /**
      * Sets a value for a key if that key was previously added to this store using {@link #addSetting(String, Class)}.

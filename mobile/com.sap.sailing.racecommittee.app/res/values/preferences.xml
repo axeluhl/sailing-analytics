@@ -58,6 +58,7 @@
         <item>PAPA</item>
         <item>INDIA</item>
         <item>BLACK</item>
+        <item>UNIFORM</item>
         <item>ZULU</item>
     </string-array>
     <string name="preference_racing_procedure_gatestart_classflag_key" translatable="false">gateStartClassFlag</string>

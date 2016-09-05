@@ -22,6 +22,7 @@ public interface RegattaCompetitionResources extends ClientBundle {
         String regattacompetition_phase_fleet();
         String regattacompetition_phase_fleetfullwidth();
         String regattacompetition_phase_fleet_race_title();
+        String regattacompetition_phase_fleetcompact();
         String regattacompetition_phase_fleet_race_subtitle();
         String regattacompetition_phase_fleet_race_arrow();
         String regattacompetition_phase_fleet_title();

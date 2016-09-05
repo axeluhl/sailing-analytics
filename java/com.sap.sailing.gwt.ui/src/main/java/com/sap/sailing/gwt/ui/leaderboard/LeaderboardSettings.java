@@ -137,25 +137,38 @@ public class LeaderboardSettings extends AbstractSettings {
         this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor = showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
     }
   
+    /**
+     * A live collection that reflects the current state of the settings of a leaderboard panel
+     */
     public List<DetailType> getManeuverDetailsToShow() {
         return maneuverDetailsToShow;
     }
 
+    /**
+     * A live collection that reflects the current state of the settings of a leaderboard panel
+     */
     public List<DetailType> getLegDetailsToShow() {
         return legDetailsToShow;
     }
 
+    /**
+     * A live collection that reflects the current state of the settings of a leaderboard panel
+     */
     public List<DetailType> getRaceDetailsToShow() {
         return raceDetailsToShow;
     }
     
+    /**
+     * A live collection that reflects the current state of the settings of a leaderboard panel
+     */
     public List<DetailType> getOverallDetailsToShow() {
         return overallDetailsToShow;
     }
     
     /**
      * If <code>null</code>, this is to mean that the race columns should not be modified by
-     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
+     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}. Otherwise a
+     * live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<String> getNamesOfRaceColumnsToShow() {
         return activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT ? namesOfRaceColumnsToShow : null;
@@ -163,7 +176,8 @@ public class LeaderboardSettings extends AbstractSettings {
 
     /**
      * If <code>null</code>, this is to mean that the race columns should not be modified by
-     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
+     * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}. Otherwise
+     * a live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<String> getNamesOfRacesToShow() {
         return activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT ? namesOfRacesToShow : null;
