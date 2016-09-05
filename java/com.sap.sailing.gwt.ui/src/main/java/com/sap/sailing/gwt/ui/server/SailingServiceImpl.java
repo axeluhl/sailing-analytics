@@ -390,6 +390,7 @@ import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
 import com.sap.sailing.server.operationaltransformation.AddCourseAreas;
 import com.sap.sailing.server.operationaltransformation.AddRemoteSailingServerReference;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
+import com.sap.sailing.server.operationaltransformation.AllowBoatResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.AllowCompetitorResetToDefaults;
 import com.sap.sailing.server.operationaltransformation.ConnectTrackedRaceToLeaderboardColumn;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
@@ -4825,7 +4826,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (BoatDTO boat : boats) {
             boatIdsAsStrings.add(boat.getIdAsString());
         }
-//        getService().apply(new AllowBoatResetToDefaults(boatIdsAsStrings));
+        getService().apply(new AllowBoatResetToDefaults(boatIdsAsStrings));
     }
 
     @Override
