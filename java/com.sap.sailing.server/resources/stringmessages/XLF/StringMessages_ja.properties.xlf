@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-08-12T07:44:34Z" original="/usr/sap/ljs/app/Converter_4178050061048672287/java/com.sap.sailing.server/resources/stringmessages/StringMessages.properties" source-language="en" target-language="ja">
+	<file datatype="javapropertyresourcebundle" date="2016-08-12T10:45:20Z" original="/usr/sap/ljs/app/Converter_4178050061048672287/java/com.sap.sailing.server/resources/stringmessages/StringMessages.properties" source-language="en" target-language="ja">
 		<header>
 			<skl>
 				<internal-file crc="c8a799f35957b659646c59bd67421d2f" form="base64">H4sIAAAAAAAAAKVUTW/bMAy9+1cQ2CEbkAVpdwvgQ5YuWIChDZr2sKPs0A1XWTIk2VkQ5L+PkvNhtzZarBfbEh/f4yNlGZHiQt3jk3BO3GU/KlQuNrwJ+/EBSIGpQzDYXx0GoDNAD+Hl9WEQmZA9l4iun+Tz/tvhy5tUEsUaTaKFWZ8YGlsMGrdzmCJqJq02enuPtpTO/iL1/EBOYuw3WTbshmLtXYWmIty+xPgY6GMwQC+svOiAX0AeMFVC7iy90vZNEMdYFDHczaSw1qfMSZHd4HpVJn8wdbHfg0wb8ChIPSz0byMsZEcsfAWFZ0sgKkFSJBKjTzCewJn+VuQ4hKtJ0L9BmxoqHGnVXcB3vd7Ftw3ajiJ4fNxyEAYvoqOGoVWqDc60MeyEhU6emqyt3A6NPg+NIXdaeSH9ATepzgt05LRZMhJt3aCTl9k5GjgKD1kfJwOSFHpaUZ+NYOVC1zuPbsVg4V1y7KJV93+NIW0p9dbeM4de8c5BtLXePFaPBSeQevLH9WRmWv9VHWPdkpRgnTAOrObS3vdTDOF6Ao5y7JYNNuavxXzdDUFRFEb/pVw4lDtgJN9q7MSWyVloobhmBvBn/FuXwTX3CqliKVDaUUZpCHOvjM5hNV3Cirviw+GCcZTaETxocKVRfBtm7awhFDwki1CRJQc7XRooLRrg0jLiaXNZboP+9DxDglJvR5GPL+tw/Oixx0VEeWGIb+FF/Y74WYl0Fy/rd2SFLF1t5qeQUvumDKN/18D20lAGAAA=</internal-file>
@@ -45,8 +45,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassRaceFinishedBody" resname="boatClassRaceFinishedBody">
 				<source>New results for boat class <ph id="1">{0}</ph> in <ph id="2">{1}</ph> are available.</source>
-				<target state="signed-off">
-          <ph id="2">{1}</ph> での艇種 <ph id="1">{0}</ph> の新しい結果が利用可能です。</target>
+				<target state="translated"><ph id="2">{1}</ph> での艇種 <ph id="1">{0}</ph> の新しい結果が利用可能です。</target>
 				<note annotates="source" from="Developer">0: boatClassName, 1: raceDescription</note>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassScoreCorrectionSubject" resname="boatClassScoreCorrectionSubject">
@@ -55,8 +54,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassScoreCorrectionBody" resname="boatClassScoreCorrectionBody">
 				<source>New results for boat class <ph id="1">{0}</ph> in <ph id="2">{1}</ph> are available.</source>
-				<target state="signed-off">
-          <ph id="2">{1}</ph> での艇種 <ph id="1">{0}</ph> の新しい結果が利用可能です。</target>
+				<target state="translated"><ph id="2">{1}</ph> での艇種 <ph id="1">{0}</ph> の新しい結果が利用可能です。</target>
 				<note annotates="source" from="Developer">0: boatClassName, 1: leaderboardDescription</note>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorPassesFinishSubject" resname="competitorPassesFinishSubject">
@@ -74,8 +72,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorScoreCorrectionBody" resname="competitorScoreCorrectionBody">
 				<source>New results for competitor <ph id="1">{0}</ph> in <ph id="2">{1}</ph> are available.</source>
-				<target state="signed-off">
-          <ph id="2">{1}</ph> での競技者 <ph id="1">{0}</ph> の新しい結果が利用可能です。</target>
+				<target state="translated"><ph id="2">{1}</ph> での競技者 <ph id="1">{0}</ph> の新しい結果が利用可能です。</target>
 				<note annotates="source" from="Developer">0: competitorName, 1: leaderboardDescription</note>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boatClassUpcomingRaceSubject" resname="boatClassUpcomingRaceSubject">
@@ -105,8 +102,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="salutation" resname="salutation">
 				<source>Hallo <ph id="1">{0}</ph>,</source>
-				<target state="signed-off">
-          <ph id="1">{0}</ph> さん、こんにちは</target>
+				<target state="translated"><ph id="1">{0}</ph> さん、こんにちは</target>
 			</trans-unit>
 		</body>
 	</file>
