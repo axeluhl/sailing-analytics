@@ -365,7 +365,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
 
         table.addColumnSortHandler(getEventTableColumnSortHandler(eventListDataProvider.getList(), eventNameColumn,
-                venueNameColumn, startEndDateColumn, isPublicColumn));
+                venueNameColumn, startEndDateColumn, isPublicColumn, courseAreasColumn, leaderboardGroupsColumn));
         table.getColumnSortList().push(startEndDateColumn);
 
         return table;
@@ -373,7 +373,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,
             Column<EventDTO, SafeHtml> eventNameColumn, TextColumn<EventDTO> venueNameColumn,
-            TextColumn<EventDTO> startEndDateColumn, TextColumn<EventDTO> isPublicColumn) {
+            TextColumn<EventDTO> startEndDateColumn, TextColumn<EventDTO> isPublicColumn, Column<EventDTO, SafeHtml> courseAreasColumn,
+            Column<EventDTO, SafeHtml> leaderboardGroupsColumn) {
         ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
         result.setComparator(eventNameColumn, new Comparator<EventDTO>() {
             @Override
@@ -407,6 +408,18 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return e1.isPublic == e2.isPublic ? 0 : e1.isPublic ? 1 : -1;
+            }
+        });
+        result.setComparator(courseAreasColumn, new Comparator<EventDTO>() {
+            @Override
+            public int compare(EventDTO e1, EventDTO e2) {
+                return e1.venue.getCourseAreas().toString().compareTo(e2.venue.getCourseAreas().toString());
+            }
+        });
+        result.setComparator(courseAreasColumn, new Comparator<EventDTO>() {
+            @Override
+            public int compare(EventDTO e1, EventDTO e2) {
+                return e1.getLeaderboardGroups().toString().compareTo(e2.getLeaderboardGroups().toString());
             }
         });
         return result;
