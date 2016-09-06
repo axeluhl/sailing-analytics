@@ -131,7 +131,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     
     protected void updateMappings() {
         try {
-            updateMappings(true);
+            updateMappingsInternal();
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not update device mappings", e);
         }
@@ -236,7 +236,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * 
      * @throws DoesNotHaveRegattaLogException
      */
-    private final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered) {
+    private final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappingsInternal() {
         final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings = calculateMappings();
         final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> oldMappings = new HashMap<>();
         LockUtil.lockForWrite(mappingsLock);
@@ -259,9 +259,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         } finally {
             LockUtil.unlockAfterWrite(mappingsLock);
         }
-        if (loadIfNotCovered) {
-            calculateDiff(oldMappings, newMappings);
-        }
+        calculateDiff(oldMappings, newMappings);
     }
     
     private void calculateDiff(Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
