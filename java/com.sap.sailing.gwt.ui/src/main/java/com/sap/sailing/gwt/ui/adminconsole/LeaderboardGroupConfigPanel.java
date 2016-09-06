@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.cell.client.FieldUpdater;
@@ -957,5 +958,24 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
 
     private LeaderboardGroupDTO getSelectedGroup() {
         return refreshableGroupsSelectionModel.getSelectedSet().isEmpty() ? null : refreshableGroupsSelectionModel.getSelectedSet().iterator().next();
+    }
+
+    @Override
+    public void setupLeaderboardGroups(Map<String, String> params) {
+        String nameLeaderBoardGroup = params.get("LeaderBoardGroupName");
+        if (nameLeaderBoardGroup == null) {
+            return;
+        }
+        //setup filter value to name from params
+        groupsFilterablePanel.getTextBox().setValue(nameLeaderBoardGroup);
+
+        //deselect all leaderboard groups except one which name is from params
+        for (LeaderboardGroupDTO leaderboardGroupDTO : availableLeaderboardGroups) {
+            if (nameLeaderBoardGroup.equals(leaderboardGroupDTO.getName())) {
+                groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, true);
+            } else if(groupsTable.getSelectionModel().isSelected(leaderboardGroupDTO)){
+                groupsTable.getSelectionModel().setSelected(leaderboardGroupDTO, false);
+            }
+        }
     }
 }
