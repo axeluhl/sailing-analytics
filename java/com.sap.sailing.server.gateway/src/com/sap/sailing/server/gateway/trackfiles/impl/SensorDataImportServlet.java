@@ -132,7 +132,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
             }
         }
         if (importerName == null) {
-            importerName = "BRAVO";
+            throw new RuntimeException("Missing preferred importer");
         }
         List<Pair<String, FileItem>> files = new ArrayList<>();
         for (FileItem fi : fileItems) {

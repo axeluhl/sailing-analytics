@@ -49,7 +49,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     public void importFixes(InputStream inputStream, Callback callback, String filename, String sourceName)
             throws FormatNotSupportedException, IOException {
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
-                UUID.randomUUID(), filename, sourceName + "_Imu", MillisecondsTimePoint.now());
+                UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
         try {
             LOG.fine("Import CSV from " + sourceName);
             final InputStreamReader isr;
