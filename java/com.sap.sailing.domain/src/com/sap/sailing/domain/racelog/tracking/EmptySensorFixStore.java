@@ -21,6 +21,10 @@ public enum EmptySensorFixStore implements SensorFixStore {
     }
 
     @Override
+    public void removeListener(FixReceivedListener<? extends Timed> listener, DeviceIdentifier device) {
+    }
+
+    @Override
     public TimeRange getTimeRangeCoveredByFixes(DeviceIdentifier device) {
         return null;
     }

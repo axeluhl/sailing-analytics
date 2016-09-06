@@ -344,7 +344,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 logger.warning(String.format(
                         "Setting the unique index on the %s collection failed because you have too many duplicates. "
                                 + "This leads to the mongo error code %s and the following message: %s \nTo fix this follow "
-                                + "the steps provided on the wiki page: http://wiki.sapsailing.com/wiki/cook-book#Remove-"
+                                + "the steps provided on the wiki page: http://wiki.sapsailing.com/wiki/howto/misc/cook-book#Remove-"
                                 + "duplicates-from-WIND_TRACK-collection", CollectionNames.WIND_TRACKS.name(),
                         exception.getCode(), exception.getMessage()));
             } else {

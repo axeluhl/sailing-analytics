@@ -5,9 +5,11 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
+import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.After;
@@ -21,8 +23,12 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
@@ -46,6 +52,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -63,6 +70,7 @@ import com.sap.sailing.domain.racelogtracking.impl.fixtracker.FixLoaderAndTracke
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
+import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -70,14 +78,19 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.SensorFixTrackImpl;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class SensorFixStoreAndLoadTest {
     private static final long FIX_TIMESTAMP = 110;
     private static final double FIX_RIDE_HEIGHT = 1337.0;
+    private static final double FIX_TEST_VALUE = 12.0;
     protected final MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
+    protected final DeviceIdentifier deviceTest = new SmartphoneImeiIdentifier("b");
     protected RaceLog raceLog;
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
@@ -135,7 +148,7 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
 
-        addFixes();
+        addBravoFixes();
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
 
@@ -159,7 +172,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
 
-        addFixes();
+        addBravoFixes();
 
         trackedRace.waitForLoadingToFinish();
 
@@ -173,7 +186,7 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(300), new MillisecondsTimePoint(400)));
 
-        addFixes();
+        addBravoFixes();
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
 
@@ -197,7 +210,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
 
-        addFixes();
+        addBravoFixes();
 
         trackedRace.waitForLoadingToFinish();
 
@@ -211,7 +224,7 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
 
-        addFixes();
+        addBravoFixes();
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
 
@@ -232,7 +245,7 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp2,
                 device, new MillisecondsTimePoint(201), new MillisecondsTimePoint(300)));
 
-        addFixes();
+        addBravoFixes();
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
 
@@ -254,7 +267,7 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(201), new MillisecondsTimePoint(300)));
 
-        addFixes();
+        addBravoFixes();
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
 
@@ -269,7 +282,7 @@ public class SensorFixStoreAndLoadTest {
     }
 
     @Test
-    public void testNothingloadedForRevokedMapping() throws InterruptedException {
+    public void testNothingLoadedForRevokedMapping() throws InterruptedException {
         RegattaLogDeviceCompetitorBravoMappingEventImpl mappingEvent = new RegattaLogDeviceCompetitorBravoMappingEventImpl(
                 new MillisecondsTimePoint(3), author, comp, device, new MillisecondsTimePoint(100),
                 new MillisecondsTimePoint(200));
@@ -281,7 +294,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
 
-        addFixes();
+        addBravoFixes();
 
         trackedRace.waitForLoadingToFinish();
 
@@ -308,7 +321,7 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         
-        addFixes();
+        addBravoFixes();
         
         trackedRace.waitForLoadingToFinish();
         
@@ -328,7 +341,7 @@ public class SensorFixStoreAndLoadTest {
                 new MillisecondsTimePoint(4), author, mappingEventId, new MillisecondsTimePoint(200));
         regattaLog.add(closeEvent);
 
-        addFixes();
+        addBravoFixes();
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
 
@@ -354,7 +367,7 @@ public class SensorFixStoreAndLoadTest {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
 
-        addFixes();
+        addBravoFixes();
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
 
@@ -364,26 +377,82 @@ public class SensorFixStoreAndLoadTest {
         trackedRace.waitForLoadingToFinish();
 
         BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
-        assertEquals(1337.0,
+        assertEquals(FIX_RIDE_HEIGHT,
                 bravoFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP)).getRideHeight());
 
         fixLoaderAndTracker.stop(true);
     }
+    
+    @Test
+    public void testMultipleFixTypesAreLoadedInSeparateTracks() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorTestMappingEventImpl(new MillisecondsTimePoint(1), author, comp,
+                deviceTest, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+        
+        addTestFixes();
+        addBravoFixes();
 
-    private void addFixes() {
+        FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+
+        trackedRace.waitForLoadingToFinish();
+
+        testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
+        testNumberOfRawFixes(trackedRace.getSensorTrack(comp, TestFixTrackImpl.TRACK_NAME), 1);
+
+        fixLoaderAndTracker.stop(true);
+    }
+    
+    @Test
+    public void testMultipleFixTypesAreLoadedInSeparateTracksWhileTracking() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorTestMappingEventImpl(new MillisecondsTimePoint(1), author, comp,
+                deviceTest, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+        
+
+        FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+
+        addTestFixes();
+        addBravoFixes();
+        
+        trackedRace.waitForLoadingToFinish();
+
+        testNumberOfRawFixes(trackedRace.getSensorTrack(comp, TestFixTrackImpl.TRACK_NAME), 1);
+        testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
+
+        fixLoaderAndTracker.stop(true);
+    }
+
+    private void addBravoFixes() {
         store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP, FIX_RIDE_HEIGHT));
         store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(120, 1338.0));
         store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(210, 1336.0));
     }
 
     private FixLoaderAndTracker createFixLoaderAndTracker() {
+        
         return new FixLoaderAndTracker(trackedRace, store, new SensorFixMapperFactory() {
+            private TestDataFixMapper testDataFixMapper = new TestDataFixMapper();
+            private BravoDataFixMapper bravoDataFixMapper = new BravoDataFixMapper();
 
             @SuppressWarnings({ "rawtypes", "unchecked" })
             @Override
             public <FixT extends Timed, TrackT extends DynamicTrack<FixT>> SensorFixMapper<FixT, TrackT, Competitor> createCompetitorMapper(
                     Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
-                return (SensorFixMapper) new BravoDataFixMapper();
+                if(bravoDataFixMapper.isResponsibleFor(eventType)) {
+                    return (SensorFixMapper) bravoDataFixMapper;
+                }
+                if(testDataFixMapper.isResponsibleFor(eventType)) {
+                    return (SensorFixMapper) testDataFixMapper;
+                }
+                throw new IllegalArgumentException("Unknown event type");
             }
         });
     }
@@ -399,4 +468,120 @@ public class SensorFixStoreAndLoadTest {
         fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeight;
         return new DoubleVectorFixImpl(new MillisecondsTimePoint(timestamp), fixData);
     }
+    
+    private void addTestFixes() {
+        store.storeFix(deviceTest, createTestDoubleVectorFixWithTestValue(FIX_TIMESTAMP, FIX_TEST_VALUE));
+    }
+    
+    private DoubleVectorFix createTestDoubleVectorFixWithTestValue(long timestamp, double testValue) {
+        double[] fixData = new double[TestFixImpl.COLUMNS.size()];
+        fixData[TestFixImpl.TEST_COLUMN_INDEX] = testValue;
+        return new DoubleVectorFixImpl(new MillisecondsTimePoint(timestamp), fixData);
+    }
+    
+    private static class TestFixImpl implements SensorFix {
+        private static final long serialVersionUID = 2033254212013220L;
+        
+        public static final String TEST_COLUMN = "testColumn";
+        public static final int TEST_COLUMN_INDEX = 1;
+        
+        public static final List<String> COLUMNS = Collections.unmodifiableList(Arrays.asList("blub", TEST_COLUMN));
+        
+        private final DoubleVectorFix fix;
+
+        public TestFixImpl(DoubleVectorFix fix) {
+            this.fix = fix;
+        }
+
+        @Override
+        public double get(String valueName) {
+            return fix.get(COLUMNS.indexOf(valueName));
+        }
+
+        @Override
+        public TimePoint getTimePoint() {
+            return fix.getTimePoint();
+        }
+
+        public double getTestValue() {
+            return fix.get(TEST_COLUMN_INDEX);
+        }
+
+    }
+    
+    public class TestFixTrackImpl<ItemType extends WithID & Serializable> extends SensorFixTrackImpl<ItemType, TestFixImpl> {
+        private static final long serialVersionUID = 5517848726454386L;
+        
+        public static final String TRACK_NAME = "TestFixTrack";
+        
+        public TestFixTrackImpl(ItemType trackedItem, String trackName) {
+            super(trackedItem, trackName, TestFixImpl.COLUMNS, 
+                    TRACK_NAME + " for " + trackedItem);
+        }
+        
+        public Double getTextValue(TimePoint timePoint) {
+            TestFixImpl fixAfter = getFirstFixAtOrAfter(timePoint);
+            if (fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
+                // exact match of timepoint -> no interpolation necessary
+                return fixAfter.getTestValue();
+            }
+            TestFixImpl fixBefore = getLastFixAtOrBefore(timePoint);
+            if (fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
+                // exact match of timepoint -> no interpolation necessary
+                return fixBefore.getTestValue();
+            }
+            if (fixAfter == null || fixBefore == null) {
+                // the fix is out of the TimeRange where we have fixes
+                return null;
+            }
+            return fixBefore.getTestValue();
+        }
+    }
+    
+    public class TestDataFixMapper implements SensorFixMapper<TestFixImpl, DynamicSensorFixTrack<Competitor, TestFixImpl>, Competitor> {
+
+        @Override
+        public DynamicSensorFixTrack<Competitor, TestFixImpl> getTrack(DynamicTrackedRace race, Competitor key) {
+            return race.getOrCreateSensorTrack(key, TestFixTrackImpl.TRACK_NAME, 
+                    () -> new TestFixTrackImpl<Competitor>(key, TestFixTrackImpl.TRACK_NAME));
+        }
+        
+        @Override
+        public TestFixImpl map(DoubleVectorFix fix) {
+            return new TestFixImpl(fix);
+        }
+        
+        @Override
+        public boolean isResponsibleFor(Class<? extends RegattaLogDeviceMappingEvent<?>> eventType) {
+            return RegattaLogDeviceCompetitorTestMappingEventImpl.class.isAssignableFrom(eventType);
+        }
+    }
+    
+    public class RegattaLogDeviceCompetitorTestMappingEventImpl extends RegattaLogDeviceMappingEventImpl<Competitor>
+        implements RegattaLogDeviceCompetitorSensorDataMappingEvent {
+        private static final long serialVersionUID = -14940305448048753L;
+        
+        
+        public RegattaLogDeviceCompetitorTestMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+                AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,
+                TimePoint from, TimePoint to) {
+            super(createdAt, logicalTimePoint, author, pId, mappedTo, device, from, to);
+        }
+        
+        public RegattaLogDeviceCompetitorTestMappingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+                Competitor mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
+            super(logicalTimePoint, author, mappedTo, device, from, to);
+        }
+        
+        @Override
+        public void accept(RegattaLogEventVisitor visitor) {
+            visitor.visit(this);
+        }
+        
+        @Override
+        public void accept(MappingEventVisitor visitor) {
+            visitor.visit(this);
+        }
+    }
+    
 }

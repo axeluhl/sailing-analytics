@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,6 +26,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 /**
@@ -192,15 +190,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     
     private void setupEventAndCourseAreaListBoxes(StringMessages stringMessages) {
         sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
-        final List<EventDTO> sortedEvents = new ArrayList<>();
-        sortedEvents.addAll(existingEvents);
-        Collections.sort(sortedEvents, new Comparator<EventDTO>() {
-            @Override
-            public int compare(EventDTO o1, EventDTO o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        for (EventDTO event : sortedEvents) {
+        for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
             sailingEventsListBox.addItem(event.getName());
             if(defaultEvent != null){
                 if (defaultEvent.getName().equals(event.getName())){

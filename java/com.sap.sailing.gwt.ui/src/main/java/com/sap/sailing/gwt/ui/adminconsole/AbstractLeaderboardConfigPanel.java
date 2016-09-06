@@ -701,4 +701,30 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             }
         });
     }
+
+    /**
+     * Looks up the regatta for the selected leaderboard by name in {@link #allRegattas}
+     */
+    protected RegattaDTO getSelectedRegatta() {
+        final String regattaName = getSelectedLeaderboard().regattaName;
+        return getRegattaByName(regattaName);
+    }
+
+    /**
+     * Looks up a regatta with name {@code regattaName} in {@link #allRegattas}
+     */
+    protected RegattaDTO getRegattaByName(final String regattaName) {
+        RegattaDTO regatta = null;
+        if (regattaName != null) {
+            if (allRegattas != null) {
+                for (RegattaDTO i : allRegattas) {
+                    if (regattaName.equals(i.getName())) {
+                        regatta = i;
+                        break;
+                    }
+                }
+            }
+        }
+        return regatta;
+    }
 }
