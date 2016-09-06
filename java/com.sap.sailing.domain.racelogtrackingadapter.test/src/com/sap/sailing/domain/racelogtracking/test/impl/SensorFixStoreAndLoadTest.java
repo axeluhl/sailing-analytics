@@ -86,7 +86,11 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class SensorFixStoreAndLoadTest {
     private static final long FIX_TIMESTAMP = 110;
+    private static final long FIX_TIMESTAMP2 = 120;
+    private static final long FIX_TIMESTAMP3 = 210;
     private static final double FIX_RIDE_HEIGHT = 1337.0;
+    private static final double FIX_RIDE_HEIGHT2 = 1338.0;
+    private static final double FIX_RIDE_HEIGHT3 = 1336.0;
     private static final double FIX_TEST_VALUE = 12.0;
     protected final MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
@@ -426,6 +430,39 @@ public class SensorFixStoreAndLoadTest {
 
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, TestFixTrackImpl.TRACK_NAME), 1);
         testNumberOfRawFixes(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME), 2);
+
+        fixLoaderAndTracker.stop(true);
+    }
+    
+    @Test
+    public void testMultipleFixTypesAreMappedCorrectly() throws InterruptedException {
+        regattaLog.add(new RegattaLogDeviceCompetitorTestMappingEventImpl(new MillisecondsTimePoint(1), author, comp,
+                deviceTest, new MillisecondsTimePoint(100), new MillisecondsTimePoint(300)));
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(300)));
+        
+
+        FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+
+        addTestFixes();
+        addBravoFixes();
+        
+        trackedRace.waitForLoadingToFinish();
+
+        BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
+        assertEquals(FIX_RIDE_HEIGHT,
+                bravoFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP)).getRideHeight());
+        assertEquals(FIX_RIDE_HEIGHT2,
+                bravoFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP2)).getRideHeight());
+        assertEquals(FIX_RIDE_HEIGHT3,
+                bravoFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP3)).getRideHeight());
+        
+        TestFixTrackImpl<Competitor> testFixTrack = trackedRace.getSensorTrack(comp, TestFixTrackImpl.TRACK_NAME);
+        assertEquals(FIX_TEST_VALUE,
+                testFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP)).getTestValue());
 
         fixLoaderAndTracker.stop(true);
     }
