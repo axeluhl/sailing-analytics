@@ -93,13 +93,10 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends
     class MappingTableBuilder extends DefaultCellTableBuilder<TrackFileImportDeviceIdentifierDTO> {
         private final String evenRowStyle;
         private final String oddRowStyle;
-        private final String selectedRowStyle;
         private final String cellStyle;
         private final String evenCellStyle;
         private final String oddCellStyle;
         private final String firstColumnStyle;
-        private final String lastColumnStyle;
-        private final String selectedCellStyle;
         private final AbstractCellTable<TrackFileImportDeviceIdentifierDTO> cellTable;
 
         public MappingTableBuilder(AbstractCellTable<TrackFileImportDeviceIdentifierDTO> cellTable) {
@@ -108,13 +105,10 @@ public class TrackFileImportDeviceIdentifierTableWrapper extends
             Style style = cellTable.getResources().style();
             evenRowStyle = style.evenRow();
             oddRowStyle = style.oddRow();
-            selectedRowStyle = " " + style.selectedRow();
             cellStyle = style.cell();
             evenCellStyle = " " + style.evenRowCell();
             oddCellStyle = " " + style.oddRowCell();
             firstColumnStyle = " " + style.firstColumn();
-            lastColumnStyle = " " + style.lastColumn();
-            selectedCellStyle = " " + style.selectedRowCell();
         }
 
         @Override

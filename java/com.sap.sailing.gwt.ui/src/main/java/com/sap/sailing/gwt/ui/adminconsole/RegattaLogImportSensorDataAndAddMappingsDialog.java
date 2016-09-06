@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -28,9 +27,6 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
     private final TrackFileImportDeviceIdentifierTableWrapper deviceIdTable;
     protected final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
     private final StringMessages stringMessages;
-
-
-    private TrackFileImportDeviceIdentifierDTO deviceToSelect;
 
     public RegattaLogImportSensorDataAndAddMappingsDialog(SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
@@ -86,14 +82,6 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
                         errorReporter.reportError("Could not load competitors: " + caught.getMessage());
                     }
                 });
-    }
-
-    private static <T> void selectOrClear(SingleSelectionModel<T> selectionModel, T object) {
-        if (object == null) {
-            selectionModel.clear();
-        } else {
-            selectionModel.setSelected(object, true);
-        }
     }
 
     @Override
