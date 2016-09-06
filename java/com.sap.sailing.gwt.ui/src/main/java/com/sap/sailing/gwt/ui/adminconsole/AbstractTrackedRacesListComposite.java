@@ -139,6 +139,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         listBoxRegattas.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
+                filterablePanelRaces.setFilterValue(listBoxRegattas.getSelectedValue(), listBoxRegattas);
                 filterablePanelRaces.filter();
             }
         });
