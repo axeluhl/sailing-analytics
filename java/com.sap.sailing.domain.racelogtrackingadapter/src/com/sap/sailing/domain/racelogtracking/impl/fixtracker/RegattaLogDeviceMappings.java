@@ -237,8 +237,6 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * @throws DoesNotHaveRegattaLogException
      */
     private final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered) {
-        // TODO remove fixes, if mappings have been removed
-        // check if there are new time ranges not covered so far
         final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings = calculateMappings();
         final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> oldMappings = new HashMap<>();
         LockUtil.lockForWrite(mappingsLock);
