@@ -385,7 +385,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,
             Column<EventDTO, SafeHtml> eventNameColumn, TextColumn<EventDTO> venueNameColumn,
             TextColumn<EventDTO> startEndDateColumn, TextColumn<EventDTO> isPublicColumn, Column<EventDTO, SafeHtml> courseAreasColumn,
-            Column<EventDTO, SafeHtml> leaderboardGroupsColumn) {
+            Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn) {
         ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
         result.setComparator(eventNameColumn, new Comparator<EventDTO>() {
             @Override
