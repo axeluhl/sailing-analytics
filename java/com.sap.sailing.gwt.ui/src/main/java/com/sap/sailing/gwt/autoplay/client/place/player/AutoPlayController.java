@@ -100,7 +100,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
             playerView.clearContent();
             boolean withFullscreenButton = autoPlayerConfiguration.isFullscreenMode() && isInitialScreen;
             LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(leaderboardPerspectiveLifecycleWithAllSettings, 
-                    sailingService, asyncActionsExecutor,
+                    sailingService, userService, asyncActionsExecutor,
                     new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
                     autoPlayerConfiguration.getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
                     userAgent, withFullscreenButton);

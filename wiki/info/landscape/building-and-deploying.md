@@ -65,7 +65,7 @@ Stopping a running server has---for your convenience---been wrapped into the `st
 
 ## Automatic Java Instance Start-Up After Boot
 
-When firing up an EC2 instance it can be convenient to not having to log on to have the EC2 instance run a Java instance automatically after it has completed its boot process. This is possible using so-called _user data_. The process of firing up an instance that either builds a certain git commit, installs and starts it after server boot or that downloads and installs a release and starts it is explained [here](http://wiki.sapsailing.com/wiki/amazon-ec2#HowTo).
+When firing up an EC2 instance it can be convenient to not having to log on to have the EC2 instance run a Java instance automatically after it has completed its boot process. This is possible using so-called _user data_. The process of firing up an instance that either builds a certain git commit, installs and starts it after server boot or that downloads and installs a release and starts it is explained [here](https://wiki.sapsailing.com/wiki/info/landscape/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_howto).
 
 ## App Build Process for iOS and Android
 

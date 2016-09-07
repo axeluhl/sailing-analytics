@@ -222,11 +222,11 @@ public class ImagesListComposite extends Composite {
         titleColumn.setSortable(true);
         createdAtDateColumn.setSortable(true);
 
-        table.addColumn(shortImageNameColumn, "Short name:");
+        table.addColumn(shortImageNameColumn, stringMessages.name());
         table.addColumn(titleColumn, stringMessages.title());
-        table.addColumn(createdAtDateColumn, "Created At");
-        table.addColumn(sizeColumn, "Size");
-        table.addColumn(tagsColumn, "Tags");
+        table.addColumn(createdAtDateColumn, stringMessages.createdAt());
+        table.addColumn(sizeColumn, stringMessages.size());
+        table.addColumn(tagsColumn, stringMessages.tags());
         table.addColumn(imageActionColumn, stringMessages.actions());
         table.addColumnSortHandler(getImageTableColumnSortHandler(imageListDataProvider.getList(), titleColumn, createdAtDateColumn));
         table.getColumnSortList().push(createdAtDateColumn);
