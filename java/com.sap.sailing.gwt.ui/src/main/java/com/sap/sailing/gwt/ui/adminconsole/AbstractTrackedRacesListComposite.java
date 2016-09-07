@@ -7,10 +7,12 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -103,6 +105,17 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         this.stringMessages = stringMessages;
     }
 
+    public void setRegattaFilterValue(String regattaName) {
+        for (int i = 0; i < listBoxRegattas.getItemCount(); i++) {
+            if (listBoxRegattas.getItemText(i).equals(regattaName)) {
+                listBoxRegattas.setSelectedIndex(i);
+                //Firing change event on combobox to filter
+                DomEvent.fireNativeEvent(Document.get().createChangeEvent(), listBoxRegattas);
+                break;
+            }
+        }
+    }
+    
     protected void createUI() {
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         raceList = new ListDataProvider<>();
@@ -139,7 +152,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         listBoxRegattas.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                filterablePanelRaces.setFilterValue(listBoxRegattas.getSelectedValue(), listBoxRegattas);
+                filterablePanelRaces.setFilterValue(listBoxRegattas, listBoxRegattas.getSelectedValue());
                 filterablePanelRaces.filter();
             }
         });
@@ -151,7 +164,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         textBoxFilter.addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                filterablePanelRaces.setFilterValue(textBoxFilter.getValue(), textBoxFilter);
+                filterablePanelRaces.setFilterValue(textBoxFilter, textBoxFilter.getValue().split(" "));
                 filterablePanelRaces.filter();
             }
         });

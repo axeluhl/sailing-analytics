@@ -10,14 +10,8 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -29,13 +23,10 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -65,7 +56,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.panels.CustomizableFilterablePanel;
+import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider,
         RegattasDisplayer, TrackedRaceChangedListener, LeaderboardsDisplayer {
@@ -92,7 +83,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     protected final CaptionPanel trackedRacesCaptionPanel;
     protected final List<RegattaDTO> allRegattas;
 
-    protected CustomizableFilterablePanel<StrippedLeaderboardDTO> filterLeaderboardPanel;
+    protected LabeledAbstractFilterablePanel<StrippedLeaderboardDTO> filterLeaderboardPanel;
 
     protected List<StrippedLeaderboardDTO> availableLeaderboardList;
 
@@ -103,8 +94,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     protected HandlerRegistration trackedRaceListHandlerRegistration;
     
     private final LeaderboardsRefresher leaderboardsRefresher;
-
-    private ListBox listBoxRegattas;
     
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
@@ -168,14 +157,15 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         leaderboardsCaptionPanel.add(leaderboardsPanel);
 
         HorizontalPanel leaderboardControlsPanel = new HorizontalPanel();
+        Label lblFilterEvents = new Label(stringMessages.filterLeaderboardsByName() + ": ");
         leaderboardControlsPanel.setSpacing(5);
         addLeaderboardControls(leaderboardControlsPanel);
         leaderboardsPanel.add(leaderboardControlsPanel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
-        filterLeaderboardPanel = new CustomizableFilterablePanel<StrippedLeaderboardDTO>(availableLeaderboardList, 
-                leaderboardTable, filteredLeaderboardList) {
+        filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents,
+                availableLeaderboardList, leaderboardTable, filteredLeaderboardList) {
             @Override
             public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -184,30 +174,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 return strings;
             }
         };
-        Label lblFilterRacesByRegatta = new Label(stringMessages.filterRacesByRegatta() + ":");
-        lblFilterRacesByRegatta.setWordWrap(false);
-        listBoxRegattas = new ListBox();
-        listBoxRegattas.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                filterLeaderboardPanel.setFilterValue(listBoxRegattas.getSelectedValue(), listBoxRegattas);
-                filterLeaderboardPanel.filter();
-            }
-        });
-        filterLeaderboardPanel.add(lblFilterRacesByRegatta, listBoxRegattas);
-        
-        Label lblFilterRacesByName = new Label(stringMessages.filterRacesByName() + ":");
-        lblFilterRacesByName.setWordWrap(false);
-        final TextBox textBoxFilter = new TextBox();
-        textBoxFilter.addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                filterLeaderboardPanel.setFilterValue(textBoxFilter.getValue(), textBoxFilter);
-                filterLeaderboardPanel.filter();
-            }
-        });
-        textBoxFilter.ensureDebugId("LeaderboardsFilterTextBox");
-        filterLeaderboardPanel.add(lblFilterRacesByName, textBoxFilter);
+        filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");
 
         leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
@@ -220,25 +187,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         leaderboardTable.setWidth("100%");
         leaderboardSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
-                //Preselecting combo box value only if one item is selected as combo box is single select
-                if (leaderboardSelectionModel.getSelectedSet().size() == 1) {
-                    //In case of flexible leaderboard we should select 'ALL' optio
-                    if (getSelectedLeaderboard().type != LeaderboardType.FlexibleLeaderboard) {
-                        //Looping through combo box items to find required one
-                        //as there is no direct setSelectedItem method available
-                        for (int i = 0; i < listBoxRegattas.getItemCount(); i++) {
-                            if (listBoxRegattas.getItemText(i).equals(getSelectedLeaderboardName())) {
-                                listBoxRegattas.setSelectedIndex(i);
-                                //Firing change event on combobox to filter
-                                DomEvent.fireNativeEvent(Document.get().createChangeEvent(), listBoxRegattas);
-                                break;
-                            }
-                        }
-                    }                    
-                } else {
-                    listBoxRegattas.setSelectedIndex(0);
-                    DomEvent.fireNativeEvent(Document.get().createChangeEvent(), listBoxRegattas);
-                }
                 leaderboardSelectionChanged();
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
             }
@@ -381,13 +329,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     public void fillLeaderboards(Iterable<StrippedLeaderboardDTO> leaderboards) {
         availableLeaderboardList.clear();
         Util.addAll(leaderboards, availableLeaderboardList);
-        listBoxRegattas.clear();
-        listBoxRegattas.addItem(stringMessages.all(), "");
-        for(StrippedLeaderboardDTO leaderboardDTO: availableLeaderboardList) {
-            if (leaderboardDTO.type != LeaderboardType.FlexibleLeaderboard) {
-                listBoxRegattas.addItem(leaderboardDTO.regattaName, leaderboardDTO.regattaName);
-            }
-        }
         filterLeaderboardPanel.updateAll(availableLeaderboardList); // also maintains the filtered leaderboardList
         leaderboardSelectionChanged();
         leaderboardRaceColumnSelectionChanged();
