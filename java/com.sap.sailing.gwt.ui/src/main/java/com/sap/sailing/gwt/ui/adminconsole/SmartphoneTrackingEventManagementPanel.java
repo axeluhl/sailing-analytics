@@ -569,11 +569,10 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 configuration.defaultCourseDesignerMode = CourseDesignerMode.BY_MARKS;
                 updateRegattaConfiguration(regatta, configuration);
             } else {
-                if (configuration.defaultCourseDesignerMode == CourseDesignerMode.BY_MARKS) {
-                    return;
+                if (configuration.defaultCourseDesignerMode != CourseDesignerMode.BY_MARKS) {
+                    DialogBox dialogBox = createOverrideConfigurationDialog(regatta, configuration);
+                    dialogBox.center();
                 }
-                DialogBox dialogBox = createOverrideConfigurationDialog(regatta, configuration);
-                dialogBox.center();
             }
         }
     }
