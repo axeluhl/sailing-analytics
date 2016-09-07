@@ -580,7 +580,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     private DialogBox createOverrideConfigurationDialog(final RegattaDTO regatta,
             final DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
         final DialogBox dialogBox = new DialogBox(true, true);
-        dialogBox.setText(stringMessages.allRacesHaveDenoted());
+        dialogBox.setText(stringMessages.allRacesHaveBeenDenoted());
 
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.add(new HTML(new SafeHtmlBuilder()
