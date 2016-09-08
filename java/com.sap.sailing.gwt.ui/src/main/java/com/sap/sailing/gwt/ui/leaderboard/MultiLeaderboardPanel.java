@@ -139,6 +139,12 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         return stringMessages.leaderboards();
     }
 
+    @Override 
+    public LeaderboardSettings getSettings() {
+        // TODO: Where do we get the LeaderboardSettings from?
+        return null;
+    }
+    
     @Override
     public boolean hasSettings() {
         return true;
@@ -242,8 +248,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-        
-        if(visible) {
+        if (visible) {
             readAndUpdateLeaderboardsOfMetaleaderboard();
         } else {
             updateSelectedLeaderboard(null, -1);
@@ -252,7 +257,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
 
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
-        if(selectedLeaderboardPanel != null) {
+        if (selectedLeaderboardPanel != null) {
             selectedLeaderboardPanel.timeChanged(newTime, oldTime);
         }
     }
@@ -269,7 +274,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
 
     @Override
     public void setSelectedLeaderboard(LeaderboardPanel selectedLeaderboard) {
-        if(this.selectedLeaderboardPanel != selectedLeaderboard) {
+        if (this.selectedLeaderboardPanel != selectedLeaderboard) {
             this.selectedLeaderboardPanel = selectedLeaderboard;
             for (SelectedLeaderboardChangeListener listener : selectedLeaderboardChangeListeners) {
                 listener.onSelectedLeaderboardChanged(selectedLeaderboardPanel);

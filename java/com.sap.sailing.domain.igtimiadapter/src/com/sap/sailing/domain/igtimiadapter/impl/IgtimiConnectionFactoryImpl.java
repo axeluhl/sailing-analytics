@@ -132,6 +132,10 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         return new ArrayList<Account>(accountsByEmail.values());
     }
 
+    public IgtimiConnection getConnectionOfAccount(Account account) {
+        return connectionsByAccount.get(account);
+    }
+    
     @Override
     public IgtimiConnection connect(Account account) {
         IgtimiConnection connection;

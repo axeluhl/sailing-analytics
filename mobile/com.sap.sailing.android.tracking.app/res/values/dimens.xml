@@ -5,9 +5,14 @@
     <!-- <dimen name="activity_vertical_margin">16dp</dimen> -->
 
     <!-- Values for regatta buttons-->
-    <dimen name="regatta_button_height">90dp</dimen>
-    <dimen name="regatta_button_side_margin">4dp</dimen>
+    <dimen name="regatta_button_layout_height">140dp</dimen>
+    <dimen name="regatta_button_height">@dimen/no_qr_code_button_height</dimen>
     <dimen name="regatta_button_margin">10dp</dimen>
     <dimen name="regatta_button_padding">10dp</dimen>
+    <dimen name="tracking_button_height">80dp</dimen>
+    <dimen name="tracking_button_text_size">@dimen/highlight_text_size</dimen>
+    <dimen name="regatta_start_date_side_margin">22dp</dimen>
+    <dimen name="countdown_separator_height">35dp</dimen>
+    <dimen name="countdown_separator_width">2dp</dimen>
 
 </resources>

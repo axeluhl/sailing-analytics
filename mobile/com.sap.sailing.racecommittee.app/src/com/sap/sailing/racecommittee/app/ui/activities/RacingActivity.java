@@ -8,6 +8,52 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
+import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.DataStore;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
+import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
+import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
+import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -40,54 +86,6 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.android.shared.util.CollectionUtils;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
-import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.DataStore;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
-import com.sap.sailing.racecommittee.app.logging.LogEvent;
-import com.sap.sailing.racecommittee.app.services.RaceStateService;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
-import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
-import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
-import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
-import com.sap.sailing.racecommittee.app.utils.RaceHelper;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RacingActivity extends SessionActivity implements RaceListCallbacks {
     private static final String TAG = RacingActivity.class.getName();
@@ -316,7 +314,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
-    public void onRaceItemClicked(ManagedRace managedRace) {
+    private void onRaceItemClicked(ManagedRace managedRace) {
         onRaceItemClicked(managedRace, false);
     }
 
@@ -380,7 +378,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
-    public void onWindEntered(Wind windFix) {
+    private void onWindEntered(Wind windFix) {
         PanelButton windValue = (PanelButton) findViewById(R.id.button_wind);
         if (windFix != null) {
             if (windValue != null) {
@@ -407,35 +405,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
-    private void registerOnService(final Collection<ManagedRace> races) {
-        // close current race, if no longer on server
-        if (!races.contains(mSelectedRace)) {
-            BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_WELCOME));
-            mSelectedRace = null;
-        }
-
-        // since the service is the long-living component
-        // he should decide whether these races are already
-        // registered or not.
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // add all received races to the service
-                for (ManagedRace race : races) {
-                    Intent registerIntent = new Intent(RacingActivity.this, RaceStateService.class);
-                    registerIntent.setAction(AppConstants.INTENT_ACTION_REGISTER_RACE);
-                    registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
-                    RacingActivity.this.startService(registerIntent);
-                }
-
-                Intent cleanupIntent = new Intent(RacingActivity.this, RaceStateService.class);
-                cleanupIntent.setAction(AppConstants.INTENT_ACTION_CLEANUP_RACES);
-                RacingActivity.this.startService(cleanupIntent);
-            }
-        }).start();
-    }
-
-    public void setProgressSpinnerVisibility(boolean visible) {
+    private void setProgressSpinnerVisibility(boolean visible) {
         if (mProgressSpinner != null) {
             if (visible) {
                 mProgressSpinner.setVisibility(View.VISIBLE);
@@ -459,7 +429,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
-    public void resetRace() {
+    private void resetRace() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
         builder.setTitle(getString(R.string.race_reset_confirmation_title));
         builder.setMessage(getString(R.string.race_reset_message));
@@ -576,7 +546,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         }
     }
 
-    public void processIntent(final Intent intent) {
+    private void processIntent(final Intent intent) {
         final Bundle args = new Bundle();
         if (mSelectedRace != null) {
             args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
@@ -717,14 +687,17 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
         @Override
         public void onLoadSucceeded(Collection<ManagedRace> data, boolean isCached) {
-            // Let's do the setup stuff only when the data is changed (or its the first time)
-            if (lastSeenRaces != null && CollectionUtils.isEqualCollection(data, lastSeenRaces)) {
-                ExLog.i(RacingActivity.this, TAG, "Same races are already loaded...");
-            } else {
-                lastSeenRaces = data;
-                registerOnService(data);
-                mRaceList.setupOn(data);
-                setupRegattaSpecificConfiguration();
+            // need to be a new instance, because of Activity restart after background kill
+            // more information see bug 3741
+            lastSeenRaces = new ArrayList<>(data);
+            mRaceList.setupOn(data);
+            setupRegattaSpecificConfiguration();
+            if (!isCached) {
+                // close current race, if no longer on server
+                if (!data.contains(mSelectedRace)) {
+                    BroadcastManager.getInstance(RacingActivity.this).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_WELCOME));
+                    mSelectedRace = null;
+                }
                 Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
             setProgressSpinnerVisibility(false);

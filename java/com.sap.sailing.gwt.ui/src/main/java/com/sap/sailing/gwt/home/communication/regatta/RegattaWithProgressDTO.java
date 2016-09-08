@@ -24,7 +24,7 @@ public class RegattaWithProgressDTO extends RegattaMetadataDTO {
     
     @Override
     public int compareTo(RegattaReferenceDTO o) {
-        if(o instanceof RegattaWithProgressDTO) {
+        if (o instanceof RegattaWithProgressDTO) {
             RegattaWithProgressDTO other = (RegattaWithProgressDTO) o;
             RegattaState state = getState();
             RegattaState otherState = other.getState();

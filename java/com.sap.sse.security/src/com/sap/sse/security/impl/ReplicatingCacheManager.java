@@ -3,6 +3,7 @@ package com.sap.sse.security.impl;
 import java.io.Serializable;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.shiro.cache.Cache;
 import org.apache.shiro.cache.CacheException;
@@ -17,7 +18,7 @@ import org.apache.shiro.cache.CacheManager;
  */
 public class ReplicatingCacheManager implements CacheManager, Serializable {
     private static final long serialVersionUID = -8035346668009900228L;
-    private ConcurrentHashMap<String, ReplicatingCache<?, ?>> caches;
+    private ConcurrentMap<String, ReplicatingCache<?, ?>> caches;
     
     public ReplicatingCacheManager() {
         this.caches = new ConcurrentHashMap<>();

@@ -1,8 +1,29 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
+
+import com.sap.sailing.android.shared.data.LoginData;
+import com.sap.sailing.android.shared.data.http.UnauthorizedException;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AuthCheckTask;
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.LoginTask;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
+import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils.URLDecoder;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.BackPressListener;
+import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
+import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
+import com.sap.sailing.racecommittee.app.utils.UrlHelper;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -34,25 +55,6 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.data.LoginData;
-import com.sap.sailing.android.shared.data.http.UnauthorizedException;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AuthCheckTask;
-import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.android.shared.util.LoginTask;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.BackPressListener;
-import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
-import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
-import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
-import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
-import com.sap.sailing.racecommittee.app.utils.UrlHelper;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListener, AuthCheckTask.AuthCheckTaskListener, BackPressListener {
 
@@ -168,6 +170,7 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
 
     private void refreshData() {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_RESET);
+        intent.putExtra(AppConstants.EXTRA_FORCE_REFRESH, true);
         BroadcastManager.getInstance(getActivity()).addIntent(intent);
     }
 
@@ -320,7 +323,17 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
     private boolean saveData(String content) {
         try {
             DeviceConfigurationQRCodeUtils.DeviceConfigurationDetails connectionConfiguration = DeviceConfigurationQRCodeUtils
-                    .splitQRContent(content);
+                    .splitQRContent(content, new URLDecoder() {
+                        @Override
+                        public String decode(String encodedURL) {
+                            try {
+                                return java.net.URLDecoder.decode(encodedURL, "UTF-8");
+                            } catch (UnsupportedEncodingException e) {
+                                ExLog.w(getActivity(), TAG, "Couldn't resolve encoding UTF-8");
+                                return encodedURL;
+                            }
+                        }
+                    });
 
             final String identifier = connectionConfiguration.getDeviceIdentifier();
             final URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());

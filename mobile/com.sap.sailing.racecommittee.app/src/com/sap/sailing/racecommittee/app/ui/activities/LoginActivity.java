@@ -72,8 +72,6 @@ public class LoginActivity extends BaseActivity
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
-    private boolean wakeUp;
-
     private final static String TAG = LoginActivity.class.getName();
 
     private final PositionListFragment positionFragment;
@@ -362,6 +360,13 @@ public class LoginActivity extends BaseActivity
     public void onResume() {
         super.onResume();
 
+        if (preferences.needConfigRefresh()) {
+            preferences.setNeedConfigRefresh(false);
+            Intent intent = new Intent(this, getClass());
+            startActivity(intent);
+            finish();
+        }
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_RESET);
         filter.addAction(AppConstants.INTENT_ACTION_VALID_DATA);
@@ -381,7 +386,6 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onPause() {
         super.onPause();
-        wakeUp = true;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
@@ -426,7 +430,7 @@ public class LoginActivity extends BaseActivity
             }
         });
 
-        if (!preferences.isOfflineMode() && preferences.needConfigRefresh()) {
+        if (!preferences.isOfflineMode()) {
             // reload the configuration if needed...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
@@ -517,7 +521,16 @@ public class LoginActivity extends BaseActivity
         return ObjectAnimator.ofFloat(target, "alpha", 1f, 0f);
     }
 
-    private void resetData() {
+    /**
+     * Reset the data (reload from server)
+     *
+     * @param force Reload data, even if the backdrop is moved up
+     */
+    private void resetData(boolean force) {
+        if (!force && backdrop.getY() != 0) {
+            return;
+        }
+
         setupDataManager();
 
         addEventListFragment();
@@ -534,12 +547,11 @@ public class LoginActivity extends BaseActivity
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (AppConstants.INTENT_ACTION_RESET.equals(action) && !wakeUp) {
-                resetData();
-            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action) && !wakeUp) {
-                resetData();
+            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+                resetData(intent.getBooleanExtra(AppConstants.EXTRA_FORCE_REFRESH, false));
+            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
+                resetData(false);
             }
-            wakeUp = false;
         }
     }
 

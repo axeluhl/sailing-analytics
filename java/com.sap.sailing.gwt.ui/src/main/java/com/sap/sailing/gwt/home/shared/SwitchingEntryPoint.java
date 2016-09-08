@@ -29,6 +29,17 @@ import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 import com.sap.sailing.gwt.home.shared.app.MobileSupport;
 
+/**
+ * Wrapper EntryPoint for the Home module that decides if the desktop or mobile page will be shown and internally starts
+ * the respective EntryPoint.
+ * 
+ * The decision is made on the following aspects:
+ * <ul>
+ *   <li>the type of device (desktop, phone, table)</li>
+ *   <li>the place to be shown and if the place is available for one or the other form factor</li>
+ *   <li>the user preference that is being triggered by the user clicking "desktop version" or "mobile version" links in the page footer</li>
+ * </ul>
+ */
 public class SwitchingEntryPoint implements EntryPoint {
     private static Logger LOG = Logger.getLogger(SwitchingEntryPoint.class.getName());
     private static final String SAPSAILING_MOBILE = "sapsailing_mobile";

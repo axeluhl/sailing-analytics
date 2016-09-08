@@ -9,6 +9,10 @@ import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel.FullscreenViewer;
 
+/**
+ * Fullscreen viewer for the image gallery that shows the current image in a big view and lists all images on the bottom
+ * as small slider.
+ */
 public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryPlayer> implements
         FullscreenViewer<SailingImageDTO> {
     

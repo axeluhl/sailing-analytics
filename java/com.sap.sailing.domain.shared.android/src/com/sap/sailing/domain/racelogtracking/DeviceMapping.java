@@ -25,4 +25,7 @@ public interface DeviceMapping<ItemType extends WithID> extends Timed {
     DeviceIdentifier getDevice();
 
     TimeRange getTimeRange();
+    
+    Class<?> getEventType();
+    
 }

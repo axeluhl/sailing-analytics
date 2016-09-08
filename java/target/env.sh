@@ -41,8 +41,7 @@ EXPEDITION_PORT=2010
 # set the REPLICATE_MASTER_EXCHANGE_NAME variable to the
 # same channel the master is using in its REPLICATION_CHANNEL variable
 
-# REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl
-
+# REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener
 # Host where the master Java instance is running
 # Make sure firewall configurations allow access
 REPLICATE_MASTER_SERVLET_HOST=
@@ -84,7 +83,7 @@ INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 
 INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
-ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:+UseMembar -XX:+UseG1GC -verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -Djava.awt.headless=true"
+ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:+UseMembar -XX:+UseG1GC -verbose:gc -XX:MaxGCPauseMillis=500 -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -Djava.awt.headless=true"
 
 JAVA_HOME=/opt/jdk1.8.0_20
 if [[ ! -d $JAVA_HOME ]] && [[ -f "/usr/libexec/java_home" ]]; then

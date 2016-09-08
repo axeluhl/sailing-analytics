@@ -1,13 +1,55 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.parser.ParseException;
+
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
+import android.widget.Toast;
+
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
+import com.sap.sailing.android.shared.data.http.HttpGetRequest;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
+import com.sap.sailing.android.shared.util.JsonHelper;
+import com.sap.sailing.android.shared.util.NetworkHelper;
+import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessListener;
+import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 
 public class CheckinManager {
     private final static String TAG = CheckinManager.class.getName();
-    private AbstractCheckinData checkinData;
+    private BaseCheckinData checkinData;
     private final CheckinDataActivity activity;
     private final Context mContext;
     private final AppPreferences prefs;
@@ -65,7 +107,7 @@ public class CheckinManager {
         String leaderboardNameFromQR = "";
         try {
             leaderboardNameFromQR = URLEncoder.encode(
-                    uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8");
+                    uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8").replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
             ExLog.e(mContext, TAG, "Failed to encode leaderboard name: " + e.getMessage());
         } catch (NullPointerException e) {
@@ -212,7 +254,7 @@ public class CheckinManager {
         }
     }
 
-    public void setCheckinData(AbstractCheckinData data) {
+    public void setCheckinData(BaseCheckinData data) {
         checkinData = data;
         if (activity != null) {
             activity.onCheckinDataAvailable(getCheckinData());
@@ -222,14 +264,14 @@ public class CheckinManager {
     }
 
     public interface DataChangedListner{
-        void handleData(AbstractCheckinData data);
+        void handleData(BaseCheckinData data);
     }
 
     public void setDataChangedListner(DataChangedListner listner){
         dataChangedListner = listner;
     }
 
-    public AbstractCheckinData getCheckinData() {
+    public BaseCheckinData getCheckinData() {
         return checkinData;
     }
 
@@ -237,10 +279,10 @@ public class CheckinManager {
      * Shows a pop-up-dialog that informs the user than an API-call has failed and recommends a retry.
      */
     private void displayAPIErrorRecommendRetry() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AppTheme_AlertDialog);
         builder.setMessage(mContext.getString(R.string.notify_user_api_call_failed));
         builder.setCancelable(true);
-        builder.setPositiveButton(mContext.getString(R.string.ok), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -248,8 +290,7 @@ public class CheckinManager {
             }
 
         });
-        AlertDialog alert = builder.create();
-        alert.show();
+        builder.show();
         setCheckinData(null);
     }
 

@@ -17,15 +17,18 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationSignOutRequestEvent;
 
+/**
+ * Mobile page header with SAP logo title and a dropdown menu (burger button) on the right.
+ */
 public class Header extends Composite {
 
     // @UiField TextBox searchText;
@@ -61,7 +64,7 @@ public class Header extends Composite {
         
         addNavigation(placeNavigator.getHomeNavigation(), StringMessages.INSTANCE.home());
         addNavigation(placeNavigator.getEventsNavigation(), StringMessages.INSTANCE.events());
-        addNavigation(placeNavigator.getSolutionsNavigation(), TextMessages.INSTANCE.solutions());
+        addNavigation(placeNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics), TextMessages.INSTANCE.solutions());
         addUrl("https://blog.sapsailing.com", TextMessages.INSTANCE.blog());
         signInNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signIn(), new Runnable() {
             @Override
@@ -91,22 +94,16 @@ public class Header extends Composite {
             }
         });
         
-        if (ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_MOBILE) {
-            eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
-                @Override
-                public void onUserChangeEvent(AuthenticationContextEvent event) {
-                    String loggedInStyle = HeaderResources.INSTANCE.css().header_navigation_iconsignedin();
-                    UIObject.setStyleName(dropdownTriggerUi, loggedInStyle, event.getCtx().isLoggedIn());
-                    signInNavigationItem.setVisible(!event.getCtx().isLoggedIn());
-                    userDetailsNavigationItem.setVisible(event.getCtx().isLoggedIn());
-                    signOutNavigationItem.setVisible(event.getCtx().isLoggedIn());
-                }
-            });
-        } else {
-            signInNavigationItem.removeFromParent();
-            userDetailsNavigationItem.removeFromParent();
-            signOutNavigationItem.removeFromParent();
-        }
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
+            @Override
+            public void onUserChangeEvent(AuthenticationContextEvent event) {
+                String loggedInStyle = HeaderResources.INSTANCE.css().header_navigation_iconsignedin();
+                UIObject.setStyleName(dropdownTriggerUi, loggedInStyle, event.getCtx().isLoggedIn());
+                signInNavigationItem.setVisible(!event.getCtx().isLoggedIn());
+                userDetailsNavigationItem.setVisible(event.getCtx().isLoggedIn());
+                signOutNavigationItem.setVisible(event.getCtx().isLoggedIn());
+            }
+        });
     }
     
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {

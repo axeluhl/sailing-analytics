@@ -117,4 +117,9 @@ public class MillisecondsDurationImpl implements Duration {
         }
     }
 
+    @Override
+    public Duration mod(Duration d) {
+        return new MillisecondsDurationImpl(asMillis() % d.asMillis());
+    }
+
 }

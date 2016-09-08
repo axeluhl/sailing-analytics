@@ -17,6 +17,20 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.2.1 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 13/07/2016
+Build number: 12627
+
+1) Bugs:
+
+ - If the Internet connection goes down, some threads can be hung despite of
+ the consumer application calls the ISubscriber.stop method (Reported by
+ Axel Uhl, 13/07/2016)
+
+********************************************
 ************* TracAPI 3.2.0 ****************
 ********************************************
 This is a final version. New functionality added:
@@ -24,13 +38,16 @@ This is a final version. New functionality added:
 Release date: 05/06/2016
 Build number: 12293
 
-1) New functionality:
+1) Features:
 
  - IRace adds the new property, status, returning a value of the enum RaceStatusType.
+
  - IRace property visibility has changed to return a value of the enum RaceVisibilityType.
+
  - IRaceCompetitor adds a new property: status of type RaceCompetitorStatusType.
+
  - Competitor updates during a race will be propagated to all subscriptors.
- 
+
 ********************************************
 ************* TracAPI 3.1.6 ****************
 ********************************************

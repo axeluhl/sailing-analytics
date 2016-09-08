@@ -6,11 +6,10 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
-import com.sap.sse.common.Named;
-import com.sap.sse.common.WithID;
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.datamining.annotations.Connector;
 
-public interface Competitor extends Named, WithID, IsManagedByCache<SharedDomainFactory> {
+public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
     @Connector(messageKey="Team", ordinal=9)
     Team getTeam();
 

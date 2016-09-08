@@ -3,9 +3,9 @@ package com.sap.sailing.domain.tracking;
 import java.io.ObjectOutputStream;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -43,7 +43,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
      * intra-leg computations are done dynamically based on wind information, selecting a different wind information
      * source can alter the intra-leg results. See {@link #currentWindSource}.
      */
-    protected final Map<WindSource, WindTrack> windTracks;
+    protected final ConcurrentMap<WindSource, WindTrack> windTracks;
     
     protected final RaceDefinition race;
     

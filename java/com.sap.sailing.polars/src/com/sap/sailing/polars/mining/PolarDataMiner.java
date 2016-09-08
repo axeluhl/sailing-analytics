@@ -11,6 +11,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -61,7 +62,7 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
  * Creates a polar data pipeline upon creation and puts incoming GPS fixes into that pipeline.
  * Also holds references to the actual data containers in which the aggregation results lay.
  * 
- * For more information on polars in SAP Sailing Analytics, please see: http://wiki.sapsailing.com/wiki/Polars
+ * For more information on polars in SAP Sailing Analytics, please see: http://wiki.sapsailing.com/wiki/howto/misc/polars
  * 
  * @author D054528 (Frederik Petersen)
  *
@@ -72,13 +73,13 @@ public class PolarDataMiner {
     private static final int THREAD_POOL_SIZE = Math.max(
             (int) (Runtime.getRuntime().availableProcessors() * (3.0 / 4.0)), 3);
     private final ThreadPoolExecutor executor = createExecutor();
-    private final ConcurrentHashMap<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new ConcurrentHashMap<>();
+    private final ConcurrentMap<TrackedRace, Set<GPSFixMovingWithOriginInfo>> fixesForRacesWhichAreStillLoading = new ConcurrentHashMap<>();
 
     private final Queue<GPSFixMovingWithOriginInfo> fixQueue = new ConcurrentLinkedQueue<GPSFixMovingWithOriginInfo>();
 
     private static final Logger logger = Logger.getLogger(PolarDataMiner.class.getSimpleName());
 
-    private final ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners = new ConcurrentHashMap<>();
+    private final ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners = new ConcurrentHashMap<>();
 
     private ParallelFilteringProcessor<GPSFixMovingWithOriginInfo> preFilteringProcessor;
 

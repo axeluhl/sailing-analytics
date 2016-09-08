@@ -239,7 +239,6 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     @Override
     public void forceUpdate() {
         super.update();
-        registerListenerOnDependentRaceIfDependentStartTime(Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
     }
 
 }

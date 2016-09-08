@@ -39,6 +39,8 @@ public class EventCreateDialog extends EventDialog {
         endDateBox.ensureDebugId("EndDateTimeBox");
         officialWebsiteURLEntryField = createTextBox(null);
         officialWebsiteURLEntryField.setVisibleLength(50);
+        baseURLEntryField = createTextBox(null);
+        baseURLEntryField.setVisibleLength(50);
         sailorsInfoWebsiteURLEntryFields = createTextBoxesForLocalesAndDefault(Collections.<String, String> emptyMap());
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(false);

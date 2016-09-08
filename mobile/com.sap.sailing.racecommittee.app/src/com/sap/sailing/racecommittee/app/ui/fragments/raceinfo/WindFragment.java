@@ -389,7 +389,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
             WebSettings settings = mMapWebView.getSettings();
             if (showMap) {
                 settings.setJavaScriptEnabled(true);
-                loadRaceMap(true, false, false, true);
+                loadRaceMap(/* showWindCharts */ true, /* showStreamlets */ false, /* showSimulation */ false, /* showMapControls */ true);
                 mMapLayout.setVisibility(View.VISIBLE);
             } else {
                 mMapWebView.loadUrl("about:blank");

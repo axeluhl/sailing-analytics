@@ -24,7 +24,7 @@ public class CompassFragment extends BaseFragment {
         if (isAdded()) {
             TextView headingText = (TextView) getActivity().findViewById(R.id.compass_bearing_text_view);
             if (bearing != null) {
-                headingText.setText(String.valueOf(Math.round(bearing.getDegrees())) + (char) 0x00B0);
+                headingText.setText(getString(R.string.course_over_ground_display, Math.round(bearing.getDegrees())));
             } else {
                 headingText.setText(R.string.initial_hyphen_degrees);
             }

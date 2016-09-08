@@ -276,7 +276,7 @@ public class ReplicationServiceImpl implements ReplicationService {
     public ReplicationServiceImpl(String exchangeName, String exchangeHost, int exchangePort,
             final ReplicationInstancesManager replicationInstancesManager, ReplicablesProvider replicablesProvider)
             throws IOException {
-        timer = new Timer("ReplicationServiceImpl timer for delayed task sending");
+        timer = new Timer("ReplicationServiceImpl timer for delayed task sending", /* isDaemon */ true);
         executionListenersByReplicableIdAsString = new HashMap<>();
         initialLoadChannels = new ConcurrentHashMap<>();
         this.replicationInstancesManager = replicationInstancesManager;

@@ -1,11 +1,11 @@
 package com.sap.sailing.domain.test.markpassing;
 
+import static org.mockito.Mockito.mock;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import static org.mockito.Mockito.mock;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
@@ -34,7 +34,6 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -72,7 +71,9 @@ public class AbstractMockedRaceMarkPassingTest {
                 new ArrayList<String>(), null)), true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)), OneDesignRankingMetric::new);
         Course course = new CourseImpl("course", waypoints);
         RaceDefinition raceDef = new RaceDefinitionImpl("Performance Race", course, boatClass, Arrays.asList(ron, tom, ben));
-        race = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(r), raceDef, new ArrayList<Sideline>(), new EmptyWindStore(), EmptyGPSFixStore.INSTANCE, 0, 10000, 10000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
+        race = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(r), raceDef, new ArrayList<Sideline>(),
+                new EmptyWindStore(), 0, 10000, 10000, /* useMarkPassingCalculator */ false,
+                OneDesignRankingMetric::new,
                 mock(RaceLogResolver.class));
         race.setStartTimeReceived(new MillisecondsTimePoint(10000));
         TimePoint t = new MillisecondsTimePoint(30000);

@@ -10,7 +10,7 @@ import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
 /**
- * {@link SAPHeader} which is decorated by a authentication control on the right side. This is typically ised to
+ * {@link SAPHeader} which is decorated by a authentication control on the right side. This is typically used to
  * integrate with {@link GenericAuthentication}.
  */
 public class SAPHeaderWithAuthentication extends SAPHeader {

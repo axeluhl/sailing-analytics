@@ -1,13 +1,18 @@
 package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
+import java.io.IOException;
+
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -23,6 +28,20 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
     @UiField public InputElement usernameUi;
     @UiField public TextBox nameUi;
     @UiField public TextBox companyUi;
+    
+    @UiField(provided = true)
+    public ValueListBox<String> localeUi = new ValueListBox<String>(new Renderer<String>() {
+        @Override
+        public String render(String object) {
+            return GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(object);
+        }
+
+        @Override
+        public void render(String object, Appendable appendable) throws IOException {
+            appendable.append(render(object));
+        }
+    });
+    
     @UiField public TextBox emailUi;
     @UiField public PasswordTextBox oldPasswordUi;
     @UiField public PasswordTextBox newPasswordUi;
@@ -54,6 +73,10 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         usernameUi.setValue(currentUser.getName());
         emailUi.setValue(currentUser.getEmail());
         
+        String currentLocale = currentUser.getLocale();
+        localeUi.setValue(currentLocale);
+        localeUi.setAcceptableValues(GWTLocaleUtil.getAvailableLocalesAndDefault());
+        
         clearPasswordFields();
     }
 
@@ -69,7 +92,7 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
     
     @UiHandler("saveChangesUi")
     public void onSaveChangesClicked(ClickEvent event) {
-        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue());
+        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue(), localeUi.getValue());
     }
     
     @UiHandler("changeEmailUi")

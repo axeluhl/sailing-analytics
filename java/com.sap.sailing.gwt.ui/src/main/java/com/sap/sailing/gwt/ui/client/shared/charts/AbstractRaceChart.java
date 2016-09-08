@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartCssResources.ChartsCss;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -32,9 +33,10 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
-public abstract class AbstractRaceChart extends AbsolutePanel implements TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
+public abstract class AbstractRaceChart<SettingsType extends Settings> extends AbsolutePanel implements Component<SettingsType>, TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
     /**
      * Used as the turboThreshold for the Highcharts series; this is basically the maximum number of points in a series
      * to be displayed. Default is 1000. See also bug 1742.
@@ -223,8 +225,7 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements TimeLis
     @Override
     public void onTimeZoomChanged(Date zoomStartTimepoint, Date zoomEndTimepoint) {
         changeMinMaxAndExtremesInterval(zoomStartTimepoint, zoomEndTimepoint, true);
-        // Probably there is a function for this in a newer version of highcharts: http://jsfiddle.net/mqz3N/1071/ 
-        // chart.showResetZoom();
+        chart.showResetZoom(); // Patched method
     }
 
     @Override
@@ -243,5 +244,10 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements TimeLis
         chart.getXAxis().removePlotLine(timePlotLine);
         timePlotLine.setValue(date.getTime());
         chart.getXAxis().addPlotLines(timePlotLine);
+    }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
     }
 }

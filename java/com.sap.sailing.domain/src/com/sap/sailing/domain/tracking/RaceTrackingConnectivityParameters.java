@@ -4,7 +4,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 
 
 
@@ -22,7 +21,8 @@ public interface RaceTrackingConnectivityParameters {
     /**
      * Starts a {@link RaceTracker} using the connectivity parameters provided by this object.
      */
-    RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception;
+    RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
+            RaceLogResolver raceLogResolver) throws Exception;
     
     /**
      * Starts a {@link RaceTracker}, associating the resulting races with the {@link Regatta} passed as argument
@@ -30,7 +30,8 @@ public interface RaceTrackingConnectivityParameters {
      * parameters. This is particularly useful if a predefined regatta with {@link Series} and {@link Fleet}s
      * is to be used.
      */
-    RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception;
+    RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
+            RaceLogResolver raceLogResolver) throws Exception;
     
     /**
      * Deliver an ID object equal to that of the {@link RaceTracker#getID()} delivered by the {@link RaceTracker}

@@ -8,6 +8,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
@@ -21,11 +27,13 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.impl.FleetIdentifierImpl;
+import com.sap.sailing.racecommittee.app.services.RaceStateService;
 import com.sap.sse.common.Util.Triple;
 
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
 
+    private Context mContext;
     private LinkedHashMap<Serializable, EventBase> eventsById;
     private LinkedHashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
     private LinkedHashMap<Serializable, Mark> marksById;
@@ -35,8 +43,20 @@ public enum InMemoryDataStore implements DataStore {
     private Serializable eventUUID;
     private UUID courseUUID;
 
+    private RaceStateService mService;
+    private boolean mBound;
+
     InMemoryDataStore() {
         reset();
+    }
+
+    @Override
+    public void setContext(Context context) {
+        if (mContext == null) {
+            mContext = context.getApplicationContext();
+        }
+        Intent intent = new Intent(mContext, RaceStateService.class);
+        mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -49,6 +69,11 @@ public enum InMemoryDataStore implements DataStore {
 
         eventUUID = null;
         courseUUID = null;
+
+        if (mContext != null && mBound) {
+            mContext.unbindService(mConnection);
+            mBound = false;
+        }
     }
 
     @Override
@@ -185,6 +210,7 @@ public enum InMemoryDataStore implements DataStore {
 
     @Override
     public void removeRace(ManagedRace race) {
+        unregisterRace(race);
         managedRaceById.remove(convertManagedRaceIdentifierToSimpleRaceLogIdentifier(race.getIdentifier()));
     }
 
@@ -303,4 +329,32 @@ public enum InMemoryDataStore implements DataStore {
         courseUUID = uuid;
     }
 
+    public void registerRaces(Collection<ManagedRace> races) {
+        if (mBound) {
+            for (ManagedRace race : races) {
+                mService.registerRace(race);
+            }
+        }
+    }
+
+    private void unregisterRace(ManagedRace race) {
+        if (mBound) {
+            mService.unregisterRace(race);
+        }
+    }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            RaceStateService.RaceStateServiceBinder binder = (RaceStateService.RaceStateServiceBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mBound = false;
+        }
+    };
 }

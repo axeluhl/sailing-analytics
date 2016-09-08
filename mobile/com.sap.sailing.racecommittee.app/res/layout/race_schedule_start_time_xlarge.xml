@@ -87,7 +87,7 @@
             android:layout_height="match_parent"
             android:background="?attr/sap_gray_black_30"
             android:visibility="gone"
-            tools:visibility="gone">
+            tools:visibility="visible">
 
             <RelativeLayout
                 android:id="@+id/buttonBar"
@@ -95,48 +95,18 @@
                 android:layout_height="@dimen/selector_header_height"
                 android:layout_alignParentTop="true">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/start_countdown"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
+                    android:gravity="center"
+                    android:layout_marginLeft="@dimen/default_margin"
+                    android:layout_marginRight="@dimen/default_margin"
                     android:layout_marginTop="@dimen/default_margin_half"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/minute_inc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:background="?attr/button_filled_bordered"
-                        android:drawableLeft="?attr/chevron_left"
-                        android:paddingRight="@dimen/default_padding_half"
-                        android:textAppearance="?attr/textLarge"
-                        android:textColor="?attr/white"
-                        tools:text="1:00:00" />
-
-                    <TextView
-                        android:id="@+id/start_countdown"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="@dimen/default_margin"
-                        android:layout_marginRight="@dimen/default_margin"
-                        android:textAppearance="?attr/textXLarge"
-                        android:visibility="visible"
-                        tools:text="1:01:00" />
-
-                    <Button
-                        android:id="@+id/minute_dec"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:background="?attr/button_filled_bordered"
-                        android:drawableRight="?attr/chevron_right"
-                        android:paddingLeft="@dimen/default_padding_half"
-                        android:textAppearance="?attr/textLarge"
-                        android:textColor="?attr/white"
-                        tools:text="1:02:00" />
-                </LinearLayout>
+                    android:textAppearance="?attr/textXLarge"
+                    android:visibility="visible"
+                    tools:text="1:01:00" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -145,14 +115,33 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true">
 
-                <Button
-                    android:id="@+id/set_start_time_absolute"
-                    style="?attr/buttonSolidSmall"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:layout_margin="@dimen/default_margin_twice"
-                    android:text="@string/race_set_time" />
+                    android:layout_margin="@dimen/default_margin"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/sync_to_minute"
+                        style="?attr/buttonSolidSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/default_margin"
+                        android:background="?attr/button_filled_bordered"
+                        android:text="@string/sync_to_minute"
+                        android:textColor="?attr/white"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <Button
+                        android:id="@+id/set_start_time_absolute"
+                        style="?attr/buttonSolidSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/default_margin"
+                        android:text="@string/race_set_time" />
+                </LinearLayout>
             </RelativeLayout>
 
             <RelativeLayout
@@ -182,6 +171,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical" />
+
+                    <NumberPicker
+                        android:id="@+id/start_time_seconds"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:descendantFocusability="blocksDescendants" />
                 </LinearLayout>
             </RelativeLayout>
 
@@ -203,7 +199,7 @@
             android:layout_height="match_parent"
             android:background="?attr/sap_gray_black_30"
             android:visibility="gone"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
             <RelativeLayout
                 android:id="@+id/set_start_time_2"
@@ -222,9 +218,9 @@
             </RelativeLayout>
 
             <RelativeLayout
-                android:layout_above="@id/set_start_time_2"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_above="@id/set_start_time_2">
 
                 <LinearLayout
                     android:id="@+id/relative_input"

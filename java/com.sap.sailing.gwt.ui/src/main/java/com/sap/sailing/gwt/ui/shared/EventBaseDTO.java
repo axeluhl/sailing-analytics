@@ -100,7 +100,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     public void setOfficialWebsiteURL(String officialWebsiteURL) {
         this.officialWebsiteURL = officialWebsiteURL;
     }
-
+    
     public Map<String, String> getSailorsInfoWebsiteURLs() {
         return sailorsInfoWebsiteURLs;
     }

@@ -34,7 +34,6 @@ import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -126,7 +125,7 @@ public class CompetitorReplicationTest extends AbstractServerReplicationTest {
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         final RegattaAndRaceIdentifier raceIdentifier = masterRegatta.getRaceIdentifier(raceDefinition);
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
-                EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 3000,
+                EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                 /* millisecondsOverWhichToAverageWind */ 30000l, /* millisecondsOverWhichToAverageSpeed */ 30000l));
         trackedRace.getTrack(competitor).addGPSFix(new GPSFixMovingImpl(new DegreePosition(49.425, 8.293), MillisecondsTimePoint.now(),
                 new KnotSpeedWithBearingImpl(12.3, new DegreeBearingImpl(242.3))));

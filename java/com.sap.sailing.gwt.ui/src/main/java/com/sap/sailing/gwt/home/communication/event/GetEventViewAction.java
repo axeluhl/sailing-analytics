@@ -25,6 +25,12 @@ import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.shared.media.ImageDescriptor;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load the basic logo, name, state, date and navigation information for a
+ * {@link #GetEventViewAction(UUID) given event-id} to be shown on several pages of this event.
+ * </p>
+ */
 public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClientCacheable {
     private static final Logger logger = Logger.getLogger(GetEventViewAction.class.getName());
 
@@ -34,6 +40,12 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
     private GetEventViewAction() {
     }
 
+    /**
+     * Creates a {@link GetEventViewAction} instance for the given event-id.
+     * 
+     * @param eventId
+     *            {@link UUID} of the {@link Event} to load data for
+     */
     public GetEventViewAction(UUID eventId) {
         this.eventId = eventId;
     }

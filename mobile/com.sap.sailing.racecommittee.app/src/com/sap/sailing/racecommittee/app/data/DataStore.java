@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
+import android.content.Context;
+
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -15,7 +17,8 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public interface DataStore {
-    
+
+    void setContext(Context context);
     void reset();
     
     SharedDomainFactory getDomainFactory();
@@ -38,6 +41,7 @@ public interface DataStore {
     ManagedRace getRace(SimpleRaceLogIdentifier id);
     boolean hasRace(String id);
     boolean hasRace(SimpleRaceLogIdentifier id);
+    void registerRaces(Collection<ManagedRace> races);
 
     Collection<Mark> getMarks();
     Mark getMark(Serializable id);

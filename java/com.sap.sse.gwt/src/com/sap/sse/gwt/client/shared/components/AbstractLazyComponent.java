@@ -16,4 +16,9 @@ public abstract class AbstractLazyComponent<SettingsType extends AbstractSetting
     public String getDependentCssClassName() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
 }

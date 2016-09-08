@@ -4,6 +4,9 @@ import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.shared.partials.lowerthird.LowerThird;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
+/**
+ * Video player with a lower third containing title, subtitle and an optional {@link LabelType}.
+ */
 public class VideoWithLowerThird extends VideoPlayer {
     private final LowerThird lowerThird = new LowerThird();
     

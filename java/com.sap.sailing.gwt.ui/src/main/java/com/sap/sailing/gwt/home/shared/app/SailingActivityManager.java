@@ -5,6 +5,13 @@ import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.gwt.client.mvp.CustomActivityManager;
 
+/**
+ * Specific {@link CustomActivityManager} that controls a {@link ResettableNavigationPathDisplay} by resetting the
+ * navigation path before activation of an activity. With that, there is no wrong path in the navigation path if an
+ * acitivity defines a navigation path by itself.
+ *
+ * @param <NPD> the concrete {@link ResettableNavigationPathDisplay} used by this ActivityManager.
+ */
 public class SailingActivityManager<NPD extends ResettableNavigationPathDisplay> extends CustomActivityManager {
 
     private NPD navigationPathDisplay;

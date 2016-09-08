@@ -23,7 +23,6 @@
   vertical-align: top;
 }
 
-
 .siteheaderLeft {
     position: relative; top:10px;left:10px;
 	display: inline-block;
@@ -54,9 +53,9 @@
 }
 
 .logotitle {
+  font-size: 1rem;
   display: inline-block;
   color: #f6f9fc;
-  font-weight: bold;
   width: 150px;
   height: 100%;
   padding: 17px 15px 0 0;
@@ -64,9 +63,7 @@
   text-align: right;
   border-right: 1px solid rgb(180,180,180);
   margin: 0px;
-  
   margin-left: -25px;
- 
   box-sizing: border-box;
 }
 .pagetitle {

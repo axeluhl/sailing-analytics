@@ -1,19 +1,23 @@
 package com.sap.sailing.gwt.home.communication.eventview;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegattaMetadata {
     private int raceCount;
     private int competitorsCount;
     private String boatClass;
-    private String boatCategory;
+    private ArrayList<String> leaderboardGroupNames;
     private String defaultCourseAreaName;
     private String defaultCourseAreaId;
     private Date startDate;
     private Date endDate;
     private RegattaState state;
     private boolean flexibleLeaderboard;
+    private RaceDataInfo raceDataInfo;
     
     public RegattaMetadataDTO() {
     }
@@ -46,12 +50,18 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     }
 
     @Override
-    public String getBoatCategory() {
-        return boatCategory;
+    public Iterable<String> getLeaderboardGroupNames() {
+        if (leaderboardGroupNames == null) {
+            leaderboardGroupNames = new ArrayList<>();
+        }
+        return Collections.unmodifiableList(leaderboardGroupNames);
     }
 
-    public void setBoatCategory(String boatCategory) {
-        this.boatCategory = boatCategory;
+    public void addLeaderboardGroupName(String leaderboardGroupName) {
+        if (leaderboardGroupNames == null) {
+            leaderboardGroupNames = new ArrayList<>();
+        }
+        leaderboardGroupNames.add(leaderboardGroupName);
     }
 
     @Override
@@ -103,5 +113,46 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
 
     public void setDefaultCourseAreaId(String defaultCourseAreaId) {
         this.defaultCourseAreaId = defaultCourseAreaId;
+    }
+    
+    public RaceDataInfo getRaceDataInfo() {
+        return raceDataInfo;
+    }
+    
+    public void setRaceDataInfo(RaceDataInfo raceDataInfo) {
+        this.raceDataInfo = raceDataInfo;
+    }
+    
+    /**
+     * Holder class for flags, which inform about GPS, wind, video or audio data availability. 
+     */
+    public static class RaceDataInfo implements DTO {
+        private boolean hasGPSData, hasWindData, hasVideoData, hasAudioData;
+        
+        protected RaceDataInfo() {
+        }
+        
+        public RaceDataInfo(boolean hasGPSData, boolean hasWindData, boolean hasVideoData, boolean hasAudioData) {
+            this.hasGPSData = hasGPSData;
+            this.hasWindData = hasWindData;
+            this.hasVideoData = hasVideoData;
+            this.hasAudioData = hasAudioData;
+        }
+
+        public boolean hasGPSData() {
+            return hasGPSData;
+        }
+
+        public boolean hasWindData() {
+            return hasWindData;
+        }
+
+        public boolean hasVideoData() {
+            return hasVideoData;
+        }
+
+        public boolean hasAudioData() {
+            return hasAudioData;
+        }
     }
 }

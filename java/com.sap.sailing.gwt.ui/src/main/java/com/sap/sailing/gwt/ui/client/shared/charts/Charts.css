@@ -11,6 +11,7 @@
 .settingsButtonStyle {
 	position: absolute;
 	right: 0px;
+	bottom: 10px;
 	z-index: 1;
 	margin-top: 14px;
 	margin-right: 4px;

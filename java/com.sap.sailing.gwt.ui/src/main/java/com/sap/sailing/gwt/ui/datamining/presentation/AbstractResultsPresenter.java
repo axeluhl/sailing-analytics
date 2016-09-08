@@ -19,8 +19,10 @@ import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 
-public abstract class AbstractResultsPresenter<SettingsType extends Settings> implements ResultsPresenterWithControls<SettingsType> {
+public abstract class AbstractResultsPresenter<SettingsType extends Settings> extends AbstractComponent<SettingsType>
+implements ResultsPresenterWithControls<SettingsType> {
     
     private enum ResultsPresenterState { BUSY, ERROR, RESULT }
     

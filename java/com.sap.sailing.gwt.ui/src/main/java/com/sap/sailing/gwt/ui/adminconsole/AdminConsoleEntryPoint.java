@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -91,7 +92,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
 
-        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, this, getStringMessages());
+        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, this, getStringMessages(), panel);
         eventManagementPanel.ensureDebugId("EventManagement");
         panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanel) {
             @Override
@@ -136,6 +137,12 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             public void refreshAfterBecomingVisible() {
                 fillLeaderboards();
                 fillLeaderboardGroups();
+            }
+
+            @Override
+            public void setupWidgetByParams(Map<String, String> params) {
+                refreshAfterBecomingVisible(); //Refresh to sure that actual data is provided
+                setupLeaderboardGroups(leaderboardGroupConfigPanel, params);
             }
         }, getStringMessages().leaderboardGroups(), Permission.MANAGE_LEADERBOARD_GROUPS);
         regattasDisplayers.add(leaderboardGroupConfigPanel);
@@ -348,5 +355,10 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                         reportError("Remote Procedure Call getRegattas() - Failure");
                     }
                 }));
+    }
+    
+    @Override
+    public void setupLeaderboardGroups(LeaderboardGroupsDisplayer displayer, Map<String, String> params) {
+        displayer.setupLeaderboardGroups(params);
     }
 }

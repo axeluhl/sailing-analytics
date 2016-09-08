@@ -27,7 +27,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -580,7 +579,6 @@ public class SimulatorMainPanel extends SimplePanel {
             mapOptions.add(courseInputButton);
         }
         
-        mapOptions.add(busyIndicator);
         //rightPanel.add(mapOptions);
         mainPanel.addNorth(mapOptions, 45);
 
@@ -853,7 +851,7 @@ public class SimulatorMainPanel extends SimplePanel {
     private void initUpdateButton() {
 
         this.updateButton = new Button(stringMessages.simulateButton());
-        this.updateButton.getElement().getStyle().setProperty("marginLeft", "30px");
+        this.updateButton.getElement().getStyle().setProperty("marginLeft", "6px");
         if (mode == SailingSimulatorConstants.ModeEvent) {
         	this.updateButton.setEnabled(true);
         }
@@ -986,14 +984,13 @@ public class SimulatorMainPanel extends SimplePanel {
         });
 
         HorizontalPanel p = new HorizontalPanel();
-        // p.add(busyIndicator);
-        DecoratorPanel d = new DecoratorPanel();
+        p.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        p.add(busyIndicator);
         p.add(windDisplayButton);
         p.add(summaryButton);
         p.add(replayButton);
         // windDisplayButton.setValue(true);
-        d.add(p);
-        mapOptions.add(d);
+        mapOptions.add(p);
     }
 
     private DialogBox createPolarDiagramDialogBox() {

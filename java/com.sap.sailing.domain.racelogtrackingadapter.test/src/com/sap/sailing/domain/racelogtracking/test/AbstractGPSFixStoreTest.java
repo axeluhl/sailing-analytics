@@ -25,8 +25,8 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoGPSFixStoreImpl;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockDeviceAndSessionIdentifierWithGPSFixesDeserializer;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
@@ -45,7 +45,7 @@ public class AbstractGPSFixStoreTest {
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
     protected RaceLog raceLog;
     protected RegattaLog regattaLog;
-    protected GPSFixStore store;
+    protected SensorFixStore store;
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
@@ -61,7 +61,8 @@ public class AbstractGPSFixStoreTest {
         service = new RacingEventServiceImpl(null, null, serviceFinderFactory);
         raceLog = new RaceLogImpl("racelog");
         regattaLog = new RegattaLogImpl("regattalog");
-        store = new MongoGPSFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
+        
+        store = new MongoSensorFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
                 serviceFinderFactory);
     }
 

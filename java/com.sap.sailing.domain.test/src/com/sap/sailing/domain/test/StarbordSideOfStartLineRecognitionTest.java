@@ -88,7 +88,7 @@ public class StarbordSideOfStartLineRecognitionTest {
         private static final long serialVersionUID = -8007932232555073829L;
 
         public MockedTrackedRaceImpl() {
-            super(null, null, Collections.<Sideline> emptyList(), null, null, 0, 0, 0, 0, false, OneDesignRankingMetric::new,
+            super(null, null, Collections.<Sideline> emptyList(), null, 0, 0, 0, 0, false, OneDesignRankingMetric::new,
                     mock(RaceLogResolver.class));
         }
         

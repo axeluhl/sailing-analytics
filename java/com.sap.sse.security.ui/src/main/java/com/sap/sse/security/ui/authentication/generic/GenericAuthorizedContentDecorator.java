@@ -2,8 +2,12 @@ package com.sap.sse.security.ui.authentication.generic;
 
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.FlyoutBasedAuthorizedContentDecorator;
 
+/**
+ * {@link AuthorizedContentDecorator} that integrates with {@link GenericAuthentication}.
+ */
 public class GenericAuthorizedContentDecorator extends FlyoutBasedAuthorizedContentDecorator {
 
     private final GenericAuthentication genericAuthentication;

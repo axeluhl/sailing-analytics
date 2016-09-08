@@ -99,7 +99,7 @@ public class WindHelper {
         return isTracked;
     }
 
-    public static String generateMapURL(Context context, ManagedRace race ,boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls){
+    public static String generateMapURL(Context context, ManagedRace race, boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls) {
         ReadonlyDataManager dataManager = OnlineDataManager.create(context);
         return dataManager.getMapUrl(AppPreferences.on(context).getServerBaseURL(), race, getEventId(context), showWindCharts, showStreamlets, showSimulation, showMapControls);
     }

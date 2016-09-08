@@ -22,7 +22,7 @@ public class DurationTest {
         TimePoint t2 = t1.plus(d);
         assertEquals(123+234, t2.asMillis());
     }
-
+    
     @Test
     public void testDurationMinus() {
         TimePoint t1 = new MillisecondsTimePoint(234);

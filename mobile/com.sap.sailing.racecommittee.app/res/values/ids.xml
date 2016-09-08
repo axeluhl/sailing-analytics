@@ -4,6 +4,7 @@
     <item name="drag_handle" type="id" />
     <item name="fling_remove" type="id" />
     <item name="click_remove" type="id" />
-    <item name="protest_flag_image_click_listener" type="id" />
+    <item name="race_list_header" type="id" />
+    <item name="race_list_holder" type="id" />
 
 </resources>

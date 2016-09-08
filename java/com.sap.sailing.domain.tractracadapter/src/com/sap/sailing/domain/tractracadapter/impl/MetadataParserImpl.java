@@ -216,11 +216,11 @@ public class MetadataParserImpl implements MetadataParser {
         if (raceCompetitorMetadataString != null) {
             Map<String, String> competitorMetadata = parseMetadata(raceCompetitorMetadataString);
             for (Entry<String, String> entry : competitorMetadata.entrySet()) {
-                if (entry.getKey().startsWith("boatName")) {
+                if (entry.getKey().equals("boatName")) {
                     parsedBoatName = entry.getValue();
-                } else if (entry.getKey().startsWith("boatId")) {
+                } else if (entry.getKey().equals("boatId")) {
                     parsedBoatId = entry.getValue();
-                } else if (entry.getKey().startsWith("boatColor")) {
+                } else if (entry.getKey().equals("boatColor")) {
                     parsedColor = entry.getValue();
                 }
             }

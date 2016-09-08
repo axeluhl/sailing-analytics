@@ -26,10 +26,19 @@ import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load data to be shown on desktop start page (including stage events, recent
+ * events and some media contents), preparing the appropriate data structure.
+ * </p>
+ */
 public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClientCacheable {
     private static final int MAX_RECENT_EVENTS = 3;
     private static final int MAX_VIDEO_COUNT = 3;
 
+    /**
+     * Creates a new {@link GetStartViewAction} instance.
+     */
     public GetStartViewAction() {
     }
     

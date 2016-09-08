@@ -394,6 +394,7 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
 
     @Override
     public void updateSettings(Settings newSettings) {
+        // no-op
     }
 
     @Override
@@ -401,4 +402,8 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
         return "resultsChart";
     }
 
+    @Override
+    public Settings getSettings() {
+        return null;
+    }
 }

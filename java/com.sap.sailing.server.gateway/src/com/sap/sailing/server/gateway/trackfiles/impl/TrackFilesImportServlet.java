@@ -23,7 +23,6 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
@@ -61,8 +60,8 @@ public class TrackFilesImportServlet extends AbstractFileUploadServlet {
 
     public void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
         try {
-            getService().getGPSFixStore().storeFix(deviceIdentifier, fix);
-        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+            getService().getSensorFixStore().storeFix(deviceIdentifier, fix);
+        } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
         }
     }

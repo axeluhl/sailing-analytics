@@ -58,17 +58,21 @@ public abstract class AbstractTextInputFilter<T, C> extends AbstractFilterWidget
         notifyValueChangeHandlers();
     }
     
+    protected void clear() {
+        textInputUi.setValue(null);
+        update();
+    }
+    
     protected abstract Filter<T> getFilter(String searchString);
     
     private class TextInputFilterHandler implements ClickHandler, KeyUpHandler {
         @Override
         public void onKeyUp(KeyUpEvent event) {
-            update();
+            AbstractTextInputFilter.this.update();
         }
         @Override
         public void onClick(ClickEvent event) {
-            textInputUi.setValue(null);
-            update();
+            AbstractTextInputFilter.this.clear();
         }
     }
 

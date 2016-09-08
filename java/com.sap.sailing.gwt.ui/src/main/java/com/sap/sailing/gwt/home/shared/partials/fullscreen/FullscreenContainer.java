@@ -26,6 +26,12 @@ import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Base class for fullscreen viewer UIs. This viewer has an extensible header area with a close button and a content
+ * area that takes the rest of the available space.
+ *
+ * @param <T> The type of the content widget.
+ */
 public class FullscreenContainer<T extends Widget> {
     
     private static FullscreenContainerUiBinder uiBinder = GWT.create(FullscreenContainerUiBinder.class);
@@ -56,9 +62,15 @@ public class FullscreenContainer<T extends Widget> {
         popup.addStyleName(style.popup());
     }
     
+    /**
+     * To be overwritten by subclasses to hook into the fullscreen viewer's lifecycle.
+     */
     protected void onShow() {
     }
     
+    /**
+     * To be overwritten by subclasses to hook into the fullscreen viewer's lifecycle.
+     */
     protected void onClose() {
     }
     
@@ -72,6 +84,9 @@ public class FullscreenContainer<T extends Widget> {
         headerContentUi.getElement().getStyle().setMarginLeft(5, Unit.EM);
     }
     
+    /**
+     * Should be called by subclasses if the content needs a border as optical guidance for the user.
+     */
     protected void showBorder() {
         contentUi.addStyleName(style.contentBorder());
     }
@@ -85,6 +100,11 @@ public class FullscreenContainer<T extends Widget> {
         return popup.addCloseHandler(handler);
     }
     
+    /**
+     * To be called by subclasses to add more actions (in addition to the close button) to the upper right corner of the fullscreen veiwer.
+     * 
+     * @param widget the action widget to add to the toolbar in the upper right corner.
+     */
     public void addToolbarAction(Widget widget) {
         widget.addStyleName(style.toolbarAction());
         toolbarUi.add(widget);

@@ -3,6 +3,7 @@ package com.sap.sailing.domain.leaderboard.impl;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,7 +61,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
 
     private Iterable<Competitor> allCompetitorsCache;
 
-    private final ConcurrentHashMap<Pair<RaceColumn, Fleet>, Iterable<Competitor>> allCompetitorsCacheByRace;
+    private final ConcurrentMap<Pair<RaceColumn, Fleet>, Iterable<Competitor>> allCompetitorsCacheByRace;
 
     public CompetitorProviderFromRaceColumnsAndRegattaLike(HasRaceColumnsAndRegattaLike provider) {
         super();

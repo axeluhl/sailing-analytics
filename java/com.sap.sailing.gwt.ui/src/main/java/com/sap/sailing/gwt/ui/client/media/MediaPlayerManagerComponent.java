@@ -38,9 +38,9 @@ import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
-import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.PlayStateListener;
@@ -48,21 +48,21 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
-public class MediaPlayerManagerComponent implements Component<AbstractSettings>, PlayStateListener, TimeListener,
+public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSettings> implements PlayStateListener, TimeListener,
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
 
     static interface VideoContainerFactory<T> {
         T createVideoContainer(VideoSynchPlayer videoPlayer, boolean showSynchControls, MediaServiceAsync mediaService,
                 ErrorReporter errorReporter, PlayerCloseListener playerCloseListener, PopoutListener popoutListener);
     }
-
+    
     private final SimplePanel rootPanel = new SimplePanel();
     private final UserService userService;
 
@@ -80,14 +80,16 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
     private final ErrorReporter errorReporter;
     private final UserAgentDetails userAgent;
     private final PopupPositionProvider popupPositionProvider;
-    private boolean autoSelectMedia;
+    private MediaPlayerSettings settings;
+    private final MediaPlayerLifecycle mediaPlayerLifecycle;
 
     private PlayerChangeListener playerChangeListener;
 
-    public MediaPlayerManagerComponent(RegattaAndRaceIdentifier selectedRaceIdentifier,
+    public MediaPlayerManagerComponent(MediaPlayerLifecycle mediaPlayerLifecycle, RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
-            UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, boolean autoSelectMedia) {
+            UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings) {
+        this.mediaPlayerLifecycle = mediaPlayerLifecycle;
         this.userService = userService;
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -104,7 +106,7 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
         this.popupPositionProvider = popupPositionProvider;
-        this.autoSelectMedia = autoSelectMedia;
+        this.settings = settings;
 
         Window.addCloseHandler(this);
         Window.addWindowClosingHandler(this);
@@ -282,9 +284,9 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
      * 
      * @return
      */
-    private AsyncCallback<Collection<MediaTrack>> getAssignedMediaCallback() {
+    private AsyncCallback<Iterable<MediaTrack>> getAssignedMediaCallback() {
 
-        return new AsyncCallback<Collection<MediaTrack>>() {
+        return new AsyncCallback<Iterable<MediaTrack>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -294,14 +296,14 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
             }
 
             @Override
-            public void onSuccess(Collection<MediaTrack> mediaTracks) {
+            public void onSuccess(Iterable<MediaTrack> mediaTracks) {
                 MediaPlayerManagerComponent.this.assignedMediaTracks.clear();
-                MediaPlayerManagerComponent.this.assignedMediaTracks.addAll(mediaTracks);
+                Util.addAll(mediaTracks, MediaPlayerManagerComponent.this.assignedMediaTracks);
                 for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.assignedMediaTracks) {
                     setStatus(mediaTrack);
                 }
 
-                if (autoSelectMedia) {
+                if (settings.isAutoSelectMedia()) {
                     playDefault();
                 }
                 notifyStateChange();
@@ -316,9 +318,9 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
      * 
      * @return
      */
-    private AsyncCallback<Collection<MediaTrack>> getOverlappingMediaCallback() {
+    private AsyncCallback<Iterable<MediaTrack>> getOverlappingMediaCallback() {
 
-        return new AsyncCallback<Collection<MediaTrack>>() {
+        return new AsyncCallback<Iterable<MediaTrack>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -328,9 +330,9 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
             }
 
             @Override
-            public void onSuccess(Collection<MediaTrack> mediaTracks) {
+            public void onSuccess(Iterable<MediaTrack> mediaTracks) {
                 MediaPlayerManagerComponent.this.overlappingMediaTracks.clear();
-                MediaPlayerManagerComponent.this.overlappingMediaTracks.addAll(mediaTracks);
+                Util.addAll(mediaTracks, MediaPlayerManagerComponent.this.overlappingMediaTracks);
                 for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.overlappingMediaTracks) {
                     setStatus(mediaTrack);
                 }
@@ -730,22 +732,27 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.videoComponentShortName();
+        return mediaPlayerLifecycle.getLocalizedShortName();
     }
 
     @Override
     public boolean hasSettings() {
-        return false;
+        return mediaPlayerLifecycle.hasSettings();
     }
 
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
-        throw new UnsupportedOperationException();
+    public SettingsDialogComponent<MediaPlayerSettings> getSettingsDialogComponent() {
+        return mediaPlayerLifecycle.getSettingsDialogComponent(mediaPlayerLifecycle.cloneSettings(settings));
     }
 
     @Override
-    public void updateSettings(AbstractSettings newSettings) {
-        throw new UnsupportedOperationException();
+    public void updateSettings(MediaPlayerSettings newSettings) {
+        this.settings = newSettings;
+    }
+
+    @Override
+    public MediaPlayerSettings getSettings() {
+        return settings;
     }
 
     @Override
@@ -798,5 +805,4 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
     public ErrorReporter getErrorReporter() {
         return errorReporter;
     }
-
 }

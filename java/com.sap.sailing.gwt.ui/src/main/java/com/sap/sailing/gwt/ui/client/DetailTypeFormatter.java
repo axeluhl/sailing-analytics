@@ -38,6 +38,10 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageSpeedOverGroundInKnots();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnots();
+        case CURRENT_RIDE_HEIGHT_IN_METERS:
+            return stringMessages.currentOrAverageRideHeightInMeters();
+        case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+            return stringMessages.currentRideHeightInMeters();
         case ESTIMATED_TIME_TO_NEXT_WAYPOINT_IN_SECONDS:
             return stringMessages.estimatedTimeToNextWaypointInSeconds();
         case VELOCITY_MADE_GOOD_IN_KNOTS:
@@ -189,6 +193,8 @@ public class DetailTypeFormatter {
         case DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS:
         case RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START:
         case DISTANCE_TO_START_LINE:
+        case CURRENT_RIDE_HEIGHT_IN_METERS:
+        case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
             return stringMessages.metersUnit();
             
         case COURSE_OVER_GROUND_TRUE_DEGREES:
@@ -304,6 +310,10 @@ public class DetailTypeFormatter {
             return stringMessages.currentOrAverageSpeedOverGroundInKnotsTooltip();
         case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
             return stringMessages.currentSpeedOverGroundInKnotsTooltip();
+        case CURRENT_RIDE_HEIGHT_IN_METERS:
+            return stringMessages.currentOrAverageRideHeightInMetersTooltip();
+        case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+            return stringMessages.currentRideHeightInMetersTooltip();
         case RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS:
             return stringMessages.windwardDistanceToCompetitorFarthestAheadInMetersTooltip();
         case WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD:

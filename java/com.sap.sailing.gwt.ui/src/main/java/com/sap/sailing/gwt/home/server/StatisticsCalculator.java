@@ -30,6 +30,16 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
+/**
+ * {@link LeaderboardCallback} implementation, which calculates the statistics for the regatta(s) passed to the
+ * {@link #doForLeaderboard(LeaderboardContext)} method. Because this calculations can be costly and time consuming,
+ * several information can be disabled/enabled:
+ * <ul>
+ * <li>Maximum speed (of a competitor) - by static flag {@link #CALCULATE_MAX_SPEED} within this class</li>
+ * <li>Total of sailed miles - by static flag {@link #CALCULATE_SAILED_MILES} within this class</li>
+ * <li>Information from tracked races - by environment variable <code>DISABLE_STATS</code></li>
+ * </ul>
+ */
 public class StatisticsCalculator implements LeaderboardCallback {
     
     private static final Logger logger = Logger.getLogger(StatisticsCalculator.class.getName());
@@ -137,6 +147,9 @@ public class StatisticsCalculator implements LeaderboardCallback {
         }
     }
     
+    /**
+     * @return the {@link ResultWithTTL} containing the calculated statistics.
+     */
     public ResultWithTTL<EventStatisticsDTO> getResult() {
         totalDistanceTraveled = totalDistanceTraveled == Distance.NULL ? null : totalDistanceTraveled;
         return new ResultWithTTL<EventStatisticsDTO>(Duration.ONE_MINUTE.times(5), new EventStatisticsDTO(regattas,

@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatFleetDT
 import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatSeriesDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionFleetView;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
@@ -48,9 +47,7 @@ public abstract class RegattaCompetitionPresenter implements
                 Map<RegattaCompetitionRaceView, SimpleRaceMetadataDTO> raceMap = new HashMap<>();
                 fleetMap.put(fleetView, raceMap);
                 for (SimpleRaceMetadataDTO race : fleet.getRaces()) {
-                    boolean tracked = race.getTrackingState() == RaceTrackingState.TRACKED_VALID_DATA;
-                    String raceViewerUrl = tracked ? getRaceViewerURL(race) : null;
-                    RegattaCompetitionRaceView raceView = fleetView.addRaceView(race, raceViewerUrl);
+                    RegattaCompetitionRaceView raceView = fleetView.addRaceView(race, this);
                     raceMap.put(raceView, race);
                 }
             }
@@ -100,6 +97,6 @@ public abstract class RegattaCompetitionPresenter implements
         seriesView.doFilter(unfilteredFleetCount == 0);
     }
     
-    protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+    protected abstract String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 
 }

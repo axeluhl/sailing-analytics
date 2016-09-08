@@ -90,6 +90,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     protected static TimePanelCss timePanelCss = TimePanelCssResources.INSTANCE.css();
 
     private final boolean forcePaddingRightToAlignToCharts;
+
     /**
      * @param forcePaddingRightToAlignToCharts
      *            if <code>true</code>, the right padding will always be set such that the time panel lines up with
@@ -301,6 +302,10 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         hideControlsPanel();
     }
     
+    public TimeRangeWithZoomProvider getTimeRangeProvider() {
+        return timeRangeProvider;
+    }
+
     private Button createSettingsButton() {
         Button settingsButton = SettingsDialog.<T>createSettingsButton(this, stringMessages);
         settingsButton.setStyleName(timePanelCss.settingsButtonStyle());
@@ -558,7 +563,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         updateTimeSliderPadding(possible);
         updatePlayPauseButtonsVisibility(timer.getPlayMode());
     }
-    
+
     private void updateTimeSliderPadding(boolean backToLivePlayButtonVisible) {
         Style timePanelStyle = timePanelSlider.getElement().getStyle();
         if (backToLivePlayButtonVisible || forcePaddingRightToAlignToCharts) {
@@ -571,8 +576,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @SuppressWarnings("unchecked")
     public T getSettings() {
-        TimePanelSettings result = new TimePanelSettings();
-        result.setRefreshInterval(timer.getRefreshInterval());
+        TimePanelSettings result = new TimePanelSettings(timer.getRefreshInterval());
         return (T) result;
     }
 
@@ -635,4 +639,10 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     public Button getBackToLiveButton() {
         return backToLivePlayButton;
     }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
+
 }

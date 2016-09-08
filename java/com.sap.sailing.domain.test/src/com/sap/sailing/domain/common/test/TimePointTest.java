@@ -1,9 +1,13 @@
 package com.sap.sailing.domain.common.test;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import org.junit.Test;
 
@@ -54,4 +58,29 @@ public class TimePointTest {
         assertFalse(t.equals("s"));
     }
 
+    @Test
+    public void nearestFullMinute() {
+        Calendar cal = new GregorianCalendar();
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(2016, 5, 15, 10, 12, 33); // 10:12:33 on June 15, 2016 in the local time zone
+        final TimePoint start = new MillisecondsTimePoint(cal.getTime());
+        cal.set(2016, 5, 15, 10, 8, 35); // 10:08:35 on June 15, 2016 in the local time zone
+        final TimePoint t1 = new MillisecondsTimePoint(cal.getTime());
+        cal.set(2016, 5, 15, 10, 8, 31); // 10:08:31 on June 15, 2016 in the local time zone
+        final TimePoint t2 = new MillisecondsTimePoint(cal.getTime());
+        cal.set(2016, 5, 15, 10, 15, 31); // 10:15:31 on June 15, 2016 in the local time zone
+        final TimePoint t3 = new MillisecondsTimePoint(cal.getTime());
+        cal.set(2016, 5, 15, 10, 15, 37); // 10:15:31 on June 15, 2016 in the local time zone
+        final TimePoint t4 = new MillisecondsTimePoint(cal.getTime());
+        assertEquals(new MillisecondsTimePoint(new GregorianCalendar(2016, 5, 15, 10, 12, 35).getTime()), start.getNearestModuloOneMinute(t1));
+        assertEquals(new MillisecondsTimePoint(new GregorianCalendar(2016, 5, 15, 10, 12, 31).getTime()), start.getNearestModuloOneMinute(t2));
+        assertEquals(new MillisecondsTimePoint(new GregorianCalendar(2016, 5, 15, 10, 12, 31).getTime()), start.getNearestModuloOneMinute(t3));
+        assertEquals(new MillisecondsTimePoint(new GregorianCalendar(2016, 5, 15, 10, 12, 37).getTime()), start.getNearestModuloOneMinute(t4));
+        // and now at least on milliseconds example
+        cal.set(Calendar.MILLISECOND, 123);
+        final TimePoint t5 = new MillisecondsTimePoint(cal.getTime());
+        final Calendar t5Compare = new GregorianCalendar(2016, 5, 15, 10, 12, 37);
+        t5Compare.set(Calendar.MILLISECOND, 123);
+        assertEquals(new MillisecondsTimePoint(t5Compare.getTime()), start.getNearestModuloOneMinute(t5));
+    }
 }

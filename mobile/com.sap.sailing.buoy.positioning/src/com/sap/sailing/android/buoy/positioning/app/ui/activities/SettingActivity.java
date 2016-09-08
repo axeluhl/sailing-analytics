@@ -1,5 +1,6 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -25,7 +26,6 @@ public class SettingActivity extends AppCompatActivity {
         if (toolbar != null) {
             toolbar.hideSubtitle();
             toolbar.setTitleSize(20);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -33,13 +33,15 @@ public class SettingActivity extends AppCompatActivity {
                 }
             });
             setSupportActionBar(toolbar);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
         }
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(getString(R.string.settings));
         }
     }

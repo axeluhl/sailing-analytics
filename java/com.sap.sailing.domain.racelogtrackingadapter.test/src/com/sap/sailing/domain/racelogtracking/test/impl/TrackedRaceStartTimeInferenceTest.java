@@ -72,7 +72,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
+                /* useMarkPassingCalculator */ false,
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         
         setStartAndEndOfRaceInRaceLog(10000, 20000);
@@ -80,7 +81,6 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         trackedRace.attachRegattaLog(regattaLog);
         
         // test inference via race start/end time in racelog
-        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
         MillisecondsTimePoint startOfRaceInRaceLog = new MillisecondsTimePoint(10000);
         TimePoint expectedStartOfTracking = startOfRaceInRaceLog.minus(Duration.ONE_MINUTE.times(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES));
         MillisecondsTimePoint endOfRaceInRaceLog = new MillisecondsTimePoint(20000);
@@ -134,7 +134,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
+                /* useMarkPassingCalculator */ false,
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         trackedRace.attachRaceLog(raceLog);
         final TimePoint[] oldAndNewStartTimeNotifiedByRace = new TimePoint[2];
@@ -171,7 +172,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
+                /* useMarkPassingCalculator */ false,
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         final TimePoint[] oldAndNewStartTimeNotifiedByRace = new TimePoint[2];
         trackedRace.addListener(new AbstractRaceChangeListener() {
@@ -212,19 +214,20 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
                 null, /* endDate */null, null, null, "a", null));
         assertTrue(regatta.getRegatta().useStartTimeInference());
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
+                /* useMarkPassingCalculator */ false,
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         final TimePoint[] newStartAndEndOfTrackingNotifiedByRace = new TimePoint[2];
         trackedRace.addListener(new AbstractRaceChangeListener() {
             @Override
-            public void startOfTrackingChanged(TimePoint startOfTracking) {
-                newStartAndEndOfTrackingNotifiedByRace[0] = startOfTracking;
+            public void startOfTrackingChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+                newStartAndEndOfTrackingNotifiedByRace[0] = newStartOfRace;
             }
             @Override
-            public void endOfTrackingChanged(TimePoint endOfTracking) {
-                newStartAndEndOfTrackingNotifiedByRace[1] = endOfTracking;
+            public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
+                newStartAndEndOfTrackingNotifiedByRace[1] = newEndOfTracking;
             }
         });
         assertNull(trackedRace.getStartOfTracking());
@@ -314,7 +317,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
+                /* useMarkPassingCalculator */ false,
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         trackedRace.attachRaceLog(raceLog);
         final TimePoint[] oldAndNewStartTimeNotifiedByRace = new TimePoint[2];

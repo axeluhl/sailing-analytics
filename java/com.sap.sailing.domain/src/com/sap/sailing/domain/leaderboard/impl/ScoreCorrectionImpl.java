@@ -7,6 +7,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,12 +40,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     /**
      * If no max point reason is provided for a competitor/race, {@link MaxPointsReason#NONE} should be the default.
      */
-    private final ConcurrentHashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
+    private final ConcurrentMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
 
     /**
      * If no score correction is provided here, the uncorrected points are the default.
      */
-    private final ConcurrentHashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double> correctedScores;
+    private final ConcurrentMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double> correctedScores;
 
     /**
      * If <code>null</code>, despite a non-<code>null</code> {@link #timePointOfLastCorrectionsValidity} value the
@@ -102,10 +103,10 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         }
     }
 
-    protected void notifyListeners(Competitor competitor, MaxPointsReason oldMaxPointsReason,
-            MaxPointsReason newMaxPointsReason) {
+    protected void notifyListeners(Competitor competitor, RaceColumn raceColumn,
+            MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
         for (ScoreCorrectionListener listener : getScoreCorrectionListeners()) {
-            listener.maxPointsReasonChanced(competitor, oldMaxPointsReason, newMaxPointsReason);
+            listener.maxPointsReasonChanced(competitor, raceColumn, oldMaxPointsReason, newMaxPointsReason);
         }
     }
 
@@ -147,7 +148,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         } else {
             oldMaxPointsReason = maxPointsReasons.put(key, reason);
         }
-        notifyListeners(competitor, oldMaxPointsReason, reason);
+        notifyListeners(competitor, raceColumn, oldMaxPointsReason, reason);
     }
 
     @Override
