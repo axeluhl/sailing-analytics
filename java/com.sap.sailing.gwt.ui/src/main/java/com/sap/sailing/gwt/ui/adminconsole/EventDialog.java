@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,7 +31,6 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
-import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
@@ -245,15 +243,5 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     @Override
     protected FocusWidget getInitialFocusWidget() {
         return nameEntryField;
-    }
-    
-    protected Map<String, TextBox> createTextBoxesForLocalesAndDefault(Map<String, String> initialValues) {
-        Map<String, TextBox> result = new LinkedHashMap<>();
-        for(String localeName : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
-            TextBox sailorsInfoWebsiteURLEntryField = createTextBox(initialValues.get(localeName));
-            sailorsInfoWebsiteURLEntryField.setVisibleLength(50);
-            result.put(localeName, sailorsInfoWebsiteURLEntryField);
-        }
-        return result;
     }
 }
