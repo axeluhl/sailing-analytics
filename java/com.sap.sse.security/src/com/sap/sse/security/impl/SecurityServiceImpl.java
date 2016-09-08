@@ -11,6 +11,7 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -391,17 +392,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void updateUserProperties(String username, String fullName, String company) throws UserManagementException {
+    public void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
             throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
         }
-        updateUserProperties(user, fullName, company);
+        updateUserProperties(user, fullName, company, locale);
     }
 
-    private void updateUserProperties(User user, String fullName, String company) {
+    private void updateUserProperties(User user, String fullName, String company, Locale locale) {
         user.setFullName(fullName);
         user.setCompany(company);
+        user.setLocale(locale);
         apply(s->s.internalStoreUser(user));
     }
 
@@ -486,7 +488,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     public StringBuilder buildURL(String baseURL, Map<String, String> urlParameters) {
         StringBuilder url = new StringBuilder(baseURL);
-        boolean first = !baseURL.contains("?");
+        // Potentially contained hash is checked to support place-based mail verification
+        boolean first = !baseURL.contains("?") || baseURL.contains("#");
         for (Map.Entry<String, String> e : urlParameters.entrySet()) {
             if (first) {
                 url.append('?');
@@ -884,7 +887,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setPreference(final String username, final String key, final String value) {
+    public Void setPreference(final String username, final String key, final String value) {
         final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalSetPreference(username, key, value));
@@ -892,12 +895,30 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to set preference for user " + username);
         }
+        return null;
+    }
+
+    @Override
+    public void setPreferenceObject(final String username, final String key, final Object value) {
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
+            final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
+            apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
+        } else {
+            throw new SecurityException("User " + subject.getPrincipal().toString()
+                    + " does not have permission to set preference object for user " + username);
+        }
     }
 
     @Override
     public Void internalSetPreference(final String username, final String key, final String value) {
         store.setPreference(username, key, value);
         return null;
+    }
+    
+    @Override
+    public String internalSetPreferenceObject(final String username, final String key, final Object value) {
+        return store.setPreferenceObject(username, key, value);
     }
     
     @Override

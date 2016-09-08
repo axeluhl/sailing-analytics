@@ -37,6 +37,7 @@
     <dimen name="list_header_height">50dp</dimen>
     <dimen name="list_row_height">80dp</dimen>
     <dimen name="list_arrow_right_margin">10dp</dimen>
+    <dimen name="list_side_margin">5dp</dimen>
 
     <!-- Values for buttons -->
     <dimen name="about_button_top_bottom_margin">10dp</dimen>

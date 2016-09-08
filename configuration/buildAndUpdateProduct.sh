@@ -207,6 +207,7 @@ if [[ "$@" == "clean" ]]; then
     fi
     cd $PROJECT_HOME/java
     rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
+    rm -rf com.sap.sailing.dashboards.gwt/com.sap.sailing.dashboards.gwt.*
     rm -rf com.sap.sse.security.ui/com.sap.sse.security.ui.*
     cd $PROJECT_HOME
     echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean"

@@ -32,6 +32,8 @@ public class PreferenceMarginItemDecoration extends RecyclerView.ItemDecoration 
         if (spanCount % 2 == 0) {
             if (rowCount % 2 != 0) {
                 rowCount = (rowCount + 1) / 2;
+            } else {
+                rowCount /= 2;
             }
         }
         mBackground.setBounds(0, 0, parent.getWidth(), mItemHeight * rowCount);

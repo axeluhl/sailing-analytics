@@ -15,7 +15,7 @@ import com.sap.sse.common.Color;
  * The drawing of the graphics is implemented as a list of graphics command on the Context2D,
  * We created the drawing commands not manually but used a SVG graphics with a well defined scale as a basis in combination
  * with a tool which translates this SVG graphics into the list of drawing commands. 
- * See http://wiki.sapsailing.com/wiki/boatgraphicssvg for further details.<p>
+ * See http://wiki.sapsailing.com/wiki/howto/development/boatgraphicssvg for further details.<p>
  * 
  * The {@link #drawBoat(Context2d, boolean, String)} implementations are expected to draw a pixel
  * size such that one pixel corresponds to one centimeter in reality. This assumption will be

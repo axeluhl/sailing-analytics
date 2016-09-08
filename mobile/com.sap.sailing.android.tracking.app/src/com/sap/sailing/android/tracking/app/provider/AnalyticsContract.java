@@ -46,14 +46,14 @@ public class AnalyticsContract {
 
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    private static final String PATH_COMPETITOR = "competitors";
+    public static final String PATH_COMPETITOR = "competitors";
     public static final String PATH_EVENT = "events";
     public static final String PATH_LEADERBOARD = "leaderboards";
     public static final String PATH_CHECKIN = "checkin_uris";
-    private static final String PATH_MARK = "marks";
+    public static final String PATH_MARK = "marks";
 
-    public static class LeaderboardsEventsJoined {
-        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("leaderboards_events_joined")
+    public static class LeaderboardsEventsCompetitorsMarksJoined {
+        public final static Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath("leaderboards_events_competitors_marks_joined")
                 .build();
     }
 

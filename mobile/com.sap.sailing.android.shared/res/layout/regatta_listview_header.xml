@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/list_header_background_color">
@@ -9,15 +8,14 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/list_header_height">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/fragment_side_margin"
-        android:layout_gravity="center_vertical"
-        android:textSize="@dimen/list_header_text_size"
-        android:textColor="@color/fiori_text_color"
-        android:text="@string/your_regattas" />
-
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="@dimen/fragment_side_margin"
+            android:text="@string/your_regattas"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="@dimen/list_header_text_size" />
     </LinearLayout>
-    
+
 </RelativeLayout>

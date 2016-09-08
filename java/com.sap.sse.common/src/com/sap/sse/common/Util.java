@@ -4,12 +4,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import com.sap.sse.common.util.NaturalComparator;
 
 
 public class Util {
@@ -358,11 +363,46 @@ public class Util {
         return defaultVal;
     }
 
+    /**
+     * Ensures that a {@link Set Set&lt;V&gt;} is contained in {@code map} for {@code key} and
+     * then adds {@code value} to that set. No synchronization / concurrency control effort is
+     * made. This is the caller's obligation.
+     */
     public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        if (! map.containsKey(key)) {
-            map.put(key, new HashSet<V>());
+        Set<V> set = map.get(key);
+        if (set == null) {
+            set = new HashSet<V>();
+            map.put(key, set);
         }
-        map.get(key).add(value);
+        set.add(value);
+    }
+
+    /**
+     * Removes {@code value} from all sets contained as values in {@code map}. If a set is emptied by this removal it is
+     * removed from the map. No synchronization / concurrency control effort is made. This is the caller's obligation.
+     */
+    public static <K, V> void removeFromAllValueSets(Map<K, Set<V>> map, V value) {
+        for (final Iterator<Entry<K, Set<V>>> i=map.entrySet().iterator(); i.hasNext(); ) {
+            final Entry<K, Set<V>> e = i.next();
+            e.getValue().remove(value);
+            if (e.getValue().isEmpty()) {
+                i.remove();
+            }
+        }
+    }
+    
+    /**
+     * Removes {@code value} from the set that is the value for {@code key} in {@code map} if that key exists. If the
+     * set existed and is emptied by this removal it is removed from the map. No synchronization / concurrency control
+     * effort is made. This is the caller's obligation.
+     */
+    public static <K, V> void removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
+        final Set<V> valuesPerKey = map.get(key);
+        if (valuesPerKey != null) {
+            if (valuesPerKey.remove(value) && valuesPerKey.isEmpty()) {
+                map.remove(key);
+            }
+        }
     }
 
     public static String join(String separator, String... strings) {
@@ -482,5 +522,32 @@ public class Util {
             }
         }
         return result;
+    }
+
+    public static <T> List<T> asList(Iterable<T> visibleCourseAreas) {
+        ArrayList<T> list = new ArrayList<T>();
+        addAll(visibleCourseAreas, list);
+        return list;
+    }
+
+    public static <T> List<T> cloneListOrNull(List<T> list) {
+        final List<T> result;
+        if (list == null) {
+            result = null;
+        } else {
+            result = new ArrayList<T>(list);
+        }
+        return result;
+    }
+
+    public static <T extends Named> List<T> sortNamedCollection(Collection<T> collection) {
+        List<T> sortedCollection = new ArrayList<>(collection);
+        Collections.sort(sortedCollection, new Comparator<T>() {
+            @Override
+            public int compare(T o1, T o2) {
+                return new NaturalComparator().compare(o1.getName(), o2.getName());
+            }
+        });
+        return sortedCollection;
     }
 }

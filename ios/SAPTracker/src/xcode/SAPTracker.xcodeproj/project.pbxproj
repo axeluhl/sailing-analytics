@@ -7,10 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F03FD3D19FA44CD00FA1327 /* APIManager.swift */; };
+		066B0DF652B5D2B188D4884B /* libPods-SAPTracker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B1229BB88872CD20C0AE25DE /* libPods-SAPTracker.a */; };
 		7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FC19F7D6700077FF95 /* ScanViewController.swift */; };
-		7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* QRCodeData.swift */; };
-		7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */; };
+		7F0658FF19F7EE910077FF95 /* RegattaData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* RegattaData.swift */; };
 		7F14A10A1A13B9A6001C1ECB /* _abkhazia.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0041A13B9A6001C1ECB /* _abkhazia.png */; };
 		7F14A10B1A13B9A6001C1ECB /* _basque-country.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0051A13B9A6001C1ECB /* _basque-country.png */; };
 		7F14A10C1A13B9A6001C1ECB /* _british-antarctic-territory.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0061A13B9A6001C1ECB /* _british-antarctic-territory.png */; };
@@ -277,51 +276,70 @@
 		7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F193A8E1A39ACF500D71773 /* TimerViewController.swift */; };
 		7F193A911A39E54600D71773 /* GPSAccuracyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F193A901A39E54600D71773 /* GPSAccuracyView.swift */; };
 		7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */; };
-		7F23F0881A1A3DEF00F03F1C /* QRCodeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */; };
+		7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */; };
 		7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C605919F160E400C32D93 /* LocationManager.swift */; };
-		7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */; };
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
 		7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */; };
-		7F4EEDBA1A6D2BAC0026F711 /* CheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
 		7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* HomeViewController.swift */; };
-		7F83F15B19F154F000C53328 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7F83F15919F154F000C53328 /* Main.storyboard */; };
+		7F83F16C19F154F000C53328 /* SAPTrackerAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */; };
 		7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
 		7F87CAA11A2CCE8B0076C617 /* OpenSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */; };
 		7F87CAA21A2CCE8B0076C617 /* OpenSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */; };
 		7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */; };
 		7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */; };
-		7F87CAA71A2CD6BA0076C617 /* Appearance.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F87CAA61A2CD6BA0076C617 /* Appearance.m */; };
-		7F87DDDB1A97339300704AC4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7F87DDDD1A97339300704AC4 /* Localizable.strings */; };
-		7F87DDE01A973C7400704AC4 /* eula-ios.html in Resources */ = {isa = PBXBuildFile; fileRef = 7F87DDE21A973C7400704AC4 /* eula-ios.html */; };
 		7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */; };
 		7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */; };
 		7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D421A373D4400C34B88 /* CourseViewController.swift */; };
 		7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */; };
-		7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */; };
+		7F950A911A35E967003C8C5C /* LeaderboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */; };
 		7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* RegattaViewController.swift */; };
-		7FA2220A1A25E54F00FD364B /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 06377F0B2F2854497073FC0E /* libPods.a */; };
 		7FA2220B1A25E55400FD364B /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
-		7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551919F6661900A1B92D /* DataManager.swift */; };
+		7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551919F6661900A1B92D /* CoreDataManager.swift */; };
 		7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FAFA7941A126B5700D230F1 /* AboutViewController.swift */; };
 		7FC5232D19F6AEE800BBFDCC /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */; };
-		7FCDB6621A1636610075D7D9 /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FCDB65E1A1636610075D7D9 /* GPSFix.swift */; };
-		7FCDB6631A1636610075D7D9 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FCDB65F1A1636610075D7D9 /* Event.swift */; };
-		7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FCDB6601A1636610075D7D9 /* LeaderBoard.swift */; };
-		7FCDB6651A1636610075D7D9 /* Competitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FCDB6611A1636610075D7D9 /* Competitor.swift */; };
 		7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD9D3021A1236080058FEAD /* Extensions.swift */; };
 		7FED44AE1A25E6110022505F /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */; };
 		7FED45C81A25F5900022505F /* competitor1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C21A25F5900022505F /* competitor1.json */; };
 		7FED45CA1A25F5910022505F /* event1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C41A25F5900022505F /* event1.json */; };
 		7FED45CC1A25F5910022505F /* leaderboard1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C61A25F5900022505F /* leaderboard1.json */; };
-		9751C84C1D34ED0B0013FA87 /* CheckInCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9751C84B1D34ED0B0013FA87 /* CheckInCell.swift */; };
-		9751C84E1D3509260013FA87 /* SAPTrackerAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */; };
 		9E95C3D61C723AB30016632B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95C3D51C723AB30016632B /* Constants.swift */; };
 		9ECBDDAE1C9C4F0300F76AEB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */; };
-		C8603D4A1C528832002B2F28 /* Acknowledgements.markdown in Sources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
+		C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936171D40D295000F30E8 /* GPSFixController.swift */; };
+		C84936291D47645F000F30E8 /* HomeViewRegattaCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */; };
+		C852914F1D48FB91009E9A9D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C85291511D48FB91009E9A9D /* Localizable.strings */; };
+		C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */; };
+		C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAAA1CF736680093B0C5 /* Preferences.swift */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
+		C8739E041D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */; };
+		C8739E051D2AA2A500A89F3C /* Regatta.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFB1D2AA2A500A89F3C /* Regatta.swift */; };
+		C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */; };
+		C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */; };
+		C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */; };
+		C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */; };
+		C8739E0A1D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */; };
+		C8739E0B1D2AA2A500A89F3C /* Competitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E011D2AA2A500A89F3C /* Competitor.swift */; };
+		C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */; };
+		C8739E0D1D2AA2A500A89F3C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E031D2AA2A500A89F3C /* Event.swift */; };
+		C8739E0F1D2BEE7900A89F3C /* RegattaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E0E1D2BEE7900A89F3C /* RegattaController.swift */; };
+		C8739E121D2BF14F00A89F3C /* EventData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E111D2BF14F00A89F3C /* EventData.swift */; };
+		C8739E141D2BF16300A89F3C /* LeaderboardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E131D2BF16300A89F3C /* LeaderboardData.swift */; };
+		C8739E161D2BF17900A89F3C /* CompetitorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E151D2BF17900A89F3C /* CompetitorData.swift */; };
+		C8739E181D2BF2DC00A89F3C /* BaseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E171D2BF2DC00A89F3C /* BaseData.swift */; };
+		C8739E1C1D2D5F1700A89F3C /* LocationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E1B1D2D5F1700A89F3C /* LocationData.swift */; };
+		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
+		C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */; };
+		C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */; };
+		C89C5FCE1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCD1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift */; };
+		C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */; };
 		C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C8A4400A1C18153600DF70A0 /* Settings.bundle */; };
 		C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BBAC781C52649E004CA551 /* LicenseViewController.swift */; };
+		C8BFCC1A1D50F10000FC1A27 /* SMTWiFiStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCC191D50F10000FC1A27 /* SMTWiFiStatus.m */; };
+		C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCC31D51C53500FC1A27 /* TeamData.swift */; };
+		C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */; };
+		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
+		C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8F1B1E01D488B6D004C3379 /* Translation.swift */; };
+		EEB2FC8E79793611ABC022B9 /* libPods-SAPTrackerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CDE153BDE8C83E9A084A24F1 /* libPods-SAPTrackerTests.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -339,6 +357,27 @@
 			remoteGlobalIDString = 8FC739D532E373E38AFCF317DFA76500;
 			remoteInfo = TSMarkdownParser;
 		};
+		C86DB6D91CF84D0000A3E636 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 39DFFF900C0CD7B7FE0EFFCE33E99FC8;
+			remoteInfo = "Pods-SAPTracker";
+		};
+		C86DB6DB1CF84D0000A3E636 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D85C2CB3CE6CB3145FBA2C06A382685E;
+			remoteInfo = "Pods-SAPTrackerTests";
+		};
+		C86DB6DD1CF84D0000A3E636 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 6358632676D524799426A4362419539C;
+			remoteInfo = SVProgressHUD;
+		};
 		C89A171B1B6A27CF00CE6814 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
@@ -353,29 +392,16 @@
 			remoteGlobalIDString = 491F530684ABE0C250361CF89F4D98F2;
 			remoteInfo = AFNetworking;
 		};
-		C8B31F7D1B68DAD500C8A809 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = AA2D50EF0C96F46B694820F2;
-			remoteInfo = Pods;
-		};
-		C8B31F831B68DAEE00C8A809 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 467DF12115DC5581D85E26096CC7D16D;
-			remoteInfo = Pods;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		06377F0B2F2854497073FC0E /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		7F03FD3D19FA44CD00FA1327 /* APIManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = APIManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		26E434E29A70875531BDD3C3 /* Pods-SAPTrackerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SAPTrackerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-SAPTrackerTests/Pods-SAPTrackerTests.release.xcconfig"; sourceTree = "<group>"; };
+		5329E51BA6042883841739D8 /* Pods-SAPTracker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SAPTracker.release.xcconfig"; path = "Pods/Target Support Files/Pods-SAPTracker/Pods-SAPTracker.release.xcconfig"; sourceTree = "<group>"; };
+		5D42C68EBF1EC67243A7A621 /* Pods-SAPTracker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SAPTracker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SAPTracker/Pods-SAPTracker.debug.xcconfig"; sourceTree = "<group>"; };
+		6010190FF03AFE91478240B4 /* Pods-SAPTrackerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SAPTrackerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SAPTrackerTests/Pods-SAPTrackerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		7F03FD3F19FA4D7400FA1327 /* bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = "<group>"; };
 		7F0658FC19F7D6700077FF95 /* ScanViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScanViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		7F0658FE19F7EE910077FF95 /* QRCodeData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = QRCodeData.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceUDIDManager.swift; sourceTree = "<group>"; };
+		7F0658FE19F7EE910077FF95 /* RegattaData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = RegattaData.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F14A0041A13B9A6001C1ECB /* _abkhazia.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _abkhazia.png; sourceTree = "<group>"; };
 		7F14A0051A13B9A6001C1ECB /* _basque-country.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_basque-country.png"; sourceTree = "<group>"; };
 		7F14A0061A13B9A6001C1ECB /* _british-antarctic-territory.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_british-antarctic-territory.png"; sourceTree = "<group>"; };
@@ -642,17 +668,14 @@
 		7F193A8E1A39ACF500D71773 /* TimerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerViewController.swift; sourceTree = "<group>"; };
 		7F193A901A39E54600D71773 /* GPSAccuracyView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSAccuracyView.swift; sourceTree = "<group>"; };
 		7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryManager.swift; sourceTree = "<group>"; };
-		7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeManager.swift; sourceTree = "<group>"; };
+		7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInController.swift; sourceTree = "<group>"; };
 		7F2C605919F160E400C32D93 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
-		7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendGPSFixController.swift; sourceTree = "<group>"; };
 		7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
 		7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckIn.swift; sourceTree = "<group>"; };
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F15419F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F15519F154F000C53328 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7F83F15719F154F000C53328 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
-		7F83F15A19F154F000C53328 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		7F83F16519F154F000C53328 /* SAPTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SAPTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F16A19F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAPTrackerAPITests.swift; sourceTree = "<group>"; };
@@ -661,40 +684,62 @@
 		7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Light.ttf"; sourceTree = "<group>"; };
 		7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Regular.ttf"; sourceTree = "<group>"; };
 		7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
-		7F87CAA51A2CD6BA0076C617 /* Appearance.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appearance.h; sourceTree = "<group>"; };
-		7F87CAA61A2CD6BA0076C617 /* Appearance.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appearance.m; sourceTree = "<group>"; };
-		7F87DDDC1A97339300704AC4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
-		7F87DDDF1A9733B200704AC4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
-		7F87DDE11A973C7400704AC4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = "Base.lproj/eula-ios.html"; sourceTree = "<group>"; };
-		7F87DDE31A973C7900704AC4 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = de; path = "de.lproj/eula-ios.html"; sourceTree = "<group>"; };
 		7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingPageViewController.swift; sourceTree = "<group>"; };
 		7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeedViewController.swift; sourceTree = "<group>"; };
 		7F8B8D421A373D4400C34B88 /* CourseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseViewController.swift; sourceTree = "<group>"; };
 		7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
-		7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderBoardViewController.swift; sourceTree = "<group>"; };
+		7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderboardViewController.swift; sourceTree = "<group>"; };
 		7F99DE3B1A126554009B3619 /* RegattaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaViewController.swift; sourceTree = "<group>"; };
-		7FA6551919F6661900A1B92D /* DataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		7FA6551919F6661900A1B92D /* CoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CoreDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7FAFA7941A126B5700D230F1 /* AboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		7FAFB0B51A603C3E0054D457 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		7FCDB65E1A1636610075D7D9 /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
-		7FCDB65F1A1636610075D7D9 /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
-		7FCDB6601A1636610075D7D9 /* LeaderBoard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderBoard.swift; sourceTree = "<group>"; };
-		7FCDB6611A1636610075D7D9 /* Competitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Competitor.swift; sourceTree = "<group>"; };
 		7FD9D3021A1236080058FEAD /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		7FED45C21A25F5900022505F /* competitor1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = competitor1.json; sourceTree = "<group>"; };
 		7FED45C41A25F5900022505F /* event1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = event1.json; sourceTree = "<group>"; };
 		7FED45C61A25F5900022505F /* leaderboard1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = leaderboard1.json; sourceTree = "<group>"; };
-		9751C84B1D34ED0B0013FA87 /* CheckInCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInCell.swift; sourceTree = "<group>"; };
-		9751C8521D352B130013FA87 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Main.strings; sourceTree = "<group>"; };
 		9E95C3D51C723AB30016632B /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		B1229BB88872CD20C0AE25DE /* libPods-SAPTracker.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SAPTracker.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
+		C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewRegattaCell.swift; sourceTree = "<group>"; };
+		C85291501D48FB91009E9A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestManager.swift; sourceTree = "<group>"; };
+		C852BAAA1CF736680093B0C5 /* Preferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
+		C85FAA501D4F84460087C2A2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
+		C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 2.xcdatamodel"; sourceTree = "<group>"; };
+		C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Regatta+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C8739DFB1D2AA2A500A89F3C /* Regatta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regatta.swift; sourceTree = "<group>"; };
+		C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GPSFix+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
+		C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Leaderboard+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Leaderboard.swift; sourceTree = "<group>"; };
+		C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Competitor+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C8739E011D2AA2A500A89F3C /* Competitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Competitor.swift; sourceTree = "<group>"; };
+		C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Event+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C8739E031D2AA2A500A89F3C /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		C8739E0E1D2BEE7900A89F3C /* RegattaController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaController.swift; sourceTree = "<group>"; };
+		C8739E111D2BF14F00A89F3C /* EventData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventData.swift; sourceTree = "<group>"; };
+		C8739E131D2BF16300A89F3C /* LeaderboardData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderboardData.swift; sourceTree = "<group>"; };
+		C8739E151D2BF17900A89F3C /* CompetitorData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorData.swift; sourceTree = "<group>"; };
+		C8739E171D2BF2DC00A89F3C /* BaseData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseData.swift; sourceTree = "<group>"; };
+		C8739E1B1D2D5F1700A89F3C /* LocationData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationData.swift; sourceTree = "<group>"; };
+		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
+		C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewStatusCell.swift; sourceTree = "<group>"; };
+		C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSAccuracyCell.swift; sourceTree = "<group>"; };
+		C89C5FCD1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSFixesCell.swift; sourceTree = "<group>"; };
+		C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewModeCell.swift; sourceTree = "<group>"; };
 		C8A4400A1C18153600DF70A0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
 		C8BBAC781C52649E004CA551 /* LicenseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseViewController.swift; sourceTree = "<group>"; };
-		CF98F25F363113C51C7CB1F3 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
-		EA431711E588F5A2B31A62AC /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		C8BFCC181D50F10000FC1A27 /* SMTWiFiStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMTWiFiStatus.h; sourceTree = "<group>"; };
+		C8BFCC191D50F10000FC1A27 /* SMTWiFiStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMTWiFiStatus.m; sourceTree = "<group>"; };
+		C8BFCCC31D51C53500FC1A27 /* TeamData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamData.swift; sourceTree = "<group>"; };
+		C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
+		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		C8F1B1E01D488B6D004C3379 /* Translation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translation.swift; sourceTree = "<group>"; };
+		CDE153BDE8C83E9A084A24F1 /* libPods-SAPTrackerTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SAPTrackerTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -704,6 +749,7 @@
 			files = (
 				7FC5232D19F6AEE800BBFDCC /* AVFoundation.framework in Frameworks */,
 				7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */,
+				066B0DF652B5D2B188D4884B /* libPods-SAPTracker.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -712,85 +758,70 @@
 			buildActionMask = 2147483647;
 			files = (
 				7FA2220B1A25E55400FD364B /* CoreLocation.framework in Frameworks */,
-				7FA2220A1A25E54F00FD364B /* libPods.a in Frameworks */,
 				7FED44AE1A25E6110022505F /* AVFoundation.framework in Frameworks */,
+				EEB2FC8E79793611ABC022B9 /* libPods-SAPTrackerTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		55CB522899730E933A8A1A9B /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				EA431711E588F5A2B31A62AC /* Pods.debug.xcconfig */,
-				CF98F25F363113C51C7CB1F3 /* Pods.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 		7AC6457280AEA3EC18F5E846 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */,
 				7F83F17519F1574700C53328 /* CoreLocation.framework */,
-				06377F0B2F2854497073FC0E /* libPods.a */,
+				B1229BB88872CD20C0AE25DE /* libPods-SAPTracker.a */,
+				CDE153BDE8C83E9A084A24F1 /* libPods-SAPTrackerTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		7F06590019F7FE750077FF95 /* Model */ = {
+		7F06590019F7FE750077FF95 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				7F0658FE19F7EE910077FF95 /* QRCodeData.swift */,
-				7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */,
-				7FCDB65F1A1636610075D7D9 /* Event.swift */,
-				7FCDB6601A1636610075D7D9 /* LeaderBoard.swift */,
-				7FCDB6611A1636610075D7D9 /* Competitor.swift */,
-				7FCDB65E1A1636610075D7D9 /* GPSFix.swift */,
+				7FA6551919F6661900A1B92D /* CoreDataManager.swift */,
 				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
+				C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */,
+				C8739DFB1D2AA2A500A89F3C /* Regatta.swift */,
+				C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */,
+				C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */,
+				C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */,
+				C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */,
+				C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */,
+				C8739E011D2AA2A500A89F3C /* Competitor.swift */,
+				C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */,
+				C8739E031D2AA2A500A89F3C /* Event.swift */,
 			);
-			name = Model;
+			name = CoreData;
 			sourceTree = "<group>";
 		};
-		7F06590119F7FE920077FF95 /* View */ = {
+		7F06590119F7FE920077FF95 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				9751C8471D34EC720013FA87 /* customcells */,
-				7F83F15719F154F000C53328 /* HomeViewController.swift */,
-				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
+				C8BBAC781C52649E004CA551 /* LicenseViewController.swift */,
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
 				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
-				7F99DE3B1A126554009B3619 /* RegattaViewController.swift */,
-				7F950A901A35E967003C8C5C /* LeaderBoardViewController.swift */,
-				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
-				7F193A901A39E54600D71773 /* GPSAccuracyView.swift */,
-				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
-				7F193A8E1A39ACF500D71773 /* TimerViewController.swift */,
-				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
-				7F8B8D421A373D4400C34B88 /* CourseViewController.swift */,
-				7F72C73F1A2DEA2100F48EE8 /* Resources */,
-				7F72C7401A2DEA3300F48EE8 /* Helpers */,
-				C8BBAC781C52649E004CA551 /* LicenseViewController.swift */,
+				7F83F15719F154F000C53328 /* HomeViewController.swift */,
+				C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */,
+				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
+				C89C60101D0FF036002AAAD2 /* Regatta */,
 			);
-			name = View;
+			name = ViewController;
 			sourceTree = "<group>";
 		};
-		7F06590219F7FEA40077FF95 /* Controller */ = {
+		7F06590219F7FEA40077FF95 /* DataController */ = {
 			isa = PBXGroup;
 			children = (
-				7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */,
-				7F2C605919F160E400C32D93 /* LocationManager.swift */,
-				7FA6551919F6661900A1B92D /* DataManager.swift */,
-				7F03FD3D19FA44CD00FA1327 /* APIManager.swift */,
-				7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */,
-				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
-				7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */,
+				7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */,
+				C84936171D40D295000F30E8 /* GPSFixController.swift */,
+				C8739E0E1D2BEE7900A89F3C /* RegattaController.swift */,
+				C8739E101D2BF13200A89F3C /* Data */,
 			);
-			name = Controller;
+			name = DataController;
 			sourceTree = "<group>";
 		};
-		7F14A0031A13B9A6001C1ECB /* flags */ = {
+		7F14A0031A13B9A6001C1ECB /* Flags */ = {
 			isa = PBXGroup;
 			children = (
 				7F14A0041A13B9A6001C1ECB /* _abkhazia.png */,
@@ -1056,34 +1087,8 @@
 				7F14A1081A13B9A6001C1ECB /* ZM.png */,
 				7F14A1091A13B9A6001C1ECB /* ZW.png */,
 			);
+			name = Flags;
 			path = flags;
-			sourceTree = "<group>";
-		};
-		7F72C73F1A2DEA2100F48EE8 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
-				7F83F15919F154F000C53328 /* Main.storyboard */,
-				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
-				7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */,
-				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
-				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
-				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
-				7F87DDE21A973C7400704AC4 /* eula-ios.html */,
-				7F87DDDD1A97339300704AC4 /* Localizable.strings */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-		};
-		7F72C7401A2DEA3300F48EE8 /* Helpers */ = {
-			isa = PBXGroup;
-			children = (
-				7FD9D3021A1236080058FEAD /* Extensions.swift */,
-				7F87CAA51A2CD6BA0076C617 /* Appearance.h */,
-				7F87CAA61A2CD6BA0076C617 /* Appearance.m */,
-				9E95C3D51C723AB30016632B /* Constants.swift */,
-			);
-			name = Helpers;
 			sourceTree = "<group>";
 		};
 		7F83F14719F154F000C53328 = {
@@ -1094,8 +1099,8 @@
 				7F83F15219F154F000C53328 /* SAPTracker */,
 				7F83F16819F154F000C53328 /* SAPTrackerTests */,
 				7F83F15119F154F000C53328 /* Products */,
-				55CB522899730E933A8A1A9B /* Pods */,
 				7AC6457280AEA3EC18F5E846 /* Frameworks */,
+				C5FA78030BEFE40BACB4AA77 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1112,10 +1117,8 @@
 			isa = PBXGroup;
 			children = (
 				7F83F15519F154F000C53328 /* AppDelegate.swift */,
-				7F06590119F7FE920077FF95 /* View */,
-				7F06590219F7FEA40077FF95 /* Controller */,
-				7F06590019F7FE750077FF95 /* Model */,
-				7F14A0031A13B9A6001C1ECB /* flags */,
+				C8739DC71D2A653F00A89F3C /* Classes */,
+				C89C60131D0FF61E002AAAD2 /* Resources */,
 				7F83F15319F154F000C53328 /* Supporting Files */,
 			);
 			path = SAPTracker;
@@ -1124,10 +1127,18 @@
 		7F83F15319F154F000C53328 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				C85291511D48FB91009E9A9D /* Localizable.strings */,
+				C8D5E81C1D479FA800DA0D61 /* Main.storyboard */,
+				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
+				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
+				7FD9D3021A1236080058FEAD /* Extensions.swift */,
+				9E95C3D51C723AB30016632B /* Constants.swift */,
 				C8603D491C528832002B2F28 /* Acknowledgements.markdown */,
 				7F83F15419F154F000C53328 /* Info.plist */,
 				7F03FD3F19FA4D7400FA1327 /* bridge.h */,
 				C8A4400A1C18153600DF70A0 /* Settings.bundle */,
+				C8F1B1E01D488B6D004C3379 /* Translation.swift */,
+				C8BFCC1B1D50F17800FC1A27 /* SMTWiFiStatus */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -1160,12 +1171,132 @@
 			name = JSON;
 			sourceTree = "<group>";
 		};
-		9751C8471D34EC720013FA87 /* customcells */ = {
+		C5FA78030BEFE40BACB4AA77 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				9751C84B1D34ED0B0013FA87 /* CheckInCell.swift */,
+				5D42C68EBF1EC67243A7A621 /* Pods-SAPTracker.debug.xcconfig */,
+				5329E51BA6042883841739D8 /* Pods-SAPTracker.release.xcconfig */,
+				6010190FF03AFE91478240B4 /* Pods-SAPTrackerTests.debug.xcconfig */,
+				26E434E29A70875531BDD3C3 /* Pods-SAPTrackerTests.release.xcconfig */,
 			);
-			name = customcells;
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		C852BAA91CF736440093B0C5 /* Preferences */ = {
+			isa = PBXGroup;
+			children = (
+				C852BAAA1CF736680093B0C5 /* Preferences.swift */,
+			);
+			name = Preferences;
+			sourceTree = "<group>";
+		};
+		C8739D8B1D23C01500A89F3C /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				7F2C605919F160E400C32D93 /* LocationManager.swift */,
+				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
+				C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */,
+			);
+			name = Managers;
+			sourceTree = "<group>";
+		};
+		C8739DC71D2A653F00A89F3C /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				7F06590019F7FE750077FF95 /* CoreData */,
+				7F06590219F7FEA40077FF95 /* DataController */,
+				C8739D8B1D23C01500A89F3C /* Managers */,
+				C852BAA91CF736440093B0C5 /* Preferences */,
+				7F06590119F7FE920077FF95 /* ViewController */,
+				C89C5FC31D06A269002AAAD2 /* Views */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		C8739E101D2BF13200A89F3C /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				7F0658FE19F7EE910077FF95 /* RegattaData.swift */,
+				C8739E111D2BF14F00A89F3C /* EventData.swift */,
+				C8739E131D2BF16300A89F3C /* LeaderboardData.swift */,
+				C8739E151D2BF17900A89F3C /* CompetitorData.swift */,
+				C8739E171D2BF2DC00A89F3C /* BaseData.swift */,
+				C8739E1B1D2D5F1700A89F3C /* LocationData.swift */,
+				C8BFCCC31D51C53500FC1A27 /* TeamData.swift */,
+			);
+			name = Data;
+			sourceTree = "<group>";
+		};
+		C89C5FC31D06A269002AAAD2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				7F193A901A39E54600D71773 /* GPSAccuracyView.swift */,
+				C89C5FC41D06A289002AAAD2 /* GradientView.swift */,
+				C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		C89C5FC61D06CE62002AAAD2 /* Tracking */ = {
+			isa = PBXGroup;
+			children = (
+				C89C5FC81D06CEA0002AAAD2 /* Cells */,
+				C89C5FC71D06CE87002AAAD2 /* Pages */,
+				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
+				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
+			);
+			name = Tracking;
+			sourceTree = "<group>";
+		};
+		C89C5FC71D06CE87002AAAD2 /* Pages */ = {
+			isa = PBXGroup;
+			children = (
+				7F193A8E1A39ACF500D71773 /* TimerViewController.swift */,
+				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
+				7F8B8D421A373D4400C34B88 /* CourseViewController.swift */,
+			);
+			name = Pages;
+			sourceTree = "<group>";
+		};
+		C89C5FC81D06CEA0002AAAD2 /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */,
+				C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */,
+				C89C5FCD1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift */,
+				C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */,
+			);
+			name = Cells;
+			sourceTree = "<group>";
+		};
+		C89C60101D0FF036002AAAD2 /* Regatta */ = {
+			isa = PBXGroup;
+			children = (
+				7F99DE3B1A126554009B3619 /* RegattaViewController.swift */,
+				7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */,
+				C89C5FC61D06CE62002AAAD2 /* Tracking */,
+			);
+			name = Regatta;
+			sourceTree = "<group>";
+		};
+		C89C60131D0FF61E002AAAD2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				7F14A0031A13B9A6001C1ECB /* Flags */,
+				C89C60141D0FF63C002AAAD2 /* Fonts */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		C89C60141D0FF63C002AAAD2 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */,
+				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
+				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
+				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
+			);
+			name = Fonts;
 			sourceTree = "<group>";
 		};
 		C8B31F781B68DAD400C8A809 /* Products */ = {
@@ -1173,10 +1304,21 @@
 			children = (
 				C89A171C1B6A27CF00CE6814 /* libAFNetworkActivityLogger.a */,
 				C89A171E1B6A27CF00CE6814 /* libAFNetworking.a */,
-				C8B31F7E1B68DAD500C8A809 /* libPods.a */,
+				C86DB6DA1CF84D0000A3E636 /* libPods-SAPTracker.a */,
+				C86DB6DC1CF84D0000A3E636 /* libPods-SAPTrackerTests.a */,
+				C86DB6DE1CF84D0000A3E636 /* libSVProgressHUD.a */,
 				C8603D4F1C528832002B2F28 /* libTSMarkdownParser.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C8BFCC1B1D50F17800FC1A27 /* SMTWiFiStatus */ = {
+			isa = PBXGroup;
+			children = (
+				C8BFCC181D50F10000FC1A27 /* SMTWiFiStatus.h */,
+				C8BFCC191D50F10000FC1A27 /* SMTWiFiStatus.m */,
+			);
+			name = SMTWiFiStatus;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1186,15 +1328,17 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7F83F16F19F154F000C53328 /* Build configuration list for PBXNativeTarget "SAPTracker" */;
 			buildPhases = (
+				76B33FD41C520D731E599E47 /* 📦 Check Pods Manifest.lock */,
 				7F83F14C19F154F000C53328 /* Sources */,
 				7F83F14D19F154F000C53328 /* Frameworks */,
 				7F83F14E19F154F000C53328 /* Resources */,
 				7FF3E4BE1A1DFCF20012F1FB /* ShellScript */,
+				D37E814068CB8A269EA0BA7A /* 📦 Embed Pods Frameworks */,
+				C3B060D2350AB28B8A794E5A /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				C8B31F841B68DAEE00C8A809 /* PBXTargetDependency */,
 			);
 			name = SAPTracker;
 			productName = SAPTracker;
@@ -1205,9 +1349,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7F83F17219F154F000C53328 /* Build configuration list for PBXNativeTarget "SAPTrackerTests" */;
 			buildPhases = (
+				61907C7E1CCEC69AC6D2E1A9 /* 📦 Check Pods Manifest.lock */,
 				7F83F16119F154F000C53328 /* Sources */,
 				7F83F16219F154F000C53328 /* Frameworks */,
 				7F83F16319F154F000C53328 /* Resources */,
+				5B330B9FCBCD42A40B192194 /* 📦 Embed Pods Frameworks */,
+				6E5ED471156D0EF691CB4D4D /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1230,7 +1377,7 @@
 				TargetAttributes = {
 					7F83F14F19F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
-						DevelopmentTeam = LTZ5ADVLSN;
+						DevelopmentTeam = RRE8EFVCE3;
 					};
 					7F83F16419F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
@@ -1272,6 +1419,27 @@
 			remoteRef = C8603D4E1C528832002B2F28 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		C86DB6DA1CF84D0000A3E636 /* libPods-SAPTracker.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libPods-SAPTracker.a";
+			remoteRef = C86DB6D91CF84D0000A3E636 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C86DB6DC1CF84D0000A3E636 /* libPods-SAPTrackerTests.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libPods-SAPTrackerTests.a";
+			remoteRef = C86DB6DB1CF84D0000A3E636 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C86DB6DE1CF84D0000A3E636 /* libSVProgressHUD.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libSVProgressHUD.a;
+			remoteRef = C86DB6DD1CF84D0000A3E636 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		C89A171C1B6A27CF00CE6814 /* libAFNetworkActivityLogger.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1284,13 +1452,6 @@
 			fileType = archive.ar;
 			path = libAFNetworking.a;
 			remoteRef = C89A171D1B6A27CF00CE6814 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		C8B31F7E1B68DAD500C8A809 /* libPods.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libPods.a;
-			remoteRef = C8B31F7D1B68DAD500C8A809 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1378,7 +1539,6 @@
 				7F14A15E1A13B9A6001C1ECB /* ER.png in Resources */,
 				7F14A12F1A13B9A6001C1ECB /* BB.png in Resources */,
 				7F14A13B1A13B9A6001C1ECB /* BR.png in Resources */,
-				7F83F15B19F154F000C53328 /* Main.storyboard in Resources */,
 				7F14A1E01A13B9A6001C1ECB /* SH.png in Resources */,
 				7F14A1261A13B9A6001C1ECB /* AQ.png in Resources */,
 				7F14A1A41A13B9A6001C1ECB /* MA.png in Resources */,
@@ -1387,7 +1547,6 @@
 				7F14A1351A13B9A6001C1ECB /* BI.png in Resources */,
 				7F14A1BB1A13B9A6001C1ECB /* NA.png in Resources */,
 				7F14A1B71A13B9A6001C1ECB /* MW.png in Resources */,
-				7F87DDDB1A97339300704AC4 /* Localizable.strings in Resources */,
 				7F14A1711A13B9A6001C1ECB /* GN.png in Resources */,
 				7F14A19C1A13B9A6001C1ECB /* LICENSE.txt in Resources */,
 				7F14A18C1A13B9A6001C1ECB /* JP.png in Resources */,
@@ -1452,6 +1611,7 @@
 				7F14A1561A13B9A6001C1ECB /* DK.png in Resources */,
 				7F14A18B1A13B9A6001C1ECB /* JO.png in Resources */,
 				7F14A1441A13B9A6001C1ECB /* CF.png in Resources */,
+				C852914F1D48FB91009E9A9D /* Localizable.strings in Resources */,
 				7F14A1BC1A13B9A6001C1ECB /* NC.png in Resources */,
 				7F14A1FA1A13B9A6001C1ECB /* TV.png in Resources */,
 				7F14A1EA1A13B9A6001C1ECB /* SV.png in Resources */,
@@ -1490,6 +1650,7 @@
 				7F14A1FC1A13B9A6001C1ECB /* TZ.png in Resources */,
 				7F14A1A91A13B9A6001C1ECB /* MG.png in Resources */,
 				7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */,
+				C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */,
 				7F14A1D51A13B9A6001C1ECB /* QA.png in Resources */,
 				7F14A10A1A13B9A6001C1ECB /* _abkhazia.png in Resources */,
 				7F14A1851A13B9A6001C1ECB /* IQ.png in Resources */,
@@ -1537,7 +1698,6 @@
 				7F14A12B1A13B9A6001C1ECB /* AW.png in Resources */,
 				7F14A10D1A13B9A6001C1ECB /* _commonwealth.png in Resources */,
 				7F14A1521A13B9A6001C1ECB /* CY.png in Resources */,
-				7F87DDE01A973C7400704AC4 /* eula-ios.html in Resources */,
 				7F14A1391A13B9A6001C1ECB /* BN.png in Resources */,
 				7F14A1231A13B9A6001C1ECB /* AM.png in Resources */,
 				7F14A10F1A13B9A6001C1ECB /* _gosquared.png in Resources */,
@@ -1589,6 +1749,66 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		5B330B9FCBCD42A40B192194 /* 📦 Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SAPTrackerTests/Pods-SAPTrackerTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		61907C7E1CCEC69AC6D2E1A9 /* 📦 Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		6E5ED471156D0EF691CB4D4D /* 📦 Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SAPTrackerTests/Pods-SAPTrackerTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		76B33FD41C520D731E599E47 /* 📦 Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
 		7FF3E4BE1A1DFCF20012F1FB /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1602,6 +1822,36 @@
 			shellPath = /bin/sh;
 			shellScript = "FILE=\"${SRCROOT}/HockeySDK-iOS/BuildAgent\"\nif [ -f \"$FILE\" ]; then\n\"$FILE\"\nfi";
 		};
+		C3B060D2350AB28B8A794E5A /* 📦 Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SAPTracker/Pods-SAPTracker-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D37E814068CB8A269EA0BA7A /* 📦 Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SAPTracker/Pods-SAPTracker-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1610,37 +1860,55 @@
 			buildActionMask = 2147483647;
 			files = (
 				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
+				C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */,
+				C8739E121D2BF14F00A89F3C /* EventData.swift in Sources */,
+				C8739E0F1D2BEE7900A89F3C /* RegattaController.swift in Sources */,
+				C8739E1C1D2D5F1700A89F3C /* LocationData.swift in Sources */,
 				7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */,
 				7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */,
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,
-				9751C84C1D34ED0B0013FA87 /* CheckInCell.swift in Sources */,
+				C8739E161D2BF17900A89F3C /* CompetitorData.swift in Sources */,
+				C8739E0A1D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift in Sources */,
+				C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */,
+				C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
+				C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */,
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
-				7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */,
-				7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */,
+				7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */,
+				C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */,
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
-				7F23F0881A1A3DEF00F03F1C /* QRCodeManager.swift in Sources */,
+				C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */,
+				7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */,
+				C84936291D47645F000F30E8 /* HomeViewRegattaCell.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
-				7FCDB6631A1636610075D7D9 /* Event.swift in Sources */,
+				C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */,
+				C8739E041D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift in Sources */,
+				C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */,
+				C8739E051D2AA2A500A89F3C /* Regatta.swift in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
-				7FCDB6621A1636610075D7D9 /* GPSFix.swift in Sources */,
+				C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */,
 				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
+				C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
-				7F4EEDBA1A6D2BAC0026F711 /* CheckIn.swift in Sources */,
-				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
-				7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */,
-				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
-				C8603D4A1C528832002B2F28 /* Acknowledgements.markdown in Sources */,
+				C8739E0D1D2AA2A500A89F3C /* Event.swift in Sources */,
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
+				C8BFCC1A1D50F10000FC1A27 /* SMTWiFiStatus.m in Sources */,
 				9E95C3D61C723AB30016632B /* Constants.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
+				C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */,
+				C8739E141D2BF16300A89F3C /* LeaderboardData.swift in Sources */,
+				C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */,
+				C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
-				7FCDB6651A1636610075D7D9 /* Competitor.swift in Sources */,
-				7F87CAA71A2CD6BA0076C617 /* Appearance.m in Sources */,
+				C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */,
+				C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */,
 				7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */,
+				C8739E181D2BF2DC00A89F3C /* BaseData.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
-				7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */,
-				7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */,
+				7F950A911A35E967003C8C5C /* LeaderboardViewController.swift in Sources */,
+				C89C5FCE1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift in Sources */,
+				C8739E0B1D2AA2A500A89F3C /* Competitor.swift in Sources */,
+				7F0658FF19F7EE910077FF95 /* RegattaData.swift in Sources */,
 				7F193A911A39E54600D71773 /* GPSAccuracyView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1649,7 +1917,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9751C84E1D3509260013FA87 /* SAPTrackerAPITests.swift in Sources */,
+				7F83F16C19F154F000C53328 /* SAPTrackerAPITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1661,39 +1929,16 @@
 			target = 7F83F14F19F154F000C53328 /* SAPTracker */;
 			targetProxy = 7F83F16619F154F000C53328 /* PBXContainerItemProxy */;
 		};
-		C8B31F841B68DAEE00C8A809 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = Pods;
-			targetProxy = C8B31F831B68DAEE00C8A809 /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		7F83F15919F154F000C53328 /* Main.storyboard */ = {
+		C85291511D48FB91009E9A9D /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				7F83F15A19F154F000C53328 /* Base */,
-				9751C8521D352B130013FA87 /* de */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		7F87DDDD1A97339300704AC4 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				7F87DDDC1A97339300704AC4 /* Base */,
-				7F87DDDF1A9733B200704AC4 /* de */,
+				C85291501D48FB91009E9A9D /* Base */,
+				C85FAA501D4F84460087C2A2 /* de */,
 			);
 			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
-		7F87DDE21A973C7400704AC4 /* eula-ios.html */ = {
-			isa = PBXVariantGroup;
-			children = (
-				7F87DDE11A973C7400704AC4 /* Base */,
-				7F87DDE31A973C7900704AC4 /* de */,
-			);
-			name = "eula-ios.html";
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -1742,7 +1987,6 @@
 					"${PROJECT_DIR}/Pods/build/${BUILD_STYLE}-${PLATFORM_NAME}/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LIBRARY_SEARCH_PATHS = "${PROJECT_DIR}/Pods/build/${BUILD_STYLE}-${PLATFORM_NAME}/**";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PODS_ROOT = "$(PROJECT_DIR)/Pods";
@@ -1787,7 +2031,6 @@
 					"${PROJECT_DIR}/Pods/build/${BUILD_STYLE}-${PLATFORM_NAME}/**",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LIBRARY_SEARCH_PATHS = "${PROJECT_DIR}/Pods/build/${BUILD_STYLE}-${PLATFORM_NAME}/**";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = NO;
 				PODS_ROOT = "$(PROJECT_DIR)/Pods";
@@ -1798,7 +2041,7 @@
 		};
 		7F83F17019F154F000C53328 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EA431711E588F5A2B31A62AC /* Pods.debug.xcconfig */;
+			baseConfigurationReference = 5D42C68EBF1EC67243A7A621 /* Pods-SAPTracker.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -1819,7 +2062,7 @@
 		};
 		7F83F17119F154F000C53328 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CF98F25F363113C51C7CB1F3 /* Pods.release.xcconfig */;
+			baseConfigurationReference = 5329E51BA6042883841739D8 /* Pods-SAPTracker.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -1840,7 +2083,7 @@
 		};
 		7F83F17319F154F000C53328 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EA431711E588F5A2B31A62AC /* Pods.debug.xcconfig */;
+			baseConfigurationReference = 6010190FF03AFE91478240B4 /* Pods-SAPTrackerTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1863,7 +2106,7 @@
 		};
 		7F83F17419F154F000C53328 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CF98F25F363113C51C7CB1F3 /* Pods.release.xcconfig */;
+			baseConfigurationReference = 26E434E29A70875531BDD3C3 /* Pods-SAPTrackerTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -1916,9 +2159,10 @@
 		7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */,
 				7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */,
 			);
-			currentVersion = 7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */;
+			currentVersion = C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */;
 			path = CoreData.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

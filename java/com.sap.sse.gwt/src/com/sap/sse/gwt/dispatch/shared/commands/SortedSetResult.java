@@ -14,6 +14,10 @@ public class SortedSetResult<T extends DTO> implements CollectionResult<T> {
         this.values.addAll(values);
     }
     
+    /**
+     * Adds the {@code value} to this result if {@code value} is not {@code null}. If an object equal
+     * to {@code value} is already contained in this result, no action is taken.
+     */
     public void addValue(T value) {
         if (value != null) {
             this.values.add(value);

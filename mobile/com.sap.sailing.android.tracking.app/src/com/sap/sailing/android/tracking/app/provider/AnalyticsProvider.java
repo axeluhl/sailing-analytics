@@ -50,7 +50,7 @@ public class AnalyticsProvider extends ContentProvider {
 
     private static final int EVENT_GPS_FIXES_JOINED = 700;
 
-    private static final int LEADERBOARDS_EVENTS_JOINED = 800;
+    private static final int LEADERBOARDS_EVENTS_COMPETITORS_MARKS_JOINED = 800;
 
     private static final int MARK = 900;
     private static final int MARK_ID = 901;
@@ -79,7 +79,7 @@ public class AnalyticsProvider extends ContentProvider {
 
         matcher.addURI(authority, "event_gps_fix_joined", EVENT_GPS_FIXES_JOINED);
 
-        matcher.addURI(authority, "leaderboards_events_joined", LEADERBOARDS_EVENTS_JOINED);
+        matcher.addURI(authority, "leaderboards_events_competitors_marks_joined", LEADERBOARDS_EVENTS_COMPETITORS_MARKS_JOINED);
 
         matcher.addURI(authority, "marks", MARK);
         matcher.addURI(authority, "marks/*", MARK_ID);
@@ -125,9 +125,9 @@ public class AnalyticsProvider extends ContentProvider {
                 cursor = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
                 return cursor;
 
-            case LEADERBOARDS_EVENTS_JOINED:
+            case LEADERBOARDS_EVENTS_COMPETITORS_MARKS_JOINED:
                 SQLiteQueryBuilder el = new SQLiteQueryBuilder();
-                el.setTables(Tables.LEADERBOARDS_JOIN_EVENTS);
+                el.setTables(Tables.LEADERBOARDS_JOIN_EVENTS_JOIN_COMPETITORS_JOIN_MARKS);
                 cursor = el.query(db, projection, selection, selectionArgs, null, null, sortOrder);
                 return cursor;
 

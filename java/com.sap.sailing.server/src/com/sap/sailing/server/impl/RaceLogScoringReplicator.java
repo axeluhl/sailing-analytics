@@ -1,7 +1,5 @@
 package com.sap.sailing.server.impl;
 
-import java.util.concurrent.Callable;
-
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -15,7 +13,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -148,21 +145,13 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         if (positioningList != null) {
             for (CompetitorResult positionedCompetitor : positioningList) {
                 Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getCompetitorId());
-                if (positionedCompetitor.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
-                    try {
-                        resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor);
-                        int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
-                        correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
-                                competitor, rankByRaceCommittee, positionedCompetitor.getScore());
-                    } catch (NoWindException ex) {
-                        ex.printStackTrace();
-                    }
-                } else {
-                    setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor, competitor);
-                }
+                int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
+                correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
+                        competitor, rankByRaceCommittee, positionedCompetitor.getScore());
+                setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor, competitor);
             }
-            //Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to be triggered, even though 
-            //no score correction was performed
+            // Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to
+            // be triggered, even though no score correction may have been performed
             applyMetadataUpdate(leaderboard, timePoint, COMMENT_TEXT_ON_SCORE_CORRECTION);
         }
     }
@@ -170,9 +159,9 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     private boolean setMaxPointsReasonInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn,
             TimePoint timePoint, CompetitorResult positionedCompetitor, Competitor competitor) {
         boolean scoreHasBeenCorrected = false;
-        MaxPointsReason trackedMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
+        MaxPointsReason oldMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
         MaxPointsReason maxPointsReasonByRaceCommittee = positionedCompetitor.getMaxPointsReason();
-        if (!maxPointsReasonByRaceCommittee.equals(trackedMaxPointsReason)) {
+        if (!Util.equalsWithNull(maxPointsReasonByRaceCommittee, oldMaxPointsReason)) {
             applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, maxPointsReasonByRaceCommittee, timePoint);
             scoreHasBeenCorrected = true;
         }
@@ -181,16 +170,11 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
 
     private void correctScoreInLeaderboard(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint,
             final int numberOfCompetitorsInRace, 
-            Competitor competitor, int rankByRaceCommittee, Double optionalExplicitScore) throws NoWindException {
+            Competitor competitor, int rankByRaceCommittee, Double optionalExplicitScore) {
         final Double scoreByRaceCommittee;
         if (optionalExplicitScore == null) {
             scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
-                rankByRaceCommittee, new Callable<Integer>() {
-                    @Override
-                    public Integer call() {
-                        return numberOfCompetitorsInRace;
-                    }
-                }, leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), timePoint);
+                rankByRaceCommittee, ()->numberOfCompetitorsInRace, leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), timePoint);
         } else {
             scoreByRaceCommittee = optionalExplicitScore;
         }
@@ -198,15 +182,6 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
     }
 
-    private boolean resetMaxPointsReasonIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint, Competitor competitor) {
-        boolean scoreHasBeenCorrected = false;
-        if (!leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint).equals(MaxPointsReason.NONE)) {
-            applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, MaxPointsReason.NONE, timePoint);
-            scoreHasBeenCorrected = true;
-        }
-        return scoreHasBeenCorrected;
-    }
-    
     private void applyScoreCorrectionOperation(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, Double correctedScore, TimePoint timePoint) {
         RacingEventServiceOperation<?> operation = new UpdateLeaderboardScoreCorrection(leaderboard.getName(), raceColumn.getName(), competitor.getId().toString(), correctedScore, timePoint);
         service.apply(operation);

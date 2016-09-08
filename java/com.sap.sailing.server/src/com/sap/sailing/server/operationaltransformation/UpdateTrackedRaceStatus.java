@@ -3,11 +3,10 @@ package com.sap.sailing.server.operationaltransformation;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
-import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 
-public class UpdateTrackedRaceStatus extends AbstractRaceOperation<Void> implements TrackingDataLoader {
+public class UpdateTrackedRaceStatus extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 5847067037829132465L;
     private final TrackedRaceStatus newStatus;
     
@@ -19,7 +18,7 @@ public class UpdateTrackedRaceStatus extends AbstractRaceOperation<Void> impleme
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        trackedRace.onStatusChanged(this, newStatus);
+        trackedRace.setStatus(newStatus);
         return null;
     }
 

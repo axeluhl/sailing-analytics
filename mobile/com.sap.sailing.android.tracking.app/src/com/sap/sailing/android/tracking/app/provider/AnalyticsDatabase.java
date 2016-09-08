@@ -48,11 +48,17 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
                 + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.COMPETITORS + "."
                 + Competitor.COMPETITOR_CHECKIN_DIGEST + ") ";
 
-        String LEADERBOARDS_JOIN_EVENTS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
+        String LEADERBOARDS_JOIN_EVENTS_JOIN_COMPETITORS_JOIN_MARKS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
             + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
             + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.CHECKIN_URIS + " ON ("
             + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.CHECKIN_URIS + "."
-            + AnalyticsContract.Checkin.CHECKIN_URI_CHECKIN_DIGEST + ") ";
+            + AnalyticsContract.Checkin.CHECKIN_URI_CHECKIN_DIGEST + ") "
+            + " LEFT OUTER JOIN " + Tables.COMPETITORS + " ON ("
+            + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.COMPETITORS + "."
+            + Competitor.COMPETITOR_CHECKIN_DIGEST + ") "
+            + " LEFT OUTER JOIN " + Tables.MARKS + " ON ("
+            + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.MARKS + "."
+            + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + ") ";
     }
 
     public AnalyticsDatabase(Context context) {

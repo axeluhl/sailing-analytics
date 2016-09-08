@@ -28,4 +28,7 @@ public interface SailingDispatchContext extends DispatchContext {
     @GwtIncompatible
     Date getCurrentClientTime();
     
+    <T> T getPreferenceForCurrentUser(String preferenceKey);
+    
+    void setPreferenceForCurrentUser(String preferenceKey, Object preference);
 }

@@ -40,6 +40,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07();
         case LOW_POINT_LEAGUE_OVERALL:
             return stringMessages.scoringSchemeLowPointForLeagueOverallLeaderboard();
+        case LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY:
+            return stringMessages.scoringSchemeLowPointTieBreakBasedOnLastSeriesOnly();
         }
         return null;
     }
@@ -60,6 +62,8 @@ public class ScoringSchemeTypeFormatter {
             return stringMessages.scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
         case HIGH_POINT_MATCH_RACING:
             return stringMessages.scoringSchemeHighPointMatchRacingDescription();
+        case LOW_POINT_TIE_BREAK_BASED_ON_LAST_SERIES_ONLY:
+            return stringMessages.scoringSchemeLowPointTieBreakBasedOnLastSeriesOnlyDescription();
         default:
             return format(scoringSchemeType, stringMessages);
         }

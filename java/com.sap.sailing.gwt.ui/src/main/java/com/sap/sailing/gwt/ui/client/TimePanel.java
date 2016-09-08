@@ -302,6 +302,10 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         hideControlsPanel();
     }
     
+    public TimeRangeWithZoomProvider getTimeRangeProvider() {
+        return timeRangeProvider;
+    }
+
     private Button createSettingsButton() {
         Button settingsButton = SettingsDialog.<T>createSettingsButton(this, stringMessages);
         settingsButton.setStyleName(timePanelCss.settingsButtonStyle());

@@ -8,8 +8,9 @@ import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 
+import android.net.Uri;
+
 public abstract class CheckinData extends BaseCheckinData {
-    // public String gcmId;
     private String leaderboardName;
     private String eventId;
     private String eventName;
@@ -24,7 +25,7 @@ public abstract class CheckinData extends BaseCheckinData {
     private boolean update;
 
     public CheckinData(UrlData data) {
-        leaderboardName = data.leaderboardName.replace("%20", " ");
+        leaderboardName = Uri.decode(data.leaderboardName);
         deviceUid = data.deviceUuid.getStringRepresentation();
         eventId = data.eventId;
         eventName = data.eventName;

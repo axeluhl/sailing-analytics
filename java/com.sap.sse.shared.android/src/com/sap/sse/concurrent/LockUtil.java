@@ -417,5 +417,30 @@ public class LockUtil {
         message.append(formatStackTrace(stackTrace));
         message.append('\n');
     }
-    
+
+    /**
+     * Convenience method to execute a {@link Runnable} while the given {@link NamedReentrantReadWriteLock} is locked
+     * for read. Ensures, that unlock is done in a finally block.
+     */
+    public static void executeWithReadLock(NamedReentrantReadWriteLock lock, Runnable runnable) {
+        lockForRead(lock);
+        try {
+            runnable.run();
+        } finally {
+            unlockAfterRead(lock);
+        }
+    }
+
+    /**
+     * Convenience method to execute a {@link Runnable} while the given {@link NamedReentrantReadWriteLock} is locked
+     * for write. Ensures, that unlock is done in a finally block.
+     */
+    public static void executeWithWriteLock(NamedReentrantReadWriteLock lock, Runnable runnable) {
+        lockForWrite(lock);
+        try {
+            runnable.run();
+        } finally {
+            unlockAfterWrite(lock);
+        }
+    }
 }

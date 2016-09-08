@@ -12,6 +12,7 @@ import java.util.UUID;
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.news.LeaderboardNewsEntryDTO;
@@ -241,6 +242,15 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                     raceMetadata.getRegattaAndRaceIdentifier());
     }
     
+    @Override
+    public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
+        RaceIdentifier raceIdentifier = raceMetadata.getRegattaAndRaceIdentifier();
+        Map<String, String> params = createRaceBoardLinkParameters(raceMetadata.getLeaderboardName(),
+                raceMetadata.getLeaderboardGroupName(), raceIdentifier.getRegattaName(), raceIdentifier.getRaceName());
+        params.put("mode", mode);
+        return EntryPointLinkFactory.createRaceBoardLink(params);
+    }
+    
     private String getRaceViewerURL(String leaderboardName, String leaderboardGroupName, RegattaAndRaceIdentifier raceIdentifier) {
         return EntryPointLinkFactory.createRaceBoardLink(createRaceBoardLinkParameters(leaderboardName, leaderboardGroupName,
                 raceIdentifier.getRegattaName(), raceIdentifier.getRaceName()));
@@ -295,7 +305,12 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public boolean isMultiRegattaEvent() {
         return getEventDTO().getType() == EventType.MULTI_REGATTA;
     }
-    
+
+    @Override
+    public boolean isSingleRegattaEvent() {
+        return getEventDTO().getType() == EventType.SINGLE_REGATTA;
+    }
+
     protected List<NavigationItem> getNavigationPathToEventLevel() {
         List<NavigationItem> navigationItems = new ArrayList<>();
         if(getEventDTO().getType() == EventType.SERIES_EVENT) {

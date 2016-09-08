@@ -34,7 +34,7 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
 
         @Override
         public void execute(SafeHtml object) {
-            column.toggleExpansion();
+            column.changeExpansionState(/* expand */ !column.isExpanded());
         }
     }
 

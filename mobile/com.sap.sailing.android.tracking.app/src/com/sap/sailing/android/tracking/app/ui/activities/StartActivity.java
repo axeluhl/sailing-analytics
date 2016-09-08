@@ -46,7 +46,7 @@ public class StartActivity extends AbstractStartActivity {
         refreshDatabase();
 
         if (!EulaHelper.with(this).isEulaAccepted()) {
-            EulaHelper.with(this).showEulaDialog();
+            EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
         }
     }
 

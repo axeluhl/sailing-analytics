@@ -119,6 +119,7 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -295,10 +296,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient ConcurrentMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     protected transient MarkPassingCalculator markPassingCalculator;
-    private final boolean hasMarkPassingCalculator;
     
     private final ConcurrentMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
 
+    /**
+     * Mapping of {@link Competitor} to generic {@link DynamicTrack} implementation. Because the same competitor could
+     * be mapped to several different tracks, a combined key of competitor object and track name identifier string is
+     * used. This identifier is usually defined within the track interface (e.g. see {@link BravoFixTrack#TRACK_NAME}).
+     */
     private final Map<Pair<Competitor, String>, DynamicTrack<?>> sensorTracks;
     
     private final Map<String, Sideline> courseSidelines;
@@ -546,7 +551,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } else {
             markPassingCalculator = null;
         }
-        hasMarkPassingCalculator = useInternalMarkPassingAlgorithm;
         sensorTracks = new HashMap<>();
         sensorTracksLock = new NamedReentrantReadWriteLock("sensorTracksLock", true);
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
@@ -648,17 +652,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         adjustStructureToCourse();
         triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
-    }
-
-    /**
-     * After the object graph has entirely been re-constructed, create the mark passing calculator if
-     * the original object had one.
-     */
-    protected Object readResolve() {
-        if (hasMarkPassingCalculator) {
-            markPassingCalculator = createMarkPassingCalculator();
-        }
-        return this;
     }
 
     /**
@@ -1101,7 +1094,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (getEndOfRace() == null) {
                 if (getTimePointOfNewestEvent() != null) {
                     endOfLivePeriod = getTimePointOfNewestEvent().plus(
-                            TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                            TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).plus(getDelayToLiveInMillis());
                 } else {
                     endOfLivePeriod = null;
                 }

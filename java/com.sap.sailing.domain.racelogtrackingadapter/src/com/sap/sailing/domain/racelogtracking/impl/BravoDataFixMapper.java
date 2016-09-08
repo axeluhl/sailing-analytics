@@ -13,20 +13,19 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.BravoFixTrackImpl;
 
 /**
- * {@link SensorFixMapper} to handle {@link BravoFix}es.
- *
+ * {@link SensorFixMapper} implementation to handle {@link BravoFix}es.
  */
-public class BravoDataFixMapper implements SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<Competitor, BravoFix>, Competitor> {
+public class BravoDataFixMapper implements SensorFixMapper<BravoFix, DynamicSensorFixTrack<Competitor, BravoFix>, Competitor> {
 
     @Override
     public DynamicSensorFixTrack<Competitor, BravoFix> getTrack(DynamicTrackedRace race, Competitor key) {
         return race.getOrCreateSensorTrack(key, BravoFixTrack.TRACK_NAME, 
                 () -> new BravoFixTrackImpl<Competitor>(key, BravoFixTrack.TRACK_NAME));
     }
-
+    
     @Override
-    public void addFix(DynamicSensorFixTrack<Competitor, BravoFix> track, DoubleVectorFix fix) {
-        track.add(new BravoFixImpl(fix));
+    public BravoFix map(DoubleVectorFix fix) {
+        return new BravoFixImpl(fix);
     }
     
     @Override

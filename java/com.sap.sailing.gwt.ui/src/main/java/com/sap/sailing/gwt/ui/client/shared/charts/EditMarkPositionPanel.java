@@ -83,7 +83,6 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
-import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.FixOverlay;
@@ -533,10 +532,34 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             setSeriesPoints(markSeries, points);
         }
     }
-    
-    private void finalizeLoadingData() {
-        hideLoading();
-        onSelectionChange(null);
+        
+    private void createMarkTrackUi(MarkDTO mark, Iterable<GPSFixDTO> track) {
+        Date fromTime = timeRangeWithZoomProvider.getFromTime();
+        Date toTime = timeRangeWithZoomProvider.getToTime();
+        PolylineOptions options = PolylineOptions.newInstance();
+        if (map != null) {
+            options.setMap(map);
+        }
+        options.setStrokeWeight(1);
+        options.setVisible(false);
+        final Polyline polyline = Polyline.newInstance(options); // Line can not be dashed at the moment, because line symbols are not supported
+        polylines.put(mark, polyline);
+        
+        SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = marks.get(mark);
+        
+        for (final GPSFixDTO fix : track) {
+            final FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
+            fixOverlayMap.put(fix, overlay);
+            overlay.setVisible(false);
+            overlayClickHandlers.add(new OverlayClickHandler(mark, fix, overlay).register());
+            if (fromTime.after(fix.timepoint)) {
+                fromTime = fix.timepoint;
+            } else if (toTime.before(fix.timepoint)) {
+                toTime = fix.timepoint;
+            }
+        }
+        updatePolylinePoints(mark);
+        marksFromToTimes.put(mark, new Pair<Date, Date>(fromTime, toTime));
         onResize();
     }
     
@@ -544,60 +567,31 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         if (selectedRaceIdentifier != null && from != null && to != null && marks == null) {
             setWidget(chart);
             showLoading(stringMessages.loadingMarkFixes());
-            markPositionService.getMarkTracks(
-                    raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier),
-                    new AsyncCallback<MarkTracksDTO>() {
+            markPositionService.getMarksInTrackedRace(raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier), 
+                    new AsyncCallback<Iterable<MarkDTO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            finalizeLoadingData();
+                            hideLoading();
                             errorReporter.reportError(stringMessages.errorCommunicatingWithServer()+": "+caught.getMessage());
                         }
 
                         @Override
-                        public void onSuccess(MarkTracksDTO markTracks) {
-                            Map<MarkDTO, Iterable<GPSFixDTO>> result = new HashMap<>();
-                            for (MarkTrackDTO track : markTracks.getTracks()) {
-                                result.put(track.getMark(), track.getFixes());
-                                marks = new HashMap<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>>();
-                                raceFromTime = timeRangeWithZoomProvider.getFromTime();
-                                raceToTime = timeRangeWithZoomProvider.getToTime();
-                                for (final Map.Entry<MarkDTO, Iterable<GPSFixDTO>> fixes : result.entrySet()) {
-                                    Date fromTime = raceFromTime;
-                                    Date toTime = raceToTime;
-                                    PolylineOptions options = PolylineOptions.newInstance();
-                                    if (map != null) {
-                                        options.setMap(map);
+                        public void onSuccess(Iterable<MarkDTO> marks) {
+                            EditMarkPositionPanel.this.marks = new HashMap<>();
+                            List<MarkDTO> markList = new ArrayList<>();
+                            for (MarkDTO mark : marks) {
+                                SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = new TreeMap<>(new Comparator<GPSFixDTO>() {
+                                    @Override
+                                    public int compare(GPSFixDTO o1, GPSFixDTO o2) {
+                                        return o1.timepoint.compareTo(o2.timepoint);
                                     }
-                                    options.setStrokeWeight(1);
-                                    options.setVisible(false);
-                                    final Polyline polyline = Polyline.newInstance(options); // Line can not be dashed at the moment, because line symbols are not supported
-                                    polylines.put(fixes.getKey(), polyline);
-                                    SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = new TreeMap<>(new Comparator<GPSFixDTO>() {
-                                        @Override
-                                        public int compare(GPSFixDTO o1, GPSFixDTO o2) {
-                                            return o1.timepoint.compareTo(o2.timepoint);
-                                        }
-                                    });
-                                    for (final GPSFixDTO fix : fixes.getValue()) {
-                                        final FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY, fixes.getKey().color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
-                                        fixOverlayMap.put(fix, overlay);
-                                        overlay.setVisible(false);
-                                        overlayClickHandlers.add(new OverlayClickHandler(fixes.getKey(), fix, overlay).register());
-                                        if (fromTime.after(fix.timepoint)) {
-                                            fromTime = fix.timepoint;
-                                        } else if (toTime.before(fix.timepoint)) {
-                                            toTime = fix.timepoint;
-                                        }
-                                    }
-                                    marks.put(fixes.getKey(), fixOverlayMap);
-                                    updatePolylinePoints(fixes.getKey());
-                                    marksFromToTimes.put(fixes.getKey(), new Pair<Date, Date>(fromTime, toTime));
-                                }
-                                List<MarkDTO> markList = new ArrayList<MarkDTO>();
-                                markList.addAll(marks.keySet());
-                                markDataProvider.setList(markList);
+                                });
+                                EditMarkPositionPanel.this.marks.put(mark, fixOverlayMap);
+                                markList.add(mark);
                             }
-                            finalizeLoadingData();
+                            markDataProvider.setList(markList);
+                            onSelectionChange(null);
+                            hideLoading();
                         }
                     });
         }
@@ -828,10 +822,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     public void setComponentViewer(SideBySideComponentViewer sideBySideComponentViewer) {
         this.sideBySideComponentViewer = sideBySideComponentViewer;
     }
-
-    @Override
-    public void onSelectionChange(SelectionChangeEvent event) {
-       selectedMark = marksPanel.getSelectedMark();
+    
+    private void selectMark(MarkDTO mark) {
+        selectedMark = mark;
         if (currentFixPositionChooser != null) {
             currentFixPositionChooser.cancel();
             currentFixPositionChooser = null;
@@ -871,6 +864,30 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
             raceMap.showAllHelplinesToShow();
             hideAllFixOverlays();
             hideAllPolylines();
+        }
+    }
+
+    @Override
+    public void onSelectionChange(SelectionChangeEvent event) {
+        final MarkDTO mark = marksPanel.getSelectedMark();
+        if (mark != null && (marks.get(mark) == null || marks.get(mark).isEmpty())) {
+            if (mark != null) {
+                markPositionService.getMarkTrack(raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier), 
+                        mark.getIdAsString(), new AsyncCallback<MarkTrackDTO>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorCommunicatingWithServer()+": "+caught.getMessage());
+                            }
+    
+                            @Override
+                            public void onSuccess(MarkTrackDTO result) {
+                                createMarkTrackUi(mark, result.getFixes());
+                                selectMark(mark);
+                            }
+                        });
+            }
+        } else {
+            selectMark(mark);
         }
     }
     

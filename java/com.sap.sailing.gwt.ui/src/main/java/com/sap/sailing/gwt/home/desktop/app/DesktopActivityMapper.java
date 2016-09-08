@@ -18,7 +18,6 @@ import com.sap.sailing.gwt.home.desktop.places.start.StartActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.ApplicationPlaceUpdater;
 import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
@@ -69,9 +68,6 @@ public class DesktopActivityMapper implements ActivityMapper {
         } else if (place instanceof EventsPlace) {
             return new EventsActivityProxy((EventsPlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof AbstractUserProfilePlace) {
-            if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_DESKTOP) {
-                return new StartActivityProxy(new StartPlace(), clientFactory);
-            }
             return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory, clientFactory.getHomePlacesNavigator());
         } else if (place instanceof StartPlace) {
             return new StartActivityProxy((StartPlace) place, clientFactory);

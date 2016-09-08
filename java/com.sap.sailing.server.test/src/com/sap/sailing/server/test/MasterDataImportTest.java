@@ -1369,9 +1369,9 @@ public class MasterDataImportTest {
 
         Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */null,
                 new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(),
-                /* officialWebsiteURL */null, /* sailorsInfoWebsiteURL */null,
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */
-                Collections.<VideoDescriptor> emptyList());
+                /* officialWebsiteURL */null, /*baseURL*/null,
+                /* sailorsInfoWebsiteURL */null, /* videos */
+                /* images */Collections.<ImageDescriptor> emptyList(), Collections.<VideoDescriptor> emptyList());
         CourseArea defaultCourseArea = sourceService.addCourseAreas(event.getId(), new String[] { "ECHO" },
                 new UUID[] { UUID.randomUUID() })[0];
 
@@ -1437,9 +1437,9 @@ public class MasterDataImportTest {
 
         Event event = sourceService.createEventWithoutReplication("Test Event", /* eventDescription */null,
                 new MillisecondsTimePoint(0), new MillisecondsTimePoint(10), "testvenue", false, UUID.randomUUID(),
-                /* officialWebsiteURL */null, /* sailorsInfoWebsiteURL */null,
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */
-                Collections.<VideoDescriptor> emptyList());
+                /* officialWebsiteURL */null, /*baseURL*/null,
+                /* sailorsInfoWebsiteURL */null, /* videos */
+                /* images */Collections.<ImageDescriptor> emptyList(), Collections.<VideoDescriptor> emptyList());
         CourseArea defaultCourseArea = sourceService.addCourseAreas(event.getId(), new String[] { "ECHO" },
                 new UUID[] { UUID.randomUUID() })[0];
 
