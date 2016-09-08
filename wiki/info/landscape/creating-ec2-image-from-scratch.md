@@ -125,4 +125,4 @@ VNCSERVERARGS[2]="-geometry 1600x900"
 ```
 
 ## Mail Relaying
-For setting up mail relaying towards central postfix server, have a look [here](https://wiki.sapsailing.com/wiki/mail-relaying)
+For setting up mail relaying towards central postfix server, have a look [here](https://wiki.sapsailing.com/wiki/info/landscape/mail-relaying)

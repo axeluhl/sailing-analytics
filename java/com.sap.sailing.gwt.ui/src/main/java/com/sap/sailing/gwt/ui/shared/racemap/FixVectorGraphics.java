@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.FixType;
 /**
  * A class for course fix graphics based on SVG graphics drawn to a HTML5 canvas
  * The SVG files for the drawing can be found in the package com.sap.sailing.gwt.ui.svg.fixes
- * A general description how to convert SVG files to 'drawing commands' can be found at http://wiki.sapsailing.com/wiki/boatgraphicssvg 
+ * A general description how to convert SVG files to 'drawing commands' can be found at http://wiki.sapsailing.com/wiki/howto/development/boatgraphicssvg
  * @author Jonas Dann
  */
 
