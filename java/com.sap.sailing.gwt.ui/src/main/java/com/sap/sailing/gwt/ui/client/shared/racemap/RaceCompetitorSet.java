@@ -123,8 +123,10 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
 
     /**
      * Tries to locate the competitors described by the IDs in {@link #idsAsStringOfCompetitorsParticipatingInRace} in
-     * <code>competitors</code> and returns them in a set. If not all competitors can be found, <code>null</code> is
-     * returned instead.
+     * <code>competitors</code> and returns them in a set. The subset of competitors found this way is returned.
+     * Note that due to the possibility of suppressing competitors it is possible that competitors are listed
+     * as entries in the race but cannot be resolved in the leaderboard's competitors which does not contain
+     * those being suppressed.
      */
     private Set<CompetitorDTO> computeCompetitorsFromIDs(Iterable<CompetitorDTO> competitors) {
         Set<CompetitorDTO> result;
@@ -138,10 +140,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
             result = new HashSet<>();
             for (String id : getIdsOfCompetitorsParticipatingInRaceAsStrings()) {
                 CompetitorDTO c = competitorsByIdAsString.get(id);
-                if (c == null) {
-                    result = null;
-                    break;
-                } else {
+                if (c != null) {
                     result.add(c);
                 }
             }
