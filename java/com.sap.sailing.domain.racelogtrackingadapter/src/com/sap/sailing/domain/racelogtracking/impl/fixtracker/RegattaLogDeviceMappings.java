@@ -265,27 +265,27 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     private void calculateDiff(Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
             Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings) {
         Set<ItemT> itemsToProcess = new HashSet<ItemT>(previousMappings.keySet());
-            itemsToProcess.addAll(newMappings.keySet());
-            for(ItemT item : itemsToProcess) {
-                if(!newMappings.containsKey(item)) {
-                previousMappings.get(item).forEach(this::mappingRemoved);
-                } else {
+        itemsToProcess.addAll(newMappings.keySet());
+        for(ItemT item : itemsToProcess) {
+            if(!newMappings.containsKey(item)) {
+                previousMappings.get(item).forEach(this::mappingRemovedInternal);
+            } else {
                 final List<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings = previousMappings.containsKey(item)
                         ? previousMappings.get(item) : Collections.emptyList();
-                    
-                    for (DeviceMappingWithRegattaLogEvent<ItemT> newMapping : newMappings.get(item)) {
-                        DeviceMappingWithRegattaLogEvent<ItemT> oldMapping = findAndRemoveMapping(newMapping,
-                                oldMappings);
-                        if (oldMapping == null) {
-                            mappingAdded(newMapping);
-                        } else if (!newMapping.getTimeRange().equals(oldMapping.getTimeRange())) {
-                            mappingChanged(oldMapping, newMapping);
-                        }
+                
+                for (DeviceMappingWithRegattaLogEvent<ItemT> newMapping : newMappings.get(item)) {
+                    DeviceMappingWithRegattaLogEvent<ItemT> oldMapping = findAndRemoveMapping(newMapping,
+                            oldMappings);
+                    if (oldMapping == null) {
+                        mappingAddedInternal(newMapping);
+                    } else if (!newMapping.getTimeRange().equals(oldMapping.getTimeRange())) {
+                        mappingChangedInternal(oldMapping, newMapping);
                     }
-                    oldMappings.forEach(this::mappingRemoved);
                 }
+                oldMappings.forEach(this::mappingRemovedInternal);
             }
         }
+    }
         
     /**
      * Called when a {@link DeviceMapping} was removed.
@@ -293,6 +293,14 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * @param mapping the removed mapping
      */
     protected abstract void mappingRemoved(DeviceMappingWithRegattaLogEvent<ItemT> mapping);
+    
+    private void mappingRemovedInternal(DeviceMappingWithRegattaLogEvent<ItemT> mapping) {
+        try {
+            mappingRemoved(mapping);
+        } catch(Exception e) {
+            logger.log(Level.SEVERE, "error while removing mapping " + mapping, e);
+        }
+    }
 
     /**
      * Called when a {@link DeviceMapping} was added.
@@ -300,6 +308,14 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * @param mapping the new mapping
      */
     protected abstract void mappingAdded(DeviceMappingWithRegattaLogEvent<ItemT> mapping);
+    
+    private void mappingAddedInternal(DeviceMappingWithRegattaLogEvent<ItemT> mapping) {
+        try {
+            mappingAdded(mapping);
+        } catch(Exception e) {
+            logger.log(Level.SEVERE, "error while adding mapping " + mapping, e);
+        }
+    }
 
     /**
      * Called when a {@link DeviceMapping} was changed regarding its mapped time range.
@@ -310,6 +326,15 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      */
     protected abstract void mappingChanged(DeviceMappingWithRegattaLogEvent<ItemT> oldMapping,
             DeviceMappingWithRegattaLogEvent<ItemT> newMapping);
+    
+    private void mappingChangedInternal(DeviceMappingWithRegattaLogEvent<ItemT> oldMapping,
+            DeviceMappingWithRegattaLogEvent<ItemT> newMapping) {
+        try {
+            mappingChanged(oldMapping, newMapping);
+        } catch(Exception e) {
+            logger.log(Level.SEVERE, "error while changing mapping old: " + oldMapping + "; new: " + newMapping, e);
+        }
+    }
     
     private DeviceMappingWithRegattaLogEvent<ItemT> findAndRemoveMapping(
             DeviceMappingWithRegattaLogEvent<ItemT> mappingToFind,
