@@ -8,6 +8,8 @@ import java.util.Set;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,6 +25,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -134,6 +137,13 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         raceTable = new FlushableCellTable<RaceDTO>(/* pageSize */10000, tableRes);
         raceTable.ensureDebugId("TrackedRacesCellTable");
         
+        Label lblFilterRaces = new Label(stringMessages.filterRaces()+":");
+        lblFilterRaces.setWordWrap(false);
+        lblFilterRaces.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        lblFilterRaces.getElement().getStyle().setMarginRight(10, Unit.PX);
+        filterPanel.add(lblFilterRaces);
+        filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
+
         filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceTable,
                 raceList) {
             @Override
@@ -145,8 +155,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 return strings;
             }
         };
-        Label lblFilterRacesByRegatta = new Label(stringMessages.filterRacesByRegatta() + ":");
-        lblFilterRacesByRegatta.setWordWrap(false);
+        Label lblFilterByRegatta = new Label(stringMessages.filterByRegatta());
+        lblFilterByRegatta.setWordWrap(false);
         listBoxRegattas = new ListBox();
         listBoxRegattas.addChangeHandler(new ChangeHandler() {
             @Override
@@ -155,9 +165,9 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 filterablePanelRaces.filter();
             }
         });
-        filterablePanelRaces.add(lblFilterRacesByRegatta, listBoxRegattas);
+        filterablePanelRaces.add(lblFilterByRegatta, listBoxRegattas);
         
-        Label lblFilterRacesByName = new Label(stringMessages.filterRacesByName() + ":");
+        Label lblFilterRacesByName = new Label(stringMessages.filterByNameOrBoatClass());
         lblFilterRacesByName.setWordWrap(false);
         final TextBox textBoxFilter = new TextBox();
         textBoxFilter.addKeyUpHandler(new KeyUpHandler() {
@@ -171,6 +181,8 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         filterablePanelRaces.add(lblFilterRacesByName, textBoxFilter);
 
         filterPanel.add(filterablePanelRaces);
+        filterPanel.setCellVerticalAlignment(filterablePanelRaces, HasVerticalAlignment.ALIGN_MIDDLE);
+
         final EntityIdentityComparator<RaceDTO> entityIdentityComparator = new EntityIdentityComparator<RaceDTO>() {
             @Override
             public boolean representSameEntity(RaceDTO dto1, RaceDTO dto2) {
