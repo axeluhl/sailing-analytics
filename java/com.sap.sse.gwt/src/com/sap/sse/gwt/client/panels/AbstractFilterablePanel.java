@@ -184,7 +184,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *            model}
      * @param multiselection
      *            set <code>true</code> when the {@link RefreshableSelectionModel selection model} should be a
-     *            {@link RefreshableMultiSelectionModel}. When it�s set <code>false</code> the
+     *            {@link RefreshableMultiSelectionModel}. When it's set <code>false</code> the
      *            {@link RefreshableSelectionModel selection model} will be a {@link RefreshableSingleSelectionModel}.
      */
     public RefreshableSelectionModel<T> registerSelectionModelOnAllElements(EntityIdentityComparator<T> comp,
