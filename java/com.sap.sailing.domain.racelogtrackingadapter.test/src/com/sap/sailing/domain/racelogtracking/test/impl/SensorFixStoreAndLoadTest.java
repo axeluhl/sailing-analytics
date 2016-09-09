@@ -2,6 +2,7 @@ package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static com.sap.sse.common.Util.size;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
@@ -22,7 +23,9 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
@@ -625,4 +628,25 @@ public class SensorFixStoreAndLoadTest {
         }
     }
     
+    @Test
+    public void testThatMappingsOutsideOfTheTrackedIntervalDontCauseLoadingToFail() throws InterruptedException {
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(new MillisecondsTimePoint(100), author, 0));
+        raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(300), author, 0));
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
+                device, new MillisecondsTimePoint(10), new MillisecondsTimePoint(20)));
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp2,
+                deviceTest, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+        regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp2,
+                deviceTest, new MillisecondsTimePoint(10), new MillisecondsTimePoint(20)));
+        addBravoFixes();
+        FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        trackedRace.waitForLoadingToFinish();
+        assertNotNull(trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME));
+        assertNotNull(trackedRace.getSensorTrack(comp2, BravoFixTrack.TRACK_NAME));
+        fixLoaderAndTracker.stop(true);
+    }
 }
