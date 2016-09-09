@@ -15,7 +15,7 @@ import com.sap.sse.common.Util;
 
 /**
  * Customizable filter panel which allows to create a flexible filter panel with various number of filter inputs (e.g.
- * combo box & text box). Need to set filter value on each input field change handler
+ * combo box and text box). Need to set filter value on each input field change handler.
  * 
  * @param <T>
  * @author Oleg Zheleznov

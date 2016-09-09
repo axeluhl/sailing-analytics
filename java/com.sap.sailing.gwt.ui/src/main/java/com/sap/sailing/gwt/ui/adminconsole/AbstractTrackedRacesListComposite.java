@@ -142,7 +142,6 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
                 strings.add(t.getName());
                 strings.add(t.boatClass);
                 strings.add(t.getRegattaName());
-                strings.add(t.toString());
                 return strings;
             }
         };
