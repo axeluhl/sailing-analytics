@@ -116,9 +116,7 @@ public class SensorFixStoreAndLoadTest {
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
-        DB db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
-        db.getCollection(CollectionNames.GPS_FIXES.name()).drop();
-        db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).drop();
+        dropPersistedData();
         raceLog = new RaceLogImpl("racelog");
         regattaLog = new RegattaLogImpl("regattalog");
 
@@ -140,11 +138,17 @@ public class SensorFixStoreAndLoadTest {
                 mock(RaceLogResolver.class));
     }
 
-    @After
-    public void after() {
+    private void dropPersistedData() {
         DB db = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory().getDatabase();
         db.getCollection(CollectionNames.GPS_FIXES.name()).drop();
         db.getCollection(CollectionNames.GPS_FIXES_METADATA.name()).drop();
+        db.getCollection(CollectionNames.REGATTA_LOGS.name()).drop();
+        db.getCollection(CollectionNames.RACE_LOGS.name()).drop();
+    }
+
+    @After
+    public void after() {
+        dropPersistedData();
     }
 
     @Test
