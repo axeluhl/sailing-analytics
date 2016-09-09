@@ -37,6 +37,8 @@ import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * At the moment, the timerange covered by the fixes for a device, and the number of fixes for a device are stored in a
@@ -52,6 +54,10 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     private final DBCollection fixesCollection;
     private final DBCollection metadataCollection;
     private final MongoObjectFactoryImpl mongoOF;
+    /**
+     * Lock object to be used when accessing {@link #listeners}.
+     */
+    private final NamedReentrantReadWriteLock listenersLock = new NamedReentrantReadWriteLock("Listeners collection lock of " + MongoSensorFixStoreImpl.class.getName(), false);
     private final Map<DeviceIdentifier, Set<FixReceivedListener<? extends Timed>>> listeners = new HashMap<>();
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory, DomainObjectFactory domainObjectFactory,
@@ -168,9 +174,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             logger.log(Level.WARNING, "Could not store fix in MongoDB");
             e.printStackTrace();
         }
-        for (FixT fix : fixes) {
-            notifyListeners(device, fix);
-        }
+        notifyListeners(device, fixes);
     }
 
     @Override
@@ -179,23 +183,30 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private <FixT extends Timed> void notifyListeners(DeviceIdentifier device, FixT fix) {
-        for (FixReceivedListener<FixT> listener : Util.<DeviceIdentifier, Set<FixReceivedListener<FixT>>> get(
-                (Map) listeners, device, Collections.emptySet())) {
-            listener.fixReceived(device, fix);
-        }
+    private <FixT extends Timed> void notifyListeners(DeviceIdentifier device, Iterable<FixT> fixes) {
+        LockUtil.executeWithReadLock(listenersLock, () -> {
+            for (FixT fix : fixes) {
+                for (FixReceivedListener<FixT> listener : Util.<DeviceIdentifier, Set<FixReceivedListener<FixT>>> get(
+                        (Map) listeners, device, Collections.emptySet())) {
+                    listener.fixReceived(device, fix);
+                }
+            }
+        });
     }
 
     @Override
-    public synchronized void addListener(FixReceivedListener<? extends Timed> listener, DeviceIdentifier device) {
-        Util.addToValueSet(listeners, device, listener);
+    public void addListener(FixReceivedListener<? extends Timed> listener, DeviceIdentifier device) {
+        LockUtil.executeWithWriteLock(listenersLock, () -> Util.addToValueSet(listeners, device, listener));
     }
 
     @Override
-    public synchronized void removeListener(FixReceivedListener<? extends Timed> listener) {
-        for (Set<FixReceivedListener<? extends Timed>> set : listeners.values()) {
-            set.remove(listener);
-        }
+    public void removeListener(FixReceivedListener<? extends Timed> listener) {
+        LockUtil.executeWithWriteLock(listenersLock, () -> Util.removeFromAllValueSets(listeners, listener));
+    }
+    
+    @Override
+    public void removeListener(FixReceivedListener<? extends Timed> listener, DeviceIdentifier device) {
+        LockUtil.executeWithWriteLock(listenersLock, () -> Util.removeFromValueSet(listeners, device, listener));
     }
 
     private DBObject getDeviceQuery(DeviceIdentifier device)

@@ -39,12 +39,12 @@
   padding: 1.333333333333333em 0.333333333333333em 0.333333333333333em 0.333333333333333em;
   vertical-align: top;
 }
-.regattacompetition_phase_fleet:first-child {
-  padding-left: 0.666666666666667em;
-}
-.regattacompetition_phase_fleet:last-child {
-  padding-right: 0.666666666666667em;
-}
+/* .regattacompetition_phase_fleet:first-child { */
+/*   padding-left: 0.666666666666667em; */
+/* } */
+/* .regattacompetition_phase_fleet:last-child { */
+/*   padding-right: 0.666666666666667em; */
+/* } */
 .regattacompetition_phase_fleetfullwidth .regattacompetition_phase_fleet_race {
   height: 3.466666666666666666em;
   text-align: center;
@@ -74,8 +74,14 @@
   font-size: 1.066666666666667em;
   font-weight: 700;
   min-height: 2.8125em;
-  padding-left: 0.9375em;
-  margin-bottom: 0.9375em;
+  margin-bottom: 0.375em;
+  text-align: center;
+}
+.regattacompetition_phase_fleetcompact .regattacompetition_phase_fleet_title {
+  font-size: 0.966666666666667em;
+}
+.regattacompetition_phase_fleetcompact .regattacompetition_phase_fleet_race_title:after {
+  width: 1.066666666666667em;
 }
 .regattacompetition_phase_fleet_race {
   position: relative;

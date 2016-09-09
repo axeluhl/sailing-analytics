@@ -12,21 +12,29 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -42,6 +50,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -540,6 +549,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             @Override
             public void onSuccess(Void result) {
                 loadAndRefreshLeaderboard(leaderboard.name);
+                updateRegattaConfigDesignerModeToByMarks(leaderboard.regattaName);
                 raceColumnTableSelectionModel.clear();
             }
 
@@ -548,6 +558,79 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                 errorReporter.reportError("Could not denote for RaceLog tracking: " + caught.getMessage());
             }
         });
+    }
+
+    private void updateRegattaConfigDesignerModeToByMarks(final String regattaName) {
+        final RegattaDTO regatta = getRegattaByName(regattaName);
+        if (regatta != null) {
+            DeviceConfigurationDTO.RegattaConfigurationDTO configuration = regatta.configuration;
+            if (configuration == null) {
+                configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO();
+                configuration.defaultCourseDesignerMode = CourseDesignerMode.BY_MARKS;
+                updateRegattaConfiguration(regatta, configuration);
+            } else {
+                if (configuration.defaultCourseDesignerMode != CourseDesignerMode.BY_MARKS) {
+                    DialogBox dialogBox = createOverrideConfigurationDialog(regatta, configuration);
+                    dialogBox.center();
+                }
+            }
+        }
+    }
+
+    private DialogBox createOverrideConfigurationDialog(final RegattaDTO regatta,
+            final DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
+        final DialogBox dialogBox = new DialogBox(true, true);
+        dialogBox.setText(stringMessages.allRacesHaveBeenDenoted());
+
+        VerticalPanel contentPanel = new VerticalPanel();
+        contentPanel.add(new HTML(new SafeHtmlBuilder()
+                .appendEscapedLines(stringMessages.warningOverrideRegattaConfigurationCourseDesignerToByMarks())
+                .toSafeHtml()));
+
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setSpacing(5);
+        contentPanel.add(buttonPanel);
+
+        Button yesButton = new Button(stringMessages.yes());
+        yesButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                configuration.defaultCourseDesignerMode = CourseDesignerMode.BY_MARKS;
+                updateRegattaConfiguration(regatta, configuration);
+                dialogBox.hide();
+            }
+        });
+        buttonPanel.add(yesButton);
+
+        Button noButton = new Button(stringMessages.no(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                dialogBox.hide();
+            }
+        });
+        buttonPanel.add(noButton);
+
+        dialogBox.setWidget(contentPanel);
+        return dialogBox;
+    }
+
+    private void updateRegattaConfiguration(final RegattaDTO regatta,
+            DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
+        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
+        sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
+                regatta.defaultCourseAreaUuid, configuration, regatta.useStartTimeInference,
+                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(
+                                "Error trying to update regatta " + regatta.getName() + ": " + caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        Window.alert(stringMessages.notificationRegattaConfigurationUpdatedUsingByMarks());
+                    }
+                }));
     }
 
     private void denoteForRaceLogTracking(final RaceColumnDTO raceColumn, final FleetDTO fleet) {
@@ -715,17 +798,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     
     private void searchBoatClass(final ShowWithBoatClass showWithBoatClass) {
         final String result;
-        RegattaDTO regatta = null;
-        if (getSelectedLeaderboard().regattaName != null) {
-            if (allRegattas != null) {
-                for (RegattaDTO i : allRegattas) {
-                    if (getSelectedLeaderboard().regattaName.equals(i.getName())) {
-                        regatta = i;
-                        break;
-                    }
-                }
-            }
-        }
+        RegattaDTO regatta = getSelectedRegatta();
         if (regatta != null) {
             result = regatta.boatClass.getName();
             showWithBoatClass.showWithBoatClass(result);

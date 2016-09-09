@@ -475,6 +475,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String url();
     String mimeType();
     String title();
+    String subtitle();
+    String copyright();
+    String widthInPx();
+    String heightInPx();
+    String tags();
+    String size();
     String reallyRemoveMediaTrack(String mediaTrackTitle);
     String duration();
     String addMediaTrack();
@@ -1635,4 +1641,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String favoriteBoatClasses();
     String notificationAboutNewResults();
     String notificationAboutUpcomingRaces();
+    String notificationRegattaConfigurationUpdatedUsingByMarks();
+    String warningOverrideRegattaConfigurationCourseDesignerToByMarks();
+    String allRacesHaveBeenDenoted();
 }

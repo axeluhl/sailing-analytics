@@ -21,16 +21,19 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Landscape and Development
 
 * [[Architecture and Infrastructure|wiki/info/landscape/architecture-and-infrastructure]]
-* [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
-* [[Server|wiki/info/landscape/server]]
+  * [[Runtime Environment|wiki/info/landscape/runtime-environment]]
+  * [[Basic architectual principles|wiki/info/landscape/basic-architectural-principles]]
+  * [[User Management|wiki/info/landscape/usermanagement]]
+  * [[Development Environment|wiki/info/landscape/development-environment]]
+  * [[Production Environment|wiki/info/landscape/production-environment]]
+  * [[Typical Development Scenarios|wiki/info/landscape/typical-development-scenarios]]
+* [[RaceLog Tracking Server Architecture|wiki/info/landscape/server]]
+  * Environment Overview [[PDF|wiki/info/mobile/event-tracking/architecture.pdf]] | [[SVG|wiki/info/mobile/event-tracking/architecture.svg]]
 * Amazon
   * [[Amazon EC2|wiki/info/landscape/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/info/landscape/amazon-ec2-backup-strategy]]
   * [[Creating an EC2 image from scratch|wiki/info/landscape/creating-ec2-image-from-scratch]]
   * [[EC2 mail relaying|wiki/info/landscape/mail-relaying]]
-* [[Development Environment|wiki/info/landscape/development-environment]]
-* [[Production Environment|wiki/info/landscape/production-environment]]
-* [[Runtime Environment|wiki/info/landscape/runtime-environment]]
 * [[Building and Deploying|wiki/info/landscape/building-and-deploying]]
 * [[Data Mining Architecture|wiki/info/landscape/data-mining-architecture]]
 * [[Typical Data Mining Scenarios|wiki/info/landscape/typical-data-mining-scenarios]]
@@ -40,39 +43,38 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### Mobile
 
 * [[Mobile Development|wiki/info/mobile/mobile-development]]
-* [[App|wiki/info/mobile/app]]
-* [[App Specification|wiki/info/mobile/app-spec]]
-* [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
-* [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
-* [[Push Notifications|wiki/info/mobile/push-notifications]]
+* Tracking App
+  * [[Tracking App Specification|wiki/info/mobile/app-spec/app-spec]]
+  * [[Event Tracking|wiki/info/mobile/event-tracking/event-tracking]]
+  * [[Steps for setting up Smartphone Tracking|wiki/info/mobile/smartphone-tracking-steps]]
+  * [[Tracking App Prototype Architecture|wiki/info/mobile/app]]
 * Racecommittee App
   * [[Racecommittee App|wiki/info/mobile/racecommittee-app]]
   * [[Environment|wiki/info/mobile/racecommittee-app-environment]]
   * [[Administrator|wiki/info/mobile/racecommittee-app-administrator]]
   * [[User|wiki/info/mobile/racecommittee-app-user]]
+* [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
+* [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
+* [[Push Notifications|wiki/info/mobile/push-notifications]]
 
 ### API
 
 * [[Web Services API|wiki/info/api/sailing-webservices]]
 * [[API v1|wiki/info/api/api-v1]]
 * [[Tracking App API|wiki/info/api/tracking-app-api]]
-* [[Tracking App API v1 draft|wiki/info/api/tracking-app-api-v1-draft]]
 * [[Training API v1 draft|wiki/info/api/training-api-v1-draft]]
-
-### Samples
-  * [[S3 Sample|wiki/info/samples/s3-sample]]
 
 ### Security
   * [[Fortify Tests|wiki/info/security/fortify]]
-  * [[User Management|wiki/info/security/usermanagement]]
   * [[SSL / HTTPS Support|wiki/info/security/ssl-support]]
 
-### Miscellanious
+### Miscellaneous
 
 * [[Big Data - Numbers|wiki/info/misc/big-data-numbers]]
 * [[Data Quality|wiki/info/misc/data-quality]]
 * [[Sailing Domain Algorithms|wiki/info/misc/sailing-domain-algorithms]]
 * [[Google Analytics (Web Page Tracking)|wiki/info/misc/ganalytics]]
+* [[S3 Development Sample|wiki/info/misc/s3-sample]]
 
 * [[FAQ for League Operators|wiki/info/misc/league-operators-faq]]
 * [[Prionet related information|wiki/info/misc/prionet-related-information]]
@@ -95,7 +97,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Log File Analysis|wiki/howto/development/log-file-analysis]]
 * [[UI Tests with Selenium|wiki/howto/development/selenium-ui-tests]]
 * [[Profiling|wiki/howto/development/profiling]]
-* [[Typical Development Scenarios|wiki/howto/development/typical-development-scenarios]]
 * [[Working with GWT Super Dev Mode|wiki/howto/development/super-dev-mode]]
 
 ### For Event Managers
@@ -110,14 +111,11 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [[Configure Races on Server|wiki/howto/setup/configure-races-on-server]]
 * [[Setting up internal Jenkins on SAP Monsoon|wiki/howto/setup/setting-up-jenkins-on-sap-monsoon]]
 
-### Miscellanious
+### Miscellaneous
 
 * [[Cook Book|wiki/howto/misc/cook-book]]
-* [[Event Tracking|wiki/howto/misc/event-tracking]]
-* [[POlars|wiki/howto/misc/polars]]
+* [[Polars|wiki/howto/misc/polars]]
 * [[Server Replication|wiki/howto/misc/server-replication]]
-* [[Smartphone Tracking General|wiki/howto/misc/smartphone-tracking-general]]
-* [[Smartphone Tracking|wiki/howto/misc/smartphone-tracking]]
 * [[TracTrac|wiki/howto/misc/tractrac-lifecycle]]
 * [[UI Tests|wiki/howto/misc/ui-tests-tutorial]]
 * [[Uploading Media Content|wiki/howto/misc/uploading-media-content]]

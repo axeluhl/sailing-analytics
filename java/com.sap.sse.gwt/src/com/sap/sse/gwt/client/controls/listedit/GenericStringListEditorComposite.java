@@ -7,12 +7,15 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.StringMessages;
@@ -139,6 +142,14 @@ public abstract class GenericStringListEditorComposite<ValueType> extends ListEd
             inputBox.addKeyUpHandler(new KeyUpHandler() {
                 @Override
                 public void onKeyUp(KeyUpEvent event) {
+                    addButton.setEnabled(!inputBox.getValue().isEmpty());
+                }
+            });
+            // Add addition handler for selection because cannot use one handler for changed SuggestBox value by reason
+            // of gwt bug https://github.com/gwtproject/gwt/issues/1642
+            inputBox.addSelectionHandler(new SelectionHandler<Suggestion>() {
+                @Override
+                public void onSelection(SelectionEvent<Suggestion> event) {
                     addButton.setEnabled(!inputBox.getValue().isEmpty());
                 }
             });

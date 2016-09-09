@@ -14,7 +14,7 @@ The following bundles implement the Shiro-based security features for SSE:
 
 This bundle contains the core Shiro libraries which so far are not yet part of the target platform. It provides basic services such as the `SecurityService` and utilities such as `SessionUtils` and `ClientUtils`. The `SecurityService` instance is created by the bundle activator and registered with the OSGi service registry.
 
-`UsernamePasswordRealm` and `OAuthRealm` are two realm implementations provided by the bundle that can be used in `shiro.ini` configuration files. Both realms store and obtain user-specific data including the roles and permissions in a `UserStore` (see the [com.sap.sse.security.userstore.mongodb](/wiki/usermanagement#com.sap.sse.security.userstore.mongodb) section) which is an instance shared by the realm objects as well as the `SecurityService`.
+`UsernamePasswordRealm` and `OAuthRealm` are two realm implementations provided by the bundle that can be used in `shiro.ini` configuration files. Both realms store and obtain user-specific data including the roles and permissions in a `UserStore` (see the [com.sap.sse.security.userstore.mongodb](/wiki/info/landscape/usermanagement#user-management-and-security_shiro-integration-into-sse_bundle-structure_com-sap-sse-security-userstore-mongodb) section) which is an instance shared by the realm objects as well as the `SecurityService`.
 
 A web bundle that wants to use Shiro-based security and user management features should declare the following in its `WEB-INF/web.xml` descriptor:
 

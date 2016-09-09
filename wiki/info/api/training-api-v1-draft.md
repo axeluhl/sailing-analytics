@@ -20,7 +20,7 @@ Use cases include:
     * Analyze sessions
     * View history
 
-Please note that this interface is independent of the race tracking API described here: http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft
+Please note that this interface is independent of the race tracking API described here: https://wiki.sapsailing.com/wiki/info/api/training-api-v1-draft
 
 ## Endpoint
 
@@ -652,7 +652,7 @@ Sets wind speed and direction.
 
 ## Tracking
 
-The tracking interface is identical to that of the race tracking API http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Send-Measurements-%28to-the-Fix-Store%29
+The tracking interface is identical to that of the race tracking API https://wiki.sapsailing.com/wiki/info/api/tracking-app-api#tracking-app-api_send-geolocation
 
 **Path:** ``gps_fixes``
 

@@ -305,7 +305,12 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     public boolean isMultiRegattaEvent() {
         return getEventDTO().getType() == EventType.MULTI_REGATTA;
     }
-    
+
+    @Override
+    public boolean isSingleRegattaEvent() {
+        return getEventDTO().getType() == EventType.SINGLE_REGATTA;
+    }
+
     protected List<NavigationItem> getNavigationPathToEventLevel() {
         List<NavigationItem> navigationItems = new ArrayList<>();
         if(getEventDTO().getType() == EventType.SERIES_EVENT) {
