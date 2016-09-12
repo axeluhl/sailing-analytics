@@ -81,10 +81,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     private func setupAFNetworking() {
         AFNetworkActivityIndicatorManager.sharedManager().enabled = true
         AFNetworkReachabilityManager.sharedManager().startMonitoring()
-        #if DEBUG
-            AFNetworkActivityLogger.sharedLogger().startLogging()
-            AFNetworkActivityLogger.sharedLogger().level = AFHTTPRequestLoggerLevel.AFLoggerLevelOff
-        #endif
     }
     
     private func setupBackgroundFetch() {
