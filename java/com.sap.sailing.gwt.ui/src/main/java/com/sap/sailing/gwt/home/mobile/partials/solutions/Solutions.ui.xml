@@ -122,21 +122,21 @@
 					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
 					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
 						<h2 class="{local_res.css.solutions_item_header_title}">
-							<ui:text from='{i18n.sapSailingInSight}' />
+							<ui:text from='{i18n.sapSailInSight}' />
 						</h2>
 						<img src="images/mobile/arrow-down-grey.png" alt=""
 							class="{local_res.css.solutions_item_header_arrow}"></img>
 					</div>
 					<div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
-						<img src="images/mobile/solutions-sap-sailing-insight.png" alt="{i18n.sapSailingInSight}"></img>
+						<img src="images/mobile/solutions-sap-sailing-insight.png" alt="{i18n.sapSailInSight}"></img>
 						<p>
-							<ui:text from='{i18n.contentSapSailingInSight}' />
+							<ui:text from='{i18n.contentSapSailInSight}' />
 						</p>
                         <div
                             class="{style.storeBadgesContainer}"
                             >
                             <a  ui:field="inSightPlayStoreLinkUi"
-                                href="{smI18n.playstoreTrackingApp}"
+                                href="{smI18n.playstoreInsightApp}"
                                 target="_blank"
                                 ><img
                                     ui:field="inSightPlayStoreImgUi"
@@ -164,7 +164,7 @@
                             class="{style.storeBadgesContainer}"
                             >
                             <a  ui:field="buoyPingerPlayStoreLinkUi"
-                                href="{smI18n.playStoreBuoypositioningApp}"
+                                href="{smI18n.playStoreBuoyPingerApp}"
                                 target="_blank"
                                 ><img
                                     ui:field="buoyPingerPlayStoreImgUi"

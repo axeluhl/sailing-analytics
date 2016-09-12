@@ -25,7 +25,7 @@ public interface SolutionsResources extends ClientBundle {
         String solutions_contentsap();
         String solutions_contentsapsailingracemanager();
         String solutions_contentsapsailingracemanager_body();
-        String solutions_contentsapsailinginsight();
+        String solutions_contentsapsailinsight();
         String solutions_contentsapsailingbuoypinger();
         String solutions_contentsapsailingbuoypinger_body();
         String solutions_contentpost();

@@ -218,9 +218,9 @@ public interface TextMessages extends Messages {
     String contentSapSailingRaceManager();
     String sapSailingRaceManagerReadMore();
 
-    String sapSailingInSight();
-    String contentSapSailingInSight();
-    String sapSailingInSightReadMore();
+    String sapSailInSight();
+    String contentSapSailInSight();
+    String sapSailInSightReadMore();
 
     String sapSailingBuoyPinger();
     String contentSapSailingBuoyPinger();
