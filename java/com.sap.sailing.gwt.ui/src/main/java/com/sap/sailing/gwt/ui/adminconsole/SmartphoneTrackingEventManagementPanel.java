@@ -619,6 +619,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
                 regatta.defaultCourseAreaUuid, configuration, regatta.useStartTimeInference,
+                regatta.controlTrackingFromStartAndFinishTimes,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {

@@ -528,6 +528,19 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
                         return null;
                     }
+
+                    @Override
+                    public boolean isControlTrackingFromStartAndFinishTimes() {
+                        // TODO Auto-generated method stub
+                        return false;
+                    }
+
+                    @Override
+                    public void setControlTrackingFromStartAndFinishTimes(
+                            boolean controlTrackingFromStartAndFinishTimes) {
+                        // TODO Auto-generated method stub
+                        
+                    }
                 };
             }
 
