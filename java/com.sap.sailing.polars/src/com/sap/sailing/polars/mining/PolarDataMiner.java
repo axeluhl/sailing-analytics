@@ -63,7 +63,7 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
  * Creates a polar data pipeline upon creation and puts incoming GPS fixes into that pipeline.
  * Also holds references to the actual data containers in which the aggregation results lay.
  * 
- * For more information on polars in SAP Sailing Analytics, please see: http://wiki.sapsailing.com/wiki/Polars
+ * For more information on polars in SAP Sailing Analytics, please see: http://wiki.sapsailing.com/wiki/howto/misc/polars
  * 
  * @author D054528 (Frederik Petersen)
  *

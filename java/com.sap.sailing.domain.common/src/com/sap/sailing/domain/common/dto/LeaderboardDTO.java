@@ -31,7 +31,7 @@ public class LeaderboardDTO extends AbstractLeaderboardDTO implements Serializab
     private String id;
     
     /**
-     * The competitor list, ordered ascending by total rank
+     * The competitor list, ordered ascending by total rank, suppressed competitors removed
      */
     public List<CompetitorDTO> competitors;
 
