@@ -1,12 +1,9 @@
 package com.sap.sailing.android.shared.ui.activities;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.BuildConfig;
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -55,16 +52,4 @@ public abstract class AbstractStartActivity extends CheckinDataActivity {
     }
 
     public abstract AbstractHomeFragment getHomeFragment();
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // checkForUpdates();
-
-        int googleServicesResultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (googleServicesResultCode != ConnectionResult.SUCCESS) {
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googleServicesResultCode, this, 0);
-            dialog.show();
-        }
-    }
 }
