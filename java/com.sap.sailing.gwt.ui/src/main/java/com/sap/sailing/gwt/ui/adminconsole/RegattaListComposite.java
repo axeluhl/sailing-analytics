@@ -206,8 +206,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 return regatta.rankingMetricType != null ? RankingMetricTypeFormatter.format(regatta.rankingMetricType, stringMessages) : "";
             }
         };
-        regattaBoatClassColumn.setSortable(true);
-        columnSortHandler.setComparator(regattaBoatClassColumn, new Comparator<RegattaDTO>() {
+        rankingMetricColumn.setSortable(true);
+        columnSortHandler.setComparator(rankingMetricColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
                 return new NaturalComparator(false).compare(r1.rankingMetricType.name(), r2.rankingMetricType.name());

@@ -610,11 +610,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return result;
     }
 
+    /**
+     * suppressed competitors are removed from the result
+     */
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return getCompetitorsFromBestToWorst(getRaceColumns(), timePoint);
     }
     
+    /**
+     * suppressed competitors are removed from the result
+     */
     private List<Competitor> getCompetitorsFromBestToWorst(Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (Competitor competitor : getCompetitors()) {
