@@ -66,7 +66,9 @@ class SettingsViewController: UITableViewController {
     
     @IBAction func batterySavingChanged(sender: UISwitch) {
         Preferences.batterySaving = sender.on
+        tableView.beginUpdates()
         setupBatterySavingDescriptionLabel()
+        tableView.endUpdates()
     }
     
     @IBAction func doneButtonTapped(sender: AnyObject) {

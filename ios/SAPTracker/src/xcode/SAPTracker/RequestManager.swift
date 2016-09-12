@@ -354,7 +354,7 @@ class RequestManager: NSObject {
         request.HTTPMethod = "POST"
         let dataTask = sessionManager.dataTaskWithRequest(request, completionHandler:{ (response, responseObject, error) in
             if (error != nil) {
-                self.postTeamImageDataFailure(error.localizedDescription, failure: failure)
+                self.postTeamImageDataFailure(error!.localizedDescription, failure: failure)
             } else {
                 self.postTeamImageDataSuccess(responseObject, success: success, failure: failure)
             }
@@ -362,7 +362,7 @@ class RequestManager: NSObject {
         dataTask.resume();
     }
     
-    private func postTeamImageDataSuccess(responseObject: AnyObject,
+    private func postTeamImageDataSuccess(responseObject: AnyObject?,
                                           success: (teamImageURL: String) -> Void,
                                           failure: (error: Error) -> Void)
     {
