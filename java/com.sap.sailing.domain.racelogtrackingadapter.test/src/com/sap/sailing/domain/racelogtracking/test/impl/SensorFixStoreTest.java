@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.mongodb.DB;
 import com.mongodb.MongoException;
@@ -24,6 +25,7 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.MongoSensorFixStoreImpl;
+import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
@@ -117,7 +119,155 @@ public class SensorFixStoreTest {
         addBravoFix(device, FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2);
         verifyNoFix(FIX_TIMESTAMP, FIX_TIMESTAMP2, device, false);
     }
-
+    
+    @Test
+    public void testSingleListenerIsNotified() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
+        store.addListener(listener, device);
+        DoubleVectorFix doubleVectorFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        
+        Mockito.verify(listener, Mockito.times(1)).fixReceived(device, doubleVectorFix);
+    }
+    
+    @Test
+    public void testMultipleListenersForSameDeviceAreNotified() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener1 = mockFixReceivedListener();
+        FixReceivedListener<DoubleVectorFix> listener2 = mockFixReceivedListener();
+        store.addListener(listener1, device);
+        store.addListener(listener2, device);
+        DoubleVectorFix doubleVectorFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        
+        Mockito.verify(listener1, Mockito.times(1)).fixReceived(device, doubleVectorFix);
+        Mockito.verify(listener2, Mockito.times(1)).fixReceived(device, doubleVectorFix);
+    }
+    
+    @Test
+    public void testListenerForNonMatchingDeviceIsNotNotified() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
+        store.addListener(listener, device);
+        addBravoFix(device2, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        
+        Mockito.verifyZeroInteractions(listener);
+    }
+    
+    @Test
+    public void testOnlyListenerForMatchingDeviceIsNotified() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener1 = mockFixReceivedListener();
+        FixReceivedListener<DoubleVectorFix> listener2 = mockFixReceivedListener();
+        store.addListener(listener1, device);
+        store.addListener(listener2, device2);
+        DoubleVectorFix doubleVectorFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        
+        Mockito.verify(listener1, Mockito.times(1)).fixReceived(device, doubleVectorFix);
+        Mockito.verifyZeroInteractions(listener2);
+    }
+    
+    @Test
+    public void testListenerForMatchingDeviceIsNotifiedMultipleTimes() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
+        store.addListener(listener, device);
+        DoubleVectorFix doubleVectorFix1 = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        DoubleVectorFix doubleVectorFix2 = addBravoFix(device, FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2);
+        
+        Mockito.verify(listener, Mockito.times(1)).fixReceived(device, doubleVectorFix1);
+        Mockito.verify(listener, Mockito.times(1)).fixReceived(device, doubleVectorFix2);
+        Mockito.verifyNoMoreInteractions(listener);
+    }
+    
+    @Test
+    public void testAfterRemoveListenerIsNotNotified() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
+        store.addListener(listener, device);
+        store.removeListener(listener);
+        addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        Mockito.verifyZeroInteractions(listener);
+    }
+    
+    @Test
+    public void testAfterRemoveForDeviceListenerIsNotNotified() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
+        store.addListener(listener, device);
+        store.removeListener(listener, device);
+        addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        Mockito.verifyZeroInteractions(listener);
+    }
+    
+    @Test
+    public void testAfterRemoveForNonMatchingDeviceListenerIsNotified() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
+        store.addListener(listener, device);
+        store.removeListener(listener, device2);
+        DoubleVectorFix doubleVectorFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        Mockito.verify(listener, Mockito.times(1)).fixReceived(device, doubleVectorFix);
+    }
+    
+    @Test
+    public void testListenerForMultipleDevicesIsNotifiedMultipleTimes() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
+        store.addListener(listener, device);
+        store.addListener(listener, device2);
+        DoubleVectorFix doubleVectorFix1 = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        DoubleVectorFix doubleVectorFix2 = addBravoFix(device2, FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2);
+        Mockito.verify(listener, Mockito.times(1)).fixReceived(device, doubleVectorFix1);
+        Mockito.verify(listener, Mockito.times(1)).fixReceived(device2, doubleVectorFix2);
+        Mockito.verifyNoMoreInteractions(listener);
+    }
+    
+    @Test
+    public void testAfterRemoveListenerForMultipleDevicesIsNotNotified() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
+        store.addListener(listener, device);
+        store.addListener(listener, device2);
+        store.removeListener(listener);
+        addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        addBravoFix(device2, FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2);
+        Mockito.verifyZeroInteractions(listener);
+    }
+    
+    @Test
+    public void testAfterRemoveListenerForOneDevicesIsNotifiedForOtherDevice() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener = mockFixReceivedListener();
+        store.addListener(listener, device);
+        store.addListener(listener, device2);
+        store.removeListener(listener, device);
+        addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        DoubleVectorFix doubleVectorFix2 = addBravoFix(device2, FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2);
+        Mockito.verify(listener, Mockito.times(1)).fixReceived(device2, doubleVectorFix2);
+        Mockito.verifyNoMoreInteractions(listener);
+    }
+    
+    @Test
+    public void testAfterRemoveListenerOtherListenerIsNotified() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener1 = mockFixReceivedListener();
+        FixReceivedListener<DoubleVectorFix> listener2 = mockFixReceivedListener();
+        store.addListener(listener1, device);
+        store.addListener(listener2, device);
+        store.removeListener(listener1);
+        DoubleVectorFix doubleVectorFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        Mockito.verify(listener2, Mockito.times(1)).fixReceived(device, doubleVectorFix);
+        Mockito.verifyNoMoreInteractions(listener2);
+        Mockito.verifyZeroInteractions(listener1);
+    }
+    
+    @Test
+    public void testAfterRemoveForDeviceListenerOtherListenerIsNotified() throws Exception {
+        FixReceivedListener<DoubleVectorFix> listener1 = mockFixReceivedListener();
+        FixReceivedListener<DoubleVectorFix> listener2 = mockFixReceivedListener();
+        store.addListener(listener1, device);
+        store.addListener(listener2, device);
+        store.removeListener(listener1, device);
+        DoubleVectorFix doubleVectorFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        Mockito.verify(listener2, Mockito.times(1)).fixReceived(device, doubleVectorFix);
+        Mockito.verifyNoMoreInteractions(listener2);
+        Mockito.verifyZeroInteractions(listener1);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private FixReceivedListener<DoubleVectorFix> mockFixReceivedListener() {
+        FixReceivedListener<DoubleVectorFix> listener = Mockito.mock(FixReceivedListener.class);
+        return listener;
+    }
+    
     private void verifySingleFix(Timed expectedFix, long start, long end, DeviceIdentifier device, boolean inclusive) throws Exception {
         List<Timed> loadedFixes = loadFixes(start, end, device, inclusive);
         assertEquals(1, loadedFixes.size());
