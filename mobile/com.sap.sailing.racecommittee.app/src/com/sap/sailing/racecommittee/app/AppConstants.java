@@ -7,13 +7,11 @@ public class AppConstants {
 
     // Intent extra fields
     public final static String COURSE_AREA_UUID_KEY = "courseUuid";
-    public final static String RACE_ID_KEY = "raceUuid";
-    public final static String SERVICE_UNIQUE_ID = "serviceUID";
-    public final static String STARTPROCEDURE_SPECIFIC_EVENT_ID = "startProcedureSpecificEventId";
-    public final static String EXTRAS_RACE_STATE_EVENT = "raceStateEvent";
-    public final static String FLAG_KEY = "raceFlag";
-    public final static String EXTRAS_WIND_FIX = "windfix";
-    public final static String EXTRA_FORCE_REFRESH = "forceRefresh";
+    public final static String INTENT_EXTRA_RACE_ID = PACKAGE_NAME + ".raceUuid";
+    public final static String INTENT_EXTRA_TIMEPOINT_MILLIS = PACKAGE_NAME + ".timePoint.millis";
+    public final static String INTENT_EXTRA_EVENTNAME = PACKAGE_NAME + ".eventName";
+    public final static String FLAG_KEY = PACKAGE_NAME + ".raceFlag";
+    public final static String EXTRA_FORCE_REFRESH = PACKAGE_NAME + ".forceRefresh";
 
     public final static String AUTHOR_TYPE_OFFICER_START = "Race Officer on Start Vessel";
     public final static String AUTHOR_TYPE_OFFICER_FINISH = "Race Officer on Finish Vessel";
@@ -44,7 +42,7 @@ public class AppConstants {
     // Inner process events
     public final static String INTENT_ACTION_TOGGLE = PACKAGE_NAME + ".action.toggle";
 
-    public final static String INTENT_ACTION_EXTRA = "extra";
+    public final static String INTENT_ACTION_EXTRA = PACKAGE_NAME + ".extra";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE = "procedure";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE = "more_mode";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER = "more_pathfinder";
