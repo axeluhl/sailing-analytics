@@ -209,7 +209,7 @@ public class RaceStateService extends Service {
                     break;
 
                 default:
-                    String id = intent.getStringExtra(AppConstants.RACE_ID_KEY);
+                    String id = intent.getStringExtra(AppConstants.INTENT_EXTRA_RACE_ID);
                     ManagedRace race = dataManager.getDataStore().getRace(id);
                     if (race == null) {
                         ExLog.w(this, TAG, "No race for id " + id);
@@ -218,8 +218,8 @@ public class RaceStateService extends Service {
 
                     switch (action) {
                         case AppConstants.INTENT_ACTION_ALARM_ACTION:
-                            long timePoint = intent.getLongExtra(AppConstants.INTENT_EXTRA_LONG, 0);
-                            String eventName = intent.getStringExtra(AppConstants.INTENT_EXTRA_STRING);
+                            long timePoint = intent.getLongExtra(AppConstants.INTENT_EXTRA_TIMEPOINT_MILLIS, 0);
+                            String eventName = intent.getStringExtra(AppConstants.INTENT_EXTRA_EVENTNAME);
                             RaceStateEvent event = new RaceStateEventImpl(new MillisecondsTimePoint(timePoint), RaceStateEvents.valueOf(eventName));
                             ExLog.i(this, TAG, String.format("Processing %s", event.toString()));
                             race.getState().processStateEvent(event);
@@ -327,9 +327,9 @@ public class RaceStateService extends Service {
     private PendingIntent createAlarmPendingIntent(ManagedRace managedRace, RaceStateEvent event) {
         Intent intent = new Intent().setClass(this, RaceStateService.class);
         intent.setAction(AppConstants.INTENT_ACTION_ALARM_ACTION);
-        intent.putExtra(AppConstants.RACE_ID_KEY, managedRace.getId());
-        intent.putExtra(AppConstants.INTENT_EXTRA_LONG, event.getTimePoint().asMillis());
-        intent.putExtra(AppConstants.INTENT_EXTRA_STRING, event.getEventName().name());
+        intent.putExtra(AppConstants.INTENT_EXTRA_RACE_ID, managedRace.getId());
+        intent.putExtra(AppConstants.INTENT_EXTRA_TIMEPOINT_MILLIS, event.getTimePoint().asMillis());
+        intent.putExtra(AppConstants.INTENT_EXTRA_EVENTNAME, event.getEventName().name());
         return PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
