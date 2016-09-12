@@ -610,11 +610,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return result;
     }
 
+    /**
+     * suppressed competitors are removed from the result
+     */
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return getCompetitorsFromBestToWorst(getRaceColumns(), timePoint);
     }
     
+    /**
+     * suppressed competitors are removed from the result
+     */
     private List<Competitor> getCompetitorsFromBestToWorst(Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (Competitor competitor : getCompetitors()) {
@@ -1745,8 +1751,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
             final TimePoint legFinishTime = trackedLeg.getFinishTime();
+            // See bug 3829: there is an unlikely possibility that legFinishTime is null and the call to hasFinishedLeg below
+            // says that the leg has already finished. This can happen if the corresponding mark passing arrives between the two
+            // calls. To avoid having to use expensive locking, we'll just double-check here if legFinishTime is null and
+            // treat this as if trackedLeg.hasFinishedLeg(timePoint) had returned false.
             result.correctedTotalTime = trackedLeg.hasStartedLeg(timePoint) ? trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getCorrectedTime(trackedLeg.getCompetitor(),
-                    trackedLeg.hasFinishedLeg(timePoint) ? legFinishTime : timePoint, cache) : null;
+                    trackedLeg.hasFinishedLeg(timePoint) && legFinishTime != null ? legFinishTime : timePoint, cache) : null;
             // fetch the leg gap in own corrected time from the ranking metric
             final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().
                     getLegGapToLegLeaderInOwnTime(trackedLeg, timePoint, rankingInfo, cache);
