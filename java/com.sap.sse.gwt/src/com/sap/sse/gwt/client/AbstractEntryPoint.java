@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.async.PendingAjaxCallMarker;
+import com.sap.sse.gwt.client.panels.AbstractTabLayoutPanel;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.shared.DebugConstants;
 
@@ -50,6 +51,19 @@ public abstract class AbstractEntryPoint<S extends StringMessages> implements En
      * Sets the size of the tab panel when the tab panel is attached to the DOM
      */
     public static void setTabPanelSize(final TabLayoutPanel advancedTabPanel, final String width, final String height) {
+        advancedTabPanel.addAttachHandler(new Handler() {
+            @Override
+            public void onAttachOrDetach(AttachEvent event) {
+                advancedTabPanel.getElement().getParentElement().getStyle().setProperty("width", width);
+                advancedTabPanel.getElement().getParentElement().getStyle().setProperty("height", height);
+            }
+        });
+    }
+
+    /**
+     * Sets the size of the abstract {@link AbstractTabLayoutPanel} tab panel when the tab panel is attached to the DOM
+     */
+    public static void setAbstractTabPanelSize(final AbstractTabLayoutPanel advancedTabPanel, final String width, final String height) {
         advancedTabPanel.addAttachHandler(new Handler() {
             @Override
             public void onAttachOrDetach(AttachEvent event) {
