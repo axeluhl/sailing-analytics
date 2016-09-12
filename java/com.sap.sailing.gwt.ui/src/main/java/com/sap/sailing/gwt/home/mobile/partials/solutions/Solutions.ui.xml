@@ -132,7 +132,17 @@
 						<p>
 							<ui:text from='{i18n.contentSapSailInSight}' />
 						</p>
-                        <div
+                        <div class="{style.storeBadgesContainer}">
+							<a  ui:field="inSightAppStoreLinkUi"
+								href="{smI18n.appstoreSapSailInsight}"
+								target="_blank"
+							><img
+								ui:field="inSightAppStoreImgUi"
+								alt="Get it on AppStore"
+								src="images/home/appstore{smI18n.appstoreBadgeSuffix}.svg"
+							/></a>
+						</div>
+						<div
                             class="{style.storeBadgesContainer}"
                             >
                             <a  ui:field="inSightPlayStoreLinkUi"
