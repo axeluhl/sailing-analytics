@@ -19,7 +19,6 @@ public class ExternalLinksComposite extends Composite {
 
     private Map<String, TextBox> sailorsInfoWebsiteURLEntryFields = new HashMap<>();
     private TextBox officialWebsiteURLEntryField;
-    private TextBox baseURLEntryField;
 
     private StringMessages stringMessages;
 
@@ -28,22 +27,19 @@ public class ExternalLinksComposite extends Composite {
 
         officialWebsiteURLEntryField = new TextBox();
         officialWebsiteURLEntryField.setVisibleLength(50);
-        baseURLEntryField = new TextBox();
-        baseURLEntryField.setVisibleLength(50);
         sailorsInfoWebsiteURLEntryFields = createTextBoxesForLocalesAndDefault(Collections.<String, String> emptyMap());
 
         int rowIndex = 0;
-        Grid formGrid = new Grid(GWTLocaleUtil.getLanguageCountWithDefault() + 3, 2);
+        Grid formGrid = new Grid(GWTLocaleUtil.getLanguageCountWithDefault() + 2, 2);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
         formGrid.setWidget(rowIndex++, 1, officialWebsiteURLEntryField);
-        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
-        formGrid.setWidget(rowIndex++, 1, baseURLEntryField);
         Map<String, String> languageByLocaleMap = getLanguageByLocaleMap();
         for (Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
             String locale = sailorsInfoWebsiteUrlEntry.getKey();
-            String suffix = " [" + (locale == null ? stringMessages.defaultLocale() + "*" : locale) + "]";
-            formGrid.setWidget(rowIndex, 0, new Label(
-                    stringMessages.eventLocaleSailorsInfoWebsiteURL(languageByLocaleMap.get(locale)) + suffix + ":"));
+            String suffix = " [" + (locale == null ? stringMessages.allLanguages() + "*" : locale) + "]";
+            String text = locale == null ? stringMessages.eventSailorsInfoWebsiteURL()
+                    : stringMessages.eventLocaleSailorsInfoWebsiteURL(languageByLocaleMap.get(locale));
+            formGrid.setWidget(rowIndex, 0, new Label(text + suffix + ":"));
             formGrid.setWidget(rowIndex, 1, sailorsInfoWebsiteUrlEntry.getValue());
             rowIndex++;
         }
@@ -57,11 +53,6 @@ public class ExternalLinksComposite extends Composite {
 
     public String getOfficialWebsiteURLValue() {
         String value = officialWebsiteURLEntryField.getText().trim();
-        return value.isEmpty() ? null : value;
-    }
-
-    public String getBaseURLValue() {
-        String value = baseURLEntryField.getText().trim();
         return value.isEmpty() ? null : value;
     }
 
@@ -82,7 +73,6 @@ public class ExternalLinksComposite extends Composite {
             sailorsInfoWebsiteURLEntryFields.get(localeName).setValue(initialValues.get(localeName));
         }
         officialWebsiteURLEntryField.setValue(event.getOfficialWebsiteURL());
-        baseURLEntryField.setValue(event.getBaseURL());
     }
 
     private Map<String, TextBox> createTextBoxesForLocalesAndDefault(Map<String, String> initialValues) {
@@ -98,7 +88,7 @@ public class ExternalLinksComposite extends Composite {
 
     private Map<String, String> getLanguageByLocaleMap() {
         Map<String, String> languageByLocaleMap = new HashMap<>();
-        languageByLocaleMap.put(null, stringMessages.unspecified());
+        languageByLocaleMap.put(null, stringMessages.allLanguages());
         languageByLocaleMap.put("en", stringMessages.english());
         languageByLocaleMap.put("de", stringMessages.german());
         languageByLocaleMap.put("ja", stringMessages.japanese());

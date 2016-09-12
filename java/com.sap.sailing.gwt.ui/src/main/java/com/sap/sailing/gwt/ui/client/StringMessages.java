@@ -1637,7 +1637,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String notificationAboutUpcomingRaces();
     String eventLocaleSailorsInfoWebsiteURL(String language);
     String externalLinks();
-    String unspecified();
+    String allLanguages();
     String english();
     String german();
     String russian();

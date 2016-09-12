@@ -27,6 +27,8 @@ public class EventEditDialog extends EventDialog {
         endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(event.isPublic);
+        baseURLEntryField = createTextBox(event.getBaseURL());
+        baseURLEntryField.setVisibleLength(50);
         id = event.id;
         courseAreaNameList.setValue(new ArrayList<>(event.venue.getCourseAreas()));
         List<String> leaderboardGroupNames = new ArrayList<>();

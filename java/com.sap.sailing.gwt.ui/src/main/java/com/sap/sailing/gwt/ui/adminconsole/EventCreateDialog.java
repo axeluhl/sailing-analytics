@@ -40,6 +40,8 @@ public class EventCreateDialog extends EventDialog {
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(false);
         isPublicCheckBox.ensureDebugId("IsPublicCheckBox");
+        baseURLEntryField = createTextBox(null);
+        baseURLEntryField.setVisibleLength(50);
         imagesListComposite.fillImages(Collections.<ImageDTO>emptyList());
         videosListComposite.fillVideos(Collections.<VideoDTO>emptyList());
         // add default course area

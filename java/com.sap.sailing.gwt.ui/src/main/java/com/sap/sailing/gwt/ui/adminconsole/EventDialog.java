@@ -46,6 +46,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected BetterDateTimeBox endDateBox;
     protected CheckBox isPublicCheckBox;
     protected UUID id;
+    protected TextBox baseURLEntryField;
     protected CourseAreaListInlineEditorComposite courseAreaNameList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
     protected Map<String, LeaderboardGroupDTO> availableLeaderboardGroupsByName;
@@ -174,7 +175,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(externalLinksComposite.getOfficialWebsiteURLValue());
-        result.setBaseURL(externalLinksComposite.getBaseURLValue());
+        result.setBaseURL(baseURLEntryField.getText().trim().isEmpty() ? null : baseURLEntryField.getText().trim());
         result.setSailorsInfoWebsiteURLs(externalLinksComposite.getSailorsInfoWebsiteURLs());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
@@ -199,7 +200,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(7, 2);
+        Grid formGrid = new Grid(8, 2);
         int rowIndex = 0;
         formGrid.setWidget(rowIndex,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(rowIndex++, 1, nameEntryField);
@@ -215,6 +216,8 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(rowIndex++, 1, endDateBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isPublic() + ":"));
         formGrid.setWidget(rowIndex++, 1, isPublicCheckBox);
+        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
+        formGrid.setWidget(rowIndex++, 1, baseURLEntryField);
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
         tabPanel.ensureDebugId("EventDialogTabs");
         tabPanel.setHeight("525px");
