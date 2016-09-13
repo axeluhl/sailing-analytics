@@ -776,7 +776,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             public void ok(Triple<EventDTO, String, String> result) {
                 sailingService.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderboardName, result.getC(),
                         null,
-                        stringMessages.playStoreBuoypositioningApp(),
+                        stringMessages.playStoreBuoyPingerApp(),
                         getLocaleInfo(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {

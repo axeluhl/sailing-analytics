@@ -179,11 +179,12 @@ public interface TextMessages extends Messages {
     String sharingTwitter();
     String socialFooterShare();
     String socialFooterTitle();
-    
 
     String solutionsSISHeadline();
     String solutionsSAPHeadline();
     String solutionsRaceHeadline();
+    String solutionsInSightHeadline();
+    String solutionsBuoyPingerHeadline();
     String solutionsPostHeadline();
     String solutionsTrainingHeadline();
     String solutionsSimulatorHeadline();
@@ -211,12 +212,19 @@ public interface TextMessages extends Messages {
     String autoPlayerConfiguration();
     String contentSapSailingAnalytics1();
     String contentSapSailingAnalytics2();
-
     String sapSailingAnalyticsReadMore();
+
     String sapSailingRaceManager();
     String contentSapSailingRaceManager();
-
     String sapSailingRaceManagerReadMore();
+
+    String sapSailInSight();
+    String contentSapSailInSight();
+    String sapSailInSightReadMore();
+
+    String sapSailingBuoyPinger();
+    String contentSapSailingBuoyPinger();
+    String sapSailingBuoyPingerReadMore();
 
     String postRaceAnalytics();
     String contentPostRaceAnalytics1();
@@ -230,6 +238,4 @@ public interface TextMessages extends Messages {
     String strategySimulatorReadMore();
 
     String impressum();
-
-
 }
