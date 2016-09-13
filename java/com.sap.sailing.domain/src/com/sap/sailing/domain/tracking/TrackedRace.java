@@ -766,6 +766,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     void addCourseDesignChangedListener(CourseDesignChangedListener listener);
     
     void addStartTimeChangedListener(StartTimeChangedListener listener);
+    
+    void removeStartTimeChangedListener(StartTimeChangedListener listener);
 
     void addRaceAbortedListener(RaceAbortedListener listener);
 
@@ -928,7 +930,6 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
      * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
      * </ol>
-     * @param waitForGPSFixesToLoad TODO
      */
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad);
     

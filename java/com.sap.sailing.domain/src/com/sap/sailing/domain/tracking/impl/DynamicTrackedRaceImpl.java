@@ -1103,6 +1103,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.startTimeChangedListeners.add(listener);
     }
     
+    
+    @Override
+    public void removeStartTimeChangedListener(StartTimeChangedListener listener) {
+        startTimeChangedListeners.remove(listener);
+    }
+
     @Override
     public void addRaceAbortedListener(RaceAbortedListener listener) {
         this.raceAbortedListeners.add(listener);

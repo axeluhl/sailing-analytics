@@ -910,6 +910,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public void removeStartTimeChangedListener(StartTimeChangedListener listener) {
+    }
+
+    @Override
     public TimePoint getStartTimeReceived() {
         return null;
     }
