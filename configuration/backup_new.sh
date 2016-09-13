@@ -16,7 +16,8 @@
 # 2016-09-13 (Steffen Wagner):
 #   - extracting all databases from a mongo connection instead of defining
 #     the exportable databases manually
-#        
+#   - made databases excludeable (by regex and name)
+#
 
 # Directories to backup
 BACKUP_DIRECTORIES="/etc /var/log/mongodb"
@@ -33,6 +34,7 @@ MONGO_CONNECTIONS="localhost:10201 localhost:10202"
 MONGOEXPORT_CMD="/opt/mongodb-linux-x86_64-1.8.1/bin/mongoexport"
 MONGODB_COLLECTIONS_NO_WIND="ActiveFileStorageService COMMAND_MESSAGES COMPETITORS CONFIGURATIONS EVENTS FileStorageServiceProperties GPS_FIXES GPS_FIXES_METADATA IGTIMI_ACCESS_TOKENS LAST_MESSAGE_COUNT LEADERBOARDS LEADERBOARD_GROUPS LEADERBOARD_GROUP_LINKS_FOR_EVENTS PREFERENCES RACES_MESSAGES RACE_LOGS REGATTAS REGATTA_FOR_RACE_ID REGATTA_LOGS RESULT_URLS SAILING_SERVERS SETTINGS SWISSTIMING_ARCHIVE_CONFIGURATIONS SWISSTIMING_CONFIGURATIONS TRACTRAC_CONFIGURATIONS USERS VIDEOS"
 MONGODB_COLLECTIONS_WIND="WIND_TRACKS"
+MONGODB_EXCLUDEDB="10201:LOAD-TEST 10201:winddb 10201:live 10201:local 10201:admin 10202:DNSTEST2 10202:imagetest 10202:live 10202:replication-test-master 10202:load-test 10202:admin 10202:dev 10202:dev-2010 10202:BYC-2010 10202:sapsailinganalytics-dev 10202:test"
 
 # Configuration for MySQL
 MYSQL_DATABASES="bugs mysql"
@@ -83,10 +85,18 @@ for MONGO_DB in $MONGO_CONNECTIONS; do
     CONNECTION=(${MONGO_DB//:/ })
     DATABASES_UNFORMATTED=($(mongo --host ${CONNECTION[0]} --port ${CONNECTION[1]} --quiet --eval "JSON.stringify(db.adminCommand('listDatabases'))"))
     DATABASES_FORMATTED=`echo ${DATABASES_UNFORMATTED} | jq -r --arg port ${CONNECTION[1]} '.databases| map($port + ":" + .name)|@csv' | tr -d '"' | tr ',' ' '`
+    
+    # Remove all explicit excluded databases
+    LIST_DATABASES_FORMATTED=( $DATABASES_FORMATTED )
+    LIST_MONGODB_EXCLUDEDB=( $MONGODB_EXCLUDEDB ) 
+    DATABASES_EXCLUDED=`echo ${LIST_DATABASES_FORMATTED[@]} ${LIST_MONGODB_EXCLUDEDB[@]} | tr ' ' '\n' | sort | uniq -u`
 
+    # Remove all regex excluded databases
+    DATABASES_FINAL=`echo ${DATABASES_EXCLUDED} | sed -r 's/[0-9]{5}:replica[0-9]+//gi'`
+    
     # Export MongoDB instances with wind upon request (weekly parameter provided)
     if [ "$PARAM" = "weekly" ]; then
-        for MONGO_CONFIG in $DATABASES_FORMATTED; do
+        for MONGO_CONFIG in $DATABASES_FINAL; do
             PARTS=(${MONGO_CONFIG//:/ })
             if [ "${PARTS[1]}" != "winddb" ]; then
                 mkdir $TARGET_DIR/mongodb-${PARTS[0]}-${PARTS[1]}-wind
@@ -103,7 +113,7 @@ for MONGO_DB in $MONGO_CONNECTIONS; do
     fi
 
     # Export MongoDB instances without wind
-    for MONGO_CONFIG in $DATABASES_FORMATTED; do
+    for MONGO_CONFIG in $DATABASES_FINAL; do
         PARTS=(${MONGO_CONFIG//:/ })
         if [ "${PARTS[1]}" != "winddb" ]; then
             mkdir $TARGET_DIR/mongodb-${PARTS[0]}-${PARTS[1]}
