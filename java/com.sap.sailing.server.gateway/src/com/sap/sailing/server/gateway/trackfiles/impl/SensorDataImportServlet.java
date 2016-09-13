@@ -63,12 +63,6 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
         for (Pair<String, FileItem> file : files) {
             final String requestedImporterName = file.getA();
             final FileItem fi = file.getB();
-            BufferedInputStream in = new BufferedInputStream(fi.getInputStream()) {
-                @Override
-                public void close() throws IOException {
-                    // prevent importers from closing this stream
-                }
-            };
             DoubleVectorFixImporter importerToUse = null;
             for (DoubleVectorFixImporter candidate : availableImporters) {
                 if (candidate.getType().equals(requestedImporterName)) {
@@ -77,43 +71,37 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                 }
             }
             if (importerToUse == null) {
-                in.close();
                 throw new RuntimeException("Sensor importer not found");
-            }
-            in.mark(READ_BUFFER_SIZE);
-
-            try {
-                in.reset();
-            } catch (IOException e1) {
-                logger.log(Level.SEVERE, "Could not reset stream", e1);
             }
             logger.log(Level.INFO,
                     "Going to import sensor data file  with importer " + importerToUse.getClass().getSimpleName());
-            try {
-                importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
-                    @Override
-                    public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
-                        deviceIds.add(device);
-                        storeFixes(fixes, device);
-                        TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
-                        TimePoint latestFixSoFarFromCurrentDevice = to.get(device);
-                        for (DoubleVectorFix fix : fixes) {
-                            if (earliestFixSoFarFromCurrentDevice == null
-                                    || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
-                                earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                from.put(device, earliestFixSoFarFromCurrentDevice);
-                            }
-                            if (latestFixSoFarFromCurrentDevice == null
-                                    || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
-                                latestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                to.put(device, latestFixSoFarFromCurrentDevice);
+            try (BufferedInputStream in = new BufferedInputStream(fi.getInputStream())) {
+                try {
+                    importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
+                        @Override
+                        public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
+                            deviceIds.add(device);
+                            storeFixes(fixes, device);
+                            TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
+                            TimePoint latestFixSoFarFromCurrentDevice = to.get(device);
+                            for (DoubleVectorFix fix : fixes) {
+                                if (earliestFixSoFarFromCurrentDevice == null
+                                        || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
+                                    earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
+                                    from.put(device, earliestFixSoFarFromCurrentDevice);
+                                }
+                                if (latestFixSoFarFromCurrentDevice == null
+                                        || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
+                                    latestFixSoFarFromCurrentDevice = fix.getTimePoint();
+                                    to.put(device, latestFixSoFarFromCurrentDevice);
+                                }
                             }
                         }
-                    }
-                }, fi.getName(), requestedImporterName);
-                logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
-            } catch (FormatNotSupportedException e) {
-                logger.log(Level.INFO, "Failed to import file " + requestedImporterName);
+                    }, fi.getName(), requestedImporterName);
+                    logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
+                } catch (FormatNotSupportedException e) {
+                    logger.log(Level.INFO, "Failed to import file " + requestedImporterName);
+                }
             }
         }
         return deviceIds;
