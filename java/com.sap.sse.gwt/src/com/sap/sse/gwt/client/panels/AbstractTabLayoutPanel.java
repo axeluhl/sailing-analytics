@@ -534,14 +534,6 @@ public abstract class AbstractTabLayoutPanel extends ResizeComposite implements 
         return true;
     }
 
-    public boolean removeAll() {
-        boolean isSuccess = true;
-        while (getWidgetCount() > 0) {
-            isSuccess &= remove(getWidgetCount() - 1, false); // Remove last widget
-        }
-        return isSuccess;
-    }
-
     public boolean remove(Widget w) {
         int index = getWidgetIndex(w);
         if (index == -1) {
