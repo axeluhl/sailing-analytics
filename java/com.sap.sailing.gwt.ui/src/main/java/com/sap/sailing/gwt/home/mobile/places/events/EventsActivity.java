@@ -13,7 +13,6 @@ import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.mobile.places.events.EventsView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 
 public class EventsActivity extends AbstractActivity implements Presenter {
@@ -28,7 +27,7 @@ public class EventsActivity extends AbstractActivity implements Presenter {
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         // TODO: create mobile placeholder
-        panel.setWidget(new Placeholder());
+        panel.setWidget(clientFactory.createBusyView());
         Window.setTitle(TextMessages.INSTANCE.events());
         final EventsView view = new EventsViewImpl(this);
 
