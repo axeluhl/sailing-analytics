@@ -51,10 +51,10 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
                 UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
         try {
-            LOG.fine("Import CSV from " + sourceName);
+            LOG.fine("Import CSV from " + filename);
             final InputStreamReader isr;
             if (sourceName.endsWith("gz")) {
-                LOG.fine("Using gzip stream reader " + sourceName);
+                LOG.fine("Using gzip stream reader " + filename);
                 isr = new InputStreamReader(new GZIPInputStream(inputStream));
             } else {
                 isr = new InputStreamReader(inputStream);
@@ -63,10 +63,10 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
             try (BufferedReader buffer = new BufferedReader(isr)) {
                 String headerLine = null;
                 headerSearch: while (headerLine == null) {
-                    LOG.fine("Searching for header in imu file");
+                    LOG.fine("Searching for header in bravo file");
                     String headerCandidate = buffer.readLine();
                     if (headerCandidate == null) {
-                        throw new RuntimeException("Missing required header in file " + sourceName);
+                        throw new RuntimeException("Missing required header in file " + filename);
                     }
                     if (headerCandidate.startsWith(BOF)) {
                         LOG.fine("Found header");
@@ -91,7 +91,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
                 buffer.close();
             }
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Exception parsing CSV file " + sourceName, e);
+            LOG.log(Level.SEVERE, "Exception parsing bravo CSV file " + filename, e);
         }
     }
 
