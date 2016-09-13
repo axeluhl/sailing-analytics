@@ -549,7 +549,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     private void processIntent(final Intent intent) {
         final Bundle args = new Bundle();
         if (mSelectedRace != null) {
-            args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
+            args.putSerializable(AppConstants.INTENT_EXTRA_RACE_ID, mSelectedRace.getId());
         }
 
         // artificial delay (to prevent "java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState")
