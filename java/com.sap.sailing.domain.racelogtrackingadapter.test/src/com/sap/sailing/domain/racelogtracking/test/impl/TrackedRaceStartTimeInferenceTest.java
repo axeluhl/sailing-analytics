@@ -82,9 +82,9 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         
         // test inference via race start/end time in racelog
         MillisecondsTimePoint startOfRaceInRaceLog = new MillisecondsTimePoint(10000);
-        TimePoint expectedStartOfTracking = startOfRaceInRaceLog.minus(Duration.ONE_MINUTE.times(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES));
+        TimePoint expectedStartOfTracking = startOfRaceInRaceLog.minus(TrackedRaceImpl.START_TRACKING_THIS_MUCH_BEFORE_RACE_START);
         MillisecondsTimePoint endOfRaceInRaceLog = new MillisecondsTimePoint(20000);
-        TimePoint expectedEndOfTracking = endOfRaceInRaceLog.plus(Duration.ONE_MINUTE.times(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES));
+        TimePoint expectedEndOfTracking = endOfRaceInRaceLog.plus(TrackedRaceImpl.STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
         assertEquals(expectedStartOfTracking, trackedRace.getStartOfTracking());
         assertEquals(expectedEndOfTracking, trackedRace.getEndOfTracking());
         

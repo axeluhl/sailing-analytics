@@ -164,7 +164,8 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
-    public static final int TRACKING_BUFFER_IN_MINUTES = 5;
+    public final static Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
+    public final static Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_MINUTE.times(2);
 
     private static final long serialVersionUID = -4825546964220003507L;
 
@@ -755,7 +756,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * <ol>
      * <li>start/end of tracking in Racelog</li>
      * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
-     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * <li>start/end of race in Racelog -/+ {@link #START_TRACKING_THIS_MUCH_BEFORE_RACE_START}/{@link #STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH}</li>
      * </ol>
      */
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
@@ -789,14 +790,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         // check for start/finished times in race log and add a few minutes on the ends
         if (!startOfTrackingFound || !endOfTrackingFound) {
             if (!startOfTrackingFound && getStartOfRace() != null) {
-                startOfTracking = getStartOfRace().minus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
-                    startOfTrackingFound = true;
-                }
-            if (!endOfTrackingFound && getFinishedTime() != null) {
-                endOfTracking = getFinishedTime().plus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
-                    endOfTrackingFound = true;
-                }
+                startOfTracking = getStartOfRace().minus(START_TRACKING_THIS_MUCH_BEFORE_RACE_START);
+                startOfTrackingFound = true;
             }
+            if (!endOfTrackingFound && getFinishedTime() != null) {
+                endOfTracking = getFinishedTime().plus(STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
+                endOfTrackingFound = true;
+            }
+        }
         startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
         endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
     }

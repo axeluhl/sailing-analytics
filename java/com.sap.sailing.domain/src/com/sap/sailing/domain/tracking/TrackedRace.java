@@ -928,7 +928,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * <ol>
      * <li>start/end of tracking in Racelog</li>
      * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
-     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * <li>start/end of race in Racelog -/+ {@link #START_TRACKING_THIS_MUCH_BEFORE_RACE_START}/{@link #STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH}</li>
      * </ol>
      */
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad);
