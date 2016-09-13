@@ -6,7 +6,6 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImp
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -19,8 +18,6 @@ import com.sap.sse.common.Util;
  *
  */
 public class EndOfTrackingController extends AbstractRaceChangeListener {
-    private final static Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_MINUTE.times(2);
-
     private final Regatta regatta;
     private final TrackedRace trackedRace;
     private final RaceLog raceLog;
@@ -47,7 +44,7 @@ public class EndOfTrackingController extends AbstractRaceChangeListener {
     @Override
     public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
         if (regatta.isControlTrackingFromStartAndFinishTimes()) {
-            final TimePoint newEndOfTracking = newFinishedTime.plus(STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
+            final TimePoint newEndOfTracking = newFinishedTime.plus(TrackedRace.STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
             if (!Util.equalsWithNull(trackedRace.getEndOfTracking(), newEndOfTracking)) {
                 raceLog.add(new RaceLogEndOfTrackingEventImpl(newEndOfTracking,
                         raceLogEventAuthor, raceLog.getCurrentPassId()));

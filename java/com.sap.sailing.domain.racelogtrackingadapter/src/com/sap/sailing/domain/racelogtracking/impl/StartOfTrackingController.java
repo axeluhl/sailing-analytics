@@ -6,7 +6,6 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventI
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -18,8 +17,6 @@ import com.sap.sse.common.Util;
  *
  */
 public class StartOfTrackingController implements StartTimeChangedListener {
-    private final static Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
-
     private final Regatta regatta;
     private final TrackedRace trackedRace;
     private final RaceLog raceLog;
@@ -45,7 +42,7 @@ public class StartOfTrackingController implements StartTimeChangedListener {
     @Override
     public void startTimeChanged(TimePoint newTimePoint) {
         if (regatta.isControlTrackingFromStartAndFinishTimes()) {
-            final TimePoint newStartOfTracking = newTimePoint.minus(START_TRACKING_THIS_MUCH_BEFORE_RACE_START);
+            final TimePoint newStartOfTracking = newTimePoint.minus(TrackedRace.START_TRACKING_THIS_MUCH_BEFORE_RACE_START);
             if (!Util.equalsWithNull(trackedRace.getStartOfTracking(), newStartOfTracking)) {
                 raceLog.add(new RaceLogStartOfTrackingEventImpl(newStartOfTracking,
                         raceLogEventAuthor, raceLog.getCurrentPassId()));
