@@ -88,6 +88,9 @@
 						<p>
 							<ui:text from='{i18n.contentSapSailingAnalytics2}' />
 						</p>
+						<a class="{res.mainCss.button}" ui:field="sailingAnalyticsDetailsAnchor">
+						   <ui:text from="{i18n.sapSailingAnalyticsReadMore}"/>
+						</a>
 					</div>
 				</div>
 				<div ui:field="raceCommitteeAppUi"
@@ -116,6 +119,9 @@
                                     src="{smI18n.playstoreBadge}" 
                                     /></a>
                         </div>
+                        <a class="{res.mainCss.button}" ui:field="raceManagerAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailingRaceManagerReadMore}"/>
+                        </a>
 					</div>
 				</div>
 				<div ui:field="inSightAppUi"
@@ -154,6 +160,9 @@
                                     src="{smI18n.playstoreBadge}"
                                     /></a>
                         </div>
+                        <a class="{res.mainCss.button}" ui:field="sailInSightAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailInSightReadMore}"/>
+                        </a>
 					</div>
 				</div>
 				<div ui:field="buoyPingerAppUi"
@@ -182,6 +191,9 @@
                                     src="{smI18n.playstoreBadge}"
                                     /></a>
                         </div>
+                        <a class="{res.mainCss.button}" ui:field="buoyPingerAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailingBuoyPingerReadMore}"/>
+                        </a>
 					</div>
 				</div>
 				<div ui:field="postRaceAnalyticsUi"
@@ -243,6 +255,9 @@
 						<p>
 							<ui:text from='{i18n.contentStrategySimulator}' />
 						</p>
+						<a class="{res.mainCss.button}" ui:field="simulatorAppDetailsAnchor">
+                           <ui:text from="{i18n.strategySimulatorReadMore}"/>
+                        </a>
 					</div>
 				</div>
 			</div>
