@@ -268,7 +268,7 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
      */
     public HorizontalTabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, Permission... requiresAnyOfThesePermissions) {
         final HorizontalTabLayoutPanel newTabPanel = new HorizontalTabLayoutPanel(2.5, Unit.EM);
-        AbstractEntryPoint.setAbstractTabPanelSize(newTabPanel, "100%", "100%");
+        AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
         newTabPanel.ensureDebugId(tabDebugId);
         remeberWidgetLocationAndPermissions(topLevelTabPanelWrapper, newTabPanel, tabTitle, requiresAnyOfThesePermissions);
