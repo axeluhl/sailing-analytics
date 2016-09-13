@@ -31,6 +31,16 @@
 			    designer. Background: using the "By Name" course designer could accidentally delete a
 			    valid course layout.
 			</li>
+			<li>Regattas now have an additional setting: "Control tracking from start and finish times."
+			    With it, the start and finish times for a race as entered into the race log, e.g., through
+			    the Race Management app, can be used by tracking connectors to control the tracking for
+			    that race. So far, the TracTrac connector has been enabled. When a start time for a race
+			    is received and the "Control..." flag is set, the tracking start time will be set to
+			    five minutes before the race start time. Similarly, when the blue flag is lowered, signaling
+			    that the race has finished, the tracking end time will be set to two minutes later.
+			    This should make an operator's job easier when the race timing is maintained properly
+			    through the race log, i.e., through the Race Management app.
+			 </li>
                     </ul>
 
                     <h2 class="articleSubheadline">July 2016</h2>

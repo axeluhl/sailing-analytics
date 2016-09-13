@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -1080,7 +1081,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             for (StartTimeChangedListener startTimeChangedListener : startTimeChangedListeners) {
                 startTimeChangedListener.startTimeChanged(newStartTime);
             }
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
         }
         updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);

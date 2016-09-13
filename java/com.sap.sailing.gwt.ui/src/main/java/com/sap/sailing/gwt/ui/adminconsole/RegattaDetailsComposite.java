@@ -79,7 +79,7 @@ public class RegattaDetailsComposite extends Composite {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 10;
+        int rows = 11;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
