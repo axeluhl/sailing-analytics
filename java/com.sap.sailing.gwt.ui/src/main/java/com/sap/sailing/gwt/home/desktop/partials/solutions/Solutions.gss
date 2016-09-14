@@ -153,6 +153,50 @@
     padding: 6.666666666666667em 0 12em;
   }
 }
+.solutions_contentsapsailinsight {
+  font-size: 1rem;
+  width: 100%;
+}
+.solutions_contentsapsailinsight .gridalternator {
+  margin: auto;
+  background-repeat: no-repeat;
+  background-position: left center;
+  background-size: 40%;
+  background-image: url("images/home/solutions-sap-sailing-insight.png");
+  padding: 4em 0 4.333333333333333em;
+}
+@media (min-width: 45em) {
+  .solutions_contentsapsailinsight .gridalternator {
+    padding: 5em 0 5.666666666666667em;
+  }
+}
+@media (min-width: 61em) {
+  .solutions_contentsapsailinsight .gridalternator {
+    padding: 6.666666666666667em 0 12em;
+  }
+}
+.solutions_contentsapsailingbuoypinger {
+  width: 100%;
+}
+.solutions_contentsapsailingbuoypinger_body {
+  margin: auto;
+  padding: 4em 50% 4.333333333333333em 0;
+  max-width: 88em;
+  background-repeat: no-repeat;
+  background-image: url("images/home/solutions-sap-sailing-buoy-pinger.png");
+  background-size: 40%;
+  background-position: center right;
+}
+@media (min-width: 45em) {
+  .solutions_contentsapsailingbuoypinger_body .gridalternator {
+    padding: 5em 0 5.666666666666667em;
+  }
+}
+@media (min-width: 61em) {
+  .solutions_contentsapsailingbuoypinger_body .gridalternator {
+    padding: 6.666666666666667em 0 12em;
+  }
+}
 .solutions_contentpost {
   font-size: 1rem;
 }

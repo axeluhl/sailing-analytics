@@ -88,6 +88,9 @@
 						<p>
 							<ui:text from='{i18n.contentSapSailingAnalytics2}' />
 						</p>
+						<a class="{res.mainCss.button}" ui:field="sailingAnalyticsDetailsAnchor">
+						   <ui:text from="{i18n.sapSailingAnalyticsReadMore}"/>
+						</a>
 					</div>
 				</div>
 				<div ui:field="raceCommitteeAppUi"
@@ -116,6 +119,81 @@
                                     src="{smI18n.playstoreBadge}" 
                                     /></a>
                         </div>
+                        <a class="{res.mainCss.button}" ui:field="raceManagerAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailingRaceManagerReadMore}"/>
+                        </a>
+					</div>
+				</div>
+				<div ui:field="inSightAppUi"
+					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+						<h2 class="{local_res.css.solutions_item_header_title}">
+							<ui:text from='{i18n.sapSailInSight}' />
+						</h2>
+						<img src="images/mobile/arrow-down-grey.png" alt=""
+							class="{local_res.css.solutions_item_header_arrow}"></img>
+					</div>
+					<div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+						<img src="images/mobile/solutions-sap-sailing-insight.png" alt="{i18n.sapSailInSight}"></img>
+						<p>
+							<ui:text from='{i18n.contentSapSailInSight}' />
+						</p>
+                        <div class="{style.storeBadgesContainer}">
+							<a  ui:field="inSightAppStoreLinkUi"
+								href="{smI18n.appstoreSapSailInsight}"
+								target="_blank"
+							><img
+								ui:field="inSightAppStoreImgUi"
+								alt="Get it on AppStore"
+								src="images/home/appstore{smI18n.appstoreBadgeSuffix}.svg"
+							/></a>
+						</div>
+						<div
+                            class="{style.storeBadgesContainer}"
+                            >
+                            <a  ui:field="inSightPlayStoreLinkUi"
+                                href="{smI18n.playstoreInsightApp}"
+                                target="_blank"
+                                ><img
+                                    ui:field="inSightPlayStoreImgUi"
+                                    alt="Get it on Google Play"
+                                    src="{smI18n.playstoreBadge}"
+                                    /></a>
+                        </div>
+                        <a class="{res.mainCss.button}" ui:field="sailInSightAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailInSightReadMore}"/>
+                        </a>
+					</div>
+				</div>
+				<div ui:field="buoyPingerAppUi"
+					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+						<h2 class="{local_res.css.solutions_item_header_title}">
+							<ui:text from='{i18n.sapSailingBuoyPinger}' />
+						</h2>
+						<img src="images/mobile/arrow-down-grey.png" alt=""
+							class="{local_res.css.solutions_item_header_arrow}"></img>
+					</div>
+					<div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+						<img src="images/mobile/solutions-sap-sailing-buoy-pinger.png" alt="{i18n.sapSailingBuoyPinger}"></img>
+						<p>
+							<ui:text from='{i18n.contentSapSailingBuoyPinger}' />
+						</p>
+                        <div
+                            class="{style.storeBadgesContainer}"
+                            >
+                            <a  ui:field="buoyPingerPlayStoreLinkUi"
+                                href="{smI18n.playStoreBuoyPingerApp}"
+                                target="_blank"
+                                ><img
+                                    ui:field="buoyPingerPlayStoreImgUi"
+                                    alt="Get it on Google Play"
+                                    src="{smI18n.playstoreBadge}"
+                                    /></a>
+                        </div>
+                        <a class="{res.mainCss.button}" ui:field="buoyPingerAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailingBuoyPingerReadMore}"/>
+                        </a>
 					</div>
 				</div>
 				<div ui:field="postRaceAnalyticsUi"
@@ -177,6 +255,9 @@
 						<p>
 							<ui:text from='{i18n.contentStrategySimulator}' />
 						</p>
+						<a class="{res.mainCss.button}" ui:field="simulatorAppDetailsAnchor">
+                           <ui:text from="{i18n.strategySimulatorReadMore}"/>
+                        </a>
 					</div>
 				</div>
 			</div>
