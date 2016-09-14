@@ -1161,6 +1161,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String lastScoreCorrectionsComment();
     String setTimeToNow();
     String useStartTimeInference();
+    String controlTrackingFromStartAndFinishTimes();
     String numberOfQueueMessagesSent();
     String totalSize();
     String averageMessageSize();
@@ -1543,11 +1544,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSelectAMark();
 
     String playstoreRacecommitteeApp();
-    String playstoreTrackingApp();
-    String playStoreBuoypositioningApp();
+    String playstoreInsightApp();
+    String playStoreBuoyPingerApp();
 
     String playstoreBadge();
-    String appstoreSapSailingInsight();
+    String appstoreSapSailInsight();
     String appstoreStgTrainingstagebuch();
     String appstoreBadgeSuffix();
     

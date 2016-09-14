@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -276,12 +277,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     /**
-     * A time point is considered "in" if it is (inclusively) between {@link #getStartOfTracking()} and {@link #getEndOfTracking()}.
-     * A <code>null</code> value for one of the two interval demarcations means an open-ended interval.
+     * A time point is considered "in" if a non-{@code null} {@link #getStartOfTracking()} has been defined and the
+     * {@code fixTimePoint} is at or after that time point and {@link #getEndOfTracking()}.
+     * A <code>null</code> value for {@link #getEndOfTracking} means an open-ended interval.
      */
     @Override
     public boolean isWithinStartAndEndOfTracking(final TimePoint fixTimePoint) {
-        return (getStartOfTracking() == null || getStartOfTracking().compareTo(fixTimePoint) <= 0) &&
+        return getStartOfTracking() != null && getStartOfTracking().compareTo(fixTimePoint) <= 0 &&
             (getEndOfTracking() == null || getEndOfTracking().compareTo(fixTimePoint) >= 0);
     }
 
@@ -1080,7 +1082,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             for (StartTimeChangedListener startTimeChangedListener : startTimeChangedListeners) {
                 startTimeChangedListener.startTimeChanged(newStartTime);
             }
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
         }
         updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
@@ -1102,6 +1104,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.startTimeChangedListeners.add(listener);
     }
     
+    
+    @Override
+    public void removeStartTimeChangedListener(StartTimeChangedListener listener) {
+        startTimeChangedListeners.remove(listener);
+    }
+
     @Override
     public void addRaceAbortedListener(RaceAbortedListener listener) {
         this.raceAbortedListeners.add(listener);

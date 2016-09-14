@@ -496,9 +496,13 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Speed getSpeed(Competitor competitor, long millisecondsBeforeRaceStart) {
         return null;
     }
-    
+
+    @Override
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
-        
+    }
+
+    @Override
+    public void removeStartTimeChangedListener(StartTimeChangedListener listener) {
     }
 
     @Override

@@ -1239,10 +1239,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Regatta createRegatta(String fullRegattaName, String boatClassName, TimePoint startDate, TimePoint endDate,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor) {
+            Serializable defaultCourseAreaId, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            RankingMetricConstructor rankingMetricConstructor) {
         com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
                 fullRegattaName, boatClassName, startDate, endDate, id, series, persistent, scoringScheme,
-                defaultCourseAreaId, useStartTimeInference, rankingMetricConstructor);
+                defaultCourseAreaId, useStartTimeInference, controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
             onRegattaLikeAdded(regatta);
@@ -1275,11 +1276,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName,
             String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor) {
+            Serializable defaultCourseAreaId, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            RankingMetricConstructor rankingMetricConstructor) {
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), startDate, endDate, series, persistent,
-                scoringScheme, id, courseArea, useStartTimeInference, rankingMetricConstructor);
+                scoringScheme, id, courseArea, useStartTimeInference, controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
@@ -1460,7 +1462,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         replicate(new AddSpecificRegatta(regatta.getName(), regatta.getBoatClass() == null ? null : regatta
                 .getBoatClass().getName(), regatta.getStartDate(), regatta.getEndDate(), regatta.getId(),
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
-                regatta.getScoringScheme(), courseAreaId, regatta.useStartTimeInference(), regatta.getRankingMetricType()));
+                regatta.getScoringScheme(), courseAreaId, regatta.useStartTimeInference(), regatta.isControlTrackingFromStartAndFinishTimes(),
+                regatta.getRankingMetricType()));
         RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
         for (RaceDefinition race : regatta.getAllRaces()) {
             replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -2141,7 +2144,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration newRegattaConfiguration,
-            Iterable<? extends Series> series, boolean useStartTimeInference) {
+            Iterable<? extends Series> series, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
@@ -2150,6 +2153,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         regatta.setStartDate(startDate);
         regatta.setEndDate(endDate);
+        regatta.setControlTrackingFromStartAndFinishTimes(controlTrackingFromStartAndFinishTimes);
         if (regatta.useStartTimeInference() != useStartTimeInference) {
             regatta.setUseStartTimeInference(useStartTimeInference);
             final DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
