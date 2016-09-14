@@ -369,7 +369,6 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
      */
     private void updateTabDisplayForCurrentUser(UserDTO user) {
         final Widget selectedPanel = getSelectedTab(null);
-        Set<VerticalOrHorizontalTabLayoutPanel> panelsFromWhichAtLeastOneTabWasRemoved = new HashSet<>();
         for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
             final Widget widgetToAddOrRemove = e.getB();
             if (user != null && userHasPermissionsToSeeWidget(user, e.getB())) {
@@ -377,9 +376,7 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
                     e.getA().add(widgetToAddOrRemove, e.getC(), /* asHtml */false);
                 }
             } else {
-                if (e.getA().remove(widgetToAddOrRemove, /* fireEvents */ false)) {
-                    panelsFromWhichAtLeastOneTabWasRemoved.add(e.getA());
-                }
+                e.getA().remove(widgetToAddOrRemove, /* fireEvents */ false);
             }
         }
         getSelectedTab(selectedPanel);
