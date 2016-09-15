@@ -34,9 +34,11 @@ public class MarkPositionTimeFilterTest {
     @Before
     public void setUp() {
         trackedRace = mock(DynamicTrackedRaceImpl.class);
+        final TimePoint startOfTracking = MillisecondsTimePoint.now();
         m = new MarkImpl("Test Mark");
         track = new DynamicGPSFixTrackImpl<Mark>(m, /* millisecondsOverWhichToAverage */ 5000);
         when(trackedRace.getOrCreateTrack(m)).thenReturn(track);
+        when(trackedRace.getStartOfTracking()).thenReturn(startOfTracking);
         doCallRealMethod().when(trackedRace).recordFix(same(m), (GPSFixMoving) anyObject(), anyBoolean());
         doCallRealMethod().when(trackedRace).isWithinStartAndEndOfTracking(anyObject());
     }
