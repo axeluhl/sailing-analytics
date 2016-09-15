@@ -598,6 +598,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String pleaseSeeToolTips();
     String numberOfManeuversInRaceTooltip();
     String competitorColumnTooltip();
+    String competitorNationalityColumnTooltip();
     String sailIdColumnTooltip();
     String rankColumnTooltip();
     String carryColumnTooltip();
@@ -1277,6 +1278,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String removeUploadedFile();
     String showCompetitorSailIdColumn();
     String showCompetitorFullNameColumn();
+    String showCompetitorNationalityColumn();
     String loadingDimensionValues();
     String runningQuery();
     String inviteBuoyTenders();

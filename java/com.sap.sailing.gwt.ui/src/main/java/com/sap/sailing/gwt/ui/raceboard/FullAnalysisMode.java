@@ -63,7 +63,8 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
                 existingSettings.isShowAddedScores(),
                 existingSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 existingSettings.isShowCompetitorSailIdColumn(),
-                existingSettings.isShowCompetitorFullNameColumn());
+                existingSettings.isShowCompetitorFullNameColumn(),
+                existingSettings.isShowCompetitorNationalityColumn());
         getLeaderboardPanel().updateSettings(newSettings);
     }
 }

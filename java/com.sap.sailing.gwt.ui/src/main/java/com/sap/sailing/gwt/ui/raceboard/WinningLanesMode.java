@@ -59,7 +59,8 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
                 existingSettings.isShowAddedScores(),
                 existingSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 existingSettings.isShowCompetitorSailIdColumn(),
-                existingSettings.isShowCompetitorFullNameColumn());
+                existingSettings.isShowCompetitorFullNameColumn(),
+                existingSettings.isShowCompetitorNationalityColumn());
         getLeaderboardPanel().updateSettings(newSettings);
     }
 

@@ -20,7 +20,8 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
             String leaderboardName, ErrorReporter errorReporter,
             StringMessages stringMessages) {
         super(sailingService, new AsyncActionsExecutor(), LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true), new CompetitorSelectionModel(
+        /* racesToShow */null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true,
+        /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true, /* showCompetitorNationalityColumn */ false), new CompetitorSelectionModel(
                 /* hasMultiSelection */true), leaderboardName, errorReporter, stringMessages, new UserAgentDetails("gecko1_8"), /* showRaceDetails */ true);
     }
 

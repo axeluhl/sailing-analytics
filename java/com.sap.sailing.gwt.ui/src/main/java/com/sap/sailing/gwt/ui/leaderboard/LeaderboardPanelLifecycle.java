@@ -38,7 +38,7 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
                 null, overallDetails, /* nameOfRaceToSort */null,
                 /* autoExpandPreSelectedRace */false, 1000L, /* numberOfLastRacesToShow */null,
                 /* raceColumnSelectionStrategy */RaceColumnSelectionStrategies.EXPLICIT,
-                /* showCompetitorSailIdColumns */true, /* showCompetitorFullNameColumn */true);
+                /* showCompetitorSailIdColumns */true, /* showCompetitorFullNameColumn */true, /* showCompetitorNationalityColumn */false);
     }
 
     @Override

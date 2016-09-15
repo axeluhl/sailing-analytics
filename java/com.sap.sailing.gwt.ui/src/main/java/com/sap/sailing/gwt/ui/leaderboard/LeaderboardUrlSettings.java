@@ -38,6 +38,8 @@ public class LeaderboardUrlSettings extends AbstractSettings {
     
     public static final String COMPETITOR_NAME_COLUMN_SAIL_ID = "SailId";
     public static final String COMPETITOR_NAME_COLUMN_FULL_NAME = "Name";
+
+    public static final String COMPETITOR_COLUMN_NATIONALITY = "Nationality";
     
     /**
      * Parameter to support scaling the complete page by a given factor. This works by either using the

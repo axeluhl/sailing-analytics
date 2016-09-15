@@ -239,6 +239,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
     
     private boolean showCompetitorSailId;
     private boolean showCompetitorFullName;
+    private boolean showCompetitorNationality;
 
     /**
      * When <code>true</code> then an additional column just before the overall points is displayed that sums up
@@ -419,6 +420,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         setShowAddedScores(newSettings.isShowAddedScores());
         setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
         setShowCompetitorFullName(newSettings.isShowCompetitorFullNameColumn());
+        setShowCompetitorNationality(newSettings.isShowCompetitorNationalityColumn());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(newSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
         final List<ExpandableSortableColumn<?>> columnsToExpandAgain = new ArrayList<ExpandableSortableColumn<?>>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
@@ -598,15 +600,15 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         return asyncActionsExecutor;
     }
     
-    protected class CompetitorColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, LeaderboardRowDTO> {
+    protected class CompetitorNameColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, LeaderboardRowDTO> {
         private final CompetitorColumnBase<LeaderboardRowDTO> base;
         
-        protected CompetitorColumn(CompetitorColumnBase<LeaderboardRowDTO> base) {
+        protected CompetitorNameColumn(CompetitorColumnBase<LeaderboardRowDTO> base) {
             super(base.getCell(getLeaderboard()), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.base = base;
         }
 
-        public CompetitorColumn(CompositeCell<LeaderboardRowDTO> compositeCell, CompetitorColumnBase<LeaderboardRowDTO> base) {
+        public CompetitorNameColumn(CompositeCell<LeaderboardRowDTO> compositeCell, CompetitorColumnBase<LeaderboardRowDTO> base) {
             super(compositeCell, SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.base = base;
         }
@@ -651,7 +653,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
     }
 
     /**
-     * Shows the country flag and sail ID, if present
+     * Shows the country flag or flag image and sailID, if present
      * 
      * @author Axel Uhl (d043530)
      * 
@@ -686,6 +688,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
 
         @Override
         public void render(Context context, T object, SafeHtmlBuilder sb) {
+            boolean isCompetitorNationalityColumnVisible = LeaderboardPanel.this.isShowCompetitorNationality(); 
             ImageResourceRenderer renderer = new ImageResourceRenderer();
             CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
@@ -701,15 +704,15 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             if (flagImageURL != null && !flagImageURL.isEmpty()) {
                 sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
                 sb.appendHtmlConstant("&nbsp;");
-            } else {
-                final ImageResource flagImageResource;
+            } else if (!isCompetitorNationalityColumnVisible) {
+                final ImageResource nationalityFlagImageResource;
                 if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
-                    flagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+                    nationalityFlagImageResource = FlagImageResolver.getEmptyFlagImageResource();
                 } else {
-                    flagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+                    nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
                 }
-                if (flagImageResource != null) {
-                    sb.append(renderer.render(flagImageResource));
+                if (nationalityFlagImageResource != null) {
+                    sb.append(renderer.render(nationalityFlagImageResource));
                     sb.appendHtmlConstant("&nbsp;");
                 }
             }
@@ -722,6 +725,61 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         @Override
         public String getValue(T object) {
             return competitorFetcher.getCompetitor(object).getSailID();
+        }
+    }
+
+    /**
+     * Shows the country flag representing the nationality, if present
+     * 
+     * @author Frank Mittag (c5163874)
+     * 
+     */
+    private class NationalityColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
+        private final CompetitorFetcher<T> competitorFetcher;
+        
+        protected NationalityColumn(CompetitorFetcher<T> competitorFetcher) {
+            super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
+            setHorizontalAlignment(ALIGN_CENTER);
+            this.competitorFetcher = competitorFetcher;
+        }
+
+        @Override
+        public InvertibleComparator<T> getComparator() {
+            return new InvertibleComparatorAdapter<T>() {
+                @Override
+                public int compare(T o1, T o2) {
+                    return competitorFetcher.getCompetitor(o1).getTwoLetterIsoCountryCode() == null ? competitorFetcher.getCompetitor(o2).getTwoLetterIsoCountryCode() == null ? 0 : -1
+                            : competitorFetcher.getCompetitor(o2).getTwoLetterIsoCountryCode() == null ? 1 : Collator.getInstance().compare(
+                                    competitorFetcher.getCompetitor(o1).getTwoLetterIsoCountryCode(), competitorFetcher.getCompetitor(o2).getTwoLetterIsoCountryCode());
+                }
+            };
+        }
+
+        @Override
+        public SafeHtmlHeader getHeader() {
+            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.nationality()), stringMessages.competitorNationalityColumnTooltip());
+        }
+
+        @Override
+        public void render(Context context, T object, SafeHtmlBuilder sb) {
+            ImageResourceRenderer renderer = new ImageResourceRenderer();
+            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
+            final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
+            final ImageResource nationalityFlagImageResource;
+            if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
+                nationalityFlagImageResource = FlagImageResolver.getEmptyFlagImageResource();
+            } else {
+                nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
+            }
+            if (nationalityFlagImageResource != null) {
+                sb.append(renderer.render(nationalityFlagImageResource));
+                sb.appendHtmlConstant("&nbsp;");
+            }
+        }
+
+        @Override
+        public String getValue(T object) {
+            return competitorFetcher.getCompetitor(object).getTwoLetterIsoCountryCode();
         }
     }
 
@@ -1863,6 +1921,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         setShowAddedScores(settings.isShowAddedScores());
         setShowCompetitorSailId(settings.isShowCompetitorSailIdColumn());
         setShowCompetitorFullName(settings.isShowCompetitorFullNameColumn());
+        setShowCompetitorNationality(settings.isShowCompetitorNationalityColumn());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
 
         SimplePanel mainPanel = new SimplePanel();
@@ -2196,7 +2255,15 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
     private void setShowCompetitorFullName(boolean showCompetitorFullName) {
         this.showCompetitorFullName = showCompetitorFullName;
     }
+
+    private boolean isShowCompetitorNationality() {
+        return showCompetitorNationality;
+    }
     
+    private void setShowCompetitorNationality(boolean showCompetitorNationality) {
+        this.showCompetitorNationality = showCompetitorNationality;
+    }
+
     /**
      * The time point for which the leaderboard currently shows results. In {@link PlayModes#Replay replay mode} this is
      * the {@link #timer}'s time point. In {@link PlayModes#Live live mode} the {@link #timer}'s time is quantized to
@@ -2947,15 +3014,22 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
      * @return the 0-based index for the next column
      */
     private int ensureSailIDAndCompetitorColumn(int columnIndexWhereToInsertTheNextColumn) {
+        if (isShowCompetitorNationality()) {
+            if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
+                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof NationalityColumn<?>)) {
+                insertColumn(columnIndexWhereToInsertTheNextColumn, createNationalityColumn());
+            }
+            columnIndexWhereToInsertTheNextColumn++;
+        } else {
+            if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn
+                    && getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof NationalityColumn<?>) {
+                removeColumn(columnIndexWhereToInsertTheNextColumn);
+            }
+        }
         if (isShowCompetitorSailId()) {
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
                     || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>)) {
-                insertColumn(columnIndexWhereToInsertTheNextColumn, new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
-                    @Override
-                    public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                        return t.competitor;
-                    }
-                }));
+                insertColumn(columnIndexWhereToInsertTheNextColumn, createSailIDColumn());
             }
             columnIndexWhereToInsertTheNextColumn++;
         } else {
@@ -2966,21 +3040,39 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         }
         if (isShowCompetitorFullName()) {
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
-                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn)) {
-                insertColumn(columnIndexWhereToInsertTheNextColumn, createCompetitorColumn());
+                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorNameColumn)) {
+                insertColumn(columnIndexWhereToInsertTheNextColumn, createCompetitorNameColumn());
             }
             columnIndexWhereToInsertTheNextColumn++;
         } else {
             if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn
-                    && getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorColumn) {
+                    && getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof CompetitorNameColumn) {
                 removeColumn(columnIndexWhereToInsertTheNextColumn);
             }
         }
         return columnIndexWhereToInsertTheNextColumn;
     }
 
-    protected CompetitorColumn createCompetitorColumn() {
-        return new CompetitorColumn(new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(),
+    protected NationalityColumn<LeaderboardRowDTO> createNationalityColumn() {
+        return new NationalityColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
+            @Override
+            public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                return t.competitor;
+            }
+        });
+    }
+
+    protected SailIDColumn<LeaderboardRowDTO> createSailIDColumn() {
+        return new SailIDColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
+            @Override
+            public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
+                return t.competitor;
+            }
+        });
+    }
+
+    protected CompetitorNameColumn createCompetitorNameColumn() {
+        return new CompetitorNameColumn(new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(),
                 new CompetitorFetcher<LeaderboardRowDTO>() {
             @Override
             public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
@@ -3114,7 +3206,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                     /* don't change nameOfRaceColumnToShow */null,
                     /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null : preSelectedRace
                             .getRaceName(), getRaceColumnSelection(), /* leave showRegattaRank and overall details unchanged */ null,
-                            /* take into account state of competitor columns*/isShowCompetitorSailId(), isShowCompetitorFullName()));
+                            /* take into account state of competitor columns*/isShowCompetitorSailId(), isShowCompetitorFullName(), isShowCompetitorNationality()));
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;
@@ -3166,7 +3258,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                 autoExpandPreSelectedRace, timer.getRefreshInterval(), /* nameOfRaceToSort*/ null,
                 /*sortAscending*/ true, /*updateUponPlayStateChange*/ true, raceColumnSelection.getType(),
                 isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
-                isShowCompetitorSailId(), isShowCompetitorFullName());
+                isShowCompetitorSailId(), isShowCompetitorFullName(), isShowCompetitorNationality());
     }
     
     @Override

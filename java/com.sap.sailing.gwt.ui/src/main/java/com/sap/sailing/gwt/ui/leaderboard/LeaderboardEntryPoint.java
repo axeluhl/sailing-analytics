@@ -244,6 +244,9 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                     showCompetitorSailIdColumn = false;
                 }
             }
+           boolean showCompetitorNationalityColumn = parameterMap.containsKey(LeaderboardUrlSettings.COMPETITOR_COLUMN_NATIONALITY) ? 
+                   Boolean.valueOf(parameterMap.get(LeaderboardUrlSettings.COMPETITOR_COLUMN_NATIONALITY).get(0)) : false; 
+           
             result = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                     /* namesOfRaceColumnsToShow */ null,
                     namesOfRacesToShow, numberOfLastRacesToShow,
@@ -251,14 +254,15 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                     namesOfRacesToShow.get(0) : null,
                             /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
                                     raceColumnSelectionStrategy, showAddedScores, showOverallColumnWithNumberOfRacesSailedPerCompetitor,
-                                    showCompetitorSailIdColumn, showCompetitorFullNameColumn);
+                                    showCompetitorSailIdColumn, showCompetitorFullNameColumn, showCompetitorNationalityColumn);
 
         } else {
             final List<DetailType> overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
                     /* overallDetails */ overallDetails, null,
                     /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
-                    raceColumnSelectionStrategy, /* showCompetitorSailIdColumns */ true, /*showCompetitorFullNameColumn*/ true);
+                    raceColumnSelectionStrategy, /* showCompetitorSailIdColumns */ true, /*showCompetitorFullNameColumn*/ true,
+                    /* showCompetitorNationalityColumn */false);
         }
         return result;
     }

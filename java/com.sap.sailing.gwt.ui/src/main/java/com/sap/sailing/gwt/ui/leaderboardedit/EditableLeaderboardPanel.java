@@ -109,7 +109,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
 
-    private class EditableCompetitorColumn extends CompetitorColumn {
+    private class EditableCompetitorColumn extends CompetitorNameColumn {
         public EditableCompetitorColumn(List<HasCell<LeaderboardRowDTO, ?>> cells, CompetitorColumnBase<LeaderboardRowDTO> base) {
             super(new CompositeCell<LeaderboardRowDTO>(cells), base);
         }
@@ -585,7 +585,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent) {
         super(sailingService, asyncActionsExecutor, LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true),
+                /* racesToShow */ null, /* namesOfRacesToShow */ null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true,
+                /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true, /* showCompetitorNationalityColumn */ false),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, userAgent, /* showRaceDetails */ true);
         suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());
@@ -752,7 +753,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     }
 
     @Override
-    protected CompetitorColumn createCompetitorColumn() {
+    protected CompetitorNameColumn createCompetitorNameColumn() {
         return new EditableCompetitorColumn(getCellListForEditableCompetitorColumn(),
                 new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(), new CompetitorFetcher<LeaderboardRowDTO>() {
                     @Override

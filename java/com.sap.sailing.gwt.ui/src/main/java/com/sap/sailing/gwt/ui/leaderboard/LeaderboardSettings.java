@@ -99,6 +99,7 @@ public class LeaderboardSettings extends AbstractSettings {
     
     private final boolean showCompetitorSailIdColumn;
     private final boolean showCompetitorFullNameColumn;
+    private final boolean showCompetitorNationalityColumn;
     
     /**
      * Show a column with total number of races completed
@@ -114,7 +115,7 @@ public class LeaderboardSettings extends AbstractSettings {
             boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort,
             boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
             boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
-            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn) {
+            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn, boolean showCompetitorNationalityColumn) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
@@ -134,6 +135,7 @@ public class LeaderboardSettings extends AbstractSettings {
         this.showAddedScores = showAddedScores;
         this.showCompetitorSailIdColumn = showCompetitorSailIdColumn;
         this.showCompetitorFullNameColumn = showCompetitorFullNameColumn;
+        this.showCompetitorNationalityColumn = showCompetitorNationalityColumn;
         this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor = showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
     }
   
@@ -265,6 +267,7 @@ public class LeaderboardSettings extends AbstractSettings {
                         (namesOfRacesToShow != null && namesOfRacesToShow.size() == 1);
             boolean showCompetitorSailIdColumn = true;
             boolean showCompetitorFullNameColumn = true;
+            boolean showCompetitorNationalityColumn = false;
             if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS)) {
                  String value = parameterMap.get(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS).get(0);
                  if (value.equals(LeaderboardUrlSettings.COMPETITOR_NAME_COLUMN_FULL_NAME)) {
@@ -283,14 +286,14 @@ public class LeaderboardSettings extends AbstractSettings {
                                      namesOfRacesToShow.get(0) : null,
                              /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
                                      raceColumnSelectionStrategy, showAddedScores, showOverallColumnWithNumberOfRacesSailedPerCompetitor,
-                                     showCompetitorSailIdColumn, showCompetitorFullNameColumn);
+                                     showCompetitorSailIdColumn, showCompetitorFullNameColumn, showCompetitorNationalityColumn);
         } else {
             final List<DetailType> overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
                     /* overallDetails */ overallDetails, null,
                     /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
                     raceColumnSelectionStrategy, /*showCompetitorSailIdColumns*/ true,
-                    /*showCompetitorFullNameColumn*/ true);
+                    /*showCompetitorFullNameColumn*/ true, /*showCompetitorNationalityColumn*/ false);
         }
         return result;
     }
@@ -323,4 +326,9 @@ public class LeaderboardSettings extends AbstractSettings {
     public boolean isShowCompetitorFullNameColumn() {
         return showCompetitorFullNameColumn;
     }
+    
+    public boolean isShowCompetitorNationalityColumn() {
+        return showCompetitorNationalityColumn;
+    }
+
 }

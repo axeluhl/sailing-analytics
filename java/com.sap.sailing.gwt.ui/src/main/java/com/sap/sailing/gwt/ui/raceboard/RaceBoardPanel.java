@@ -402,7 +402,8 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
                         new ExplicitRaceColumnSelectionWithPreselectedRace(selectedRaceIdentifier), /* showRegattaRank */ false,
                         /*showCompetitorSailIdColumn*/true,
                         /* don't showCompetitorFullNameColumn in case screen is so small that we don't
-                         * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard);
+                         * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard,
+                         /*showCompetitorNationalityColumn*/ false);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier != null, selectedRaceIdentifier,
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 userAgent, /* showRaceDetails */ true, competitorSearchTextBox,
