@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.jaxrs.api;
+package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,7 +9,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.server.gateway.jaxrs.RoundingUtil;
+import com.sap.sailing.server.gateway.serialization.RoundingUtil;
 import com.sap.sse.common.TimePoint;
 
 public class DefaultWindTrackJsonSerializer implements WindTrackJsonSerializer {

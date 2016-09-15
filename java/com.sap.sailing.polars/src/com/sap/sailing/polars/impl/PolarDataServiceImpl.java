@@ -361,4 +361,8 @@ public class PolarDataServiceImpl implements PolarDataService,
         }
     }
 
+    public PolarDataMiner getPolarDataMiner() {
+        return polarDataMiner;
+    }
+
 }

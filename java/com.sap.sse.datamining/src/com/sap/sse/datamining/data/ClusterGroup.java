@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.data;
 
 import java.io.Serializable;
+import java.util.Set;
 
 
 /**
@@ -23,5 +24,7 @@ public interface ClusterGroup<ElementType extends Serializable> extends Serializ
     public Cluster<ElementType> getClusterFor(ElementType value);
 
     public Class<ElementType> getClusterElementsType();
+
+    public Set<Cluster<ElementType>> getClusters();
 
 }

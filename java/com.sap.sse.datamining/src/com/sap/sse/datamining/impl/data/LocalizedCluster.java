@@ -1,9 +1,11 @@
 package com.sap.sse.datamining.impl.data;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Locale;
 
 import com.sap.sse.datamining.data.Cluster;
+import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class LocalizedCluster<ElementType extends Serializable> implements Cluster<ElementType> {
@@ -30,6 +32,11 @@ public class LocalizedCluster<ElementType extends Serializable> implements Clust
     @Override
     public Class<ElementType> getClusterElementsType() {
         return cluster.getClusterElementsType();
+    }
+
+    @Override
+    public Collection<ClusterBoundary<ElementType>> getBoundaries() {
+        return cluster.getBoundaries();
     }
 
 }

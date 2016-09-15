@@ -12,6 +12,10 @@ public class FixClusterGroup<ElementType extends Serializable> implements Cluste
     private static final long serialVersionUID = -5080331147800848136L;
     
     private final Set<Cluster<ElementType>> clusters;
+    
+    public Set<Cluster<ElementType>> getClusters() {
+        return clusters;
+    }
 
     public FixClusterGroup(Collection<Cluster<ElementType>> clusters) {
         this.clusters = new HashSet<>(clusters);

@@ -13,6 +13,10 @@ public abstract class AbstractCluster<ElementType extends Serializable> implemen
     private static final long serialVersionUID = 1606840566021644768L;
     
     private Collection<ClusterBoundary<ElementType>> boundaries;
+    
+    public Collection<ClusterBoundary<ElementType>> getBoundaries() {
+        return boundaries;
+    }
 
     public AbstractCluster(Collection<ClusterBoundary<ElementType>> boundaries) {
         this.boundaries = new ArrayList<>(boundaries);

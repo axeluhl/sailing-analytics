@@ -1,8 +1,10 @@
 package com.sap.sailing.polars.mining;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -38,6 +40,7 @@ public class CubicRegressionPerCourseProcessor implements
     private static final Logger logger = Logger.getLogger(CubicRegressionPerCourseProcessor.class.getName());
 
     private final Map<GroupKey, AngleAndSpeedRegression> regressions = new HashMap<>();
+    private List<GroupedDataEntry<GPSFixMovingWithPolarContext>> dataEntries = new ArrayList<>();
 
     /**
      * FIXME Make sure replication and listeners interact correctly
@@ -52,6 +55,7 @@ public class CubicRegressionPerCourseProcessor implements
 
     @Override
     public void processElement(GroupedDataEntry<GPSFixMovingWithPolarContext> element) {
+        dataEntries.add(element);
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         if (fix.getLegType() == LegType.UPWIND || fix.getLegType() == LegType.DOWNWIND) {
             GroupKey key = element.getKey();
@@ -221,4 +225,8 @@ public class CubicRegressionPerCourseProcessor implements
         return null;
     }
 
+    public List<GroupedDataEntry<GPSFixMovingWithPolarContext>> getDataEntries() {
+        return dataEntries;
+    }
+    
 }
