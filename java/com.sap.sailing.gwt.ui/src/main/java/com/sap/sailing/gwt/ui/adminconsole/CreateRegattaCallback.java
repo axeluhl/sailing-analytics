@@ -67,6 +67,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                 newRegatta.startDate, newRegatta.endDate, 
                 new RegattaCreationParametersDTO(seriesStructure), true,
                 newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.useStartTimeInference,
+                newRegatta.controlTrackingFromStartAndFinishTimes,
                 newRegatta.rankingMetricType, new AsyncCallback<RegattaDTO>() {
             @Override
             public void onFailure(Throwable t) {

@@ -77,6 +77,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
                 }
             }
             if (importerToUse == null) {
+                in.close();
                 throw new RuntimeException("Sensor importer not found");
             }
             in.mark(READ_BUFFER_SIZE);

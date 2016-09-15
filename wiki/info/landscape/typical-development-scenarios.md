@@ -214,3 +214,24 @@ Experience has shown that sometimes the SAP HTTP proxy doesn't properly resolve 
 Run this inside a tmux window to be sure that logging off does not interrupt the process. After the process completes, copy the resulting declination-<year> file to your git workspace to 'java/com.sap.sailing.declination/resources' and commit.
 
 There is also a script java/target/importdeclination that automates these steps.
+
+## Dynamic Remote Debugging using the SAP JVM
+
+The SAP JVM (see [http://sapjvm:1080](here)) offers a nice feature. It can be switched into debug mode during runtime, using the ``jvmmon`` tool from the ``bin`` folder of the VM distribution, next to the ``java`` binary. Imagine you have started a VM in production mode and it starts misbehaving. You isolate the instance, e.g., by removing it from the load balancer (ELB) or by replacing it in the central Apache configuration by a new one. Now you have time to investigate the VM's state more closely. But attaching a jconsole often isn't sufficient to understand what has gone wrong. With the SAP JVM you can proceed as follows:
+
+<pre>
+[sailing@ip-172-31-28-55 ~]$ /opt/sapjvm_8/bin/jvmmon &lt;java PID&gt;
+$ start debugging
+$ print debugging information
+State : Debugging back is waiting for debugger to connect
+Port  : 8000
+$ exit
+</pre>
+
+Now connect an Eclipse debugger to that VM's port 8000. This may require an SSH tunnel that forwards the port accordingly. When done, use ``jvmmon`` again to stop debugging, just like you started it:
+
+<pre>
+[sailing@ip-172-31-28-55 ~]$ /opt/sapjvm_8/bin/jvmmon &lt;java PID&gt;
+$ stop debugging
+$ exit
+</pre>

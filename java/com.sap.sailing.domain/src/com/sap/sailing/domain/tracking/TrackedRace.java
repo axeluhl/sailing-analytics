@@ -72,6 +72,9 @@ import com.sap.sse.common.Util.Pair;
  * 
  */
 public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomainFactory> {
+    final Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
+    final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_MINUTE.times(2);
+
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
 
     final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
@@ -766,6 +769,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     void addCourseDesignChangedListener(CourseDesignChangedListener listener);
     
     void addStartTimeChangedListener(StartTimeChangedListener listener);
+    
+    void removeStartTimeChangedListener(StartTimeChangedListener listener);
 
     void addRaceAbortedListener(RaceAbortedListener listener);
 
@@ -926,9 +931,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * <ol>
      * <li>start/end of tracking in Racelog</li>
      * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
-     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * <li>start/end of race in Racelog -/+ {@link #START_TRACKING_THIS_MUCH_BEFORE_RACE_START}/{@link #STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH}</li>
      * </ol>
-     * @param waitForGPSFixesToLoad TODO
      */
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad);
     

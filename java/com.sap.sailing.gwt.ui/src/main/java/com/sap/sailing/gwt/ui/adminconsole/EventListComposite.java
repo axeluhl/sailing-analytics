@@ -427,7 +427,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return e1.venue.getCourseAreas().toString().compareTo(e2.venue.getCourseAreas().toString());
             }
         });
-        result.setComparator(courseAreasColumn, new Comparator<EventDTO>() {
+        result.setComparator(leaderboardGroupsColumn, new Comparator<EventDTO>() {
             @Override
             public int compare(EventDTO e1, EventDTO e2) {
                 return e1.getLeaderboardGroups().toString().compareTo(e2.getLeaderboardGroups().toString());

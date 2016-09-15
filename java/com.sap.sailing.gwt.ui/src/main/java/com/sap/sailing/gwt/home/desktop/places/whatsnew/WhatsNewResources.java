@@ -16,6 +16,12 @@ public interface WhatsNewResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/home/solutions/RaceCommitteeAppNotes.html")
     public TextResource getRaceCommitteeAppNotesHtml();
+
+    @Source("com/sap/sailing/gwt/home/solutions/InSightAppNotes.html")
+    public TextResource getInSightAppNotesHtml();
+
+    @Source("com/sap/sailing/gwt/home/solutions/BuoyPingerAppNotes.html")
+    public TextResource getBuoyPingerAppNotesHtml();
     
     @Source("WhatsNew.css")
     LocalCss css();
