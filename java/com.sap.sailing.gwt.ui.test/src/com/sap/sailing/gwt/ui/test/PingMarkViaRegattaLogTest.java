@@ -42,7 +42,7 @@ public class PingMarkViaRegattaLogTest {
         Regatta regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser", /*startDate*/ null, /*endDate*/ null, 
                 UUID.randomUUID(), Collections.<Series>singletonList(series),
                 false, new HighPoint(), UUID.randomUUID(), /* useStartTimeInference */ true,
-                RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
+                /* controlTrackingFromStartAndFinishTimes */ false, RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
         RegattaLeaderboard leaderboard = service.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "RegattaLeaderboard", new int[] {});
         
         MarkDTO mark = new MarkDTO("mark", "mark");

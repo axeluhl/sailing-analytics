@@ -90,16 +90,18 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     
     private final RaceLogConnectivityParams params;
     private final WindStore windStore;
-    private final DynamicTrackedRegatta regatta;
+    private final DynamicTrackedRegatta trackedRegatta;
     private final RaceLogResolver raceLogResolver;
 
     private DynamicTrackedRace trackedRace;
+    private StartOfTrackingController startOfTrackingController;
+    private EndOfTrackingController endOfTrackingController;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
             RaceLogResolver raceLogResolver) {
         this.params = params;
         this.windStore = windStore;
-        this.regatta = regatta;
+        this.trackedRegatta = regatta;
         this.raceLogResolver = raceLogResolver;
 
         // add log listeners
@@ -164,15 +166,22 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     protected void onStop(boolean preemptive) {
         RaceLog raceLog = params.getRaceLog();
         final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
-        if (trackingTimes == null || trackingTimes.getB() == null || trackingTimes.getB().getTimePoint() == null) {
+        if (!trackedRegatta.getRegatta().isControlTrackingFromStartAndFinishTimes() &&
+                (trackingTimes == null || trackingTimes.getB() == null || trackingTimes.getB().getTimePoint() == null)) {
             // seems the first time tracking for this race is stopped; enter "now" as end of tracking
             // into the race log
-            raceLog.add(new RaceLogEndOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, /* passId */ 0));
+            raceLog.add(new RaceLogEndOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, raceLog.getCurrentPassId()));
         }
         
         // remove listeners on logs
         for (Entry<AbstractLog<?, ?>, Object> visitor : visitors.entrySet()) {
             visitor.getKey().removeListener(visitor.getValue());
+        }
+        if (startOfTrackingController != null && trackedRace != null) {
+            trackedRace.removeStartTimeChangedListener(startOfTrackingController);
+        }
+        if (endOfTrackingController != null && trackedRace != null) {
+            trackedRace.removeListener(endOfTrackingController);
         }
 
         logger.info(String.format("Stopped tracking race-log race %s %s %s", params.getLeaderboard(),
@@ -181,7 +190,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
 
     @Override
     public Regatta getRegatta() {
-        return regatta.getRegatta();
+        return trackedRegatta.getRegatta();
     }
 
     @Override
@@ -201,7 +210,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
 
     @Override
     public DynamicTrackedRegatta getTrackedRegatta() {
-        return regatta;
+        return trackedRegatta;
     }
 
     @Override
@@ -265,9 +274,10 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         Fleet fleet = params.getFleet();
         RaceLogDenoteForTrackingEvent denoteEvent = new RaceInformationFinder(raceLog).analyze();
         final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
-        if (trackingTimes == null || trackingTimes.getA() == null || trackingTimes.getA().getTimePoint() == null) {
+        if (!trackedRegatta.getRegatta().isControlTrackingFromStartAndFinishTimes() &&
+                (trackingTimes == null || trackingTimes.getA() == null || trackingTimes.getA().getTimePoint() == null)) {
             // the start of tracking interval is unset or set to null; enter "now" as start of tracking into the race log
-            raceLog.add(new RaceLogStartOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, /* passId */ 0));
+            raceLog.add(new RaceLogStartOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, raceLog.getCurrentPassId()));
         }
         BoatClass boatClass = denoteEvent.getBoatClass();
         String raceName = denoteEvent.getRaceName();
@@ -293,11 +303,15 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
         Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
         // set race definition, so race is linked to leaderboard automatically
-        regatta.getRegatta().addRace(raceDef);
-        raceColumn.setRaceIdentifier(fleet, regatta.getRegatta().getRaceIdentifier(raceDef));
-        trackedRace = regatta.createTrackedRace(raceDef, sidelines, windStore,
+        trackedRegatta.getRegatta().addRace(raceDef);
+        raceColumn.setRaceIdentifier(fleet, trackedRegatta.getRegatta().getRaceIdentifier(raceDef));
+        trackedRace = trackedRegatta.createTrackedRace(raceDef, sidelines, windStore,
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver);
+        startOfTrackingController = new StartOfTrackingController(trackedRace, raceLog, raceLogEventAuthor);
+        trackedRace.addStartTimeChangedListener(startOfTrackingController);
+        endOfTrackingController = new EndOfTrackingController(trackedRace, raceLog, raceLogEventAuthor);
+        trackedRace.addListener(endOfTrackingController);
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles
         synchronized (this) {

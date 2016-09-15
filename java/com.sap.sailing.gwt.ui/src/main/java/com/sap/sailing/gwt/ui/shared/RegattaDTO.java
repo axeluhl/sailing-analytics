@@ -32,6 +32,7 @@ public class RegattaDTO extends NamedDTO {
     public String defaultCourseAreaName;
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
     public boolean useStartTimeInference = true;
+    public boolean controlTrackingFromStartAndFinishTimes = false;
     public RankingMetrics rankingMetricType;
 
     public RegattaDTO() {}
@@ -62,6 +63,7 @@ public class RegattaDTO extends NamedDTO {
         this.rankingMetricType = other.rankingMetricType;
         this.configuration = other.configuration;
         this.useStartTimeInference = other.useStartTimeInference;
+        this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
     }
     
     public Pair<SeriesDTO, FleetDTO> getSeriesAndFleet(RegattaAndRaceIdentifier raceIdentifier) {
