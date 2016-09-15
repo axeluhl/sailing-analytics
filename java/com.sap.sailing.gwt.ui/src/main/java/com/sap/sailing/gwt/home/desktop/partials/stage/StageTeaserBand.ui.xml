@@ -12,7 +12,7 @@
 			<div class="{local_res.css.stageteaser_content_band_text_name}">
 				<span ui:field="bandSubtitle" />&nbsp;&nbsp;&nbsp;
 				<div ui:field="isLiveDiv" data-labeltype="live" class="{res.mainCss.label}">
-					<ui:text from="{i18n.liveСapitalLetter}" />
+					<ui:text from="{i18n.liveCapitalLetter}" />
 				</div>
 			</div>
 		</div>

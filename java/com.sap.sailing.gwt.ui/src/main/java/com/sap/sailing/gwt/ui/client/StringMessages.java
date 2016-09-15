@@ -1682,7 +1682,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String countdownHour();
     String countdownMinute();
     String countdownSecond();
-    String live—apitalLetter();
+    String liveCapitalLetter();
     String watchNow();
     String boxNewsUpdateMoreLink();
     String boxNewsUpdateTitle();
