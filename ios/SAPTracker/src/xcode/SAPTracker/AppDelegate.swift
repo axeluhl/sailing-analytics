@@ -11,79 +11,116 @@ import CoreData
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    struct NotificationType {
-        static let openUrl = "openUrl"
-    }
     
     var window: UIWindow?
-
+    
+    func application(application: UIApplication, performFetchWithCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
+        logInfo("\(#function)", info: "Background fetch started...")
+        var noData = true
+        var allSuccess = true
+        let regattas = CoreDataManager.sharedManager.fetchRegattas()
+        regattas?.forEach({ (regatta) in
+            if regatta.gpsFixes?.count > 0 {
+                noData = false
+                let gpsFixController = GPSFixController(regatta: regatta)
+                gpsFixController.sendAll({ (withSuccess) in
+                    allSuccess = allSuccess && withSuccess
+                })
+            }
+        })
+        let fetchResult: UIBackgroundFetchResult = noData ? .NoData : allSuccess ? .NewData : .Failed
+        logInfo("\(#function)", info: "Background fetch completed with result: \(fetchResult.rawValue)")
+        completionHandler(fetchResult)
+    }
+    
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-
-        // set up connection logging for debug builds
-        #if DEBUG
-        AFNetworkActivityLogger.sharedLogger().startLogging()
-        AFNetworkActivityLogger.sharedLogger().level = AFHTTPRequestLoggerLevel.AFLoggerLevelDebug
-        #endif
-        
-        // initialize core data, migrate database if needed, or delete if migration needed but not possible
-        DataManager.sharedManager
-        
-        // start timer in case GPS fixes need to be sent
-        SendGPSFixController.sharedManager.timer()
-        
-        // set up styling
-        UINavigationBar.appearance().setBackgroundImage(UIImage(named: "navbar_bg"), forBarMetrics: UIBarMetrics.Default)
-        UINavigationBar.appearance().tintColor = UIColor.whiteColor()
-        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor(), NSFontAttributeName: UIFont(name: "OpenSans-Bold", size: CGFloat(17.0))!]
-        UIPageControl.appearance().pageIndicatorTintColor = UIColor.lightGrayColor()
-        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor.blackColor()
-        UIPageControl.appearance().backgroundColor = UIColor.whiteColor()
-        // needed for missing Swift method
-        Appearance.setAppearance()
+        setup()
         return true
     }
     
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
-			
-        let rootViewController = self.window!.rootViewController as! UINavigationController
-        rootViewController.popToRootViewControllerAnimated(false)
-        rootViewController.dismissViewControllerAnimated(false, completion: nil)
+        Preferences.newCheckInURL = urlStringForDeeplink(url)
+        return true
+    }
+    
+    func applicationWillResignActive(application: UIApplication) {
+        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+        // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+    }
+    
+    func applicationDidEnterBackground(application: UIApplication) {
+        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
+        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+        CoreDataManager.sharedManager.saveContext()
+    }
+    
+    func applicationWillEnterForeground(application: UIApplication) {
+        // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+    }
+    
+    func applicationDidBecomeActive(application: UIApplication) {
+        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    }
+    
+    func applicationWillTerminate(application: UIApplication) {
+        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+        CoreDataManager.sharedManager.saveContext()
+    }
+    
+    // MARK: - Setup
+    
+    private func setup() {
+        setupAFNetworking()
+        setupBackgroundFetch()
+        setupCoreData()
+        setupNavigationBarApperance()
+        setupPageControlApperance()
+        setupSVProgressHUD()
+    }
+    
+    private func setupAFNetworking() {
+        AFNetworkActivityIndicatorManager.sharedManager().enabled = true
+        AFNetworkReachabilityManager.sharedManager().startMonitoring()
+    }
+    
+    private func setupBackgroundFetch() {
+        UIApplication.sharedApplication().setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
+    }
+    
+    private func setupCoreData() {
+        CoreDataManager.sharedManager // Initialize core data, migrate database if needed, or delete if migration needed but not possible
+    }
+    
+    private func setupNavigationBarApperance() {
+        UINavigationBar.appearance().tintColor = Colors.NavigationBarTintColor
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: Colors.NavigationBarTitleColor, NSFontAttributeName: Fonts.OpenSansBold17]
+    }
+    
+    private func setupPageControlApperance() {
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor.lightGrayColor()
+        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor.blackColor()
+    }
+    
+    private func setupSVProgressHUD() {
+        SVProgressHUD.setDefaultMaskType(.Gradient)
+    }
+    
+    // MARK: - Helper
+    
+    private func urlStringForDeeplink(url: NSURL) -> String {
         var urlString = url.absoluteString
         let appPrefix : String = "comsapsailingtracker://"
+        
+        // FIXME: - Two prefixes are not allowed
+        // Deeplink needs another structure (if possible) because of allowed characters in URL
+        // https:// -> http//
+        
         urlString = urlString.hasPrefix(appPrefix) ? urlString.substringFromIndex(appPrefix.endIndex) : urlString
         let httpPrefix : String = "http//"
         urlString = urlString.hasPrefix(httpPrefix) ? "http://" + urlString.substringFromIndex(httpPrefix.endIndex) : urlString
         let httpsPrefix : String = "https//"
         urlString = urlString.hasPrefix(httpsPrefix) ? "https://" + urlString.substringFromIndex(httpsPrefix.endIndex) : urlString
-        let notification = NSNotification(name: NotificationType.openUrl, object: self, userInfo:["url": urlString])
-        NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
-        return true
+        return urlString
     }
-
-    func applicationWillResignActive(application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
-    }
-
-    func applicationDidEnterBackground(application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-        DataManager.sharedManager.saveContext()
-    }
-
-    func applicationWillEnterForeground(application: UIApplication) {
-        // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-    }
-
-    func applicationDidBecomeActive(application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    }
-
-    func applicationWillTerminate(application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-        DataManager.sharedManager.saveContext()
-    }
-
-
+    
 }
-
