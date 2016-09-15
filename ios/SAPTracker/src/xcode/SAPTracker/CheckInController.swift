@@ -86,13 +86,7 @@ class CheckInController : NSObject {
     
     private func postCheckInSuccess(regattaData: RegattaData, completion: (withSuccess: Bool) -> Void) {
         let regatta = CoreDataManager.sharedManager.fetchRegatta(regattaData) ?? CoreDataManager.sharedManager.newRegatta()
-        regatta.updateWirhRegattaData(regattaData)
-        let event = regatta.event ?? CoreDataManager.sharedManager.newEvent(regatta)
-        event.updateWithEventData(regattaData.eventData)
-        let leaderboard = regatta.leaderboard ?? CoreDataManager.sharedManager.newLeaderboard(regatta)
-        leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
-        let competitor = regatta.competitor ?? CoreDataManager.sharedManager.newCompetitor(regatta)
-        competitor.updateWithCompetitorData(regattaData.competitorData)
+        regatta.updateWithRegattaData(regattaData)
         CoreDataManager.sharedManager.saveContext()
         checkInDidFinish(withSuccess: true, completion: completion)
     }
