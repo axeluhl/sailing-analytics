@@ -88,9 +88,13 @@ import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class SensorFixStoreAndLoadTest {
+    private static final long START_OF_TRACKING = 100;
+    private static final long MID_OF_TRACKING = 200;
+    private static final long END_OF_TRACKING = 300;
     private static final long FIX_TIMESTAMP = 110;
     private static final long FIX_TIMESTAMP2 = 120;
     private static final long FIX_TIMESTAMP3 = 210;
+    private static final long AFTER_LAST_FIX = FIX_TIMESTAMP3 + 1;
     private static final double FIX_RIDE_HEIGHT = 1337.0;
     private static final double FIX_RIDE_HEIGHT2 = 1338.0;
     private static final double FIX_RIDE_HEIGHT3 = 1336.0;
@@ -121,6 +125,9 @@ public class SensorFixStoreAndLoadTest {
     public void setUp() throws UnknownHostException, MongoException {
         dropPersistedData();
         raceLog = new RaceLogImpl("racelog");
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(new MillisecondsTimePoint(START_OF_TRACKING), author, 0));
+        raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(END_OF_TRACKING), author, 0));
+        
         regattaLog = new RegattaLogImpl("regattalog");
 
         store = new MongoSensorFixStoreImpl(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
@@ -157,7 +164,7 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testLoadAlreadyAddedFixes() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
 
         addBravoFixes();
 
@@ -176,7 +183,7 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testAddFixesWhileTracking() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
 
@@ -195,7 +202,7 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testNoFixesAreLoadedIfNoStoredFixIsInTimeRange() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(300), new MillisecondsTimePoint(400)));
+                device, new MillisecondsTimePoint(AFTER_LAST_FIX), new MillisecondsTimePoint(END_OF_TRACKING)));
 
         addBravoFixes();
 
@@ -214,7 +221,7 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testFixesNotInMappedTimeRangeAreIgnoredWhileTracking() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(300), new MillisecondsTimePoint(400)));
+                device, new MillisecondsTimePoint(AFTER_LAST_FIX), new MillisecondsTimePoint(END_OF_TRACKING)));
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
 
@@ -233,7 +240,7 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testCompetitorWithoutMappingHasNoTrack() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
 
         addBravoFixes();
 
@@ -252,9 +259,9 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testDeviceIsMappedToDifferentCompetitorsInDifferentTimeRanges() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp2,
-                device, new MillisecondsTimePoint(201), new MillisecondsTimePoint(300)));
+                device, new MillisecondsTimePoint(MID_OF_TRACKING + 1), new MillisecondsTimePoint(END_OF_TRACKING)));
 
         addBravoFixes();
 
@@ -274,9 +281,9 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testMultipleMappingsForOneDeviceAndCompetitor() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(201), new MillisecondsTimePoint(300)));
+                device, new MillisecondsTimePoint(MID_OF_TRACKING + 1), new MillisecondsTimePoint(END_OF_TRACKING)));
 
         addBravoFixes();
 
@@ -295,8 +302,8 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testNothingLoadedForRevokedMapping() throws InterruptedException {
         RegattaLogDeviceCompetitorBravoMappingEventImpl mappingEvent = new RegattaLogDeviceCompetitorBravoMappingEventImpl(
-                new MillisecondsTimePoint(3), author, comp, device, new MillisecondsTimePoint(100),
-                new MillisecondsTimePoint(200));
+                new MillisecondsTimePoint(3), author, comp, device, new MillisecondsTimePoint(START_OF_TRACKING),
+                new MillisecondsTimePoint(MID_OF_TRACKING));
         regattaLog.add(mappingEvent);
         regattaLog.add(new RegattaLogRevokeEventImpl(author, mappingEvent, "Test purposes"));
 
@@ -318,14 +325,14 @@ public class SensorFixStoreAndLoadTest {
     public void testFixesAreLoadedIfThereIsOneRevokedAndOneNonRevokedMapping() throws InterruptedException {
         // revoked mapping timestamp 100-300
         RegattaLogDeviceCompetitorBravoMappingEventImpl mappingEvent = new RegattaLogDeviceCompetitorBravoMappingEventImpl(
-                new MillisecondsTimePoint(3), author, comp, device, new MillisecondsTimePoint(100),
-                new MillisecondsTimePoint(300));
+                new MillisecondsTimePoint(3), author, comp, device, new MillisecondsTimePoint(START_OF_TRACKING),
+                new MillisecondsTimePoint(END_OF_TRACKING));
         regattaLog.add(mappingEvent);
         regattaLog.add(new RegattaLogRevokeEventImpl(author, mappingEvent, "Test purposes"));
         
         // non-revoked mapping timestamp 100-200
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
         
@@ -346,10 +353,10 @@ public class SensorFixStoreAndLoadTest {
     public void testLoadFixesWhenClosingEventIsRevoked() throws InterruptedException {
         UUID mappingEventId = UUID.randomUUID();
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(MillisecondsTimePoint.now(),
-                new MillisecondsTimePoint(3), author, mappingEventId, comp, device, new MillisecondsTimePoint(100),
+                new MillisecondsTimePoint(3), author, mappingEventId, comp, device, new MillisecondsTimePoint(START_OF_TRACKING),
                 null));
         RegattaLogCloseOpenEndedDeviceMappingEventImpl closeEvent = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(
-                new MillisecondsTimePoint(4), author, mappingEventId, new MillisecondsTimePoint(200));
+                new MillisecondsTimePoint(4), author, mappingEventId, new MillisecondsTimePoint(MID_OF_TRACKING));
         regattaLog.add(closeEvent);
 
         addBravoFixes();
@@ -376,7 +383,7 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testBravoFixIsCorrectlyWrapped() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
 
         addBravoFixes();
 
@@ -397,9 +404,9 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testMultipleFixTypesAreLoadedInSeparateTracks() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorTestMappingEventImpl(new MillisecondsTimePoint(1), author, comp,
-                deviceTest, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                deviceTest, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         
         addTestFixes();
         addBravoFixes();
@@ -420,9 +427,9 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testMultipleFixTypesAreLoadedInSeparateTracksWhileTracking() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorTestMappingEventImpl(new MillisecondsTimePoint(1), author, comp,
-                deviceTest, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                deviceTest, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
@@ -444,9 +451,9 @@ public class SensorFixStoreAndLoadTest {
     @Test
     public void testMultipleFixTypesAreMappedCorrectly() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorTestMappingEventImpl(new MillisecondsTimePoint(1), author, comp,
-                deviceTest, new MillisecondsTimePoint(100), new MillisecondsTimePoint(300)));
+                deviceTest, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(300)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(END_OF_TRACKING)));
         
 
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
@@ -476,8 +483,8 @@ public class SensorFixStoreAndLoadTest {
 
     private void addBravoFixes() {
         store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP, FIX_RIDE_HEIGHT));
-        store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(120, 1338.0));
-        store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(210, 1336.0));
+        store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2));
+        store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP3, FIX_RIDE_HEIGHT3));
     }
 
     private FixLoaderAndTracker createFixLoaderAndTracker() {
@@ -630,14 +637,12 @@ public class SensorFixStoreAndLoadTest {
     
     @Test
     public void testThatMappingsOutsideOfTheTrackedIntervalDontCauseLoadingToFail() throws InterruptedException {
-        raceLog.add(new RaceLogStartOfTrackingEventImpl(new MillisecondsTimePoint(100), author, 0));
-        raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(300), author, 0));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
-                device, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(10), new MillisecondsTimePoint(20)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp2,
-                deviceTest, new MillisecondsTimePoint(100), new MillisecondsTimePoint(200)));
+                deviceTest, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp2,
                 deviceTest, new MillisecondsTimePoint(10), new MillisecondsTimePoint(20)));
         addBravoFixes();
