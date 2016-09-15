@@ -302,7 +302,7 @@ public class MasterDataImportTest {
                 logTimePoint4, author, competitor, deviceIdentifier2, logTimePoint,
                 logTimePoint3);
         regatta.getRegattaLog().add(bravoMappingEvent);
-        double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.getColumns().size()];
+        double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.columnCount];
         double rideHeightValue = 1337.0;
         fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeightValue;
         DoubleVectorFixImpl doubleVectorFix = new DoubleVectorFixImpl(logTimePoint2, fixData);

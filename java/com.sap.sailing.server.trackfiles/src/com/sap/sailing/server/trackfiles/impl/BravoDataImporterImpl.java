@@ -125,7 +125,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
         // long r16TP = ZonedDateTime.of(LocalDateTime.of(2016, 3, 19, 11, 55), ZoneId.of("Europe/Berlin"))
         // .toEpochSecond() * 1000;
         // fixTp = fixTp.plus(r16TP - 1461828459589l);
-        double[] fixData = new double[metadata.getColumns().size()];
+        double[] fixData = new double[metadata.columnCount];
         for (int columnIndexInFix = 0; columnIndexInFix < fixData.length; columnIndexInFix++) {
             String columnName = metadata.getColumns().get(columnIndexInFix);
             Integer columnIndexInFile = colIndices.get(columnName);
