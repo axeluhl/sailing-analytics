@@ -26,7 +26,6 @@ public class EventsActivity extends AbstractActivity implements Presenter {
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
-        // TODO: create mobile placeholder
         panel.setWidget(clientFactory.createBusyView());
         Window.setTitle(TextMessages.INSTANCE.events());
         final EventsView view = new EventsViewImpl(this);
