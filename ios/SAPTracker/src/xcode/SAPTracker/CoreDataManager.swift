@@ -70,22 +70,26 @@ public class CoreDataManager: NSObject {
     // MARK: - Insert
     
     func newRegatta() -> Regatta {
-        return NSEntityDescription.insertNewObjectForEntityForName(Entities.Regatta.rawValue, inManagedObjectContext: managedObjectContext) as! Regatta
+        let regatta = NSEntityDescription.insertNewObjectForEntityForName(Entities.Regatta.rawValue, inManagedObjectContext: managedObjectContext) as! Regatta
+        regatta.event = newEvent(regatta)
+        regatta.leaderboard = newLeaderboard(regatta)
+        regatta.competitor = newCompetitor(regatta)
+        return regatta
     }
     
-    func newEvent(regatta: Regatta) -> Event {
+    private func newEvent(regatta: Regatta) -> Event {
         let event = NSEntityDescription.insertNewObjectForEntityForName(Entities.Event.rawValue, inManagedObjectContext: managedObjectContext) as! Event
         event.regatta = regatta
         return event
     }
     
-    func newLeaderboard(regatta: Regatta) -> Leaderboard {
+    private func newLeaderboard(regatta: Regatta) -> Leaderboard {
         let leaderboard = NSEntityDescription.insertNewObjectForEntityForName(Entities.Leaderboard.rawValue, inManagedObjectContext: managedObjectContext) as! Leaderboard
         leaderboard.regatta = regatta
         return leaderboard
     }
     
-    func newCompetitor(regatta: Regatta) -> Competitor {
+    private func newCompetitor(regatta: Regatta) -> Competitor {
         let competitor = NSEntityDescription.insertNewObjectForEntityForName(Entities.Competitor.rawValue, inManagedObjectContext: managedObjectContext) as! Competitor
         competitor.regatta = regatta
         return competitor

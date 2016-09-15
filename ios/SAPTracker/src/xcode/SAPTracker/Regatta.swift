@@ -12,10 +12,13 @@ import CoreData
 @objc(Regatta)
 class Regatta: NSManagedObject {
 
-    func updateWirhRegattaData(regattaData: RegattaData) {
+    func updateWithRegattaData(regattaData: RegattaData) {
         serverURL = regattaData.serverURL
         teamImageURL = regattaData.teamImageURL
         teamImageRetry = false
+        event.updateWithEventData(regattaData.eventData)
+        leaderboard.updateWithLeaderboardData(regattaData.leaderboardData)
+        competitor.updateWithCompetitorData(regattaData.competitorData)
     }
     
     func eventURL() -> NSURL? {
