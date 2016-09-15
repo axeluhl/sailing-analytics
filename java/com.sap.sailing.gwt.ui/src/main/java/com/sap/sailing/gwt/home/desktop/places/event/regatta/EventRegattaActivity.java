@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
+import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
@@ -91,14 +91,14 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     public void forPlaceSelection(PlaceCallback callback) {
         EventViewDTO event = eventDTO;
         if (event.getType() == EventType.SERIES_EVENT) {
-            for(EventReferenceDTO seriesEvent : event.getEventsOfSeries()) {
+            for(EventReferenceWithStateDTO seriesEvent : event.getEventsOfSeries()) {
                 AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext().withId(seriesEvent.getId().toString()));
-                callback.forPlace(place, seriesEvent.getDisplayName(), (event.getId().equals(seriesEvent.getId())));
+                callback.forPlace(place, seriesEvent.getDisplayName(), (event.getId().equals(seriesEvent.getId())), seriesEvent.getState());
             }
         } else {
             for(RegattaReferenceDTO regatta : event.getRegattas()) {
                 AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(contextForRegatta(regatta.getId()));
-                callback.forPlace(place, regatta.getDisplayName(), (getRegattaId().equals(regatta.getId())));
+                callback.forPlace(place, regatta.getDisplayName(), (getRegattaId().equals(regatta.getId())), null);
             }
         }
     }

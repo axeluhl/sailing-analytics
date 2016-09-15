@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
@@ -182,18 +183,20 @@ public class EventHeader extends Composite {
         
         presenter.forPlaceSelection(new PlaceCallback() {
             @Override
-            public void forPlace(final AbstractEventPlace place, String title, boolean active) {
-                DropdownItem dropdownItem = new DropdownItem(title, presenter.getUrl(place), active);
-                dropdownItem.addDomHandler(new ClickHandler() {
-                    @Override
-                    public void onClick(ClickEvent event) {
-                        if(LinkUtil.handleLinkClick((Event) event.getNativeEvent())) {
-                            event.preventDefault();
-                            presenter.navigateTo(place);
+            public void forPlace(final AbstractEventPlace place, String title, boolean active, EventState eventState) {
+                if(eventState != EventState.PLANNED) {
+                    DropdownItem dropdownItem = new DropdownItem(title, presenter.getUrl(place), active);
+                    dropdownItem.addDomHandler(new ClickHandler() {
+                        @Override
+                        public void onClick(ClickEvent event) {
+                            if(LinkUtil.handleLinkClick((Event) event.getNativeEvent())) {
+                                event.preventDefault();
+                                presenter.navigateTo(place);
+                            }
                         }
-                    }
-                }, ClickEvent.getType());
-                dropdownContent.add(dropdownItem);
+                    }, ClickEvent.getType());
+                    dropdownContent.add(dropdownItem);
+                }
             }
         });
     }
