@@ -6,7 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class ThreadPoolUtilImpl implements ThreadPoolUtil {
-    private static final int REASONABLE_THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()-1, 3);
+    private static final int REASONABLE_THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
 
     private final ScheduledExecutorService defaultBackgroundTaskThreadPoolExecutor;
     private final ScheduledExecutorService defaultForegroundTaskThreadPoolExecutor;
@@ -14,7 +14,7 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
     public ThreadPoolUtilImpl() {
         defaultBackgroundTaskThreadPoolExecutor = Executors.newScheduledThreadPool(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
                 new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
-        defaultForegroundTaskThreadPoolExecutor = Executors.newScheduledThreadPool(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
+        defaultForegroundTaskThreadPoolExecutor = Executors.newScheduledThreadPool(/* corePoolSize */ Math.max(Runtime.getRuntime().availableProcessors()-1, 6),
                 new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
     }
     
