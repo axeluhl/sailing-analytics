@@ -226,7 +226,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             @PathParam("racename") String raceName, @QueryParam("fromtime") String fromtime,
             @QueryParam("fromtimeasmillis") Long fromtimeasmillis, @QueryParam("totime") String totime,
             @QueryParam("totimeasmillis") Long totimeasmillis, @QueryParam("withtack") Boolean withTack,
-            @QueryParam("competitorId") Set<String> competitorIds) {
+            @QueryParam("competitorId") Set<String> competitorIds,
+            @DefaultValue("false") @QueryParam("lastknown") boolean addLastKnown) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -281,33 +282,48 @@ public class RegattasResource extends AbstractSailingServerResource {
                             } else {
                                 fixIter = track.getFixesIterator(from, /* inclusive */true);
                             }
+                            GPSFixMoving fix = null; 
+                            boolean lastAdded = false;
                             while (fixIter.hasNext()) {
-                                GPSFixMoving fix = fixIter.next();
+                                fix = fixIter.next();
                                 if (to != null && fix.getTimePoint() != null && to.compareTo(fix.getTimePoint()) < 0) {
+                                    lastAdded = false;
                                     break;
                                 }
-                                JSONObject jsonFix = new JSONObject();
-                                jsonFix.put("timepoint-ms", fix.getTimePoint().asMillis());
-                                jsonFix.put("lat-deg", RoundingUtil.latLngDecimalFormatter.format(fix
-                                        .getPosition().getLatDeg()));
-                                jsonFix.put("lng-deg", RoundingUtil.latLngDecimalFormatter.format(fix
-                                        .getPosition().getLngDeg()));
-                                jsonFix.put("truebearing-deg", fix.getSpeed().getBearing().getDegrees());
-                                jsonFix.put("speed-kts",
-                                        RoundingUtil.knotsDecimalFormatter.format(fix.getSpeed().getKnots()));
+                                Tack tack = null;
                                 if (withTack != null && withTack) {
-                                    String tackName;
                                     try {
-                                        final Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
-                                        if (tack != null) {
-                                            tackName = tack.name();
-                                            jsonFix.put("tack", tackName);
-                                        }
+                                        tack = trackedRace.getTack(competitor, fix.getTimePoint());
                                     } catch (NoWindException e) {
                                         // don't output tack
                                     }
                                 }
-                                jsonFixes.add(jsonFix);
+                                addCompetitorFixToJsonFixes(jsonFixes, fix, tack);
+                                lastAdded = true;
+                            }
+                            
+                            if (addLastKnown && !lastAdded) {
+                                // find a fix earlier than the interval requested:
+                                Iterator<GPSFixMoving> earlierFixIter = track.getFixesDescendingIterator(from, /* inclusive */false);
+                                final GPSFixMoving earlierFix;
+                                if (earlierFixIter.hasNext()) {
+                                    earlierFix = earlierFixIter.next();
+                                } else {
+                                    earlierFix = null;
+                                }
+                                Tack tack = null;
+                                if (withTack != null && withTack) {
+                                    try {
+                                        tack = trackedRace.getTack(competitor, fix.getTimePoint());
+                                    } catch (NoWindException e) {
+                                        // don't output tack
+                                    }
+                                }
+                                if (earlierFix != null && (fix == null || earlierFix.getTimePoint().until(from).compareTo(to.until(fix.getTimePoint())) <= 0)) {
+                                    addCompetitorFixToJsonFixes(jsonFixes, earlierFix, tack); // the earlier fix is closer to the interval's beginning than fix is to its end
+                                } else if (fix != null) {
+                                    addCompetitorFixToJsonFixes(jsonFixes, fix, tack);
+                                }
                             }
                         } finally {
                             track.unlockAfterRead();
@@ -323,6 +339,23 @@ public class RegattasResource extends AbstractSailingServerResource {
             }
         }
         return response;
+    }
+
+    private JSONObject addCompetitorFixToJsonFixes(JSONArray jsonFixes, GPSFixMoving fix, Tack tack) {
+        JSONObject jsonFix = new JSONObject();
+        jsonFix.put("timepoint-ms", fix.getTimePoint().asMillis());
+        jsonFix.put("lat-deg", RoundingUtil.latLngDecimalFormatter.format(fix
+                .getPosition().getLatDeg()));
+        jsonFix.put("lng-deg", RoundingUtil.latLngDecimalFormatter.format(fix
+                .getPosition().getLngDeg()));
+        jsonFix.put("truebearing-deg", fix.getSpeed().getBearing().getDegrees());
+        jsonFix.put("speed-kts",
+                RoundingUtil.knotsDecimalFormatter.format(fix.getSpeed().getKnots()));
+        if (tack != null) {
+            jsonFix.put("tack", tack.name());
+        }
+        jsonFixes.add(jsonFix);
+        return jsonFix;
     }
 
     /**
@@ -404,7 +437,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         lastAdded = false;
                         break;
                     }
-                    addFixToJsonFixes(jsonFixes, fix);
+                    addMarkFixToJsonFixes(jsonFixes, fix);
                     lastAdded = true;
                 }
                 
@@ -418,9 +451,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                         earlierFix = null;
                     }
                     if (earlierFix != null && (fix == null || earlierFix.getTimePoint().until(from).compareTo(to.until(fix.getTimePoint())) <= 0)) {
-                        addFixToJsonFixes(jsonFixes, earlierFix); // the earlier fix is closer to the interval's beginning than fix is to its end
+                        addMarkFixToJsonFixes(jsonFixes, earlierFix); // the earlier fix is closer to the interval's beginning than fix is to its end
                     } else if (fix != null) {
-                        addFixToJsonFixes(jsonFixes, fix);
+                        addMarkFixToJsonFixes(jsonFixes, fix);
                     }
                 }
                 
@@ -437,19 +470,14 @@ public class RegattasResource extends AbstractSailingServerResource {
         return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
-    private JSONObject addFixToJsonFixes(JSONArray jsonFixes, GPSFix fix) {
-        JSONObject jsonFix = constructFixJson(fix);
-        jsonFixes.add(jsonFix);
-        return jsonFix;
-    }
-
-    private JSONObject constructFixJson(GPSFix fix) {
+    private JSONObject addMarkFixToJsonFixes(JSONArray jsonFixes, GPSFix fix) {
         JSONObject jsonFix = new JSONObject();
         jsonFix.put("timepoint-ms", fix.getTimePoint().asMillis());
         jsonFix.put("lat-deg",
                 RoundingUtil.latLngDecimalFormatter.format(fix.getPosition().getLatDeg()));
         jsonFix.put("lng-deg",
                 RoundingUtil.latLngDecimalFormatter.format(fix.getPosition().getLngDeg()));
+        jsonFixes.add(jsonFix);
         return jsonFix;
     }
 
