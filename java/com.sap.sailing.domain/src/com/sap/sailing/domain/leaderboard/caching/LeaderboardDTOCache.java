@@ -6,8 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Logger;
 
@@ -25,7 +23,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * Caches the expensive to compute {@link LeaderboardDTO} results of a
@@ -63,17 +60,6 @@ public class LeaderboardDTOCache implements LeaderboardCache {
      */
     private final boolean waitForLatestAnalyses;
     
-    /**
-     * A multi-threaded executor for the currently running leaderboard requests, executing the {@link Future}s currently
-     * pending. Note that this thread pool must be distinct from the thread pools used by
-     * {@link Leaderboard#computeDTO(TimePoint, Collection, boolean, boolean, TrackedRegattaRegistry, DomainFactory, boolean)}.
-     * If not, deadlocks may occur because the tasks scheduled to this executor will call
-     * {@link Leaderboard#computeDTO(TimePoint, Collection, boolean, boolean, TrackedRegattaRegistry, DomainFactory, boolean)
-     * computeDTO} which in turn requires runnable threads to complete the calculations of the leaderboard cells and the
-     * race details.
-     */
-    private static final Executor computeLeadearboardByNameExecutor = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor();
-
     private final LeaderboardCacheManager leaderboardCacheManager;
     
     private final Leaderboard leaderboard;
@@ -171,7 +157,6 @@ public class LeaderboardDTOCache implements LeaderboardCache {
                     }
                 }
             });
-            computeLeadearboardByNameExecutor.execute(future);
             // The add(Leaderboard) method that the cache manager calls back on this class does nothing, so no synchronization required
             this.leaderboardCacheManager.add(leaderboard); // ensure the leaderboard is tracked for changes to invalidate
             LockUtil.lockForWrite(leaderboardCacheLock);
@@ -180,6 +165,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
             } finally {
                 LockUtil.unlockAfterWrite(leaderboardCacheLock);
             }
+            future.run(); // execute in calling thread as it is fetched a few instructions later using future.get() anyway
         } else {
             cacheHit = true;
         }
