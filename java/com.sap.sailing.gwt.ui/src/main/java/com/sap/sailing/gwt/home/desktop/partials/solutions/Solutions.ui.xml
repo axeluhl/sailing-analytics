@@ -1,9 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-	<ui:with field="i18n"
-		type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
-    <ui:with field="smI18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res"
 		type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res"
@@ -112,7 +110,7 @@
 						<div
 							class="{res.mediaCss.small5} {res.mediaCss.smalloffset7} {res.mediaCss.columns}">
 							<h2>
-								<ui:text from='{i18n.sapSailingAnalytics}' />
+								<ui:text from='{i18n.sapSailingAnalyticsTitle}' />
 							</h2>
 							<p>
 								<ui:text from='{i18n.contentSapSailingAnalytics1}' />
@@ -143,12 +141,12 @@
                                     class="{style.storeBadgesContainer}"
                                     >
                                     <a  ui:field="raceManagerPlayStoreLinkUi"
-                                        href="{smI18n.playstoreRacecommitteeApp}"
+                                        href="{i18n.playstoreRacecommitteeApp}"
                                         target="_blank"
                                         ><img
                                             ui:field="raceManagerPlayStoreImgUi" 
                                             alt="Get it on Google Play" 
-                                            src="{smI18n.playstoreBadge}" 
+                                            src="{i18n.playstoreBadge}" 
                                             /></a>
                                 </div>
 								<g:Anchor ui:field="raceCommitteeAppDetailsAnchor"
@@ -172,22 +170,22 @@
 							</p>
 							<div class="{style.storeBadgesContainer}">
 								<a  ui:field="inSightAppStoreLinkUi"
-									href="{smI18n.appstoreSapSailInsight}"
+									href="{i18n.appstoreSapSailInsight}"
 									target="_blank"
 								><img
 									ui:field="inSightAppStoreImgUi"
 									alt="Get it on AppStore"
-									src="images/home/appstore{smI18n.appstoreBadgeSuffix}.svg"
+									src="images/home/appstore{i18n.appstoreBadgeSuffix}.svg"
 								/></a>
 							</div>
 							<div class="{style.storeBadgesContainer}">
 								<a  ui:field="inSightPlayStoreLinkUi"
-									href="{smI18n.playstoreInsightApp}"
+									href="{i18n.playstoreInsightApp}"
 									target="_blank"
 								><img
 									ui:field="inSightPlayStoreImgUi"
 									alt="Get it on Google Play"
-									src="{smI18n.playstoreBadge}"
+									src="{i18n.playstoreBadge}"
 								/></a>
 							</div>
 							<g:Anchor ui:field="inSightAppDetailsAnchor"
@@ -213,12 +211,12 @@
 									class="{style.storeBadgesContainer}"
 								>
 									<a  ui:field="buoyPingerPlayStoreLinkUi"
-										href="{smI18n.playStoreBuoyPingerApp}"
+										href="{i18n.playStoreBuoyPingerApp}"
 										target="_blank"
 									><img
 										ui:field="buoyPingerPlayStoreImgUi"
 										alt="Get it on Google Play"
-										src="{smI18n.playstoreBadge}"
+										src="{i18n.playstoreBadge}"
 									/></a>
 								</div>
 								<g:Anchor ui:field="buoyPingerAppDetailsAnchor"
@@ -262,9 +260,9 @@
                                     >
                                     <a
                                         alt="Get it on Appstore" 
-                                        href="{smI18n.appstoreStgTrainingstagebuch}"
+                                        href="{i18n.appstoreStgTrainingstagebuch}"
                                         target="_blank" class="{local_res.css.solutions_content_linkappstore}">
-                                        <img src="images/home/appstore{smI18n.appstoreBadgeSuffix}.svg"></img>
+                                        <img src="images/home/appstore{i18n.appstoreBadgeSuffix}.svg"></img>
                                     </a>
                                 </div>
 							</div>
