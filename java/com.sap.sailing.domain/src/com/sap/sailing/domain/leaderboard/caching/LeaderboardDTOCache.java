@@ -140,21 +140,13 @@ public class LeaderboardDTOCache implements LeaderboardCache {
             LockUtil.unlockAfterRead(leaderboardCacheLock);
         }
         if (future == null) {
-            final Thread callerThread = Thread.currentThread();
             future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
                 @Override
                 public LeaderboardDTO call() throws Exception {
-                    // The outer getLeaderboardByName(...) method will always wait for this future's completion.
-                    // Therefore, it's safe to propagate the calling thread's locks to this one:
-                    LockUtil.propagateLockSetFrom(callerThread);
-                    try {
-                        LeaderboardDTO result = leaderboard.computeDTO(adjustedTimePoint,
-                                namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
-                                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
-                        return result;
-                    } finally {
-                        LockUtil.unpropagateLockSetFrom(callerThread);
-                    }
+                    LeaderboardDTO result = leaderboard.computeDTO(adjustedTimePoint,
+                            namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
+                            waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
+                    return result;
                 }
             });
             // The add(Leaderboard) method that the cache manager calls back on this class does nothing, so no synchronization required
