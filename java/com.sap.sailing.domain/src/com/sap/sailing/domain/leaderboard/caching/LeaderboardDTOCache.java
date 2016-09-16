@@ -66,13 +66,13 @@ public class LeaderboardDTOCache implements LeaderboardCache {
     /**
      * A multi-threaded executor for the currently running leaderboard requests, executing the {@link Future}s currently
      * pending. Note that this thread pool must be distinct from the thread pools used by
-     * {@link Leaderboard#computeDTO(TimePoint, Collection, boolean, boolean, TrackedRegattaRegistry, DomainFactory, boolean)}
-     * . If not, deadlocks may occur because the tasks scheduled to this executor will call
+     * {@link Leaderboard#computeDTO(TimePoint, Collection, boolean, boolean, TrackedRegattaRegistry, DomainFactory, boolean)}.
+     * If not, deadlocks may occur because the tasks scheduled to this executor will call
      * {@link Leaderboard#computeDTO(TimePoint, Collection, boolean, boolean, TrackedRegattaRegistry, DomainFactory, boolean)
      * computeDTO} which in turn requires runnable threads to complete the calculations of the leaderboard cells and the
      * race details.
      */
-    private static final Executor computeLeadearboardByNameExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor();
+    private static final Executor computeLeadearboardByNameExecutor = ThreadPoolUtil.INSTANCE.createForegroundTaskThreadPoolExecutor();
 
     private final LeaderboardCacheManager leaderboardCacheManager;
     

@@ -63,4 +63,16 @@ public interface ThreadPoolUtil {
      * JITter.
      */
     int getReasonableThreadPoolSize();
+
+    /**
+     * Returns a new fixed-size thread pool executor that can be used to schedule foreground tasks for which quick
+     * response times are expected. Normally, clients should use {@link #getDefaultForegroundTaskThreadPoolExecutor()}
+     * instead. However, under certain rare circumstances it may be necessary or advisable to create a separate thread
+     * pool, e.g., when the computations of tasks submitted to the default thread pool depend on the results of other
+     * tasks. Those other tasks then must not be submitted to the same executor as deadlocks may occur.
+     * <p>
+     * 
+     * The same configuration as for {@link #getDefaultForegroundTaskThreadPoolExecutor()} is used.
+     */
+    ScheduledExecutorService createForegroundTaskThreadPoolExecutor();
 }

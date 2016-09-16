@@ -30,8 +30,17 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
 
     @Override
     public ScheduledExecutorService createBackgroundTaskThreadPoolExecutor() {
+        return createThreadPoolExecutor(Thread.NORM_PRIORITY-1);
+    }
+
+    @Override
+    public ScheduledExecutorService createForegroundTaskThreadPoolExecutor() {
+        return createThreadPoolExecutor(Thread.NORM_PRIORITY);
+    }
+
+    private ScheduledExecutorService createThreadPoolExecutor(final int priority) {
         return Executors.newScheduledThreadPool(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
-                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
+                new ThreadFactoryWithPriority(priority, /* daemon */ true));
     }
 
     @Override
