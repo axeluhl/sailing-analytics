@@ -29,6 +29,8 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
@@ -744,6 +746,16 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
                 TimePoint endOfInvalidation = interval.to();
                 scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
             }
+        }
+        
+        @Override
+        public void competitorSensorFixAdded(Competitor competitor, String trackName, SensorFix fix) {
+            // no action required
+        }
+        
+        @Override
+        public void competitorSensorTrackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
+            // no action required
         }
     }
 
