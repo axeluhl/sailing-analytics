@@ -150,7 +150,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     private transient Set<CacheInvalidationListener> cacheInvalidationListeners;
 
-    private static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
+    private static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
     
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
 
