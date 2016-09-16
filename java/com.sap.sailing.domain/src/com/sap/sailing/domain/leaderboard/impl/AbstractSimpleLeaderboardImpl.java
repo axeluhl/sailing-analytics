@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -153,17 +152,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     private static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
     
-    /**
-     * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
-     * can depend on the results of the tasks run by {@link #raceDetailsExecutor}, and an {@link Executor} doesn't
-     * move a task that is blocked by waiting for another {@link FutureTask} to the side but blocks permanently,
-     * ending in a deadlock (one that cannot easily be detected by the Eclipse debugger either). Using the default
-     * foreground executor ensures slightly higher priority than for the {@link #executor}, ensuring that these tasks
-     * are preferred over the {@link #executor} tasks which may be waiting for the completion of the tasks submitted
-     * to this excutor.
-     */
-    private final static ExecutorService raceDetailsExecutor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
-
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
 
     private transient LeaderboardDTOCache leaderboardDTOCache;
@@ -1618,9 +1606,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             RankingInfo rankingInfo, final WindLegTypeAndLegBearingCache cache) throws InterruptedException, ExecutionException {
         final com.sap.sse.common.Util.Pair<TrackedRace, Competitor> key = new com.sap.sse.common.Util.Pair<TrackedRace, Competitor>(trackedRace, competitor);
         RunnableFuture<RaceDetails> raceDetails;
+        final boolean needToRunRaceDetails; // when found in cache, another call to this method is already running it; else, it needs to be run here
         synchronized (raceDetailsAtEndOfTrackingCache) {
             raceDetails = raceDetailsAtEndOfTrackingCache.get(key);
             if (raceDetails == null) {
+                needToRunRaceDetails = true;
                 raceDetails = new FutureTask<RaceDetails>(new Callable<RaceDetails>() {
                     @Override
                     public RaceDetails call() throws Exception {
@@ -1635,12 +1625,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 legRanksCache, cache, rankingInfo);
                     }
                 });
-                raceDetailsExecutor.execute(raceDetails);
-                raceDetailsAtEndOfTrackingCache.put(key, raceDetails);
+                raceDetailsAtEndOfTrackingCache.put(key, raceDetails); // this way, 
                 final CacheInvalidationListener cacheInvalidationListener = new CacheInvalidationListener(trackedRace, competitor);
                 trackedRace.addListener(cacheInvalidationListener);
                 cacheInvalidationListeners.add(cacheInvalidationListener);
+            } else {
+                needToRunRaceDetails = false;
             }
+        }
+        // now, outside the synchronized block, run task if needed:
+        if (needToRunRaceDetails) {
+            raceDetails.run();
         }
         return raceDetails.get();
     }
