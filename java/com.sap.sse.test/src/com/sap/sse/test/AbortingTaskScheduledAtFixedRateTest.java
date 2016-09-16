@@ -15,6 +15,11 @@ public class AbortingTaskScheduledAtFixedRateTest {
     private static final int RATE_IN_MILLIS = 100;
     private static final Logger logger = Logger.getLogger(AbortingTaskScheduledAtFixedRateTest.class.getName());
     
+    /**
+     * Asserts that calling {@link ScheduledFuture#cancel(boolean)} on an object returned by
+     * {@link ScheduledExecutorService#scheduleAtFixedRate(Runnable, long, long, TimeUnit)} keeps the
+     * task from executing again.
+     */
     @Test
     public void testAbortTaskScheduledAtFixedRate() throws InterruptedException {
         final int[] executions = new int[1];
