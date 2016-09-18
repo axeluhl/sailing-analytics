@@ -81,7 +81,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         return (TypeBasedServiceFinder) serviceFinderFactory.createServiceFinder(FixMongoHandler.class);
     }
 
-    public <T extends Timed> T loadFix(DBObject object)
+    private <T extends Timed> T loadFix(DBObject object)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
         String type = (String) object.get(FieldNames.GPSFIX_TYPE.name());
         DBObject fixObject = (DBObject) object.get(FieldNames.GPSFIX.name());
@@ -259,5 +259,11 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     @SuppressWarnings("unchecked")
     private <FixT extends Timed> FixMongoHandler<FixT> findService(String type) {
         return (FixMongoHandler<FixT>) fixServiceFinder.findService(type);
+    }
+
+    @Override
+    public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
