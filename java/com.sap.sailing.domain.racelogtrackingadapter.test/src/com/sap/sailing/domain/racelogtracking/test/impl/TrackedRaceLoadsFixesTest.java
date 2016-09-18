@@ -179,5 +179,14 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         assertEquals(1, lastFixes3.size());
         Timed lastFix3 = lastFixes3.get(device);
         assertEquals(2200, lastFix3.getTimePoint().asMillis());
+        final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
+        store.storeFix(device2, createFix(1200, 10, 20, 30, 40));
+        store.storeFix(device2, createFix(1100, 10, 20, 30, 40));
+        final Map<DeviceIdentifier, Timed> lastFixes4 = store.getLastFix(Arrays.asList(device, device2));
+        assertEquals(2, lastFixes4.size());
+        Timed lastFix4 = lastFixes4.get(device);
+        assertEquals(2200, lastFix4.getTimePoint().asMillis());
+        Timed lastFixDevice2 = lastFixes4.get(device2);
+        assertEquals(1200, lastFixDevice2.getTimePoint().asMillis());
     }
 }
