@@ -262,8 +262,22 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     }
 
     @Override
-    public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) {
-        // TODO Auto-generated method stub
-        return null;
+    public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices)
+            throws TransformationException, NoCorrespondingServiceRegisteredException {
+        Map<DeviceIdentifier, FixT> result  = new HashMap<>();
+        for (final DeviceIdentifier deviceIdentifier : forDevices) {
+            final DBObject deviceQuery = new BasicDBObject(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(),
+                    deviceIdentifier.getStringRepresentation());
+            final DBObject orderBy = new BasicDBObject(FieldNames.GPSFIX.name()+"."+FieldNames.TIME_AS_MILLIS.name(), -1);
+            DBCursor lastFixForDeviceCursor = fixesCollection.find(deviceQuery).sort(orderBy).limit(1);
+            if (lastFixForDeviceCursor.hasNext()) {
+                final DBObject lastFixForDeviceDbObject = lastFixForDeviceCursor.next();
+                final Timed lastFixForDevice = loadFix(lastFixForDeviceDbObject);
+                @SuppressWarnings("unchecked")
+                final FixT lastFixForDeviceTyped = (FixT) lastFixForDevice;
+                result.put(deviceIdentifier, lastFixForDeviceTyped);
+            }
+        }
+        return result;
     }
 }

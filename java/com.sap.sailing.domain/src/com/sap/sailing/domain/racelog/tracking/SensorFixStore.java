@@ -70,5 +70,5 @@ public interface SensorFixStore {
     
     long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException;
     
-    <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices);
+    <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) throws TransformationException, NoCorrespondingServiceRegisteredException;
 }
