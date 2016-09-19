@@ -71,3 +71,7 @@
   font-size: 1.1rem;
   font-weight: bold;
 }
+a.logolink, a.logolink:hover, a.logolink:visited {
+  border: none;
+  text-decoration: none;
+}

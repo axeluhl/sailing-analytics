@@ -21,6 +21,7 @@ public interface SAPHeaderResources extends ClientBundle {
         String logo();
         String logotitle();
         String pagetitle();
+        String logolink();
     }
     
     @Source("logo-small@2x.png")
