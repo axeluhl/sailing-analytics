@@ -4,7 +4,7 @@ import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 
 public class WhatsNewPlace extends AbstractBasePlace {
-    public enum WhatsNewNavigationTabs { SailingAnalytics, RaceCommiteeApp, PostRaceAnalytics, TrainingDiary, SailingSimulator };
+    public enum WhatsNewNavigationTabs { SailingAnalytics, RaceManagerApp, InSightApp, BuoyPingerApp, PostRaceAnalytics, TrainingDiary, SailingSimulator };
     private final WhatsNewNavigationTabs navigationTab;
     private final static String PARAM_NAVIGATION_TAB = "navigationTab"; 
 

@@ -12,7 +12,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
@@ -31,7 +30,6 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     }
     
     private static final CellTemplates TEMPLATE = GWT.create(CellTemplates.class);
-    private static final TextMessages I18N_UBI = TextMessages.INSTANCE;
     private static final StringMessages I18N = StringMessages.INSTANCE;
     
     private final RaceviewerLaunchPadResources local_res = RaceviewerLaunchPadResources.INSTANCE;
@@ -80,7 +78,7 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
             String styleNames = data.isFinished() ? analyzeStyleNames : liveStyleNames;
             sb.append(TEMPLATE.raceviewerLaunchPad(styleNames, iconStyleNames, I18N.raceDetailsToShow()));
         } else {
-            sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, I18N_UBI.eventRegattaRaceNotTracked()));
+            sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, I18N.eventRegattaRaceNotTracked()));
         }
     }
 

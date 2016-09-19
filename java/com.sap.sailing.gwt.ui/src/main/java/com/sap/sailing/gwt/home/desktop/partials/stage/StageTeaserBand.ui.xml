@@ -1,6 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.stage.StageResources" />
 	<g:HTMLPanel styleName="{local_res.css.stageteaser_content_band_item} {res.mediaCss.columns}">
@@ -12,7 +12,7 @@
 			<div class="{local_res.css.stageteaser_content_band_text_name}">
 				<span ui:field="bandSubtitle" />&nbsp;&nbsp;&nbsp;
 				<div ui:field="isLiveDiv" data-labeltype="live" class="{res.mainCss.label}">
-					<ui:text from='{i18n.live}' />
+					<ui:text from="{i18n.liveCapitalLetter}" />
 				</div>
 			</div>
 		</div>

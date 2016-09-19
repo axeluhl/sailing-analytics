@@ -4,7 +4,6 @@
 	xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials"
 	xmlns:s="urn:import:com.sap.sailing.gwt.home.desktop.places.fakeseries">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-  <ui:with field="tm" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
   <ui:style>
     .header {
       position: relative;
@@ -45,10 +44,10 @@
       <c:tabcontent title="{i18n.events}">
         <s:eventstab.SeriesEventsTabView />
       </c:tabcontent>
-      <c:tabcontent title="{tm.overallLeaderboard}">
+      <c:tabcontent title="{i18n.overallLeaderboard}">
         <s:overallleaderboardtab.EventSeriesOverallLeaderboardTabView />
       </c:tabcontent>
-      <c:tabcontent title="{tm.regattaLeaderboards}">
+      <c:tabcontent title="{i18n.regattaLeaderboards}">
         <s:leaderboardstab.EventSeriesLeaderboardsTabView />
       </c:tabcontent>
       <c:tabcontent title="{i18n.competitorsAnalytics}">
