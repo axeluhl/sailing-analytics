@@ -56,6 +56,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.v4.content.LocalBroadcastManager;
@@ -83,7 +84,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
 
     private View mHeaderLayout;
     private View mContentLayout;
-    private View mMapLayout;
 
     private TextView mHeaderText;
     private TextView mHeaderWindSensor;
@@ -98,8 +98,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     private EditText mWindInputDirection;
     private EditText mWindInputSpeed;
     private Button mContentMapShow;
-    private WebView mMapWebView;
-    private Button mMapHide;
     private ImageView mEditCourse;
     private ImageView mEditSpeed;
 
@@ -149,7 +147,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
 
         mHeaderLayout = ViewHelper.get(layout, R.id.header_layout);
         mContentLayout = ViewHelper.get(layout, R.id.content_layout);
-        mMapLayout = ViewHelper.get(layout, R.id.map_layout);
 
         mHeaderText = ViewHelper.get(layout, R.id.header_text);
         mHeaderWindSensor = ViewHelper.get(layout, R.id.wind_sensor);
@@ -174,8 +171,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
             mWindInputSpeed.addTextChangedListener(new DecimalInputTextWatcher(mWindInputSpeed, 1));
         }
         mContentMapShow = ViewHelper.get(layout, R.id.position_show);
-        mMapWebView = ViewHelper.get(layout, R.id.web_view);
-        mMapHide = ViewHelper.get(layout, R.id.position_hide);
 
         mReceiver = new IsTrackedReceiver(mContentMapShow);
 
@@ -212,15 +207,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         super.notifyTick(now);
 
         refreshUI(true);
-    }
-
-    @Override
-    public boolean onBackPressed() {
-        if (mMapHide == null && mContentLayout.getVisibility() == View.GONE) {
-            setupLayouts(false);
-            return true;
-        }
-        return super.onBackPressed();
     }
 
     /**
@@ -321,15 +307,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
             mContentMapShow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    setupLayouts(true);
-                }
-            });
-        }
-        if (mMapHide != null) {
-            mMapHide.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    setupLayouts(false);
+                    loadRaceMap(/* showWindCharts */ true, /* showStreamlets */ false, /* showSimulation */ false, /* showMapControls */ true);
                 }
             });
         }
@@ -385,18 +363,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         if (mContentLayout != null) {
             mContentLayout.setVisibility(showMap ? View.GONE : View.VISIBLE);
         }
-        if (mMapLayout != null) {
-            WebSettings settings = mMapWebView.getSettings();
-            if (showMap) {
-                settings.setJavaScriptEnabled(true);
-                loadRaceMap(/* showWindCharts */ true, /* showStreamlets */ false, /* showSimulation */ false, /* showMapControls */ true);
-                mMapLayout.setVisibility(View.VISIBLE);
-            } else {
-                mMapWebView.loadUrl("about:blank");
-                settings.setJavaScriptEnabled(false);
-                mMapLayout.setVisibility(View.GONE);
-            }
-        }
     }
 
     private boolean loadRaceMap(boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls) {
@@ -404,7 +370,9 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         if (race != null) {
             // build complete race map url
             String mapUrl = WindHelper.generateMapURL(getActivity(), race, showWindCharts, showStreamlets, showSimulation, showMapControls);
-            mMapWebView.loadUrl(mapUrl);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(mapUrl));
+            startActivity(intent);
             return true;
         }
         return false;
