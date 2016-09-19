@@ -12,7 +12,6 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -53,7 +52,7 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
     @Override
     public void navigateTabsTo(AbstractUserProfilePlace place) {
         tabPanelUi.activatePlace(place);
-        StringBuilder titleBuilder = new StringBuilder(TextMessages.INSTANCE.sapSailing()).append(" - ");
+        StringBuilder titleBuilder = new StringBuilder(StringMessages.INSTANCE.sapSailing()).append(" - ");
 
         titleBuilder.append(place.getLocationTitle());
 

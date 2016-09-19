@@ -10,28 +10,53 @@ import Foundation
 
 class TimerViewController: UIViewController {
 
-    @IBOutlet weak var trackingTimeLabel: UILabel!
+    private let startDate = NSDate()
     
-    let startDate = NSDate()
-    let dateFormatter = NSDateFormatter()
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var timeLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // start tracking timer
-        let timer = NSTimer(timeInterval: 0.1, target: self, selector: "timer:", userInfo: nil, repeats: true)
-        NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)
-        dateFormatter.dateFormat = "HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
-        
+        setup()
     }
     
-    // MARK:- Timer
+    // MARK: - Setup
     
-    func timer(timer: NSTimer) {
+    private func setup() {
+        setupLocalization()
+        setupTimer()
+    }
+    
+    private func setupLocalization() {
+        titleLabel.text = Translation.TimerView.TitleLabel.Text.String
+    }
+    
+    private func setupTimer() {
+        let timer = NSTimer(timeInterval: 0.1,
+                            target: self,
+                            selector: #selector(tick),
+                            userInfo: nil,
+                            repeats: true
+        )
+        NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)    
+    }
+    
+    // MARK: - Timer
+    
+    @objc private func tick(timer: NSTimer) {
         let currentDate = NSDate()
         let timeInterval = currentDate.timeIntervalSinceDate(startDate)
         let timerDate = NSDate(timeIntervalSince1970: timeInterval)
-        trackingTimeLabel.text = dateFormatter.stringFromDate(timerDate)
+        timeLabel.text = dateFormatter.stringFromDate(timerDate)
     }
+    
+    // MARK: - Properties
+    
+    private lazy var dateFormatter: NSDateFormatter = {
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateFormat = "HH:mm:ss"
+        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
+        return dateFormatter
+    }()
+    
 }

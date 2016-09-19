@@ -14,6 +14,7 @@ class LicenseViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.title = Translation.LicenseView.Title.String
         if let file = NSBundle.mainBundle().pathForResource("Acknowledgements", ofType: "markdown") {
             let license = try? NSString(contentsOfFile: file, encoding: NSUTF8StringEncoding)
             if (license != nil) {
