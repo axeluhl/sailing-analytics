@@ -15,6 +15,25 @@
     <string name="preference_energy_saving_is_disabled">Off</string>
     <string name="preference_energy_saving_summary_is_enabled">GPS updates are being sent to server every 30 seconds.</string>
     <string name="preference_energy_saving_summary_is_disabled">GPS updates are being sent to server every second.</string>
+    
+    <string name="preference_energy_saving_sending_interval_key">msgSndInt</string>
+    <string name="preference_energy_saving_sending_interval_default">0</string>
+    <string name="preference_energy_saving_sending_interval">choose GPS update sending interval</string> 
+    <string name="preference_energy_saving_sending_interval_summary">Choose a value as high as possible to preserve battery life while still maintaining the required live experience given by your use case.</string>
+    <string-array name="preference_energy_saving_sending_interval_entries">
+    	<item>immediately</item>
+    	<item>5 seconds</item>
+    	<item>10 seconds</item>
+    	<item>20 seconds</item>
+    	<item>60 seconds</item>
+	</string-array>
+	<string-array name="preference_energy_saving_sending_interval_values">
+    	<item>0</item>
+    	<item>5</item>
+    	<item>10</item>
+    	<item>20</item>
+    	<item>60</item>
+	</string-array>
 
     <string name="preference_gps_fix_interval_ms_key" translatable="false">gpsFixInterval</string>
     <string name="preference_gps_fix_interval_ms_default" translatable="false">500</string>

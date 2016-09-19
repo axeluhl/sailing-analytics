@@ -353,8 +353,10 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     private void updateResendIntervalSetting() {
         float batteryPct = getBatteryPercentage();
         boolean batteryIsCharging = prefs.getBatteryIsCharging();
-        int updateInterval = UPDATE_INTERVAL_IN_MILLIS_DEFAULT;
-        if (prefs.getEnergySavingEnabledByUser() || (batteryPct < BATTERY_POWER_SAVE_THRESHOLD && !batteryIsCharging)) {
+        //int updateInterval = UPDATE_INTERVAL_IN_MILLIS_DEFAULT;
+        int updateInterval = prefs.getMessageSendingIntervalInMillis();
+        //if (prefs.getEnergySavingEnabledByUser() || (batteryPct < BATTERY_POWER_SAVE_THRESHOLD && !batteryIsCharging)) {
+        if (batteryPct < BATTERY_POWER_SAVE_THRESHOLD && !batteryIsCharging) {
             if (BuildConfig.DEBUG) {
                 ExLog.i(this, "POWER-LEVELS", "in power saving mode");
             }

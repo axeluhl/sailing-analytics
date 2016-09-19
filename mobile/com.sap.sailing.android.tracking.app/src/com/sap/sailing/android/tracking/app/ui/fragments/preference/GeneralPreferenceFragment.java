@@ -1,7 +1,9 @@
 package com.sap.sailing.android.tracking.app.ui.fragments.preference;
 
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.SwitchPreference;
 
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
@@ -9,8 +11,7 @@ import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
-public class GeneralPreferenceFragment extends BasePreferenceFragment {
-
+public class GeneralPreferenceFragment extends BasePreferenceFragment implements OnPreferenceChangeListener {   
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,11 +25,14 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         if (currentDeviceId != null && currentDeviceId.length() > 0) {
             deviceIdPreference.setSummary(currentDeviceId);
         } else {
-            // this would, in most caes, be set elsewhere, but since we don't want to show an empty summary,
+            // this would, in most cases, be set elsewhere, but since we don't want to show an empty summary,
             // we can just set it here. (UniqueDeviceUuid.getUniqueId sets it in prefs.)
             String newDeviceId = UniqueDeviceUuid.getUniqueId(getActivity());
             deviceIdPreference.setSummary(newDeviceId);
         }
+        
+        ListPreference prefSendingInterval = findPreference(R.string.preference_energy_saving_sending_interval_key);
+        prefSendingInterval.setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -42,5 +46,23 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
         prefs.setEnergySavingEnabledByUser(prefEnergy.isChecked());
         prefs.setDisplayHeadingWithSubtractedDeclination(prefDeclination.isChecked());
+    }
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        AppPreferences prefs = new AppPreferences(getActivity());
+        if(preference.getKey().equals(getString(R.string.preference_energy_saving_sending_interval_key))) {
+            int msgSndInt = Integer.parseInt((String)newValue);
+            switch (msgSndInt){
+                case 0:
+                    //send every second
+                    prefs.setMessageResendIntervalInMillis(1000);
+                    break;
+                default:
+                    prefs.setMessageResendIntervalInMillis(msgSndInt * 1000);
+                    break;
+            }
+        }
+        return true;
     }
 }
