@@ -38,6 +38,8 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
+    public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
+
     private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
 
     private String leaderboardName;
@@ -145,7 +147,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             mainPanel.addNorth(logoAndTitlePanel, 68);
         }
         ScrollPanel contentScrollPanel = new ScrollPanel();
-        long delayBetweenAutoAdvancesInMilliseconds = 3000l;
+        long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
         Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
