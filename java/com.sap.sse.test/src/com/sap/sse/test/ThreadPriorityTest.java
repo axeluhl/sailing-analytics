@@ -45,7 +45,9 @@ public class ThreadPriorityTest {
         Counter[] tasks = new Counter[Thread.MAX_PRIORITY+1];
         for (int i=Thread.MIN_PRIORITY; i<=Thread.MAX_PRIORITY; i++) {
             tasks[i] = new Counter();
-            new Thread(tasks[i]).start();
+            final Thread thread = new Thread(tasks[i]);
+            thread.setPriority(i);
+            thread.start();
         }
         Thread.sleep(10000l);
         for (int i=Thread.MIN_PRIORITY; i<=Thread.MAX_PRIORITY; i++) {
