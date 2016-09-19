@@ -58,26 +58,18 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     }
 
     private boolean requestQRCodeScan() {
-        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-
-        PackageManager manager = getActivity().getPackageManager();
-        List<ResolveInfo> infos = manager.queryIntentActivities(intent, 0);
-        if (infos.size() != 0) {
+        try {
+            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
             startActivityForResult(intent, requestCodeQRCode);
-            return true;
-        } else {
+        }
+        catch (Exception ex) {
             Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
             Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            infos = manager.queryIntentActivities(marketIntent, 0);
-            if (infos.size() != 0) {
-                startActivity(marketIntent);
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.error_play_store_and_scanning_not_available),
-                        Toast.LENGTH_LONG).show();
-            }
+            startActivity(marketIntent);
             return false;
         }
+        return true;
     }
 
     @Override
