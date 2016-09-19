@@ -54,6 +54,9 @@ public class EventParamUtils {
                 || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_MANEUVER_DETAIL)
                 || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_OVERALL_DETAIL)
                 || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES)
+                || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_PRESELECTED_RACE)
+                || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS)
+                || parameterMap.containsKey(LeaderboardUrlSettings.COMPETITOR_COLUMN_NATIONALITY)
                 || parameterMap
                         .containsKey(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED)) {
             List<DetailType> maneuverDetails = getDetailTypeListFromParamValue(parameterMap
