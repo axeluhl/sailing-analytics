@@ -43,6 +43,7 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * This class listens to RaceLog Events, changes to the race and fix loading events and properly handles mappings and
@@ -297,8 +298,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             activeLoaders.incrementAndGet();
             setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
         }
-        Thread t = new Thread(
-                this.getClass().getSimpleName() + " loader for tracked race " + trackedRace.getRace().getName()) {
+        ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -320,11 +320,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         }
                     }
                     trackedRace.unlockAfterSerializationRead();
-                    logger.info("Thread " + getName() + " done.");
                 }
             }
-        };
-        t.start();
+        });
     }
 
     /**

@@ -39,10 +39,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -487,7 +484,7 @@ import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ServiceTrackerFactory;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.ThreadPoolUtil;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
 
@@ -606,12 +603,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
-        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
-        executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-                /* maximumPoolSize */ THREAD_POOL_SIZE,
-                /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>(),
-                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+        executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
     }
     
     /**

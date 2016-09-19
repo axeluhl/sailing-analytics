@@ -10,9 +10,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +27,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.IntHolder;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using an {@link CandidateFinder} and an
@@ -52,11 +49,7 @@ public class MarkPassingCalculator {
     private CandidateChooser chooser;
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
     private final MarkPassingUpdateListener listener;
-    private final static ExecutorService executor = new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime
-            .getRuntime().availableProcessors()/2, 3),
-    /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
-    /* keepAliveTime */60, TimeUnit.SECONDS,
-    /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1, /* daemon */ true));
+    private final static ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
 
     private boolean suspended = false;
     
