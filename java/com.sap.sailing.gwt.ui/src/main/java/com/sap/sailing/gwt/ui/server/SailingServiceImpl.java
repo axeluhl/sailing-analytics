@@ -452,6 +452,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -5399,6 +5400,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
+        final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getLastFix(Collections.singleton(mapping.getDevice()));
+        final Timed lastFix;
+        if (lastFixes != null && lastFixes.containsKey(mapping.getDevice())) {
+            lastFix = lastFixes.get(mapping.getDevice());
+        } else {
+            lastFix = null;
+        }
         String deviceId = serializeDeviceIdentifier(mapping.getDevice());
         Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ? 
                 null : mapping.getTimeRange().from().asDate();
@@ -5428,7 +5436,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             originalRaceLogEventUUIDs.add((UUID) id);
         }
         return new DeviceMappingDTO(new DeviceIdentifierDTO(mapping.getDevice().getIdentifierType(),
-                deviceId), from, to, item, originalRaceLogEventUUIDs);
+                deviceId), from, to, item, originalRaceLogEventUUIDs, lastFix==null?null:lastFix.getTimePoint());
     }
     
     private List<AbstractLog<?, ?>> getLogHierarchy(String leaderboardName, String raceColumnName,
