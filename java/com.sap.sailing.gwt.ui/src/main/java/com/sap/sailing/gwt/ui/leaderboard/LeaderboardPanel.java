@@ -701,10 +701,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                 sb.appendHtmlConstant("<div style=\"border-bottom: 2px solid " + competitorColor + ";\">");
             }
             
-            if (flagImageURL != null && !flagImageURL.isEmpty()) {
-                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
-                sb.appendHtmlConstant("&nbsp;");
-            } else if (!isCompetitorNationalityColumnVisible) {
+            if (isCompetitorNationalityColumnVisible || flagImageURL == null || flagImageURL.isEmpty()) {
                 final ImageResource nationalityFlagImageResource;
                 if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
                     nationalityFlagImageResource = FlagImageResolver.getEmptyFlagImageResource();
@@ -716,6 +713,10 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                     sb.appendHtmlConstant("&nbsp;");
                 }
             }
+            if (flagImageURL != null && !flagImageURL.isEmpty()) {
+                sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
+                sb.appendHtmlConstant("&nbsp;");
+            }
             sb.appendEscaped(competitor.getSailID());
             if (showBoatColor) {
                 sb.appendHtmlConstant("</div>");
@@ -725,61 +726,6 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         @Override
         public String getValue(T object) {
             return competitorFetcher.getCompetitor(object).getSailID();
-        }
-    }
-
-    /**
-     * Shows the country flag representing the nationality, if present
-     * 
-     * @author Frank Mittag (c5163874)
-     * 
-     */
-    private class NationalityColumn<T> extends LeaderboardSortableColumnWithMinMax<T, String> {
-        private final CompetitorFetcher<T> competitorFetcher;
-        
-        protected NationalityColumn(CompetitorFetcher<T> competitorFetcher) {
-            super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
-            setHorizontalAlignment(ALIGN_CENTER);
-            this.competitorFetcher = competitorFetcher;
-        }
-
-        @Override
-        public InvertibleComparator<T> getComparator() {
-            return new InvertibleComparatorAdapter<T>() {
-                @Override
-                public int compare(T o1, T o2) {
-                    return competitorFetcher.getCompetitor(o1).getTwoLetterIsoCountryCode() == null ? competitorFetcher.getCompetitor(o2).getTwoLetterIsoCountryCode() == null ? 0 : -1
-                            : competitorFetcher.getCompetitor(o2).getTwoLetterIsoCountryCode() == null ? 1 : Collator.getInstance().compare(
-                                    competitorFetcher.getCompetitor(o1).getTwoLetterIsoCountryCode(), competitorFetcher.getCompetitor(o2).getTwoLetterIsoCountryCode());
-                }
-            };
-        }
-
-        @Override
-        public SafeHtmlHeader getHeader() {
-            return new SafeHtmlHeaderWithTooltip(SafeHtmlUtils.fromString(stringMessages.nationality()), stringMessages.competitorNationalityColumnTooltip());
-        }
-
-        @Override
-        public void render(Context context, T object, SafeHtmlBuilder sb) {
-            ImageResourceRenderer renderer = new ImageResourceRenderer();
-            CompetitorDTO competitor = competitorFetcher.getCompetitor(object);
-            final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
-            final ImageResource nationalityFlagImageResource;
-            if (twoLetterIsoCountryCode==null || twoLetterIsoCountryCode.isEmpty()) {
-                nationalityFlagImageResource = FlagImageResolver.getEmptyFlagImageResource();
-            } else {
-                nationalityFlagImageResource = FlagImageResolver.getFlagImageResource(twoLetterIsoCountryCode);
-            }
-            if (nationalityFlagImageResource != null) {
-                sb.append(renderer.render(nationalityFlagImageResource));
-                sb.appendHtmlConstant("&nbsp;");
-            }
-        }
-
-        @Override
-        public String getValue(T object) {
-            return competitorFetcher.getCompetitor(object).getTwoLetterIsoCountryCode();
         }
     }
 
@@ -3014,18 +2960,6 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
      * @return the 0-based index for the next column
      */
     private int ensureSailIDAndCompetitorColumn(int columnIndexWhereToInsertTheNextColumn) {
-        if (isShowCompetitorNationality()) {
-            if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
-                    || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof NationalityColumn<?>)) {
-                insertColumn(columnIndexWhereToInsertTheNextColumn, createNationalityColumn());
-            }
-            columnIndexWhereToInsertTheNextColumn++;
-        } else {
-            if (getLeaderboardTable().getColumnCount() > columnIndexWhereToInsertTheNextColumn
-                    && getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof NationalityColumn<?>) {
-                removeColumn(columnIndexWhereToInsertTheNextColumn);
-            }
-        }
         if (isShowCompetitorSailId()) {
             if (getLeaderboardTable().getColumnCount() <= columnIndexWhereToInsertTheNextColumn
                     || !(getLeaderboardTable().getColumn(columnIndexWhereToInsertTheNextColumn) instanceof SailIDColumn<?>)) {
@@ -3051,15 +2985,6 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             }
         }
         return columnIndexWhereToInsertTheNextColumn;
-    }
-
-    protected NationalityColumn<LeaderboardRowDTO> createNationalityColumn() {
-        return new NationalityColumn<LeaderboardRowDTO>(new CompetitorFetcher<LeaderboardRowDTO>() {
-            @Override
-            public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
-                return t.competitor;
-            }
-        });
     }
 
     protected SailIDColumn<LeaderboardRowDTO> createSailIDColumn() {
