@@ -26,6 +26,12 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
  * created by this class's constructor by calling {@link #getColumnSortHandler}.
  */
 public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> implements IsWidget {
+    /**
+     * If the {@code enablePager} constructur argument is set to {@code true} then this many entries are shown
+     * at most on one page, and users will have to flip through the pages one by one.
+     */
+    private static final int PAGING_SIZE = 100;
+    
     protected final FlushableCellTable<T> table;
     private S selectionModel;
     protected ListDataProvider<T> dataProvider;
@@ -67,7 +73,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
         dataProvider.addDataDisplay(table);
         mainPanel.add(table);
         if (enablePager) {
-            table.setPageSize(8);
+            table.setPageSize(PAGING_SIZE);
             SimplePager pager = new SimplePager() {
                 protected String createText() {
                     HasRows display = getDisplay();
