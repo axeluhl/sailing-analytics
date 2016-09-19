@@ -203,6 +203,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 };
             }
         };
+        deviceMappingTable.registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         final VerticalPanel vp = new VerticalPanel();
         deviceMappingPanel.add(vp);
         vp.add(filterField);

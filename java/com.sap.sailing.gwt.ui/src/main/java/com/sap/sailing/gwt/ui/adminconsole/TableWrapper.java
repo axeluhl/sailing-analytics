@@ -19,6 +19,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
+import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
 /**
  * Implementing classes still have to add the table to the main panel. The table created and wrapped by this object
@@ -115,8 +116,11 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
     }
     
     /**
-     * This method allows you to change the data base for the {@link RefreshableSelectionModel}. Therefore a new
-     * {@link ListDataProvider} is needed.
+     * This method allows you to change the data base for the {@link RefreshableSelectionModel}. This can, e.g., be useful
+     * if the table wrapped by this object is filtered through an {@link AbstractFilterablePanel} that has an
+     * {@link AbstractFilterablePanel#getAll() all} data structure of which the table displays only a subset, but selection
+     * shall be kept across filtering, based on all records available so that removing the filter will restore the previous
+     * selection again.
      * 
      * @param dataProvider
      *            {@link ListDataProvider} as data base for the {@link RefreshableSelectionModel}.
