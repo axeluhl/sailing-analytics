@@ -1737,4 +1737,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String contentStrategySimulator();
     String strategySimulatorReadMore();
     String impressum();
+    String lastFix();
+    String filterDeviceMappings();
 }

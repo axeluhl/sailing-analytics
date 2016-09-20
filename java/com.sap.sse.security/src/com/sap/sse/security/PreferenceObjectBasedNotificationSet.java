@@ -148,7 +148,7 @@ public abstract class PreferenceObjectBasedNotificationSet<PrefT, T> implements 
             } else {
                 // we can not exclude users without verified email address when calculating the association because this
                 // state could have changed meanwhile. So this need to be done on the fly.
-                if(user.isEmailValidated()) {
+                if (user.isEmailValidated()) {
                     consumer.accept(user);
                 }
             }

@@ -39,11 +39,12 @@ import com.sap.sse.datamining.impl.components.management.QueryDefinitionDTOManag
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class DataMiningFrameworkActivator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(DataMiningFrameworkActivator.class.getName());
     private static final String STRING_MESSAGES_BASE_NAME = "stringmessages/StringMessages";
-    private static final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors(), 3);
+    private static final int THREAD_POOL_SIZE = ThreadPoolUtil.INSTANCE.getReasonableThreadPoolSize();
     
     private static DataMiningFrameworkActivator INSTANCE;
 
