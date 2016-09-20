@@ -1,13 +1,16 @@
 package com.sap.sailing.android.ui.fragments;
 
-import java.util.List;
+import com.sap.sailing.android.shared.R;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
+import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
+import com.sap.sailing.android.shared.util.BaseAppPreferences;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -17,13 +20,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.R;
-import com.sap.sailing.android.shared.data.BaseCheckinData;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
-import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
-import com.sap.sailing.android.shared.util.BaseAppPreferences;
 
 public abstract class AbstractHomeFragment extends BaseFragment {
     private final static String TAG = AbstractHomeFragment.class.getName();
