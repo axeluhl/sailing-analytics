@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.common.filter.TextOperator.Operators;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 import com.sap.sse.common.settings.generic.DecimalListSetting;
@@ -92,6 +93,49 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
             l = new DecimalListSetting("l", this);
         }
     }
+    
+    private static class NonSerializableTestSettings implements Settings {
+        private String testValue = "trumba";
+        
+        public NonSerializableTestSettings() {
+        }
+        
+        public void changeValue() {
+            testValue = "trumba2";
+        }
+        
+        @Override
+        public String toString() {
+            return testValue;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((testValue == null) ? 0 : testValue.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            NonSerializableTestSettings other = (NonSerializableTestSettings) obj;
+            if (testValue == null) {
+                if (other.testValue != null)
+                    return false;
+            } else if (!testValue.equals(other.testValue))
+                return false;
+            return true;
+        }
+        
+        
+    }
 
     private static class TestEnumListSettings extends AbstractGenericSerializableSettings {
         private static final long serialVersionUID = 93688955681544920L;
@@ -166,6 +210,27 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         settings.trala.setValue(TextOperator.Operators.Contains);
         settings.num.setValue(BigDecimal.TEN);
         settings.l.setValues(Arrays.asList(BigDecimal.ONE, BigDecimal.valueOf(2), BigDecimal.valueOf(3)));
+        return settings;
+    }
+    
+    protected GenericSerializableSettings createTestSettingsWithValues2() {
+        final TestSettings settings = new TestSettings();
+        settings.humba.setValue("trala2");
+        settings.bumpa.setValue(false);
+        settings.trala.setValue(TextOperator.Operators.Equals);
+        settings.num.setValue(BigDecimal.ONE);
+        settings.l.setValues(Arrays.asList(BigDecimal.valueOf(6), BigDecimal.valueOf(7), BigDecimal.valueOf(8)));
+        return settings;
+    }
+    
+    protected Settings createNonSerializableTestSettingsWithChangedValues() {
+        final NonSerializableTestSettings settings = new NonSerializableTestSettings();
+        settings.changeValue();
+        return settings;
+    }
+    
+    protected Settings createNonSerializableTestSettingsWithDefaultValues() {
+        final NonSerializableTestSettings settings = new NonSerializableTestSettings();
         return settings;
     }
 
