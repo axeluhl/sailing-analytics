@@ -27,6 +27,7 @@ public class StartActivity extends AbstractActivity implements Presenter {
 
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
+        panel.setWidget(clientFactory.createBusyView());
         Window.setTitle(place.getTitle());
         final StartView view = new StartViewImpl(StartActivity.this);
         clientFactory.getDispatch().execute(new GetStagedEventsAction(true), 

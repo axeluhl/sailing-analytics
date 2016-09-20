@@ -10,8 +10,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
@@ -46,6 +45,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.SerializableComparator;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.ThreadPoolUtil;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
@@ -506,21 +506,16 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         if (delayForCacheInvalidationInMilliseconds == 0) {
             invalidateCache();
         } else {
-            final Timer cacheInvalidationTimer = new Timer(
-                    "TrackBasedEstimationWindTrackImpl cache invalidation timer for race " + getTrackedRace().getRace(), /* isDaemon */ true);
-            cacheInvalidationTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    // no locking required here; the incremental cache refresh protects the inner cache structures from concurrent modifications
-                    cacheInvalidationTimer.cancel(); // terminates the timer thread
-                    if (getTrackedRace().getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
-                        // during loading, only invalidate the cache after the interval expired but don't trigger incremental re-calculation
-                        invalidateCache();
-                    } else {
-                        refreshCacheIncrementally();
-                    }
-                }
-            }, delayForCacheInvalidationInMilliseconds);
+            ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor().
+                    schedule(()->{
+                        // no locking required here; the incremental cache refresh protects the inner cache structures from concurrent modifications
+                        if (getTrackedRace().getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
+                            // during loading, only invalidate the cache after the interval expired but don't trigger incremental re-calculation
+                            invalidateCache();
+                        } else {
+                            refreshCacheIncrementally();
+                        }
+                    }, delayForCacheInvalidationInMilliseconds, TimeUnit.MILLISECONDS);
         }
     }
 
