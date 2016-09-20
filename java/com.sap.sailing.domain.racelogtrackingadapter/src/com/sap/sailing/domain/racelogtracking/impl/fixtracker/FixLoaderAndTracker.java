@@ -302,8 +302,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             @Override
             public void run() {
                 try {
+                    trackedRace.lockForSerializationRead();
                     if (!preemptiveStopRequested.get()) {
-                        trackedRace.lockForSerializationRead();
                         setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
                         synchronized (FixLoaderAndTracker.this) {
                             FixLoaderAndTracker.this.notifyAll();
