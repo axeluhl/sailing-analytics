@@ -88,7 +88,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
                 true, /* enablePager */true);
         registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
-                true, /* enablePager */true);
+                true, /* enablePager */false);
         allCompetitorsPanel.add(allCompetitorsTable);
         registeredCompetitorsPanel.add(registeredCompetitorsTable);
         VerticalPanel movePanel = new VerticalPanel();

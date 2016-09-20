@@ -1971,6 +1971,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void clearAllCachesExceptManeuvers() {
         synchronized (cacheInvalidationTimerLock) {
+            // TODO bug 3864: schedule a task with a background thread executor instead of affording a new Timer for each race
             if (cacheInvalidationTimer == null) {
                 cacheInvalidationTimer = new Timer("Cache invalidation timer for TrackedRaceImpl "
                         + getRace().getName(), /* isDaemon */ true);

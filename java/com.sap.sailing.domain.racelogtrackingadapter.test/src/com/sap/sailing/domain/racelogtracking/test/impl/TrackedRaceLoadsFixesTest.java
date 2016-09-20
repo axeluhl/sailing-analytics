@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,6 +39,7 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
@@ -156,5 +158,35 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
         assertEquals(2, store.getNumberOfFixes(device));
         assertEquals(TimeRangeImpl.create(100, 200), store.getTimeRangeCoveredByFixes(device));
+    }
+    
+    @Test
+    public void testFindLatestFixForMapping() throws TransformationException, NoCorrespondingServiceRegisteredException {
+        store.storeFix(device, createFix(100, 10, 20, 30, 40));
+        store.storeFix(device, createFix(1100, 10, 20, 30, 40));
+        store.storeFix(device, createFix(2100, 10, 20, 30, 40));
+        final Map<DeviceIdentifier, Timed> lastFixes = store.getLastFix(Collections.singleton(device));
+        assertEquals(1, lastFixes.size());
+        Timed lastFix = lastFixes.get(device);
+        assertEquals(2100, lastFix.getTimePoint().asMillis());
+        store.storeFix(device, createFix(2000, 10, 20, 30, 40));
+        final Map<DeviceIdentifier, Timed> lastFixes2 = store.getLastFix(Collections.singleton(device));
+        assertEquals(1, lastFixes2.size());
+        Timed lastFix2 = lastFixes2.get(device);
+        assertEquals(2100, lastFix2.getTimePoint().asMillis());
+        store.storeFix(device, createFix(2200, 10, 20, 30, 40));
+        final Map<DeviceIdentifier, Timed> lastFixes3 = store.getLastFix(Collections.singleton(device));
+        assertEquals(1, lastFixes3.size());
+        Timed lastFix3 = lastFixes3.get(device);
+        assertEquals(2200, lastFix3.getTimePoint().asMillis());
+        final DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
+        store.storeFix(device2, createFix(1200, 10, 20, 30, 40));
+        store.storeFix(device2, createFix(1100, 10, 20, 30, 40));
+        final Map<DeviceIdentifier, Timed> lastFixes4 = store.getLastFix(Arrays.asList(device, device2));
+        assertEquals(2, lastFixes4.size());
+        Timed lastFix4 = lastFixes4.get(device);
+        assertEquals(2200, lastFix4.getTimePoint().asMillis());
+        Timed lastFixDevice2 = lastFixes4.get(device2);
+        assertEquals(1200, lastFixDevice2.getTimePoint().asMillis());
     }
 }
