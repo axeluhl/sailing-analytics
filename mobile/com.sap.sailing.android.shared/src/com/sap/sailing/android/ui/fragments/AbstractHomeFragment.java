@@ -1,5 +1,7 @@
 package com.sap.sailing.android.ui.fragments;
 
+import java.util.List;
+
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -11,6 +13,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -54,18 +58,30 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     }
 
     private boolean requestQRCodeScan() {
-        boolean result = true;
-        try {
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, requestCodeQRCode);
-        } catch (Exception ex) {
-            Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-            startActivity(marketIntent);
+        boolean result;
+        PackageManager manager = getActivity().getPackageManager();
+        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+        List<ResolveInfo> infos = manager.queryIntentActivities(intent, 0);
+        if (infos.size() != 0) {
+            try {
+                startActivityForResult(intent, requestCodeQRCode);
+                result = true;
+            } catch (Exception ex) {
+                requestQRCodeScannerInstallation();
+                result = false;
+            }
+        } else {
+            requestQRCodeScannerInstallation();
             result = false;
         }
         return result;
+    }
+
+    private void requestQRCodeScannerInstallation() {
+        Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+        Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
+        startActivity(marketIntent);
     }
 
     @Override
