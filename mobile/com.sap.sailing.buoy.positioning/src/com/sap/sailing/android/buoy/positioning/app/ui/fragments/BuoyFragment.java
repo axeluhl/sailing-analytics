@@ -1,14 +1,16 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
-import android.app.Activity;
+//import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
+//import android.content.IntentSender;
 import android.location.Location;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -20,20 +22,21 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
+//import com.google.android.gms.common.ConnectionResult;
+//import com.google.android.gms.common.api.GoogleApiClient;
+//import com.google.android.gms.common.api.PendingResult;
+//import com.google.android.gms.common.api.ResultCallback;
+//import com.google.android.gms.common.api.Status;
+//import com.google.android.gms.location.LocationListener;
+//import com.google.android.gms.location.LocationRequest;
+//import com.google.android.gms.location.LocationServices;
+//import com.google.android.gms.location.LocationSettingsRequest;
+//import com.google.android.gms.location.LocationSettingsResult;
+//import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sap.sailing.android.buoy.positioning.app.R;
@@ -50,13 +53,15 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
 public class BuoyFragment extends BaseFragment
-    implements GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
-
+    //implements GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
+    implements android.location.LocationListener, OnMapReadyCallback {
+    
     private static final String TAG = BuoyFragment.class.getName();
 
     private static final int GPS_MIN_TIME = 1000;
+    private float minLocationUpdateDistanceInMeters = 0f;
     private static final String N_A = "n/a";
-    private static final int REQUEST_CHECK_SETTINGS = 1 << 16;
+    //private static final int REQUEST_CHECK_SETTINGS = 1 << 16;
 
     private TextView accuracyTextView;
     private TextView distanceTextView;
@@ -71,9 +76,11 @@ public class BuoyFragment extends BaseFragment
     private PositioningActivity positioningActivity;
     private LocalBroadcastManager mBroadcastManager;
 
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
-    private LocationSettingsRequest mSettingsRequest;
+    //private GoogleApiClient mGoogleApiClient;
+    //private LocationRequest mLocationRequest;
+    //private LocationSettingsRequest mSettingsRequest;
+    
+    protected LocationManager locationManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -93,16 +100,26 @@ public class BuoyFragment extends BaseFragment
         mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
         initMapFragment();
 
-        mLocationRequest = LocationRequest.create();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(GPS_MIN_TIME);
-        mLocationRequest.setFastestInterval(GPS_MIN_TIME);
+//        mLocationRequest = LocationRequest.create();
+//        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+//        mLocationRequest.setInterval(GPS_MIN_TIME);
+//        mLocationRequest.setFastestInterval(GPS_MIN_TIME);
+//
+//        mSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest).build();
+//  
+//        mGoogleApiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).addConnectionCallbacks(this)
+//            .addOnConnectionFailedListener(this).build();
 
-        mSettingsRequest = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest).build();
-
-        mGoogleApiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).addConnectionCallbacks(this)
-            .addOnConnectionFailedListener(this).build();
-
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            /**
+             * prior to JellyBean, the minimum time for location updates parameter MIGHT be ignored,
+             * so providing a minimum distance value greater than 0 is recommended
+             */
+            minLocationUpdateDistanceInMeters = .5f;
+        }
+        
         return layout;
     }
 
@@ -136,6 +153,11 @@ public class BuoyFragment extends BaseFragment
         transaction.commit();
     }
 
+    @Override
+    public void onMapReady(GoogleMap arg0) {
+        // TODO Auto-generated method stub
+    }
+    
     private void setUpSetPositionButton(View layout, ClickListener clickListener) {
         setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
         disablePositionButton();
@@ -148,61 +170,62 @@ public class BuoyFragment extends BaseFragment
         setPositionButton.setText(resId);
     }
 
-    private void checkGPS() {
-        PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mSettingsRequest);
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(LocationSettingsResult settingsResult) {
-                final Status status = settingsResult.getStatus();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        // All location settings are satisfied. The client can initialize location
-                        // requests here.
-                        startLocationUpdates();
-                        break;
+//    private void checkGPS() {
+//        startLocationUpdates();
+//        PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mSettingsRequest);
+//        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+//            @Override
+//            public void onResult(LocationSettingsResult settingsResult) {
+//                final Status status = settingsResult.getStatus();
+//                switch (status.getStatusCode()) {
+//                    case LocationSettingsStatusCodes.SUCCESS:
+//                        // All location settings are satisfied. The client can initialize location
+//                        // requests here.
+//                        startLocationUpdates();
+//                        break;
+//
+//                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+//                        // Location settings are not satisfied. But could be fixed by showing the user
+//                        // a dialog.
+//                        try {
+//                            // Show the dialog by calling startResolutionForResult(),
+//                            // and check the result in onActivityResult().
+//                            status.startResolutionForResult(getActivity(), REQUEST_CHECK_SETTINGS);
+//                        } catch (IntentSender.SendIntentException e) {
+//                            // Ignore the error.
+//                        }
+//                        break;
+//
+//                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+//                        // Location settings are not satisfied. However, we have no way to fix the
+//                        // settings so we won't show the dialog.
+//                        break;
+//                }
+//            }
+//        });
+//    }
 
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        // Location settings are not satisfied. But could be fixed by showing the user
-                        // a dialog.
-                        try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            status.startResolutionForResult(getActivity(), REQUEST_CHECK_SETTINGS);
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
-                        }
-                        break;
-
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        // Location settings are not satisfied. However, we have no way to fix the
-                        // settings so we won't show the dialog.
-                        break;
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        int code = (requestCode + 1) << 16;
-        switch (code) {
-            case REQUEST_CHECK_SETTINGS:
-                switch (resultCode) {
-                    case Activity.RESULT_OK:
-                        // All required changes were successfully made
-                        mGoogleApiClient.connect();
-                        break;
-
-                    case Activity.RESULT_CANCELED:
-                        // The user was asked to change settings, but chose not to
-                        break;
-
-                    default:
-                        break;
-                }
-                break;
-        }
-    }
+//    @Override
+//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        int code = (requestCode + 1) << 16;
+//        switch (code) {
+//            case REQUEST_CHECK_SETTINGS:
+//                switch (resultCode) {
+//                    case Activity.RESULT_OK:
+//                        // All required changes were successfully made
+//                        //mGoogleApiClient.connect();
+//                        break;
+//
+//                    case Activity.RESULT_CANCELED:
+//                        // The user was asked to change settings, but chose not to
+//                        break;
+//
+//                    default:
+//                        break;
+//                }
+//                break;
+//        }
+//    }
 
     private void initMarkerReceiver() {
         IntentFilter filter = new IntentFilter();
@@ -214,17 +237,19 @@ public class BuoyFragment extends BaseFragment
     @Override
     public void onStart() {
         super.onStart();
-
-        mGoogleApiClient.connect();
+        //mGoogleApiClient.connect();
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, minLocationUpdateDistanceInMeters , this);
+        lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mGoogleApiClient.isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        }
-        mGoogleApiClient.disconnect();
+        //if (mGoogleApiClient.isConnected()) {
+            //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        locationManager.removeUpdates(this);
+        //}
+        //mGoogleApiClient.disconnect();
 
         mBroadcastManager.unregisterReceiver(mReceiver);
     }
@@ -253,6 +278,10 @@ public class BuoyFragment extends BaseFragment
         distanceTextView.setText(distanceText);
     }
 
+    
+    /**
+     * Methods implemented through LocationManager
+     */ 
     @Override
     public void onLocationChanged(Location location) {
         if (getActivity() instanceof PositioningActivity) {
@@ -273,6 +302,21 @@ public class BuoyFragment extends BaseFragment
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 15));
             initialLocationUpdate = false;
         }
+    }
+    
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+      //Status Update by the provider (GPS)
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+      //provider (GPS) disabled by the user while tracking
+    }
+    
+    @Override
+    public void onProviderEnabled(String provider) {
+      //provider (GPS) (re)enabled by the user while tracking
     }
 
     private void configureMap(GoogleMap map) {
@@ -314,25 +358,25 @@ public class BuoyFragment extends BaseFragment
         pingListener = listener;
     }
 
-    @Override
-    public void onConnected(Bundle bundle) {
-        checkGPS();
-    }
+//    @Override
+//    public void onConnected(Bundle bundle) {
+//        checkGPS();
+//    }
 
-    private void startLocationUpdates() {
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-    }
+//    private void startLocationUpdates() {
+//        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+//        lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//    }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        // no-op
-    }
+//    @Override
+//    public void onConnectionSuspended(int i) {
+//        // no-op
+//    }
 
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        ExLog.e(getActivity(), TAG, "Failed to connect to Google Play Services for location updates");
-    }
+//    @Override
+//    public void onConnectionFailed(ConnectionResult connectionResult) {
+//        ExLog.e(getActivity(), TAG, "Failed to connect to Google Play Services for location updates");
+//    }
 
     private enum GPSQuality {
         noSignal(0), poor(2), good(3), great(4);
