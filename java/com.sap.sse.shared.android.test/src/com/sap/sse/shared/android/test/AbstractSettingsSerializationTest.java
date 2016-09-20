@@ -158,17 +158,22 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
             throw new RuntimeException(e);
         }
     }
-
-    @Test
-    public void testFlatJsonSerialization() {
+    
+    protected GenericSerializableSettings createTestSettingsWithValues() {
         final TestSettings settings = new TestSettings();
         settings.humba.setValue("trala");
         settings.bumpa.setValue(true);
         settings.trala.setValue(TextOperator.Operators.Contains);
         settings.num.setValue(BigDecimal.TEN);
         settings.l.setValues(Arrays.asList(BigDecimal.ONE, BigDecimal.valueOf(2), BigDecimal.valueOf(3)));
+        return settings;
+    }
 
-        final TestSettings deserializedSettings = serializeAndDeserialize(settings);
+    @Test
+    public void testFlatJsonSerialization() {
+        final GenericSerializableSettings settings = createTestSettingsWithValues();
+
+        final GenericSerializableSettings deserializedSettings = serializeAndDeserialize(settings);
         assertEquals(settings, deserializedSettings);
     }
 
