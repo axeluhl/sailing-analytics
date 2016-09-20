@@ -35,11 +35,11 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
 
     public JSONObject serialize(TrackedRace trackedRace) {
         JSONObject jsonRace = new JSONObject();
-        
+
         jsonRace.put(FIELD_NAME, trackedRace.getRace().getName());
         jsonRace.put(FIELD_REGATTA, trackedRace.getRaceIdentifier().getRegattaName());
 
-        if(windTrackSerializer != null) {
+        if (windTrackSerializer != null) {
             JSONArray windTracks = new JSONArray();
 
             List<WindSource> windSources = getAvailableWindSources(trackedRace);
@@ -52,14 +52,16 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
             }
             jsonRace.put("availableWindSources", jsonWindSourcesDisplayed);
             for (WindSource windSource : windSources) {
-                if (ALL_WINDSOURCES.equals(windSourceToSerialize) || windSource.getType().name().equalsIgnoreCase(windSourceToSerialize)) {
-                    if (windSourceIdToSerialize != null && windSource.getId() != null && !windSource.getId().toString().equalsIgnoreCase(windSourceIdToSerialize)) {
+                if (ALL_WINDSOURCES.equals(windSourceToSerialize)
+                        || windSource.getType().name().equalsIgnoreCase(windSourceToSerialize)) {
+                    if (windSourceIdToSerialize != null && windSource.getId() != null
+                            && !windSource.getId().toString().equalsIgnoreCase(windSourceIdToSerialize)) {
                         continue;
                     }
                     windTrackSerializer.setFromTime(fromTime);
                     windTrackSerializer.setToTime(toTime);
                     windTrackSerializer.setWindSource(windSource);
-                    
+
                     WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
                     JSONObject jsonWindTrack = windTrackSerializer.serialize(windTrack);
                     windTracks.add(jsonWindTrack);
@@ -82,7 +84,7 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
     public void setToTime(TimePoint toTime) {
         this.toTime = toTime;
     }
-    
+
     private List<WindSource> getAvailableWindSources(TrackedRace trackedRace) {
         List<WindSource> windSources = new ArrayList<WindSource>();
         for (WindSource windSource : trackedRace.getWindSources()) {

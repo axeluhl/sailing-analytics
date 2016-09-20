@@ -18,7 +18,7 @@ public class GPSFixMovingWithPolarContextJsonSerializer implements JsonSerialize
         result.put("fix", new GPSFixMovingJsonSerializer().serialize(object.getFix()));
         result.put("race", new TrackedRaceJsonSerializer(new DefaultWindTrackJsonSerializer(10000)).serialize(object.getRace()));
         result.put("competitor", new CompetitorJsonSerializer().serialize(object.getCompetitor()));
-        result.put("angleClusterGroup", new FixClusterGroupJsonSerializer<Bearing>().serialize(object.getAngleClusterGroup()));
+        result.put("angleClusterGroup", new ClusterGroupJsonSerializer<Bearing>().serialize(object.getAngleClusterGroup()));
 
         return result;
     }
