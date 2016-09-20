@@ -10,12 +10,12 @@ import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.JSONObject; 
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
+//import com.google.android.gms.common.ConnectionResult;
+//import com.google.android.gms.common.api.GoogleApiClient;
+//import com.google.android.gms.location.LocationRequest;
+//import com.google.android.gms.location.LocationServices;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.tracking.app.BuildConfig;
@@ -50,13 +50,14 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
-public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, android.location.LocationListener {
+//GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
 
-    private GoogleApiClient googleApiClient;
-    private LocationRequest locationRequest;
+public class TrackingService extends Service implements  android.location.LocationListener {
+
+    //private GoogleApiClient googleApiClient;
+    //private LocationRequest locationRequest;
     private NotificationManager notificationManager;
-    private boolean locationUpdateRequested = false;
+    //private boolean locationUpdateRequested = false;
     private AppPreferences prefs;
 
     private GPSQualityListener gpsQualityListener;
@@ -70,7 +71,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
     private final static int UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE = 30000;
-    private float UPDATE_INTERVAL_IN_METERS = 0.2f;
+    private float minLocationUpdateDistanceInMeters = 0f;
     private final static float BATTERY_POWER_SAVE_THRESHOLD = 0.2f;
     private boolean initialLocation;
 
@@ -111,12 +112,12 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     @Override
     public void onCreate() {
         super.onCreate();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             /**
-             * prior to JellyBean, the minimum time for location updates parameter might be ignored,
-             * so providing a minimum distance value greater than 0 is necessary
+             * prior to JellyBean, the minimum time for location updates parameter MIGHT be ignored,
+             * so providing a minimum distance value greater than 0 is recommended
              */
-            UPDATE_INTERVAL_IN_METERS = 1f;
+            minLocationUpdateDistanceInMeters = .5f;
         }
 
         locationsQueuedBasedOnSendingInterval = new LinkedHashMap<>();
@@ -124,16 +125,17 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
         initialLocation = true;
         // http://developer.android.com/training/location/receive-location-updates.html
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(prefs.getGPSFixInterval());
-        locationRequest.setFastestInterval(prefs.getGPSFixFastestInterval());
+        //locationRequest = LocationRequest.create();
+        //locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        //locationRequest.setInterval(prefs.getGPSFixInterval());
 
-        googleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this).build();
+        //googleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this)
+        //        .addOnConnectionFailedListener(this).build();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        
+        
     }
 
     @Override
@@ -169,8 +171,9 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     }
 
     private void startTracking() {
-        googleApiClient.connect();
-        locationUpdateRequested = true;
+        //googleApiClient.connect();
+        //locationUpdateRequested = true;
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, prefs.getGPSFixInterval(), minLocationUpdateDistanceInMeters, this);
 
         ExLog.i(this, TAG, "Started Tracking");
         showNotification();
@@ -180,11 +183,11 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     }
 
     private void stopTracking() {
-        if (googleApiClient.isConnected()) {
+        //if (googleApiClient.isConnected()) {
             locationManager.removeUpdates(this);
-        }
-        googleApiClient.disconnect();
-        locationUpdateRequested = false;
+        //}
+        //googleApiClient.disconnect();
+        //locationUpdateRequested = false;
 
         prefs.setTrackerIsTracking(false);
         prefs.setTrackerIsTrackingCheckinDigest(null);
@@ -193,23 +196,23 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         ExLog.i(this, TAG, "Stopped Tracking");
     }
 
-    @Override
-    public void onConnectionFailed(ConnectionResult arg0) {
-        ExLog.e(this, TAG, "Failed to connect to Google Play Services for location updates");
-    }
+//    @Override
+//    public void onConnectionFailed(ConnectionResult arg0) {
+//        ExLog.e(this, TAG, "Failed to connect to Google Play Services for location updates");
+//    }
 
-    @Override
-    public void onConnected(Bundle arg0) {
-        if (locationUpdateRequested) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, prefs.getGPSFixInterval(), UPDATE_INTERVAL_IN_METERS, this);
-        }
-    }
+//    @Override
+//    public void onConnected(Bundle arg0) {
+//        if (locationUpdateRequested) {
+//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, prefs.getGPSFixInterval(), minLocationUpdateDistanceInMeters, this);
+//        }
+//    }
 
 
-    @Override
-    public void onConnectionSuspended(int cause) {
-        //do nothing
-    }
+//    @Override
+//    public void onConnectionSuspended(int cause) {
+//        //no-op
+//    }
 
     private void reportGPSQualityBearingAndSpeed(float gpsAccuracy, float bearing, float speed, double latitude,
             double longitude, double altitude) {
@@ -375,6 +378,8 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
      *
      * @return battery charging level in interval [0,1]
      */
+    
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     private float getBatteryPercentage() {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = this.registerReceiver(null, ifilter);
@@ -404,7 +409,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     }
 
     /**
-     * Methods implemented through LocationListener
+     * Methods implemented through LocationManager
      */ 
     @Override
     public void onLocationChanged(Location location) {
