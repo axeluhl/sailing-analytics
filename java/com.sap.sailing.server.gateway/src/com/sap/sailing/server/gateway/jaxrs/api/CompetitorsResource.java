@@ -48,7 +48,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
     private static final int MAX_SIZE_IN_MB = 5;
 
     public static JSONObject getCompetitorJSON(Competitor competitor) {
-        // see http://wiki.sapsailing.com/wiki/tracking-app-api-v1-draft#Competitor-Information
+        // see http://wiki.sapsailing.com/wiki/info/api/api-v1#tracking-app-api-v1_check-in-information_competitor-information-in-general
         JSONObject json = new JSONObject();
         json.put(CompetitorJsonConstants.FIELD_ID, competitor.getId().toString());
         json.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
