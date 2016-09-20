@@ -19,7 +19,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
 
     private TreeSet<RegattaMetadataDTO> regattas = new TreeSet<>();
     private ArrayList<EventReferenceDTO> eventsOfSeries = new ArrayList<>();
-    
+
     private EventType type;
     private boolean hasMedia;
     private boolean hasAnalytics;

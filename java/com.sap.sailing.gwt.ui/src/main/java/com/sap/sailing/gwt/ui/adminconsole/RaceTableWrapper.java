@@ -16,6 +16,8 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorTemplate
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -25,7 +27,8 @@ public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOA
 extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private String selectedLeaderboardName;
-
+    private double selectedRegattaHullLenghtCircleFactor;
+    
     public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection) {
         super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ false,
@@ -52,6 +55,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
                     Map<String, String> params = new HashMap<>();
                     params.put("leaderboardName", selectedLeaderboardName);
+                    params.put(RaceMapSettings.PARAM_VIEW_BUOY_ZONE_RADIUS, String.valueOf(selectedRegattaHullLenghtCircleFactor));
                     params.put("regattaName", raceIdentifier.getRegattaName());
                     params.put("raceName", raceIdentifier.getRaceName());
                     params.put("canReplayDuringLiveRaces", "true");
@@ -88,5 +92,9 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     
     public void setSelectedLeaderboardName(String name) {
         this.selectedLeaderboardName = name;
+    }
+    
+    public void setSelectedRegattaHullLenghtCircleFactor(double selectedRegattaHullLenghtCircleFactor) {
+        this.selectedRegattaHullLenghtCircleFactor = selectedRegattaHullLenghtCircleFactor;
     }
 }

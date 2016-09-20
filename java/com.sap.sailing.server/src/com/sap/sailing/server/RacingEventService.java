@@ -314,12 +314,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param controlTrackingFromStartAndFinishTimes TODO
      */
     Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
-            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId,
+            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, double circleRadius,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
     
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
-            Iterable<? extends Series> series, boolean useStartTimeInference,
+            Iterable<? extends Series> series, double circleRadius, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes);
 
     /**
@@ -465,7 +465,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
             TimePoint startDate, TimePoint endDate, Serializable id, 
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
+            Serializable defaultCourseAreaId, double circleRadius, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
 
     /**
      * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to

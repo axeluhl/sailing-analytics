@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -248,8 +249,20 @@ public class LeaderboardContext {
         RegattaRaceDataInfoCalculator regattaRaceDataInfoCalculator = new RegattaRaceDataInfoCalculator();
         forRaces(regattaRaceDataInfoCalculator);
         regattaDTO.setRaceDataInfo(regattaRaceDataInfoCalculator.getRaceDataInfo());
+        regattaDTO.setBuoyZoneRadius(getRegattaBuoyZoneRadius());
     }
-    
+
+    private double getRegattaBuoyZoneRadius() {
+        Regatta regatta = service.getRegattaByName(getLeaderboardName());
+        Double boatHullLength = HomeServiceUtil.getBoatClassHullLenght(leaderboard);
+        if (regatta != null) {
+            return boatHullLength == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
+                    : (boatHullLength * regatta.getCircleRadius());
+        }
+
+        return boatHullLength == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS : boatHullLength * Regatta.DEFAULT_HULL_LENGHT_FACTOR;
+    }
+
     private static boolean hasMultipleLeaderboardGroups(EventBase event) {
         return Util.size(event.getLeaderboardGroups()) > 1;
     }

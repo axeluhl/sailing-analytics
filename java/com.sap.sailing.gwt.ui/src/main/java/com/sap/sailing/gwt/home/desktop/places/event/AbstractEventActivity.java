@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
+import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
@@ -180,7 +181,20 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         linkParams.put(RaceMapSettings.PARAM_SHOW_MAPCONTROLS, "true");
         linkParams.put(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
         linkParams.put("regattaName", regattaName);
+        linkParams.put(RaceMapSettings.PARAM_VIEW_BUOY_ZONE_RADIUS, String.valueOf(getRegattaBuoyZoneRadius(regattaName)));
         return linkParams;
+    }
+
+    private double getRegattaBuoyZoneRadius(String regattaName) {
+        if (regattaName == null) {
+            return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS;
+        }
+        for (RegattaMetadataDTO regatta : eventDTO.getRegattas()) {
+            if (regattaName.equals(regatta.getId())) {
+                return regatta.getBuoyZoneRadius();
+            }
+        }
+        return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS;
     }
 
     @Override

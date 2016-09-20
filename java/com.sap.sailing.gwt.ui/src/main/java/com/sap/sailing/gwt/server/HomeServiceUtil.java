@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
@@ -226,6 +227,13 @@ public final class HomeServiceUtil {
     public static String getBoatClassName(Leaderboard leaderboard) {
         BoatClass boatClass = getBoatClass(leaderboard);
         return boatClass == null ? null : boatClass.getName();
+    }
+
+    public static Double getBoatClassHullLenght(Leaderboard leaderboard) {
+        BoatClass boatClass = getBoatClass(leaderboard);
+        Distance boatHullLength = boatClass == null ? null
+                : boatClass.getHullLength();
+        return boatHullLength == null ? null : boatHullLength.getMeters();
     }
 
     private static BoatClass getBoatClass(Leaderboard leaderboard) {

@@ -34,7 +34,8 @@ public class RegattaDTO extends NamedDTO {
     public boolean useStartTimeInference = true;
     public boolean controlTrackingFromStartAndFinishTimes = false;
     public RankingMetrics rankingMetricType;
-
+    public double circleRadius;
+    
     public RegattaDTO() {}
     
     public RegattaDTO(String name, ScoringSchemeType scoringScheme) {
@@ -64,6 +65,8 @@ public class RegattaDTO extends NamedDTO {
         this.configuration = other.configuration;
         this.useStartTimeInference = other.useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
+        this.circleRadius = other.circleRadius;
+        
     }
     
     public Pair<SeriesDTO, FleetDTO> getSeriesAndFleet(RegattaAndRaceIdentifier raceIdentifier) {

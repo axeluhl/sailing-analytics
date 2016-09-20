@@ -12,7 +12,8 @@ public class RegattaOverviewEntryDTO implements IsSerializable {
     public String regattaName;
     public String boatClassName;
     public Date currentServerTime;
-    
+    public double buyZoneRadius;
+
     // for GWT serialization
     public RegattaOverviewEntryDTO() { }
     

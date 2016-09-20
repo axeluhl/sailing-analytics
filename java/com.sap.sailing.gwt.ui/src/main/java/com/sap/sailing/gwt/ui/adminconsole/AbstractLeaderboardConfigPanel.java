@@ -189,6 +189,13 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             public void onSelectionChange(SelectionChangeEvent event) {
                 leaderboardSelectionChanged();
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
+
+                RegattaDTO regatta = getSelectedRegatta();
+                if (regatta != null) {
+                    double buoyZoneRadiusInMeters = regatta.boatClass == null ? 15 /* default if no boat class */
+                            : (regatta.boatClass.getHullLengthInMeters() * regatta.circleRadius);
+                    raceColumnTable.setSelectedRegattaHullLenghtCircleFactor(buoyZoneRadiusInMeters);
+                }
             }
         });
         filteredLeaderboardList.addDataDisplay(leaderboardTable);
@@ -706,7 +713,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
      * Looks up the regatta for the selected leaderboard by name in {@link #allRegattas}
      */
     protected RegattaDTO getSelectedRegatta() {
-        final String regattaName = getSelectedLeaderboard().regattaName;
+        final String regattaName = getSelectedLeaderboard() == null ? "" : getSelectedLeaderboard().regattaName;
         return getRegattaByName(regattaName);
     }
 

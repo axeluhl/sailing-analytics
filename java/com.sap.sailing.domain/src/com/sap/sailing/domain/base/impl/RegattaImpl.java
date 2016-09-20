@@ -115,6 +115,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private transient RaceLogStore raceLogStore;
     private final IsRegattaLike regattaLikeHelper;
     private final RankingMetricConstructor rankingMetricConstructor;
+    private double circleRadius;
 
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
@@ -162,7 +163,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id,
             CourseArea courseArea, RankingMetricConstructor rankingMetricConstructor) {
         this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, name, boatClass, startDate, endDate, series,
-                persistent, scoringScheme, id, courseArea, /* useStartTimeInference */true, /* controlTrackingFromStartAndFinishTimes */ false,
+                persistent, scoringScheme, id, courseArea, 0.0, /* useStartTimeInference */true, /* controlTrackingFromStartAndFinishTimes */ false,
                 rankingMetricConstructor);
     }
 
@@ -204,7 +205,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections
                         .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                 /* race column names */new ArrayList<String>(), trackedRegattaRegistry)), /* persistent */false,
-                scoringScheme, id, courseArea, /* useStartTimeInference */true, controlTrackingFromStartAndFinishTimes,
+                scoringScheme, id, courseArea, 1.0, /* useStartTimeInference */true, controlTrackingFromStartAndFinishTimes,
                 rankingMetricConstructor);
     }
 
@@ -215,7 +216,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      */
     public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
             BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent,
-            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, boolean useStartTimeInference,
+            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, double circleRadius, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
         super(name);
         this.rankingMetricConstructor = rankingMetricConstructor;
@@ -241,6 +242,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.scoringScheme = scoringScheme;
         this.defaultCourseArea = courseArea;
         this.configuration = null;
+        this.circleRadius = circleRadius;
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore) {
             private static final long serialVersionUID = 8546222568682770206L;
 
@@ -570,6 +572,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void setEndDate(TimePoint endDate) {
         this.endDate = endDate;
+    }
+
+    @Override
+    public double getCircleRadius() {
+        return circleRadius;
+    }
+
+    @Override
+    public void setCircleRadius(double circleRadius) {
+        this.circleRadius = circleRadius;
     }
 
     @Override

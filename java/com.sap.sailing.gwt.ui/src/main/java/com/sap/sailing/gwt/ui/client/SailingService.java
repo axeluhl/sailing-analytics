@@ -215,7 +215,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     RegattaDTO createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
-            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference,
+            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, double circleRadius, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType);
 
     void removeRegatta(RegattaIdentifier regattaIdentifier);
@@ -225,7 +225,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void removeRegattas(Collection<RegattaIdentifier> regattas);
     
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
-            RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes);
+            RegattaConfigurationDTO regattaConfiguration, double circleRadius, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes);
     
     List<RaceColumnInSeriesDTO> addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
             List<Pair<String, Integer>> columnNames);

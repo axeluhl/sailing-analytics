@@ -1645,4 +1645,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String notificationRegattaConfigurationUpdatedUsingByMarks();
     String warningOverrideRegattaConfigurationCourseDesignerToByMarks();
     String allRacesHaveBeenDenoted();
+    String circleRadius();
 }

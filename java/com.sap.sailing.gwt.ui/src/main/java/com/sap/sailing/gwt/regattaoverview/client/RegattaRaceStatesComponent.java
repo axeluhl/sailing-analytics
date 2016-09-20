@@ -55,6 +55,7 @@ import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
@@ -933,10 +934,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             raceLinkParameters.put("raceName", entryDTO.raceInfo.raceIdentifier.getRaceName());
             raceLinkParameters.put("canReplayDuringLiveRaces", "true");
             raceLinkParameters.put("regattaName", entryDTO.regattaName);
+            raceLinkParameters.put(RaceMapSettings.PARAM_VIEW_BUOY_ZONE_RADIUS, String.valueOf(entryDTO.buyZoneRadius));
+
             return EntryPointLinkFactory.createRaceBoardLink(raceLinkParameters);
         }
         return null;
     }
+
     private String createRegattaLink(RegattaOverviewEntryDTO entryDTO) {
         String leaderboardLink = EntryPointLinkFactory.createLeaderboardTabLink(eventId.toString(), entryDTO.regattaName);
         return leaderboardLink;

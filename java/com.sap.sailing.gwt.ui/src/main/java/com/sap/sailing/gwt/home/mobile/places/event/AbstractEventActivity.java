@@ -45,6 +45,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 
@@ -266,12 +267,24 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         }
         linkParams.put("raceName", trackedRaceName);
         linkParams.put("regattaName", regattaName);
+        linkParams.put(RaceMapSettings.PARAM_VIEW_BUOY_ZONE_RADIUS, String.valueOf(getRegattaBuoyZoneRadius(regattaName)));
         // TODO this must only be forwarded if there is a logged-on user
         // linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         return linkParams;
     }
 
-    
+    private double getRegattaBuoyZoneRadius(String regattaName) {
+        if (regattaName == null) {
+            return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS;
+        }
+        for (RegattaMetadataDTO regatta : eventDTO.getRegattas()) {
+            if (regattaName.equals(regatta.getId())) {
+                return regatta.getBuoyZoneRadius();
+            }
+        }
+        return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS;
+    }
+
     public String getRegattaId() {
         String regattaId = place.getRegattaId();
         if(regattaId  != null) {

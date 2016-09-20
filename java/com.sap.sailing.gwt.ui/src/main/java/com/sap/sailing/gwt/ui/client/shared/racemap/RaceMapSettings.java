@@ -17,6 +17,9 @@ public class RaceMapSettings extends AbstractSettings {
     public static final String PARAM_VIEW_SHOW_STREAMLETS = "viewShowStreamlets";
     public static final String PARAM_VIEW_SHOW_STREAMLET_COLORS = "viewShowStreamletColors";
     public static final String PARAM_VIEW_SHOW_SIMULATION = "viewShowSimulation";
+    public static final String PARAM_VIEW_BUOY_ZONE_RADIUS = "regattaHullLenghtCircleFactor";
+
+    public static final double DEFAULT_BUOY_ZONE_RADIUS = 15;
 
     private final boolean showDouglasPeuckerPoints;
 
@@ -61,6 +64,7 @@ public class RaceMapSettings extends AbstractSettings {
                 /* showMapControls */ true,
                 new RaceMapHelpLinesSettings(),
                 /* windUp */ false,
+                /* showDouglasPeuckerPoints */ 0.0,
                 /* showWindStreamletOverlay */ false,
                 /* showWindStreamletColors */ false,
                 /* showSimulationOverlay */ false);
@@ -88,11 +92,11 @@ public class RaceMapSettings extends AbstractSettings {
         this.showDouglasPeuckerPoints = showDouglasPeuckerPoints;
     }
 
-    private RaceMapSettings(boolean showMapControls, boolean showCourseGeometry, boolean windUp, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
-        this(showMapControls, new RaceMapHelpLinesSettings(createHelpLineSettings(showCourseGeometry)), windUp, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
+    private RaceMapSettings(boolean showMapControls, boolean showCourseGeometry, boolean windUp, double buoyZoneRadiusInMeters, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
+        this(showMapControls, new RaceMapHelpLinesSettings(createHelpLineSettings(showCourseGeometry)), windUp, buoyZoneRadiusInMeters, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
     }
     
-    private RaceMapSettings(boolean showMapControls, RaceMapHelpLinesSettings helpLineSettings, boolean windUp, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
+    private RaceMapSettings(boolean showMapControls, RaceMapHelpLinesSettings helpLineSettings, boolean windUp, double buoyZoneRadiusInMeters, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
         this(
                 new RaceMapZoomSettings(),
                 helpLineSettings,
@@ -100,7 +104,7 @@ public class RaceMapSettings extends AbstractSettings {
                 /* hoverlineStrokeWeight as discussed with Stefan on 2015-12-08 */ 15,
                 /* tailLengthInMilliseconds */ 100000l,
                 /* windUp */ windUp,
-                /* buoyZoneRadiusInMeters */ 0.0,
+                /* buoyZoneRadiusInMeters */ buoyZoneRadiusInMeters,
                 /* showOnlySelectedCompetitors */ false,
                 /* showSelectedCompetitorsInfo */ true,
                 /* showWindStreamletColors */ showWindStreamletColors,
@@ -239,7 +243,8 @@ public class RaceMapSettings extends AbstractSettings {
         final boolean showWindStreamletOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLETS, defaultForViewShowStreamlets /* default */);
         final boolean showWindStreamletColors = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLET_COLORS, defaultForViewShowStreamletColors /* default */);
         final boolean showSimulationOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_SIMULATION, defaultForViewShowSimulation /* default */);
-        return new RaceMapSettings(showMapControls, showCourseGeometry, windUp, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
+        final double buoyZoneRadiusInMeters = GwtHttpRequestUtils.getDoubleParameter(PARAM_VIEW_BUOY_ZONE_RADIUS, 0.0 /* default */);
+        return new RaceMapSettings(showMapControls, showCourseGeometry, windUp, buoyZoneRadiusInMeters, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
     }
 
     public Set<ManeuverType> getManeuverTypesToShow() {

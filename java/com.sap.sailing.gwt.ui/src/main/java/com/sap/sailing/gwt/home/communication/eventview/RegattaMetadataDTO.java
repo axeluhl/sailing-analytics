@@ -18,6 +18,7 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private RegattaState state;
     private boolean flexibleLeaderboard;
     private RaceDataInfo raceDataInfo;
+    private double buoyZoneRadius;
     
     public RegattaMetadataDTO() {
     }
@@ -122,7 +123,15 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     public void setRaceDataInfo(RaceDataInfo raceDataInfo) {
         this.raceDataInfo = raceDataInfo;
     }
-    
+
+    public double getBuoyZoneRadius() {
+        return buoyZoneRadius;
+    }
+
+    public void setBuoyZoneRadius(double buoyZoneRadius) {
+        this.buoyZoneRadius = buoyZoneRadius;
+    }
+
     /**
      * Holder class for flags, which inform about GPS, wind, video or audio data availability. 
      */

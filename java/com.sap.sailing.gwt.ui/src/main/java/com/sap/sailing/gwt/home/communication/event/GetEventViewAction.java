@@ -117,6 +117,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         } else {
             dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
         }
+
         return dto;
     }
 
