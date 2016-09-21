@@ -23,21 +23,16 @@ public class PolarDataResource extends AbstractPolarResource {
     @Produces("application/json;charset=UTF-8")
     public Response getCubicRegression() {
         JSONObject jsonCubicRegression = new JSONObject();
-
         JSONArray cubicRegressionPerCourse = new JSONArray();
         for (GroupedDataEntry<GPSFixMovingWithPolarContext> entry : getPolarDataServiceImpl().getPolarDataMiner()
                 .getCubicRegressionPerCourseProcessor().getDataEntries()) {
             JSONObject jsonEntry = new JSONObject();
-
             GPSFixMovingWithPolarContextJsonSerializer serializer = new GPSFixMovingWithPolarContextJsonSerializer();
-
             jsonEntry.put("key", entry.getKey());
             jsonEntry.put("dataEntry", serializer.serialize(entry.getDataEntry()));
-
             cubicRegressionPerCourse.add(jsonEntry);
         }
         jsonCubicRegression.put("cubicRegressionPerCourse", cubicRegressionPerCourse);
-
         String json = jsonCubicRegression.toJSONString();
         return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
@@ -47,11 +42,9 @@ public class PolarDataResource extends AbstractPolarResource {
     @Produces("application/json;charset=UTF-8")
     public Response getSpeedRegression() {
         JSONObject jsonSpeedRegression = new JSONObject();
-
         jsonSpeedRegression.put("angleClusterGroup",
                 new ClusterGroupJsonSerializer<Bearing>().serialize(getPolarDataServiceImpl().getPolarDataMiner()
                         .getSpeedRegressionPerAngleClusterProcessor().getAngleCluster()));
-
         String json = jsonSpeedRegression.toJSONString();
         return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
