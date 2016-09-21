@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
@@ -14,11 +15,16 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
  * Groups settings for multiple {@link Component}s. This can be of particular interest when working with
  * {@link Perspective}s and the perspective's {@link PerspectiveCompositeSettings composite settings}.
  */
-public class CompositeSettings extends AbstractSettings {
+public class CompositeSettings extends AbstractSettings implements SettingsMap {
     private final Map<Serializable, Settings> settingsPerComponentId;
 
     public CompositeSettings(Map<Serializable, Settings> settingsPerComponentId) {
         this.settingsPerComponentId = new HashMap<>(settingsPerComponentId);
+    }
+    
+    @Override
+    public Map<Serializable, Settings> getSettingsByKey() {
+        return getSettingsPerComponentId();
     }
 
     public Map<Serializable, Settings> getSettingsPerComponentId() {
