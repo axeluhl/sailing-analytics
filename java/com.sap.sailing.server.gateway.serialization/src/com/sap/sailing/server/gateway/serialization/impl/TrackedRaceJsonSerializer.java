@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sailing.server.gateway.serialization.WindTrackJsonSerializer;
 import com.sap.sse.common.TimePoint;
 
 public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
