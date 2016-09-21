@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
@@ -141,7 +140,7 @@ public class EventHeader extends Composite {
             if(event.getOfficialWebsiteURL() != null) {
                 String title = withoutPrefix(event.getOfficialWebsiteURL(), "http://", "https://");
                 if(title.length() > 35) {
-                    title = TextMessages.INSTANCE.officalEventWebsite();
+                    title = StringMessages.INSTANCE.officalEventWebsite();
                 }
                 eventLink.setInnerText(title);
                 eventLink.setHref(event.getOfficialWebsiteURL());

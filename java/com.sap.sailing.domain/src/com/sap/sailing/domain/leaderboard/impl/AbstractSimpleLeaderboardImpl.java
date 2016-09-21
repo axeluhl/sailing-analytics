@@ -19,13 +19,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -99,7 +96,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * Base implementation for various types of leaderboards. The {@link RaceColumnListener} implementation forwards events
@@ -153,24 +150,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     private transient Set<CacheInvalidationListener> cacheInvalidationListeners;
 
-    private final static int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
-    private static final ThreadPoolExecutor executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-            /* maximumPoolSize */ THREAD_POOL_SIZE,
-            /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
-    /**
-     * This executor needs to be a different one than {@link #executor} because the tasks run by {@link #executor}
-     * can depend on the results of the tasks run by {@link #raceDetailsExecutor}, and an {@link Executor} doesn't
-     * move a task that is blocked by waiting for another {@link FutureTask} to the side but blocks permanently,
-     * ending in a deadlock (one that cannot easily be detected by the Eclipse debugger either).
-     */
-    private final static Executor raceDetailsExecutor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-            /* maximumPoolSize */ THREAD_POOL_SIZE,
-            /* keepAliveTime */ 60, TimeUnit.SECONDS,
-            /* workQueue */ new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
-
-
-
+    private static final ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
+    
     private transient LiveLeaderboardUpdater liveLeaderboardUpdater;
 
     private transient LeaderboardDTOCache leaderboardDTOCache;
@@ -610,11 +591,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         return result;
     }
 
+    /**
+     * suppressed competitors are removed from the result
+     */
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint) {
         return getCompetitorsFromBestToWorst(getRaceColumns(), timePoint);
     }
     
+    /**
+     * suppressed competitors are removed from the result
+     */
     private List<Competitor> getCompetitorsFromBestToWorst(Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) {
         List<Competitor> result = new ArrayList<Competitor>();
         for (Competitor competitor : getCompetitors()) {
@@ -1619,9 +1606,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             RankingInfo rankingInfo, final WindLegTypeAndLegBearingCache cache) throws InterruptedException, ExecutionException {
         final com.sap.sse.common.Util.Pair<TrackedRace, Competitor> key = new com.sap.sse.common.Util.Pair<TrackedRace, Competitor>(trackedRace, competitor);
         RunnableFuture<RaceDetails> raceDetails;
+        final boolean needToRunRaceDetails; // when found in cache, another call to this method is already running it; else, it needs to be run here
         synchronized (raceDetailsAtEndOfTrackingCache) {
             raceDetails = raceDetailsAtEndOfTrackingCache.get(key);
             if (raceDetails == null) {
+                needToRunRaceDetails = true;
                 raceDetails = new FutureTask<RaceDetails>(new Callable<RaceDetails>() {
                     @Override
                     public RaceDetails call() throws Exception {
@@ -1636,12 +1625,17 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 legRanksCache, cache, rankingInfo);
                     }
                 });
-                raceDetailsExecutor.execute(raceDetails);
-                raceDetailsAtEndOfTrackingCache.put(key, raceDetails);
+                raceDetailsAtEndOfTrackingCache.put(key, raceDetails); // this way, 
                 final CacheInvalidationListener cacheInvalidationListener = new CacheInvalidationListener(trackedRace, competitor);
                 trackedRace.addListener(cacheInvalidationListener);
                 cacheInvalidationListeners.add(cacheInvalidationListener);
+            } else {
+                needToRunRaceDetails = false;
             }
+        }
+        // now, outside the synchronized block, run task if needed:
+        if (needToRunRaceDetails) {
+            raceDetails.run();
         }
         return raceDetails.get();
     }
@@ -1745,8 +1739,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             result.timeInMilliseconds = time.asMillis();
             result.finished = trackedLeg.hasFinishedLeg(timePoint);
             final TimePoint legFinishTime = trackedLeg.getFinishTime();
+            // See bug 3829: there is an unlikely possibility that legFinishTime is null and the call to hasFinishedLeg below
+            // says that the leg has already finished. This can happen if the corresponding mark passing arrives between the two
+            // calls. To avoid having to use expensive locking, we'll just double-check here if legFinishTime is null and
+            // treat this as if trackedLeg.hasFinishedLeg(timePoint) had returned false.
             result.correctedTotalTime = trackedLeg.hasStartedLeg(timePoint) ? trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().getCorrectedTime(trackedLeg.getCompetitor(),
-                    trackedLeg.hasFinishedLeg(timePoint) ? legFinishTime : timePoint, cache) : null;
+                    trackedLeg.hasFinishedLeg(timePoint) && legFinishTime != null ? legFinishTime : timePoint, cache) : null;
             // fetch the leg gap in own corrected time from the ranking metric
             final Duration gapToLeaderInOwnTime = trackedLeg.getTrackedLeg().getTrackedRace().getRankingMetric().
                     getLegGapToLegLeaderInOwnTime(trackedLeg, timePoint, rankingInfo, cache);

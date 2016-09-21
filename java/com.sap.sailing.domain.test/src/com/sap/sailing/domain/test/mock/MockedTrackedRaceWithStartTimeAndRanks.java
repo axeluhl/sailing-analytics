@@ -509,6 +509,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public void removeStartTimeChangedListener(StartTimeChangedListener listener) {
+    }
+
+    @Override
     public TimePoint getStartTimeReceived() {
         return null;
     }

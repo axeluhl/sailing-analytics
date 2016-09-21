@@ -23,6 +23,49 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">September 2016</h2>
+                    <ul class="bulletList">
+			<li>When denoting a regatta for smartphone tracking, the "By Marks" course designer is
+			    automatically selected if no active regatta configuration was set yet, or a warning
+			    and question to the user is issued, strongly suggesting the use of the "By Marks" course
+			    designer. Background: using the "By Name" course designer could accidentally delete a
+			    valid course layout.
+			</li>
+			<li>Regattas now have an additional setting: "Control tracking from start and finish times."
+			    With it, the start and finish times for a race as entered into the race log, e.g., through
+			    the Race Management app, can be used by tracking connectors to control the tracking for
+			    that race. So far, the TracTrac connector and the Smartphone connector have been
+			    enabled. When a start time for a race
+			    is received and the "Control..." flag is set, the tracking start time will be set to
+			    five minutes before the race start time. Similarly, when the blue flag is lowered, signaling
+			    that the race has finished, the tracking end time will be set to two minutes later.
+			    This should make an operator's job easier when the race timing is maintained properly
+			    through the race log, i.e., through the Race Management app.<p>
+			    In turn, for the Smartphone tracking connector, start/end tracking times are recorded
+			    automatically upon start and stop tracking actions only if the regatta is <em>not</em>
+			    marked as "Control tracking from start and finish times." Background: with this it is
+			    possible to start tracking for a number of races scheduled for a day and having the
+			    Race Management app control the tracking times automatically.
+			 </li>
+			 <li>The "start of tracking" property on a tracked race now has to be set to a valid, non-empty value
+			     in order for fixed to be accepted into the race. As before, an empty "end of tracking" value
+			     means an open-ended interval, and fixes at or after the start of tracking time point will then
+			     continue to be accepted.
+			 </li>
+			 <li>The device mappings dialog now shows the time point of the last fix received from each mapping
+			     and has a convenient filter text box.
+			 </li>
+			 <li>Thread management has been improved. Fewer and more reasonably-designed thread pools
+			     are now created, and thread priorities less than normal (for background operations) now
+			     correctly map to operating system thread priorities, making foreground tasks more
+			     responsive. The less excessive concurrency has furthermore healthy effects on memory
+			     mamangement and garbage collection.
+			 </li>
+			 <li>Fixed a bug in the smart phone tracking course designer. When adding or removing marks
+			     now, unsaved changes to the waypoints and control points tables are preserved.
+			 </li>
+                    </ul>
+
                     <h2 class="articleSubheadline">July 2016</h2>
                     <ul class="bulletList">
                         <li>According to some change in a tracked races lifecycle, fix-tracking no longer depends
