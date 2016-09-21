@@ -11,8 +11,8 @@ import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 public abstract class AbstractPolarResource {
     @Context ServletContext servletContext;
     
-    //Working with concrete implementation not to create new dependencies between domain and datamining 
-    //(PolarDataMiner is unavailable in com.sap.sailing.domain 
+    // Working with concrete implementation not to create new dependencies between domain and datamining
+    // (PolarDataMiner is unavailable in com.sap.sailing.domain)
     protected PolarDataServiceImpl getPolarDataServiceImpl() {
         @SuppressWarnings("unchecked")
         ServiceTracker<PolarDataServiceImpl, PolarDataServiceImpl> tracker = (ServiceTracker<PolarDataServiceImpl, PolarDataServiceImpl>) servletContext
