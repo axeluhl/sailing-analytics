@@ -69,6 +69,9 @@ public class TrackingFragment extends BaseFragment {
             qualityIndicator.setSignalQuality(savedInstanceState.getInt(SIS_GPS_QUALITY));
             accuracyText.setText(savedInstanceState.getString(SIS_GPS_ACCURACY));
             unsentFixesText.setText(savedInstanceState.getString(SIS_GPS_UNSENT_FIXES));
+        } else {
+            //initially set quality to "No GPS" on start tracking
+            updateTrackingStatus(GPSQuality.noSignal);
         }
     }
 
