@@ -223,6 +223,8 @@ public class AppPreferences {
         switch (type) {
             case RRS26:
                 return key(R.string.preference_racing_procedure_rrs26_classflag_key);
+            case SWC:
+                return key(R.string.preference_racing_procedure_swc_classflag_key);
             case GateStart:
                 return key(R.string.preference_racing_procedure_gatestart_classflag_key);
             case ESS:
@@ -245,6 +247,8 @@ public class AppPreferences {
         switch (type) {
             case RRS26:
                 return key(R.string.preference_racing_procedure_rrs26_hasxray_key);
+            case SWC:
+                return key(R.string.preference_racing_procedure_swc_hasxray_key);
             case GateStart:
                 return key(R.string.preference_racing_procedure_gatestart_hasxray_key);
             case ESS:
@@ -267,6 +271,8 @@ public class AppPreferences {
         switch (type) {
         case RRS26:
             return key(R.string.preference_racing_procedure_rrs26_resultentryenabled_key);
+        case SWC:
+            return key(R.string.preference_racing_procedure_swc_resultentryenabled_key);
         case GateStart:
             return key(R.string.preference_racing_procedure_gatestart_resultentryenabled_key);
         case ESS:
@@ -282,6 +288,15 @@ public class AppPreferences {
     
     public Set<Flags> getRRS26StartmodeFlags() {
         Set<String> flagNames = helper.getStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), new HashSet<String>());
+        Set<Flags> flags = new HashSet<>();
+        for (String flagName : flagNames) {
+            flags.add(Flags.valueOf(flagName));
+        }
+        return flags;
+    }
+
+    public Set<Flags> getSWCStartmodeFlags() {
+        Set<String> flagNames = helper.getStringSet(key(R.string.preference_racing_procedure_swc_startmode_flags_key), new HashSet<String>());
         Set<Flags> flags = new HashSet<>();
         for (String flagName : flagNames) {
             flags.add(Flags.valueOf(flagName));
@@ -421,6 +436,14 @@ public class AppPreferences {
             flagNames.add(flag.name());
         }
         helper.getEditor().putStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), flagNames).commit();
+    }
+
+    public void setSWCStartmodeFlags(Set<Flags> flags) {
+        Set<String> flagNames = new HashSet<>();
+        for (Flags flag : flags) {
+            flagNames.add(flag.name());
+        }
+        helper.getEditor().putStringSet(key(R.string.preference_racing_procedure_swc_startmode_flags_key), flagNames).commit();
     }
 
     public void setSendingActive(boolean activate) {

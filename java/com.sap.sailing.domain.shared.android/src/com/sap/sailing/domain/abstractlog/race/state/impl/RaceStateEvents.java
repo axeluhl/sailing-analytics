@@ -8,7 +8,11 @@ public enum RaceStateEvents {
     RRS26_CLASS_UP,
     RRS26_STARTMODE_UP,
     RRS26_STARTMODE_DOWN,
-    
+
+    SWC_CLASS_UP,
+    SWC_STARTMODE_UP,
+    SWC_STARTMODE_DOWN,
+
     ESS_AP_DOWN,
     ESS_THREE_UP,
     ESS_TWO_UP,
