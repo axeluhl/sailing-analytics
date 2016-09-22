@@ -20,7 +20,6 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.NoMorePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureChangedListeners;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.swc.SWCChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.swc.SWCRacingProcedure;
 import com.sap.sailing.domain.base.configuration.procedures.SWCConfiguration;
@@ -31,9 +30,10 @@ import com.sap.sse.common.TimePoint;
 
 public class SWCRacingProcedureImpl extends BaseRacingProcedure implements SWCRacingProcedure {
 
-    private final static long startPhaseClassUpInterval = 5 * 60 * 1000; // minutes * seconds * milliseconds
-    private final static long startPhaseStartModeUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static long startPhaseClassUpInterval = 6 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static long startPhaseStartModeUpInterval = 6 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseStartModeDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static long startPhaseClassDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
 
     private final SWCStartModeFlagFinder startModeFlagAnalyzer;
     
@@ -51,7 +51,7 @@ public class SWCRacingProcedureImpl extends BaseRacingProcedure implements SWCRa
             this.startModeFlagAnalyzer = new SWCStartModeFlagFinder(procedureAnalyzer, raceLog);
         }
         
-        this.cachedStartmodeFlag = RRS26RacingProcedure.DefaultStartMode;
+        this.cachedStartmodeFlag = SWCRacingProcedure.DefaultStartMode;
         this.startmodeFlagHasBeenSet = false;
         
         update();
@@ -104,8 +104,9 @@ public class SWCRacingProcedureImpl extends BaseRacingProcedure implements SWCRa
         return Arrays.<RaceStateEvent> asList(
                 new RaceStateEventImpl(startTime.minus(startPhaseClassUpInterval), RaceStateEvents.SWC_CLASS_UP),
                 new RaceStateEventImpl(startTime.minus(startPhaseStartModeUpInterval), RaceStateEvents.SWC_STARTMODE_UP),
-                new RaceStateEventImpl(startTime.minus(startPhaseStartModeDownInterval), RaceStateEvents.SWC_STARTMODE_DOWN), 
-                new RaceStateEventImpl(startTime, RaceStateEvents.START));
+                new RaceStateEventImpl(startTime, RaceStateEvents.START),
+                new RaceStateEventImpl(startTime.plus(startPhaseStartModeDownInterval), RaceStateEvents.SWC_STARTMODE_DOWN), 
+                new RaceStateEventImpl(startTime.plus(startPhaseClassDownInterval), RaceStateEvents.SWC_CLASS_DOWN));
     }
 
     @Override
@@ -117,6 +118,7 @@ public class SWCRacingProcedureImpl extends BaseRacingProcedure implements SWCRa
             }
         case SWC_CLASS_UP:
         case SWC_STARTMODE_DOWN:
+        case SWC_CLASS_DOWN:
             getChangedListeners().onActiveFlagsChanged(this);
             return true;
         default:

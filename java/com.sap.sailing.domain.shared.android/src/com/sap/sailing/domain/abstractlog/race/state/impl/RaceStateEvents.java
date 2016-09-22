@@ -12,6 +12,7 @@ public enum RaceStateEvents {
     SWC_CLASS_UP,
     SWC_STARTMODE_UP,
     SWC_STARTMODE_DOWN,
+    SWC_CLASS_DOWN,
 
     ESS_AP_DOWN,
     ESS_THREE_UP,
