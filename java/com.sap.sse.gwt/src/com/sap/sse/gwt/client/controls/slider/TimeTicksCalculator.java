@@ -158,10 +158,24 @@ public class TimeTicksCalculator {
 
         // get tick positions
         i = 1;
+        /*
+         * There are the Competitor and the Wind highcharts which
+         * set time ticks depending on a locale. So we have to
+         * move the ticks in this time slider on the time zone offset
+         * to match the time ticks in time slider with ticks in highcharts
+         */
+        minDate = new Date(minDate.getTime() - minDate.getTimezoneOffset() * TimeUnits.MINUTE.unitInMs);
         minYear = minDate.getYear() + 1900;
         int minMonth = minDate.getMonth() + 1;
         int minDateDate = minDate.getDate();
         long time = minDate.getTime();
+        /*
+         * After the moving time on time zone offset,
+         * we should make some steps back to find the race start time
+         */
+        while (time > min) {
+            time -= interval * count;
+        }
 
         // iterate and add tick positions at appropriate values
         while (time < max) {
