@@ -23,6 +23,11 @@
     <string name="empty" translatable="false"></string>
     <string name="generic_error">Error</string>
     <string name="about">Info</string>
+    
+    <!-- Dialog -->
+    <string name="gps_required_message">GPS is required for this application to work.\nPlease enable GPS on this device.</string>
+    <string name="gps_required_cancel">not now</string>
+    <string name="gps_required_accept">settings</string>
 
     <!-- Signal quality -->
     <string name="signal_accuracy_indicator_view_description">GPS Accuracy</string>

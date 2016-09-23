@@ -21,9 +21,6 @@
         GPS auf Ihrem Gerät oder warten Sie bis ein GPS-Signal verfügbar ist.</string>
     <string name="action_settings">@string/settings</string>
     <string name="settings">Einstellungen</string>
-    <string name="gps_required_message">Diese Anwendung benötigt GPS Daten.\nBitte aktivieren Sie den GPS Empfang.</string>
-    <string name="gps_required_cancel">Jetzt nicht</string>
-    <string name="gps_required_accept">Einstellungen</string>
 
     <string name="server">Polling Einstellungen</string>
     <string name="server_sync_settings">Abfrage Intervall (Sekunden)</string>

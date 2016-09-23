@@ -1,13 +1,9 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-//import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
@@ -38,6 +34,7 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.ui.customviews.AskForGPSDialog;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
@@ -223,25 +220,8 @@ public class BuoyFragment extends BaseFragment
         disablePositionButton();
         setUpTextUI(null);
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
-        askForGpsAction();
-    }
-    
-    private void askForGpsAction() {
-        Builder dialog = new AlertDialog.Builder(getActivity());
-        dialog.setMessage(getString(R.string.gps_required_message));
-        dialog.setPositiveButton(getString(R.string.gps_required_accept), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 100);
-            }
-         });
-         dialog.setNegativeButton(getString(R.string.gps_required_cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                
-            }
-        });
-        dialog.show();
+        
+        AskForGPSDialog.showPrompt(getActivity());
     }
 
     @Override
