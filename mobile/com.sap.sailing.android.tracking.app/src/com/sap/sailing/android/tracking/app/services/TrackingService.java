@@ -12,10 +12,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject; 
 
-//import com.google.android.gms.common.ConnectionResult;
-//import com.google.android.gms.common.api.GoogleApiClient;
-//import com.google.android.gms.location.LocationRequest;
-//import com.google.android.gms.location.LocationServices;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.tracking.app.BuildConfig;
@@ -50,14 +46,9 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
-//GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-
 public class TrackingService extends Service implements  android.location.LocationListener {
 
-    //private GoogleApiClient googleApiClient;
-    //private LocationRequest locationRequest;
     private NotificationManager notificationManager;
-    //private boolean locationUpdateRequested = false;
     private AppPreferences prefs;
 
     private GPSQualityListener gpsQualityListener;
@@ -124,13 +115,6 @@ public class TrackingService extends Service implements  android.location.Locati
         prefs = new AppPreferences(this);
 
         initialLocation = true;
-        // http://developer.android.com/training/location/receive-location-updates.html
-        //locationRequest = LocationRequest.create();
-        //locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        //locationRequest.setInterval(prefs.getGPSFixInterval());
-
-        //googleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this)
-        //        .addOnConnectionFailedListener(this).build();
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -171,8 +155,6 @@ public class TrackingService extends Service implements  android.location.Locati
     }
 
     private void startTracking() {
-        //googleApiClient.connect();
-        //locationUpdateRequested = true;
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, prefs.getGPSFixInterval(), minLocationUpdateDistanceInMeters, this);
 
         ExLog.i(this, TAG, "Started Tracking");
@@ -183,11 +165,7 @@ public class TrackingService extends Service implements  android.location.Locati
     }
 
     private void stopTracking() {
-        //if (googleApiClient.isConnected()) {
-            locationManager.removeUpdates(this);
-        //}
-        //googleApiClient.disconnect();
-        //locationUpdateRequested = false;
+        locationManager.removeUpdates(this);
 
         prefs.setTrackerIsTracking(false);
         prefs.setTrackerIsTrackingCheckinDigest(null);
@@ -195,24 +173,6 @@ public class TrackingService extends Service implements  android.location.Locati
         stopSelf();
         ExLog.i(this, TAG, "Stopped Tracking");
     }
-
-//    @Override
-//    public void onConnectionFailed(ConnectionResult arg0) {
-//        ExLog.e(this, TAG, "Failed to connect to Google Play Services for location updates");
-//    }
-
-//    @Override
-//    public void onConnected(Bundle arg0) {
-//        if (locationUpdateRequested) {
-//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, prefs.getGPSFixInterval(), minLocationUpdateDistanceInMeters, this);
-//        }
-//    }
-
-
-//    @Override
-//    public void onConnectionSuspended(int cause) {
-//        //no-op
-//    }
 
     private void reportGPSQualityBearingAndSpeed(float gpsAccuracy, float bearing, float speed, double latitude,
             double longitude, double altitude) {
@@ -425,17 +385,20 @@ public class TrackingService extends Service implements  android.location.Locati
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-      //Status Update by the provider (GPS)
+        //Status Update by the provider (GPS)
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-      //provider (GPS) disabled by the user while tracking
+        //provider (GPS) disabled by the user while tracking
+        Intent local = new Intent();
+        local.setAction("gpsDisabled");
+        this.sendBroadcast(local);
     }
     
     @Override
     public void onProviderEnabled(String provider) {
-      //provider (GPS) (re)enabled by the user while tracking
+        //provider (GPS) (re)enabled by the user while tracking
     }
 
      private void showNotification() {

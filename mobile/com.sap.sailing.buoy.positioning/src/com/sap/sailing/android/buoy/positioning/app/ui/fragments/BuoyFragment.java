@@ -34,7 +34,6 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
-import com.sap.sailing.android.shared.ui.customviews.AskForGPSDialog;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
@@ -221,7 +220,7 @@ public class BuoyFragment extends BaseFragment
         setUpTextUI(null);
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
         
-        AskForGPSDialog.showPrompt(getActivity());
+        LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
     }
 
     @Override

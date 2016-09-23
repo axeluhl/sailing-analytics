@@ -16,11 +16,6 @@
     <string name="great">sehr gut</string>
     <string name="no_signal">kein Signal</string>
     <string name="ok">OK</string>
-    
-    <!-- Dialog -->
-    <string name="gps_required_message">Diese Anwendung benötigt GPS Daten.\nBitte aktivieren Sie GPS Empfang.</string>
-    <string name="gps_required_cancel">Jetzt nicht</string>
-    <string name="gps_required_accept">Einstellungen</string>
 
     <!-- QR Code -->
     <string name="notify_user_db_operation_failed">Fehler: Datenbank-Operation ist fehlgeschlagen.</string>
