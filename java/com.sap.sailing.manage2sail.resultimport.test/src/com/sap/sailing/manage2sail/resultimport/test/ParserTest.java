@@ -146,10 +146,16 @@ public class ParserTest {
         }
         assertEquals(new HashSet<String>(Arrays.asList(new String[] { "1", "2", "3", "4", "5", "6", "7", "8" })), raceNamesOrNumbers);
         {
+            final ScoreCorrectionsForRace resultsForR2 = Util.get(scoreCorrectionsForRaces, 1);
+            ScoreCorrectionForCompetitorInRace scoreCorrectionR2ForDEN63 = resultsForR2.getScoreCorrectionForCompetitor("DEN 63");
+            assertEquals(0, scoreCorrectionR2ForDEN63.getPoints(), 29.00000001);
+            assertSame(MaxPointsReason.UFD, scoreCorrectionR2ForDEN63.getMaxPointsReason());
+        }
+        {
             final ScoreCorrectionsForRace resultsForR5 = Util.get(scoreCorrectionsForRaces, 4);
-            ScoreCorrectionForCompetitorInRace scoreCorrectionForDEN63 = resultsForR5.getScoreCorrectionForCompetitor("DEN 63");
-            assertEquals(0, scoreCorrectionForDEN63.getPoints(), 35.00000001);
-            assertSame(MaxPointsReason.BFD, scoreCorrectionForDEN63.getMaxPointsReason());
+            ScoreCorrectionForCompetitorInRace scoreCorrectionR5ForDEN63 = resultsForR5.getScoreCorrectionForCompetitor("DEN 63");
+            assertEquals(0, scoreCorrectionR5ForDEN63.getPoints(), 35.00000001);
+            assertSame(MaxPointsReason.BFD, scoreCorrectionR5ForDEN63.getMaxPointsReason());
         }
    
     }
