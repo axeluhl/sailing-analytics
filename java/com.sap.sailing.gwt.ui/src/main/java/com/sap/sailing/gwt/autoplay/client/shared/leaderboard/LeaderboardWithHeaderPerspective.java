@@ -52,7 +52,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, boolean startInFullScreenMode) {
-        super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(), perspectiveLifecycleWithAllSettings.getPerspectiveSettings());
+        super(perspectiveLifecycleWithAllSettings);
         this.stringMessages = stringMessages;
         this.componentLifecyclesAndSettings = perspectiveLifecycleWithAllSettings;
         Window.addResizeHandler(new ResizeHandler() {
@@ -70,8 +70,8 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         leaderboardPanel = createLeaderboardPanel(sailingService, asyncActionsExecutor,
                 competitorSelectionProvider, timer, leaderboardName, errorReporter, stringMessages, userAgent);
         leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        components.add(sapHeader);
-        components.add(leaderboardPanel);
+        addChildComponent(sapHeader);
+        addChildComponent(leaderboardPanel);
         dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addNorth(sapHeader, SAP_HEADER_HEIGHT);
         OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel);

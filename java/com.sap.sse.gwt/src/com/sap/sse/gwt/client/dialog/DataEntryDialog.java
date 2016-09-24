@@ -63,6 +63,7 @@ public abstract class DataEntryDialog<T> {
     private final Button cancelButton;
     private final Label statusLabel;
     private final FlowPanel panelForAdditionalWidget;
+    private final FlowPanel buttonPanel;
 
     public static interface Validator<T> {
         /**
@@ -125,7 +126,7 @@ public abstract class DataEntryDialog<T> {
         panelForAdditionalWidget = new FlowPanel();
         panelForAdditionalWidget.setWidth("100%");
         dialogFPanel.add(panelForAdditionalWidget);
-        FlowPanel buttonPanel = new FlowPanel();
+        buttonPanel = new FlowPanel();
         dialogFPanel.add(buttonPanel);
         buttonPanel.setStyleName("additionalWidgets");
         buttonPanel.add(okButton);
@@ -436,7 +437,7 @@ public abstract class DataEntryDialog<T> {
     }
     
     public FlowPanel createHeadline(String headlineText, boolean regularHeadline) {
-    	FlowPanel headlinePanel = new FlowPanel();
+        FlowPanel headlinePanel = new FlowPanel();
         Label headlineLabel = new Label(headlineText);
         if (regularHeadline) {
             headlinePanel.addStyleName("dialogInnerHeadline");
@@ -588,5 +589,9 @@ public abstract class DataEntryDialog<T> {
     
     protected void addAutoHidePartner(Element element) {
         dateEntryDialog.addAutoHidePartner(element);
+    }
+    
+    protected FlowPanel getButtonPannel() {
+        return buttonPanel;
     }
 }

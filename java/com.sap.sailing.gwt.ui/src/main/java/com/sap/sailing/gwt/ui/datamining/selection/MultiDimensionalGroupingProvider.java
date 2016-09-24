@@ -27,9 +27,10 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class MultiDimensionalGroupingProvider implements GroupingProvider {
+public class MultiDimensionalGroupingProvider extends AbstractComponent<SerializableSettings> implements GroupingProvider {
     
     private static final String GROUPING_PROVIDER_ELEMENT_STYLE = "groupingProviderElement";
     
@@ -266,8 +267,4 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
         return null;
     }
 
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
-    }
 }

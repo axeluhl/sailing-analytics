@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.regattaoverview.client;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -69,7 +68,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 
@@ -78,7 +77,7 @@ import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
  * on the setting {@link RegattaRaceStatesSettings}. Each entry shows what flags are currently displayed, what start
  * time the race has and additional information, e.g. for Gate start.
  */
-public class RegattaRaceStatesComponent extends SimplePanel implements Component<RegattaRaceStatesSettings>,
+public class RegattaRaceStatesComponent extends AbstractCompositeComponent<RegattaRaceStatesSettings> implements
         EventAndRaceGroupAvailabilityListener {
     public interface EntryHandler {
         void onEntryClicked(RegattaOverviewEntryDTO entry);
@@ -153,12 +152,12 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         loadAndSetSettings(settings);
         mainPanel = new VerticalPanel();
         mainPanel.getElement().getStyle().setWidth(100, Unit.PCT);
-        getElement().getStyle().setWidth(100, Unit.PCT);
         regattaOverviewDataProvider = new ListDataProvider<RegattaOverviewEntryDTO>();
         // regattaOverviewTable = createRegattaTable(true);
         createColumns();
         mainPanel.add(tableHolder);
-        setWidget(mainPanel);
+        initWidget(mainPanel);
+        getElement().getStyle().setWidth(100, Unit.PCT);
     }
 
     private void loadAndSetSettings(RegattaRaceStatesSettings settings) {
@@ -945,8 +944,4 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         this.repeatedInfoLabel = repeatedInfoLabel;
     }
 
-    @Override
-    public Serializable getId() {
-        return getLocalizedShortName();
-    }
 }

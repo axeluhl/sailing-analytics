@@ -139,17 +139,20 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener,
-        RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
+public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
+        RaceTimesInfoProviderListener, TailFactory, RequiresDataInitialization, RequiresResize, QuickRankProvider {
     private static final Color LOWLIGHTED_TAIL_COLOR = new RGBColor(200, 200, 200);
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
+    
+    private AbsolutePanel rootPanel = new AbsolutePanel();
     
     private MapWidget map;
     
@@ -413,7 +416,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, 
             boolean showHeaderPanel) {
         this.raceMapLifecycle = raceMapLifecycle;
-        this.setSize("100%", "100%");
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
@@ -459,6 +461,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
+        initWidget(rootPanel);
+        this.setSize("100%", "100%");
     }
     
     /**
@@ -552,10 +556,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           public void run() {
               MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false);
               map = new MapWidget(mapOptions);
-              RaceMap.this.add(map, 0, 0);
+              rootPanel.add(map, 0, 0);
               if (showHeaderPanel) {
                   Image sapLogo = createSAPLogo();
-                  RaceMap.this.add(sapLogo);
+                  rootPanel.add(sapLogo);
               }
               
               map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
@@ -701,7 +705,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         map.setControls(ControlPosition.TOP_LEFT, panelForLeftHeaderLabels);
         panelForLeftHeaderLabels.getElement().getParentElement().getStyle().setProperty("zIndex", "1");
         panelForLeftHeaderLabels.getElement().getStyle().setProperty("overflow", "visible");
-        add(panelForRightHeaderLabels);
+        rootPanel.add(panelForRightHeaderLabels);
         panelForRightHeaderLabels.getElement().getStyle().setProperty("zIndex", "1");
         panelForRightHeaderLabels.getElement().getStyle().setProperty("overflow", "visible");
         // need to initialize size before css kicks in to make sure
@@ -2896,11 +2900,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     InfoWindow getLastInfoWindow() {
         return lastInfoWindow;
-    }
-
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
     }
 
     public void addCompetitorsForRaceDefinedListener(CompetitorsForRaceDefinedListener listener) {

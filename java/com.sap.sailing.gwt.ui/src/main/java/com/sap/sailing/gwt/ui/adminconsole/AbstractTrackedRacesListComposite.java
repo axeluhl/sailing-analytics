@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -46,10 +45,10 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public abstract class AbstractTrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>,
+public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> implements
         RegattasDisplayer {
 
     protected final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
@@ -102,7 +101,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS / 1000l);
         VerticalPanel panel = new VerticalPanel();
-        setWidget(panel);
+        initWidget(panel);
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
         Label lblFilterRaces = new Label(stringMessages.filterRacesByName() + ":");
@@ -497,8 +496,4 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         return refreshableSelectionModel;
     }
 
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
-    }
 }

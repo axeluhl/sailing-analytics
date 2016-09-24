@@ -18,9 +18,10 @@ import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class MultiResultsPresenter implements ResultsPresenter<Settings> {
+public class MultiResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
     
     private final StringMessages stringMessages;
     
@@ -201,8 +202,4 @@ public class MultiResultsPresenter implements ResultsPresenter<Settings> {
         
     }
 
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
-    }
 }

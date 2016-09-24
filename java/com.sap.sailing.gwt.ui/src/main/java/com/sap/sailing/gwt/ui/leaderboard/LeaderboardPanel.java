@@ -115,7 +115,7 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
@@ -128,7 +128,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LeaderboardPanel extends SimplePanel implements Component<LeaderboardSettings>, TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
+public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSettings> implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
     IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider, LeaderboardUpdateProvider {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
@@ -1897,7 +1897,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         if (showCompetitorFilterStatus) {
             contentPanel.add(createFilterDeselectionControl());
         }
-        setWidget(mainPanel);
+        initWidget(mainPanel);
         mainPanel.setWidget(contentPanel);
         this.setTitle(stringMessages.leaderboard());
         if (timer.isInitialized()) {
@@ -3375,8 +3375,4 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         }
     }
 
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
-    }
 }

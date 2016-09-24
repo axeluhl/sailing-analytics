@@ -44,10 +44,10 @@ import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class EditMarkPassingsPanel extends AbsolutePanel implements Component<AbstractSettings>, CompetitorSelectionChangeListener {
+public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSettings> implements CompetitorSelectionChangeListener {
     private static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -265,9 +265,9 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         });
         selectCompetitorLabel.setText(stringMessages.selectCompetitor());
         refreshWaypoints();
-        setVisible(false);
+        AbsolutePanel rootPanel = new AbsolutePanel();
         HorizontalPanel tableAndButtons = new HorizontalPanel();
-        add(tableAndButtons, 0, 0);
+        rootPanel.add(tableAndButtons, 0, 0);
         tableAndButtons.setSpacing(3);
         tableAndButtons.add(wayPointSelectionTable);
         VerticalPanel buttonPanel = new VerticalPanel();
@@ -279,6 +279,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         buttonPanel.add(removeSuppressedPassingButton);
         buttonPanel.add(selectCompetitorLabel);
         enableButtons();
+        initWidget(rootPanel);
+        setVisible(false);
     }
     
     @Override
@@ -459,8 +461,4 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         return null;
     }
 
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
-    }
 }

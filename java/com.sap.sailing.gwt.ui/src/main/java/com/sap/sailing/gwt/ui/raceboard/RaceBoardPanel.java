@@ -75,6 +75,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
@@ -150,8 +151,6 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
-    private final PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleWithAllSettings;
-    
     /**
      * @param eventId
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
@@ -172,8 +171,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo) {
-        super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(), perspectiveLifecycleWithAllSettings.getPerspectiveSettings());
-        this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;
+        super(perspectiveLifecycleWithAllSettings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -251,7 +249,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
         leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox, isScreenLargeEnoughToInitiallyDisplayLeaderboard);
-        components.add(leaderboardPanel);
+        addChildComponent(leaderboardPanel);
 
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
@@ -307,14 +305,14 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
             FlowPanel mainPanel, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap,
             UserService userService, boolean showChartMarkEditMediaButtonsAndVideo) {
 
-        MediaPlayerLifecycle mediaPlayerLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getMediaPlayerLifecycle();
-        MediaPlayerSettings mediaPlayerSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(mediaPlayerLifecycle);
+        MediaPlayerLifecycle mediaPlayerLifecycle = getPerspectiveLifecycle().getMediaPlayerLifecycle();
+        MediaPlayerSettings mediaPlayerSettings = findComponentSettingsByLifecycle(mediaPlayerLifecycle);
 
-        WindChartLifecycle windChartLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getWindChartLifecycle();
-        WindChartSettings windChartSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(windChartLifecycle);
+        WindChartLifecycle windChartLifecycle = getPerspectiveLifecycle().getWindChartLifecycle();
+        WindChartSettings windChartSettings = findComponentSettingsByLifecycle(windChartLifecycle);
 
-        MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getMultiCompetitorRaceChartLifecycle();
-        MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(multiCompetitorRaceChartLifecycle);
+        MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle = getPerspectiveLifecycle().getMultiCompetitorRaceChartLifecycle();
+        MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = findComponentSettingsByLifecycle(multiCompetitorRaceChartLifecycle);
 
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
@@ -355,7 +353,9 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
                 errorReporter, userAgent, this, mediaPlayerSettings);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent,
                 componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel);
-        components.addAll(componentsForSideBySideViewer);
+        for(Component<? extends Settings> component : componentsForSideBySideViewer) {
+            addChildComponent(component);
+        }
         this.setupUserManagementControlPanel(userService);
         mainPanel.add(leaderboardAndMapViewer.getViewerWidget());
         boolean showLeaderboard = getPerspectiveSettings().isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;

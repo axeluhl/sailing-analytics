@@ -33,11 +33,11 @@ import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class TimePanel<T extends TimePanelSettings> extends SimplePanel implements Component<T>, TimeListener, TimeZoomChangeListener,
+public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeComponent<T> implements TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeProvider;
@@ -290,7 +290,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
        
         timePanelCss.ensureInjected();
         controlsPanel.add(createSettingsButton());
-        setWidget(timePanelInnerWrapper);
+        initWidget(timePanelInnerWrapper);
         playStateChanged(timer.getPlayState(), timer.getPlayMode());
         
         controlsPanel.add(playSpeedControlPanel);
@@ -638,11 +638,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     public Button getBackToLiveButton() {
         return backToLivePlayButton;
-    }
-
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
     }
 
 }

@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
@@ -22,7 +23,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogCom
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class AnchorDataMiningSettingsControl implements DataMiningSettingsControl {
+public class AnchorDataMiningSettingsControl extends AbstractComponent<CompositeSettings> implements DataMiningSettingsControl {
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
     
     private final StringMessages stringMessages;
@@ -127,11 +128,6 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
     @Override
     public String getDependentCssClassName() {
         return "AnchorDataMiningSettingsControl";
-    }
-
-    @Override
-    public Serializable getId() {
-        return getLocalizedShortName();
     }
 
 }

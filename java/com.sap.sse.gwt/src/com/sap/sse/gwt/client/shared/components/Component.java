@@ -62,4 +62,6 @@ public interface Component<SettingsType extends Settings> {
      * a dependent CSS class name for those components.
      */
     String getDependentCssClassName();
+
+    ComponentTreeNodeInfo<SettingsType> getComponentTreeNodeInfo();
 }
