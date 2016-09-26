@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class SAPHeader extends Composite {
     
     private static final String LOGO_URL = "https://sapsponsorships.com/";
-    private static final String TITLE_URL = "http://www.sapsailing.com";
+//    private static final String TITLE_URL = "http://www.sapsailing.com";
     
     private static SAPHeaderUiBinder uiBinder = GWT.create(SAPHeaderUiBinder.class);
 
@@ -34,7 +34,7 @@ public class SAPHeader extends Composite {
     }
 
     @UiField
-    DivElement applicationNameUi;
+    AnchorElement applicationNameAnchor;
     @UiField
     DivElement pageTitleUi;
     @UiField
@@ -45,16 +45,14 @@ public class SAPHeader extends Composite {
     SimplePanel rightSideUi;
     @UiField
     AnchorElement logoAnchor;
-    @UiField
-    AnchorElement titleUiAnchor;
 
-    public SAPHeader(String applicationName) {
+    public SAPHeader(String applicationName, String applicationBaseUrl) {
         SAPHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        applicationNameUi.setInnerText(applicationName != null ? applicationName : "&nbsp;");
+        applicationNameAnchor.setInnerText(applicationName != null ? applicationName : "&nbsp;");
         logoAnchor.setHref(LOGO_URL);
-        String sapSailingUrl = TITLE_URL + "?locale=" + LocaleInfo.getCurrentLocale().getLocaleName();
-        titleUiAnchor.setHref(sapSailingUrl);
+        String sapSailingUrl = applicationBaseUrl + "?locale=" + LocaleInfo.getCurrentLocale().getLocaleName();
+        applicationNameAnchor.setHref(sapSailingUrl);
     }
 
     public void setHeaderTitle(String title) {
