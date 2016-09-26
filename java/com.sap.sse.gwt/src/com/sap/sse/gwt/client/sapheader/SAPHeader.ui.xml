@@ -14,8 +14,7 @@
                 <div ui:field="titleUi" style="margin-top:14px;" class="{local_res.css.siteHeaderTitle}"></div>
                 <div ui:field="subTitleUi" style="display:none;" class="{local_res.css.siteHeaderSubTitle}"></div>
             </div>
-            <g:SimplePanel ui:field="rightSideUi" styleName="{local_res.css.siteheaderRight}">
-            </g:SimplePanel>
+            <g:SimplePanel ui:field="rightSideUi" styleName="{local_res.css.siteheaderRight}" />
         </header>
     </g:HTMLPanel>
 </ui:UiBinder>
