@@ -23,7 +23,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     private static final Logger logger = Logger.getLogger(TrackedRaceWithWindEssentials.class.getName());
     
     /**
-     * Serializing an instance of this class has to serialized the various data structures holding the tracked race's
+     * Serializing an instance of this class has to serialize the various data structures holding the tracked race's
      * state. When a race is currently on, these structures change very frequently, and
      * {@link ConcurrentModificationException}s during serialization will be the norm rather than the exception. To
      * avoid this, all modifications to any data structure that is not in itself synchronized obtains this lock's
