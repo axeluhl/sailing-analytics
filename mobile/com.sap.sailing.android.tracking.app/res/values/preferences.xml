@@ -17,9 +17,7 @@
     <string name="preference_energy_saving_summary_is_disabled">GPS updates are being sent to server every second.</string>
 
     <string name="preference_gps_fix_interval_ms_key" translatable="false">gpsFixInterval</string>
-    <string name="preference_gps_fix_interval_ms_default" translatable="false">500</string>
-    <string name="preference_gps_fix_fastest_interval_ms_key" translatable="false">gpsFixFastestInterval</string>
-    <string name="preference_gps_fastest_fix_interval_ms_default" translatable="false">100</string>
+    <string name="preference_gps_fix_interval_ms_default" translatable="false">1000</string>
     <string name="preference_battery_is_charging" translatable="false">batteryIsCharging</string>
     <string name="preference_tracking_timer_started" translatable="false">trackingTimerStarted</string>
     <string name="preference_tracker_is_tracking" translatable="false">trackerIsTracking</string>
