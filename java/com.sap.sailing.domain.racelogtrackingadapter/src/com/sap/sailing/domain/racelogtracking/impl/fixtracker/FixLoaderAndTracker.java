@@ -267,12 +267,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    // TEMP: kommt von RaceLogSensorFixTracker
     protected TimePoint getStartOfTracking() {
         return trackedRace.getStartOfTracking();
     }
 
-    // TEMP: kommt von RaceLogSensorFixTracker
     protected TimePoint getEndOfTracking() {
         return trackedRace.getEndOfTracking();
     }
@@ -292,7 +290,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * @param updateCallback
      *            the {@link Runnable} callback used to run the update
      */
-    // TODO Consider using a thread pool here, after merging bug3864 into master
     private void updateAsyncInternal(final Runnable updateCallback) {
         synchronized (FixLoaderAndTracker.this) {
             activeLoaders.incrementAndGet();
