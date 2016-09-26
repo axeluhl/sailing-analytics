@@ -2291,9 +2291,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception {
+    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) {
         for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
-            windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+            try {
+                windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to track wind using wind tracker factory "+windTrackerFactory, e);
+            }
         }
     }
 
