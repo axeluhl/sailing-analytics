@@ -92,8 +92,9 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
         }
     }
     
-    /** Creates a {@link RaceviewerLaunchPad} for the given data object with a <code>min-width</code> depending 
-     *  on the {@link Element#getOffsetWidth() offset width} of the provided button element.*/
+    /** 
+     * Creates a {@link RaceviewerLaunchPad} for the given data object.
+     */
     private RaceviewerLaunchPad createLaunchPad(Element button, T data) {
         RaceviewerLaunchPad launchPad = new RaceviewerLaunchPad(data, panel) {
             @Override
@@ -101,7 +102,6 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
                 return presenter.getRaceViewerURL(data, raceBoardMode);
             }
         };
-        launchPad.getElement().getStyle().setProperty("minWidth", button.getOffsetWidth() + 1, Unit.PX);
         return launchPad;
     }
     
