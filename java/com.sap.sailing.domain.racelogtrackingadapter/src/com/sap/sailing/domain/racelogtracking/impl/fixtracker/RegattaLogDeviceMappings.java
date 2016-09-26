@@ -270,8 +270,8 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
             Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings) {
         Set<ItemT> itemsToProcess = new HashSet<ItemT>(previousMappings.keySet());
         itemsToProcess.addAll(newMappings.keySet());
-        for(ItemT item : itemsToProcess) {
-            if(!newMappings.containsKey(item)) {
+        for (ItemT item : itemsToProcess) {
+            if (!newMappings.containsKey(item)) {
                 previousMappings.get(item).forEach(this::mappingRemoved);
             } else {
                 final List<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings = previousMappings.containsKey(item)

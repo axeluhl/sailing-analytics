@@ -112,7 +112,8 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
                 if(displayName == null) {
                     displayName = eventInSeries.getName();
                 }
-                dto.getEventsOfSeries().add(new EventReferenceDTO(eventInSeries.getId(), displayName));
+                EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
+                dto.getEventsOfSeries().add(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
             }
         } else {
             dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
