@@ -71,6 +71,8 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * Install the Google Android SDK from the same Google Plugin for Eclipse update site
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> Google -> Web Toolkit -> Add...)
+  * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs 
+  * In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
   * Check that JDK 1.8 is available and has been set for compilation in Eclipse
