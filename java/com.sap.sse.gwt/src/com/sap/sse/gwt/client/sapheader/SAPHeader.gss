@@ -52,7 +52,7 @@
   display: inline-block;
 }
 
-.logotitle {
+.logotitle, .logotitle:hover, .logotitle:visited {
   font-size: 1rem;
   display: inline-block;
   color: #f6f9fc;
@@ -65,6 +65,7 @@
   margin: 0px;
   margin-left: -25px;
   box-sizing: border-box;
+  text-decoration: none;
 }
 .pagetitle {
   color: #ffffff;

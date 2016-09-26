@@ -34,8 +34,6 @@ public class SAPHeader extends Composite {
     }
 
     @UiField
-    DivElement applicationNameUi;
-    @UiField
     DivElement pageTitleUi;
     @UiField
     DivElement titleUi;
@@ -46,7 +44,7 @@ public class SAPHeader extends Composite {
     @UiField
     AnchorElement logoAnchor;
     @UiField
-    AnchorElement titleUiAnchor;
+    AnchorElement applicationNameUi;
 
     public SAPHeader(String applicationName) {
         SAPHeaderResources.INSTANCE.css().ensureInjected();
@@ -54,7 +52,7 @@ public class SAPHeader extends Composite {
         applicationNameUi.setInnerText(applicationName != null ? applicationName : "&nbsp;");
         logoAnchor.setHref(LOGO_URL);
         String sapSailingUrl = TITLE_URL + "?locale=" + LocaleInfo.getCurrentLocale().getLocaleName();
-        titleUiAnchor.setHref(sapSailingUrl);
+        applicationNameUi.setHref(sapSailingUrl);
     }
 
     public void setHeaderTitle(String title) {
