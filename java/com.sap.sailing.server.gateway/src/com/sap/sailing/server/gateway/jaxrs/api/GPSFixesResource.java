@@ -52,9 +52,7 @@ public class GPSFixesResource extends AbstractSailingServerResource {
         List<GPSFixMoving> fixes = data.getB();
 
         try {
-            for (GPSFixMoving fix : fixes) {
-                getService().getSensorFixStore().storeFix(device, fix);
-            }
+            getService().getSensorFixStore().storeFixes(device, fixes);
             logger.log(Level.INFO, "Added " + fixes.size() + " fixes for device " + device.toString()  + " to store");
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store fix for device " + device);
