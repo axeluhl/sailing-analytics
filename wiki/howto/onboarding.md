@@ -73,6 +73,7 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> Google -> Web Toolkit -> Add...)
   * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs 
   * In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces
+  * In "Window->Preferences->General->Content Types" select on the right side CSS, now add in the lower file association list *.gss to get limited syntax highlighting and content assist in GSS files
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
   * Check that JDK 1.8 is available and has been set for compilation in Eclipse
