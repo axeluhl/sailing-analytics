@@ -18,10 +18,10 @@ public interface MemoryMonitorAction extends Comparable<MemoryMonitorAction> {
      * Checks if the given argument is below the {@link #getThreshold() threshold}
      * and performs the action if yes.
      * 
-     * @param freeMemoryInPercent The current free memory in percent.
+     * @param freeMemoryRatio The current free memory as a ratio of the total memory, between 0..1
      * @return <code>true</code>, if the action has been performed.
      */
-    boolean checkMemoryAndPerformAction(double freeMemoryInPercent);
+    boolean checkMemoryAndPerformAction(double freeMemoryRatio);
     
     /**
      * Compares this action to the given action by its importance.
