@@ -748,6 +748,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     /**
+     * Monitor object to synchronize access to the {@link #updateStartAndEndOfTracking(boolean)} method. See bug 3922.
+     */
+    private final Serializable updateStartAndEndOfTrackingMonitor = "";
+    
+    /**
      * Updates the start and end of tracking in the following precedence order:
      * 
      * <ol>
@@ -757,46 +762,48 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * </ol>
      */
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
-        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
-        TimePoint oldStartOfTracking = getStartOfTracking();
-        TimePoint oldEndOfTracking = getEndOfTracking();
-        boolean startOfTrackingFound = false;
-        boolean endOfTrackingFound = false;
-        // check race log
-        if (trackingTimesFromRaceLog != null){
-            if (trackingTimesFromRaceLog.getA() != null) {
-                startOfTracking = trackingTimesFromRaceLog.getA().getTimePoint();
-                startOfTrackingFound = true;
+        synchronized (updateStartAndEndOfTrackingMonitor) {
+            final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
+            TimePoint oldStartOfTracking = getStartOfTracking();
+            TimePoint oldEndOfTracking = getEndOfTracking();
+            boolean startOfTrackingFound = false;
+            boolean endOfTrackingFound = false;
+            // check race log
+            if (trackingTimesFromRaceLog != null){
+                if (trackingTimesFromRaceLog.getA() != null) {
+                    startOfTracking = trackingTimesFromRaceLog.getA().getTimePoint();
+                    startOfTrackingFound = true;
+                }
+                if (trackingTimesFromRaceLog.getB() != null) {
+                    endOfTracking = trackingTimesFromRaceLog.getB().getTimePoint();
+                    endOfTrackingFound = true;
+                }
             }
-            if (trackingTimesFromRaceLog.getB() != null) {
-                endOfTracking = trackingTimesFromRaceLog.getB().getTimePoint();
-                endOfTrackingFound = true;
+            // check "received" variants coming from a connector directly
+            if (!startOfTrackingFound || !endOfTrackingFound) {
+                if (startOfTrackingReceived != null && !startOfTrackingFound) {
+                    startOfTrackingFound = true;
+                    startOfTracking = startOfTrackingReceived;
+                }
+                if (endOfTrackingReceived != null && !endOfTrackingFound) {
+                    endOfTrackingFound = true;
+                    endOfTracking = endOfTrackingReceived;
+                }
             }
+            // check for start/finished times in race log and add a few minutes on the ends
+            if (!startOfTrackingFound || !endOfTrackingFound) {
+                if (!startOfTrackingFound && getStartOfRace() != null) {
+                    startOfTracking = getStartOfRace().minus(START_TRACKING_THIS_MUCH_BEFORE_RACE_START);
+                    startOfTrackingFound = true;
+                }
+                if (!endOfTrackingFound && getFinishedTime() != null) {
+                    endOfTracking = getFinishedTime().plus(STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
+                    endOfTrackingFound = true;
+                }
+            }
+            startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
+            endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
         }
-        // check "received" variants coming from a connector directly
-        if (!startOfTrackingFound || !endOfTrackingFound) {
-            if (startOfTrackingReceived != null && !startOfTrackingFound) {
-                startOfTrackingFound = true;
-                startOfTracking = startOfTrackingReceived;
-            }
-            if (endOfTrackingReceived != null && !endOfTrackingFound) {
-                endOfTrackingFound = true;
-                endOfTracking = endOfTrackingReceived;
-            }
-        }
-        // check for start/finished times in race log and add a few minutes on the ends
-        if (!startOfTrackingFound || !endOfTrackingFound) {
-            if (!startOfTrackingFound && getStartOfRace() != null) {
-                startOfTracking = getStartOfRace().minus(START_TRACKING_THIS_MUCH_BEFORE_RACE_START);
-                startOfTrackingFound = true;
-            }
-            if (!endOfTrackingFound && getFinishedTime() != null) {
-                endOfTracking = getFinishedTime().plus(STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
-                endOfTrackingFound = true;
-            }
-        }
-        startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
-        endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
     }
 
     @Override
