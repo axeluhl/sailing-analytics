@@ -15,6 +15,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
@@ -192,6 +193,9 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
+                    if (!isSettingFixedMarkPossible(timer)) {
+                        return;
+                    }
                     sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                             leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
                             leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
@@ -281,6 +285,23 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         enableButtons();
     }
     
+    /*
+     * If we try to set a time as mark passing of a waypoint then first we should make sure the times of previous mark
+     * is before the time of current setting mark and time of the following mark is after the setting time
+     */
+    private boolean isSettingFixedMarkPossible(Timer timer) {
+        Pair<Integer, Date> selectedWaypoint = waypointSelectionModel.getSelectedObject();
+        for (Pair<Integer, Date> waypoint : waypointList.getList()) {
+            if ((waypoint.getA() < selectedWaypoint.getA() && waypoint.getB().after(timer.getTime()))
+                    || (waypoint.getA() > selectedWaypoint.getA() && waypoint.getB().before(timer.getTime()))) {
+                Window.alert("You may not to set the time of " + currentWaypoints.get(selectedWaypoint.getA()).getName()
+                        + " waypoint that is before the time of the previous mark or after the time of the following mark");
+                return false;
+            }
+        }
+        return true;
+    }
+   
     @Override
     public void setVisible(boolean visible) {
         processCompetitorSelectionChange(visible);
