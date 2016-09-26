@@ -61,4 +61,3 @@ public class GPSFixesResource extends AbstractSailingServerResource {
         return Response.ok().build();
     }
 }
- 
