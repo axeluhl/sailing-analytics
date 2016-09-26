@@ -108,14 +108,17 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
         }, ClickEvent.getType());
     }
 
-    @UiHandler("autoRefreshAnchor")
-    void toogleAutoRefreshClicked(ClickEvent event) {
+    /**
+     * Refactoring to make leaderboard click handler available from {@link EventSeriesLeaderboardsTabView}
+     */
+    public void handleAutoRefreshClick() {
         if (autoRefreshTimer != null) {
             autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
             autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
             if (delegate != null) {
                 delegate.getAutoRefreshControl().removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-                delegate.getAutoRefreshControl().removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
+                delegate.getAutoRefreshControl()
+                        .removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
             }
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
@@ -132,10 +135,16 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
                 autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
                 if (delegate != null) {
                     // delegate.getAutoRefreshControl().getElement().getStyle().setBackgroundColor("red");
-                    delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+                    delegate.getAutoRefreshControl()
+                            .addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
                 }
             }
         }
+    }
+
+    @UiHandler("autoRefreshAnchor")
+    void toogleAutoRefreshClicked(ClickEvent event) {
+        handleAutoRefreshClick();
     }
     
     @UiHandler("settingsAnchor")

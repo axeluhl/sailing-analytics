@@ -80,29 +80,28 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         this.delegate = delegate;
         this.setupFullscreenDelegate();
         
-        //adding handler on page loading
+        // adding handler on page loading
         this.addAttachHandler(new Handler() {
             @Override
             public void onAttachOrDetach(AttachEvent event) {
                 if (event.isAttached() && leaderboardPanel != null) {
-                    //waiting while leaderboard is loaded
+                    // waiting while leaderboard is loaded
                     leaderboardPanel.addLeaderboardUpdateListener(new LeaderboardUpdateListener() {
-                        //remove event as we need to select button only at startup
-                        //if race or regatta is live then check button by default
+                        // We have to remove listener to prevent endless loop of button clicking
+                        // as when leaderboard is live it is updated through some interval
                         @Override
                         public void updatedLeaderboard(LeaderboardDTO leaderboard) {
                             leaderboardPanel.removeLeaderboardUpdateListener(this);
+                            // If race or regatta is live then check button by default
                             if (leaderboard.hasLiveRace(autoRefreshTimer.getLiveTimePointInMillis())) {
-                                delegate.getAutoRefreshControl().fireEvent(new ClickEvent() {});
+                                handleAutoRefreshClick();
                             }
-                            
                         }
-                        
+
                         @Override
                         public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) { }
                     });
                 }
-                
             }
         });
     }
@@ -137,8 +136,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         }, ClickEvent.getType());
     }
     
-    @UiHandler("autoRefreshAnchor")
-    void toogleAutoRefreshClicked(ClickEvent event) {
+    private void handleAutoRefreshClick() {
         autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
         autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
         if (delegate != null) {
@@ -165,6 +163,11 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
                 }
             }
         }
+    }
+    
+    @UiHandler("autoRefreshAnchor")
+    void toogleAutoRefreshClicked(ClickEvent event) {
+        handleAutoRefreshClick();
     }
     
     @UiHandler("settingsAnchor")
