@@ -762,10 +762,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * </ol>
      */
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
+        final TimePoint oldStartOfTracking;
+        final TimePoint oldEndOfTracking;
         synchronized (updateStartAndEndOfTrackingMonitor) {
             final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
-            TimePoint oldStartOfTracking = getStartOfTracking();
-            TimePoint oldEndOfTracking = getEndOfTracking();
+            oldStartOfTracking = getStartOfTracking();
+            oldEndOfTracking = getEndOfTracking();
             boolean startOfTrackingFound = false;
             boolean endOfTrackingFound = false;
             // check race log
@@ -801,9 +803,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     endOfTrackingFound = true;
                 }
             }
-            startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
-            endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
         }
+        startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
+        endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
     }
 
     @Override

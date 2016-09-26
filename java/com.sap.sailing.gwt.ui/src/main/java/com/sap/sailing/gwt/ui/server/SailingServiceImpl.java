@@ -1139,7 +1139,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * can be obtained within this timeout, wind for the race will be tracked; otherwise, the method returns without
      * taking any effect.
      */
-    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
+    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) {
         Regatta regatta = raceHandle.getRegatta();
         if (regatta != null) {
             RaceDefinition race = raceHandle.getRace(timeoutInMilliseconds);

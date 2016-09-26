@@ -291,7 +291,7 @@ public class MarkPassingCalculator {
             try {
                 executor.invokeAll(tasks);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.log(Level.INFO, "mark passing calculation interrupted", e);
             }
         }
 
