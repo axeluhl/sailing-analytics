@@ -146,7 +146,4 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     protected NamedReentrantReadWriteLock getSerializationLock() {
         return serializationLock;
     }
-
-    
-
 }
