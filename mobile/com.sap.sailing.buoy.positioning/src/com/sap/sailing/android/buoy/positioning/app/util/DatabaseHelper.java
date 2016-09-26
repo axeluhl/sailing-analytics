@@ -281,7 +281,7 @@ public class DatabaseHelper {
         mpcv.put(MarkPing.MARK_ID, markPing.getMarkId().toString());
         mpcv.put(MarkPing.MARK_PING_LATITUDE, markPing.getLatitude());
         mpcv.put(MarkPing.MARK_PING_LONGITUDE, markPing.getLongitude());
-        mpcv.put(MarkPing.MARK_PING_ACCURACY, markPing.getAccuracy());
+        mpcv.put(MarkPing.MARK_PING_ACCURACY, (markPing.getAccuracy() == 1 ? MarkPingInfo.NOT_SET_BY_USER : markPing.getAccuracy()));
         mpcv.put(MarkPing.MARK_PING_TIMESTAMP, markPing.getTimestamp());
         opList.add(ContentProviderOperation.newInsert(MarkPing.CONTENT_URI).withValues(mpcv).build());
 

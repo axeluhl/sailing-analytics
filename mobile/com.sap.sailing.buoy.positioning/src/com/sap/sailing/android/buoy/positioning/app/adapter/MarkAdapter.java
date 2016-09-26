@@ -33,8 +33,15 @@ public class MarkAdapter extends ResourceCursorAdapter {
         } else {
             final DecimalFormat df = new DecimalFormat("#.##");
             final double accuracy = markPings.get(0).getAccuracy();
-            final String accuracyString = String.format(context.getString(R.string.mark_list_accuracy), df.format(accuracy));
-            setText = context.getString(R.string.set) + " " + accuracyString;
+            String accuracyString= "";
+            if(accuracy == MarkPingInfo.NOT_SET_BY_USER){
+                accuracyString = context.getString(R.string.unknown);
+            }
+            else {
+                accuracyString = context.getString(R.string.set) + " " +
+                        String.format(context.getString(R.string.mark_list_accuracy), df.format(accuracy));
+            }
+            setText = accuracyString;
         }
         markName.setText(name);
         markSet.setText(setText);
