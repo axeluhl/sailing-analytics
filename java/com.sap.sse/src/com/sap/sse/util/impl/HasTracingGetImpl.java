@@ -28,7 +28,7 @@ public abstract class HasTracingGetImpl<V> implements HasTracingGet<V> {
                 return future.get(MILLIS_AFTER_WHICH_TO_TRACE_NON_RETURNING_GET, TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {
                 logger.log(Level.INFO, "Timeout waiting for future task "+this+
-                        "; "+ getAdditionalTraceInfo(), e);
+                        " (retrying); "+ getAdditionalTraceInfo(), e);
             }
         }
     }
