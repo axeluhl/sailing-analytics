@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -23,6 +24,9 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.SmartFutureCache.UpdateInterval;
+import com.sap.sse.util.impl.KnowsExecutor;
+import com.sap.sse.util.impl.KnowsExecutorAndTracingGet;
+import com.sap.sse.util.impl.KnowsExecutorAndTracingGetImpl;
 
 /**
  * A cache for which a background update can be triggered. Readers can decide whether they want to wait for any ongoing
@@ -201,7 +205,9 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * @author Axel Uhl (D043530)
      * 
      */
-    private class FutureTaskWithCancelBlocking extends FutureTask<V> implements Callable<V> {
+    private class FutureTaskWithCancelBlocking extends FutureTask<V> implements KnowsExecutor, Callable<V> {
+        private final KnowsExecutorAndTracingGet<V> tracingGetHelper;
+        
         private boolean runningAndReadUpdateInterval;
         
         private final K key;
@@ -228,6 +234,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         public FutureTaskWithCancelBlocking(SettableCallable<V> callable, final K key, final U updateInterval,
                 final boolean callerWaitsSynchronouslyForResult, final Thread callerThread) {
             super(callable);
+            tracingGetHelper = new KnowsExecutorAndTracingGetImpl<>();
             callable.setCallable(this);
             this.gettingThreads = new HashSet<>();
             this.key = key;
@@ -274,7 +281,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                     }
                 }
             }
-            return super.get();
+            return tracingGetHelper.callGetAndTraceAfterEachTimeout(this);
         }
 
         @Override
@@ -362,6 +369,11 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
         public U getUpdateInterval() {
             return updateInterval;
+        }
+
+        @Override
+        public void setExecutorThisTaskIsScheduledFor(ThreadPoolExecutor executorThisTaskIsScheduledFor) {
+            tracingGetHelper.setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
         }
     }
     

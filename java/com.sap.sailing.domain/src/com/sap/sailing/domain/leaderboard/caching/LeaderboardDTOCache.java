@@ -23,6 +23,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
 /**
  * Caches the expensive to compute {@link LeaderboardDTO} results of a
@@ -140,15 +141,16 @@ public class LeaderboardDTOCache implements LeaderboardCache {
             LockUtil.unlockAfterRead(leaderboardCacheLock);
         }
         if (future == null) {
-            future = new FutureTask<LeaderboardDTO>(new Callable<LeaderboardDTO>() {
-                @Override
-                public LeaderboardDTO call() throws Exception {
-                    LeaderboardDTO result = leaderboard.computeDTO(adjustedTimePoint,
-                            namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
-                            waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
-                    return result;
-                }
-            });
+            future = new FutureTaskWithTracingGet<LeaderboardDTO>(LeaderboardDTOCache.class.getName()+" for leaderboard "+leaderboard.getName(),
+                    new Callable<LeaderboardDTO>() {
+                        @Override
+                        public LeaderboardDTO call() throws Exception {
+                            LeaderboardDTO result = leaderboard.computeDTO(adjustedTimePoint,
+                                    namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
+                                    waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
+                            return result;
+                        }
+                    });
             // The add(Leaderboard) method that the cache manager calls back on this class does nothing, so no synchronization required
             this.leaderboardCacheManager.add(leaderboard); // ensure the leaderboard is tracked for changes to invalidate
             LockUtil.lockForWrite(leaderboardCacheLock);

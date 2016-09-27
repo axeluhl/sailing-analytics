@@ -51,8 +51,9 @@ public interface ThreadPoolUtil {
      * <p>
      * 
      * The same configuration as for {@link #getDefaultBackgroundTaskThreadPoolExecutor()} is used.
+     * @param name TODO
      */
-    ScheduledExecutorService createBackgroundTaskThreadPoolExecutor();
+    ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(String name);
     
     /**
      * In case an application module really requires its own thread pool instead of
@@ -73,6 +74,7 @@ public interface ThreadPoolUtil {
      * <p>
      * 
      * The same configuration as for {@link #getDefaultForegroundTaskThreadPoolExecutor()} is used.
+     * @param name TODO
      */
-    ScheduledExecutorService createForegroundTaskThreadPoolExecutor();
+    ScheduledExecutorService createForegroundTaskThreadPoolExecutor(String name);
 }

@@ -158,6 +158,7 @@ import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -1875,7 +1876,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             synchronized (directionFromStartToNextMarkCache) {
                 future = directionFromStartToNextMarkCache.get(at);
                 if (future == null) {
-                    newFuture = new FutureTask<Wind>(new Callable<Wind>() {
+                    newFuture = new FutureTaskWithTracingGet<Wind>("getDirectionFromStartToNextMark for "+this, new Callable<Wind>() {
                         @Override
                         public Wind call() {
                             Wind result;
