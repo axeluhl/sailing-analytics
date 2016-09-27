@@ -8,7 +8,8 @@ public class MarkPingInfo {
     private final Serializable markId;
     private final GPSFix gpsFix;
     private final double accuracy;
-    public static final int NOT_SET_BY_USER = -1;
+    
+    public static final int NOT_SET_BY_USER = -1;       // this is used for accuracies that are displayed as "n/a"
 
     public MarkPingInfo(Serializable markId, GPSFix gpsFix, double accuracy) {
         super();

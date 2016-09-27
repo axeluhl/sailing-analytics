@@ -34,6 +34,7 @@ public class MarkAdapter extends ResourceCursorAdapter {
             final DecimalFormat df = new DecimalFormat("#.##");
             final double accuracy = markPings.get(0).getAccuracy();
             String accuracyString= "";
+            //accuracy-values that are stored as -1 will be displayed as "n/a"
             if(accuracy == MarkPingInfo.NOT_SET_BY_USER){
                 accuracyString = context.getString(R.string.unknown);
             }
