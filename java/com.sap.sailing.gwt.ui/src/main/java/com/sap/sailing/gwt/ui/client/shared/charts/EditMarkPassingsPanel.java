@@ -192,10 +192,11 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
+                    final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
+                    final Date time = timer.getTime();
                     sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                             leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
-                            leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
-                                    waypointSelectionModel.getSelectedObject().getA(), timer.getTime(), competitor,
+                            leaderboardNameRaceColumnNameAndFleetName.getFleetName(), waypoint, time, competitor,
                                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -204,7 +205,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     
                         @Override
                         public void onSuccess(Void result) {
-                            refillList();
+                            refillList(new Pair<>(waypoint, time));
                         }
                     });
                 }
@@ -314,7 +315,21 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         clearInfo();
     }
     
+    /**
+     * Previous version of refill List calls overloaded version with null argument
+     * Shell use this method if there is no need to set new mark passing exactly
+     */
     private void refillList() {
+        refillList(null);
+    }
+    
+    /**
+     * Overloaded version of refill list which accepts new mark passing created on UI.
+     * Implemented due to TrackedRace inaccessibility at GWT 
+     * 
+     * @param markPassing - pair of waypoint (integer) and datetime of passing
+     */
+    private void refillList(final Pair<Integer, Date> markPassing) {
         clearInfo();
         competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         // Get current mark passings
@@ -326,6 +341,12 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
 
             @Override
             public void onSuccess(Map<Integer, Date> result) {
+                //Sometimes getCompetitorMarkPassings returns result before actual calculation completed
+                //In this case we will not get new mark passing date, but we can get this info from GWT side
+                //If mark Passing was set then add it to received map
+                if (markPassing != null) {
+                    result.put(markPassing.getA(), markPassing.getB());
+                }
                 List<Util.Pair<Integer, Date>> newMarkPassings = new ArrayList<>();
                 for (WaypointDTO waypoint : currentWaypoints) {
                     int index = currentWaypoints.indexOf(waypoint);
