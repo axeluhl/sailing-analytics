@@ -70,6 +70,6 @@ public class NamedTracingScheduledThreadPoolExecutor extends ScheduledThreadPool
 
     @Override
     public String toString() {
-        return "NamedTracingScheduledThreadPoolExecutor [name=" + name + "]";
+        return super.toString() + "[name=" + name + "]";
     }
 }

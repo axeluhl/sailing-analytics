@@ -51,7 +51,6 @@ public interface ThreadPoolUtil {
      * <p>
      * 
      * The same configuration as for {@link #getDefaultBackgroundTaskThreadPoolExecutor()} is used.
-     * @param name TODO
      */
     ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(String name);
     
@@ -74,7 +73,8 @@ public interface ThreadPoolUtil {
      * <p>
      * 
      * The same configuration as for {@link #getDefaultForegroundTaskThreadPoolExecutor()} is used.
-     * @param name TODO
      */
     ScheduledExecutorService createForegroundTaskThreadPoolExecutor(String name);
+
+    ScheduledExecutorService createForegroundTaskThreadPoolExecutor(int size, String name);
 }

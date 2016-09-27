@@ -173,7 +173,7 @@ public class MarkPassingCalculator {
                                     + " while waiting for new GPSFixes");
                         }
                         listener.getQueue().drainTo(allNewFixInsertions);
-                        logger.finer("MPC for "+raceName+" recieved "+ allNewFixInsertions.size()+" new updates.");
+                        logger.fine("MPC for "+raceName+" received "+ allNewFixInsertions.size()+" new updates.");
                         for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
                             if (listener.isEndMarker(fixInsertion)) {
                                 logger.info("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);

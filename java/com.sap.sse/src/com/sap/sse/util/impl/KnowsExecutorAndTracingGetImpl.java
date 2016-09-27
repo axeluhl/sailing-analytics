@@ -25,8 +25,7 @@ public class KnowsExecutorAndTracingGetImpl<V> extends HasTracingGetImpl<V> impl
 
     @Override
     protected String getAdditionalTraceInfo() {
-        return (executorThisTaskIsScheduledFor == null ? "not scheduled"
-                : ("scheduled with executor " + executorThisTaskIsScheduledFor + " with queue size "
-                        + executorThisTaskIsScheduledFor.getQueue().size()));
+        return executorThisTaskIsScheduledFor == null ? "not scheduled"
+                : ("scheduled with executor " + executorThisTaskIsScheduledFor);
     }
 }
