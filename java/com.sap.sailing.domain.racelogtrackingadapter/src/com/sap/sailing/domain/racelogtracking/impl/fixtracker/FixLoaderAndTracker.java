@@ -161,6 +161,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
 
     private void loadFixes(TimeRange timeRangeToLoad, DeviceMappingWithRegattaLogEvent<? extends WithID> mapping) {
+        if(timeRangeToLoad == null) {
+            return;
+        }
         if (preemptiveStopRequested.get()) {
             return;
         }
@@ -264,12 +267,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    // TEMP: kommt von RaceLogSensorFixTracker
     protected TimePoint getStartOfTracking() {
         return trackedRace.getStartOfTracking();
     }
 
-    // TEMP: kommt von RaceLogSensorFixTracker
     protected TimePoint getEndOfTracking() {
         return trackedRace.getEndOfTracking();
     }
@@ -277,10 +278,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     protected void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
         final TimeRangeImpl extendedTimeRange = new TimeRangeImpl(loadFixesFrom, loadFixesTo);
         deviceMappings.forEachMapping((mapping) -> {
-            TimeRange timeRangeToLoad = extendedTimeRange.intersection(mapping.getTimeRange());
-            if (timeRangeToLoad != null && !preemptiveStopRequested.get()) {
-                loadFixes(timeRangeToLoad, mapping);
-            }
+            loadFixes(extendedTimeRange.intersection(mapping.getTimeRange()), mapping);
         });
     }
 
@@ -292,7 +290,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * @param updateCallback
      *            the {@link Runnable} callback used to run the update
      */
-    // TODO Consider using a thread pool here, after merging bug3864 into master
     private void updateAsyncInternal(final Runnable updateCallback) {
         synchronized (FixLoaderAndTracker.this) {
             activeLoaders.incrementAndGet();
@@ -302,8 +299,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             @Override
             public void run() {
                 try {
+                    trackedRace.lockForSerializationRead();
                     if (!preemptiveStopRequested.get()) {
-                        trackedRace.lockForSerializationRead();
                         setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
                         synchronized (FixLoaderAndTracker.this) {
                             FixLoaderAndTracker.this.notifyAll();
@@ -366,8 +363,22 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         protected void mappingChanged(DeviceMappingWithRegattaLogEvent<WithID> oldMapping,
                 DeviceMappingWithRegattaLogEvent<WithID> newMapping) {
-            // TODO can the new time range be bigger than the old one? In this case we would need to load the
-            // additional time range.
+            final TimeRange newTimeRange = newMapping.getTimeRange();
+            final TimeRange oldTimeRange = oldMapping.getTimeRange();
+            if(newTimeRange.endsAfter(oldTimeRange)) {
+                final TimePoint oldTo= oldTimeRange.to();
+                final TimePoint newFrom = newTimeRange.from();
+                final TimePoint from = oldTo.after(newFrom) ? oldTo : newFrom;
+                final TimeRange rangeToLoad = new TimeRangeImpl(from, newTimeRange.to());
+                loadFixes(rangeToLoad, newMapping);
+            }
+            if(newTimeRange.startsBefore(oldTimeRange)) {
+                final TimePoint oldFrom= oldTimeRange.from();
+                final TimePoint newTo = newTimeRange.to();
+                final TimePoint to = oldFrom.after(newTo) ? oldFrom : newTo;
+                final TimeRange rangeToLoad = new TimeRangeImpl(newTimeRange.from(), to);
+                loadFixes(rangeToLoad, newMapping);
+            }
         }
     }
 }

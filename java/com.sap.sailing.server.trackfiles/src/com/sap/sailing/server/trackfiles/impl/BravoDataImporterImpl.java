@@ -46,15 +46,15 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
     private static final int BATCH_SIZE = 5000;
 
-    public void importFixes(InputStream inputStream, Callback callback, String sourceName)
+    public void importFixes(InputStream inputStream, Callback callback, String filename, String sourceName)
             throws FormatNotSupportedException, IOException {
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
-                UUID.randomUUID(), sourceName, sourceName + "_Imu", MillisecondsTimePoint.now());
+                UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
         try {
-            LOG.fine("Import CSV from " + sourceName);
+            LOG.fine("Import CSV from " + filename);
             final InputStreamReader isr;
             if (sourceName.endsWith("gz")) {
-                LOG.fine("Using gzip stream reader " + sourceName);
+                LOG.fine("Using gzip stream reader " + filename);
                 isr = new InputStreamReader(new GZIPInputStream(inputStream));
             } else {
                 isr = new InputStreamReader(inputStream);
@@ -63,10 +63,10 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
             try (BufferedReader buffer = new BufferedReader(isr)) {
                 String headerLine = null;
                 headerSearch: while (headerLine == null) {
-                    LOG.fine("Searching for header in imu file");
+                    LOG.fine("Searching for header in bravo file");
                     String headerCandidate = buffer.readLine();
                     if (headerCandidate == null) {
-                        throw new RuntimeException("Missing required header in file " + sourceName);
+                        throw new RuntimeException("Missing required header in file " + filename);
                     }
                     if (headerCandidate.startsWith(BOF)) {
                         LOG.fine("Found header");
@@ -91,7 +91,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
                 buffer.close();
             }
         } catch (Exception e) {
-            LOG.log(Level.SEVERE, "Exception parsing CSV file " + sourceName, e);
+            LOG.log(Level.SEVERE, "Exception parsing bravo CSV file " + filename, e);
         }
     }
 
@@ -125,7 +125,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
         // long r16TP = ZonedDateTime.of(LocalDateTime.of(2016, 3, 19, 11, 55), ZoneId.of("Europe/Berlin"))
         // .toEpochSecond() * 1000;
         // fixTp = fixTp.plus(r16TP - 1461828459589l);
-        double[] fixData = new double[metadata.getColumns().size()];
+        double[] fixData = new double[metadata.columnCount];
         for (int columnIndexInFix = 0; columnIndexInFix < fixData.length; columnIndexInFix++) {
             String columnName = metadata.getColumns().get(columnIndexInFix);
             Integer columnIndexInFile = colIndices.get(columnName);
