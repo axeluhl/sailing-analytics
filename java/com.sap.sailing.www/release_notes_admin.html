@@ -52,6 +52,18 @@
 			     means an open-ended interval, and fixes at or after the start of tracking time point will then
 			     continue to be accepted.
 			 </li>
+			 <li>The device mappings dialog now shows the time point of the last fix received from each mapping
+			     and has a convenient filter text box.
+			 </li>
+			 <li>Thread management has been improved. Fewer and more reasonably-designed thread pools
+			     are now created, and thread priorities less than normal (for background operations) now
+			     correctly map to operating system thread priorities, making foreground tasks more
+			     responsive. The less excessive concurrency has furthermore healthy effects on memory
+			     mamangement and garbage collection.
+			 </li>
+			 <li>Fixed a bug in the smart phone tracking course designer. When adding or removing marks
+			     now, unsaved changes to the waypoints and control points tables are preserved.
+			 </li>
                     </ul>
 
                     <h2 class="articleSubheadline">July 2016</h2>

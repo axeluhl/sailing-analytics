@@ -206,8 +206,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         sailingEventsListBox.addItem(stringMessages.selectSailingEvent());
         for (EventDTO event : Util.sortNamedCollection(existingEvents)) {
             sailingEventsListBox.addItem(event.getName());
-            if(defaultEvent != null){
-                if (defaultEvent.getName().equals(event.getName())){
+            if (defaultEvent != null) {
+                if (defaultEvent.getName().equals(event.getName())) {
                     sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
                     fillCourseAreaListBox(event);
                     //select default course area, 2 elements as first is please select course area string
@@ -258,9 +258,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         EventDTO result = null;
         int selIndex = sailingEventsListBox.getSelectedIndex();
         if (selIndex > 0) { // the zero index represents the 'no selection' text
-            String itemText = sailingEventsListBox.getItemText(selIndex);
+            String itemValue = sailingEventsListBox.getValue(selIndex);
             for (EventDTO eventDTO : existingEvents) {
-                if (eventDTO.getName().equals(itemText)) {
+                if (eventDTO.getName().equals(itemValue)) {
                     result = eventDTO;
                     break;
                 }

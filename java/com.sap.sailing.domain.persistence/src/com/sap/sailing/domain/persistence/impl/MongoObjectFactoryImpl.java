@@ -221,8 +221,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public DBCollection getGPSFixCollection() {
         DBCollection gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
         DBObject index = new BasicDBObject();
-        index.put(FieldNames.DEVICE_ID.name(), null);
-        index.put(FieldNames.TIME_AS_MILLIS.name(), null);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
+        index.put(FieldNames.GPSFIX.name()+"."+FieldNames.TIME_AS_MILLIS.name(), 1);
         gpsFixCollection.createIndex(index);
         return gpsFixCollection;
     }

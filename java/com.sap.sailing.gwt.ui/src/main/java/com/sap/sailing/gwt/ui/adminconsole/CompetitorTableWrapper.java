@@ -35,7 +35,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 public class CompetitorTableWrapper<S extends RefreshableSelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     
-    public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
+    public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
@@ -244,7 +244,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     allowUpdate(Collections.singleton(competitor));
                 }
             }
-
         });
         
         mainPanel.insert(filterField, 0);

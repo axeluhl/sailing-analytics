@@ -189,7 +189,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @throws SocketException
      *             thrown, e.g., in case there is already another listener on the port requested
      */
-    void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception;
+    void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination);
 
     void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException;
 
