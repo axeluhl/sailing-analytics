@@ -208,7 +208,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         RaceTimePanelLifecycle raceTimePanelLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getRaceTimePanelLifecycle();
         RaceTimePanelSettings raceTimePanelSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(raceTimePanelLifecycle);
         
-        final double buoyZoneRadiusInMeters = GwtHttpRequestUtils.getDoubleParameter(RaceMapSettings.PARAM_VIEW_BUOY_ZONE_RADIUS, 0.0 /* default */);
+        final double buoyZoneRadiusInMeters = GwtHttpRequestUtils.getDoubleParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS /* default */);
         final RaceMapSettings raceMapSettings = new RaceMapSettings(defaultRaceMapSettings.getZoomSettings(), defaultRaceMapSettings.getHelpLinesSettings(),
                 defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
                 defaultRaceMapSettings.getTailLengthInMilliseconds(), defaultRaceMapSettings.isWindUp(),

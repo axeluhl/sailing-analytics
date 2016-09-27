@@ -1144,7 +1144,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
                 }
             }
-            final Double cicleRadius = (Double) dbRegatta.get(FieldNames.REGATTA_CIRCLE_RADIUS.name()); 
+            final Double cicleRadius = (Double) dbRegatta.get(FieldNames.REGATTA_HULL_LENGTH_RADIUS_FACTOR.name()); 
             final Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
             final Boolean controlTrackingFromStartAndFinishTimes = (Boolean) dbRegatta.get(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name());
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);

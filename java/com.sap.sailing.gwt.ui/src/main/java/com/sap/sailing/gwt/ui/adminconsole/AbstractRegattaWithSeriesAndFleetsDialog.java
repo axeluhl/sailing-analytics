@@ -51,7 +51,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final ListBox sailingEventsListBox;
     protected final CheckBox useStartTimeInferenceCheckBox;
     protected final CheckBox controlTrackingFromStartAndFinishTimesCheckBox;
-    protected final DoubleBox circleRadiusDoubleBox;
+    protected final DoubleBox hullLengthRadiusFactorDoubleBox;
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
     
@@ -96,8 +96,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         controlTrackingFromStartAndFinishTimesCheckBox.ensureDebugId("ControlTrackingFromStartAndFinishTimesCheckBox");
         controlTrackingFromStartAndFinishTimesCheckBox.setValue(regatta.controlTrackingFromStartAndFinishTimes);
 
-        circleRadiusDoubleBox = createDoubleBox(regatta.circleRadius, 10);
-        circleRadiusDoubleBox.ensureDebugId("CircleRadiusDoubleBox");
+        hullLengthRadiusFactorDoubleBox = createDoubleBox(regatta.hullLengthRadiusFactor, 10);
+        hullLengthRadiusFactorDoubleBox.ensureDebugId("HullLengthRadiusFactorDoubleBox");
 
         courseAreaListBox = createListBox(false);
         courseAreaListBox.ensureDebugId("CourseAreaListBox");
@@ -166,8 +166,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(6, 1, useStartTimeInferenceCheckBox);
         formGrid.setWidget(7, 0, new Label(stringMessages.controlTrackingFromStartAndFinishTimes() + ":"));
         formGrid.setWidget(7, 1, controlTrackingFromStartAndFinishTimesCheckBox);
-        formGrid.setWidget(8, 0, new Label(stringMessages.circleRadius() + ":"));
-        formGrid.setWidget(8, 1, circleRadiusDoubleBox);
+        formGrid.setWidget(8, 0, new Label(stringMessages.hullLengthRadiusFactor() + ":"));
+        formGrid.setWidget(8, 1, hullLengthRadiusFactorDoubleBox);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }
@@ -292,7 +292,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         result.scoringScheme = getSelectedScoringSchemeType();
         result.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
         result.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimesCheckBox.getValue();
-        result.circleRadius = circleRadiusDoubleBox.getValue();
+        result.hullLengthRadiusFactor = hullLengthRadiusFactorDoubleBox.getValue();
         setCourseAreaInRegatta(result);
         result.series = getSeriesEditor().getValue();
         return result;

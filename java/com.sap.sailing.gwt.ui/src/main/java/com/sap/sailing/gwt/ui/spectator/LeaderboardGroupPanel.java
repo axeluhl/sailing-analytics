@@ -434,12 +434,21 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 Boolean.toString(showNavigationPanel));
         linkParams.put("regattaName", raceIdentifier.getRegattaName());
         linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
+        linkParams.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS,
+                String.valueOf(getRegattaBuoyZoneRadius(raceIdentifier.getRegattaName())));
         if (viewMode != null && !viewMode.isEmpty()) {
             linkParams.put("viewMode", viewMode);
         }
         return linkParams;
     }
-    
+
+    private double getRegattaBuoyZoneRadius(String regattaName) {
+        RegattaDTO regatta = regattasByName.get(regattaName);
+        double buoyZoneRadius = regatta == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
+                : regatta.getCalculatedBuoyZoneRadius();
+        return buoyZoneRadius;
+    }
+
     private SafeHtml getAnchor(String link, String linkText, String style) {
         if (isEmbedded) {
             return ANCHORTEMPLATE.anchorWithTarget(link, linkText, style, "_blank");

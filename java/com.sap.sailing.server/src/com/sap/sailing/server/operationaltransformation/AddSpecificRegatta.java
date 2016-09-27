@@ -29,14 +29,14 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final boolean persistent;
     private final ScoringScheme scoringScheme;
     private final Serializable defaultCourseAreaId;
-    private final double circleRadius;
+    private final double hullLengthRadiusFactor;
     private final boolean useStartTimeInference;
     private final boolean controlTrackingFromStartAndFinishTimes;
     private final RankingMetrics rankingMetricType;
     
     public AddSpecificRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
-            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, double circleRadius, boolean useStartTimeInference,
+            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, double hullLengthRadiusFactor, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
         super(regattaName, boatClassName, startDate, endDate, id);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;
@@ -46,13 +46,13 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
         this.useStartTimeInference = useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
         this.rankingMetricType = rankingMetricType;
-        this.circleRadius = circleRadius;
+        this.hullLengthRadiusFactor = hullLengthRadiusFactor;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), getStartDate(), getEndDate(), getId(), createSeries(toState),
-                persistent, scoringScheme, defaultCourseAreaId, circleRadius, useStartTimeInference, controlTrackingFromStartAndFinishTimes, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
+                persistent, scoringScheme, defaultCourseAreaId, hullLengthRadiusFactor, useStartTimeInference, controlTrackingFromStartAndFinishTimes, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
         return regatta;
     }
 

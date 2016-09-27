@@ -336,7 +336,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races =
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());
                     races.remove(raceColumnDTOAndFleetDTO);
-                    double regattaHullLenghtCircleFactor = getSelectedRegatta() != null ? null : getSelectedRegatta().circleRadius;
+                    double regattaHullLenghtCircleFactor = getSelectedRegatta() != null ? null : getSelectedRegatta().hullLengthRadiusFactor;
                     new CopyCourseAndCompetitorsDialog(sailingService, errorReporter, stringMessages, races,
                             leaderboardName, regattaHullLenghtCircleFactor, new DialogCallback<CourseAndCompetitorCopyOperation>() {
                                 @Override
@@ -619,7 +619,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
-                regatta.defaultCourseAreaUuid, configuration, regatta.circleRadius, regatta.useStartTimeInference,
+                regatta.defaultCourseAreaUuid, configuration, regatta.hullLengthRadiusFactor, regatta.useStartTimeInference,
                 regatta.controlTrackingFromStartAndFinishTimes,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override

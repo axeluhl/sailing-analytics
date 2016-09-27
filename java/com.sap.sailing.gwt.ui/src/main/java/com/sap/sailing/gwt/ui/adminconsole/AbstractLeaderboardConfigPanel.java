@@ -44,6 +44,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
@@ -191,11 +192,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
 
                 RegattaDTO regatta = getSelectedRegatta();
-                if (regatta != null) {
-                    double buoyZoneRadiusInMeters = regatta.boatClass == null ? 15 /* default if no boat class */
-                            : (regatta.boatClass.getHullLengthInMeters() * regatta.circleRadius);
-                    raceColumnTable.setSelectedRegattaHullLenghtCircleFactor(buoyZoneRadiusInMeters);
-                }
+                double buoyZoneRadius = regatta == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
+                        : regatta.getCalculatedBuoyZoneRadius();
+                raceColumnTable.setSelectedRegattaHullLenghtCircleFactor(buoyZoneRadius);
+
             }
         });
         filteredLeaderboardList.addDataDisplay(leaderboardTable);

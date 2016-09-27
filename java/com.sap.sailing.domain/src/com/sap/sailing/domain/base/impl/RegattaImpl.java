@@ -115,7 +115,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private transient RaceLogStore raceLogStore;
     private final IsRegattaLike regattaLikeHelper;
     private final RankingMetricConstructor rankingMetricConstructor;
-    private double circleRadius;
+    private double hullLengthRadiusFactor;
 
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
@@ -216,7 +216,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      */
     public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
             BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent,
-            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, double circleRadius, boolean useStartTimeInference,
+            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, double hullLengthRadiusFactor, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
         super(name);
         this.rankingMetricConstructor = rankingMetricConstructor;
@@ -242,7 +242,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.scoringScheme = scoringScheme;
         this.defaultCourseArea = courseArea;
         this.configuration = null;
-        this.circleRadius = circleRadius;
+        this.hullLengthRadiusFactor = hullLengthRadiusFactor;
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore) {
             private static final long serialVersionUID = 8546222568682770206L;
 
@@ -575,13 +575,13 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public double getCircleRadius() {
-        return circleRadius;
+    public double getHullLengthRadiusFactor() {
+        return hullLengthRadiusFactor;
     }
 
     @Override
-    public void setCircleRadius(double circleRadius) {
-        this.circleRadius = circleRadius;
+    public void setHullLengthRadiusFactor(double hullLengthRadiusFactor) {
+        this.hullLengthRadiusFactor = hullLengthRadiusFactor;
     }
 
     @Override

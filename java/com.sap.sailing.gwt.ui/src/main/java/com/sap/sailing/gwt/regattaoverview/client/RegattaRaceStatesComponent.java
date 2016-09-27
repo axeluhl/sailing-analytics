@@ -934,7 +934,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             raceLinkParameters.put("raceName", entryDTO.raceInfo.raceIdentifier.getRaceName());
             raceLinkParameters.put("canReplayDuringLiveRaces", "true");
             raceLinkParameters.put("regattaName", entryDTO.regattaName);
-            raceLinkParameters.put(RaceMapSettings.PARAM_VIEW_BUOY_ZONE_RADIUS, String.valueOf(entryDTO.buyZoneRadius));
+            raceLinkParameters.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS, String.valueOf(entryDTO.buyZoneRadius));
 
             return EntryPointLinkFactory.createRaceBoardLink(raceLinkParameters);
         }

@@ -17,7 +17,6 @@ import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
-import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -55,7 +54,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
                     Map<String, String> params = new HashMap<>();
                     params.put("leaderboardName", selectedLeaderboardName);
-                    params.put(RaceMapSettings.PARAM_VIEW_BUOY_ZONE_RADIUS, String.valueOf(selectedRegattaHullLenghtCircleFactor));
+                    params.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS, String.valueOf(selectedRegattaHullLenghtCircleFactor));
                     params.put("regattaName", raceIdentifier.getRegattaName());
                     params.put("raceName", raceIdentifier.getRaceName());
                     params.put("canReplayDuringLiveRaces", "true");

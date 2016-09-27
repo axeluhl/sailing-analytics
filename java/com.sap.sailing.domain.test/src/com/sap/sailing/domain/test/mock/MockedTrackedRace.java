@@ -446,13 +446,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     }
 
-                    public double getCircleRadius(){
+                    @Override
+                    public double getHullLengthRadiusFactor(){
                         return 1.0;
                     }
 
-                    public void setCircleRadius(double circleRadius){
+                    @Override
+                    public void setHullLengthRadiusFactor(double hullLengthRadiusFactor){
                     }
-                    
+
                     @Override
                     public RegattaLikeIdentifier getRegattaLikeIdentifier() {
                         return null;

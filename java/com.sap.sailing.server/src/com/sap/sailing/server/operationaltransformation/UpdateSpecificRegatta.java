@@ -15,14 +15,14 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     private final RegattaIdentifier regattaIdentifier;
     private final UUID newDefaultCourseAreaId;
     private final RegattaConfiguration newConfiguration;
-    private final double circleRadius;
+    private final double hullLengthRadiusFactor;
     private final boolean useStartTimeInference;
     private final boolean controlTrackingFromStartAndFinishTimes;
     private final TimePoint startDate;
     private final TimePoint endDate;
     
     public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate, UUID newDefaultCourseAreaId,
-            RegattaConfiguration newConfiguration, double circleRadius, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
+            RegattaConfiguration newConfiguration, double hullLengthRadiusFactor, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
         this.regattaIdentifier = regattaIdentifier;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -30,12 +30,12 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
         this.newConfiguration = newConfiguration;
         this.useStartTimeInference = useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
-        this.circleRadius = circleRadius;
+        this.hullLengthRadiusFactor = hullLengthRadiusFactor;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.updateRegatta(regattaIdentifier, startDate, endDate, newDefaultCourseAreaId, newConfiguration, null, circleRadius, useStartTimeInference, controlTrackingFromStartAndFinishTimes);
+        Regatta regatta = toState.updateRegatta(regattaIdentifier, startDate, endDate, newDefaultCourseAreaId, newConfiguration, null, hullLengthRadiusFactor, useStartTimeInference, controlTrackingFromStartAndFinishTimes);
         return regatta;
     }
 

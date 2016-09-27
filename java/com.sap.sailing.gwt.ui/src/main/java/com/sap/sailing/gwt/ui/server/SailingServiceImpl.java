@@ -301,7 +301,6 @@ import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -443,6 +442,7 @@ import com.sap.sailing.simulator.SimulationResults;
 import com.sap.sailing.simulator.TimedPositionWithSpeed;
 import com.sap.sailing.simulator.impl.PolarDiagramGPS;
 import com.sap.sailing.simulator.impl.SparseSimulationDataException;
+import com.sap.sailing.util.RegattaUtil;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
@@ -561,7 +561,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Activator activator = Activator.getInstance();
         if (context != null) {
             activator.setSailingService(this); // register so this service is informed when the bundle shuts down
-        }
+        } 
         quickRanksLiveCache = new QuickRanksLiveCache(this);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);
@@ -835,7 +835,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             regattaDTO.defaultCourseAreaUuid = regatta.getDefaultCourseArea().getId();
             regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
         }
-        regattaDTO.circleRadius = regatta.getCircleRadius();
+        regattaDTO.hullLengthRadiusFactor = regatta.getHullLengthRadiusFactor();
         regattaDTO.useStartTimeInference = regatta.useStartTimeInference();
         regattaDTO.controlTrackingFromStartAndFinishTimes = regatta.isControlTrackingFromStartAndFinishTimes();
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
@@ -2819,7 +2819,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(new FleetImpl(
                                     LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                             /* race column names */new ArrayList<String>(), getService())), false,
-                            baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /*circleRadius*/1.0, /* useStartTimeInference */ true,
+                            baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /*hullLengthRadiusFactor*/2.0, /* useStartTimeInference */ true,
                             /* controlTrackingFromStartAndFinishTimes */ false, RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
                     // TODO: is course area relevant for swiss timing replay?
                 } else {
@@ -3921,7 +3921,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateRegatta(RegattaIdentifier regattaName, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
-            RegattaConfigurationDTO configurationDTO, double circleRadius, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
+            RegattaConfigurationDTO configurationDTO, double hullLengthRadiusFactor, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
         Regatta regatta = getService().getRegatta(regattaName);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
@@ -3929,7 +3929,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         getService().apply(new UpdateSpecificRegatta(regattaName, startTimePoint, endTimePoint,
-                defaultCourseAreaUuid, convertToRegattaConfiguration(configurationDTO), circleRadius, useStartTimeInference, controlTrackingFromStartAndFinishTimes));
+                defaultCourseAreaUuid, convertToRegattaConfiguration(configurationDTO), hullLengthRadiusFactor, useStartTimeInference, controlTrackingFromStartAndFinishTimes));
     }
 
     @Override
@@ -4020,7 +4020,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RegattaDTO createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate, 
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-            boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, double circleRadius, boolean useStartTimeInference,
+            boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, double hullLengthRadiusFactor, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
         SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regattaName));
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
@@ -4029,7 +4029,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 new AddSpecificRegatta(
                         regattaName, boatClassName, startTimePoint, endTimePoint, UUID.randomUUID(),
                         seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-                        persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId, circleRadius, useStartTimeInference,
+                        persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId, hullLengthRadiusFactor, useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes, rankingMetricType));
         return convertToRegattaDTO(regatta);
     }
@@ -4237,15 +4237,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (leaderboard != null) {
             if (visibleRegattas != null && !visibleRegattas.contains(leaderboard.getName())) {
                 return result;
-            }
+            } 
             String regattaName = getRegattaNameFromLeaderboard(leaderboard);
             if (leaderboard instanceof RegattaLeaderboard) {
                 RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
                 Regatta regatta = regattaLeaderboard.getRegatta();
                 BoatClass boatClass = regatta.getBoatClass();
-                Distance boatHullLength = boatClass.getHullLength();
-                double buyZoneRadius = boatHullLength == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
-                        : boatHullLength.getMeters() * regatta.getCircleRadius();
+                double buyZoneRadius = RegattaUtil.getCalculatedRegattaBuoyZoneRadius(regatta, boatClass);
                 for (Series series : regatta.getSeries()) {
                     Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
                     for (RaceColumn raceColumn : series.getRaceColumns()) {
@@ -4261,9 +4259,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     boatClass = trackedRace.getRace().getBoatClass();
                     break;
                 }
-                Distance boatHullLength = boatClass == null ? null : boatClass.getHullLength();
-                double buyZoneRadius = boatHullLength == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
-                        : boatHullLength.getMeters() * Regatta.DEFAULT_HULL_LENGHT_FACTOR;
+                double buyZoneRadius = RegattaUtil.getCalculatedRegattaBuoyZoneRadius(null, boatClass);
                 Map<String, List<RegattaOverviewEntryDTO>> entriesPerFleet = new HashMap<String, List<RegattaOverviewEntryDTO>>();
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                     getRegattaOverviewEntries(showOnlyRacesOfSameDay, dayToCheck, usedCourseArea,
@@ -4279,7 +4275,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regatta.getName()));
         this.createRegatta(regatta.getName(), regatta.boatClass.getName(), regatta.startDate, regatta.endDate,
                         new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), 
-                        true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.circleRadius, regatta.useStartTimeInference,
+                        true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.hullLengthRadiusFactor, regatta.useStartTimeInference,
                         regatta.controlTrackingFromStartAndFinishTimes, regatta.rankingMetricType);
     }
     

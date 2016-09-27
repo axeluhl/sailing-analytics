@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -109,6 +110,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             List<EventDTO> existingEvents, EventDTO correspondingEvent, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(new RegattaDTO(), Collections.<SeriesDTO>emptySet(), existingEvents, correspondingEvent, stringMessages.addRegatta(), stringMessages.ok(),
                 stringMessages, new RegattaParameterValidator(stringMessages, existingRegattas), callback);
+        hullLengthRadiusFactorDoubleBox.setValue(Regatta.DEFAULT_HULL_LENGHT_FACTOR);
         SeriesDTO series = new SeriesDTO();
         series.setName(Series.DEFAULT_NAME);
         series.setMedal(false);

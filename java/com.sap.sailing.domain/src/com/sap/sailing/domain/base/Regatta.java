@@ -24,7 +24,7 @@ import com.sap.sse.common.TimePoint;
  *
  */
 public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike {
-    
+
     public static final double DEFAULT_HULL_LENGHT_FACTOR = 2;
 
     ScoringScheme getScoringScheme();
@@ -158,9 +158,9 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
 
     RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
 
-    public double getCircleRadius();
+    public double getHullLengthRadiusFactor();
 
-    public void setCircleRadius(double circleRadius);
+    public void setHullLengthRadiusFactor(double hullLengthRadiusFactor);
 
     /**
      * When there is no race committee app in place and no operator is managing the race start times for this regatta,
