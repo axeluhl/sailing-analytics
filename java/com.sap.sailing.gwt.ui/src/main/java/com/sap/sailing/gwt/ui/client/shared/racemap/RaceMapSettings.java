@@ -64,7 +64,7 @@ public class RaceMapSettings extends AbstractSettings {
                 /* showMapControls */ true,
                 new RaceMapHelpLinesSettings(),
                 /* windUp */ false,
-                /* showDouglasPeuckerPoints */ 0.0,
+                /* buoyZoneRadiusInMeters */ DEFAULT_BUOY_ZONE_RADIUS,
                 /* showWindStreamletOverlay */ false,
                 /* showWindStreamletColors */ false,
                 /* showSimulationOverlay */ false);
@@ -95,7 +95,7 @@ public class RaceMapSettings extends AbstractSettings {
     private RaceMapSettings(boolean showMapControls, boolean showCourseGeometry, boolean windUp, double buoyZoneRadiusInMeters, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
         this(showMapControls, new RaceMapHelpLinesSettings(createHelpLineSettings(showCourseGeometry)), windUp, buoyZoneRadiusInMeters, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
     }
-    
+
     private RaceMapSettings(boolean showMapControls, RaceMapHelpLinesSettings helpLineSettings, boolean windUp, double buoyZoneRadiusInMeters, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
         this(
                 new RaceMapZoomSettings(),
@@ -250,5 +250,4 @@ public class RaceMapSettings extends AbstractSettings {
     public Set<ManeuverType> getManeuverTypesToShow() {
         return maneuverTypesToShow;
     }
-
 }

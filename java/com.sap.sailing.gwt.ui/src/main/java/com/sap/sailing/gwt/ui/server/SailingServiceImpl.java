@@ -559,7 +559,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Activator activator = Activator.getInstance();
         if (context != null) {
             activator.setSailingService(this); // register so this service is informed when the bundle shuts down
-        } 
+        }
         quickRanksLiveCache = new QuickRanksLiveCache(this);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
         replicationServiceTracker = ServiceTrackerFactory.createAndOpen(context, ReplicationService.class);

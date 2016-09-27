@@ -49,7 +49,7 @@ public class RegattaDetailsComposite extends Composite {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
-    
+
     private final Label regattaId;
     private final Label regattaName;
     private final Label startDate;

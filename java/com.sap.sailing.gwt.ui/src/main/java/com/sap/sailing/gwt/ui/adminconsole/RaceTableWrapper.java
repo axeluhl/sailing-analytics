@@ -27,7 +27,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private String selectedLeaderboardName;
     private double selectedRegattaHullLenghtCircleFactor;
-    
+
     public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection) {
         super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ false,

@@ -43,7 +43,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
 
     protected StringMessages stringMessages;
     private final RegattaDTO regatta;
-    
+
     protected final BetterDateTimeBox startDateBox;
     protected final BetterDateTimeBox endDateBox;
     protected final ListBox scoringSchemeListBox;
@@ -54,7 +54,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final DoubleBox hullLengthRadiusFactorDoubleBox;
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
-    
+
     protected final List<EventDTO> existingEvents;
     private EventDTO defaultEvent;
 

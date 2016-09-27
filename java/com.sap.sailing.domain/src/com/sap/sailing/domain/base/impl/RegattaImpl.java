@@ -205,7 +205,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections
                         .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                 /* race column names */new ArrayList<String>(), trackedRegattaRegistry)), /* persistent */false,
-                scoringScheme, id, courseArea, 1.0, /* useStartTimeInference */true, controlTrackingFromStartAndFinishTimes,
+                scoringScheme, id, courseArea, /*hullLengthRadiusFactor*/2.0, /* useStartTimeInference */true, controlTrackingFromStartAndFinishTimes,
                 rankingMetricConstructor);
     }
 
