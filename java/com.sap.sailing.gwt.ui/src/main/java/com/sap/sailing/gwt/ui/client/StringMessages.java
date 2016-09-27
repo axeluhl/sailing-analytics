@@ -1330,6 +1330,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     
     String fixedMarkPassing();
     String suppressedMarkPassing();
+    String warningSettingFixedPassing(String waypoint);
     String windUp();
     String currentFilterSelection();
     String notCapableOfGeneratingACodeForIdentifier();

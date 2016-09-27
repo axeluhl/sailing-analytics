@@ -193,7 +193,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
-                    if (!isSettingFixedMarkPossible(timer)) {
+                    if (!isSettingFixedMarkPossible(timer, stringMessages)) {
                         return;
                     }
                     sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
@@ -289,13 +289,13 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
      * If we try to set a time as mark passing of a waypoint then first we should make sure the times of previous mark
      * is before the time of current setting mark and time of the following mark is after the setting time
      */
-    private boolean isSettingFixedMarkPossible(Timer timer) {
+    private boolean isSettingFixedMarkPossible(Timer timer, StringMessages stringMessages) {
         Pair<Integer, Date> selectedWaypoint = waypointSelectionModel.getSelectedObject();
         for (Pair<Integer, Date> waypoint : waypointList.getList()) {
             if ((waypoint.getA() < selectedWaypoint.getA() && waypoint.getB().after(timer.getTime()))
                     || (waypoint.getA() > selectedWaypoint.getA() && waypoint.getB().before(timer.getTime()))) {
-                Window.alert("You may not to set the time of " + currentWaypoints.get(selectedWaypoint.getA()).getName()
-                        + " waypoint that is before the time of the previous mark or after the time of the following mark");
+                Window.alert(stringMessages
+                        .warningSettingFixedPassing(currentWaypoints.get(selectedWaypoint.getA()).getName()));
                 return false;
             }
         }
