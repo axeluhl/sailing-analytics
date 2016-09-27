@@ -16,112 +16,139 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
 
     @Test
     public void testSettingsMapWithOneSerializableSettings() throws Exception {
-        final GenericSerializableSettings settings = createTestSettingsWithValues();
+        final GenericSerializableSettings settingsValues = createTestSettingsWithValues();
         
-        SettingsMap settingsMapToSave = new SettingsMapImpl("aaa", settings);
+        SettingsMap settingsMapToSave = new SettingsMapImpl("aaa", settingsValues);
 
-        final SettingsMap deserializedSettings = serializeAndDeserialize(settingsMapToSave);
-        assertEquals(settingsMapToSave, deserializedSettings);
+        final SettingsMap deserializedSettingsMap = serializeAndDeserialize(settingsMapToSave);
+        Settings deserializedSettingsValues = deserializedSettingsMap.getSettingsByKey().get("aaa");
+        assertEquals(deserializedSettingsValues, createTestSettingsWithValues());
+        assertEquals(deserializedSettingsMap.getSettingsByKey().size(), 1);
     }
     
     @Test
     public void testSettingsMapWithMultipleSerializableSettings() throws Exception {
         
-        final GenericSerializableSettings childSettings = createTestSettingsWithValues();
-        final GenericSerializableSettings childSettings2 = createTestSettingsWithValues2();
+        final GenericSerializableSettings settingsValues1 = createTestSettingsWithValues();
+        final GenericSerializableSettings settingsValues2 = createTestSettingsWithValues2();
         Map<Serializable, Settings> settings = new HashMap<>();
-        settings.put("aaa", childSettings);
-        settings.put("bbb", childSettings2);
+        settings.put("aaa", settingsValues1);
+        settings.put("bbb", settingsValues2);
         
         SettingsMap settingsMapToSave = new SettingsMapImpl(settings);
 
-        final SettingsMap deserializedSettings = serializeAndDeserialize(settingsMapToSave);
-        assertEquals(settingsMapToSave, deserializedSettings);
+        final SettingsMap deserializedSettingsMap = serializeAndDeserialize(settingsMapToSave);
+        Settings deserializedSettingsValues1 = deserializedSettingsMap.getSettingsByKey().get("aaa");
+        Settings deserializedSettingsValues2 = deserializedSettingsMap.getSettingsByKey().get("bbb");
+        assertEquals(deserializedSettingsValues1, createTestSettingsWithValues());
+        assertEquals(deserializedSettingsValues2, createTestSettingsWithValues2());
+        assertEquals(deserializedSettingsMap.getSettingsByKey().size(), 2);
     }
     
     @Test
     public void testSettingsMapWithNestedSettingsMapWithOneSerializableSettingsChild() throws Exception {
-        final GenericSerializableSettings settings = createTestSettingsWithValues();
-        SettingsMap childSettingsMap = new SettingsMapImpl("aaa", settings);
+        final GenericSerializableSettings childSettingsValues = createTestSettingsWithValues();
+        SettingsMap childSettingsMap = new SettingsMapImpl("aaa", childSettingsValues);
         SettingsMap settingsMapToSave = new SettingsMapImpl("bbb", childSettingsMap);
 
-        final SettingsMap deserializedSettings = serializeAndDeserialize(settingsMapToSave);
-        assertEquals(settingsMapToSave, deserializedSettings);
+        final SettingsMap deserializedSettingsMap = serializeAndDeserialize(settingsMapToSave);
+        SettingsMap deserializedChildSettingsMap = (SettingsMap) deserializedSettingsMap.getSettingsByKey().get("bbb");
+        Settings deserializedChildSettingsValues = deserializedChildSettingsMap.getSettingsByKey().get("aaa");
+        assertEquals(deserializedChildSettingsValues, createTestSettingsWithValues());
+        assertEquals(deserializedSettingsMap.getSettingsByKey().size(), 1);
+        assertEquals(deserializedChildSettingsMap.getSettingsByKey().size(), 1);
     }
     
     @Test
     public void testSettingsMapWithOneSerializableSettingsAndNestedSettingsMapWithOneSerializableSettings() throws Exception {
-        final GenericSerializableSettings nestedMapSettingsChild = createTestSettingsWithValues2();
-        SettingsMap nestedSettingsMap = new SettingsMapImpl("aaa", nestedMapSettingsChild);
+        final GenericSerializableSettings childSettingsValues = createTestSettingsWithValues2();
+        SettingsMap childSettingsMap = new SettingsMapImpl("aaa", childSettingsValues);
         
-        final GenericSerializableSettings rootSettingsChild = createTestSettingsWithValues();
-        Map<Serializable, Settings> rootSettings = new HashMap<>();
-        rootSettings.put("aaa", rootSettingsChild);
-        rootSettings.put("bbb", nestedSettingsMap);
-        final SettingsMap rootSettingsMapToSave = new SettingsMapImpl(rootSettings);
+        final GenericSerializableSettings settingsValues = createTestSettingsWithValues();
+        Map<Serializable, Settings> settings = new HashMap<>();
+        settings.put("aaa", settingsValues);
+        settings.put("bbb", childSettingsMap);
+        final SettingsMap settingsMapToSave = new SettingsMapImpl(settings);
         
-        final SettingsMap deserializedSettings = serializeAndDeserialize(rootSettingsMapToSave);
-        assertEquals(rootSettingsMapToSave, deserializedSettings);
+        final SettingsMap deserializedSettingsMap = serializeAndDeserialize(settingsMapToSave);
+        SettingsMap deserializedChildSettingsMap = (SettingsMap) deserializedSettingsMap.getSettingsByKey().get("bbb");
+        Settings deserializedSettingsValues = deserializedSettingsMap.getSettingsByKey().get("aaa");
+        Settings deserializedChildSettingsValues = deserializedChildSettingsMap.getSettingsByKey().get("aaa");
+        
+        assertEquals(deserializedSettingsValues, createTestSettingsWithValues());
+        assertEquals(deserializedChildSettingsValues, createTestSettingsWithValues2());
+        
+        assertEquals(deserializedSettingsMap.getSettingsByKey().size(), 2);
+        assertEquals(deserializedChildSettingsMap.getSettingsByKey().size(), 1);
     }
     
     @Test
     public void testSettingsMapWithOneNonSerializableSettings() throws Exception {
-        final Settings settings = createNonSerializableTestSettingsWithChangedValues();
+        final Settings settingsValuesNonSerializable = createNonSerializableTestSettingsWithChangedValues();
         
-        SettingsMap settingsMapToSave = new SettingsMapImpl("aaa", settings);
+        SettingsMap settingsMapToSave = new SettingsMapImpl("aaa", settingsValuesNonSerializable);
 
-        final SettingsMap deserializedSettings = serializeAndDeserialize(settingsMapToSave);
+        final SettingsMap deserializedSettingsMap = serializeAndDeserialize(settingsMapToSave);
         
-        final Settings defaultSettings = createNonSerializableTestSettingsWithDefaultValues();
-        settingsMapToSave.getSettingsByKey().put("aaa", defaultSettings);
-        assertEquals(settingsMapToSave, deserializedSettings);
+        Settings deserializedSettingsValues = deserializedSettingsMap.getSettingsByKey().get("aaa");
+        assertEquals(deserializedSettingsValues, createNonSerializableTestSettingsWithDefaultValues());
+        assertEquals(deserializedSettingsMap.getSettingsByKey().size(), 1);
     }
     
     @Test
     public void testSettingsMapWithOneSerializableAndOneNonSerializableSettings() throws Exception {
         
-        final GenericSerializableSettings childSettings = createTestSettingsWithValues();
-        final Settings childSettingsNonSerializable = createNonSerializableTestSettingsWithChangedValues();
+        final GenericSerializableSettings childSettingsValues = createTestSettingsWithValues();
+        final Settings childSettingsValuesNonSerializable = createNonSerializableTestSettingsWithChangedValues();
         Map<Serializable, Settings> settings = new HashMap<>();
-        settings.put("aaa", childSettings);
-        settings.put("bbb", childSettingsNonSerializable);
+        settings.put("aaa", childSettingsValues);
+        settings.put("bbb", childSettingsValuesNonSerializable);
         
         SettingsMap settingsMapToSave = new SettingsMapImpl(settings);
         
-        final SettingsMap deserializedSettings = serializeAndDeserialize(settingsMapToSave);
-        
-        final Settings defaultNonSerializableSettings = createNonSerializableTestSettingsWithDefaultValues();
-        settingsMapToSave.getSettingsByKey().put("bbb", defaultNonSerializableSettings);
-        assertEquals(settingsMapToSave, deserializedSettings);
+        final SettingsMap deserializedSettingsMap = serializeAndDeserialize(settingsMapToSave);
+        Settings deserializedSettingsValues = deserializedSettingsMap.getSettingsByKey().get("aaa");
+        Settings deserializedSettingsValuesNonSerializable = deserializedSettingsMap.getSettingsByKey().get("bbb");
+        assertEquals(deserializedSettingsValues, createTestSettingsWithValues());
+        assertEquals(deserializedSettingsValuesNonSerializable, createNonSerializableTestSettingsWithDefaultValues());
+        assertEquals(deserializedSettingsMap.getSettingsByKey().size(), 2);
     }
     
     @Test
     public void testSettingsMapWithNestedSerializableAndNonSerializableSettings() throws Exception {
         
-        final GenericSerializableSettings childSettings = createTestSettingsWithValues();
+        final GenericSerializableSettings childSettingsValues = createTestSettingsWithValues();
         final Settings childSettingsNonSerializable = createNonSerializableTestSettingsWithChangedValues();
-        Map<Serializable, Settings> nestedSettings = new HashMap<>();
-        nestedSettings.put("aaa", childSettings);
-        nestedSettings.put("bbb", childSettingsNonSerializable);
+        Map<Serializable, Settings> childSettings = new HashMap<>();
+        childSettings.put("aaa", childSettingsValues);
+        childSettings.put("bbb", childSettingsNonSerializable);
         
-        SettingsMap nestedSettingsMap = new SettingsMapImpl(nestedSettings);
+        SettingsMap childSettingsMap = new SettingsMapImpl(childSettings);
         
-        final GenericSerializableSettings settingsSerializable = createTestSettingsWithValues();
-        final Settings settingsNonSerializable = createNonSerializableTestSettingsWithChangedValues();
-        Map<Serializable, Settings> rootSettings = new HashMap<>();
-        rootSettings.put("aaa", nestedSettingsMap);
-        rootSettings.put("bbb", settingsNonSerializable);
-        rootSettings.put("ccc", settingsSerializable);
+        final GenericSerializableSettings settingsValues = createTestSettingsWithValues();
+        final Settings settingsValuesNonSerializable = createNonSerializableTestSettingsWithChangedValues();
+        Map<Serializable, Settings> settings = new HashMap<>();
+        settings.put("aaa", childSettingsMap);
+        settings.put("bbb", settingsValuesNonSerializable);
+        settings.put("ccc", settingsValues);
         
-        SettingsMap settingsMapToSave = new SettingsMapImpl(rootSettings);
+        SettingsMap settingsMapToSave = new SettingsMapImpl(settings);
         
-        final SettingsMap deserializedSettings = serializeAndDeserialize(settingsMapToSave);
+        final SettingsMap deserializedSettingsMap = serializeAndDeserialize(settingsMapToSave);
+        SettingsMap deserializedChildSettingsMap = (SettingsMap) deserializedSettingsMap.getSettingsByKey().get("aaa");
+        Settings deserializedSettingsValuesNonSerializable = deserializedSettingsMap.getSettingsByKey().get("bbb");
+        Settings deserializedSettingsValues = deserializedSettingsMap.getSettingsByKey().get("ccc");
         
-        final Settings defaultNonSerializableSettings = createNonSerializableTestSettingsWithDefaultValues();
-        settingsMapToSave.getSettingsByKey().put("bbb", defaultNonSerializableSettings);
-        final Settings nestedDefaultNonSerializableSettings = createNonSerializableTestSettingsWithDefaultValues();
-        ((SettingsMap) settingsMapToSave.getSettingsByKey().get("aaa")).getSettingsByKey().put("bbb", nestedDefaultNonSerializableSettings);
-        assertEquals(settingsMapToSave, deserializedSettings);
+        assertEquals(deserializedSettingsValues, createTestSettingsWithValues());
+        assertEquals(deserializedSettingsValuesNonSerializable, createNonSerializableTestSettingsWithDefaultValues());
+        assertEquals(deserializedSettingsMap.getSettingsByKey().size(), 3);
+        
+        Settings deserializedChildSettingsValues = deserializedChildSettingsMap.getSettingsByKey().get("aaa");
+        Settings deserializedChildSettingsValuesNonSerializable = deserializedChildSettingsMap.getSettingsByKey().get("bbb");
+        
+        assertEquals(deserializedChildSettingsValues, createTestSettingsWithValues());
+        assertEquals(deserializedChildSettingsValuesNonSerializable, createNonSerializableTestSettingsWithDefaultValues());
+        assertEquals(deserializedChildSettingsMap.getSettingsByKey().size(), 2);
     }
     
     private static class SettingsMapImpl implements SettingsMap {
