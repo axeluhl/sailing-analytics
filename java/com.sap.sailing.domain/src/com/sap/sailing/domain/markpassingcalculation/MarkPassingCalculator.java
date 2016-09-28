@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -283,9 +282,24 @@ public class MarkPassingCalculator {
                     fixes.addAll(fixesAffectedByNewMarkFixes.getValue());
                 }
             }
-            List<Callable<Object>> tasks = new ArrayList<>();
-            for (Entry<Competitor, Set<GPSFix>> c : combinedCompetitorFixes.entrySet()) {
-                tasks.add(Executors.callable(new ComputeMarkPassings(c.getKey(), c.getValue())));
+            List<Callable<Void>> tasks = new ArrayList<>();
+            for (final Entry<Competitor, Set<GPSFix>> c : combinedCompetitorFixes.entrySet()) {
+                final Runnable runnable = new ComputeMarkPassings(c.getKey(), c.getValue());
+                tasks.add(new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        runnable.run();
+                        return null;
+                    }
+                    
+                    /**
+                     * A reasonable toString implementation helps identifying these tasks in log messages for long-running tasks
+                     */
+                    @Override
+                    public String toString() {
+                        return "Mark passing calculation for competitor "+c.getKey()+" with "+c.getValue().size()+" fixes";
+                    }
+                });
             }
             try {
                 executor.invokeAll(tasks);
