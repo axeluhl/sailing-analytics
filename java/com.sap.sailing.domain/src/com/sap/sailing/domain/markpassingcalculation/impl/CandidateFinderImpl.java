@@ -47,6 +47,7 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -383,27 +384,32 @@ public class CandidateFinderImpl implements CandidateFinder {
                     changedWaypoints.add(w);
                 }
             }
-            final Set<Callable<Void>> tasks = new HashSet<>();;
+            final Set<Callable<Void>> tasks = new HashSet<>();
+            final Thread executingThread = Thread.currentThread(); // most likely the MarkPassingCalculator.Listen thread
             for (Competitor c : race.getRace().getCompetitors()) {
                 tasks.add(()->{
-                    List<Candidate> badCans = new ArrayList<>();
-                    List<Candidate> newCans = new ArrayList<>();
-                    for (Waypoint w : changedWaypoints) {
-                        Map<List<GPSFix>, Candidate> xteCans = getXteCandidates(c, w);
-                        badCans.addAll(xteCans.values());
-                        xteCans.clear();
-                        Map<GPSFix, Candidate> distanceCans = getDistanceCandidates(c, w);
-                        badCans.addAll(distanceCans.values());
-                        distanceCans.clear();
+                    LockUtil.propagateLockSetFrom(executingThread); // "inherit" the course read lock from the "calling" thread into the thread pool executor thread
+                    try {
+                        List<Candidate> badCans = new ArrayList<>();
+                        List<Candidate> newCans = new ArrayList<>();
+                        for (Waypoint w : changedWaypoints) {
+                            Map<List<GPSFix>, Candidate> xteCans = getXteCandidates(c, w);
+                            badCans.addAll(xteCans.values());
+                            xteCans.clear();
+                            Map<GPSFix, Candidate> distanceCans = getDistanceCandidates(c, w);
+                            badCans.addAll(distanceCans.values());
+                            distanceCans.clear();
+                        }
+                        Set<GPSFix> allFixes = getAllFixes(c);
+                        newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
+                        newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
+                        result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
+                        return null;
+                    } finally {
+                        LockUtil.unpropagateLockSetFrom(executingThread); // "return" the course read lock from the thread pool executor thread to the "calling" thread
                     }
-                    Set<GPSFix> allFixes = getAllFixes(c);
-                    newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
-                    newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
-                    result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
-                    return null;
                 });
             }
-            // FIXME bug 3928: holding the course read lock while pushing the tasks to the executor and waiting synchronously for their completion is deadlock-prone when a course update requests the write lock and future read lock requests have to wait
             executor.invokeAll(tasks);
         } catch (InterruptedException e) {
             logger.log(Level.SEVERE, "Problem trying to update competitor candidate sets after waypoints starting at zero-based index "+
