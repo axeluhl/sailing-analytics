@@ -13,7 +13,7 @@ For further discussion on the topic there is bug [#3883]( https://bugzilla.sapsa
 
 Monitoring energy consumption in Android is not easy. Detailed statistics can only be obtained from the system if you have root access from Android 4.4 onwards. Information like what app is responsible for what portion of the energy consumption is either not available in APIs before 4.4 or would require rooting all the testing devices. Since that was not an option we decided to monitor the general battery level over a time of 2 hours to get somewhat representative results. We made sure that the phone was only running the regular set of background activities and no unnecessary applications.
 
-Having decided that, we wrote an EnergyLog class that you can find in com.sap.sailing.android.shared.util on the ìbug3883î-branch ready for future testing. It is able to monitor the following data by itself whenever `addEntryToLog` is called: a timestamp, the battery-percentage, battery temperature, CPU usage and GSM signal strength. Instantiate the class once for every log you want to write and when you are done logging/adding entries call `writeLog`. You can also monitor GPS accuracy and the amount of satellites used for finding the fix. This is useful if you want to measure energy consumption in the InSight app whenever `onLocationChanged` is called.
+Having decided that, we wrote an EnergyLog class that you can find in com.sap.sailing.android.shared.util on the ‚Äúbug3883‚Äù-branch ready for future testing. It is able to monitor the following data by itself whenever `addEntryToLog` is called: a timestamp, the battery-percentage, battery temperature, CPU usage and GSM signal strength. Instantiate the class once for every log you want to write and when you are done logging/adding entries call `writeLog`. You can also monitor GPS accuracy and the amount of satellites used for finding the fix. This is useful if you want to measure energy consumption in the InSight app whenever `onLocationChanged` is called.
 
 ### Location APIs
 
@@ -66,33 +66,33 @@ Some phones though behave unexpectedly on a bad connection. The S2 shows the exa
 
 Generally we have to say that energy consumption heavily depends on the phone itself. On some phones the app would still be able to run 10 hours without optimization, on others only 4. It also depends on the specific device how effective energy conserving measures are.
 <b>GPS fix interval</b>
- * different GPS fix acquiring intervals do not make a difference in battery drain
- * they would if the interval was much lower - say 5-10 minutes upwards
- * this is not an option for a precise tracking app though so there is nothing which can be done at this point
+* different GPS fix acquiring intervals do not make a difference in battery drain
+* they would if the interval was much lower - say 5-10 minutes upwards
+* this is not an option for a precise tracking app though so there is nothing which can be done at this point
 
 <b>Connectivity state</b>
- * better signal strength leads to a lower required transmission power by the phone's antenna
+* better signal strength leads to a lower required transmission power by the phone's antenna
    --> a solid 2G connection is better than a bad 3G connection
- * the longer the chip needs to be active, the higher the drain
+* the longer the chip needs to be active, the higher the drain
    --> the faster data is sent, the better
    --> 3G is more economical, if stable, especially with bigger data batches
- * frequent signal loss forces the phone to constanly try to reconnect to the cellular network
+* frequent signal loss forces the phone to constanly try to reconnect to the cellular network
 
 <b>Message sending interval</b>
- * the main thing where power saving measures can be applied on all phones
+* the main thing where power saving measures can be applied on all phones
 
 <b>Heat</b>
- * heat will have no short term influence on battery life on the current cycle
- * only long term influence on battery degredation
+* heat will have no short term influence on battery life on the current cycle
+* only long term influence on battery degredation
 
 
 <b>Resulting actions going forth</b>
- * send messages _only_ as fast as necessary to still provide a reasonable experience
+* send messages _only_ as fast as necessary to still provide a reasonable experience
 * intervals between 5 and 60 seconds are imaginable as a choice for the user
 * provide a setting in the app for that - possibly displaying an educated guess on remaining battery life with each setting; taking into account the following:
-   * the user's device (battery level, capacity, average idle power drain)
-   * statistics provided by the backend (how power-intense are the different intervals on the average of devices)
-   * possibly taking android-provided expected time into account - see <b>Intent.ACTION_POWER_USAGE_SUMMARY</b>
+* the user's device (battery level, capacity, average idle power drain)
+* statistics provided by the backend (how power-intense are the different intervals on the average of devices)
+* possibly taking android-provided expected time into account - see <b>Intent.ACTION_POWER_USAGE_SUMMARY</b>
 
 ---
 
