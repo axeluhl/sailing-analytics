@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -13,6 +12,7 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Util;
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
@@ -57,13 +57,8 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
         for (RaceColumn currentRaceColumn : raceColumns) {
             final TrackedRace trackedRaceInColumnForFleet = currentRaceColumn.getTrackedRace(fleet);
             if (trackedRaceInColumnForFleet != null) {
-                Set<TrackedRace> previousRaces = previousRacesByRace.get(trackedRaceInColumnForFleet);
-                if (previousRaces == null) {
-                    previousRaces = new HashSet<>();
-                    previousRacesByRace.put(trackedRaceInColumnForFleet, previousRaces);
-                }
                 if (previousRace != null) {
-                    previousRaces.add(previousRace);
+                    Util.addToValueSet(previousRacesByRace, trackedRaceInColumnForFleet, previousRace);
                 }
                 previousRace = trackedRaceInColumnForFleet;
             }
@@ -96,11 +91,13 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
 
     @Override
     public Set<TrackedRace> getPreviousRacesInExecutionOrder(TrackedRace race) {
-        Set<TrackedRace> result = Collections.emptySet();
+        final Set<TrackedRace> result;
         final Map<TrackedRace, Set<TrackedRace>> previousRacesByRace = getPreviousRacesByRace();
         if (previousRacesByRace != null) {
             result = previousRacesByRace.get(race);
-        } 
+        } else {
+            result = Collections.emptySet();
+        }
         return result;
     }
 }
