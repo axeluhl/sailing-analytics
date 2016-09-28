@@ -751,7 +751,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Monitor object to synchronize access to the {@link #updateStartAndEndOfTracking(boolean)} method. See bug 3922.
      */
-    private final Serializable updateStartAndEndOfTrackingMonitor = "";
+    private final Serializable updateStartAndEndOfTrackingMonitor = "updateStartAndEndOfTrackingMonitor";
     
     /**
      * Updates the start and end of tracking in the following precedence order:
