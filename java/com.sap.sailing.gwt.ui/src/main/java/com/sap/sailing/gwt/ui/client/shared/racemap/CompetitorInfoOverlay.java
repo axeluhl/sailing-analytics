@@ -29,7 +29,10 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
 
     private int canvasWidth;
     private int canvasHeight;
-    private int infoBoxHeight = 20;
+    private int infoBoxHeight;
+    private int defaultInfoBoxHeight = 20;
+    private int xTextCoordinate = 8;
+    private int yTextCoordinate = 14;
 
     private Color competitorColor; 
 
@@ -52,10 +55,11 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             CssColor grayTransparentColor = CssColor.make("rgba(255,255,255,0.75)");
 
             ctx.setFont("12px bold Verdana sans-serif");
-            TextMetrics measureText = ctx.measureText(infoText);
-            double textWidth = measureText.getWidth();
-
-            canvasWidth = (int) textWidth + 10 + infoBoxHeight;
+            String[] textLines = infoText.split("\n");
+            TextMetrics measureText = ctx.measureText(findLargestLine(textLines));
+            double largestLineWidth = measureText.getWidth();
+            infoBoxHeight = defaultInfoBoxHeight + textLines.length * 11;
+            canvasWidth = (int)largestLineWidth + 10 + infoBoxHeight;
             setCanvasSize(canvasWidth, canvasHeight);
 
             ctx.save();
@@ -95,7 +99,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
 
             ctx.beginPath();
             ctx.setFillStyle("black");
-            ctx.fillText(infoText, 8, 14);
+            drawText(textLines, ctx);
             ctx.stroke();
 
             ctx.restore();
@@ -120,5 +124,23 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
      */
     public void setInfoText(String infoText) {
         this.infoText = infoText;
+    }
+    
+    private void drawText(String[] lines, Context2d ctx) {
+        for (int i = 0; i < lines.length; i++) {
+            ctx.fillText(lines[i], xTextCoordinate, yTextCoordinate + i * 15);
+        }
+    }
+
+    private String findLargestLine(String[] lines) {
+        int index = 0;
+        int maxLength = lines[0].length();
+        for (int i = 0; i < lines.length; i++) {
+            if (maxLength < lines[i].length()) {
+                index = i;
+                maxLength = lines[i].length();
+            }
+        }
+        return lines[index];
     }
 }
