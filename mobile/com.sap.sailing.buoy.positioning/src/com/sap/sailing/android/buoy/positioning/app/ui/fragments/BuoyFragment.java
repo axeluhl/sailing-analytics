@@ -55,7 +55,6 @@ public class BuoyFragment extends BaseFragment
     private static final String TAG = BuoyFragment.class.getName();
 
     private static final int GPS_MIN_TIME = 1000;
-    private static final String N_A = "n/a";
     private static final int REQUEST_CHECK_SETTINGS = 1 << 16;
 
     private TextView accuracyTextView;
@@ -230,8 +229,8 @@ public class BuoyFragment extends BaseFragment
     }
 
     private void setUpTextUI(Location location) {
-        String accuracyText = N_A;
-        String distanceText = N_A;
+        String accuracyText = this.getString(R.string.unknown);
+        String distanceText = this.getString(R.string.unknown);
         if (location != null) {
             accuracyText = getString(R.string.buoy_detail_accuracy_ca, location.getAccuracy());
             MarkPingInfo markPing = positioningActivity.getMarkPing();
