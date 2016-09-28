@@ -65,6 +65,7 @@ Some phones though behave unexpectedly on a bad connection. The S2 shows the exa
 ## Conclusion
 
 Generally we have to say that energy consumption heavily depends on the phone itself. On some phones the app would still be able to run 10 hours without optimization, on others only 4. It also depends on the specific device how effective energy conserving measures are.
+
 <b>GPS fix interval</b>
 
 * different GPS fix acquiring intervals do not make a difference in battery drain
