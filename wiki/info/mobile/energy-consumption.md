@@ -66,11 +66,13 @@ Some phones though behave unexpectedly on a bad connection. The S2 shows the exa
 
 Generally we have to say that energy consumption heavily depends on the phone itself. On some phones the app would still be able to run 10 hours without optimization, on others only 4. It also depends on the specific device how effective energy conserving measures are.
 <b>GPS fix interval</b>
+
 * different GPS fix acquiring intervals do not make a difference in battery drain
 * they would if the interval was much lower - say 5-10 minutes upwards
 * this is not an option for a precise tracking app though so there is nothing which can be done at this point
 
 <b>Connectivity state</b>
+
 * better signal strength leads to a lower required transmission power by the phone's antenna
    --> a solid 2G connection is better than a bad 3G connection
 * the longer the chip needs to be active, the higher the drain
@@ -79,14 +81,17 @@ Generally we have to say that energy consumption heavily depends on the phone it
 * frequent signal loss forces the phone to constanly try to reconnect to the cellular network
 
 <b>Message sending interval</b>
+
 * the main thing where power saving measures can be applied on all phones
 
 <b>Heat</b>
+
 * heat will have no short term influence on battery life on the current cycle
 * only long term influence on battery degredation
 
 
 <b>Resulting actions going forth</b>
+
 * send messages _only_ as fast as necessary to still provide a reasonable experience
 * intervals between 5 and 60 seconds are imaginable as a choice for the user
 * provide a setting in the app for that - possibly displaying an educated guess on remaining battery life with each setting; taking into account the following:
