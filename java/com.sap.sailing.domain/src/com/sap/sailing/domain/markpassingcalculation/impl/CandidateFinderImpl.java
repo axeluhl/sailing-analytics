@@ -403,6 +403,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                     return null;
                 });
             }
+            // FIXME bug 3928: holding the course read lock while pushing the tasks to the executor and waiting synchronously for their completion is deadlock-prone when a course update requests the write lock and future read lock requests have to wait
             executor.invokeAll(tasks);
         } catch (InterruptedException e) {
             logger.log(Level.SEVERE, "Problem trying to update competitor candidate sets after waypoints starting at zero-based index "+
