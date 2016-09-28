@@ -32,29 +32,35 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment implements
         }
         
         ListPreference prefSendingInterval = findPreference(R.string.preference_energy_saving_sending_interval_key);
+        prefSendingInterval.setDefaultValue(R.string.preference_energy_saving_sending_interval_default);
         prefSendingInterval.setOnPreferenceChangeListener(this);
+        
+        updateEnergySavingMessage(null);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        SwitchPreference prefEnergy = findPreference(R.string.preference_energy_saving_enabled_key);
+        //SwitchPreference prefEnergy = findPreference(R.string.preference_energy_saving_enabled_key);
         SwitchPreference prefDeclination = findPreference(R.string.preference_heading_with_declination_subtracted_key);
 
         AppPreferences prefs = new AppPreferences(getActivity());
 
-        prefs.setEnergySavingEnabledByUser(prefEnergy.isChecked());
+        //prefs.setEnergySavingEnabledByUser(prefEnergy.isChecked());
         prefs.setDisplayHeadingWithSubtractedDeclination(prefDeclination.isChecked());
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         AppPreferences prefs = new AppPreferences(getActivity());
+        
+        //GPS message sending interval settings
         if(preference.getKey().equals(getString(R.string.preference_energy_saving_sending_interval_key))) {
             int msgSndInt = Integer.parseInt((String)newValue);
             switch (msgSndInt){
                 case 0:
+                    
                     //send every second
                     prefs.setMessageResendIntervalInMillis(1000);
                     break;
@@ -62,7 +68,40 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment implements
                     prefs.setMessageResendIntervalInMillis(msgSndInt * 1000);
                     break;
             }
+            if(prefs.getEnergySavingEnabledAutomatically())
+                prefs.setEnergySavingOverride(true);
+            updateEnergySavingMessage(newValue.toString());
         }
         return true;
+    }
+    
+    private void updateEnergySavingMessage(String value){
+        Preference msgSndIntMessage = findPreference(getString(R.string.preference_energy_saving_sending_interval_message_key));
+        ListPreference msgSndIntPreference = (ListPreference) findPreference(getString(R.string.preference_energy_saving_sending_interval_key));
+        
+        //when value == null, (meaning the settings screen just launched) - current entry will be selected
+        //otherwise, we need to get the index of the newly selected entry as the one resulting from getEntry() will be the previous one
+        String entry;
+        if (value == null){
+            entry = msgSndIntPreference.getEntry().toString();
+        } else {
+            int indexOfEntry = msgSndIntPreference.findIndexOfValue(value);
+            entry = msgSndIntPreference.getEntries()[indexOfEntry].toString();
+        }
+        
+        //possibly fill in the word "every"
+        String fillEvery = (entry.equals(msgSndIntPreference.getEntries()[0])) ? "" : " " + getString(R.string.preference_energy_saving_sending_interval_message_every);
+        
+        //set Text
+        AppPreferences prefs = new AppPreferences(getActivity());
+        if(prefs.getEnergySavingEnabledAutomatically() && !prefs.getEnergySavingOverride()){
+            msgSndIntMessage.setSummary(getString(R.string.preference_energy_saving_enabled_automatically));
+        } else {
+            msgSndIntMessage.setSummary(String.format(
+                    getString(R.string.preference_energy_saving_sending_interval_message),
+                    fillEvery,
+                    entry)
+            );
+        }
     }
 }
