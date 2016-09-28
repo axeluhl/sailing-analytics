@@ -1213,19 +1213,24 @@ public class CandidateFinderImpl implements CandidateFinder {
      * @return an average of the estimated legs before and after <code>w</code>.
      */
     private Distance getAverageLengthOfAdjacentLegs(TimePoint t, Waypoint w) {
-        Course course = race.getRace().getCourse();
-        if (w == course.getFirstWaypoint()) {
-            return race.getTrackedLegStartingAt(w).getGreatCircleDistance(t);
+        final Distance result;
+        final Course course = race.getRace().getCourse();
+        if (course.getNumberOfWaypoints() < 2) {
+            result = null;
+        } else if (w == course.getFirstWaypoint()) {
+            result = race.getTrackedLegStartingAt(w).getGreatCircleDistance(t);
         } else if (w == course.getLastWaypoint()) {
-            return race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t);
+            result = race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t);
         } else {
             Distance before = race.getTrackedLegStartingAt(w).getGreatCircleDistance(t);
             Distance after = race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t);
             if (after != null && before != null) {
-                return new MeterDistance(before.add(after).getMeters() / 2);
+                result = new MeterDistance(before.add(after).getMeters() / 2);
+            } else {
+                result = null;
             }
-            return null;
         }
+        return result;
     }
 
     /**
