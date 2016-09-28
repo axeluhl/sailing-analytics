@@ -4,6 +4,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -19,15 +21,27 @@ import com.sap.sse.util.ThreadPoolUtil;
  * @param <V>
  */
 public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements KnowsExecutor {
+    private static final Logger logger = Logger.getLogger(ThreadPoolAwareFutureTask.class.getName());
     private final KnowsExecutorAndTracingGet<V> getHelper = new KnowsExecutorAndTracingGetImpl<V>();
+    private final Object callableOrRunnableIfLoggingFine;
     
     public ThreadPoolAwareFutureTask(ThreadPoolExecutor executor, Callable<V> callable) {
         super(callable);
+        if (logger.isLoggable(Level.FINE)) {
+            callableOrRunnableIfLoggingFine = callable;
+        } else {
+            callableOrRunnableIfLoggingFine = null;
+        }
         getHelper.setExecutorThisTaskIsScheduledFor(executor);
     }
 
     public ThreadPoolAwareFutureTask(ThreadPoolExecutor executor, Runnable runnable, V result) {
         super(runnable, result);
+        if (logger.isLoggable(Level.FINE)) {
+            callableOrRunnableIfLoggingFine = runnable;
+        } else {
+            callableOrRunnableIfLoggingFine = null;
+        }
         getHelper.setExecutorThisTaskIsScheduledFor(executor);
     }
     
@@ -39,5 +53,10 @@ public class ThreadPoolAwareFutureTask<V> extends FutureTask<V> implements Knows
     @Override
     public V get() throws InterruptedException, ExecutionException {
         return getHelper.callGetAndTraceAfterEachTimeout(this);
+    }
+    
+    @Override
+    public String toString() {
+        return super.toString()+(callableOrRunnableIfLoggingFine==null?"":(" "+callableOrRunnableIfLoggingFine.toString()));
     }
 }
