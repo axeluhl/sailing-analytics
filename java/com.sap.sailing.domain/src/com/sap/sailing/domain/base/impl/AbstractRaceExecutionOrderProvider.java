@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -12,7 +13,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.common.Util;
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 
@@ -43,6 +43,10 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
 
     protected abstract Map<Fleet, Iterable<? extends RaceColumn>> getRaceColumnsOfSeries();
     
+    /**
+     * For all tracked races found on any of the {@link #getRaceColumnsOfSeries() race columns} produces a valid and
+     * potentially empty set.
+     */
     private Map<TrackedRace, Set<TrackedRace>> reloadAndGetPreviousRacesByRace() {
         final Map<TrackedRace, Set<TrackedRace>> previousRacesByRace = new HashMap<>();
         for (Entry<Fleet, Iterable<? extends RaceColumn>> raceColumnsInSeries : getRaceColumnsOfSeries().entrySet()) {
@@ -57,8 +61,13 @@ public abstract class AbstractRaceExecutionOrderProvider implements RaceExecutio
         for (RaceColumn currentRaceColumn : raceColumns) {
             final TrackedRace trackedRaceInColumnForFleet = currentRaceColumn.getTrackedRace(fleet);
             if (trackedRaceInColumnForFleet != null) {
+                Set<TrackedRace> previousRaces = previousRacesByRace.get(trackedRaceInColumnForFleet);
+                if (previousRaces == null) {
+                    previousRaces = new HashSet<>();
+                    previousRacesByRace.put(trackedRaceInColumnForFleet, previousRaces);
+                }
                 if (previousRace != null) {
-                    Util.addToValueSet(previousRacesByRace, trackedRaceInColumnForFleet, previousRace);
+                    previousRaces.add(previousRace);
                 }
                 previousRace = trackedRaceInColumnForFleet;
             }

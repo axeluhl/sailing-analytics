@@ -24,6 +24,8 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.SmartFutureCache.UpdateInterval;
+import com.sap.sse.util.impl.HasTracingGet;
+import com.sap.sse.util.impl.HasTracingGetImpl;
 import com.sap.sse.util.impl.KnowsExecutor;
 import com.sap.sse.util.impl.KnowsExecutorAndTracingGet;
 import com.sap.sse.util.impl.KnowsExecutorAndTracingGetImpl;
@@ -519,14 +521,33 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
                 notifyAll();
             }
         }
+        
+        public String toString() {
+            final String result;
+            synchronized (this) {
+                if (isSet) {
+                    result = value==null?"null":value.toString();
+                } else {
+                    result = "unset";
+                }
+            }
+            return result;
+        }
     }
     
     private static class TransitiveFuture<T> implements Future<T> {
         private final SettableFuture<Future<T>> future;
+        private final HasTracingGet<T> tracingGetHelper;
         
         protected TransitiveFuture(SettableFuture<Future<T>> future) {
             super();
             this.future = future;
+            this.tracingGetHelper = new HasTracingGetImpl<T>() {
+                @Override
+                protected String getAdditionalTraceInfo() {
+                    return "transitive future "+TransitiveFuture.this.future.toString();
+                }
+            };
         }
 
         @Override
@@ -558,7 +579,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
 
         @Override
         public T get() throws InterruptedException, ExecutionException {
-            return future.get().get();
+            return tracingGetHelper.callGetAndTraceAfterEachTimeout(this);
         }
 
         @Override
