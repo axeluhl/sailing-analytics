@@ -29,7 +29,7 @@ As for the Race Committee app, unprecise locations will do here, since those are
 
 <b>Battery drain aspects</b>
 We tested both APIs on three devices over a period of two hours. See the results below.
-<img src="/wiki/info/mobile/energy-consumption/ComparisonAPIs.png"/>
+<a href="/wiki/info/mobile/energy-consumption/ComparisonAPIs.png"><img src="/wiki/info/mobile/energy-consumption/ComparisonAPIs.png"/></a>
 
 As you can see above, the difference between the two APIs is relatively small. Moreover it seems that on some phones, one API has less impact on battery drain than the other, while on other phones it is the other way around, though this delta is probably within margin of error. So switching APIs really has no impact on battery consumption.
 
@@ -38,7 +38,7 @@ As you can see above, the difference between the two APIs is relatively small. M
 There is the common opinion that a 2G network connection drains less battery than 3G. This is only partially true though as in certain situations it is the other way around, especially in situations without good coverage (which is the case while sailing on the water most of the time).
 
 See our tests in a good connection state below - again tested on three devices over two hours, the devices set to only use the respective network.
-<img src="/wiki/info/mobile/energy-consumption/Comparison3G2G.png"/>
+<a href="/wiki/info/mobile/energy-consumption/Comparison3G2G.png"><img src="/wiki/info/mobile/energy-consumption/Comparison3G2G.png"/></a>
 
 The results show that for the Sail InSight app, 2G does not consume less battery in any case. The difference again is very small and probably within margin of error on two of our testing phones. Interestingly though, on the third phone, 2G actually drains the phone's battery noticeably stronger than 3G.
 
@@ -54,7 +54,7 @@ On the Y-axis you can see the consumed energy over 2 hours.
 
 See the results below.
 
-<img src="/wiki/info/mobile/energy-consumption/ComparisonConnectivity.png"/>
+<a href="/wiki/info/mobile/energy-consumption/ComparisonConnectivity.png"><img src="/wiki/info/mobile/energy-consumption/ComparisonConnectivity.png"/></a>
 
 What you can see in this diagram is that battery consumption will drop with increasing sending intervals, no matter how good or bad cellular connection is. The most significant differences are observable on intervals ranging from 5 to 25 seconds. The difference between 30 seconds and 5 minutes is negligible, so is the difference between immediate sending and a 5 second interval.
 
