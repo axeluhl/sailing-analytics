@@ -194,6 +194,10 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
             return callable.call();
         }
         
+        @Override
+        public String toString() {
+            return callable==null?"null":callable.toString();
+        }
     }
     
     /**
@@ -376,6 +380,11 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
         @Override
         public void setExecutorThisTaskIsScheduledFor(ThreadPoolExecutor executorThisTaskIsScheduledFor) {
             tracingGetHelper.setExecutorThisTaskIsScheduledFor(executorThisTaskIsScheduledFor);
+        }
+        
+        @Override
+        public String toString() {
+            return getClass().getName()+" [key="+key+", updateInterval="+updateInterval+", cacheUpdateComputer="+cacheUpdateComputer+"]";
         }
     }
     
