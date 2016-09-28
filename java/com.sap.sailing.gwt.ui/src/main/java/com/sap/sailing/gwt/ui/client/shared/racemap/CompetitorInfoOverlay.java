@@ -31,8 +31,8 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
     private int canvasHeight;
     private int infoBoxHeight;
     private int defaultInfoBoxHeight = 20;
-    private int xTextCoordinate = 8;
-    private int yTextCoordinate = 14;
+    public static final int X_TEXT_COORDINATE = 8;
+    public static final int Y_TEXT_COORDINATE = 14;
 
     private Color competitorColor; 
 
@@ -128,7 +128,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
     
     private void drawText(String[] lines, Context2d ctx) {
         for (int i = 0; i < lines.length; i++) {
-            ctx.fillText(lines[i], xTextCoordinate, yTextCoordinate + i * 15);
+            ctx.fillText(lines[i], X_TEXT_COORDINATE, Y_TEXT_COORDINATE + i * 15);
         }
     }
 
