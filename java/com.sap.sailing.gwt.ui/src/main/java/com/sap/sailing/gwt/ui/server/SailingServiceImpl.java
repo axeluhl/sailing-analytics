@@ -2173,7 +2173,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 actualTimePoint = timePoint;
             }
-            RaceDefinition race = trackedRace.getRace();
+            final RaceDefinition race = trackedRace.getRace();
             int rank = 1;
             final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(actualTimePoint);
             for (Competitor competitor : competitorsFromBestToWorst) {
