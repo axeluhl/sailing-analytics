@@ -212,8 +212,7 @@ public class MarkPassingCalculator {
                                 }
                                 executor.invokeAll(tasks);
                             }
-                            updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings,
-                                    unsuppressedMarkPassings);
+                            updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings, unsuppressedMarkPassings);
                             computeMarkPasses(competitorFixes, markFixes);
                             competitorFixes.clear();
                             markFixes.clear();
@@ -296,8 +295,8 @@ public class MarkPassingCalculator {
         }
 
         private class ComputeMarkPassings implements Runnable {
-            Competitor c;
-            Iterable<GPSFix> fixes;
+            final Competitor c;
+            final Iterable<GPSFix> fixes;
 
             public ComputeMarkPassings(Competitor c, Iterable<GPSFix> fixes) {
                 this.c = c;
@@ -306,12 +305,22 @@ public class MarkPassingCalculator {
 
             @Override
             public void run() {
-                logger.finer("Calculating MarkPassings for race "+raceName+", competitor " + c + " (" + Util.size(fixes) + " new fixes)");
-                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
-                logger.finer("Received " + Util.size(candidateDeltas.getA()) + " new Candidates for race "+raceName+
-                        " and competitor "+c+" and will remove "
-                        + Util.size(candidateDeltas.getB()) + " old Candidates for " + c);
-                chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());
+                try {
+                    if (logger.isLoggable(Level.FINER)) {
+                        logger.finer("Calculating MarkPassings for race "+raceName+", competitor " + c + " (" + Util.size(fixes) + " new fixes)");
+                    }
+                    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
+                    if (logger.isLoggable(Level.FINER)) {
+                        logger.finer("Received " + Util.size(candidateDeltas.getA()) + " new Candidates for race "+raceName+
+                            " and competitor "+c+" and will remove "
+                            + Util.size(candidateDeltas.getB()) + " old Candidates for " + c);
+                    }
+                    chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());
+                } catch (Exception e) {
+                    // make sure the exception is logged and not only "swallowed" and suppressed by an invokeAll(...) statement
+                    logger.log(Level.SEVERE, "Exception trying to compute mark passings for competitor "+c, e);
+                    throw e;
+                }
             }
         }
 
