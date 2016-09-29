@@ -37,7 +37,6 @@ import com.sap.sse.common.Util.Pair;
 public class SensorDataImportServlet extends AbstractFileUploadServlet {
     private static final long serialVersionUID = 1120226743039934620L;
     private static final Logger logger = Logger.getLogger(SensorDataImportServlet.class.getName());
-    private static final int READ_BUFFER_SIZE = 1024 * 1024 * 1024;
 
     public void storeFixes(Iterable<DoubleVectorFix> fixes, DeviceIdentifier deviceIdentifier) {
         try {
