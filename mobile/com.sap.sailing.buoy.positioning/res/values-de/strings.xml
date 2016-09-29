@@ -9,6 +9,7 @@
     <string name="reset_position">Position zurücksetzen</string>
     <string name="getting_marks">Empfangen der Markierungen&#8230;</string>
     <string name="set">Gesetzt</string>
+    <string name="unknown">Unbekannt</string>
     <string name="not_set">Nicht gesetzt</string>
     <string name="mark_list_accuracy">(Genauigkeit ca. %1$sm)</string>
     <string name="accuracy">GPS Genauigkeit</string>
