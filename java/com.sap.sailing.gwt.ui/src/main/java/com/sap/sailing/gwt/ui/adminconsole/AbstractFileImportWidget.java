@@ -41,6 +41,7 @@ public abstract class AbstractFileImportWidget extends Composite {
     protected final SailingServiceAsync sailingService;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
+    private boolean shouldClearListOnNewUploadComplete = true;
 
     protected AbstractFileImportWidget(String formActionUrl, StringMessages stringMessages,
             TrackFileImportDeviceIdentifierTableWrapper table, SailingServiceAsync sailingService,
@@ -73,7 +74,9 @@ public abstract class AbstractFileImportWidget extends Composite {
 
     @UiHandler("formPanelUi")
     void onFileImportComplete(SubmitCompleteEvent event) {
-        table.getDataProvider().getList().clear();
+        if (shouldClearListOnNewUploadComplete) {
+            table.getDataProvider().getList().clear();
+        }
         String[] uuids = event.getResults().split("\\n");
         if (uuids.length != 1 || (uuids.length > 0 && !uuids[0].isEmpty())) {
             sailingService.getTrackFileImportDeviceIds(Arrays.asList(uuids), 
@@ -106,4 +109,7 @@ public abstract class AbstractFileImportWidget extends Composite {
 
     protected abstract void getImporterTypes(AsyncCallback<Collection<String>> callback);
 
+    protected void setShouldClearListOnNewUploadComplete(boolean shouldClearListOnNewUploadComplete) {
+        this.shouldClearListOnNewUploadComplete = shouldClearListOnNewUploadComplete;
+    }
 }

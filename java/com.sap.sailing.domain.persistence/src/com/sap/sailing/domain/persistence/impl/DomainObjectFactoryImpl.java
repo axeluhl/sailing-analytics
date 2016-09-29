@@ -344,7 +344,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 logger.warning(String.format(
                         "Setting the unique index on the %s collection failed because you have too many duplicates. "
                                 + "This leads to the mongo error code %s and the following message: %s \nTo fix this follow "
-                                + "the steps provided on the wiki page: http://wiki.sapsailing.com/wiki/cook-book#Remove-"
+                                + "the steps provided on the wiki page: http://wiki.sapsailing.com/wiki/howto/misc/cook-book#Remove-"
                                 + "duplicates-from-WIND_TRACK-collection", CollectionNames.WIND_TRACKS.name(),
                         exception.getCode(), exception.getMessage()));
             } else {
@@ -1145,10 +1145,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             }
             final Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
+            final Boolean controlTrackingFromStartAndFinishTimes = (Boolean) dbRegatta.get(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name());
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
             result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass, startDate, endDate, series, /* persistent */true,
                     loadScoringScheme(dbRegatta), id, courseArea, useStartTimeInference == null ? true
-                            : useStartTimeInference, rankingMetricConstructor);
+                            : useStartTimeInference, controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
+                                    rankingMetricConstructor);
             result.setRegattaConfiguration(configuration);
         }
         return result;

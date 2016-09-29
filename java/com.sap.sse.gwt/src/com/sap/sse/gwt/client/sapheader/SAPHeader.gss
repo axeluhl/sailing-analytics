@@ -47,24 +47,32 @@
 	vertical-align: top;
 }
 
-.logo {
+.logo, .logo:hover, .logo:visited {
   margin: 0px;
   display: inline-block;
+  gwt-sprite: "logo";
+  background-size: cover;
+  width: 80px;
+  height: 40px;
+  border: none;
+  text-decoration: none;
 }
 
-.logotitle {
+.logotitle, .logotitle:hover, .logotitle:visited {
   font-size: 1rem;
   display: inline-block;
-  color: #f6f9fc;
+  color: #fff;
   width: 150px;
   height: 100%;
   padding: 17px 15px 0 0;
   vertical-align: top;
   text-align: right;
+  border: none;
   border-right: 1px solid rgb(180,180,180);
   margin: 0px;
   margin-left: -25px;
   box-sizing: border-box;
+  text-decoration: none;
 }
 .pagetitle {
   color: #ffffff;

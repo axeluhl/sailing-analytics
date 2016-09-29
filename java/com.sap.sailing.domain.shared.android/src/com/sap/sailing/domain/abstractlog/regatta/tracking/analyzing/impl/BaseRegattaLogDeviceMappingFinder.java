@@ -65,7 +65,7 @@ public abstract class BaseRegattaLogDeviceMappingFinder<ItemT extends WithID>
                 if (!endOfFirstHalf.before(from)) {
                     log.add(createDeviceMappingEvent(item, event.getAuthor(), from, endOfFirstHalf, event.getDevice()));
                 }
-                if (!to.before(startOfSecondHalf)) {
+                if (to == null || !to.before(startOfSecondHalf)) {
                     log.add(createDeviceMappingEvent(item, event.getAuthor(), startOfSecondHalf, to,
                             event.getDevice()));
                 }

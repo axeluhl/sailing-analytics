@@ -1075,8 +1075,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
                 unlockAfterRead();
             }
         }
-        for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
-            listener.gpsFixReceived(fix, getTrackedItem(), firstFixInTrack);
+        if (result) {
+            for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
+                listener.gpsFixReceived(fix, getTrackedItem(), firstFixInTrack);
+            }
         }
         return result;
     }

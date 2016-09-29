@@ -43,7 +43,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                                 sailingService.addMarkToRegattaLog(leaderboardName, mark, new AsyncCallback<Void>() {
                                     @Override
                                     public void onSuccess(Void result) {
-                                        refresh();
+                                        refreshMarks();
                                     }
 
                                     @Override
@@ -73,7 +73,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    refresh();
+                                    refreshMarks();
                                 }
 
                                 @Override
@@ -160,7 +160,14 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                         errorReporter.reportError("Could not load course: " + caught.getMessage());
                     }
                 });
+        refreshMarks();
+    }
 
+    /**
+     * Loads the marks data from the server using {@link SailingServiceAsync#getMarksInRegattaLog(String, AsyncCallback)} and updates
+     * the {@link #marks} table with the results.
+     */
+    protected void refreshMarks() {
         sailingService.getMarksInRegattaLog(leaderboardName, new AsyncCallback<Iterable<MarkDTO>>() {
             @Override
             public void onSuccess(Iterable<MarkDTO> result) {

@@ -104,7 +104,8 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);
         AddSpecificRegatta addRegattaOperation = new AddSpecificRegatta(regattaName, boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true,
-                new LowPoint(), /* default course area ID */ UUID.randomUUID(), /* useStartTimeInference */ true, RankingMetrics.ONE_DESIGN);
+                new LowPoint(), /* default course area ID */ UUID.randomUUID(), /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN);
         return master.apply(addRegattaOperation);
     }
 
