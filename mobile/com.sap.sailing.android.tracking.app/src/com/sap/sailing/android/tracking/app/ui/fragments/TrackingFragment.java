@@ -152,9 +152,9 @@ public class TrackingFragment extends BaseFragment {
                 public void run() {
                     TextView textView = (TextView) getActivity().findViewById(R.id.mode);
                     if (apiConnectivity == APIConnectivity.transmissionSuccess) {
-                        if (prefs.getEnergySavingEnabledByUser()) {
+                        if (prefs.getEnergySavingEnabledAutomatically() && !prefs.getEnergySavingOverride()) {
                             textView.setText(getString(R.string.tracking_mode_battery_saving));
-                            textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
+                            textView.setTextColor(getResources().getColor(R.color.sap_red));
                         } else {
                             textView.setText(getString(R.string.tracking_mode_live));
                             textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
