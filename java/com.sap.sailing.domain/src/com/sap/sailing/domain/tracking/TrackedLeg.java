@@ -57,6 +57,16 @@ public interface TrackedLeg extends Serializable {
     Bearing getLegBearing(TimePoint at);
 
     /**
+     * Same as {@link #getLegBearing(TimePoint)}, but giving the caller the possibility to provide a cache for
+     * mark positions and related position and bearing data
+     * 
+     * @param markPositionCache
+     *            a cache for this tracked leg's {@link MarkPositionAtTimePointCache#getTrackedRace() race} and the
+     *            {@link MarkPositionAtTimePointCache#getTimePoint() timePoint} passed
+     */
+    Bearing getLegBearing(TimePoint at, MarkPositionAtTimePointCache markPositionCache);
+
+    /**
      * Returns the positive (absolute) distance of <code>p</code> to this leg's course middle line at <code>timePoint</code>,
      * based on the position of the waypoints delimiting this leg at that time.
      */
@@ -79,6 +89,16 @@ public interface TrackedLeg extends Serializable {
      * If any of the positions of the two adjacent marks cannot be found, <code>null</code> is returned.
      */
     Distance getGreatCircleDistance(TimePoint timePoint);
+
+    /**
+     * Same as {@link #getGreatCircleDistance(TimePoint)}, but giving the caller the possibility to provide a cache for
+     * mark positions and related position and bearing data
+     * 
+     * @param markPositionCache
+     *            a cache for this tracked leg's {@link MarkPositionAtTimePointCache#getTrackedRace() race} and the
+     *            {@link MarkPositionAtTimePointCache#getTimePoint() timePoint} passed
+     */
+    Distance getGreatCircleDistance(TimePoint timePoint, MarkPositionAtTimePointCache markPositionCache);
 
     /**
      * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
