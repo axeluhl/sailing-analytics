@@ -3896,8 +3896,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
         }
         Duration durationOfAllLegs = Duration.NULL;
+        final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, timepoint);
         for (TrackedLeg leg : trackedLegs.values()) {
-            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint);
+            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint, markPositionCache);
             durationOfAllLegs = durationOfAllLegs.plus(durationOfLeg);
         }
         return durationOfAllLegs;
