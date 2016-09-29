@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -9,11 +10,14 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphics;
+import com.sap.sailing.gwt.ui.shared.racemap.StartboatVectorGraphics;
 import com.sap.sse.common.Util;
 
 /**
@@ -24,6 +28,8 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
      * The course mark to draw
      */
     private final MarkDTO mark;
+    
+    private final CoursePositionsDTO coursePositionsDTO;
 
     private Position position;
 
@@ -43,18 +49,23 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     private Boolean lastShowBuoyZone;
     private Boolean lastIsSelected;
     private Double lastBuoyZoneRadiusInMeter;
-
-    public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO, CoordinateSystem coordinateSystem) {
+    
+    public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO, CoordinateSystem coordinateSystem, CoursePositionsDTO coursePositionsDTO) {
         super(map, zIndex, coordinateSystem);
         this.mark = markDTO;
+        this.coursePositionsDTO = coursePositionsDTO;
         this.position = markDTO.position;
         this.buoyZoneRadiusInMeter = 0.0;
         this.showBuoyZone = false;
-        markVectorGraphics = new MarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
-        markScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
+        if(markDTO.type != MarkType.STARTBOAT) {
+        	this.markVectorGraphics = new MarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+        } else {
+        	this.markVectorGraphics = new StartboatVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+        }
+        this.markScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
         setCanvasSize(50, 50);
     }
-
+  
     @Override
     protected void draw() {
         if (mapProjection != null && mark != null && position != null) {
@@ -83,6 +94,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 Context2d context2d = getCanvas().getContext2d();
                 // draw the course mark
                 markVectorGraphics.drawMarkToCanvas(context2d, isSelected, canvasWidth, canvasHeight, markSizeScaleFactor);
+                setRotation();
                 // draw the buoy zone
                 if (showBuoyZone && isMarkWithBuoyZone(mark) && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                     CssColor grayTransparentColor = CssColor.make("rgba(37,158,255,0.75)");
@@ -111,6 +123,15 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         }
     }
     
+    private void setRotation() {
+    	if(mark.type == MarkType.STARTBOAT) {
+    		Bearing startlineBearing = getStartlineBearing();
+    		if(startlineBearing != null) {
+    			setCanvasRotation(startlineBearing.getDegrees());
+    		}
+    	}
+    }
+    
     private boolean isMarkWithBuoyZone(MarkDTO mark) {
         return mark.type == null || mark.type == MarkType.BUOY || mark.type == MarkType.STARTBOAT || 
                 mark.type == MarkType.FINISHBOAT || mark.type == MarkType.LANDMARK;
@@ -129,25 +150,40 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                lastHeight == null || lastHeight != height;
     }
 
-    public Util.Pair<Double, Size> getMarkScaleAndSize(Position markPosition) {
-        double minMarkHeight = 20;
-        
-        // the original buoy vector graphics is too small (2.1m x 1.5m) for higher zoom levels
-        // therefore we scale the buoys with factor 2 by default
-        double buoyScaleFactor = 2.0;
+	public Util.Pair<Double, Size> getMarkScaleAndSize(Position markPosition) {
+			double minMarkHeight = 20;
 
-        Size markSizeInPixel = calculateBoundingBox(mapProjection, markPosition,
-                markVectorGraphics.getMarkWidthInMeters() * buoyScaleFactor, markVectorGraphics.getMarkHeightInMeters() * buoyScaleFactor);
-        
-        double markHeightInPixel = markSizeInPixel.getHeight();
-        if(markHeightInPixel < minMarkHeight)
-            markHeightInPixel = minMarkHeight;
+			// the original buoy vector graphics is too small (2.1m x 1.5m) for
+			// higher zoom levels
+			// therefore we scale the buoys with factor 2 by default
+			double buoyScaleFactor = 2.0;
 
-        // The coordinates of the canvas drawing methods are based on the 'centimeter' unit (1px = 1cm).
-        // To calculate the display real mark size the scale factor from canvas units to the real   
-        double markSizeScaleFactor = markHeightInPixel / (markVectorGraphics.getMarkHeightInMeters() * 100);
+			Size markSizeInPixel = calculateBoundingBox(mapProjection, markPosition,
+					markVectorGraphics.getMarkWidthInMeters() * buoyScaleFactor,
+					markVectorGraphics.getMarkHeightInMeters() * buoyScaleFactor);
 
-        return new Util.Pair<Double, Size>(markSizeScaleFactor, Size.newInstance(markHeightInPixel * 2.0, markHeightInPixel * 2.0));
+			double markHeightInPixel = markSizeInPixel.getHeight();
+			if (markHeightInPixel < minMarkHeight)
+				markHeightInPixel = minMarkHeight;
+
+			// The coordinates of the canvas drawing methods are based on the
+			// 'centimeter' unit (1px = 1cm).
+			// To calculate the display real mark size the scale factor from
+			// canvas units to the real
+			double markSizeScaleFactor = markHeightInPixel / (markVectorGraphics.getMarkHeightInMeters() * 100);
+
+			return new Util.Pair<Double, Size>(markSizeScaleFactor, Size.newInstance(markHeightInPixel * 2.0, markHeightInPixel * 2.0));
+	}
+    
+	private Bearing getStartlineBearing() {
+    	Bearing result = null;
+    	List<Position> startlinePositions = coursePositionsDTO.getStartMarkPositions();
+    	Position startboatPosition = startlinePositions.get(0);
+    	Position pinendPosition = startlinePositions.get(1);
+    	if(startboatPosition != null) {
+    		result = startboatPosition.getBearingGreatCircle(pinendPosition);
+    	}
+    	return result;
     }
 
     private String getTitle() {

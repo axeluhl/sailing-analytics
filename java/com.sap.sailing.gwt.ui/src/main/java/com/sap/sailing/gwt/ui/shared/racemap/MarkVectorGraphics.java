@@ -22,8 +22,8 @@ public class MarkVectorGraphics {
     
     private static final double doublePi = 2 * Math.PI;
 
-    private double anchorPointX = 0.44;
-    private double anchorPointY = 1.67;
+    protected double anchorPointX = 0.44;
+    protected double anchorPointY = 1.67;
     
     private final static String DEFAULT_MARK_COLOR = "#f9ac00";
     private final static String DEFAULT_MARK_BG_COLOR = "#f0f0f0";
@@ -77,8 +77,8 @@ public class MarkVectorGraphics {
                 drawLandmark(ctx, isSelected, color);
                 break;
             case STARTBOAT:
-                drawStartBoat(ctx, isSelected, color);
-                break;
+            	drawStartboat(ctx, "#000000");
+            	break;
             case UMPIREBOAT:
             case CAMERABOAT:
                 // umpire and camera boats are not course marks -> see TrackedAssetVectorGraphics 
@@ -519,6 +519,65 @@ public class MarkVectorGraphics {
         ctx.restore();
         ctx.restore();
     }
+    
+    private void drawStartboat(Context2d ctx, String color) {
+    	ctx.beginPath();
+    	ctx.setFillStyle(color);
+    	ctx.setStrokeStyle("#FFFFFF");
+    	ctx.setLineWidth(30.0);
+    	ctx.setLineCap("butt");
+    	ctx.setLineJoin("miter");
+    	ctx.setMiterLimit(3.0);
+    	ctx.moveTo(33,30.36);
+    	ctx.quadraticCurveTo(103.47,18.96,194.65,18.55);
+    	ctx.quadraticCurveTo(285.83,18.13,370.62,34.74);
+    	ctx.quadraticCurveTo(455.42,51.34,520.29,87.99);
+    	ctx.quadraticCurveTo(585.16,124.64,603,187.36);
+    	ctx.quadraticCurveTo(584.67,244.84,520.84,277.54);
+    	ctx.quadraticCurveTo(457,310.24,372.97,324.79);
+    	ctx.quadraticCurveTo(288.94,339.34,197.37,339.08);
+    	ctx.quadraticCurveTo(105.8,338.81,32,330.36);
+    	ctx.lineTo(33,30.362205);
+    	ctx.fill();
+    	ctx.stroke();
+       
+    	ctx.setFillStyle("#FFFFFF");
+    	ctx.beginPath();
+    	ctx.beginPath();
+    	ctx.setLineWidth(1.0);
+    	ctx.setLineJoin("miter");
+    	ctx.setMiterLimit(4.0);
+    	ctx.moveTo(81,78);
+    	ctx.lineTo(349,78);
+    	ctx.lineTo(349,291);
+    	ctx.lineTo(81,291);
+    	ctx.lineTo(81,78);
+    	ctx.fill();
+    	ctx.stroke();
+    	
+    	ctx.setFillStyle("#000000");
+    	ctx.beginPath();
+    	ctx.moveTo(337,186.36);
+    	ctx.quadraticCurveTo(337,180.56,334.76,175.46);
+    	ctx.quadraticCurveTo(332.52,170.36,328.65,166.56);
+    	ctx.quadraticCurveTo(324.78,162.76,319.59,160.56);
+    	ctx.quadraticCurveTo(314.4,158.36,308.5,158.36);
+    	ctx.quadraticCurveTo(302.6,158.36,297.41,160.56);
+    	ctx.quadraticCurveTo(292.22,162.76,288.35,166.56);
+    	ctx.quadraticCurveTo(284.48,170.36,282.24,175.46);
+    	ctx.quadraticCurveTo(280,180.56,280,186.36);
+    	ctx.quadraticCurveTo(280,192.16,282.24,197.26);
+    	ctx.quadraticCurveTo(284.48,202.36,288.35,206.16);
+    	ctx.quadraticCurveTo(292.22,209.96,297.41,212.16);
+    	ctx.quadraticCurveTo(302.6,214.36,308.5,214.36);
+    	ctx.quadraticCurveTo(314.4,214.36,319.59,212.16);
+    	ctx.quadraticCurveTo(324.78,209.96,328.65,206.16);
+    	ctx.quadraticCurveTo(332.52,202.36,334.76,197.26);
+    	ctx.quadraticCurveTo(337,192.16,337,186.36);
+    	ctx.stroke();
+    	ctx.fill();
+    	ctx.beginPath();
+    }
 
     protected void drawConicalBuoy(Context2d ctx, boolean isSelected, String color) {
         ctx.setStrokeStyle("rgba(0,0,0,0)");
@@ -590,87 +649,6 @@ public class MarkVectorGraphics {
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
-        ctx.restore();
-    }
-
-    protected void drawStartBoat(Context2d ctx, boolean isSelected, String color2) {
-        ctx.setStrokeStyle("rgba(0,0,0,0)");
-        
-        ctx.save();
-        ctx.setFillStyle(color);
-        ctx.transform(12.5,0,0,12.5,-578,22.2);
-        
-        ctx.beginPath();
-        ctx.arc(49.7,12.8,2.66,0,doublePi,false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-        
-        ctx.save();
-        ctx.setFillStyle(DEFAULT_MARK_BG_COLOR);
-        ctx.transform(12.5,0,0,12.5,-578,22.2);
-        ctx.beginPath();
-        ctx.arc(49.7,11.3,3.37,0,doublePi,false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-        
-        ctx.save();
-        ctx.setFillStyle(color);
-        ctx.transform(12.5,0,0,12.5,-578,22.2);
-        ctx.beginPath();
-        ctx.arc(49.6,10.6,2.66,0,doublePi,false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle(DEFAULT_MARK_BG_COLOR);
-        ctx.transform(4.98,0,0,10.8,-205,50.4);
-        ctx.beginPath();
-        ctx.moveTo(50.8,9.84);
-        ctx.lineTo(48.5,9.84);
-        ctx.lineTo(48.5,1.44);
-        ctx.lineTo(50.8,1.9);
-        ctx.lineTo(50.8,9.84);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.transform(12.5,0,0,12.5,-570,22.2);
-        ctx.save();
-        ctx.setFillStyle(color);
-        ctx.beginPath();
-        ctx.moveTo(48.8,3.82);
-        ctx.lineTo(48.8,-1.32);
-        ctx.lineTo(57,1.05);
-        ctx.lineTo(48.8,3.82);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-        
-        ctx.save();
-        ctx.setFillStyle(DEFAULT_MARK_BG_COLOR);
-        ctx.beginPath();
-        ctx.moveTo(48.5,4.16);
-        ctx.lineTo(48.5,-1.65);
-        ctx.lineTo(57.8,1.03);
-        ctx.lineTo(48.5,4.16);
-        ctx.closePath();
-        ctx.moveTo(49,-0.994);
-        ctx.lineTo(49,3.47);
-        ctx.lineTo(56.2,1.07);
-        ctx.lineTo(49,-0.994);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
         ctx.restore();
     }
 
@@ -755,12 +733,12 @@ public class MarkVectorGraphics {
         ctx.restore();
     }
 
-    public double getMarkHeightInMeters() {
-        return markHeightInMeters;
-    }
+	public double getMarkHeightInMeters() {
+		return markHeightInMeters;
+	}
 
     public double getMarkWidthInMeters() {
-        return markWidthInMeters;
+		return markWidthInMeters;
     }
     
     public String getColor() {
