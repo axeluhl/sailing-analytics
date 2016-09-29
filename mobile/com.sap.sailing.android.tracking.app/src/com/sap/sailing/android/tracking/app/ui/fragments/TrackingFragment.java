@@ -22,6 +22,7 @@ import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
@@ -59,7 +60,7 @@ public class TrackingFragment extends BaseFragment {
         
         //setup receiver to get message from tracking service if GPS is disabled while tracking
         IntentFilter filter = new IntentFilter();
-        filter.addAction("gpsDisabled"); 
+        filter.addAction(TrackingService.GPS_DISABLED_MESSAGE); 
 
         gpsDisabledReceiver = new BroadcastReceiver() {
             @Override

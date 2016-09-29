@@ -61,6 +61,7 @@ public class TrackingService extends Service implements  android.location.Locati
     private int NOTIFICATION_ID = R.string.tracker_started;
 
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
+    public final static String GPS_DISABLED_MESSAGE = "gpsDisabled";
     private final static int UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE = 30000;
     private float minLocationUpdateDistanceInMeters = 0f;
     private final static float BATTERY_POWER_SAVE_THRESHOLD = 0.2f;
@@ -392,7 +393,7 @@ public class TrackingService extends Service implements  android.location.Locati
     public void onProviderDisabled(String provider) {
         //provider (GPS) disabled by the user while tracking
         Intent local = new Intent();
-        local.setAction("gpsDisabled");
+        local.setAction(GPS_DISABLED_MESSAGE);
         this.sendBroadcast(local);
     }
     
