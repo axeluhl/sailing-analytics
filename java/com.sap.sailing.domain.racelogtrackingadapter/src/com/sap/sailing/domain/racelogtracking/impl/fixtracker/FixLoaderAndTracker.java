@@ -296,8 +296,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(new Runnable() {
             @Override
             public void run() {
+                trackedRace.lockForSerializationRead();
                 try {
-                    trackedRace.lockForSerializationRead();
                     if (!preemptiveStopRequested.get()) {
                         setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
                         synchronized (FixLoaderAndTracker.this) {
