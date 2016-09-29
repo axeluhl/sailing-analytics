@@ -31,8 +31,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**
- * Import servlet for sensor data files. Importers are located through the OSGi service registry and mathed against the
- * name provided by the upload formular.
+ * Import servlet for sensor data files. Importers are located through the OSGi service registry and matched against the
+ * name provided by the upload form.
  */
 public class SensorDataImportServlet extends AbstractFileUploadServlet {
     private static final long serialVersionUID = 1120226743039934620L;
