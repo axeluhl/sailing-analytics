@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Test;
-import org.mockito.Matchers;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
