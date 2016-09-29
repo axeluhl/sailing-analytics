@@ -17,9 +17,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,10 +47,11 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
- * The standard implemantation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
+ * The standard implementation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
  * every time a competitor passes the crossing-bearing of a waypoint, a candidate is created using linear interpolation
  * to estimate the exact time the bearing was crossed. Secondly, all local distance minima to a waypoint are candidates.
  * The probability of a candidate depends on its distance, whether it is on the right side and if it passes in the right
@@ -149,11 +147,7 @@ public class CandidateFinderImpl implements CandidateFinder {
      * Like {@link #CandidateFinderImpl(DynamicTrackedRace, ExecutorService)} but creates a default executor service
      */
     public CandidateFinderImpl(DynamicTrackedRace race) {
-        this(race, new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime
-                .getRuntime().availableProcessors()/2, 3),
-                /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors()/2, 3),
-                /* keepAliveTime */60, TimeUnit.SECONDS,
-                /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1, /* daemon */ true)));
+        this(race, ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
     }
 
     public CandidateFinderImpl(DynamicTrackedRace race, ExecutorService executor) {
@@ -390,24 +384,30 @@ public class CandidateFinderImpl implements CandidateFinder {
                     changedWaypoints.add(w);
                 }
             }
-            final Set<Callable<Void>> tasks = new HashSet<>();;
+            final Set<Callable<Void>> tasks = new HashSet<>();
+            final Thread executingThread = Thread.currentThread(); // most likely the MarkPassingCalculator.Listen thread
             for (Competitor c : race.getRace().getCompetitors()) {
                 tasks.add(()->{
-                    List<Candidate> badCans = new ArrayList<>();
-                    List<Candidate> newCans = new ArrayList<>();
-                    for (Waypoint w : changedWaypoints) {
-                        Map<List<GPSFix>, Candidate> xteCans = getXteCandidates(c, w);
-                        badCans.addAll(xteCans.values());
-                        xteCans.clear();
-                        Map<GPSFix, Candidate> distanceCans = getDistanceCandidates(c, w);
-                        badCans.addAll(distanceCans.values());
-                        distanceCans.clear();
+                    LockUtil.propagateLockSetFrom(executingThread); // "inherit" the course read lock from the "calling" thread into the thread pool executor thread
+                    try {
+                        List<Candidate> badCans = new ArrayList<>();
+                        List<Candidate> newCans = new ArrayList<>();
+                        for (Waypoint w : changedWaypoints) {
+                            Map<List<GPSFix>, Candidate> xteCans = getXteCandidates(c, w);
+                            badCans.addAll(xteCans.values());
+                            xteCans.clear();
+                            Map<GPSFix, Candidate> distanceCans = getDistanceCandidates(c, w);
+                            badCans.addAll(distanceCans.values());
+                            distanceCans.clear();
+                        }
+                        Set<GPSFix> allFixes = getAllFixes(c);
+                        newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
+                        newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
+                        result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
+                        return null;
+                    } finally {
+                        LockUtil.unpropagateLockSetFrom(executingThread); // "return" the course read lock from the thread pool executor thread to the "calling" thread
                     }
-                    Set<GPSFix> allFixes = getAllFixes(c);
-                    newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
-                    newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
-                    result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
-                    return null;
                 });
             }
             executor.invokeAll(tasks);
@@ -520,8 +520,8 @@ public class CandidateFinderImpl implements CandidateFinder {
     private Set<GPSFix> getAllFixes(Competitor c) {
         Set<GPSFix> fixes = new TreeSet<GPSFix>(comp);
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+        track.lockForRead();
         try {
-            track.lockForRead();
             for (GPSFix fix : track.getFixes(
                     timeRangeForValidCandidates.from(), /* fromInclusive */ true,
                     timeRangeForValidCandidates.to(),   /*  toInclusive  */ true)) {
@@ -549,8 +549,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                 affectedFixes.add(fix);
                 GPSFix fixBefore;
                 GPSFix fixAfter;
+                track.lockForRead();
                 try {
-                    track.lockForRead();
                     TimePoint timePoint = fix.getTimePoint();
                     fixBefore = track.getLastFixBefore(timePoint);
                     fixAfter = track.getFirstFixAfter(timePoint);
@@ -1213,19 +1213,24 @@ public class CandidateFinderImpl implements CandidateFinder {
      * @return an average of the estimated legs before and after <code>w</code>.
      */
     private Distance getAverageLengthOfAdjacentLegs(TimePoint t, Waypoint w) {
-        Course course = race.getRace().getCourse();
-        if (w == course.getFirstWaypoint()) {
-            return race.getTrackedLegStartingAt(w).getGreatCircleDistance(t);
+        final Distance result;
+        final Course course = race.getRace().getCourse();
+        if (course.getNumberOfWaypoints() < 2) {
+            result = null;
+        } else if (w == course.getFirstWaypoint()) {
+            result = race.getTrackedLegStartingAt(w).getGreatCircleDistance(t);
         } else if (w == course.getLastWaypoint()) {
-            return race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t);
+            result = race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t);
         } else {
             Distance before = race.getTrackedLegStartingAt(w).getGreatCircleDistance(t);
             Distance after = race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t);
             if (after != null && before != null) {
-                return new MeterDistance(before.add(after).getMeters() / 2);
+                result = new MeterDistance(before.add(after).getMeters() / 2);
+            } else {
+                result = null;
             }
-            return null;
         }
+        return result;
     }
 
     /**

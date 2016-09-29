@@ -43,6 +43,7 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.util.ThreadPoolUtil;
 
 /**
  * This class listens to RaceLog Events, changes to the race and fix loading events and properly handles mappings and
@@ -160,6 +161,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
 
     private void loadFixes(TimeRange timeRangeToLoad, DeviceMappingWithRegattaLogEvent<? extends WithID> mapping) {
+        if(timeRangeToLoad == null) {
+            return;
+        }
         if (preemptiveStopRequested.get()) {
             return;
         }
@@ -263,12 +267,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    // TEMP: kommt von RaceLogSensorFixTracker
     protected TimePoint getStartOfTracking() {
         return trackedRace.getStartOfTracking();
     }
 
-    // TEMP: kommt von RaceLogSensorFixTracker
     protected TimePoint getEndOfTracking() {
         return trackedRace.getEndOfTracking();
     }
@@ -276,10 +278,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     protected void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
         final TimeRangeImpl extendedTimeRange = new TimeRangeImpl(loadFixesFrom, loadFixesTo);
         deviceMappings.forEachMapping((mapping) -> {
-            TimeRange timeRangeToLoad = extendedTimeRange.intersection(mapping.getTimeRange());
-            if (timeRangeToLoad != null && !preemptiveStopRequested.get()) {
-                loadFixes(timeRangeToLoad, mapping);
-            }
+            loadFixes(extendedTimeRange.intersection(mapping.getTimeRange()), mapping);
         });
     }
 
@@ -291,19 +290,17 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * @param updateCallback
      *            the {@link Runnable} callback used to run the update
      */
-    // TODO Consider using a thread pool here, after merging bug3864 into master
     private void updateAsyncInternal(final Runnable updateCallback) {
         synchronized (FixLoaderAndTracker.this) {
             activeLoaders.incrementAndGet();
             setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
         }
-        Thread t = new Thread(
-                this.getClass().getSimpleName() + " loader for tracked race " + trackedRace.getRace().getName()) {
+        ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 try {
+                    trackedRace.lockForSerializationRead();
                     if (!preemptiveStopRequested.get()) {
-                        trackedRace.lockForSerializationRead();
                         setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
                         synchronized (FixLoaderAndTracker.this) {
                             FixLoaderAndTracker.this.notifyAll();
@@ -311,20 +308,21 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         updateCallback.run();
                     }
                 } finally {
-                    synchronized (FixLoaderAndTracker.this) {
-                        int currentActiveLoaders = activeLoaders.decrementAndGet();
-                        FixLoaderAndTracker.this.notifyAll();
-                        if (currentActiveLoaders == 0) {
-                            setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
-                                    : TrackedRaceStatusEnum.TRACKING, 1.0);
+                    try {
+                        synchronized (FixLoaderAndTracker.this) {
+                            int currentActiveLoaders = activeLoaders.decrementAndGet();
+                            FixLoaderAndTracker.this.notifyAll();
+                            if (currentActiveLoaders == 0) {
+                                setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
+                                        : TrackedRaceStatusEnum.TRACKING, 1.0);
+                            }
                         }
+                    } finally {
+                        trackedRace.unlockAfterSerializationRead();
                     }
-                    trackedRace.unlockAfterSerializationRead();
-                    logger.info("Thread " + getName() + " done.");
                 }
             }
-        };
-        t.start();
+        });
     }
 
     /**
@@ -368,8 +366,22 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         protected void mappingChanged(DeviceMappingWithRegattaLogEvent<WithID> oldMapping,
                 DeviceMappingWithRegattaLogEvent<WithID> newMapping) {
-            // TODO can the new time range be bigger than the old one? In this case we would need to load the
-            // additional time range.
+            final TimeRange newTimeRange = newMapping.getTimeRange();
+            final TimeRange oldTimeRange = oldMapping.getTimeRange();
+            if(newTimeRange.endsAfter(oldTimeRange)) {
+                final TimePoint oldTo= oldTimeRange.to();
+                final TimePoint newFrom = newTimeRange.from();
+                final TimePoint from = oldTo.after(newFrom) ? oldTo : newFrom;
+                final TimeRange rangeToLoad = new TimeRangeImpl(from, newTimeRange.to());
+                loadFixes(rangeToLoad, newMapping);
+            }
+            if(newTimeRange.startsBefore(oldTimeRange)) {
+                final TimePoint oldFrom= oldTimeRange.from();
+                final TimePoint newTo = newTimeRange.to();
+                final TimePoint to = oldFrom.after(newTo) ? oldFrom : newTo;
+                final TimeRange rangeToLoad = new TimeRangeImpl(newTimeRange.from(), to);
+                loadFixes(rangeToLoad, newMapping);
+            }
         }
     }
 }

@@ -120,10 +120,17 @@ extends Track<EventT>, WithID {
     void merge(AbstractLog<EventT, VisitorT> other);
     
     /**
-     * Inserts a {@link RevokeEvent} for {@code toRevoke}, if latter is revokable, exists in the racelog
-     * and has not yet been revoked.
+     * Inserts a {@link RevokeEvent} for {@code toRevoke}, if latter is revokable, exists in the racelog and has not yet
+     * been revoked and the {@code author} has a {@link AbstractLogEventAuthor#getPriority() priority} that is at least
+     * as high as that of {@code toRevoke}'s author (numerically less or equal).
      * 
-     * @param author The author for the {@code RevokeEvent}.
+     * @param author
+     *            The author for the {@code RevokeEvent}.
+     * @param toRevoke
+     *            the event to revoke
+     * 
+     * @exception NotRevokableException if {@code toRevoke} is not a {@link Revokable} event or {@code author} doesn't
+     * have sufficient priority 
      */
     void revokeEvent(AbstractLogEventAuthor author, EventT toRevoke, String reason) throws NotRevokableException;
     void revokeEvent(AbstractLogEventAuthor author, EventT toRevoke) throws NotRevokableException;

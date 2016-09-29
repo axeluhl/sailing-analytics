@@ -15,7 +15,6 @@ import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboardD
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEventSeriesTabView;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
 /**
@@ -54,7 +53,7 @@ public class EventSeriesOverallLeaderboardTabView extends SharedLeaderboardEvent
 
     @Override
     public void start(final EventSeriesOverallLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
-        contentArea.setWidget(new Placeholder());
+        contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
