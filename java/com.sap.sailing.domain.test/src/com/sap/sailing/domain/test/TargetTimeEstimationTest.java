@@ -40,6 +40,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.MarkPositionAtTimePointCacheImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -88,9 +89,8 @@ public class TargetTimeEstimationTest {
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
         
         //Actual test of functionality
-        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint);
+        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint, new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint));
         assertEquals(75494, duration.asMillis(), 100);
-        
     }
     
     @Test
@@ -141,7 +141,7 @@ public class TargetTimeEstimationTest {
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
         
         //Actual test of functionality
-        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint);
+        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint, new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint));
         assertEquals(213513, duration.asMillis(), 100);
     }
     
@@ -193,7 +193,7 @@ public class TargetTimeEstimationTest {
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
         
         //Actual test of functionality
-        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint);
+        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint, new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint));
         assertEquals(95090, duration.asMillis(), 100);
         
     }
