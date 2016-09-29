@@ -72,10 +72,6 @@ dependencies {
     /* support libraries */
     compile "com.android.support:appcompat-v7:${rootProject.ext.support}"
 
-    /* Google Play Services */
-    compile "com.google.android.gms:play-services-gcm:${rootProject.ext.play_services}"
-    compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
-
     /* license dialog */
     compile("de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}")
 

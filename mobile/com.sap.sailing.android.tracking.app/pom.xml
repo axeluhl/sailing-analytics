@@ -27,12 +27,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.android.gms</groupId>
-			<artifactId>play-services-gcm</artifactId>
-			<type>aar</type>
-		</dependency>
-
-		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>com.sap.sailing.android.shared</artifactId>
 			<version>${project.version}</version>
