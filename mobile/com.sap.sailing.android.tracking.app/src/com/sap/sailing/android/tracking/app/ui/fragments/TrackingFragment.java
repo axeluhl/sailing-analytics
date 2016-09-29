@@ -7,11 +7,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
@@ -32,6 +32,8 @@ public class TrackingFragment extends BaseFragment {
 
     private AppPreferences prefs;
     private long lastGPSQualityUpdate;
+    private Toast gpsToast;
+    private boolean gpsFound = true;
 
     private String TAG = TrackingFragment.class.getName();
 
@@ -69,6 +71,9 @@ public class TrackingFragment extends BaseFragment {
             qualityIndicator.setSignalQuality(savedInstanceState.getInt(SIS_GPS_QUALITY));
             accuracyText.setText(savedInstanceState.getString(SIS_GPS_ACCURACY));
             unsentFixesText.setText(savedInstanceState.getString(SIS_GPS_UNSENT_FIXES));
+        } else {
+            //initially set quality to "No GPS" on start tracking
+            updateTrackingStatus(GPSQuality.noSignal);
         }
     }
 
@@ -115,9 +120,22 @@ public class TrackingFragment extends BaseFragment {
             if (quality == GPSQuality.noSignal) {
                 textView.setText(getString(R.string.tracking_status_no_gps_signal));
                 textView.setTextColor(getResources().getColor(R.color.sap_red));
+                //either GPS has been found before or tracking just started (but is not available now) --> show noGPS Toast
+                if (gpsFound || gpsToast == null) {
+                    gpsToast = Toast.makeText(getActivity(),getString(R.string.tracking_status_no_gps_signal), Toast.LENGTH_LONG);
+                    gpsToast.show();
+                    gpsFound = false;
+                }
             } else {
                 textView.setText(getString(R.string.tracking_status_tracking));
                 textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
+                gpsToast.cancel();
+                //GPS was lost before but is available again now --> show gpsFound toast
+                if (!gpsFound) {
+                    gpsToast = Toast.makeText(getActivity(),getString(R.string.tracking_status_gps_found), Toast.LENGTH_SHORT);
+                    gpsToast.show();
+                    gpsFound = true;
+                }
             }
         }
     }
@@ -183,7 +201,7 @@ public class TrackingFragment extends BaseFragment {
             } else {
                 locationProviders = Settings.Secure.getString(context.getContentResolver(),
                         Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-                return !TextUtils.isEmpty(locationProviders);
+                return locationProviders.contains("gps");
             }
         } else {
             return false;
