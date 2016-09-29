@@ -161,6 +161,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
 
     private void loadFixes(TimeRange timeRangeToLoad, DeviceMappingWithRegattaLogEvent<? extends WithID> mapping) {
+        if(timeRangeToLoad == null) {
+            return;
+        }
         if (preemptiveStopRequested.get()) {
             return;
         }
@@ -194,8 +197,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     try {
                         @SuppressWarnings({ "unchecked" })
                         DeviceMapping<Competitor> competitorMapping = (DeviceMapping<Competitor>) mapping;
-                        gpsFixStore.loadCompetitorTrack(track, competitorMapping, getStartOfTracking(),
-                                getEndOfTracking());
+                        gpsFixStore.loadCompetitorTrack(track, competitorMapping, timeRangeToLoad.from(),
+                                timeRangeToLoad.to());
                     } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                         logger.log(Level.WARNING, "Could not load competitor track " + mapping.getMappedTo());
                     }
@@ -208,12 +211,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 try {
                     @SuppressWarnings("unchecked")
                     DeviceMapping<Mark> markMapping = (DeviceMapping<Mark>) mapping;
-                    TimePoint from = getStartOfTracking();
-                    TimePoint to = getEndOfTracking();
-                    gpsFixStore.loadMarkTrack(track, markMapping, from, to);
+                    gpsFixStore.loadMarkTrack(track, markMapping, timeRangeToLoad.from(), timeRangeToLoad.to());
                     if (track.getFirstRawFix() == null) {
-                        logger.fine("Loading mark positions from outside of start/end of tracking interval (" + from
-                                + ".." + to + ") because no fixes were found in that interval");
+                        logger.fine("Loading mark positions from outside of start/end of tracking interval (" + timeRangeToLoad.from()
+                                + ".." + timeRangeToLoad.to() + ") because no fixes were found in that interval");
                         // got an empty track for the mark; try again without constraining the mapping interval
                         // by start/end of tracking to at least attempt to get fixes at all in case there were any
                         // within the device mapping interval specified
@@ -264,12 +265,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    // TEMP: kommt von RaceLogSensorFixTracker
     protected TimePoint getStartOfTracking() {
         return trackedRace.getStartOfTracking();
     }
 
-    // TEMP: kommt von RaceLogSensorFixTracker
     protected TimePoint getEndOfTracking() {
         return trackedRace.getEndOfTracking();
     }
@@ -277,10 +276,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     protected void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
         final TimeRangeImpl extendedTimeRange = new TimeRangeImpl(loadFixesFrom, loadFixesTo);
         deviceMappings.forEachMapping((mapping) -> {
-            TimeRange timeRangeToLoad = extendedTimeRange.intersection(mapping.getTimeRange());
-            if (timeRangeToLoad != null && !preemptiveStopRequested.get()) {
-                loadFixes(timeRangeToLoad, mapping);
-            }
+            loadFixes(extendedTimeRange.intersection(mapping.getTimeRange()), mapping);
         });
     }
 
@@ -292,7 +288,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * @param updateCallback
      *            the {@link Runnable} callback used to run the update
      */
-    // TODO Consider using a thread pool here, after merging bug3864 into master
     private void updateAsyncInternal(final Runnable updateCallback) {
         synchronized (FixLoaderAndTracker.this) {
             activeLoaders.incrementAndGet();
@@ -301,9 +296,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(new Runnable() {
             @Override
             public void run() {
+                trackedRace.lockForSerializationRead();
                 try {
                     if (!preemptiveStopRequested.get()) {
-                        trackedRace.lockForSerializationRead();
                         setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
                         synchronized (FixLoaderAndTracker.this) {
                             FixLoaderAndTracker.this.notifyAll();
@@ -311,15 +306,18 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         updateCallback.run();
                     }
                 } finally {
-                    synchronized (FixLoaderAndTracker.this) {
-                        int currentActiveLoaders = activeLoaders.decrementAndGet();
-                        FixLoaderAndTracker.this.notifyAll();
-                        if (currentActiveLoaders == 0) {
-                            setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
-                                    : TrackedRaceStatusEnum.TRACKING, 1.0);
+                    try {
+                        synchronized (FixLoaderAndTracker.this) {
+                            int currentActiveLoaders = activeLoaders.decrementAndGet();
+                            FixLoaderAndTracker.this.notifyAll();
+                            if (currentActiveLoaders == 0) {
+                                setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
+                                        : TrackedRaceStatusEnum.TRACKING, 1.0);
+                            }
                         }
+                    } finally {
+                        trackedRace.unlockAfterSerializationRead();
                     }
-                    trackedRace.unlockAfterSerializationRead();
                 }
             }
         });
@@ -350,7 +348,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         protected void mappingRemoved(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
             final DeviceIdentifier device = mapping.getDevice();
-            if(!hasMappingForDevice(device)) {
+            if (!hasMappingForDevice(device)) {
                 sensorFixStore.removeListener(listener, device);
             }
             // TODO if tracks are always associated to only one device mapping, we could remove tracks here
@@ -366,8 +364,22 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         protected void mappingChanged(DeviceMappingWithRegattaLogEvent<WithID> oldMapping,
                 DeviceMappingWithRegattaLogEvent<WithID> newMapping) {
-            // TODO can the new time range be bigger than the old one? In this case we would need to load the
-            // additional time range.
+            final TimeRange newTimeRange = newMapping.getTimeRange();
+            final TimeRange oldTimeRange = oldMapping.getTimeRange();
+            if(newTimeRange.endsAfter(oldTimeRange)) {
+                final TimePoint oldTo= oldTimeRange.to();
+                final TimePoint newFrom = newTimeRange.from();
+                final TimePoint from = oldTo.after(newFrom) ? oldTo : newFrom;
+                final TimeRange rangeToLoad = new TimeRangeImpl(from, newTimeRange.to());
+                loadFixes(rangeToLoad, newMapping);
+            }
+            if(newTimeRange.startsBefore(oldTimeRange)) {
+                final TimePoint oldFrom= oldTimeRange.from();
+                final TimePoint newTo = newTimeRange.to();
+                final TimePoint to = oldFrom.after(newTo) ? oldFrom : newTo;
+                final TimeRange rangeToLoad = new TimeRangeImpl(newTimeRange.from(), to);
+                loadFixes(rangeToLoad, newMapping);
+            }
         }
     }
 }

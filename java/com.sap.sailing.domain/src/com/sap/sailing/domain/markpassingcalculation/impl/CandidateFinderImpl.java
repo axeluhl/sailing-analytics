@@ -47,6 +47,7 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -383,24 +384,30 @@ public class CandidateFinderImpl implements CandidateFinder {
                     changedWaypoints.add(w);
                 }
             }
-            final Set<Callable<Void>> tasks = new HashSet<>();;
+            final Set<Callable<Void>> tasks = new HashSet<>();
+            final Thread executingThread = Thread.currentThread(); // most likely the MarkPassingCalculator.Listen thread
             for (Competitor c : race.getRace().getCompetitors()) {
                 tasks.add(()->{
-                    List<Candidate> badCans = new ArrayList<>();
-                    List<Candidate> newCans = new ArrayList<>();
-                    for (Waypoint w : changedWaypoints) {
-                        Map<List<GPSFix>, Candidate> xteCans = getXteCandidates(c, w);
-                        badCans.addAll(xteCans.values());
-                        xteCans.clear();
-                        Map<GPSFix, Candidate> distanceCans = getDistanceCandidates(c, w);
-                        badCans.addAll(distanceCans.values());
-                        distanceCans.clear();
+                    LockUtil.propagateLockSetFrom(executingThread); // "inherit" the course read lock from the "calling" thread into the thread pool executor thread
+                    try {
+                        List<Candidate> badCans = new ArrayList<>();
+                        List<Candidate> newCans = new ArrayList<>();
+                        for (Waypoint w : changedWaypoints) {
+                            Map<List<GPSFix>, Candidate> xteCans = getXteCandidates(c, w);
+                            badCans.addAll(xteCans.values());
+                            xteCans.clear();
+                            Map<GPSFix, Candidate> distanceCans = getDistanceCandidates(c, w);
+                            badCans.addAll(distanceCans.values());
+                            distanceCans.clear();
+                        }
+                        Set<GPSFix> allFixes = getAllFixes(c);
+                        newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
+                        newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
+                        result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
+                        return null;
+                    } finally {
+                        LockUtil.unpropagateLockSetFrom(executingThread); // "return" the course read lock from the thread pool executor thread to the "calling" thread
                     }
-                    Set<GPSFix> allFixes = getAllFixes(c);
-                    newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
-                    newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
-                    result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
-                    return null;
                 });
             }
             executor.invokeAll(tasks);
@@ -513,8 +520,8 @@ public class CandidateFinderImpl implements CandidateFinder {
     private Set<GPSFix> getAllFixes(Competitor c) {
         Set<GPSFix> fixes = new TreeSet<GPSFix>(comp);
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+        track.lockForRead();
         try {
-            track.lockForRead();
             for (GPSFix fix : track.getFixes(
                     timeRangeForValidCandidates.from(), /* fromInclusive */ true,
                     timeRangeForValidCandidates.to(),   /*  toInclusive  */ true)) {
@@ -542,8 +549,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                 affectedFixes.add(fix);
                 GPSFix fixBefore;
                 GPSFix fixAfter;
+                track.lockForRead();
                 try {
-                    track.lockForRead();
                     TimePoint timePoint = fix.getTimePoint();
                     fixBefore = track.getLastFixBefore(timePoint);
                     fixAfter = track.getFirstFixAfter(timePoint);
@@ -1206,19 +1213,24 @@ public class CandidateFinderImpl implements CandidateFinder {
      * @return an average of the estimated legs before and after <code>w</code>.
      */
     private Distance getAverageLengthOfAdjacentLegs(TimePoint t, Waypoint w) {
-        Course course = race.getRace().getCourse();
-        if (w == course.getFirstWaypoint()) {
-            return race.getTrackedLegStartingAt(w).getGreatCircleDistance(t);
+        final Distance result;
+        final Course course = race.getRace().getCourse();
+        if (course.getNumberOfWaypoints() < 2) {
+            result = null;
+        } else if (w == course.getFirstWaypoint()) {
+            result = race.getTrackedLegStartingAt(w).getGreatCircleDistance(t);
         } else if (w == course.getLastWaypoint()) {
-            return race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t);
+            result = race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t);
         } else {
             Distance before = race.getTrackedLegStartingAt(w).getGreatCircleDistance(t);
             Distance after = race.getTrackedLegFinishingAt(w).getGreatCircleDistance(t);
             if (after != null && before != null) {
-                return new MeterDistance(before.add(after).getMeters() / 2);
+                result = new MeterDistance(before.add(after).getMeters() / 2);
+            } else {
+                result = null;
             }
-            return null;
         }
+        return result;
     }
 
     /**
@@ -1414,8 +1426,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         final TimePoint newNonInferredStartTime = race.getStartOfRace(/* inferred */ false);
         final TimePoint newTimePointWhenToStartConsideringCandidates = getTimePointWhenToStartConsideringCandidates(newNonInferredStartTime);
         if (!Util.equalsWithNull(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.from())) {
+            final TimePoint oldTimePointWhenToStartConsideringCandidates = timeRangeForValidCandidates.from();
             timeRangeForValidCandidates = new TimeRangeImpl(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.to());
-            result = updateCandiatesAfterRaceTimeRangeChanged(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.from());
+            result = updateCandiatesAfterRaceTimeRangeChanged(newTimePointWhenToStartConsideringCandidates, oldTimePointWhenToStartConsideringCandidates);
         } else {
             result = Collections.emptyMap();
         }
@@ -1427,12 +1440,10 @@ public class CandidateFinderImpl implements CandidateFinder {
             TimePoint oldFinishedTime, TimePoint newFinishedTime) {
         final Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result;
         final TimePoint newTimePointWhenToFinishConsideringCandidates = getTimePointWhenToFinishConsideringCandidates(newFinishedTime);
-        final TimePoint oldTimePointWhenToFinishConsideringCandidates = timeRangeForValidCandidates.to();
         if (!Util.equalsWithNull(timeRangeForValidCandidates.to(), newTimePointWhenToFinishConsideringCandidates)) {
+            final TimePoint oldTimePointWhenToFinishConsideringCandidates = timeRangeForValidCandidates.to();
             timeRangeForValidCandidates = new TimeRangeImpl(timeRangeForValidCandidates.from(), newTimePointWhenToFinishConsideringCandidates);
-            result = updateCandiatesAfterRaceTimeRangeChanged(
-                    oldTimePointWhenToFinishConsideringCandidates,
-                    newTimePointWhenToFinishConsideringCandidates);
+            result = updateCandiatesAfterRaceTimeRangeChanged(oldTimePointWhenToFinishConsideringCandidates, newTimePointWhenToFinishConsideringCandidates);
         } else {
             result = Collections.emptyMap();
         }
