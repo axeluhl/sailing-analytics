@@ -1426,8 +1426,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         final TimePoint newNonInferredStartTime = race.getStartOfRace(/* inferred */ false);
         final TimePoint newTimePointWhenToStartConsideringCandidates = getTimePointWhenToStartConsideringCandidates(newNonInferredStartTime);
         if (!Util.equalsWithNull(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.from())) {
+            final TimePoint oldTimePointWhenToStartConsideringCandidates = timeRangeForValidCandidates.from();
             timeRangeForValidCandidates = new TimeRangeImpl(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.to());
-            result = updateCandiatesAfterRaceTimeRangeChanged(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.from());
+            result = updateCandiatesAfterRaceTimeRangeChanged(newTimePointWhenToStartConsideringCandidates, oldTimePointWhenToStartConsideringCandidates);
         } else {
             result = Collections.emptyMap();
         }
@@ -1439,12 +1440,10 @@ public class CandidateFinderImpl implements CandidateFinder {
             TimePoint oldFinishedTime, TimePoint newFinishedTime) {
         final Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result;
         final TimePoint newTimePointWhenToFinishConsideringCandidates = getTimePointWhenToFinishConsideringCandidates(newFinishedTime);
-        final TimePoint oldTimePointWhenToFinishConsideringCandidates = timeRangeForValidCandidates.to();
         if (!Util.equalsWithNull(timeRangeForValidCandidates.to(), newTimePointWhenToFinishConsideringCandidates)) {
+            final TimePoint oldTimePointWhenToFinishConsideringCandidates = timeRangeForValidCandidates.to();
             timeRangeForValidCandidates = new TimeRangeImpl(timeRangeForValidCandidates.from(), newTimePointWhenToFinishConsideringCandidates);
-            result = updateCandiatesAfterRaceTimeRangeChanged(
-                    oldTimePointWhenToFinishConsideringCandidates,
-                    newTimePointWhenToFinishConsideringCandidates);
+            result = updateCandiatesAfterRaceTimeRangeChanged(oldTimePointWhenToFinishConsideringCandidates, newTimePointWhenToFinishConsideringCandidates);
         } else {
             result = Collections.emptyMap();
         }
