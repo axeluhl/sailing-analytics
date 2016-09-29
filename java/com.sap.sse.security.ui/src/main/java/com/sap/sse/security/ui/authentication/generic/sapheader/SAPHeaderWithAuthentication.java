@@ -20,13 +20,13 @@ public class SAPHeaderWithAuthentication extends SAPHeader {
 
     private AuthenticationMenuView authenticationMenuView;
 
-    public SAPHeaderWithAuthentication(String applicationName, String headerTitle) {
-        this(applicationName);
+    public SAPHeaderWithAuthentication(String applicationName, String applicationBaseUrl, String headerTitle) {
+        this(applicationName, applicationBaseUrl);
         setHeaderTitle(headerTitle);
     }
 
-    public SAPHeaderWithAuthentication(String applicationName) {
-        super(applicationName);
+    public SAPHeaderWithAuthentication(String applicationName, String applicationBaseUrl) {
+        super(applicationName, applicationBaseUrl);
         res.css().ensureInjected();
         
         FlowPanel rightWithAuthentication = new FlowPanel();

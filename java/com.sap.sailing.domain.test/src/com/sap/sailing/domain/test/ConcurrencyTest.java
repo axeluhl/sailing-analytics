@@ -10,7 +10,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import org.junit.Before;
@@ -30,6 +29,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.util.ThreadPoolUtil;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
@@ -77,7 +77,7 @@ public class ConcurrencyTest extends OnlineTracTracBasedTest {
         logger.info("1 thread: "+duration+"ns");
         logger.info("number of approximation points: "+approximation1.size());
 
-        dp = new DouglasPeucker<Competitor, GPSFixMoving>(teamAquaTrack, Executors.newFixedThreadPool(numberOfCPUs));
+        dp = new DouglasPeucker<Competitor, GPSFixMoving>(teamAquaTrack, ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor());
         start = System.nanoTime();
         List<GPSFixMoving> approximation2 = dp.approximate(new MeterDistance(3), firstMarkPassing.getTimePoint(), lastMarkPassing.getTimePoint());
         duration = System.nanoTime()-start;
