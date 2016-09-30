@@ -36,7 +36,7 @@ public class MarkAdapter extends ResourceCursorAdapter {
             String accuracyString= "";
             //accuracy-values that are stored as -1 will be displayed as "n/a"
             if(accuracy == MarkPingInfo.NOT_SET_BY_USER){
-                accuracyString = context.getString(R.string.unknown);
+                accuracyString = context.getString(R.string.set);
             }
             else {
                 accuracyString = context.getString(R.string.set) + " " +
