@@ -37,11 +37,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.hardware.GeomagneticField;
 import android.location.Location;
-import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -68,8 +66,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     private int NOTIFICATION_ID = R.string.tracker_started;
 
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
-    private final static int UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE = 20000;
-    private final static float BATTERY_POWER_SAVE_THRESHOLD = 0.2f;
     private boolean initialLocation;
 
     private String checkinDigest;
@@ -163,7 +159,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
         prefs.setTrackerIsTracking(true);
         prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
-        prefs.setEnergySavingOverride(false);
     }
 
     private void stopTracking() {
@@ -236,7 +231,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         if (initialLocation) {
             storeInitialTrackingTimestamp();
         }
-        updateResendIntervalSetting();
         reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
                 location.getLatitude(), location.getLongitude(), location.getAltitude());
         final String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
@@ -346,48 +340,6 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
             prefs.setTrackingTimerStarted(System.currentTimeMillis());
         }
         initialLocation = false;
-    }
-
-    /**
-     * Update the interval in which message sending service should retry - possibly enable power saving
-     */
-    private void updateResendIntervalSetting() {
-        float batteryPct = getBatteryPercentage();
-        boolean batteryIsCharging = prefs.getBatteryIsCharging();
-        int updateInterval = prefs.getMessageSendingIntervalInMillis();
-        if (batteryPct < BATTERY_POWER_SAVE_THRESHOLD && !batteryIsCharging && !prefs.getEnergySavingOverride()) {
-            if (BuildConfig.DEBUG) {
-                ExLog.i(this, "POWER-LEVELS", "in power saving mode");
-            }
-            updateInterval = UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE;
-            prefs.setEnergySavingEnabledAutomatically(true);
-        } else {
-            if (BuildConfig.DEBUG) {
-                ExLog.i(this, "POWER-LEVELS", "in default power mode");
-            }
-        }
-        prefs.setMessageResendIntervalInMillis(updateInterval);
-    }
-
-    /**
-     * Get battery charging level
-     *
-     * @return battery charging level in interval [0,1]
-     */
-    private float getBatteryPercentage() {
-        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = this.registerReceiver(null, ifilter);
-
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-
-        float batteryPct = level / (float) scale;
-
-        if (BuildConfig.DEBUG) {
-            ExLog.i(this, TAG, "Battery: " + (batteryPct * 100) + "%");
-        }
-
-        return batteryPct;
     }
 
     @Override
