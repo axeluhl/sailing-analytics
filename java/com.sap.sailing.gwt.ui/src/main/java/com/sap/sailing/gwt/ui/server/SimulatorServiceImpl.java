@@ -10,10 +10,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -86,7 +83,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class SimulatorServiceImpl extends RemoteServiceServlet implements SimulatorService {
 
@@ -107,12 +104,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
     private SpeedWithBearing averageWind = null;
 
     public SimulatorServiceImpl() {
-        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
-        Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */THREAD_POOL_SIZE,
-        /* maximumPoolSize */THREAD_POOL_SIZE,
-        /* keepAliveTime */60, TimeUnit.SECONDS,
-        /* workQueue */new LinkedBlockingQueue<Runnable>(),
-        new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+        final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
         // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, null);        
     }

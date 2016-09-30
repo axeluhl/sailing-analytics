@@ -48,7 +48,6 @@ public class EndOfTrackingController extends AbstractRaceChangeListener {
             if (!Util.equalsWithNull(trackedRace.getEndOfTracking(), newEndOfTracking)) {
                 raceLog.add(new RaceLogEndOfTrackingEventImpl(newEndOfTracking,
                         raceLogEventAuthor, raceLog.getCurrentPassId()));
-                trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
             }
         }
     }

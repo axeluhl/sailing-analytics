@@ -262,6 +262,10 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         calculateDiff(oldMappings, newMappings);
     }
     
+    /**
+     * Calculates <em>and applies</em> the mapping changes by removing listeners no longer needed for the mappings removed,
+     * and by loading and adding the fixes for extended or added mappings.
+     */
     private void calculateDiff(Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
             Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings) {
         Set<ItemT> itemsToProcess = new HashSet<ItemT>(previousMappings.keySet());

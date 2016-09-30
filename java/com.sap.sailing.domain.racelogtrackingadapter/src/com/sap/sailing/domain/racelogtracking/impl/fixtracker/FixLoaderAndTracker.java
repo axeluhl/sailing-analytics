@@ -197,8 +197,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     try {
                         @SuppressWarnings({ "unchecked" })
                         DeviceMapping<Competitor> competitorMapping = (DeviceMapping<Competitor>) mapping;
-                        gpsFixStore.loadCompetitorTrack(track, competitorMapping, getStartOfTracking(),
-                                getEndOfTracking());
+                        gpsFixStore.loadCompetitorTrack(track, competitorMapping, timeRangeToLoad.from(),
+                                timeRangeToLoad.to());
                     } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                         logger.log(Level.WARNING, "Could not load competitor track " + mapping.getMappedTo());
                     }
@@ -211,12 +211,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 try {
                     @SuppressWarnings("unchecked")
                     DeviceMapping<Mark> markMapping = (DeviceMapping<Mark>) mapping;
-                    TimePoint from = getStartOfTracking();
-                    TimePoint to = getEndOfTracking();
-                    gpsFixStore.loadMarkTrack(track, markMapping, from, to);
+                    gpsFixStore.loadMarkTrack(track, markMapping, timeRangeToLoad.from(), timeRangeToLoad.to());
                     if (track.getFirstRawFix() == null) {
-                        logger.fine("Loading mark positions from outside of start/end of tracking interval (" + from
-                                + ".." + to + ") because no fixes were found in that interval");
+                        logger.fine("Loading mark positions from outside of start/end of tracking interval (" + timeRangeToLoad.from()
+                                + ".." + timeRangeToLoad.to() + ") because no fixes were found in that interval");
                         // got an empty track for the mark; try again without constraining the mapping interval
                         // by start/end of tracking to at least attempt to get fixes at all in case there were any
                         // within the device mapping interval specified
@@ -298,8 +296,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(new Runnable() {
             @Override
             public void run() {
+                trackedRace.lockForSerializationRead();
                 try {
-                    trackedRace.lockForSerializationRead();
                     if (!preemptiveStopRequested.get()) {
                         setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
                         synchronized (FixLoaderAndTracker.this) {
@@ -308,15 +306,18 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         updateCallback.run();
                     }
                 } finally {
-                    synchronized (FixLoaderAndTracker.this) {
-                        int currentActiveLoaders = activeLoaders.decrementAndGet();
-                        FixLoaderAndTracker.this.notifyAll();
-                        if (currentActiveLoaders == 0) {
-                            setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
-                                    : TrackedRaceStatusEnum.TRACKING, 1.0);
+                    try {
+                        synchronized (FixLoaderAndTracker.this) {
+                            int currentActiveLoaders = activeLoaders.decrementAndGet();
+                            FixLoaderAndTracker.this.notifyAll();
+                            if (currentActiveLoaders == 0) {
+                                setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
+                                        : TrackedRaceStatusEnum.TRACKING, 1.0);
+                            }
                         }
+                    } finally {
+                        trackedRace.unlockAfterSerializationRead();
                     }
-                    trackedRace.unlockAfterSerializationRead();
                 }
             }
         });
@@ -347,7 +348,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         protected void mappingRemoved(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
             final DeviceIdentifier device = mapping.getDevice();
-            if(!hasMappingForDevice(device)) {
+            if (!hasMappingForDevice(device)) {
                 sensorFixStore.removeListener(listener, device);
             }
             // TODO if tracks are always associated to only one device mapping, we could remove tracks here
