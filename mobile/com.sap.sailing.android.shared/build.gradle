@@ -49,6 +49,9 @@ dependencies {
     compile project(':java:com.sap.sse.common')
     compile project(':java:org.json.simple')
 
+    /* Google Play Services */
+    compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
+
     /* license dialog */
     compile("de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}")
 
