@@ -12,13 +12,18 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -558,26 +563,75 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     private void updateRegattaConfigDesignerModeToByMarks(final String regattaName) {
         final RegattaDTO regatta = getRegattaByName(regattaName);
         if (regatta != null) {
-            DeviceConfigurationDTO.RegattaConfigurationDTO configuration =  regatta.configuration;
+            DeviceConfigurationDTO.RegattaConfigurationDTO configuration = regatta.configuration;
             if (configuration == null) {
                 configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO();
                 configuration.defaultCourseDesignerMode = CourseDesignerMode.BY_MARKS;
-            } //TODO: Show message if regatta has configuration with design mode not equal "By marks"
-
-            final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName()); 
-            sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate, regatta.defaultCourseAreaUuid,
-                    configuration, regatta.useStartTimeInference, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to update regatta " + regattaName + ": "
-                                    + caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(Void result) {
-                        }
-            }));
+                updateRegattaConfiguration(regatta, configuration);
+            } else {
+                if (configuration.defaultCourseDesignerMode != CourseDesignerMode.BY_MARKS) {
+                    DialogBox dialogBox = createOverrideConfigurationDialog(regatta, configuration);
+                    dialogBox.center();
+                }
+            }
         }
+    }
+
+    private DialogBox createOverrideConfigurationDialog(final RegattaDTO regatta,
+            final DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
+        final DialogBox dialogBox = new DialogBox(true, true);
+        dialogBox.setText(stringMessages.allRacesHaveBeenDenoted());
+
+        VerticalPanel contentPanel = new VerticalPanel();
+        contentPanel.add(new HTML(new SafeHtmlBuilder()
+                .appendEscapedLines(stringMessages.warningOverrideRegattaConfigurationCourseDesignerToByMarks())
+                .toSafeHtml()));
+
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setSpacing(5);
+        contentPanel.add(buttonPanel);
+
+        Button yesButton = new Button(stringMessages.yes());
+        yesButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                configuration.defaultCourseDesignerMode = CourseDesignerMode.BY_MARKS;
+                updateRegattaConfiguration(regatta, configuration);
+                dialogBox.hide();
+            }
+        });
+        buttonPanel.add(yesButton);
+
+        Button noButton = new Button(stringMessages.no(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                dialogBox.hide();
+            }
+        });
+        buttonPanel.add(noButton);
+
+        dialogBox.setWidget(contentPanel);
+        return dialogBox;
+    }
+
+    private void updateRegattaConfiguration(final RegattaDTO regatta,
+            DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
+        final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
+        sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
+                regatta.defaultCourseAreaUuid, configuration, regatta.useStartTimeInference,
+                regatta.controlTrackingFromStartAndFinishTimes,
+                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(
+                                "Error trying to update regatta " + regatta.getName() + ": " + caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        Window.alert(stringMessages.notificationRegattaConfigurationUpdatedUsingByMarks());
+                    }
+                }));
     }
 
     private void denoteForRaceLogTracking(final RaceColumnDTO raceColumn, final FleetDTO fleet) {
@@ -722,7 +776,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             public void ok(Triple<EventDTO, String, String> result) {
                 sailingService.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderboardName, result.getC(),
                         null,
-                        stringMessages.playStoreBuoypositioningApp(),
+                        stringMessages.playStoreBuoyPingerApp(),
                         getLocaleInfo(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {

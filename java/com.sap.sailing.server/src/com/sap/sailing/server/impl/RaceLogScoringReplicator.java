@@ -123,8 +123,6 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
      * last {@link RaceLogFinishPositioningListChangedEvent} event with {@link CompetitorResults} is looked up and its
      * results are used.
      * 
-     * TODO bug 3420: also extract the optional score / finishing time / comment and make good use of it
-     * 
      * @param timePoint
      *            the TimePoint at which the race committee confirmed their last rank list entered in the app.
      */
@@ -148,7 +146,7 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                 int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
                 correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
                         competitor, rankByRaceCommittee, positionedCompetitor.getScore());
-                setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor, competitor);
+                setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor.getMaxPointsReason(), competitor);
             }
             // Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to
             // be triggered, even though no score correction may have been performed
@@ -157,10 +155,10 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     private boolean setMaxPointsReasonInLeaderboardIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn,
-            TimePoint timePoint, CompetitorResult positionedCompetitor, Competitor competitor) {
+            TimePoint timePoint, MaxPointsReason maxPointsReason, Competitor competitor) {
         boolean scoreHasBeenCorrected = false;
         MaxPointsReason oldMaxPointsReason = leaderboard.getMaxPointsReason(competitor, raceColumn, timePoint);
-        MaxPointsReason maxPointsReasonByRaceCommittee = positionedCompetitor.getMaxPointsReason();
+        MaxPointsReason maxPointsReasonByRaceCommittee = maxPointsReason;
         if (!Util.equalsWithNull(maxPointsReasonByRaceCommittee, oldMaxPointsReason)) {
             applyMaxPointsReasonOperation(leaderboard, raceColumn, competitor, maxPointsReasonByRaceCommittee, timePoint);
             scoreHasBeenCorrected = true;

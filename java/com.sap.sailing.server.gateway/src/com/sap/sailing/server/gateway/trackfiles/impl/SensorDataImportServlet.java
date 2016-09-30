@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.trackfiles.impl;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,13 +31,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**
- * Import servlet for sensor data files. Importers are located through the OSGi service registry and mathed against the
- * name provided by the upload formular.
+ * Import servlet for sensor data files. Importers are located through the OSGi service registry and matched against the
+ * name provided by the upload form.
  */
 public class SensorDataImportServlet extends AbstractFileUploadServlet {
     private static final long serialVersionUID = 1120226743039934620L;
     private static final Logger logger = Logger.getLogger(SensorDataImportServlet.class.getName());
-    private static final int READ_BUFFER_SIZE = 1024 * 1024 * 1024;
 
     public void storeFixes(Iterable<DoubleVectorFix> fixes, DeviceIdentifier deviceIdentifier) {
         try {
@@ -54,21 +52,16 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
      * 
      * @throws IOException
      */
-    private Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, InputStream>> files)
+    private Iterable<TrackFileImportDeviceIdentifier> importFiles(Iterable<Pair<String, FileItem>> files)
             throws IOException {
         final Set<TrackFileImportDeviceIdentifier> deviceIds = new HashSet<>();
         final Map<DeviceIdentifier, TimePoint> from = new HashMap<>();
         final Map<DeviceIdentifier, TimePoint> to = new HashMap<>();
         final Collection<DoubleVectorFixImporter> availableImporters = new LinkedHashSet<>();
         availableImporters.addAll(getOSGiRegisteredImporters());
-        for (Pair<String, InputStream> file : files) {
+        for (Pair<String, FileItem> file : files) {
             final String requestedImporterName = file.getA();
-            BufferedInputStream in = new BufferedInputStream(file.getB()) {
-                @Override
-                public void close() throws IOException {
-                    // prevent importers from closing this stream
-                }
-            };
+            final FileItem fi = file.getB();
             DoubleVectorFixImporter importerToUse = null;
             for (DoubleVectorFixImporter candidate : availableImporters) {
                 if (candidate.getType().equals(requestedImporterName)) {
@@ -79,40 +72,35 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
             if (importerToUse == null) {
                 throw new RuntimeException("Sensor importer not found");
             }
-            in.mark(READ_BUFFER_SIZE);
-
-            try {
-                in.reset();
-            } catch (IOException e1) {
-                logger.log(Level.SEVERE, "Could not reset stream", e1);
-            }
             logger.log(Level.INFO,
                     "Going to import sensor data file  with importer " + importerToUse.getClass().getSimpleName());
-            try {
-                importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
-                    @Override
-                    public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
-                        deviceIds.add(device);
-                        storeFixes(fixes, device);
-                        TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
-                        TimePoint latestFixSoFarFromCurrentDevice = to.get(device);
-                        for (DoubleVectorFix fix : fixes) {
-                            if (earliestFixSoFarFromCurrentDevice == null
-                                    || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
-                                earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                from.put(device, earliestFixSoFarFromCurrentDevice);
-                            }
-                            if (latestFixSoFarFromCurrentDevice == null
-                                    || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
-                                latestFixSoFarFromCurrentDevice = fix.getTimePoint();
-                                to.put(device, latestFixSoFarFromCurrentDevice);
+            try (BufferedInputStream in = new BufferedInputStream(fi.getInputStream())) {
+                try {
+                    importerToUse.importFixes(in, new DoubleVectorFixImporter.Callback() {
+                        @Override
+                        public void addFixes(Iterable<DoubleVectorFix> fixes, TrackFileImportDeviceIdentifier device) {
+                            deviceIds.add(device);
+                            storeFixes(fixes, device);
+                            TimePoint earliestFixSoFarFromCurrentDevice = from.get(device);
+                            TimePoint latestFixSoFarFromCurrentDevice = to.get(device);
+                            for (DoubleVectorFix fix : fixes) {
+                                if (earliestFixSoFarFromCurrentDevice == null
+                                        || earliestFixSoFarFromCurrentDevice.after(fix.getTimePoint())) {
+                                    earliestFixSoFarFromCurrentDevice = fix.getTimePoint();
+                                    from.put(device, earliestFixSoFarFromCurrentDevice);
+                                }
+                                if (latestFixSoFarFromCurrentDevice == null
+                                        || latestFixSoFarFromCurrentDevice.before(fix.getTimePoint())) {
+                                    latestFixSoFarFromCurrentDevice = fix.getTimePoint();
+                                    to.put(device, latestFixSoFarFromCurrentDevice);
+                                }
                             }
                         }
-                    }
-                }, requestedImporterName);
-                logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
-            } catch (FormatNotSupportedException e) {
-                logger.log(Level.INFO, "Failed to import file " + requestedImporterName);
+                    }, fi.getName(), requestedImporterName);
+                    logger.log(Level.INFO, "Successfully imported file " + requestedImporterName);
+                } catch (FormatNotSupportedException e) {
+                    logger.log(Level.INFO, "Failed to import file " + requestedImporterName);
+                }
             }
         }
         return deviceIds;
@@ -124,7 +112,6 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        List<Pair<String, InputStream>> files = new ArrayList<>();
         String importerName = null;
         searchForPrefferedImporter: for (FileItem fi : fileItems) {
             if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
@@ -133,11 +120,12 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
             }
         }
         if (importerName == null) {
-            importerName = "BRAVO";
+            throw new RuntimeException("Missing preferred importer");
         }
+        List<Pair<String, FileItem>> files = new ArrayList<>();
         for (FileItem fi : fileItems) {
             if ("file".equalsIgnoreCase(fi.getFieldName())) {
-                files.add(new Pair<>(importerName, fi.getInputStream()));
+                files.add(new Pair<>(importerName, fi));
             }
         }
         final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(files);

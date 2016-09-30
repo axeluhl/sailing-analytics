@@ -62,8 +62,8 @@ public class TrackingService extends Service implements  android.location.Locati
 
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
     public final static String GPS_DISABLED_MESSAGE = "gpsDisabled";
-    private final static int UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE = 30000;
     private float minLocationUpdateDistanceInMeters = 0f;
+    private final static int UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE = 20000;
     private final static float BATTERY_POWER_SAVE_THRESHOLD = 0.2f;
     private boolean initialLocation;
 
@@ -163,6 +163,7 @@ public class TrackingService extends Service implements  android.location.Locati
 
         prefs.setTrackerIsTracking(true);
         prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
+        prefs.setEnergySavingOverride(false);
     }
 
     private void stopTracking() {
@@ -315,17 +316,18 @@ public class TrackingService extends Service implements  android.location.Locati
     }
 
     /**
-     * Update whether message sending service should retry every 3 seconds or every 30.
+     * Update the interval in which message sending service should retry - possibly enable power saving
      */
     private void updateResendIntervalSetting() {
         float batteryPct = getBatteryPercentage();
         boolean batteryIsCharging = prefs.getBatteryIsCharging();
-        int updateInterval = UPDATE_INTERVAL_IN_MILLIS_DEFAULT;
-        if (prefs.getEnergySavingEnabledByUser() || (batteryPct < BATTERY_POWER_SAVE_THRESHOLD && !batteryIsCharging)) {
+        int updateInterval = prefs.getMessageSendingIntervalInMillis();
+        if (batteryPct < BATTERY_POWER_SAVE_THRESHOLD && !batteryIsCharging && !prefs.getEnergySavingOverride()) {
             if (BuildConfig.DEBUG) {
                 ExLog.i(this, "POWER-LEVELS", "in power saving mode");
             }
             updateInterval = UPDATE_INTERVAL_IN_MILLIS_POWERSAVE_MODE;
+            prefs.setEnergySavingEnabledAutomatically(true);
         } else {
             if (BuildConfig.DEBUG) {
                 ExLog.i(this, "POWER-LEVELS", "in default power mode");

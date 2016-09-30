@@ -206,8 +206,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 return regatta.rankingMetricType != null ? RankingMetricTypeFormatter.format(regatta.rankingMetricType, stringMessages) : "";
             }
         };
-        regattaBoatClassColumn.setSortable(true);
-        columnSortHandler.setComparator(regattaBoatClassColumn, new Comparator<RegattaDTO>() {
+        rankingMetricColumn.setSortable(true);
+        columnSortHandler.setComparator(rankingMetricColumn, new Comparator<RegattaDTO>() {
             @Override
             public int compare(RegattaDTO r1, RegattaDTO r2) {
                 return new NaturalComparator(false).compare(r1.rankingMetricType.name(), r2.rankingMetricType.name());
@@ -290,7 +290,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         final RegattaIdentifier regattaName = new RegattaName(editedRegatta.getName());
 
         sailingService.updateRegatta(regattaName, editedRegatta.startDate, editedRegatta.endDate, editedRegatta.defaultCourseAreaUuid,
-                editedRegatta.configuration, editedRegatta.useStartTimeInference, new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                editedRegatta.configuration, editedRegatta.useStartTimeInference, editedRegatta.controlTrackingFromStartAndFinishTimes,
+                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update regatta " + editedRegatta.getName() + ": "

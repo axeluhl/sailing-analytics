@@ -195,6 +195,10 @@ public interface TrackedLegOfCompetitor extends Serializable {
      */
     TimePoint getStartTime();
     
+    /**
+     * @return <code>null</code> if the competitor hasn't finished this leg yet; the time point when the competitor passed
+     * the end waypoint of this leg otherwise
+     */
     TimePoint getFinishTime();
 
     /**

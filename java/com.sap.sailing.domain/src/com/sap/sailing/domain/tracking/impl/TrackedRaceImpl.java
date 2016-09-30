@@ -158,14 +158,13 @@ import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
 import difflib.DiffUtils;
 import difflib.Patch;
 import difflib.PatchFailedException;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
-    public static final int TRACKING_BUFFER_IN_MINUTES = 5;
-
     private static final long serialVersionUID = -4825546964220003507L;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -750,53 +749,62 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     /**
+     * Monitor object to synchronize access to the {@link #updateStartAndEndOfTracking(boolean)} method. See bug 3922.
+     */
+    private final Serializable updateStartAndEndOfTrackingMonitor = "updateStartAndEndOfTrackingMonitor";
+    
+    /**
      * Updates the start and end of tracking in the following precedence order:
      * 
      * <ol>
      * <li>start/end of tracking in Racelog</li>
      * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
-     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * <li>start/end of race in Racelog -/+ {@link #START_TRACKING_THIS_MUCH_BEFORE_RACE_START}/{@link #STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH}</li>
      * </ol>
      */
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
-        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
-        TimePoint oldStartOfTracking = getStartOfTracking();
-        TimePoint oldEndOfTracking = getEndOfTracking();
-        boolean startOfTrackingFound = false;
-        boolean endOfTrackingFound = false;
-        // check race log
-        if (trackingTimesFromRaceLog != null){
-            if (trackingTimesFromRaceLog.getA() != null) {
-                startOfTracking = trackingTimesFromRaceLog.getA().getTimePoint();
-                startOfTrackingFound = true;
-            }
-            if (trackingTimesFromRaceLog.getB() != null) {
-                endOfTracking = trackingTimesFromRaceLog.getB().getTimePoint();
-                endOfTrackingFound = true;
-            }
-        }
-        // check "received" variants coming from a connector directly
-        if (!startOfTrackingFound || !endOfTrackingFound) {
-            if (startOfTrackingReceived != null && !startOfTrackingFound) {
-                startOfTrackingFound = true;
-                startOfTracking = startOfTrackingReceived;
-            }
-            if (endOfTrackingReceived != null && !endOfTrackingFound) {
-                endOfTrackingFound = true;
-                endOfTracking = endOfTrackingReceived;
-            }
-        }
-        // check for start/finished times in race log and add a few minutes on the ends
-        if (!startOfTrackingFound || !endOfTrackingFound) {
-            if (!startOfTrackingFound && getStartOfRace() != null) {
-                startOfTracking = getStartOfRace().minus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
+        final TimePoint oldStartOfTracking;
+        final TimePoint oldEndOfTracking;
+        synchronized (updateStartAndEndOfTrackingMonitor) {
+            final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
+            oldStartOfTracking = getStartOfTracking();
+            oldEndOfTracking = getEndOfTracking();
+            boolean startOfTrackingFound = false;
+            boolean endOfTrackingFound = false;
+            // check race log
+            if (trackingTimesFromRaceLog != null){
+                if (trackingTimesFromRaceLog.getA() != null) {
+                    startOfTracking = trackingTimesFromRaceLog.getA().getTimePoint();
                     startOfTrackingFound = true;
                 }
-            if (!endOfTrackingFound && getFinishedTime() != null) {
-                endOfTracking = getFinishedTime().plus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
+                if (trackingTimesFromRaceLog.getB() != null) {
+                    endOfTracking = trackingTimesFromRaceLog.getB().getTimePoint();
                     endOfTrackingFound = true;
                 }
             }
+            // check "received" variants coming from a connector directly
+            if (!startOfTrackingFound || !endOfTrackingFound) {
+                if (startOfTrackingReceived != null && !startOfTrackingFound) {
+                    startOfTrackingFound = true;
+                    startOfTracking = startOfTrackingReceived;
+                }
+                if (endOfTrackingReceived != null && !endOfTrackingFound) {
+                    endOfTrackingFound = true;
+                    endOfTracking = endOfTrackingReceived;
+                }
+            }
+            // check for start/finished times in race log and add a few minutes on the ends
+            if (!startOfTrackingFound || !endOfTrackingFound) {
+                if (!startOfTrackingFound && getStartOfRace() != null) {
+                    startOfTracking = getStartOfRace().minus(START_TRACKING_THIS_MUCH_BEFORE_RACE_START);
+                    startOfTrackingFound = true;
+                }
+                if (!endOfTrackingFound && getFinishedTime() != null) {
+                    endOfTracking = getFinishedTime().plus(STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
+                    endOfTrackingFound = true;
+                }
+            }
+        }
         startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
         endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
     }
@@ -1868,7 +1876,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             synchronized (directionFromStartToNextMarkCache) {
                 future = directionFromStartToNextMarkCache.get(at);
                 if (future == null) {
-                    newFuture = new FutureTask<Wind>(new Callable<Wind>() {
+                    newFuture = new FutureTaskWithTracingGet<Wind>("getDirectionFromStartToNextMark for "+this, new Callable<Wind>() {
                         @Override
                         public Wind call() {
                             Wind result;
@@ -1973,6 +1981,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void clearAllCachesExceptManeuvers() {
         synchronized (cacheInvalidationTimerLock) {
+            // TODO bug 3864: schedule a task with a background thread executor instead of affording a new Timer for each race
             if (cacheInvalidationTimer == null) {
                 cacheInvalidationTimer = new Timer("Cache invalidation timer for TrackedRaceImpl "
                         + getRace().getName(), /* isDaemon */ true);
