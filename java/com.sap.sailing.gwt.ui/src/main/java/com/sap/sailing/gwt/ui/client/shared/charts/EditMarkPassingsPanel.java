@@ -285,7 +285,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         enableButtons();
     }
     
-    /*
+    /**
      * If we try to set a time as mark passing of a waypoint then first we should make sure the times of previous mark
      * is before the time of current setting mark and time of the following mark is after the setting time
      */
