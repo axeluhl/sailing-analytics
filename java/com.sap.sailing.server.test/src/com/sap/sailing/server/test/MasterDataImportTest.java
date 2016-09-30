@@ -47,7 +47,9 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConf
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
@@ -94,7 +96,9 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -108,6 +112,7 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -126,6 +131,7 @@ import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.testsupport.RacingEventServiceImplMock;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -289,6 +295,18 @@ public class MasterDataImportTest {
         GPSFix gpsFix = new GPSFixMovingImpl(new DegreePosition(54.333, 10.133), logTimePoint2,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90)));
         sourceService.getSensorFixStore().storeFix(deviceIdentifier, gpsFix);
+        
+        // Add sensor fix
+        DeviceIdentifier deviceIdentifier2 = new SmartphoneImeiIdentifier("b");
+        RegattaLogDeviceMappingEvent<Competitor> bravoMappingEvent = new RegattaLogDeviceCompetitorBravoMappingEventImpl(
+                logTimePoint4, author, competitor, deviceIdentifier2, logTimePoint,
+                logTimePoint3);
+        regatta.getRegattaLog().add(bravoMappingEvent);
+        double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.columnCount];
+        double rideHeightValue = 1337.0;
+        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeightValue;
+        DoubleVectorFixImpl doubleVectorFix = new DoubleVectorFixImpl(logTimePoint2, fixData);
+        sourceService.getSensorFixStore().storeFix(deviceIdentifier2, doubleVectorFix);
 
         // Set score correction
         double scoreCorrection = 12.0;
@@ -427,7 +445,13 @@ public class MasterDataImportTest {
         Assert.assertEquals(competitor.getId(), registerEventOnTarget.getCompetitor().getId());
 
         // Check for import of racelogtracking fix
-        Assert.assertTrue(destService.getSensorFixStore().getNumberOfFixes(deviceIdentifier) == 1);
+        SensorFixStore sensorFixStore = destService.getSensorFixStore();
+        Assert.assertEquals(1, sensorFixStore.getNumberOfFixes(deviceIdentifier));
+        verifyFix(gpsFix, sensorFixStore, logTimePoint, logTimePoint3, deviceIdentifier);
+        
+        // Check for import of sensor fix
+        Assert.assertEquals(1, sensorFixStore.getNumberOfFixes(deviceIdentifier2));
+        verifyFix(doubleVectorFix, sensorFixStore, logTimePoint, logTimePoint3, deviceIdentifier2);
 
         // Check for persisting of race log events:
         RacingEventService dest2 = new RacingEventServiceImplMock(){};
@@ -445,6 +469,17 @@ public class MasterDataImportTest {
                 .getRegattaLog().getFirstFixAtOrAfter(regattaLogTimepoint);
         Assert.assertNotNull(registerEventOnTarget2);
         Assert.assertEquals(registerEvent.getId(), registerEventOnTarget2.getId());
+    }
+    
+    private void verifyFix(Timed expectedFix, SensorFixStore store, TimePoint start, TimePoint end, DeviceIdentifier deviceIdentifier) {
+        List<Timed> fixes = new ArrayList<>(1);
+        try {
+            store.loadFixes(fixes::add, deviceIdentifier, start, end, true);
+            assertEquals(1, fixes.size());
+            assertEquals(expectedFix, fixes.get(0));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test

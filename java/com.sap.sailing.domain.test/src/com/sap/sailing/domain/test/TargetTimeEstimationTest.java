@@ -37,8 +37,10 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
+import com.sap.sailing.domain.tracking.impl.MarkPositionAtTimePointCacheImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -87,9 +89,8 @@ public class TargetTimeEstimationTest {
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
         
         //Actual test of functionality
-        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint);
+        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint, new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint));
         assertEquals(75494, duration.asMillis(), 100);
-        
     }
     
     @Test
@@ -123,9 +124,10 @@ public class TargetTimeEstimationTest {
         when(leg.getFrom()).thenReturn(from);
         when(leg.getTo()).thenReturn(to);
         
-        when(trackedRace.getApproximatePosition(from, timepoint)).thenReturn(startOfLeg);
-        when(trackedRace.getApproximatePosition(to, timepoint)).thenReturn(endOfLeg);
-        
+        when(trackedRace.getApproximatePosition(eq(from), eq(timepoint))).thenReturn(startOfLeg);
+        when(trackedRace.getApproximatePosition(eq(to), eq(timepoint))).thenReturn(endOfLeg);
+        when(trackedRace.getApproximatePosition(eq(from), eq(timepoint), any(MarkPositionAtTimePointCache.class))).thenReturn(startOfLeg);
+        when(trackedRace.getApproximatePosition(eq(to), eq(timepoint), any(MarkPositionAtTimePointCache.class))).thenReturn(endOfLeg);
 
         SpeedWithBearing speedWithBearingPort = new KnotSpeedWithBearingImpl(6, new DegreeBearingImpl(-45));
         SpeedWithBearingWithConfidence<Void> boatSpeedWithBearingWithConfidencePort = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearingPort, 1, null);
@@ -139,9 +141,8 @@ public class TargetTimeEstimationTest {
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
         
         //Actual test of functionality
-        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint);
+        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint, new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint));
         assertEquals(213513, duration.asMillis(), 100);
-        
     }
     
     @Test
@@ -175,9 +176,10 @@ public class TargetTimeEstimationTest {
         when(leg.getFrom()).thenReturn(from);
         when(leg.getTo()).thenReturn(to);
         
-        when(trackedRace.getApproximatePosition(from, timepoint)).thenReturn(startOfLeg);
-        when(trackedRace.getApproximatePosition(to, timepoint)).thenReturn(endOfLeg);
-        
+        when(trackedRace.getApproximatePosition(eq(from), eq(timepoint))).thenReturn(startOfLeg);
+        when(trackedRace.getApproximatePosition(eq(to), eq(timepoint))).thenReturn(endOfLeg);
+        when(trackedRace.getApproximatePosition(eq(from), eq(timepoint), any(MarkPositionAtTimePointCache.class))).thenReturn(startOfLeg);
+        when(trackedRace.getApproximatePosition(eq(to), eq(timepoint), any(MarkPositionAtTimePointCache.class))).thenReturn(endOfLeg);
 
         SpeedWithBearing speedWithBearingPort = new KnotSpeedWithBearingImpl(11, new DegreeBearingImpl(150));
         SpeedWithBearingWithConfidence<Void> boatSpeedWithBearingWithConfidencePort = new SpeedWithBearingWithConfidenceImpl<Void>(speedWithBearingPort, 1, null);
@@ -191,7 +193,7 @@ public class TargetTimeEstimationTest {
         TrackedLeg trackedLeg = new TrackedLegImpl(trackedRace, leg, competitors);
         
         //Actual test of functionality
-        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint);
+        Duration duration = trackedLeg.getEstimatedTimeToComplete(mockedPolars, timepoint, new MarkPositionAtTimePointCacheImpl(trackedRace, timepoint));
         assertEquals(95090, duration.asMillis(), 100);
         
     }
