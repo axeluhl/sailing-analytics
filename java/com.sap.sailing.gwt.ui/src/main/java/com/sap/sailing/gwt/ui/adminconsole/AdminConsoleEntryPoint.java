@@ -16,6 +16,7 @@ import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Roles;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
@@ -45,7 +46,6 @@ import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorat
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
-import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 import com.sap.sse.security.ui.client.component.UserManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -66,8 +66,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
      
     private void createUI() {
         HeaderPanel headerPanel = new HeaderPanel();
-        SAPHeaderWithAuthentication header = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(),
-                getStringMessages().administration());
+        SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().administration());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {

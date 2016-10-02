@@ -127,6 +127,7 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -158,6 +159,7 @@ import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
+import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -750,7 +752,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Monitor object to synchronize access to the {@link #updateStartAndEndOfTracking(boolean)} method. See bug 3922.
      */
-    private final Serializable updateStartAndEndOfTrackingMonitor = "";
+    private final Serializable updateStartAndEndOfTrackingMonitor = "updateStartAndEndOfTrackingMonitor";
     
     /**
      * Updates the start and end of tracking in the following precedence order:
@@ -1670,10 +1672,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
+    public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint, MarkPositionAtTimePointCache markPositionCache) {
+        assert timePoint.equals(markPositionCache.getTimePoint());
+        assert this == markPositionCache.getTrackedRace();
         Position result = null;
         for (Mark mark : waypoint.getMarks()) {
-            Position nextPos = getOrCreateTrack(mark).getEstimatedPosition(timePoint, /* extrapolate */false);
+            Position nextPos = markPositionCache.getEstimatedPosition(mark);
             if (result == null) {
                 result = nextPos;
             } else if (nextPos != null) {
@@ -1875,7 +1879,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             synchronized (directionFromStartToNextMarkCache) {
                 future = directionFromStartToNextMarkCache.get(at);
                 if (future == null) {
-                    newFuture = new FutureTask<Wind>(new Callable<Wind>() {
+                    newFuture = new FutureTaskWithTracingGet<Wind>("getDirectionFromStartToNextMark for "+this, new Callable<Wind>() {
                         @Override
                         public Wind call() {
                             Wind result;
@@ -3892,8 +3896,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
         }
         Duration durationOfAllLegs = Duration.NULL;
+        final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, timepoint);
         for (TrackedLeg leg : trackedLegs.values()) {
-            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint);
+            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint, markPositionCache);
             durationOfAllLegs = durationOfAllLegs.plus(durationOfLeg);
         }
         return durationOfAllLegs;

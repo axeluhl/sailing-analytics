@@ -52,7 +52,7 @@ public interface ThreadPoolUtil {
      * 
      * The same configuration as for {@link #getDefaultBackgroundTaskThreadPoolExecutor()} is used.
      */
-    ScheduledExecutorService createBackgroundTaskThreadPoolExecutor();
+    ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(String name);
     
     /**
      * In case an application module really requires its own thread pool instead of
@@ -74,5 +74,7 @@ public interface ThreadPoolUtil {
      * 
      * The same configuration as for {@link #getDefaultForegroundTaskThreadPoolExecutor()} is used.
      */
-    ScheduledExecutorService createForegroundTaskThreadPoolExecutor();
+    ScheduledExecutorService createForegroundTaskThreadPoolExecutor(String name);
+
+    ScheduledExecutorService createForegroundTaskThreadPoolExecutor(int size, String name);
 }
