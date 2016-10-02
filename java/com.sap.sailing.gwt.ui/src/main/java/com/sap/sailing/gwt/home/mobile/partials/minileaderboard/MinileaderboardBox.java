@@ -68,8 +68,10 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     public void setData(final GetMiniLeaderboardDTO data) {
         String headerText = isOverall ? I18N.overallStandings() : I18N.results();
         int itemCount = data.getItems().size();
+        boolean showLeaderboardButton = false;
         if (itemCount > 0 && data.getTotalCompetitorCount() > itemCount) {
             headerText += " (" + StringMessages.INSTANCE.topN(itemCount) + ")";
+            showLeaderboardButton = true;
         }
         headerUi.setSectionTitle(headerText);
         
@@ -90,7 +92,9 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         for (MiniLeaderboardItemDTO item : data.getItems()) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item, showRaceCounts));
         }
-        itemContainerUi.addContent(showLeaderboardButtonUi);
+        if(showLeaderboardButton) {
+            itemContainerUi.addContent(showLeaderboardButtonUi);
+        }
         if (showRaceCounts) {
             itemContainerUi.addContent(new MinileaderboardBoxItemLegend());
         }
