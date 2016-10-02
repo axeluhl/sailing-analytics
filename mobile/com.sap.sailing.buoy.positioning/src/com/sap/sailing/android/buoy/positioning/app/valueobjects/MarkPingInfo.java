@@ -9,7 +9,7 @@ public class MarkPingInfo {
     private final GPSFix gpsFix;
     private final double accuracy;
     
-    public static final int NOT_SET_BY_USER = -1;       // this is used for accuracies that are displayed as "n/a"
+    public static final int NOT_AVAILABLE_THROUGH_SERVER = -1;       // this is used for unknown accuracies simply displayed as "set"
 
     public MarkPingInfo(Serializable markId, GPSFix gpsFix, double accuracy) {
         super();

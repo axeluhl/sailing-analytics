@@ -17,7 +17,7 @@ public class FlatGPSFixJsonSerializer implements JsonSerializer<GPSFix> {
         result.put(FIELD_LON_DEG, object.getPosition().getLngDeg());
         result.put(FIELD_LAT_DEG, object.getPosition().getLatDeg());
         result.put(FIELD_TIME_MILLIS, object.getTimePoint().asMillis());
-        result.put(FIELD_ACCURACY, 1);
+        result.put(FIELD_ACCURACY, -1);
         return result;
     }
 }
