@@ -187,6 +187,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         leaderboardTable.setWidth("100%");
         leaderboardSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {
+            	if (trackedRacesListComposite != null) {
+            		trackedRacesListComposite.setRegattaFilterValue(getSelectedLeaderboardName());
+            	}
                 leaderboardSelectionChanged();
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
             }

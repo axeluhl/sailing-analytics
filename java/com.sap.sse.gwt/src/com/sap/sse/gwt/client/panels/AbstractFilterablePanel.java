@@ -55,7 +55,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *            This panel keeps a copy, so modifications to the <code>all</code> object do not reflect in the table
      *            contents. Use {@link #updateAll(Iterable)} instead to update the sequence of available objects.
      */
-    public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
+    public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered, boolean drawTextBox) {
         setSpacing(5);
         this.all = new ListDataProvider<>();
         this.display = display;
@@ -64,13 +64,13 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this.textBox.ensureDebugId("FilterTextBox");
         this.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         setAll(all);
-        add(getTextBox());
-        getTextBox().addKeyUpHandler(new KeyUpHandler() {
-            @Override
-            public void onKeyUp(KeyUpEvent event) {
-                filter();
-            }
-        });
+        if (drawTextBox) {
+            addDefaultTextBox();
+        }
+    }
+    
+    public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
+        this(all, display, filtered, true);
     }
     
     private void setAll(Iterable<T> all) {
@@ -164,6 +164,16 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         if (display != null) {
             ColumnSortEvent.fire(display, display.getColumnSortList());
         }
+    }
+    
+    public void addDefaultTextBox() {
+        add(getTextBox());
+        getTextBox().addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
+                filter();
+            }
+        });
     }
 
     public TextBox getTextBox() {

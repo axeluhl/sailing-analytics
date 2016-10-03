@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -15,8 +16,6 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -30,7 +29,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -49,6 +47,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -59,8 +58,8 @@ import com.sap.sse.gwt.client.panels.CustomizableFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public abstract class AbstractTrackedRacesListComposite extends SimplePanel implements Component<TrackedRacesSettings>,
-        RegattasDisplayer {
+public abstract class AbstractTrackedRacesListComposite extends SimplePanel
+        implements Component<TrackedRacesSettings>, RegattasDisplayer {
 
     protected final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
 
@@ -112,10 +111,16 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         for (int i = 0; i < listBoxRegattas.getItemCount(); i++) {
             if (listBoxRegattas.getItemText(i).equals(regattaName)) {
                 listBoxRegattas.setSelectedIndex(i);
-                //Firing change event on combobox to filter
+                // Firing change event on combobox to filter
                 DomEvent.fireNativeEvent(Document.get().createChangeEvent(), listBoxRegattas);
-                break;
+                return;
             }
+        }
+
+        // Set 'All' option in case there are no tracked race related to regatta
+        if (listBoxRegattas.getItemCount() > 0) {
+            listBoxRegattas.setSelectedIndex(0);
+            DomEvent.fireNativeEvent(Document.get().createChangeEvent(), listBoxRegattas);
         }
     }
     
@@ -145,7 +150,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
 
         filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceTable,
-                raceList) {
+                raceList) {            
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -161,24 +166,21 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
         listBoxRegattas.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                filterablePanelRaces.setFilterValue(listBoxRegattas, listBoxRegattas.getSelectedValue());
                 filterablePanelRaces.filter();
             }
         });
-        filterablePanelRaces.add(lblFilterByRegatta, listBoxRegattas);
-        
-        Label lblFilterRacesByName = new Label(stringMessages.filterByNameOrBoatClass());
-        lblFilterRacesByName.setWordWrap(false);
-        final TextBox textBoxFilter = new TextBox();
-        textBoxFilter.addKeyUpHandler(new KeyUpHandler() {
+        filterablePanelRaces.add(lblFilterByRegatta, listBoxRegattas, new AbstractListFilter<RaceDTO>() {
             @Override
-            public void onKeyUp(KeyUpEvent event) {
-                filterablePanelRaces.setFilterValue(textBoxFilter, textBoxFilter.getValue().split(" "));
-                filterablePanelRaces.filter();
+            public Iterable<String> getStrings(RaceDTO t) {
+                return Arrays.asList(t.getRegattaName());
             }
         });
-        textBoxFilter.ensureDebugId("TrackedRacesFilterTextBox");
-        filterablePanelRaces.add(lblFilterRacesByName, textBoxFilter);
+
+        Label lblFilterRacesByName = new Label(stringMessages.filterByNameOrBoatClass() + ":");
+        lblFilterRacesByName.setWordWrap(false);
+        filterablePanelRaces.add(lblFilterRacesByName);
+        filterablePanelRaces.addDefaultTextBox();
+        filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
 
         filterPanel.add(filterablePanelRaces);
         filterPanel.setCellVerticalAlignment(filterablePanelRaces, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -541,7 +543,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
 
         listBoxRegattas.clear();
         listBoxRegattas.addItem(stringMessages.all(), "");
-        for(String regatta: regattaNames) {
+        for (String regatta : regattaNames) {
             listBoxRegattas.addItem(regatta, regatta);
         }
         allRaces = newAllRaces;

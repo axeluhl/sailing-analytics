@@ -1,9 +1,7 @@
 package com.sap.sse.gwt.client.panels;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -12,6 +10,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.AbstractListFilter;
 
 /**
  * Customizable filter panel which allows to create a flexible filter panel with various number of filter inputs (e.g.
@@ -23,26 +22,19 @@ import com.sap.sse.common.Util;
  */
 public abstract class CustomizableFilterablePanel<T> extends AbstractFilterablePanel<T> {
 
-    private List<Widget> widgets;
-    private Map<Widget, String[]> values;
+    private Map<Widget, AbstractListFilter<T>> widgetsFilterMap;
 
     public CustomizableFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, ListDataProvider<T> filtered) {
-        super(all, display, filtered);
-        this.widgets = new ArrayList<>();
-        this.values = new HashMap<>();
-        remove(getTextBox());
+        super(all, display, filtered, false);
+        this.widgetsFilterMap = new HashMap<>();
     }
 
-    private List<String> getFilterValue(Widget widget) {
-        return values.containsKey(widget) ? Arrays.asList(values.get(widget)) : new ArrayList<String>();
+    private String getFilterValue(Widget widget) {
+        return widget.getElement().getPropertyString("value");
     }
 
-    public void setFilterValue(Widget widget, String... value) {
-        values.put(widget, value);
-    }
-
-    public void add(Label label, Widget widget) {
-        widgets.add(widget);
+    public void add(Label label, Widget widget, AbstractListFilter<T> filterer) {
+        widgetsFilterMap.put(widget, filterer);
         add(label);
         add(widget);
         setCellVerticalAlignment(label, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -50,12 +42,12 @@ public abstract class CustomizableFilterablePanel<T> extends AbstractFilterableP
 
     @Override
     public void filter() {
-        filtered.getList().clear();
-        List<String> keywords = new ArrayList<>();
-        for (Widget widget : widgets) {
-            keywords.addAll(getFilterValue(widget));
+        super.filter();
+
+        for (Widget widget: widgetsFilterMap.keySet()) {
+            filtered.setList(Util.createList(widgetsFilterMap.get(widget).applyFilter(Arrays.asList(getFilterValue(widget)), filtered.getList())));
         }
-        Util.addAll(filterer.applyFilter(keywords, all.getList()), filtered.getList());
+
         filtered.refresh();
         sort();
     }
