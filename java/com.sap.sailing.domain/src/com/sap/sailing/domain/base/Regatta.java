@@ -162,9 +162,9 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
      * Define the value which would be multipled by hull length from {@link BoatClass}. 
      * Next the calculated value {@link RegattaUtil} would be used to fill out radius of buoy on race map setting.
      */
-    public double getHullLengthRadiusFactor();
+    public Double getHullLengthRadiusFactor();
 
-    public void setHullLengthRadiusFactor(double hullLengthRadiusFactor);
+    public void setHullLengthRadiusFactor(Double hullLengthRadiusFactor);
 
     /**
      * When there is no race committee app in place and no operator is managing the race start times for this regatta,

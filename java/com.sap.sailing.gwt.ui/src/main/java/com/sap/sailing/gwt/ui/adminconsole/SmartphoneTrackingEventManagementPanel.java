@@ -49,6 +49,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -336,9 +337,11 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races =
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());
                     races.remove(raceColumnDTOAndFleetDTO);
-                    double regattaHullLenghtCircleFactor = getSelectedRegatta() != null ? null : getSelectedRegatta().hullLengthRadiusFactor;
+                    double buoyZoneRadiusInMeters = getSelectedRegatta() == null
+                            ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS_IN_METERS
+                            : getSelectedRegatta().getCalculatedBuoyZoneRadiusInMeters();
                     new CopyCourseAndCompetitorsDialog(sailingService, errorReporter, stringMessages, races,
-                            leaderboardName, regattaHullLenghtCircleFactor, new DialogCallback<CourseAndCompetitorCopyOperation>() {
+                            leaderboardName, buoyZoneRadiusInMeters, new DialogCallback<CourseAndCompetitorCopyOperation>() {
                                 @Override
                                 public void ok(CourseAndCompetitorCopyOperation operation) {
                                     operation.perform(leaderboardName, raceColumnDTOAndFleetDTO, /* onSuccessCallback */ new Runnable() {

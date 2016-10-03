@@ -314,12 +314,12 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param controlTrackingFromStartAndFinishTimes TODO
      */
     Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
-            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, double hullLengthRadiusFactor,
+            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double hullLengthRadiusFactor,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
     
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
-            Iterable<? extends Series> series, double hullLengthRadiusFactor, boolean useStartTimeInference,
+            Iterable<? extends Series> series, Double hullLengthRadiusFactor, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes);
 
     /**

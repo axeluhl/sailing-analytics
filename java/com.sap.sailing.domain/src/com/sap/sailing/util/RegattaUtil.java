@@ -8,9 +8,9 @@ public class RegattaUtil {
 
     public static final double DEFAULT_BUOY_ZONE_RADIUS = 15;
 
-    public static double getCalculatedRegattaBuoyZoneRadius(Regatta regatta, BoatClass boatClass) {
+    public static double getCalculatedRegattaBuoyZoneRadiusInMeters(Regatta regatta, BoatClass boatClass) {
         double hullLengthRadiusFactor = Regatta.DEFAULT_HULL_LENGHT_FACTOR;
-        if (regatta != null) {
+        if (regatta != null && regatta.getHullLengthRadiusFactor() != null) {
             hullLengthRadiusFactor = regatta.getHullLengthRadiusFactor();
         }
 

@@ -27,7 +27,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     
     public CopyCourseAndCompetitorsDialog(SailingServiceAsync sailingService, ErrorReporter errorReporter, final StringMessages stringMessages,
             Collection<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
-            String leaderboardName, double regattaHullLenghtCircleFactor, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
+            String leaderboardName, double buoyZoneRadiusInMeters, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
         super(stringMessages.selectRaces(), stringMessages.selectRaces(), stringMessages.ok(), stringMessages.cancel(),
                 new Validator<CourseAndCompetitorCopyOperation>() {
                     @Override
@@ -41,7 +41,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         racesTable = new RaceTableWrapper<RefreshableMultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingService, stringMessages, errorReporter, /* multiSelection */ true);
         racesTable.setSelectedLeaderboardName(leaderboardName);
-        racesTable.setSelectedRegattaHullLenghtCircleFactor(regattaHullLenghtCircleFactor);
+        racesTable.setSelectedBuoyZoneRadiusInMeters(buoyZoneRadiusInMeters);
         racesTable.getDataProvider().getList().addAll(races);
         racesTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override

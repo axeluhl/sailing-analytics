@@ -26,7 +26,7 @@ public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOA
 extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private String selectedLeaderboardName;
-    private double selectedRegattaHullLenghtCircleFactor;
+    private double selectedBuoyZoneRadiusInMeters;
 
     public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection) {
@@ -54,7 +54,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
                     Map<String, String> params = new HashMap<>();
                     params.put("leaderboardName", selectedLeaderboardName);
-                    params.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS, String.valueOf(selectedRegattaHullLenghtCircleFactor));
+                    params.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, String.valueOf(selectedBuoyZoneRadiusInMeters));
                     params.put("regattaName", raceIdentifier.getRegattaName());
                     params.put("raceName", raceIdentifier.getRaceName());
                     params.put("canReplayDuringLiveRaces", "true");
@@ -93,7 +93,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
         this.selectedLeaderboardName = name;
     }
     
-    public void setSelectedRegattaHullLenghtCircleFactor(double selectedRegattaHullLenghtCircleFactor) {
-        this.selectedRegattaHullLenghtCircleFactor = selectedRegattaHullLenghtCircleFactor;
+    public void setSelectedBuoyZoneRadiusInMeters(double selectedBuoyZoneRadiusInMeters) {
+        this.selectedBuoyZoneRadiusInMeters = selectedBuoyZoneRadiusInMeters;
     }
 }

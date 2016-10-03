@@ -17,9 +17,9 @@ public class RaceMapSettings extends AbstractSettings {
     public static final String PARAM_VIEW_SHOW_STREAMLETS = "viewShowStreamlets";
     public static final String PARAM_VIEW_SHOW_STREAMLET_COLORS = "viewShowStreamletColors";
     public static final String PARAM_VIEW_SHOW_SIMULATION = "viewShowSimulation";
-    public static final String PARAM_BUOY_ZONE_RADIUS = "buoyZoneRadius";
+    public static final String PARAM_BUOY_ZONE_RADIUS_IN_METERS = "buoyZoneRadiusInMeters";
 
-    public static final double DEFAULT_BUOY_ZONE_RADIUS = 15;
+    public static final double DEFAULT_BUOY_ZONE_RADIUS_IN_METERS = 15;
 
     private final boolean showDouglasPeuckerPoints;
 
@@ -64,7 +64,7 @@ public class RaceMapSettings extends AbstractSettings {
                 /* showMapControls */ true,
                 new RaceMapHelpLinesSettings(),
                 /* windUp */ false,
-                /* buoyZoneRadiusInMeters */ DEFAULT_BUOY_ZONE_RADIUS,
+                /* buoyZoneRadiusInMeters */ DEFAULT_BUOY_ZONE_RADIUS_IN_METERS,
                 /* showWindStreamletOverlay */ false,
                 /* showWindStreamletColors */ false,
                 /* showSimulationOverlay */ false);
@@ -243,7 +243,7 @@ public class RaceMapSettings extends AbstractSettings {
         final boolean showWindStreamletOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLETS, defaultForViewShowStreamlets /* default */);
         final boolean showWindStreamletColors = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLET_COLORS, defaultForViewShowStreamletColors /* default */);
         final boolean showSimulationOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_SIMULATION, defaultForViewShowSimulation /* default */);
-        final double buoyZoneRadiusInMeters = GwtHttpRequestUtils.getDoubleParameter(PARAM_BUOY_ZONE_RADIUS, 0.0 /* default */);
+        final double buoyZoneRadiusInMeters = GwtHttpRequestUtils.getDoubleParameter(PARAM_BUOY_ZONE_RADIUS_IN_METERS, DEFAULT_BUOY_ZONE_RADIUS_IN_METERS /* default */);
         return new RaceMapSettings(showMapControls, showCourseGeometry, windUp, buoyZoneRadiusInMeters, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
     }
 

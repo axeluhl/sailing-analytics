@@ -250,13 +250,13 @@ public class LeaderboardContext {
         RegattaRaceDataInfoCalculator regattaRaceDataInfoCalculator = new RegattaRaceDataInfoCalculator();
         forRaces(regattaRaceDataInfoCalculator);
         regattaDTO.setRaceDataInfo(regattaRaceDataInfoCalculator.getRaceDataInfo());
-        regattaDTO.setBuoyZoneRadius(getRegattaBuoyZoneRadius());
+        regattaDTO.setBuoyZoneRadiusInMeters(getRegattaBuoyZoneRadiusInMeters());
     }
 
-    private double getRegattaBuoyZoneRadius() {
+    private double getRegattaBuoyZoneRadiusInMeters() {
         Regatta regatta = service.getRegattaByName(getLeaderboardName());
         BoatClass boatClass = HomeServiceUtil.getBoatClass(leaderboard);
-        double boatHullLength = RegattaUtil.getCalculatedRegattaBuoyZoneRadius(regatta, boatClass);
+        double boatHullLength = RegattaUtil.getCalculatedRegattaBuoyZoneRadiusInMeters(regatta, boatClass);
         return boatHullLength; 
     }
 

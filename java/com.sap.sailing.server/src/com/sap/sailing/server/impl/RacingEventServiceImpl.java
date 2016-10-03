@@ -1239,7 +1239,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Regatta createRegatta(String fullRegattaName, String boatClassName, TimePoint startDate, TimePoint endDate,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, double hullLengthRadiusFactor, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            Serializable defaultCourseAreaId, Double hullLengthRadiusFactor, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             RankingMetricConstructor rankingMetricConstructor) {
         com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
                 fullRegattaName, boatClassName, startDate, endDate, id, series, persistent, scoringScheme,
@@ -2144,7 +2144,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration newRegattaConfiguration,
-            Iterable<? extends Series> series, double hullLengthRadiusFactor, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
+            Iterable<? extends Series> series, Double hullLengthRadiusFactor, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);

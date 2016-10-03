@@ -73,6 +73,10 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                 errorMessage = stringMessages.regattaWithThisNameAlreadyExists();
             }
 
+            if (regattaToValidate.hullLengthRadiusFactor == null) {
+                errorMessage = stringMessages.incorrectValueForRegattaHullLengthRadiusFactor();
+            }
+
             if (errorMessage == null) {
                 List<SeriesDTO> seriesToValidate = regattaToValidate.series;
                 int index = 0;

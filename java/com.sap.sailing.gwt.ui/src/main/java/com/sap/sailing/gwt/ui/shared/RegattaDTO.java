@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -35,7 +36,7 @@ public class RegattaDTO extends NamedDTO {
     public boolean useStartTimeInference = true;
     public boolean controlTrackingFromStartAndFinishTimes = false;
     public RankingMetrics rankingMetricType;
-    public double hullLengthRadiusFactor;
+    public Double hullLengthRadiusFactor;
     
     public RegattaDTO() {}
     
@@ -124,9 +125,10 @@ public class RegattaDTO extends NamedDTO {
         return false;
     }
 
-    public double getCalculatedBuoyZoneRadius() {
-        double boatHullLength = boatClass == null ? 0.0 : boatClass.getHullLengthInMeters();
-        return boatHullLength == 0.0 ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS : (boatHullLength * hullLengthRadiusFactor);
+    public double getCalculatedBuoyZoneRadiusInMeters() {
+        Double boatHullLength = boatClass == null ? null : boatClass.getHullLengthInMeters();
+        double hullLengthFactor = this.hullLengthRadiusFactor == null ? Regatta.DEFAULT_HULL_LENGHT_FACTOR : this.hullLengthRadiusFactor;
+        return boatHullLength == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS_IN_METERS : (boatHullLength * hullLengthFactor);
     }
 
     @Override
