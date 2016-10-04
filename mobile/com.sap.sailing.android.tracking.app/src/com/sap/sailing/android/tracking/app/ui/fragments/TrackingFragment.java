@@ -30,7 +30,6 @@ public class TrackingFragment extends BaseFragment {
     static final String SIS_GPS_ACCURACY = "instanceStateGpsAccuracy";
     static final String SIS_GPS_UNSENT_FIXES = "instanceStateGpsUnsentFixes";
 
-    private AppPreferences prefs;
     private long lastGPSQualityUpdate;
     private Toast gpsToast;
     private boolean gpsFound = true;
@@ -116,7 +115,6 @@ public class TrackingFragment extends BaseFragment {
     public void updateTrackingStatus(GPSQuality quality) {
         if (isAdded()) {
             TextView textView = (TextView) getActivity().findViewById(R.id.tracking_status);
-
             if (quality == GPSQuality.noSignal) {
                 textView.setText(getString(R.string.tracking_status_no_gps_signal));
                 textView.setTextColor(getResources().getColor(R.color.sap_red));
@@ -129,7 +127,9 @@ public class TrackingFragment extends BaseFragment {
             } else {
                 textView.setText(getString(R.string.tracking_status_tracking));
                 textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
-                gpsToast.cancel();
+                if (gpsToast == null) {
+                    gpsToast.cancel();
+                }
                 //GPS was lost before but is available again now --> show gpsFound toast
                 if (!gpsFound) {
                     gpsToast = Toast.makeText(getActivity(),getString(R.string.tracking_status_gps_found), Toast.LENGTH_SHORT);
@@ -152,14 +152,8 @@ public class TrackingFragment extends BaseFragment {
                 public void run() {
                     TextView textView = (TextView) getActivity().findViewById(R.id.mode);
                     if (apiConnectivity == APIConnectivity.transmissionSuccess) {
-                        if (prefs.getEnergySavingEnabledAutomatically() && !prefs.getEnergySavingOverride()) {
-                            textView.setText(getString(R.string.tracking_mode_battery_saving));
-                            textView.setTextColor(getResources().getColor(R.color.sap_red));
-                        } else {
-                            textView.setText(getString(R.string.tracking_mode_live));
-                            textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
-                        }
-
+                        textView.setText(getString(R.string.tracking_mode_live));
+                        textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
                     } else if (apiConnectivity == APIConnectivity.noAttempt) {
                         textView.setText(getString(R.string.tracking_mode_offline));
                         textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
