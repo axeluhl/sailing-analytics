@@ -160,7 +160,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
             if (!isZoomed) {
                 isZoomed = true;
             }
-            //Set a minute as max time zoom
+            //Set a minute as max time zoom just as for chart
             if (xAxisMax - xAxisMin > 60 * 1000) {
                 timeRangeWithZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
             } else {
