@@ -117,7 +117,7 @@ public class BravoFixTrackSerializationTest {
         }
         
         private void addOrReplaceBravoFixToTrack(boolean replace) {
-            double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.getColumns().size()];
+            double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.columnCount];
             fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeight;
             track.add(new BravoFixImpl(new DoubleVectorFixImpl(timePoint, fixData)), replace);
         }

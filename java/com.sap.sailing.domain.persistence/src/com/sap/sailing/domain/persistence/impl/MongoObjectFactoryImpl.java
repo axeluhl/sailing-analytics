@@ -224,8 +224,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public DBCollection getGPSFixCollection() {
         DBCollection gpsFixCollection = database.getCollection(CollectionNames.GPS_FIXES.name());
         DBObject index = new BasicDBObject();
-        index.put(FieldNames.DEVICE_ID.name(), null);
-        index.put(FieldNames.TIME_AS_MILLIS.name(), null);
+        index.put(FieldNames.DEVICE_ID.name()+"."+FieldNames.DEVICE_TYPE_SPECIFIC_ID.name(), 1);
+        index.put(FieldNames.GPSFIX.name()+"."+FieldNames.TIME_AS_MILLIS.name(), 1);
         gpsFixCollection.createIndex(index);
         return gpsFixCollection;
     }
@@ -650,6 +650,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbRegatta.put(FieldNames.REGATTA_REGATTA_CONFIGURATION.name(), configurationObject);
         }
         dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
+        dbRegatta.put(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name(), regatta.isControlTrackingFromStartAndFinishTimes());
         dbRegatta.put(FieldNames.REGATTA_RANKING_METRIC.name(), storeRankingMetric(regatta));
         regattasCollection.update(query, dbRegatta, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
     }

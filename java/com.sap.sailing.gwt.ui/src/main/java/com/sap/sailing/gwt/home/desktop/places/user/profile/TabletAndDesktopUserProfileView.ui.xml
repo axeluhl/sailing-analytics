@@ -4,7 +4,6 @@
 	xmlns:uh="urn:import:com.sap.sse.security.ui.userprofile.desktop.userheader"
 	xmlns:s="urn:import:com.sap.sailing.gwt.home.desktop.places.user.profile">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-  <ui:with field="tm" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
   <ui:style>
     .header {
       position: relative;

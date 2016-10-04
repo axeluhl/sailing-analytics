@@ -4,7 +4,6 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
     <ui:style>
 		.row {
 			padding-bottom:1em;
@@ -23,7 +22,7 @@
         <div style="height:1em;" />
         <div class="{res.mediaCss.grid} {style.row}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-			    <span><ui:text from='{i18n_ubi.chooseALanguage}' />:</span>
+			    <span><ui:text from='{i18n.chooseALanguage}' />:</span>
 	        </div>
 		    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 				<g:ListBox ui:field="localeSelectionBox" />

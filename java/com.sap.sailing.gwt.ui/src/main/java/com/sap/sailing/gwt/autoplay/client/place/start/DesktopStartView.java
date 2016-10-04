@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
@@ -35,6 +36,7 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -43,7 +45,6 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTa
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
-import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 import com.sap.sse.security.ui.client.UserService;
 
 public class DesktopStartView extends Composite implements StartView {
@@ -52,7 +53,7 @@ public class DesktopStartView extends Composite implements StartView {
     interface StartPageViewUiBinder extends UiBinder<Widget, DesktopStartView> {
     }
 
-    @UiField(provided=true) SAPHeaderWithAuthentication sapHeader;
+    @UiField(provided=true) SAPSailingHeaderWithAuthentication sapHeader;
     @UiField(provided=true) ListBox localeSelectionBox;
     @UiField(provided=true) ListBox eventSelectionBox;
     @UiField(provided=true) ListBox leaderboardSelectionBox;
@@ -81,8 +82,7 @@ public class DesktopStartView extends Composite implements StartView {
         this.eventBus = eventBus;
         this.events = new ArrayList<EventDTO>();
 
-        sapHeader = new SAPHeaderWithAuthentication(StringMessages.INSTANCE.sapSailingAnalytics(),
-                StringMessages.INSTANCE.autoplayConfiguration());
+        sapHeader = new SAPSailingHeaderWithAuthentication(StringMessages.INSTANCE.autoplayConfiguration());
         new FixedSailingAuthentication(userService, sapHeader.getAuthenticationMenuView());
         
         eventSelectionBox = new ListBox();
@@ -143,13 +143,12 @@ public class DesktopStartView extends Composite implements StartView {
     public void setEvents(List<EventDTO> events) {
         this.events.clear();
         this.events.addAll(events);
-        
         eventSelectionBox.addItem(StringMessages.INSTANCE.pleaseSelectAnEvent());
-        for(EventDTO event: events) {
+        for (EventDTO event : Util.sortNamedCollection(events)) {
             eventSelectionBox.addItem(event.getName());
         }
     }
-    
+
     @UiHandler("eventSelectionBox")
     void onEventSelectionChange(ChangeEvent event) {
         EventDTO selectedEvent = getSelectedEvent();

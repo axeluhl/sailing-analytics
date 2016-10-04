@@ -53,7 +53,7 @@ public class BravoDataImportTest {
                 callbackCallCount++;
                 sumRideHeight += new BravoFixImpl(fix).getRideHeight();
             }
-        }, "source");
+        }, "filename", "source");
         Assert.assertEquals(importData.expectedFixesCount, callbackCallCount);
         Assert.assertEquals(importData.expectedAverageRideHeight, 
                 callbackCallCount == 0 ? sumRideHeight : sumRideHeight / callbackCallCount, 0.00001);

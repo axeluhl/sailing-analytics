@@ -28,12 +28,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -247,7 +243,7 @@ import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.JoinedClassLoader;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.ThreadPoolUtil;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
         LeaderboardRegistry, Replicator, EventFetcher {
@@ -257,7 +253,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * A scheduler for the periodic checks of the paramURL documents for the advent of {@link ControlPoint}s with static
      * position information otherwise not available through <code>MarkPassingReceiver</code>'s events.
      */
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+    private static final ScheduledExecutorService scheduler = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
 
     private final com.sap.sailing.domain.base.DomainFactory baseDomainFactory;
 
@@ -608,12 +604,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
-        final int SIMULATION_THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/3, 1);
-        Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */SIMULATION_THREAD_POOL_SIZE,
-        /* maximumPoolSize */SIMULATION_THREAD_POOL_SIZE,
-        /* keepAliveTime */60, TimeUnit.SECONDS,
-        /* workQueue */new LinkedBlockingQueue<Runnable>(),  new ThreadFactoryWithPriority(
-                Thread.NORM_PRIORITY, /* daemon */true));
+        final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         this.raceLogReplicator = new RaceLogReplicatorAndNotifier(this);
@@ -1247,10 +1238,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Regatta createRegatta(String fullRegattaName, String boatClassName, TimePoint startDate, TimePoint endDate,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor) {
+            Serializable defaultCourseAreaId, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            RankingMetricConstructor rankingMetricConstructor) {
         com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
                 fullRegattaName, boatClassName, startDate, endDate, id, series, persistent, scoringScheme,
-                defaultCourseAreaId, useStartTimeInference, rankingMetricConstructor);
+                defaultCourseAreaId, useStartTimeInference, controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
             onRegattaLikeAdded(regatta);
@@ -1283,11 +1275,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName,
             String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor) {
+            Serializable defaultCourseAreaId, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            RankingMetricConstructor rankingMetricConstructor) {
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
                 getBaseDomainFactory().getOrCreateBoatClass(boatClassName), startDate, endDate, series, persistent,
-                scoringScheme, id, courseArea, useStartTimeInference, rankingMetricConstructor);
+                scoringScheme, id, courseArea, useStartTimeInference, controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
         boolean wasCreated = addAndConnectRegatta(persistent, defaultCourseAreaId, regatta);
         if (wasCreated) {
             logger.info("Created regatta " + regatta.getName() + " (" + hashCode() + ") on " + this);
@@ -1468,7 +1461,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         replicate(new AddSpecificRegatta(regatta.getName(), regatta.getBoatClass() == null ? null : regatta
                 .getBoatClass().getName(), regatta.getStartDate(), regatta.getEndDate(), regatta.getId(),
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
-                regatta.getScoringScheme(), courseAreaId, regatta.useStartTimeInference(), regatta.getRankingMetricType()));
+                regatta.getScoringScheme(), courseAreaId, regatta.useStartTimeInference(), regatta.isControlTrackingFromStartAndFinishTimes(),
+                regatta.getRankingMetricType()));
         RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
         for (RaceDefinition race : regatta.getAllRaces()) {
             replicate(new AddRaceDefinition(regattaIdentifier, race));
@@ -2149,7 +2143,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration newRegattaConfiguration,
-            Iterable<? extends Series> series, boolean useStartTimeInference) {
+            Iterable<? extends Series> series, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
         // We're not doing any renaming of the regatta itself, therefore we don't have to sync on the maps.
         Regatta regatta = getRegatta(regattaIdentifier);
         CourseArea newCourseArea = getCourseArea(newDefaultCourseAreaId);
@@ -2158,6 +2152,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         regatta.setStartDate(startDate);
         regatta.setEndDate(endDate);
+        regatta.setControlTrackingFromStartAndFinishTimes(controlTrackingFromStartAndFinishTimes);
         if (regatta.useStartTimeInference() != useStartTimeInference) {
             regatta.setUseStartTimeInference(useStartTimeInference);
             final DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
@@ -2295,9 +2290,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception {
+    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) {
         for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
-            windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+            try {
+                windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to track wind using wind tracker factory "+windTrackerFactory, e);
+            }
         }
     }
 

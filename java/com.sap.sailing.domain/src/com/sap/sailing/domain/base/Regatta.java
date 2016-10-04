@@ -10,6 +10,7 @@ import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sse.common.NamedWithID;
@@ -196,4 +197,24 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
     default RankingMetrics getRankingMetricType() {
         return RankingMetricsFactory.getForClass(getRankingMetricConstructor().apply(/* trackedRace */ null).getClass());
     }
+
+    /**
+     * When a regatta has well-managed {@link TrackedRace#getStartOfRace() start} and
+     * {@link TrackedRace#getFinishedTime() finish times} it can make sense to drive the tracking infrastructure based
+     * on these times. This may include automatically starting the tracking for a race a certain number of minutes
+     * before the race starts, and finishing the tracking some time after the race has finished. This capability can be
+     * activated using this flag. Tracking connectors can optionally evaluate it and take measures to drive their
+     * {@link RaceTracker} and adjust start and end of tracking times accordingly.
+     * <p>
+     * 
+     * See also
+     * <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3588">https://bugzilla.sapsailing.com/bugzilla/
+     * show_bug.cgi?id=3588</a>.
+     */
+    boolean isControlTrackingFromStartAndFinishTimes();
+
+    /**
+     * @see #isControlTrackingFromStartAndFinishTimes()
+     */
+    void setControlTrackingFromStartAndFinishTimes(boolean controlTrackingFromStartAndFinishTimes);
 }

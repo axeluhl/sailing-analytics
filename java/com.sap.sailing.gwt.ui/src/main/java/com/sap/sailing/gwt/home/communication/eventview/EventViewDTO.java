@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
+import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
@@ -18,7 +18,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     }
 
     private TreeSet<RegattaMetadataDTO> regattas = new TreeSet<>();
-    private ArrayList<EventReferenceDTO> eventsOfSeries = new ArrayList<>();
+    private ArrayList<EventReferenceWithStateDTO> eventsOfSeries = new ArrayList<>();
     
     private EventType type;
     private boolean hasMedia;
@@ -47,7 +47,7 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
         return regattas;
     }
 
-    public List<EventReferenceDTO> getEventsOfSeries() {
+    public List<EventReferenceWithStateDTO> getEventsOfSeries() {
         return eventsOfSeries;
     }
 

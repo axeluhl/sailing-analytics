@@ -75,6 +75,8 @@ public class AbstractGPSFixStoreTest {
         MongoObjectFactoryImpl mongoOF = (MongoObjectFactoryImpl) service.getMongoObjectFactory();
         mongoOF.getGPSFixCollection().drop();
         mongoOF.getGPSFixMetadataCollection().drop();
+        mongoOF.getRaceLogCollection().drop();
+        mongoOF.getRegattaLogCollection().drop();
     }
 
     protected void map(RegattaLog regattaLog, Competitor comp, DeviceIdentifier device, long from, long to) {

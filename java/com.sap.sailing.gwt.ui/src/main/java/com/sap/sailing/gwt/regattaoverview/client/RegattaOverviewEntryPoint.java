@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewBaseSettings;
@@ -21,7 +22,6 @@ import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSett
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
-import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
 
@@ -33,7 +33,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     private final Label clockLabel = new Label();
 
     private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
-    private SAPHeaderWithAuthentication siteHeader;
+    private SAPSailingHeaderWithAuthentication siteHeader;
 
     @Override
     public void doOnModuleLoad() {
@@ -50,8 +50,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         
         clockLabel.addStyleName(style.clockLabel());
 
-        siteHeader = new SAPHeaderWithAuthentication(getStringMessages()
-                .sapSailingAnalytics());
+        siteHeader = new SAPSailingHeaderWithAuthentication();
         new FixedSailingAuthentication(getUserService(), siteHeader.getAuthenticationMenuView());
 
         siteHeader.addWidgetToRightSide(clockLabel);

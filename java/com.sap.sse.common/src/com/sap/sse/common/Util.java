@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import com.sap.sse.common.util.NaturalComparator;
 
 
 public class Util {
@@ -534,5 +538,16 @@ public class Util {
             result = new ArrayList<T>(list);
         }
         return result;
+    }
+
+    public static <T extends Named> List<T> sortNamedCollection(Collection<T> collection) {
+        List<T> sortedCollection = new ArrayList<>(collection);
+        Collections.sort(sortedCollection, new Comparator<T>() {
+            @Override
+            public int compare(T o1, T o2) {
+                return new NaturalComparator().compare(o1.getName(), o2.getName());
+            }
+        });
+        return sortedCollection;
     }
 }

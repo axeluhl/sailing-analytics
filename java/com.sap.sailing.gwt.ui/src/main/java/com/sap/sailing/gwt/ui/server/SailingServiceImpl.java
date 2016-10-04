@@ -39,10 +39,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -454,6 +451,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
@@ -488,7 +486,7 @@ import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ServiceTrackerFactory;
-import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.sap.sse.util.ThreadPoolUtil;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
 
@@ -607,12 +605,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
         // core to other things, but by using at least three threads ensure that no simplistic deadlocks may occur.
-        final int THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
-        executor = new ThreadPoolExecutor(/* corePoolSize */ THREAD_POOL_SIZE,
-                /* maximumPoolSize */ THREAD_POOL_SIZE,
-                /* keepAliveTime */ 60, TimeUnit.SECONDS,
-                /* workQueue */ new LinkedBlockingQueue<Runnable>(),
-                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+        executor = ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor();
     }
     
     /**
@@ -837,6 +830,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
         }
         regattaDTO.useStartTimeInference = regatta.useStartTimeInference();
+        regattaDTO.controlTrackingFromStartAndFinishTimes = regatta.isControlTrackingFromStartAndFinishTimes();
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
         regattaDTO.rankingMetricType = regatta.getRankingMetricType();
         return regattaDTO;
@@ -1156,7 +1150,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * can be obtained within this timeout, wind for the race will be tracked; otherwise, the method returns without
      * taking any effect.
      */
-    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) throws Exception {
+    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) {
         Regatta regatta = raceHandle.getRegatta();
         if (regatta != null) {
             RaceDefinition race = raceHandle.getRace(timeoutInMilliseconds);
@@ -2192,7 +2186,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 actualTimePoint = timePoint;
             }
-            RaceDefinition race = trackedRace.getRace();
+            final RaceDefinition race = trackedRace.getRace();
             int rank = 1;
             final List<Competitor> competitorsFromBestToWorst = trackedRace.getCompetitorsFromBestToWorst(actualTimePoint);
             for (Competitor competitor : competitorsFromBestToWorst) {
@@ -2830,7 +2824,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                             /* race column names */new ArrayList<String>(), getService())), false,
                             baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true,
-                            RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
+                            /* controlTrackingFromStartAndFinishTimes */ false, RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
                     // TODO: is course area relevant for swiss timing replay?
                 } else {
                     regatta = getService().getRegatta(regattaIdentifier);
@@ -3931,7 +3925,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void updateRegatta(RegattaIdentifier regattaName, Date startDate, Date endDate, UUID defaultCourseAreaUuid, 
-            RegattaConfigurationDTO configurationDTO, boolean useStartTimeInference) {
+            RegattaConfigurationDTO configurationDTO, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
         Regatta regatta = getService().getRegatta(regattaName);
         if (regatta != null) {
             SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
@@ -3939,7 +3933,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         getService().apply(new UpdateSpecificRegatta(regattaName, startTimePoint, endTimePoint,
-                defaultCourseAreaUuid, convertToRegattaConfiguration(configurationDTO), useStartTimeInference));
+                defaultCourseAreaUuid, convertToRegattaConfiguration(configurationDTO), useStartTimeInference, controlTrackingFromStartAndFinishTimes));
     }
 
     @Override
@@ -4031,7 +4025,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public RegattaDTO createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate, 
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference,
-            RankingMetrics rankingMetricType) {
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
         SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regattaName));
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
@@ -4040,7 +4034,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         regattaName, boatClassName, startTimePoint, endTimePoint, UUID.randomUUID(),
                         seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
                         persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId, useStartTimeInference,
-                        rankingMetricType));
+                        controlTrackingFromStartAndFinishTimes, rankingMetricType));
         return convertToRegattaDTO(regatta);
     }
     
@@ -4283,7 +4277,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         this.createRegatta(regatta.getName(), regatta.boatClass.getName(), regatta.startDate, regatta.endDate,
                         new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), 
                         true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.useStartTimeInference,
-                        regatta.rankingMetricType);
+                        regatta.controlTrackingFromStartAndFinishTimes, regatta.rankingMetricType);
     }
     
     private SeriesParameters getSeriesParameters(SeriesDTO seriesDTO) {
@@ -5450,6 +5444,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
+        final Map<DeviceIdentifier, Timed> lastFixes = getService().getSensorFixStore().getLastFix(Collections.singleton(mapping.getDevice()));
+        final Timed lastFix;
+        if (lastFixes != null && lastFixes.containsKey(mapping.getDevice())) {
+            lastFix = lastFixes.get(mapping.getDevice());
+        } else {
+            lastFix = null;
+        }
         String deviceId = serializeDeviceIdentifier(mapping.getDevice());
         Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ? 
                 null : mapping.getTimeRange().from().asDate();
@@ -5479,7 +5480,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             originalRaceLogEventUUIDs.add((UUID) id);
         }
         return new DeviceMappingDTO(new DeviceIdentifierDTO(mapping.getDevice().getIdentifierType(),
-                deviceId), from, to, item, originalRaceLogEventUUIDs);
+                deviceId), from, to, item, originalRaceLogEventUUIDs, lastFix==null?null:lastFix.getTimePoint());
     }
     
     private List<AbstractLog<?, ?>> getLogHierarchy(String leaderboardName, String raceColumnName,

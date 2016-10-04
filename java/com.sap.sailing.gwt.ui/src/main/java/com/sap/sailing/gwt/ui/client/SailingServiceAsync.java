@@ -442,7 +442,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference,
-            RankingMetrics rankingMetricType, AsyncCallback<RegattaDTO> callback);
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType,
+            AsyncCallback<RegattaDTO> callback);
 
     void addRaceColumnsToSeries(RegattaIdentifier regattaIdentifier, String seriesName,
             List<Pair<String, Integer>> columnNames, AsyncCallback<List<RaceColumnInSeriesDTO>> callback);
@@ -527,7 +528,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
-            RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference, AsyncCallback<Void> callback);
+            RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference,
+            boolean controlTrackingFromStartAndFinishTimes, AsyncCallback<Void> callback);
 
     /**
      * @param detailType

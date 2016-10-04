@@ -20,8 +20,10 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
-import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.ServerInfoRetriever;
+import com.sap.sse.gwt.client.panels.AbstractTabLayoutPanel;
+import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
@@ -66,7 +68,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * @author Axel Uhl (D043530)
  *
  */
-public class AdminConsolePanel extends DockLayoutPanel {
+public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelectable{
     private final UserService userService;
     
     /**
@@ -107,15 +109,15 @@ public class AdminConsolePanel extends DockLayoutPanel {
         public void onSelection(SelectionEvent<Integer> event) {
             Object source = event.getSource();
             if (source != null) {
-                if (source instanceof TabLayoutPanel) {
-                    final TabLayoutPanel tabPanel = ((TabLayoutPanel) source);
+                if (source instanceof HorizontalTabLayoutPanel) {
+                    final HorizontalTabLayoutPanel tabPanel = ((HorizontalTabLayoutPanel) source);
                     final Widget selectedPanel = tabPanel.getWidget(event.getSelectedItem());
                     refreshDataFor(selectedPanel);
                 } else if (source instanceof VerticalTabLayoutPanel) {
                     final VerticalTabLayoutPanel verticalTabLayoutPanel = (VerticalTabLayoutPanel) source;
                     Widget widgetAssociatedToVerticalTab = verticalTabLayoutPanel.getWidget(verticalTabLayoutPanel.getSelectedIndex());
-                    if (widgetAssociatedToVerticalTab instanceof TabLayoutPanel) {
-                        TabLayoutPanel selectedTabLayoutPanel = (TabLayoutPanel) widgetAssociatedToVerticalTab;
+                    if (widgetAssociatedToVerticalTab instanceof HorizontalTabLayoutPanel) {
+                        HorizontalTabLayoutPanel selectedTabLayoutPanel = (HorizontalTabLayoutPanel) widgetAssociatedToVerticalTab;
                         final int selectedIndex = selectedTabLayoutPanel.getSelectedIndex();
                         if (selectedIndex >= 0) {
                             widgetAssociatedToVerticalTab = selectedTabLayoutPanel.getWidget(selectedIndex);
@@ -133,21 +135,22 @@ public class AdminConsolePanel extends DockLayoutPanel {
             }
         }
 
-        /**
-         * If the <code>widgetMaybeWrappedByScrollPanel</code> is a scroll panel, returns the content widget,
-         * otherwise <code>widgetMaybeWrappedByScrollPanel</code> is returned.
-         */
-        private Widget unwrapScrollPanel(Widget widgetMaybeWrappedByScrollPanel) {
-            final Widget target;
-            if (widgetMaybeWrappedByScrollPanel instanceof ScrollPanel) {
-                target = ((ScrollPanel) widgetMaybeWrappedByScrollPanel).getWidget();
-            } else {
-                target = widgetMaybeWrappedByScrollPanel;
-            }
-            return target;
-        }
     }
     
+    /**
+     * If the <code>widgetMaybeWrappedByScrollPanel</code> is a scroll panel, returns the content widget,
+     * otherwise <code>widgetMaybeWrappedByScrollPanel</code> is returned.
+     */
+    private static Widget unwrapScrollPanel(Widget widgetMaybeWrappedByScrollPanel) {
+        final Widget target;
+        if (widgetMaybeWrappedByScrollPanel instanceof ScrollPanel) {
+            target = ((ScrollPanel) widgetMaybeWrappedByScrollPanel).getWidget();
+        } else {
+            target = widgetMaybeWrappedByScrollPanel;
+        }
+        return target;
+    }
+
     public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
             ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
             String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
@@ -181,13 +184,29 @@ public class AdminConsolePanel extends DockLayoutPanel {
             }
 
             @Override
-            public void remove(Widget child) {
-                topLevelTabPanel.remove(child);
+            public boolean remove(Widget child) {
+                return topLevelTabPanel.remove(child);
+            }
+
+            @Override
+            public boolean remove(Widget child, boolean fireEvents) {
+                return topLevelTabPanel.remove(topLevelTabPanel.getWidgetIndex(child), fireEvents);
             }
 
             @Override
             public Widget getPanel() {
                 return topLevelTabPanel;
+            }
+
+            @Override
+            public void selectTab(int index) {
+                topLevelTabPanel.selectTab(index);
+                
+            }
+
+            @Override
+            public int getWidgetIndex(Widget child) {
+                return topLevelTabPanel.getWidgetIndex(child);
             }
         };
         final DockPanel informationPanel = new DockPanel();
@@ -229,9 +248,15 @@ public class AdminConsolePanel extends DockLayoutPanel {
     private static interface VerticalOrHorizontalTabLayoutPanel {
         void add(Widget child, String text, boolean asHtml);
 
-        void remove(Widget child);
+        boolean remove(Widget child);
+        
+        boolean remove(Widget child, boolean fireEvents);
         
         Widget getPanel();
+        
+        void selectTab(int index);
+        
+        int getWidgetIndex(Widget child);
     }
 
     /**
@@ -240,8 +265,8 @@ public class AdminConsolePanel extends DockLayoutPanel {
      * @return the horizontal tab panel that was created and added to the top-level vertical tab panel; the panel returned can be specified
      * as argument to {@link #addToTabPanel(TabLayoutPanel, Widget, String, AdminConsoleFeatures)}.
      */
-    public TabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, Permission... requiresAnyOfThesePermissions) {
-        final TabLayoutPanel newTabPanel = new TabLayoutPanel(2.5, Unit.EM);
+    public HorizontalTabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, Permission... requiresAnyOfThesePermissions) {
+        final HorizontalTabLayoutPanel newTabPanel = new HorizontalTabLayoutPanel(2.5, Unit.EM);
         AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
         newTabPanel.ensureDebugId(tabDebugId);
@@ -265,7 +290,7 @@ public class AdminConsolePanel extends DockLayoutPanel {
         return scrollPanel;
     }
 
-    public void addToTabPanel(final TabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, Permission... requiresAnyOfThesePermissions) {
+    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, Permission... requiresAnyOfThesePermissions) {
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
             public void add(Widget child, String text, boolean asHtml) {
@@ -274,13 +299,29 @@ public class AdminConsolePanel extends DockLayoutPanel {
             }
 
             @Override
-            public void remove(Widget child) {
-                tabPanel.remove(child);
+            public boolean remove(Widget child) {
+                return tabPanel.remove(child);
+            }
+            
+            @Override
+            public boolean remove(Widget child, boolean fireEvents) {
+                return tabPanel.remove(tabPanel.getWidgetIndex(child), fireEvents);
             }
 
             @Override
             public Widget getPanel() {
                 return tabPanel;
+            }
+
+            @Override
+            public void selectTab(int index) {
+               tabPanel.selectTab(index);
+                
+            }
+
+            @Override
+            public int getWidgetIndex(Widget child) {
+                return tabPanel.getWidgetIndex(child);
             }
         };
         addToTabPanel(wrapper, panelToAdd, tabTitle, requiresAnyOfThesePermissions);
@@ -323,17 +364,82 @@ public class AdminConsolePanel extends DockLayoutPanel {
 
     /**
      * After initialization or whenever the user changes, the tab display is adjusted based on which roles are required
-     * to see which tabs. See {@link #roleSpecificTabs}.
+     * to see which tabs. See {@link #roleSpecificTabs}. A selection event is fired when the tab currently selected
+     * was removed and another tab was therefore selected.
      */
     private void updateTabDisplayForCurrentUser(UserDTO user) {
+        final Widget selectedPanel = getSelectedTab(null);
         for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
-            final Widget widgetToAdd = e.getB();
+            final Widget widgetToAddOrRemove = e.getB();
             if (user != null && userHasPermissionsToSeeWidget(user, e.getB())) {
-                e.getA().add(widgetToAdd, e.getC(), /* asHtml */false);
+                if (e.getA().getWidgetIndex(widgetToAddOrRemove) == -1) {
+                    e.getA().add(widgetToAddOrRemove, e.getC(), /* asHtml */false);
+                }
             } else {
-                e.getA().remove(widgetToAdd);
+                e.getA().remove(widgetToAddOrRemove, /* fireEvents */ false);
             }
         }
+        getSelectedTab(selectedPanel);
+    }
+
+    /**
+     * If the top-level selected tab is a horizontal tab panel, its selected panel is returned; otherwise, the selected
+     * top-level panel is returned. If no top-level panel exists or is selected, {@code null} is returned.
+     * 
+     * @param reselectCurrentSelectionIfNotSameAsThis
+     *            if not {@code null}, the selected panel is {@link AbstractTabLayoutPanel#selectTab(Widget) selected}
+     *            again in case it isn't the same as {@code reselectCurrentSelectionIfNotSameAsThis}, firing a selection
+     *            event
+     */
+    private Widget getSelectedTab(Widget reselectCurrentSelectionIfNotSameAsThis) {
+        final Widget topLevelSelectedTab;
+        Widget selectedTabInHorizontalTabPanel = null;
+        if (topLevelTabPanel.getSelectedIndex() != -1) {
+            topLevelSelectedTab = unwrapScrollPanel(topLevelTabPanel.getWidget(topLevelTabPanel.getSelectedIndex()));
+            if (topLevelSelectedTab instanceof AbstractTabLayoutPanel) {
+                AbstractTabLayoutPanel p = (AbstractTabLayoutPanel) topLevelSelectedTab;
+                if (p.getSelectedIndex() != -1) {
+                    selectedTabInHorizontalTabPanel = unwrapScrollPanel(p.getWidget(p.getSelectedIndex()));
+                    if (reselectCurrentSelectionIfNotSameAsThis != null && selectedTabInHorizontalTabPanel != reselectCurrentSelectionIfNotSameAsThis) {
+                        SelectionEvent.fire(p, p.getSelectedIndex());
+                    }
+                } else {
+                    selectedTabInHorizontalTabPanel = null;
+                }
+            } else {
+                if (reselectCurrentSelectionIfNotSameAsThis != null && topLevelSelectedTab != reselectCurrentSelectionIfNotSameAsThis) {
+                    SelectionEvent.fire(topLevelTabPanel, topLevelTabPanel.getSelectedIndex());
+                }
+            }
+        } else {
+            topLevelSelectedTab = null;
+        }
+        return selectedTabInHorizontalTabPanel != null ? selectedTabInHorizontalTabPanel : topLevelSelectedTab;
+    }
+
+    @Override
+    public void selectTabByNames(String verticalTabName, String horizontalTabName, Map<String, String> params) {
+        if (verticalTabName == null) {
+            return;
+        }
+
+        Widget widgetForSetup = null; //Remember widget for set up
+        for (Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String> e : roleSpecificTabs) {
+            VerticalOrHorizontalTabLayoutPanel panel = e.getA();
+            Widget currentWidget = e.getB();
+            if (panel == topLevelTabPanelWrapper && verticalTabName.equals(e.getC())) { // for vertical panel
+                int index = panel.getWidgetIndex(currentWidget);
+                panel.selectTab(index);
+                if (horizontalTabName == null) {//If we don't have horizontal tab will setup vertical tab.
+                    widgetForSetup = currentWidget;
+                }
+            } else if (horizontalTabName != null && horizontalTabName.equals(e.getC())) { // for horizontal panel
+                int index = panel.getWidgetIndex(currentWidget);
+                panel.selectTab(index);
+                widgetForSetup = currentWidget;
+            }
+        }
+        panelsByWidget.get(unwrapScrollPanel(widgetForSetup)).setupWidgetByParams(params);;
     }
 
     /**

@@ -30,25 +30,27 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final ScoringScheme scoringScheme;
     private final Serializable defaultCourseAreaId;
     private final boolean useStartTimeInference;
+    private final boolean controlTrackingFromStartAndFinishTimes;
     private final RankingMetrics rankingMetricType;
     
     public AddSpecificRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, boolean useStartTimeInference,
-            RankingMetrics rankingMetricType) {
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
         super(regattaName, boatClassName, startDate, endDate, id);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
         this.defaultCourseAreaId = defaultCourseAreaId;
         this.useStartTimeInference = useStartTimeInference;
+        this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
         this.rankingMetricType = rankingMetricType;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), getStartDate(), getEndDate(), getId(), createSeries(toState),
-                persistent, scoringScheme, defaultCourseAreaId, useStartTimeInference, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
+                persistent, scoringScheme, defaultCourseAreaId, useStartTimeInference, controlTrackingFromStartAndFinishTimes, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
         return regatta;
     }
 
