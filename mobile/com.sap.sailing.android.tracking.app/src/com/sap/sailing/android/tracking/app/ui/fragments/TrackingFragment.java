@@ -115,7 +115,6 @@ public class TrackingFragment extends BaseFragment {
     public void updateTrackingStatus(GPSQuality quality) {
         if (isAdded()) {
             TextView textView = (TextView) getActivity().findViewById(R.id.tracking_status);
-
             if (quality == GPSQuality.noSignal) {
                 textView.setText(getString(R.string.tracking_status_no_gps_signal));
                 textView.setTextColor(getResources().getColor(R.color.sap_red));
@@ -128,7 +127,9 @@ public class TrackingFragment extends BaseFragment {
             } else {
                 textView.setText(getString(R.string.tracking_status_tracking));
                 textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
-                gpsToast.cancel();
+                if (gpsToast == null) {
+                    gpsToast.cancel();
+                }
                 //GPS was lost before but is available again now --> show gpsFound toast
                 if (!gpsFound) {
                     gpsToast = Toast.makeText(getActivity(),getString(R.string.tracking_status_gps_found), Toast.LENGTH_SHORT);
