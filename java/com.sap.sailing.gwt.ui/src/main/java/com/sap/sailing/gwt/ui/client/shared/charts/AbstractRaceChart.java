@@ -68,6 +68,8 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     
     /** the tick count must be the same as TimeSlider.TICKCOUNT, otherwise the time ticks will be not synchronized */  
     private final int TICKCOUNT = 10;
+    
+    public static final long MINUTE_IN_MILLIS = 60 * 1000;
 
     private boolean ignoreNextClickEvent;
     
@@ -161,7 +163,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
                 isZoomed = true;
             }
             //Set a minute as max time zoom just as for chart
-            if (xAxisMax - xAxisMin > 60 * 1000) {
+            if (xAxisMax - xAxisMin > MINUTE_IN_MILLIS) {
                 timeRangeWithZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
             } else {
                 return false;
