@@ -9,7 +9,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.start.EventQuickfinderDTO;
@@ -56,11 +55,11 @@ public class StartViewImpl extends Composite implements StartView {
             String group;
             EventState state = event.getState();
             if(state == EventState.FINISHED) {
-                group = TextMessages.INSTANCE.searchResultSortNewest();
+                group = i18n.searchResultSortNewest();
             } else if(state == EventState.RUNNING) {
-                group = TextMessages.INSTANCE.live();
+                group = i18n.live();
             } else {
-                group = TextMessages.INSTANCE.seriesHeaderUpcoming();
+                group = i18n.seriesHeaderUpcoming();
             }
             PlaceNavigation<?> eventPlaceNavigation = currentPresenter.getEventNavigation(event);
             quickFinderUi.addItemToGroup(group, event.getDisplayName(), eventPlaceNavigation);

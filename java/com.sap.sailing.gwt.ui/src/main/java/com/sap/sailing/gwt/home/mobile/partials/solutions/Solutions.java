@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.solutions;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -10,6 +11,8 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
+import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 
 public class Solutions extends Composite {
@@ -22,20 +25,40 @@ public class Solutions extends Composite {
     @UiField DivElement sapInSailingDiv;
     @UiField DivElement sapSailingAnalyticsUi;
     @UiField DivElement raceCommitteeAppUi;
+    @UiField DivElement inSightAppUi;
+    @UiField DivElement buoyPingerAppUi;
     @UiField DivElement postRaceAnalyticsUi;
     @UiField DivElement stgTrainingDiaryUi;
     @UiField DivElement strategySimulatorUi;
     
-    public Solutions() {
+    @UiField AnchorElement sailingAnalyticsDetailsAnchor;
+    @UiField AnchorElement raceManagerAppDetailsAnchor;
+    @UiField AnchorElement sailInSightAppDetailsAnchor;
+    @UiField AnchorElement buoyPingerAppDetailsAnchor;
+    @UiField AnchorElement simulatorAppDetailsAnchor;
+    
+    public Solutions(MobilePlacesNavigator placesNavigator) {
         SolutionsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        
+        initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.SailingAnalytics, sailingAnalyticsDetailsAnchor);
+        initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.RaceManagerApp, raceManagerAppDetailsAnchor);
+        initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.InSightApp, sailInSightAppDetailsAnchor);
+        initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.BuoyPingerApp, buoyPingerAppDetailsAnchor);
+        initWhatsNewLink(placesNavigator, WhatsNewNavigationTabs.SailingSimulator, simulatorAppDetailsAnchor);
         
         initAnimation(sapInSailingDiv, true);
         initAnimation(sapSailingAnalyticsUi, false);
         initAnimation(raceCommitteeAppUi, false);
+        initAnimation(inSightAppUi, false);
+        initAnimation(buoyPingerAppUi, false);
         initAnimation(postRaceAnalyticsUi, false);
         initAnimation(stgTrainingDiaryUi, false);
         initAnimation(strategySimulatorUi, false);
+    }
+    
+    private void initWhatsNewLink(MobilePlacesNavigator placesNavigator, WhatsNewNavigationTabs tab, AnchorElement anchor) {
+        placesNavigator.getWhatsNewNavigation(tab).configureAnchorElement(anchor);
     }
 
     private void initAnimation(final DivElement rootElement, boolean showInitial) {

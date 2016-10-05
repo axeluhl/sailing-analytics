@@ -49,6 +49,7 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
@@ -72,6 +73,9 @@ import com.sap.sse.common.Util.Pair;
  * 
  */
 public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomainFactory> {
+    final Duration START_TRACKING_THIS_MUCH_BEFORE_RACE_START = Duration.ONE_MINUTE.times(5);
+    final Duration STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH = Duration.ONE_MINUTE.times(2);
+
     final long MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS = 30000;
 
     final long DEFAULT_LIVE_DELAY_IN_MILLISECONDS = 5000;
@@ -313,8 +317,22 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>
      * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
      */
-    Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
+    default Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
+        return getApproximatePosition(waypoint, timePoint, new NonCachingMarkPositionAtTimePointCache(this, timePoint));
+    }
     
+    /**
+     * Same as {@link #getApproximatePosition(Waypoint, TimePoint)}, but giving the caller the possibility to pass a
+     * cache of mark positions and related information that can help speed up compound operations requiring frequent
+     * access to the same marks in the same race for the same time point.
+     * 
+     * @param markPositionCache
+     *            a cache for this {@link MarkPositionAtTimePointCache#getTrackedRace() race} and the
+     *            {@link MarkPositionAtTimePointCache#getTimePoint() timePoint} passed
+     */
+    Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint,
+            MarkPositionAtTimePointCache markPositionCache);
+
     /**
      * Checks whether the {@link Wind#getTimePoint()} is in range of start and end {@link TimePoint}s plus extra time
      * for wind recording. If, based on a {@link RaceExecutionOrderProvider}, there is no previous race that takes the
@@ -766,6 +784,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     void addCourseDesignChangedListener(CourseDesignChangedListener listener);
     
     void addStartTimeChangedListener(StartTimeChangedListener listener);
+    
+    void removeStartTimeChangedListener(StartTimeChangedListener listener);
 
     void addRaceAbortedListener(RaceAbortedListener listener);
 
@@ -926,9 +946,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * <ol>
      * <li>start/end of tracking in Racelog</li>
      * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
-     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * <li>start/end of race in Racelog -/+ {@link #START_TRACKING_THIS_MUCH_BEFORE_RACE_START}/{@link #STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH}</li>
      * </ol>
-     * @param waitForGPSFixesToLoad TODO
      */
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad);
     
@@ -942,4 +961,5 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * @return all currently attached {@link RaceLog}s or an empty Iterable if there aren't any
      */
     Iterable<RaceLog> getAttachedRaceLogs();
+
 }

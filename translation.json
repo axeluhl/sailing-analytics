@@ -11,15 +11,6 @@
                ],
 	       "targetFolderPath":".",
 	       "pseudoLocFolderPath":"."
-            },
- 	    {  
-               "sourceFolderPath":"java/com.sap.sailing.gwt.ui/src/main/java/com/sap/sailing/gwt/common/client/i18n",
-               "sourceFilters":[  
-                  "TextMessages*.properties"
-               ],
-               "xlfFolderPath":"./XLF",
-	       "targetFolderPath":".",
-	       "pseudoLocFolderPath":"."
             }
          ]
       },
