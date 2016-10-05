@@ -24,6 +24,7 @@ public enum BravoSensorDataMetadata {
             "BravoNet_Node0x0A0_Voltage", "BravoNet_Node0x0A0_Temperature", "BravoNet_Node0x0A0_Current"));
     
     public final int rideHeightColumn = getColumnIndex(RIDE_HEIGHT);
+    public final int columnCount = columns.size();
 
     public List<String> getColumns() {
         return columns;
