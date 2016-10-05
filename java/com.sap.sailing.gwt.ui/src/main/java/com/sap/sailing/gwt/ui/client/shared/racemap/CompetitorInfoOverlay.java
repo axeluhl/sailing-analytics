@@ -59,7 +59,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             TextMetrics measureText = ctx.measureText(findLargestLine(textLines));
             double largestLineWidth = measureText.getWidth();
             infoBoxHeight = defaultInfoBoxHeight + textLines.length * 11;
-            canvasWidth = (int)largestLineWidth + 10 + infoBoxHeight;
+            canvasWidth = (int)largestLineWidth + infoBoxHeight;
             setCanvasSize(canvasWidth, canvasHeight);
 
             ctx.save();

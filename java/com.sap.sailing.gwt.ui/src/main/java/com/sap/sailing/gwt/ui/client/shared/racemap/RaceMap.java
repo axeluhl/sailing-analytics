@@ -1946,8 +1946,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private String createInfoText(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO) {
         StringBuilder infoText = new StringBuilder();
-        infoText.append(stringMessages.id()).append(" : ").append(competitorDTO.getSailID()).append("\n");
-        infoText.append(stringMessages.name()).append(" : ").append(competitorDTO.getName()).append("\n");
+        infoText.append(competitorDTO.getName()).append(" (").append(competitorDTO.getSailID()).append(")")
+                .append("\n");
         infoText.append(stringMessages.speed()).append(" : ")
                 .append(NumberFormatterFactory.getDecimalFormat(1).format(gpsFixDTO.speedWithBearing.speedInKnots))
                 .append(" ").append(stringMessages.knotsUnit()).append("\n");
