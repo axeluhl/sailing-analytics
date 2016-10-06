@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.After;
@@ -37,6 +39,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMa
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -105,13 +108,16 @@ public class SensorFixStoreAndLoadTest {
     protected RaceLog raceLog;
     protected RegattaLog regattaLog;
     protected SensorFixStore store;
-    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null,
+    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null,
             null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
-    protected final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null,
+    protected final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null,
             null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
+    private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
+    protected final Boat boat1 = DomainFactory.INSTANCE.getOrCreateBoat(comp, "Boat1", boatClass, "GER 1", null);
+    protected final Boat boat2 = DomainFactory.INSTANCE.getOrCreateBoat(comp2, "Boat2", boatClass, "GER 2", null);
+    
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
     protected final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
-    private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
 
     protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
     private DynamicTrackedRace trackedRace;
@@ -139,7 +145,10 @@ public class SensorFixStoreAndLoadTest {
                 new MillisecondsTimePoint(1), 0, mark2));
         Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { new WaypointImpl(mark), new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp, comp2));
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(comp, boat1);
+        competitorsAndBoats.put(comp2, boat2);
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
                 /* startDate */ null, /* endDate */null, null, null, "a", null));
