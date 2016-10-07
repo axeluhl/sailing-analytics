@@ -40,6 +40,11 @@ public enum EmptySensorFixStore implements SensorFixStore {
             TimePoint start, TimePoint end, boolean inclusive) throws NoCorrespondingServiceRegisteredException,
             TransformationException {
     }
+    @Override
+    public <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier,
+            TimePoint start, TimePoint end, boolean inclusive, ProgressCallback progressReporter)
+            throws NoCorrespondingServiceRegisteredException, TransformationException {
+    }
 
     @Override
     public <FixT extends Timed> void storeFix(DeviceIdentifier device, FixT fix) {

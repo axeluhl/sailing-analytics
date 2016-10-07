@@ -53,11 +53,23 @@ public interface GPSFixStore {
             TimePoint start, TimePoint end)
             throws TransformationException, NoCorrespondingServiceRegisteredException;
 
+    void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, DeviceMapping<Competitor> mapping,
+            TimePoint start, TimePoint end,ProgressCallback progressReporter)
+            throws TransformationException, NoCorrespondingServiceRegisteredException;
+    
     /**
      * Load all fixes that correspond to the {@code mapping}.
      */
     void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping, TimePoint start,
             TimePoint end) throws TransformationException,
+    NoCorrespondingServiceRegisteredException;
+    
+
+    /**
+     * Load all fixes that correspond to the {@code mapping}.
+     */
+    void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping, TimePoint start,
+            TimePoint end,ProgressCallback progressReport) throws TransformationException,
     NoCorrespondingServiceRegisteredException;
     
     /**

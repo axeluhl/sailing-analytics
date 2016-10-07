@@ -28,6 +28,19 @@ public interface SensorFixStore {
      */
     <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier, TimePoint start, TimePoint end, boolean inclusive) throws NoCorrespondingServiceRegisteredException,
     TransformationException;
+    
+    /**
+     * Loads fixes for a device in a given time range.
+     * 
+     * @param consumer will be called for each loaded fix. Must not be <code>null</code>.
+     * @param deviceIdentifier the device to load the fixes for. Must not be <code>null</code>.
+     * @param start the lower bound of the time range to load. If <code>null</code>, fixes are loaded from {@link TimePoint#BeginningOfTime}.
+     * @param end the upper bound of the time range to load. If <code>null</code>, fixes are loaded to {@link TimePoint#EndOfTime}.
+     * @param inclusive true if fixes exactly at the bounds of the time range should be loaded, false otherwise.
+     * @param progressReporter not allowed to be null, can be used to get reports of the approximate loading progress
+     */
+    <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier, TimePoint start, TimePoint end, boolean inclusive,ProgressCallback progressReporter) throws NoCorrespondingServiceRegisteredException,
+    TransformationException;
 
     /**
      * Saves a single fix for the given device and informs all registered listeners about the new fix.

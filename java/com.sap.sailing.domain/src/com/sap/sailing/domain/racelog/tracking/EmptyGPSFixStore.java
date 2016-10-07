@@ -79,4 +79,18 @@ public enum EmptyGPSFixStore implements GPSFixStore {
             DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end)
             throws TransformationException, NoCorrespondingServiceRegisteredException {
     }
+
+    @Override
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end, ProgressCallback progressReporter)
+            throws TransformationException, NoCorrespondingServiceRegisteredException {
+        
+    }
+
+    @Override
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping, TimePoint start,
+            TimePoint end, ProgressCallback progressReport)
+            throws TransformationException, NoCorrespondingServiceRegisteredException {
+        
+    }
 }

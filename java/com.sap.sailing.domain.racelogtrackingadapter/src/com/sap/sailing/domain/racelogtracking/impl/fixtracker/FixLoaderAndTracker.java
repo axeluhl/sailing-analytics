@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.ProgressCallback;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
@@ -167,6 +168,14 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         if (preemptiveStopRequested.get()) {
             return;
         }
+        
+        //TODO remove me
+        ProgressCallback dummy = new ProgressCallback() {
+
+            public void progressChange(double progress) {
+            }
+        };
+        
         mapping.getRegattaLogEvent().accept(new MappingEventVisitor() {
             @Override
             public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
@@ -179,7 +188,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     // competitor retrieved from the mapping event does not have a track in trackedRace
                     try {
                         sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(),
-                                timeRangeToLoad.from(), timeRangeToLoad.to(), true);
+                                timeRangeToLoad.from(), timeRangeToLoad.to(), true,dummy);
                     } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
                         logger.log(Level.WARNING, "Could not load track for competitor: " + mapping.getMappedTo()
                                 + "; device: " + mapping.getDevice());
@@ -198,7 +207,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         @SuppressWarnings({ "unchecked" })
                         DeviceMapping<Competitor> competitorMapping = (DeviceMapping<Competitor>) mapping;
                         gpsFixStore.loadCompetitorTrack(track, competitorMapping, timeRangeToLoad.from(),
-                                timeRangeToLoad.to());
+                                timeRangeToLoad.to(),dummy);
                     } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                         logger.log(Level.WARNING, "Could not load competitor track " + mapping.getMappedTo());
                     }
@@ -211,7 +220,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 try {
                     @SuppressWarnings("unchecked")
                     DeviceMapping<Mark> markMapping = (DeviceMapping<Mark>) mapping;
-                    gpsFixStore.loadMarkTrack(track, markMapping, timeRangeToLoad.from(), timeRangeToLoad.to());
+                    gpsFixStore.loadMarkTrack(track, markMapping, timeRangeToLoad.from(), timeRangeToLoad.to(),dummy);
                     if (track.getFirstRawFix() == null) {
                         logger.fine("Loading mark positions from outside of start/end of tracking interval (" + timeRangeToLoad.from()
                                 + ".." + timeRangeToLoad.to() + ") because no fixes were found in that interval");
@@ -219,7 +228,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         // by start/end of tracking to at least attempt to get fixes at all in case there were any
                         // within the device mapping interval specified
                         gpsFixStore.loadMarkTrack(track, markMapping, /* startOfTimeWindowToLoad */ null,
-                                /* endOfTimeWindowToLoad */ null);
+                                /* endOfTimeWindowToLoad */ null,dummy);
                     }
                 } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                     logger.log(Level.WARNING, "Could not load mark track " + mapping.getMappedTo());
