@@ -8,7 +8,7 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 
 public class MarkerService extends IntentService implements  CheckinManager.DataChangedListner{
     private static String TAG = MarkerService.class.getName();
@@ -26,13 +26,17 @@ public class MarkerService extends IntentService implements  CheckinManager.Data
     }
 
     @Override
-    public void handleData(AbstractCheckinData data) {
-        try {
-            CheckinData checkinData = (CheckinData) data;
-            DatabaseHelper helper = DatabaseHelper.getInstance();
-            helper.updateMarks(this, checkinData.marks, checkinData.getLeaderboard());
-        } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
-            Log.e(TAG, "Error trying to analyze mark checkin data", e);
+    public void handleData(BaseCheckinData data) {
+        if (data != null) {
+            try {
+                CheckinData checkinData = (CheckinData) data;
+                DatabaseHelper helper = DatabaseHelper.getInstance();
+                helper.updateMarks(this, checkinData.marks, checkinData.getLeaderboard());
+            } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
+                Log.e(TAG, "Error trying to analyze mark checkin data", e);
+            }
+        } else {
+            Log.e(TAG, "checkin data was null");
         }
     }
 

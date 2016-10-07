@@ -2,7 +2,6 @@ package com.sap.sailing.domain.base;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.List;
 
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
@@ -72,7 +71,7 @@ public interface DomainFactory extends SharedDomainFactory {
     TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace);
 
     TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet, Collection<MediaTrack> mediatracks);
+            Fleet fleet, Iterable<MediaTrack> mediatracks);
 
     /**
      * @param trackedRace must not be <code>null</code>

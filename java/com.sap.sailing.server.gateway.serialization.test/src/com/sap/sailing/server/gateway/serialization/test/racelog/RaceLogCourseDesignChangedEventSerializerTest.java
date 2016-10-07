@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -63,7 +64,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
                         factory), new GateDeserializer(factory, new MarkDeserializer(factory))))));
         now = MillisecondsTimePoint.now();
 
-        event = new RaceLogCourseDesignChangedEventImpl(now, author, 0, createCourseData());
+        event = new RaceLogCourseDesignChangedEventImpl(now, author, 0, createCourseData(), CourseDesignerMode.BY_MARKS);
     }
 
     @Test
@@ -75,6 +76,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
         assertEquals(event.getId(), deserializedEvent.getId());
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
         assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
+        assertEquals(event.getCourseDesignerMode(), deserializedEvent.getCourseDesignerMode());
         assertEquals(0, Util.size(event.getInvolvedBoats()));
         assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
 

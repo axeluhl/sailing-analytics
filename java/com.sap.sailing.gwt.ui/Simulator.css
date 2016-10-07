@@ -23,6 +23,10 @@
   top: -1000px;
 }
 
+html {
+  font-size: 15px;
+}
+
 .titleLabelWrapper {
   position: relative;
     margin-left: auto;
@@ -274,7 +278,7 @@ input.magnifier {
 }
 
 .sliderLabel {
-  width: 200px;
+  width: 210px;
   padding: 12px 0 14px 12px;
 }
 
@@ -494,13 +498,8 @@ table {
 	border-collapse: separate;
 }
 
-.CombinedWindPanelParentDiv {
+.TopLeftControlsWrapperPanelParentDiv {
 	padding-top: 34px;
-	padding-left: 10px;
-}
-
-.TrueNorthIndicatorPanelParentDiv {
-	padding-top: 10px;
 	padding-left: 10px;
 }
 
@@ -837,13 +836,10 @@ img.openColumn {
 }
 
 .busyIndicator-Simple {
-	position: absolute;
-	top: 0.7em;
-	right: 7.4em;
+	padding-right: 10px; 
 }
 
 .busyIndicator-Circle {
-	
 }
 
 .raceBoard-TitlePanel {

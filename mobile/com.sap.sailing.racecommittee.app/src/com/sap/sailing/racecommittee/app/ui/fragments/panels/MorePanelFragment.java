@@ -150,7 +150,7 @@ public class MorePanelFragment extends BasePanelFragment {
 
             if (mGateTiming != null && mGateTimingValue != null) {
                 mGateTiming.setVisibility(View.VISIBLE);
-                mGateTimingValue.setText(RaceHelper.getGateTiming(getActivity(), typedProcedure));
+                mGateTimingValue.setText(RaceHelper.getGateTiming(getActivity(), typedProcedure, getRace().getRaceGroup()));
             }
         }
     }

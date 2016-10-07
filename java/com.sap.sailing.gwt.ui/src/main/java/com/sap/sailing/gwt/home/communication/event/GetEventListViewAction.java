@@ -8,6 +8,12 @@ import com.sap.sailing.gwt.server.EventListDataCalculator;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load data to be shown in the events list overview, using a
+ * {@link EventListDataCalculator} to prepare the appropriate data structure.
+ * </p>
+ */
 public class GetEventListViewAction implements SailingAction<EventListViewDTO>, IsClientCacheable {
     @Override
     @GwtIncompatible

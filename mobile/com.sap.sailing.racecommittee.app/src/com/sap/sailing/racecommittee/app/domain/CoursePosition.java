@@ -2,10 +2,9 @@ package com.sap.sailing.racecommittee.app.domain;
 
 import java.util.UUID;
 
-import com.sap.sse.common.Named;
-import com.sap.sse.common.WithID;
+import com.sap.sse.common.NamedWithID;
 
-public interface CoursePosition extends Named, WithID {
+public interface CoursePosition extends NamedWithID {
 
    UUID getId();
 

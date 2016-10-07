@@ -1,15 +1,15 @@
 package com.sap.sailing.android.tracking.app.utils;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
-import com.sap.sailing.android.shared.util.PrefUtils;
-import com.sap.sailing.android.tracking.app.R;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
+import com.sap.sailing.android.shared.util.PrefUtils;
+import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 
@@ -63,9 +63,14 @@ public class AppPreferences extends BaseAppPreferences {
                 URLEncoder.encode(competitorId, "UTF-8").replaceAll("\\+", "%20"));
     }
 
-    public String getServerCompetiorTeamPath(String competitorId){
+    public String getServerCompetitorTeamPath(String competitorId){
         return context.getString(R.string.preference_server_team_info_path).replace("{competitor_id}",
             competitorId);
+    }
+
+    public String getServerMarkPath(String leaderboardName, String markId) {
+        String path = context.getString(R.string.preferece_server_mark_path);
+        return path.replace("{leaderboardName}", leaderboardName).replace("{markId}", markId);
     }
 
     public int getGPSFixInterval() {
@@ -105,15 +110,6 @@ public class AppPreferences extends BaseAppPreferences {
 
     public void setCompetitorId(String id) {
         preferences.edit().putString(context.getString(R.string.preference_competitor_key), id).commit();
-    }
-
-    public void setEnergySavingEnabledByUser(boolean newValue) {
-        preferences.edit().putBoolean(context.getString(R.string.preference_energy_saving_enabled_key), newValue)
-                .commit();
-    }
-
-    public boolean getEnergySavingEnabledByUser() {
-        return preferences.getBoolean(context.getString(R.string.preference_energy_saving_enabled_key), false);
     }
 
     public void setDisplayHeadingWithSubtractedDeclination(boolean newValue) {
@@ -158,9 +154,16 @@ public class AppPreferences extends BaseAppPreferences {
         return false;
     }
 
-    public void setMessageResendInterval(int interval) {
-        preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), interval)
-                .commit();
+    public void setMessageResendIntervalInMillis(int intervalInMillis) {
+        preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), intervalInMillis).commit();
+    }
+
+    /**
+     * Returns the message sending interval in milliseconds
+     */
+    public int getMessageSendingIntervalInMillis() {
+        return preferences.getInt(context.getString(R.string.preference_messageResendIntervalMillis_key),
+                /* default */ TrackingService.UPDATE_INTERVAL_IN_MILLIS_DEFAULT);
     }
 
     public boolean hasFailedUpload(String key) {
@@ -174,4 +177,5 @@ public class AppPreferences extends BaseAppPreferences {
     public void removeFailedUpload(String key) {
         pref.edit().remove(key).commit();
     }
+
 }

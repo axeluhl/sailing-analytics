@@ -20,6 +20,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     private final DynamicBoat boat;
     private final Serializable id;
     private String name;
+    private String searchTag;
     private Color color;
     private transient Set<CompetitorChangeListener> listeners;
     private String email;
@@ -27,7 +28,7 @@ public class CompetitorImpl implements DynamicCompetitor {
     private Double timeOnTimeFactor;
     private Duration timeOnDistanceAllowancePerNauticalMile;
     
-    public CompetitorImpl(Serializable id, String name, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
+    public CompetitorImpl(Serializable id, String name, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile, String searchTag) {
         this.id = id;
         this.name = name;
         this.team = team;
@@ -37,6 +38,7 @@ public class CompetitorImpl implements DynamicCompetitor {
         this.flagImage = flagImage;
         this.timeOnTimeFactor = timeOnTimeFactor;
         this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
+        this.searchTag = searchTag;
         this.listeners = new HashSet<CompetitorChangeListener>();
     }
     
@@ -85,10 +87,11 @@ public class CompetitorImpl implements DynamicCompetitor {
     public Competitor resolve(SharedDomainFactory domainFactory) {
         Competitor result = domainFactory
                 .getOrCreateCompetitor(getId(), getName(), getColor(), getEmail(), getFlagImage(), getTeam(),
-                        getBoat(), getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile());
+                        getBoat(), getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile(), searchTag);
         return result;
     }
 
+    @Override
     public Color getColor() {
         return color;
     }
@@ -127,6 +130,22 @@ public class CompetitorImpl implements DynamicCompetitor {
         }
     }
 
+    @Override
+    public String getSearchTag() {
+        return searchTag;
+    }
+
+    public void setSearchTag(String newSearchTag) {
+        final String oldSearchTag = this.searchTag;
+        if (!Util.equalsWithNull(oldSearchTag, newSearchTag)) {
+            this.searchTag = newSearchTag;
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.searchTagChanged(oldSearchTag, newSearchTag);
+            }
+        }
+    }
+
+    @Override
     public String getEmail() {
         return email;
     }
@@ -141,6 +160,7 @@ public class CompetitorImpl implements DynamicCompetitor {
         }
     }
     
+    @Override
     public boolean hasEmail(){
         return email != null && !email.isEmpty();
     }

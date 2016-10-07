@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -64,6 +65,7 @@ import com.sap.sailing.domain.regattalike.RegattaLikeListener;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -101,7 +103,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
     private static final long serialVersionUID = 6509564189552478869L;
-    private ConcurrentHashMap<String, RaceDefinition> races;
+    private ConcurrentMap<String, RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private List<? extends Series> series;
@@ -127,6 +129,21 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      * @see #isPersistent
      */
     private final boolean persistent;
+    
+    /**
+     * When a regatta has well-managed {@link TrackedRace#getStartOfRace() start} and
+     * {@link TrackedRace#getFinishedTime() finish times} it can make sense to drive the tracking infrastructure based
+     * on these times. This may include automatically starting the tracking for a race a certain number of minutes
+     * before the race starts, and finishing the tracking some time after the race has finished. This capability can be
+     * activated using this flag. Tracking connectors can optionally evaluate it and take measures to drive their
+     * {@link RaceTracker} and adjust start and end of tracking times accordingly.
+     * <p>
+     * 
+     * See also
+     * <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3588">https://bugzilla.sapsailing.com/bugzilla/
+     * show_bug.cgi?id=3588</a>.
+     */
+    private boolean controlTrackingFromStartAndFinishTimes;
 
     /**
      * Defaults to <code>true</code>. See {@link Regatta#useStartTimeInference()}.
@@ -138,18 +155,21 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             AbstractLeaderboardImpl.class.getName(), 0);
     
     /**
-     * Constructs a regatta with an empty {@link RaceLogStore}.
+     * Constructs a regatta with an empty {@link RaceLogStore} and with
+     * {@link Regatta#isControlTrackingFromStartAndFinishTimes()} set to {@code false}.
      */
     public RegattaImpl(String name, BoatClass boatClass, TimePoint startDate, TimePoint endDate,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id,
             CourseArea courseArea, RankingMetricConstructor rankingMetricConstructor) {
         this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, name, boatClass, startDate, endDate, series,
-                persistent, scoringScheme, id, courseArea, /* useStartTimeInference */true, rankingMetricConstructor);
+                persistent, scoringScheme, id, courseArea, /* useStartTimeInference */true, /* controlTrackingFromStartAndFinishTimes */ false,
+                rankingMetricConstructor);
     }
 
     /**
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
-     * is not {@link #isPersistent() marked for persistence}.
+     * is not {@link #isPersistent() marked for persistence}. The regatta is created with
+     * {@link Regatta#isControlTrackingFromStartAndFinishTimes()} set to {@code false}.
      * 
      * @param trackedRegattaRegistry
      *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
@@ -162,13 +182,12 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             TimePoint startDate, TimePoint endDate, TrackedRegattaRegistry trackedRegattaRegistry,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
         this(raceLogStore, regattaLogStore, name, boatClass, startDate, endDate, trackedRegattaRegistry, scoringScheme,
-                id, courseArea, OneDesignRankingMetric::new);
+                id, courseArea, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
     }
 
     /**
      * Constructs a regatta with a single default series with empty race column list, and a single default fleet which
      * is not {@link #isPersistent() marked for persistence}.
-     * 
      * @param trackedRegattaRegistry
      *            used to find the {@link TrackedRegatta} for this column's series' {@link Series#getRegatta() regatta}
      *            in order to re-associate a {@link TrackedRace} passed to {@link #setTrackedRace(Fleet, TrackedRace)}
@@ -179,13 +198,14 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name, BoatClass boatClass,
             TimePoint startDate, TimePoint endDate, TrackedRegattaRegistry trackedRegattaRegistry,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea,
-            RankingMetricConstructor rankingMetricConstructor) {
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
         this(raceLogStore, regattaLogStore, name, boatClass, startDate, endDate, Collections
                 .singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
-                /* isMedal */false, Collections
+                /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections
                         .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                 /* race column names */new ArrayList<String>(), trackedRegattaRegistry)), /* persistent */false,
-                scoringScheme, id, courseArea, /* useStartTimeInference */true, rankingMetricConstructor);
+                scoringScheme, id, courseArea, /* useStartTimeInference */true, controlTrackingFromStartAndFinishTimes,
+                rankingMetricConstructor);
     }
 
     /**
@@ -196,10 +216,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
             BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, boolean useStartTimeInference,
-            RankingMetricConstructor rankingMetricConstructor) {
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
         super(name);
         this.rankingMetricConstructor = rankingMetricConstructor;
         this.useStartTimeInference = useStartTimeInference;
+        this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
         this.id = id;
         this.raceLogStore = raceLogStore;
         races = new ConcurrentHashMap<>();
@@ -208,8 +229,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.boatClass = boatClass;
         this.startDate = startDate;
         this.endDate = endDate;
-        List<S> seriesList = new ArrayList<S>();
-        for (S s : series) {
+        final List<S> seriesList = new ArrayList<S>();
+        for (final S s : series) {
             seriesList.add(s);
         }
         this.series = seriesList;
@@ -261,7 +282,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     public static String getDefaultName(String baseName, String boatClassName) {
-        return baseName + (boatClassName == null ? "" : " (" + boatClassName + ")").replace('/', '_');
+        return baseName.replace('/', '_') + (boatClassName == null ? "" : " (" + boatClassName + ")").replace('/', '_');
     }
 
     @Override
@@ -386,6 +407,14 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
+    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+        if (competitorsProvider == null) {
+            competitorsProvider = new CompetitorProviderFromRaceColumnsAndRegattaLike(this);
+        }
+        return competitorsProvider;
+    }
+    
+    @Override
     public Iterable<Competitor> getAllCompetitors() {
         Set<Competitor> result = new HashSet<Competitor>();
         if (competitorsProvider == null) {
@@ -427,6 +456,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+
+    @Override
+    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        raceColumnListeners.notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
     }
 
     @Override
@@ -546,6 +580,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void setDefaultCourseArea(CourseArea newCourseArea) {
         this.defaultCourseArea = newCourseArea;
+    }
+    
+    @Override
+    public boolean isControlTrackingFromStartAndFinishTimes() {
+        return controlTrackingFromStartAndFinishTimes;
+    }
+    
+    @Override
+    public void setControlTrackingFromStartAndFinishTimes(boolean controlTrackingFromStartAndFinishTimes) {
+        this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
     }
 
     @Override

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.common.PathType;
 import com.sap.sailing.simulator.Path;
-import com.sap.sailing.simulator.PathType;
 import com.sap.sailing.simulator.RaceProperties;
 import com.sap.sailing.simulator.SimulationParameters;
 import com.sap.sailing.simulator.Simulator;

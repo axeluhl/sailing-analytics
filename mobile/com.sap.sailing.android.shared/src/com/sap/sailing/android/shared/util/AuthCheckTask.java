@@ -41,7 +41,7 @@ public class AuthCheckTask extends AsyncTask<Void, Void, Boolean> {
         Boolean authenticated = false;
         if (url != null) {
             try {
-                HttpRequest request = new HttpJsonGetRequest(url, context);
+                HttpRequest request = new HttpJsonGetRequest(context, url);
                 InputStream responseStream = request.execute();
 
                 JSONParser parser = new JSONParser();

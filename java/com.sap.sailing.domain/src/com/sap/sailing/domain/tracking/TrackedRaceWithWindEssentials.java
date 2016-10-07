@@ -3,9 +3,9 @@ package com.sap.sailing.domain.tracking;
 import java.io.ObjectOutputStream;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -23,7 +23,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     private static final Logger logger = Logger.getLogger(TrackedRaceWithWindEssentials.class.getName());
     
     /**
-     * Serializing an instance of this class has to serialized the various data structures holding the tracked race's
+     * Serializing an instance of this class has to serialize the various data structures holding the tracked race's
      * state. When a race is currently on, these structures change very frequently, and
      * {@link ConcurrentModificationException}s during serialization will be the norm rather than the exception. To
      * avoid this, all modifications to any data structure that is not in itself synchronized obtains this lock's
@@ -43,7 +43,7 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
      * intra-leg computations are done dynamically based on wind information, selecting a different wind information
      * source can alter the intra-leg results. See {@link #currentWindSource}.
      */
-    protected final Map<WindSource, WindTrack> windTracks;
+    protected final ConcurrentMap<WindSource, WindTrack> windTracks;
     
     protected final RaceDefinition race;
     
@@ -146,7 +146,4 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
     protected NamedReentrantReadWriteLock getSerializationLock() {
         return serializationLock;
     }
-
-    
-
 }

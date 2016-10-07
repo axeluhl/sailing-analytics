@@ -78,7 +78,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * more races.
      */
     @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
+    public boolean isValidInNetScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
         boolean result;
         Iterable<? extends Fleet> fleets = raceColumn.getFleets();
         if (Util.size(fleets) <= 1 || allFleetsOrdered(fleets)) {
@@ -101,7 +101,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         for (Competitor competitor : leaderboard.getCompetitors()) {
             Fleet fleet = raceColumn.getFleetOfCompetitor(competitor);
             if (fleetsForWhichNoScoreWasFound.contains(fleet)) {
-                if (leaderboard.getNetPoints(competitor, raceColumn, at) != null) {
+                if (leaderboard.getTotalPoints(competitor, raceColumn, at) != null) {
                     fleetsForWhichNoScoreWasFound.remove(fleet);
                 }
             }
@@ -160,12 +160,18 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
         return 0;
     }
 
+    /**
+     * @param o1ScoresIncludingDiscarded scores that include the points for those races that have been discarded (net points)
+     * @param o2ScoresIncludingDiscarded scores that include the points for those races that have been discarded (net points)
+     */
     @Override
-    public int compareByLastRace(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByLastRace(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1ScoresIncludingDiscarded,
+            List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2ScoresIncludingDiscarded,
+            boolean nullScoresAreBetter) {
         int result = 0;
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
-        ListIterator<Pair<RaceColumn, Double>> o1Iter = o1Scores.listIterator(o1Scores.size());
-        ListIterator<Pair<RaceColumn, Double>> o2Iter = o2Scores.listIterator(o2Scores.size());
+        ListIterator<Pair<RaceColumn, Double>> o1Iter = o1ScoresIncludingDiscarded.listIterator(o1ScoresIncludingDiscarded.size());
+        ListIterator<Pair<RaceColumn, Double>> o2Iter = o2ScoresIncludingDiscarded.listIterator(o2ScoresIncludingDiscarded.size());
         while (result == 0 && o1Iter.hasPrevious() && o2Iter.hasPrevious()) {
             result = pureScoreComparator.compare(o1Iter.previous().getB(), o2Iter.previous().getB());
         }

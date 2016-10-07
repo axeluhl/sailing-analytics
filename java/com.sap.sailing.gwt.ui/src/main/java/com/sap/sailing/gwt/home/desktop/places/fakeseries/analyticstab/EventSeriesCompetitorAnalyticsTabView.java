@@ -21,7 +21,6 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.EventSeriesAnalyticsDa
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SharedLeaderboardEventSeriesTabView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sse.common.Util;
@@ -58,7 +57,7 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
 
     @Override
     public void start(EventSeriesCompetitorAnalyticsPlace myPlace, AcceptsOneWidget contentArea) {
-        contentArea.setWidget(new Placeholder());
+        contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String leaderboardName = currentPresenter.getSeriesDTO().getLeaderboardId();
         if (leaderboardName != null && !leaderboardName.isEmpty()) {
             EventSeriesAnalyticsDataManager eventSeriesAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
@@ -80,7 +79,7 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
     private List<DetailType> getAvailableDetailsTypes() {
         List<DetailType> availableDetailsTypes = new ArrayList<DetailType>();
         availableDetailsTypes.add(DetailType.OVERALL_RANK);
-        availableDetailsTypes.add(DetailType.REGATTA_TOTAL_POINTS_SUM);
+        availableDetailsTypes.add(DetailType.REGATTA_NET_POINTS_SUM);
         return availableDetailsTypes;
     }
 

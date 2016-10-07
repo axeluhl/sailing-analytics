@@ -12,7 +12,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class RegattaLogDeviceCompetitorMappingFinder extends RegattaLogDeviceMappingFinder<Competitor> {
+public class RegattaLogDeviceCompetitorMappingFinder extends BaseRegattaLogDeviceMappingFinder<Competitor> {
 
     public RegattaLogDeviceCompetitorMappingFinder(RegattaLog log) {
         super(log);

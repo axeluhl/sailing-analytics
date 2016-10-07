@@ -180,7 +180,8 @@ public class MasterDataImportPanel extends VerticalPanel {
                                                     } else {
                                                         overallProgressBar.setPercent((int) (result
                                                                 .getOverallProgressPct() * 100));
-                                                        subProgressName.setText(result.getNameOfCurrentSubProgress());
+                                                        subProgressName.setText(result.getCurrentSubProgress()
+                                                                .getMessage(stringMessages));
                                                         subProgressBar.setPercent((int) (result
                                                                 .getCurrentSubProgressPct() * 100));
                                                     }
@@ -315,7 +316,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
-        contentPanel.add(new Label(stringMessages.importLeaderboardGroups()));
+        contentPanel.add(new Label(stringMessages.availableLeaderboardGroups()));
         
         HorizontalPanel filterPanel = new HorizontalPanel();
         filterPanel.add(new Label(stringMessages.filterName() + ":"));

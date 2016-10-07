@@ -35,7 +35,7 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 public class CompetitorTableWrapper<S extends RefreshableSelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     
-    public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
+    public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDTO>() {
@@ -170,6 +170,20 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             }
         });
 
+        TextColumn<CompetitorDTO> competitorSearchTagColumn = new TextColumn<CompetitorDTO>() {
+            @Override
+            public String getValue(CompetitorDTO competitor) {
+                return competitor.getSearchTag();
+            }
+        };
+        competitorSearchTagColumn.setSortable(true);
+        competitorColumnListHandler.setComparator(competitorSearchTagColumn, new Comparator<CompetitorDTO>() {
+            @Override
+            public int compare(CompetitorDTO o1, CompetitorDTO o2) {
+                return new NaturalComparator(false).compare(o1.getSearchTag(), o2.getSearchTag());
+            }
+        });
+
         TextColumn<CompetitorDTO> timeOnTimeFactorColumn = new TextColumn<CompetitorDTO>() {
             @Override
             public String getValue(CompetitorDTO competitor) {
@@ -212,9 +226,11 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 string.add(t.getSailID());
                 string.add(t.getBoatClass().getName());
                 string.add(t.getIdAsString());
+                string.add(t.getSearchTag());
                 return string;
             }
         };
+        registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         
         //CompetitorTableEditFeatures
         ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new ImagesBarColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
@@ -228,7 +244,6 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     allowUpdate(Collections.singleton(competitor));
                 }
             }
-
         });
         
         mainPanel.insert(filterField, 0);
@@ -241,6 +256,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         table.addColumn(displayColorColumn, stringMessages.color());
         table.addColumn(imageColumn, stringMessages.image());
         table.addColumn(competitorEMailColumn, stringMessages.email());
+        table.addColumn(competitorSearchTagColumn, stringMessages.searchTag());
         table.addColumn(competitorIdColumn, stringMessages.id());
         table.addColumn(competitorActionColumn, stringMessages.actions());
         table.ensureDebugId("CompetitorsTable");

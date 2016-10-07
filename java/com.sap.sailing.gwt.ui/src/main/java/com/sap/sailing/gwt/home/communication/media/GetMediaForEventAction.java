@@ -15,6 +15,12 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load images and videos to be shown on the media page for the
+ * {@link #GetMediaForEventAction(UUID) given event-id}, preparing the appropriate data structure.
+ * </p>
+ */
 public class GetMediaForEventAction implements SailingAction<MediaDTO>, IsClientCacheable {
     
     private UUID eventId;
@@ -23,6 +29,12 @@ public class GetMediaForEventAction implements SailingAction<MediaDTO>, IsClient
     private GetMediaForEventAction() {
     }
 
+    /**
+     * Creates a {@link GetMediaForEventAction} instance for the given event-id.
+     * 
+     * @param eventId
+     *            {@link UUID} of the event to load media for
+     */
     public GetMediaForEventAction(UUID eventId) {
         this.eventId = eventId;
     }

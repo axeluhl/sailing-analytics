@@ -8,7 +8,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingFactoryImpl;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -53,14 +52,14 @@ public interface SwissTimingFactory {
     
     SwissTimingRaceTracker createRaceTracker(String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore,
             boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws InterruptedException, UnknownHostException,
             IOException, ParseException;
 
     RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
-            WindStore windStore, GPSFixStore gpsFixStore, boolean useInternalMarkPassingAlgorithm,
+            WindStore windStore, boolean useInternalMarkPassingAlgorithm,
             DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws UnknownHostException,
             InterruptedException, IOException, ParseException;
 

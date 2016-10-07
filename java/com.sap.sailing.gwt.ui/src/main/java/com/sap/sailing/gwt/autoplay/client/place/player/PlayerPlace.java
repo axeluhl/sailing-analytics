@@ -1,69 +1,46 @@
 package com.sap.sailing.gwt.autoplay.client.place.player;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 
 public class PlayerPlace extends AbstractBasePlace {
-    // general parameters
-    private final String eventUuidAsString;
-    private final boolean fullscreen;
+    private final AutoPlayerConfiguration playerConfiguration;
     
-    public final static String PARAM_EVENTID = "eventId"; 
-    public final static String PARAM_FULLSCREEN = "fullscreen";
-    
-    // leaderboard parameters
-    private final String leaderboardIdAsNameString;
-    private final String leaderboardZoom;
-    
-    public final static String PARAM_LEADEROARD_NAME = "leaderboardName"; 
-    public final static String PARAM_LEADEROARD_ZOOM = "leaderboardZoom"; 
-
-    // raceboard parameters
-    private String raceboardAutoSelectMedia;  
-
-    public final static String PARAM_RACEBOARD_AUTOSELECT_MEDIA = "autoSelectMedia"; 
+    private final PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleWithAllSettings;
+    private final PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleWithAllSettings;
     
     public PlayerPlace(String url) {
         super(url);
-        eventUuidAsString = getParameter(PARAM_EVENTID);
-        fullscreen = Boolean.valueOf(getParameter(PARAM_FULLSCREEN));
-
-        leaderboardIdAsNameString = getParameter(PARAM_LEADEROARD_NAME);
-        leaderboardZoom = getParameter(PARAM_LEADEROARD_ZOOM);
         
-        raceboardAutoSelectMedia = getParameter(PARAM_RACEBOARD_AUTOSELECT_MEDIA);
+        String eventUuidAsString = getParameter(AutoPlayerConfiguration.PARAM_EVENTID);
+        String leaderboardName= getParameter(AutoPlayerConfiguration.PARAM_LEADEROARD_NAME);
+        Boolean fullscreen = Boolean.valueOf(getParameter(AutoPlayerConfiguration.PARAM_FULLSCREEN));
+        Integer timeToSwitchBeforeRaceStartInSeconds = Integer.valueOf(getParameter(AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START));
+        
+        this.playerConfiguration = new AutoPlayerConfiguration(eventUuidAsString, leaderboardName, fullscreen, timeToSwitchBeforeRaceStartInSeconds);
+        this.leaderboardPerspectiveLifecycleWithAllSettings = null;
+        this.raceboardPerspectiveLifecycleWithAllSettings = null;
     }
 
-    public PlayerPlace(String eventUuidAsString, boolean fullscreen,
-            String leaderboardIdAsNameString, String leaderboardZoomAsString, String raceboardAutoSelectMedia) {
-        super(PARAM_EVENTID, eventUuidAsString, PARAM_FULLSCREEN, String.valueOf(fullscreen), 
-                PARAM_LEADEROARD_NAME, leaderboardIdAsNameString, PARAM_LEADEROARD_ZOOM, leaderboardZoomAsString,
-                PARAM_RACEBOARD_AUTOSELECT_MEDIA, raceboardAutoSelectMedia);
-        this.eventUuidAsString = eventUuidAsString;
-        this.fullscreen = fullscreen;
-        this.leaderboardIdAsNameString = leaderboardIdAsNameString;
-        this.leaderboardZoom = leaderboardZoomAsString;
-        this.raceboardAutoSelectMedia = raceboardAutoSelectMedia; 
+    public PlayerPlace(AutoPlayerConfiguration playerConfiguration,
+            PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleWithAllSettings,
+            PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleWithAllSettings) {
+        super(AutoPlayerConfiguration.PARAM_EVENTID, playerConfiguration.getEventUidAsString(),
+                AutoPlayerConfiguration.PARAM_FULLSCREEN, String.valueOf(playerConfiguration.isFullscreenMode()), 
+                AutoPlayerConfiguration.PARAM_LEADEROARD_NAME, playerConfiguration.getLeaderboardName(),
+               AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START, String.valueOf(playerConfiguration.getTimeToSwitchBeforeRaceStartInSeconds()));
+        this.playerConfiguration = playerConfiguration;
+        this.leaderboardPerspectiveLifecycleWithAllSettings = leaderboardPerspectiveLifecycleWithAllSettings;
+        this.raceboardPerspectiveLifecycleWithAllSettings = raceboardPerspectiveLifecycleWithAllSettings;
     }
 
-    public String getEventUuidAsString() {
-        return eventUuidAsString;
-    }
-
-    public String getLeaderboardIdAsNameString() {
-        return leaderboardIdAsNameString;
-    }
-
-    public String getLeaderboardZoom() {
-        return leaderboardZoom;
-    }
-    
-    public String getRaceboardAutoSelectMedia() {
-        return raceboardAutoSelectMedia;
-    }
-
-    public boolean isFullscreen() {
-        return fullscreen;
+    public AutoPlayerConfiguration getConfiguration() {
+        return this.playerConfiguration;
     }
 
     public static class Tokenizer implements PlaceTokenizer<PlayerPlace> {
@@ -76,5 +53,13 @@ public class PlayerPlace extends AbstractBasePlace {
         public PlayerPlace getPlace(String url) {
             return new PlayerPlace(url);
         }
+    }
+
+    public PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> getLeaderboardPerspectiveLifecycleWithAllSettings() {
+        return leaderboardPerspectiveLifecycleWithAllSettings;
+    }
+
+    public PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> getRaceboardPerspectiveLifecycleWithAllSettings() {
+        return raceboardPerspectiveLifecycleWithAllSettings;
     }
 }

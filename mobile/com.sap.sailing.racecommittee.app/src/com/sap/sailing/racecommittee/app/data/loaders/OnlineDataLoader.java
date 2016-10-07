@@ -1,5 +1,10 @@
 package com.sap.sailing.racecommittee.app.data.loaders;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+
 import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Loader;
@@ -9,11 +14,6 @@ import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.data.handlers.DataHandler;
 import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
 
 /**
  * <p>
@@ -27,7 +27,7 @@ import java.net.URL;
  * <p/>
  * <p>
  * The data returned by the remote resource is parsed by the given {@link DataParser} and may be cached through your
- * implementation of {@link DataHandler#onResult(Object)}.
+ * implementation of {@link DataHandler#onResult(Object, boolean)}.
  * </p>
  *
  * @param <T> result type.
@@ -78,7 +78,7 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     @Override
     public void deliverResult(DataLoaderResult<T> result) {
         if (result.isSuccessful()) {
-            dataHandler.onResult(result.getResult());
+            dataHandler.onResult(result.getResult(), result.isResultCached());
         }
         super.deliverResult(result);
     }

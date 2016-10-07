@@ -16,16 +16,16 @@ public class HttpJsonPostRequest extends HttpRequest {
     private String requestBody;
     private String accessToken;
 
-    public HttpJsonPostRequest(URL requestUrl, Context context) {
-        this(requestUrl, null, context, null);
+    public HttpJsonPostRequest(Context context, URL requestUrl) {
+        this(context, requestUrl, null, null);
     }
 
-    public HttpJsonPostRequest(URL requestUrl, String body, Context context) {
-        this(requestUrl, body, context, null);
+    public HttpJsonPostRequest(Context context, URL requestUrl, String body) {
+        this(context, requestUrl, body, null);
     }
 
-    public HttpJsonPostRequest(URL requestUrl, String body, Context context, String accessToken) {
-        super(requestUrl, context);
+    public HttpJsonPostRequest(Context context, URL requestUrl, String body, String accessToken) {
+        super(context, requestUrl);
         this.requestBody = body;
         this.accessToken = accessToken;
     }

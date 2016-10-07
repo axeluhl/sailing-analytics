@@ -28,7 +28,9 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
@@ -46,6 +48,8 @@ import com.sap.sse.mongodb.MongoDBService;
 
 public class WebSocketTest {
     private static final Logger logger = Logger.getLogger(WebSocketTest.class.getName());
+
+    @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(1 * 60 * 1000);
 
     @WebSocket
     public class SimpleEchoTestSocket {

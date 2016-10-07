@@ -106,23 +106,23 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public boolean scoredInMedalRace(CompetitorDTO competitor) {
         LeaderboardRowDTO row = rows.get(competitor);
         for (RaceColumnDTO race : races) {
-            if (race.isMedalRace() && row.fieldsByRaceColumnName.get(race.getRaceColumnName()).totalPoints > 0) {
+            if (race.isMedalRace() && row.fieldsByRaceColumnName.get(race.getRaceColumnName()).netPoints > 0) {
                 return true;
             }
         }
         return false;
     }
 
-    public Double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
-        Double netPoints = null;
-        LeaderboardRowDTO row = rows.get(competitor);
+    public Double getTotalPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
+        Double totalPoints = null;
+        final LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
             LeaderboardEntryDTO field = row.fieldsByRaceColumnName.get(nameOfLastRaceSoFar);
-            if (field != null &&  field.netPoints != null) {
-                netPoints = field.netPoints;
+            if (field != null &&  field.totalPoints != null) {
+                totalPoints = field.totalPoints;
             }
         }
-        return netPoints;
+        return totalPoints;
     }
 
     public boolean raceIsTracked(String raceColumnName) {

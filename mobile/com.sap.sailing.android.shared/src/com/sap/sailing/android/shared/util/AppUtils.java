@@ -37,7 +37,9 @@ public class AppUtils {
      */
     public static void lockOrientation(Activity activity) {
         if (with(activity).isPhone()) {
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
     }
 
@@ -76,13 +78,21 @@ public class AppUtils {
     /**
      * Read the build.info from the asset folder, which is written at build time with git information
      *
-     * @return content of the build.info file or an empty string, if no file was found
+     * @return content of the build.info (or build_gradle.info) file or an empty string, if no file was found
      */
     public String getBuildInfo() {
         String buildInfo = "";
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(mContext.getAssets().open("build.info")));
+            String file = "build.info";
+            String[] files = mContext.getAssets().list("");
+            for (String item : files) {
+                if ("build_gradle.info".equals(item)) {
+                    file = item;
+                    break;
+                }
+            }
+            reader = new BufferedReader(new InputStreamReader(mContext.getAssets().open(file)));
             buildInfo = reader.readLine();
         } catch (IOException e) {
             Log.d(TAG, "Can't open file with build info", e);

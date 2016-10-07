@@ -44,9 +44,10 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
     @Override
     protected RaceLogRaceStatus performAnalysis() {
-        ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<>(RaceLogRaceStatusEventComparator.INSTANCE);
-        for(RaceLogEvent event: getPassEvents()) {
-            if(event instanceof RaceLogRaceStatusEvent) {
+        ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<>(
+                RaceLogRaceStatusEventComparator.INSTANCE);
+        for (RaceLogEvent event : getPassEvents()) {
+            if (event instanceof RaceLogRaceStatusEvent) {
                 statusEvents.add((RaceLogRaceStatusEvent) event);
             }
         }
@@ -54,7 +55,6 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
             event.accept(eventDispatcher);
             return eventDispatcher.nextStatus;
         }
-        
         return RaceLogRaceStatus.UNSCHEDULED;
     }
     
@@ -79,15 +79,15 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
         private void setRaceLogStatusBasedOnStartTime(TimePoint startTime) {
             if (startTime == null) {
                 nextStatus = RaceLogRaceStatus.PRESCHEDULED;
-                return;
-            }
-            TimePoint now = clock.now();
-            if (racingProcedure.isStartphaseActive(startTime, now)) {
-                nextStatus = RaceLogRaceStatus.STARTPHASE;
-            } else if (now.before(startTime)) {
-                nextStatus = RaceLogRaceStatus.SCHEDULED;
             } else {
-                nextStatus = RaceLogRaceStatus.RUNNING;
+                TimePoint now = clock.now();
+                if (racingProcedure.isStartphaseActive(startTime, now)) {
+                    nextStatus = RaceLogRaceStatus.STARTPHASE;
+                } else if (now.before(startTime)) {
+                    nextStatus = RaceLogRaceStatus.SCHEDULED;
+                } else {
+                    nextStatus = RaceLogRaceStatus.RUNNING;
+                }
             }
         }
 
@@ -101,6 +101,6 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
             DependentStartTimeResolver startTimeResolver = new DependentStartTimeResolver(resolver);
             TimePoint startTime = startTimeResolver.resolve(event).getStartTime();
             setRaceLogStatusBasedOnStartTime(startTime);
-        };
-    };
+        }
+    }
 }

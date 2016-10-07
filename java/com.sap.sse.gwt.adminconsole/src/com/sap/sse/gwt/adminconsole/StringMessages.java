@@ -16,4 +16,6 @@ public interface StringMessages extends Messages {
     String removeUploadedFile();
     
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
+    
+    String send();
 }

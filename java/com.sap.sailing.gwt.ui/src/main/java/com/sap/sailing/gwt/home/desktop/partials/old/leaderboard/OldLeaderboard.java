@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources;
 import com.sap.sailing.gwt.home.desktop.partials.old.LeaderboardDelegate;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
@@ -190,10 +189,10 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
                 String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatter.render(lastCorrectionDate) + ", "
                         + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
                 lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
-                lastScoringUpdateTextDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
+                lastScoringUpdateTextDiv.setInnerText(StringMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
                 if (delegate != null) {
                     delegate.getLastScoringUpdateTimeElement().setInnerText(lastUpdate);
-                    delegate.getLastScoringUpdateTextElement().setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
+                    delegate.getLastScoringUpdateTextElement().setInnerText(StringMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
                 }
             } else {
                 lastScoringUpdateTimeDiv.setInnerHTML("&nbsp;");
@@ -225,7 +224,7 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
     @Override
     public void onBusyStateChange(boolean busyState) {
         busyIndicator.setBusy(busyState);
-        if(delegate != null) {
+        if (delegate != null) {
             delegate.setBusyState(busyState);
         }
     }

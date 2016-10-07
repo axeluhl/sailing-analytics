@@ -15,6 +15,12 @@ import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load recent events to be shown in the event list overview, where
+ * the amount of loaded entries can be {@link #GetRecentEventsAction(int) limited}.
+ * </p>
+ */
 public class GetRecentEventsAction implements SailingAction<ListResult<EventQuickfinderDTO>>, IsClientCacheable {
     
     private int limit;
@@ -22,6 +28,12 @@ public class GetRecentEventsAction implements SailingAction<ListResult<EventQuic
     protected GetRecentEventsAction() {
     }
     
+    /**
+     * Creates a {@link GetRecentEventsAction} instance where the loaded entries are limited to the provided amount.
+     * 
+     * @param limit
+     *            maximum number of entries to be loaded
+     */
     public GetRecentEventsAction(int limit) {
         this.limit = limit;
     }

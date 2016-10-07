@@ -21,8 +21,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 
 /**
- * Helper class to support converting old places to new ones.
- * 
+ * Helper class to support converting old places to new ones and relace inconsistent places with working ones.
  */
 public class ApplicationPlaceUpdater {
 

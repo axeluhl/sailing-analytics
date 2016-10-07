@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
@@ -41,7 +42,7 @@ public class LeaderboardCacheManager {
     private final WeakHashMap<Leaderboard, CacheInvalidationUponScoreCorrectionListener> scoreCorrectionListeners;
     private final NamedReentrantReadWriteLock scoreCorrectionAndCompetitorChangeListenersLock;
     private final WeakHashMap<Leaderboard, CacheInvalidationUponCompetitorChangeListener> competitorChangeListeners;
-    private final ConcurrentWeakHashMap<Leaderboard, ConcurrentHashMap<TrackedRace, Set<CacheInvalidationListener>>> invalidationListenersPerLeaderboard;
+    private final ConcurrentWeakHashMap<Leaderboard, ConcurrentMap<TrackedRace, Set<CacheInvalidationListener>>> invalidationListenersPerLeaderboard;
     private final WeakHashMap<Leaderboard, RaceColumnListener> raceColumnListeners;
     
     private class CacheInvalidationListener extends AbstractRaceChangeListener {
@@ -125,6 +126,11 @@ public class LeaderboardCacheManager {
         }
 
         @Override
+        public void searchTagChanged(String oldSearchTag, String newSearchTag) {
+            //ignore (email not shown in leaderboard)
+        }
+
+        @Override
         public void flagImageChanged(URI oldFlagImageURL, URI newFlagImageURL) {
             removeFromCache(leaderboard);
         }
@@ -154,8 +160,8 @@ public class LeaderboardCacheManager {
         }
 
         @Override
-        public void maxPointsReasonChanced(Competitor competitor, MaxPointsReason oldMaxPointsReason,
-                MaxPointsReason newMaxPointsReason) {
+        public void maxPointsReasonChanced(Competitor competitor, RaceColumn raceColumn,
+                MaxPointsReason oldMaxPointsReason, MaxPointsReason newMaxPointsReason) {
             removeFromCache(leaderboard);
         }
 
@@ -194,7 +200,7 @@ public class LeaderboardCacheManager {
     }
     
     private void removeFromCache(Leaderboard leaderboard) {
-        ConcurrentHashMap<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard.remove(leaderboard);
+        ConcurrentMap<TrackedRace, Set<CacheInvalidationListener>> listenersMap = invalidationListenersPerLeaderboard.remove(leaderboard);
         if (listenersMap != null) {
             for (Map.Entry<TrackedRace, Set<CacheInvalidationListener>> e : listenersMap.entrySet()) {
                 synchronized (e.getValue()) { // the Set is a Collections.synchronizedSet, and synchronization is required for iteration
@@ -294,7 +300,7 @@ public class LeaderboardCacheManager {
     }
 
     private void registerListener(final Leaderboard leaderboard, TrackedRace trackedRace) {
-        ConcurrentHashMap<TrackedRace, Set<CacheInvalidationListener>> invalidationListeners;
+        ConcurrentMap<TrackedRace, Set<CacheInvalidationListener>> invalidationListeners;
         final CacheInvalidationListener listener;
         listener = new CacheInvalidationListener(leaderboard, trackedRace);
         trackedRace.addListener(listener);

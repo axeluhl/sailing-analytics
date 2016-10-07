@@ -132,7 +132,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     private void setupCourseDesignerListBox(Grid grid, int gridRow) {
         designerModeEntryListBox = new ListBox();
         designerModeEntryListBox.setMultipleSelect(false);
-
         designerModeEntryListBox.setWidth("100%");
         ListBoxUtils.setupCourseDesignerModeListBox(designerModeEntryListBox,
                 originalConfiguration.defaultCourseDesignerMode, stringMessages.dontoverwrite());
@@ -267,19 +266,14 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         gateStartClassFlagListBox.setWidth("100%");
         gateStartRecallBox = setupRecallBox(originalConfiguration==null?null:originalConfiguration.gateStartConfiguration);
         gateStartResultEntryBox = setupResultEntryBox(originalConfiguration==null?null:originalConfiguration.gateStartConfiguration);
-        gateStartPathfinderBox = new CheckBox(stringMessages.activatePathfinder());
-        gateStartPathfinderBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-            }
-        });
+        gateStartPathfinderBox = createCheckbox(stringMessages.activatePathfinder());
+        if (originalConfiguration.gateStartConfiguration != null) {
+            gateStartPathfinderBox.setValue(originalConfiguration.gateStartConfiguration.hasPathfinder);
+        }
         gateStartGolfDownBox = createCheckbox(stringMessages.hasAdditionalGolfDownTime());
-        gateStartGolfDownBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-            }
-        });
-
+        if (originalConfiguration.gateStartConfiguration != null) {
+            gateStartGolfDownBox.setValue(originalConfiguration.gateStartConfiguration.hasAdditionalGolfDownTime);
+        }
         grid.setWidget(0, 0, new Label(stringMessages.classFlag() + ":"));
         grid.setWidget(0, 1, gateStartClassFlagListBox);
         grid.setWidget(0, 2, createHelpImage(stringMessages.classFlagHelpText("Gate Start")));

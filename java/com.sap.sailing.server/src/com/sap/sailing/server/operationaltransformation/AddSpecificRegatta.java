@@ -30,25 +30,27 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final ScoringScheme scoringScheme;
     private final Serializable defaultCourseAreaId;
     private final boolean useStartTimeInference;
+    private final boolean controlTrackingFromStartAndFinishTimes;
     private final RankingMetrics rankingMetricType;
     
     public AddSpecificRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, boolean useStartTimeInference,
-            RankingMetrics rankingMetricType) {
+            boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
         super(regattaName, boatClassName, startDate, endDate, id);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
         this.defaultCourseAreaId = defaultCourseAreaId;
         this.useStartTimeInference = useStartTimeInference;
+        this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
         this.rankingMetricType = rankingMetricType;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), getStartDate(), getEndDate(), getId(), createSeries(toState),
-                persistent, scoringScheme, defaultCourseAreaId, useStartTimeInference, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
+                persistent, scoringScheme, defaultCourseAreaId, useStartTimeInference, controlTrackingFromStartAndFinishTimes, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
         return regatta;
     }
 
@@ -56,7 +58,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
         List<Series> result = new ArrayList<Series>();
         for (Map.Entry<String, SeriesCreationParametersDTO> e : seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds.getSeriesCreationParameters().entrySet()) {
             final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-            Series s = new SeriesImpl(e.getKey(), e.getValue().isMedal(), createFleets(e.getValue().getFleets()),
+            Series s = new SeriesImpl(e.getKey(), e.getValue().isMedal(), e.getValue().isFleetsCanRunInParallel(), createFleets(e.getValue().getFleets()),
                     emptyRaceColumnNamesList, trackedRegattaRegistry);
             if (e.getValue().getDiscardingThresholds() != null) {
                 s.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(e.getValue().getDiscardingThresholds()));
@@ -64,6 +66,7 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
             s.setStartsWithZeroScore(e.getValue().isStartsWithZero());
             s.setSplitFleetContiguousScoring(e.getValue().hasSplitFleetContiguousScoring());
             s.setFirstColumnIsNonDiscardableCarryForward(e.getValue().isFirstColumnIsNonDiscardableCarryForward());
+            s.setMaximumNumberOfDiscards(e.getValue().getMaximumNumberOfDiscards());
             result.add(s);
         }
         return result;

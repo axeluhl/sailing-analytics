@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.LicenseHelper;
@@ -48,7 +47,7 @@ public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFrag
                 EulaHelper.with(getActivity()).openEulaPage();
             }
         });
-        OpenSansTextView versionTextView = (OpenSansTextView) view.findViewById(R.id.system_information_application_version);
+        TextView versionTextView = (TextView) view.findViewById(R.id.system_information_application_version);
         versionTextView.setText(AppUtils.with(getActivity()).getBuildInfo());
         return view;
     }
@@ -56,10 +55,11 @@ public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFrag
     private void showLicenseDialog() {
         Notices notices = new Notices();
         LicenseHelper licenseHelper = new LicenseHelper();
-        notices.addNotice(licenseHelper.getAndroidSupportNotice());
+        notices.addNotice(licenseHelper.getAndroidSupportNotice(getActivity()));
         notices.addNotice(licenseHelper.getOpenSansNotice());
         notices.addNotice(licenseHelper.getJsonSimpleNotice());
-        notices.addNotice(licenseHelper.getDialogNotice());
+        notices.addNotice(licenseHelper.getViewPageIndicator(getActivity()));
+        notices.addNotice(licenseHelper.getDialogNotice(getActivity()));
         LicensesDialog.Builder builder = new LicensesDialog.Builder(getActivity());
         builder.setTitle(getString(R.string.license_information));
         builder.setNotices(notices);
@@ -74,7 +74,7 @@ public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFrag
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View widget) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + url));
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(browserIntent);
             }
         };

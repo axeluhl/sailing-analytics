@@ -3,13 +3,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-    <View
-        android:id="@+id/top_bar"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_alignParentTop="true"
-        android:background="@color/sap_yellow"/>
-
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
@@ -17,7 +10,7 @@
         android:layout_alignParentBottom="true"
         android:orientation="vertical">
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
+        <Button
             android:id="@+id/license_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/about_button_height"
@@ -25,13 +18,12 @@
             android:layout_marginLeft="@dimen/about_button_side_margin"
             android:layout_marginRight="@dimen/about_button_side_margin"
             android:layout_marginTop="@dimen/about_button_top_bottom_margin"
-            android:background="@drawable/rounded_btn_yellow"
+            android:background="@drawable/blue_button"
             android:text="@string/license_information"
-            android:textAllCaps="false"
             android:textSize="@dimen/about_button_text_size"
             android:textStyle="bold"/>
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
+        <Button
             android:id="@+id/eula_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/about_button_height"
@@ -39,20 +31,19 @@
             android:layout_marginLeft="@dimen/about_button_side_margin"
             android:layout_marginRight="@dimen/about_button_side_margin"
             android:layout_marginTop="@dimen/about_button_top_bottom_margin"
-            android:background="@drawable/rounded_btn_yellow"
+            android:background="@drawable/blue_button"
             android:text="@string/eula"
-            android:textAllCaps="false"
             android:textSize="@dimen/about_button_text_size"
             android:textStyle="bold"/>
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        <TextView
             android:id="@+id/system_information_application_version_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/about_button_side_margin"
             android:text="@string/application_version"/>
 
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        <TextView
             android:id="@+id/system_information_application_version"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -66,7 +57,6 @@
         android:layout_above="@+id/linearLayout"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/top_bar"
         android:layout_marginTop="@dimen/about_header_margin_top"
         android:fillViewport="false">
 

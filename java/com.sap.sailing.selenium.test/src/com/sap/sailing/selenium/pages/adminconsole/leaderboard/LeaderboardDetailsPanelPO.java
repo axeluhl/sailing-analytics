@@ -91,6 +91,9 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "TrackedRacesListComposite")
     private WebElement trackedRacesListComposite;
     
+    @FindBy(how = BySeleniumId.class, using = "TrackedRacesFilterTextBox")
+    private WebElement trackedRacesFilterTextBox;
+    
     public LeaderboardDetailsPanelPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
@@ -101,10 +104,14 @@ public class LeaderboardDetailsPanelPO extends PageArea {
 //     */
 //    // TODO: Must be a flexible leaderboard
     public void addRacesToFlexibleLeaderboard(int i) {
+        addRacesToFlexibleLeaderboard(i, "R");
+    }
+    
+    public void addRacesToFlexibleLeaderboard(int i, String s) {
         this.addRacesButton.click();
         WebElement dialog = findElementBySeleniumId(this.driver, "RaceColumnsInLeaderboardDialog");
         RaceColumnsInLeaderboardDialog raceColumnsInLeaderboardDialog = new RaceColumnsInLeaderboardDialog(this.driver, dialog);
-        raceColumnsInLeaderboardDialog.addRaces(2);
+        raceColumnsInLeaderboardDialog.addRaces(i, s);
         //selectRaceColumn("R1", "Default");
     }
 //    
@@ -208,6 +215,10 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     
     public LeaderboardRacesTablePO getRacesTable() {
         return new LeaderboardRacesTablePO(driver, this.racesCellTable);
+    }
+    
+    public void filter(String s) {
+        trackedRacesFilterTextBox.sendKeys(s);
     }
     
     private CellTablePO<DataEntryPO> getTrackedRacesTable() {

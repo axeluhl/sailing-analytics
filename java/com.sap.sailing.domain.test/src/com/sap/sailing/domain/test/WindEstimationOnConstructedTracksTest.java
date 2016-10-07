@@ -60,7 +60,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     
     private void initRace(int numberOfCompetitorsToUse, int[] numberOfMarksPassed, TimePoint timePointForFixes) {
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505",
-                competitors.subList(0, numberOfCompetitorsToUse), timePointForFixes));
+                competitors.subList(0, numberOfCompetitorsToUse), timePointForFixes, /* useMarkPassingCalculator */ false));
         for (int i=0; i<numberOfCompetitorsToUse; i++) {
             initializeMarkPassingForStartGate(competitors.get(i), numberOfMarksPassed[i], timePointForFixes);
         }

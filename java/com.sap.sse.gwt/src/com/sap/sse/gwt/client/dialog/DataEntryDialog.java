@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -176,13 +177,37 @@ public abstract class DataEntryDialog<T> {
         return createTextBoxInternal(initialValue, 30);
     }
 
-    public SuggestBox createSuggestBox(Iterable<String> suggestValues) {
+    /**
+     * This methods creates a {@link MultiWordSuggestOracle} where the given suggest values are
+     * {@link MultiWordSuggestOracle#addAll(java.util.Collection) added} and
+     * {@link MultiWordSuggestOracle#setDefaultSuggestionsFromText(java.util.Collection) set as default suggestions},
+     * first. Afterwards, this oracle is used to {@link #createSuggestBox(SuggestOracle) create} as {@link SuggestBox}.
+     * 
+     * @param suggestValues the plain text suggestions to use
+     * @return the new {@link SuggestBox} instance
+     * 
+     * @see #createSuggestBox(SuggestOracle)
+     */
+    protected SuggestBox createSuggestBox(Iterable<String> suggestValues) {
         List<String> suggestValuesAsCollection = new ArrayList<>();
         Util.addAll(suggestValues, suggestValuesAsCollection);
         final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
         oracle.addAll(suggestValuesAsCollection);
         oracle.setDefaultSuggestionsFromText(suggestValuesAsCollection);
-        final SuggestBox result = new SuggestBox(oracle);
+        return createSuggestBox(oracle);
+    }
+    
+    /**
+     * Creates a {@link SuggestBox} using the given {@link SuggestOracle}, a {@link TextBox} and the
+     * {@link com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay DefaultSuggestionDisplay} 
+     * 
+     * @param suggestOracle the {@link SuggestOracle} to in the {@link SuggestBox}
+     * @return the new {@link SuggestBox} instance
+     * 
+     * @see SuggestBox#SuggestBox(SuggestOracle)
+     */
+    protected SuggestBox createSuggestBox(SuggestOracle suggestOracle) {
+        final SuggestBox result = new SuggestBox(suggestOracle);
         result.getValueBox().addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
@@ -526,6 +551,10 @@ public abstract class DataEntryDialog<T> {
 
     protected void setCursor(Style.Cursor cursor) {
         dateEntryDialog.getElement().getStyle().setCursor(cursor);
+    }
+
+    public void center() {
+        dateEntryDialog.center();
     }
 
     public void show() {

@@ -43,7 +43,9 @@
 	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole"/>
 	<inherits name="com.sap.sailing.gwt.regattaoverview.SourceRegattaOverview"/>
 	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard"/>
-	<inherits name='com.sap.sse.gwt.CommonControlCSS'/>
+        <inherits name="com.sap.sailing.gwt.ui.SourceRaceboard"/>
+  	<inherits name='com.sap.sse.gwt.CommonControlCSS'/>
+	<inherits name='com.sap.sailing.gwt.settings.Settings'/>
 	
 	<replace-with class="com.sap.sailing.gwt.home.shared.utils.dateformatter.CustomEventDatesFormatter">
         <when-type-is class="com.sap.sailing.gwt.home.shared.utils.dateformatter.DefaultEventDatesFormatter"/>

@@ -6,6 +6,10 @@ import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sse.common.TimePoint;
 
 public interface SettableScoreCorrection extends ScoreCorrection {
+    /**
+     * The listeners added are transient and do not need to be {@link Serializable}. When this object is
+     * de-serialized, it starts out with an empty set of listeners.
+     */
     void addScoreCorrectionListener(ScoreCorrectionListener listener);
     
     void removeScoreCorrectionListener(ScoreCorrectionListener listener);

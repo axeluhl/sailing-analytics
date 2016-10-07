@@ -22,7 +22,7 @@ public class DurationTest {
         TimePoint t2 = t1.plus(d);
         assertEquals(123+234, t2.asMillis());
     }
-
+    
     @Test
     public void testDurationMinus() {
         TimePoint t1 = new MillisecondsTimePoint(234);
@@ -72,7 +72,7 @@ public class DurationTest {
         assertEquals("1 day", fmt.format(oneDay));
         Duration someMinutes = Duration.ONE_MINUTE.times(5).plus(Duration.ONE_SECOND.times(40));
         assertEquals(0, someMinutes.asDays(), 0);
-        assertEquals(0, someMinutes.asHours(), 0);
+        assertEquals(0, someMinutes.asHours(), (5.+40./60.)/60.);
         assertEquals(5.6, someMinutes.asMinutes(), 0.1);
         assertEquals(340, someMinutes.asSeconds(), 0.1);
         assertEquals(340000, someMinutes.asMillis());

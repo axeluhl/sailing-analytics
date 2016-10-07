@@ -1,12 +1,18 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:drawable="@color/background_material_dark"/>
+        android:drawable="@drawable/fiori_main_background"/>
 
-    <item>
+    <item android:bottom="60dp">
         <bitmap
             android:gravity="center"
             android:src="@drawable/launch_screen_icon"/>
+    </item>
+
+    <item android:top="80dp">
+        <bitmap
+            android:src="@drawable/launch_screen_text"
+            android:gravity="center|clip_horizontal|clip_vertical"/>
     </item>
 
 </layer-list>

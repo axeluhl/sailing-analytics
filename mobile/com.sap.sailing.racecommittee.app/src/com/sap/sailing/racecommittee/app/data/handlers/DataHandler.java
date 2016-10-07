@@ -9,7 +9,7 @@ public abstract class DataHandler<T> {
         this.manager = manager;
     }
 
-    public abstract void onResult(T data);
+    public abstract void onResult(T data, boolean isCached);
 
     public boolean hasCachedResults() {
         return false;

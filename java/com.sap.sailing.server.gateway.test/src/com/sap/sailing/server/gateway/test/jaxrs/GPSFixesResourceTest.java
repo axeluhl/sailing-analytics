@@ -61,6 +61,6 @@ public class GPSFixesResourceTest {
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
         
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString("af855a56-9726-4a9c-a77e-da955bd289bf"));
-        assertThat("all fixes stored", service.getGPSFixStore().getNumberOfFixes(device), equalTo(2L));
+        assertThat("all fixes stored", service.getSensorFixStore().getNumberOfFixes(device), equalTo(2L));
     }
 }

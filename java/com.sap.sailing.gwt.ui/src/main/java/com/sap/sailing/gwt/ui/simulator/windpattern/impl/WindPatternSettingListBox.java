@@ -16,7 +16,7 @@ public class WindPatternSettingListBox implements WindPatternSetting<String>, Is
      * name should match the corresponding field name from @WindControlParameters for which this control is being set
      */
     private String name;
-    private String displayName;
+    private SettingName settingName;
     private String currentValue;
     private List<String> values;
     
@@ -27,9 +27,9 @@ public class WindPatternSettingListBox implements WindPatternSetting<String>, Is
         
     }
     
-    public WindPatternSettingListBox(String name, String displayName) {
+    public WindPatternSettingListBox(String name, SettingName settingName) {
         this.name = name;
-        this.displayName = displayName;
+        this.settingName = settingName;
         this.values = new ArrayList<String>();
     }
     
@@ -102,7 +102,7 @@ public class WindPatternSettingListBox implements WindPatternSetting<String>, Is
     }
 
     @Override
-    public String getDisplayName() {
-       return displayName;
+    public SettingName getSettingName() {
+        return settingName;
     }
 }

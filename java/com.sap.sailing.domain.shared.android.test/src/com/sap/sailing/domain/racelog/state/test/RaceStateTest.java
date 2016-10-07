@@ -37,6 +37,7 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -177,7 +178,7 @@ public class RaceStateTest {
         state.forceNewStartTime(nowMock, new MillisecondsTimePoint(1));
         Thread.sleep(100);
         state.setFinishedTime(new MillisecondsTimePoint(10));
-        state.setCourseDesign(nowMock, mock(CourseBase.class));
+        state.setCourseDesign(nowMock, mock(CourseBase.class), CourseDesignerMode.ADMIN_CONSOLE);
         
         state.setAdvancePass(mock(TimePoint.class));
         

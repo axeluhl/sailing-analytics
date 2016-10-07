@@ -32,7 +32,7 @@ public class LogoutTask extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... params) {
         if (url != null && params != null && params.length > 0) {
-            HttpRequest request = new HttpJsonGetRequest(url, context);
+            HttpRequest request = new HttpJsonGetRequest(context, url);
             try {
                 request.execute();
             } catch (IOException e) {

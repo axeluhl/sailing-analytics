@@ -11,6 +11,7 @@ import java.util.NavigableMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -70,7 +71,7 @@ public class WaypointPositionAndDistanceCache {
      * symmetrically under the map's monitor being held, i.e., if (w1, w2) is a cache key then so is
      * (w2, w1), with equal value.
      */
-    private final ConcurrentHashMap<Pair<ControlPoint, ControlPoint>, SortedMap<TimePoint, Distance>> distanceCache;
+    private final ConcurrentMap<Pair<ControlPoint, ControlPoint>, SortedMap<TimePoint, Distance>> distanceCache;
     
     /**
      * Caches minimum distances between the positions cached in {@link #waypointPositionCache}. For two-mark control
@@ -80,7 +81,7 @@ public class WaypointPositionAndDistanceCache {
      * {@link #waypointPositionCache}, it is also invalidated here. Keys always occur symmetrically under the map's
      * monitor being held, i.e., if (w1, w2) is a cache key then so is (w2, w1), with equal value.
      */
-    private final ConcurrentHashMap<Pair<ControlPoint, ControlPoint>, SortedMap<TimePoint, Distance>> minimumDistanceCache;
+    private final ConcurrentMap<Pair<ControlPoint, ControlPoint>, SortedMap<TimePoint, Distance>> minimumDistanceCache;
     
     /**
      * The duration of the time ranges whose center time points serve as keys for the {@link NavigableMap}s used as
@@ -277,7 +278,7 @@ public class WaypointPositionAndDistanceCache {
             for (Waypoint otherWaypoint : waypoints) {
                 ControlPoint otherControlPoint = otherWaypoint.getControlPoint();
                 if (otherControlPoint != controlPoint) {
-                    for (ConcurrentHashMap<Pair<ControlPoint, ControlPoint>, SortedMap<TimePoint, Distance>> cache : Arrays.asList(distanceCache, minimumDistanceCache)) {
+                    for (ConcurrentMap<Pair<ControlPoint, ControlPoint>, SortedMap<TimePoint, Distance>> cache : Arrays.asList(distanceCache, minimumDistanceCache)) {
                         final Map<TimePoint, Distance> distanceMap = cache.get(new Pair<>(controlPoint, otherControlPoint));
                         if (distanceMap != null) {
                             distanceMap.remove(timePoint);

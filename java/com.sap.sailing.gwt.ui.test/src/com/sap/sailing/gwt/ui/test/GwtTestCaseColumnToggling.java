@@ -179,7 +179,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
         service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* addOverallDetails */ false, /* previousLeaderboardId */ null,
-                /* fillUncorrectedNetPoints */ false, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+                /* fillUncorrectedTotalPoints */ false, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Failed to get leaderboard.");
@@ -206,7 +206,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
         });
     }
     
-    private void removeColumnAndAssert(){
+    private void removeColumnAndAssert() {
         service.removeLeaderboardColumn(LEADERBOARD_NAME, COLUMN1_NAME,
                 new AsyncCallback<Void>() {
                     @Override
@@ -220,7 +220,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                         leaderboardPanel.updateLeaderboard(leaderboard);
                         assertNotNull(rc);
                         try {
-                            rc.toggleExpansion();
+                            rc.changeExpansionState(/* expand */ !rc.isExpanded());
                             leaderboardPanel.updateLeaderboard(leaderboard);
                         } catch (Exception e) {
                             fail("Toggle column failed." + e.getLocalizedMessage());

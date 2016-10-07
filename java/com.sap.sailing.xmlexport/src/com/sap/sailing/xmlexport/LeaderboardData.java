@@ -243,7 +243,7 @@ public class LeaderboardData extends ExportAction {
                     addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
                     boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitorInLeaderboard, column, timepointToBeUsed);
                     addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
-                    Double finalRaceScore = leaderboard.getTotalPoints(competitorInLeaderboard, column, timepointToBeUsed);
+                    Double finalRaceScore = leaderboard.getNetPoints(competitorInLeaderboard, column, timepointToBeUsed);
                     addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
                     competitorElement.addContent(competitorRaceDataElement);
                     raceElement.addContent(competitorElement);
@@ -404,7 +404,7 @@ public class LeaderboardData extends ExportAction {
                         addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
                         boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitorInLeaderboard, column, race.getEndOfRace());
                         addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
-                        Double finalRaceScore = leaderboard.getTotalPoints(competitorInLeaderboard, column, race.getEndOfRace());
+                        Double finalRaceScore = leaderboard.getNetPoints(competitorInLeaderboard, column, race.getEndOfRace());
                         addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
                         competitorElement.addContent(competitorRaceDataElement);
                         raceElement.addContent(competitorElement);
@@ -428,7 +428,7 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
             boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitor, column, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
-            Double finalRaceScore = leaderboard.getTotalPoints(competitor, column, race.getEndOfRace());
+            Double finalRaceScore = leaderboard.getNetPoints(competitor, column, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
             if (maxPointsReason.equals(MaxPointsReason.DNS) || race.getMarkPassings(competitor).isEmpty()) {
                 // we do not want to include competitors that did not start the race
@@ -701,7 +701,7 @@ public class LeaderboardData extends ExportAction {
         Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true);
         addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
         addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, timePointOfLatestModification));
-        addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, timePointOfLatestModification));
+        addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getNetPoints(competitor, timePointOfLatestModification));
         competitorElement.addContent(createDataConfidenceXML(competitorConfidenceAndErrorMessages));
         TimePoint elapsedTime = MillisecondsTimePoint.now().minus(timeSpent.asMillis());
         addNamedElementWithValue(competitorElement, "generation_time_in_milliseconds", elapsedTime.asMillis());
@@ -772,7 +772,8 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorLegDataElement, "leg_rank_at_leg_finish", competitorLeg.getRank(legFinishTime));
             
             if (legCounter>1) {
-                addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg_between_start_and_finish", competitorLeg.getRank(competitorLeg.getStartTime())-competitorLeg.getRank(legFinishTime));
+                final TrackedLegOfCompetitor previousLeg = competitorLeg.getTrackedLeg().getTrackedRace().getTrackedLegFinishingAt(competitorLeg.getLeg().getFrom()).getTrackedLeg(competitor);
+                addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg_between_start_and_finish", previousLeg.getRank(previousLeg.getFinishTime())-competitorLeg.getRank(legFinishTime));
             } else {
                 addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg_between_start_and_finish", 0);
             }
@@ -809,31 +810,35 @@ public class LeaderboardData extends ExportAction {
     }
     
     private List<Element> createFullWindDataXML(TrackedRace race, Fleet fleet, int sameDayIndex) {
-        List<Element> windElements = new ArrayList<>();
-        List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
-        WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
+        final List<Element> windElements = new ArrayList<>();
+        final List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+        final WindSource windSource = new WindSourceImpl(WindSourceType.COMBINED);
         windSourcesToDeliver.add(windSource);
-        TimePoint fromTimePoint = race.getStartOfRace();
-        TimePoint toTimePoint = race.getEndOfRace();
-        int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / /*resolutionInMillis*/ 1000*60*5);
-        WindTrack windTrack = race.getOrCreateWindTrack(windSource);
-        TimePoint timePoint = fromTimePoint;
-        for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
-            WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
-                    .getAveragedWindWithConfidence(null, timePoint);
-            if (averagedWindWithConfidence != null) {
-                Element windElement = new Element("windFix");
-                addNamedElementWithValue(windElement, "same_day_index", sameDayIndex);
-                addNamedElementWithValue(windElement, "race_name", race.getRace().getName());
-                addNamedElementWithValue(windElement, "fleet_name", fleet.getName());
-                windElement.addContent(createTimedXML("", averagedWindWithConfidence.getObject().getTimePoint()));
-                addNamedElementWithValue(windElement, "bearingInDegrees", averagedWindWithConfidence.getObject().getBearing().getDegrees());
-                addNamedElementWithValue(windElement, "directionFromInDegrees", averagedWindWithConfidence.getObject().getBearing().reverse().getDegrees());
-                windElement.addContent(createWindXML("", new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(averagedWindWithConfidence.getObject().getKnots()), 
-                        averagedWindWithConfidence.getConfidence(), toTimePoint)));
-                windElements.add(windElement);
+        final TimePoint fromTimePoint = race.getStartOfRace();
+        if (fromTimePoint != null) {
+            final TimePoint toTimePoint = race.getEndOfRace();
+            final Duration samplingInterval = Duration.ONE_MINUTE.times(5);
+            final WindTrack windTrack = race.getOrCreateWindTrack(windSource);
+            TimePoint timePoint = fromTimePoint;
+            int attemptedNumberOfFixes = 0;
+            while (toTimePoint == null ? (attemptedNumberOfFixes<5) : (timePoint.compareTo(toTimePoint) < 0)) {
+                WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                        .getAveragedWindWithConfidence(null, timePoint);
+                if (averagedWindWithConfidence != null) {
+                    Element windElement = new Element("windFix");
+                    addNamedElementWithValue(windElement, "same_day_index", sameDayIndex);
+                    addNamedElementWithValue(windElement, "race_name", race.getRace().getName());
+                    addNamedElementWithValue(windElement, "fleet_name", fleet.getName());
+                    windElement.addContent(createTimedXML("", averagedWindWithConfidence.getObject().getTimePoint()));
+                    addNamedElementWithValue(windElement, "bearingInDegrees", averagedWindWithConfidence.getObject().getBearing().getDegrees());
+                    addNamedElementWithValue(windElement, "directionFromInDegrees", averagedWindWithConfidence.getObject().getBearing().reverse().getDegrees());
+                    windElement.addContent(createWindXML("", new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(averagedWindWithConfidence.getObject().getKnots()), 
+                            averagedWindWithConfidence.getConfidence(), timePoint)));
+                    windElements.add(windElement);
+                }
+                timePoint = timePoint.plus(samplingInterval);
+                attemptedNumberOfFixes++;
             }
-            timePoint = new MillisecondsTimePoint(timePoint.asMillis() + 1000*60*5);
         }
         return windElements;
     }

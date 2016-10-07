@@ -1,11 +1,11 @@
 package com.sap.sailing.android.shared.ui.activities;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 
@@ -13,7 +13,13 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
 
     private static final String TAG = AbstractBaseActivity.class.getName();
 
-    protected ProgressDialog progressDialog;
+    /**
+     * An object used to synchronize access to the {@link #progressDialog} field to avoid concurrency
+     * issues during re-assigning a new dialog.
+     */
+    private final Object progressDialogMonitor = new Object();
+    
+    private ProgressDialog progressDialog;
 
     public void replaceFragment(int view, Fragment fragment) {
         ExLog.i(this, TAG, "Set new Fragment: " + fragment.toString());
@@ -25,11 +31,13 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
     }
 
     public void showProgressDialog(String title, String message) {
-        if (progressDialog == null || !progressDialog.isShowing()) {
-            progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle(title);
-            progressDialog.setMessage(message);
-            progressDialog.show();
+        synchronized (progressDialogMonitor) {
+            if (progressDialog == null || !progressDialog.isShowing()) {
+                progressDialog = new ProgressDialog(this);
+                progressDialog.setTitle(title);
+                progressDialog.setMessage(message);
+                progressDialog.show();
+            }
         }
     }
 
@@ -38,24 +46,33 @@ public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
     }
 
     public void dismissProgressDialog() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
+        synchronized (progressDialogMonitor) {
+            try {
+                if (progressDialog != null && progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+            } catch (final IllegalArgumentException e) {
+                ExLog.i(this, TAG, "progressDialog was not attached: " + e);
+            } catch (final Exception e) {
+                ExLog.i(this, TAG, "Unknown exception: " + e);
+            } finally {
+                progressDialog = null;
+            }
         }
     }
 
     public void showErrorPopup(String title, String message) {
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(title).setMessage(message)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        new AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         dialog.dismiss();
                     }
-                }).create();
-
-        dialog.show();
+            }).show();
     }
 
-    public void showErrorPopup(int string1Id, int string2Id) {
-        showErrorPopup(getString(string1Id), getString(string2Id));
+    public void showErrorPopup(int title, int message) {
+        showErrorPopup(getString(title), getString(message));
     }
 }

@@ -21,10 +21,10 @@ public class AppPreferences extends BaseAppPreferences {
                 cleanLeaderBoardName);
     }
 
-    public String getServerMarkPingPath(String leaderBoardName, String markID) {
+    public String getServerMarkPingPath(String leaderBoardName, String markIdAsString) {
         String cleanLeaderBoardName = leaderBoardName.replaceAll(" ", "%20");
         return context.getString(R.string.preference_server_gps_fixes_post_path)
-                .replace("{leaderboard_name}", cleanLeaderBoardName).replace("{mark-id}", markID);
+                .replace("{leaderboard_name}", cleanLeaderBoardName).replace("{mark-id}", markIdAsString);
     }
 
     public void setDataRefreshInterval(long interval){

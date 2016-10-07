@@ -1,5 +1,6 @@
 package com.sap.sailing.xrr.resultimport.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -102,7 +103,8 @@ public class RaceResultAsScoreCorrectionForCompetitorInRace implements ScoreCorr
 
     @Override
     public Double getPoints() {
-        return raceResult.getRacePoints().doubleValue();
+        final BigDecimal racePoints = raceResult.getRacePoints();
+        return racePoints == null ? null : racePoints.doubleValue();
     }
 
     @Override

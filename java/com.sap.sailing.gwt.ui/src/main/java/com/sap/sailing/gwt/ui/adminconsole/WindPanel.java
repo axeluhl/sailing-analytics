@@ -165,7 +165,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         final VerticalPanel windSourcesPanel = new VerticalPanel();
         windSourcesPanel.setSpacing(10);
         tabPanel.add(windSourcesPanel, stringMessages.windSourcesUsed());
-        tabPanel.add(windFixesDisplayPanel, "Wind fixes");
+        tabPanel.add(windFixesDisplayPanel, stringMessages.windFixes());
         tabPanel.selectTab(0);
 
         raceIsKnownToStartUpwindBox = new CheckBox(stringMessages.raceIsKnownToStartUpwind());
@@ -240,10 +240,10 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         rawWindFixesTable = new BaseCelltable<WindDTO>(/* pageSize */10000, tableRes);
-        rawWindFixesTable.addColumn(timeColumn, "Time");
-        rawWindFixesTable.addColumn(speedInKnotsColumn, "Speed (kn)");
-        rawWindFixesTable.addColumn(windDirectionInDegColumn, "From (deg)");
-        rawWindFixesTable.addColumn(positionColumn, "Position");
+        rawWindFixesTable.addColumn(timeColumn, stringMessages.time());
+        rawWindFixesTable.addColumn(speedInKnotsColumn, stringMessages.speedInKnots());
+        rawWindFixesTable.addColumn(windDirectionInDegColumn, stringMessages.fromDeg());
+        rawWindFixesTable.addColumn(positionColumn, stringMessages.position());
         rawWindFixesTable.addColumn(removeColumn, stringMessages.actions());
         rawWindFixesDataProvider = new ListDataProvider<WindDTO>();
         rawWindFixesDataProvider.addDataDisplay(rawWindFixesTable);

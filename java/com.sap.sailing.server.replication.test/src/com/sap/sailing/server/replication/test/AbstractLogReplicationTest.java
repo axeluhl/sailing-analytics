@@ -96,15 +96,16 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
     protected Regatta setupRegatta(final String regattaName, String seriesName, String fleetName, String boatClassName) {
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParameters = new LinkedHashMap<>();
         SeriesCreationParametersDTO creationParametersForDefaultSeries = new SeriesCreationParametersDTO(
-                Arrays.asList(new FleetDTO[] { new FleetDTO(fleetName, 0, Color.BLACK), }), /* medal */false, /* startsWithZero */
+                Arrays.asList(new FleetDTO[] { new FleetDTO(fleetName, 0, Color.BLACK), }), /* medal */false, /* fleetsCanRunInParallel */ true, /* startsWithZero */
                 false, /* firstColumnIsNonDiscardableCarryForward */false, /* discardingThresholds */new int[0], /* hasSplitFleetContiguousScoring */
-                false);
+                false, /* maximumNumberOfDiscards */ null);
         seriesCreationParameters.put(seriesName, creationParametersForDefaultSeries);
         // 1. Install some race column on master...
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);
         AddSpecificRegatta addRegattaOperation = new AddSpecificRegatta(regattaName, boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true,
-                new LowPoint(), /* default course area ID */ UUID.randomUUID(), /* useStartTimeInference */ true, RankingMetrics.ONE_DESIGN);
+                new LowPoint(), /* default course area ID */ UUID.randomUUID(), /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN);
         return master.apply(addRegattaOperation);
     }
 

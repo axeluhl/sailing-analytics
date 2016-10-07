@@ -21,10 +21,10 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class RetrieverLevelFilterSelectionProvider implements Component<AbstractSettings> {
+public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<AbstractSettings> {
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -213,6 +213,7 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
 
     @Override
     public void updateSettings(AbstractSettings newSettings) {
+        // no-op
     }
 
     @Override
@@ -240,4 +241,8 @@ public class RetrieverLevelFilterSelectionProvider implements Component<Abstract
         return "singleRetrieverLevelSelectionPanel";
     }
 
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
+    }
 }

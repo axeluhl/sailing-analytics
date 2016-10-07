@@ -3,13 +3,12 @@ package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceClickListener;
+import android.text.TextUtils;
 
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
@@ -21,7 +20,7 @@ import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 
 /**
  * <p>
- * This preference fragment can be redirected to display the {@link RegattaConfiguration} of a specifc regatta.
+ * This preference fragment can be redirected to display the {@link RegattaConfiguration} of a specific regatta.
  * </p>
  * <p/>
  * <p/>
@@ -29,31 +28,14 @@ import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
  */
 public class RegattaPreferenceFragment extends BasePreferenceFragment {
 
-    private boolean isRedirected = false;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Activity activity = getActivity();
-        if (activity instanceof PreferenceActivity) {
-            PreferenceActivity settingsActivity = (PreferenceActivity) activity;
-            isRedirected = settingsActivity.isRedirected();
-        }
-        if (isRedirected) {
-            addPreferencesFromResource(R.xml.preference_regatta_specific);
+        if (getArguments() != null && !TextUtils.isEmpty(getArguments().getString(PreferenceActivity.EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME))) {
+            getPreferenceManager().setSharedPreferencesName(getArguments().getString(PreferenceActivity.EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME));
         }
         addPreferencesFromResource(R.xml.preference_regatta_defaults);
-
-        if (isRedirected) {
-            setupSaveButton();
-        }
-        setupGeneral();
-        setupRRS26();
-        setupGateStart();
-        setupESS();
-        setupBasic();
-        setupLeague();
 
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
         bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key));
@@ -61,24 +43,13 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_ess_classflag_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_basic_classflag_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_league_classflag_key));
-    }
 
-    private void setupSaveButton() {
-        final String preferencesName = getArguments().getString(PreferenceActivity.EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME);
-        final String raceGroupName = getArguments().getString(PreferenceActivity.EXTRA_SPECIFIC_REGATTA_NAME);
-
-        Preference preference = findPreference(R.string.preference_regatta_specific_save_key);
-
-        preference.setTitle(getString(R.string.preference_regatta_specific_save_title, raceGroupName));
-        preference.setSummary(getString(R.string.preference_regatta_specific_save_description, raceGroupName));
-        preference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                PreferenceActivity.commitSpecificRegattaConfiguration(getActivity(), preferencesName, raceGroupName);
-                getActivity().finish();
-                return false;
-            }
-        });
+        setupGeneral();
+        setupRRS26();
+        setupGateStart();
+        setupESS();
+        setupBasic();
+        setupLeague();
     }
 
     private void setupRRS26() {
@@ -138,6 +109,8 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         preference.setEntryValues(entryValues.toArray(new String[entryValues.size()]));
 
         bindPreferenceSummaryToValue(preference);
+
+        preference.setSummary(CourseDesignerMode.valueOf(preference.getValue()).toString());
     }
 
     private void setupDependentRacesPreference() {
@@ -154,6 +127,11 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         Collections.sort(flags);
         preference.setEntries(flags.toArray(new String[flags.size()]));
         preference.setEntryValues(flags.toArray(new String[flags.size()]));
+
+        Set<String> values = preference.getValues();
+        List<String> checkedFlags = new ArrayList<>(values);
+        Collections.sort(checkedFlags);
+        preference.setSummary(checkedFlags.toString());
     }
 
     private void setupClassFlagList(ListPreference preference) {

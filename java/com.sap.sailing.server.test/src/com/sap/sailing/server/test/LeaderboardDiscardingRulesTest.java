@@ -86,10 +86,10 @@ public class LeaderboardDiscardingRulesTest {
         TimePoint now = MillisecondsTimePoint.now();
         // Hunger scores better than Plattner in this case because Hunger's two discards are 123/124, keeping 122/122
         // whereas Plattner is to discard two of the four 123 results, keeping 123/123, being two points worse than Hunger:
-        double totalPointsHasso = leaderboard.getTotalPoints(hasso, now);
-        double totalPointsWolfgang = leaderboard.getTotalPoints(wolfgang, now);
-        assertEquals(122.+122., totalPointsWolfgang, 0.0000000001);
-        assertEquals(123.+123., totalPointsHasso,  0.000000001);
+        double netPointsHasso = leaderboard.getNetPoints(hasso, now);
+        double netPointsWolfgang = leaderboard.getNetPoints(wolfgang, now);
+        assertEquals(122.+122., netPointsWolfgang, 0.0000000001);
+        assertEquals(123.+123., netPointsHasso,  0.000000001);
     }
 
     /**
@@ -129,11 +129,11 @@ public class LeaderboardDiscardingRulesTest {
         TimePoint now = MillisecondsTimePoint.now();
         // Jes scores better than Rasmus in this case because Jes's two discards are 1.0/2.0, keeping 3.0/3.0
         // whereas Rasmus is to discard two of the four 2.0 results, keeping 2.0/2.0, being two points worse than Hunger:
-        double totalPointsRasmus = leaderboard.getTotalPoints(rasmus, now);
-        double totalPointsJes = leaderboard.getTotalPoints(jes, now);
+        double netPointsRasmus = leaderboard.getNetPoints(rasmus, now);
+        double netPointsJes = leaderboard.getNetPoints(jes, now);
         assertEquals(3, Util.size(leaderboard.getCompetitors()));
-        assertEquals(3.+3., totalPointsJes, 0.0000000001);
-        assertEquals(2.+2., totalPointsRasmus,  0.000000001);
+        assertEquals(3.+3., netPointsJes, 0.0000000001);
+        assertEquals(2.+2., netPointsRasmus,  0.000000001);
     }
 
     /**
@@ -171,9 +171,9 @@ public class LeaderboardDiscardingRulesTest {
         TimePoint now = MillisecondsTimePoint.now();
         // Hunger scores better than Plattner in this case because Hunger's two discards are 123/124, keeping 122/122
         // whereas Plattner is to discard two of the four 123 results, keeping 123/123, being two points worse than Hunger:
-        double totalPointsHasso = leaderboard.getTotalPoints(hasso, now);
-        double totalPointsWolfgang = leaderboard.getTotalPoints(wolfgang, now);
-        assertEquals(122.+122., totalPointsWolfgang, 0.0000000001);
-        assertEquals(123.+123., totalPointsHasso,  0.000000001);
+        double netPointsHasso = leaderboard.getNetPoints(hasso, now);
+        double netPointsWolfgang = leaderboard.getNetPoints(wolfgang, now);
+        assertEquals(122.+122., netPointsWolfgang, 0.0000000001);
+        assertEquals(123.+123., netPointsHasso,  0.000000001);
     }
 }

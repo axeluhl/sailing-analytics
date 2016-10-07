@@ -52,7 +52,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
         
         // header option is set to allow communication between two sapsailing servers, especially for 
         // the master data import functionality
-        return Response.ok(json, MediaType.APPLICATION_JSON).header("Access-Control-Allow-Origin", "*").build();
+        return Response.ok(json).header("Access-Control-Allow-Origin", "*").header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
     
     @GET
@@ -154,7 +154,7 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
                 }
             }
             String json = jsonLeaderboardGroup.toJSONString();
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }

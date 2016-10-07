@@ -398,6 +398,10 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         public double getStatuteMilesPerHour() {
             return 0;
         }
+        @Override
+        public Distance travel(Duration duration) {
+            return null;
+        }
     }
 
     @Override

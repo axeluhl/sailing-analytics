@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/button_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center_vertical"
+        android:background="?attr/sap_gray_black_30">
+
+        <Button
+            android:id="@+id/set_column_factor"
+            style="?attr/buttonSolidNormal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="@dimen/unscheduled_confirm_button_margin"
+            android:text="@string/set_column_factor"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/button_bar"
+        android:background="?attr/sap_gray_black_30">
+
+        <com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            app:floatLabelPaddingLeft="@dimen/float_label_padding"
+            app:floatLabelTextAppearance="?attr/floatLabel">
+
+            <EditText
+                android:id="@+id/column_factor"
+                style="?attr/editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:hint="@string/race_factor"
+                android:inputType="numberDecimal"
+                android:textAppearance="?attr/textNormal"
+                android:textColor="?attr/white"/>
+        </com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout>
+    </RelativeLayout>
+</RelativeLayout>

@@ -27,7 +27,7 @@ public class MultiCompetitorLeaderboardChartSettingsDialogComponent implements S
 
         availableDetailsTypes = new ArrayList<DetailType>();
         availableDetailsTypes.add(DetailType.REGATTA_RANK);
-        availableDetailsTypes.add(DetailType.REGATTA_TOTAL_POINTS_SUM);
+        availableDetailsTypes.add(DetailType.REGATTA_NET_POINTS_SUM);
     }
 
     @Override

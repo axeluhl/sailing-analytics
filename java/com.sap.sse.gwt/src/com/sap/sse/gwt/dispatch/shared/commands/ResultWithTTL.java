@@ -7,14 +7,14 @@ import com.sap.sse.gwt.dispatch.shared.caching.HasClientCacheTotalTimeToLive;
 /**
  * Result implementation that holds a {@link DTO} with a defined time to live expiration.
  *
- * @param <T>
+ * @param <T> The type of the actual result that is wrapped by this.
  */
 public class ResultWithTTL<T extends DTO> implements Result, HasClientCacheTotalTimeToLive {
     
     /** max millis the result might be loaded earlier so we do batches **/
     public static final Duration MAX_TIME_TO_LOAD_EARLIER = Duration.ONE_SECOND.times(5);
 
-    /** Time to live*/
+    /** Time to live. Defines when the client should ask for data the next time.*/
     private Duration ttl;
     private T dto;
     @SuppressWarnings("unused")

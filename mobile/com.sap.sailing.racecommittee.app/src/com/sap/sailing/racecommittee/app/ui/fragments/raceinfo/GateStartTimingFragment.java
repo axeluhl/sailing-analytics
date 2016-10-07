@@ -11,7 +11,6 @@ import com.sap.sailing.android.shared.util.ActivityHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -57,7 +56,7 @@ public class GateStartTimingFragment extends BaseFragment {
 
         View additional = ViewHelper.get(layout, R.id.addition_golf_time);
         if (additional != null) {
-            if (AppPreferences.on(getActivity()).getGateStartHasAdditionalGolfDownTime()) {
+            if (preferences.getGateStartHasAdditionalGolfDownTime()) {
                 additional.setVisibility(View.VISIBLE);
             }
         }

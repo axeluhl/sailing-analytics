@@ -21,6 +21,7 @@
     <attr name="buttonSolidXSmall" format="reference"/>
     <attr name="buttonSolidSmall" format="reference"/>
     <attr name="buttonSolidNormal" format="reference"/>
+    <attr name="checkedItemBackground" format="reference"/>
     <attr name="round" format="reference"/>
     <attr name="round_transparent" format="reference"/>
     <attr name="text" format="reference"/>
@@ -37,6 +38,8 @@
     <attr name="textPanelCaption" format="reference"/>
     <attr name="editText" format="reference"/>
     <attr name="floatLabel" format="reference"/>
+
+    <attr name="factor_background" format="reference"/>
 
     <!-- drawable -->
     <attr name="add" format="reference"/>

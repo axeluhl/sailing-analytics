@@ -8,6 +8,12 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 
+/**
+ * Specialized {@link LifecycleRefreshManager} that is bound to the lifecycle of a given {@link AcceptsOneWidget} and
+ * ensures that a content {@link Widget} is being attached when the first refresh is successfully finished. This enures
+ * that no uninitialized {@link RefreshableWidget} are initially shown. Instead you can explicitly set a placeholder
+ * widget to the container that is automatically replaced with the actual content when the data is available.
+ */
 public class AutoAttachingRefreshManager extends LifecycleRefreshManager {
     private static final Logger LOG = Logger.getLogger(AutoAttachingRefreshManager.class.getName());
 

@@ -279,12 +279,12 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         buttonPanel.add(removeSuppressedPassingButton);
         buttonPanel.add(selectCompetitorLabel);
         enableButtons();
-        refreshWaypoints();
     }
     
     @Override
     public void setVisible(boolean visible) {
         processCompetitorSelectionChange(visible);
+        refreshWaypoints();
         super.setVisible(visible);
     }
 
@@ -452,5 +452,15 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
 
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
+    }
+
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
+    }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
     }
 }

@@ -7,6 +7,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.PreferenceConverterRegistrationManager;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -14,6 +15,7 @@ public class Activator implements BundleActivator {
 
     private static BundleContext context;
     private ServiceRegistration<?> registration;
+    private PreferenceConverterRegistrationManager preferenceConverterRegistrationManager;
 
     static BundleContext getContext() {
         return context;
@@ -26,8 +28,10 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
+        UserStoreImpl userStore = new UserStoreImpl();
         registration = context.registerService(UserStore.class.getName(),
-                new UserStoreImpl(), null);
+                userStore, null);
+        preferenceConverterRegistrationManager = new PreferenceConverterRegistrationManager(bundleContext, userStore);
         Logger.getLogger(Activator.class.getName()).info("User store registered.");
         for (CollectionNames name : CollectionNames.values()) {
             MongoDBService.INSTANCE.registerExclusively(CollectionNames.class, name.name());
@@ -40,6 +44,7 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext bundleContext) throws Exception {
+        preferenceConverterRegistrationManager.stop();
         registration.unregister();
         Activator.context = null;
     }

@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -38,6 +39,7 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -61,7 +63,7 @@ public class TrackedLegImpl implements TrackedLeg {
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private TrackedRaceImpl trackedRace;
-    private transient ConcurrentHashMap<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
+    private transient ConcurrentMap<TimePoint, List<TrackedLegOfCompetitor>> competitorTracksOrderedByRank;
     
     public TrackedLegImpl(DynamicTrackedRaceImpl trackedRace, Leg leg, Iterable<Competitor> competitors) {
         super();
@@ -203,8 +205,15 @@ public class TrackedLegImpl implements TrackedLeg {
 
     @Override
     public Bearing getLegBearing(TimePoint at) {
-        Position startMarkPos = getTrackedRace().getApproximatePosition(getLeg().getFrom(), at);
-        Position endMarkPos = getTrackedRace().getApproximatePosition(getLeg().getTo(), at);
+        return getLegBearing(at, new MarkPositionAtTimePointCacheImpl(getTrackedRace(), at));
+    }
+
+    @Override
+    public Bearing getLegBearing(TimePoint at, MarkPositionAtTimePointCache markPositionCache) {
+        assert markPositionCache.getTimePoint().equals(at);
+        assert markPositionCache.getTrackedRace() == getTrackedRace();
+        Position startMarkPos = markPositionCache.getApproximatePosition(getLeg().getFrom());
+        Position endMarkPos = markPositionCache.getApproximatePosition(getLeg().getTo());
         Bearing legBearing = (startMarkPos != null && endMarkPos != null) ? startMarkPos.getBearingGreatCircle(endMarkPos) : null;
         return legBearing;
     }
@@ -336,16 +345,23 @@ public class TrackedLegImpl implements TrackedLeg {
     }
 
     @Override
-    public Distance getGreatCircleDistance(TimePoint timePoint) {
+    public Distance getGreatCircleDistance(TimePoint timePoint, MarkPositionAtTimePointCache markPositionCache) {
+        assert markPositionCache.getTimePoint().equals(timePoint);
+        assert markPositionCache.getTrackedRace() == getTrackedRace();
         final Distance result;
-        final Position approximatePositionOfFrom = getTrackedRace().getApproximatePosition(getLeg().getFrom(), timePoint);
-        final Position approximatePositionOfTo = getTrackedRace().getApproximatePosition(getLeg().getTo(), timePoint);
+        final Position approximatePositionOfFrom = markPositionCache.getApproximatePosition(getLeg().getFrom());
+        final Position approximatePositionOfTo = markPositionCache.getApproximatePosition(getLeg().getTo());
         if (approximatePositionOfFrom != null && approximatePositionOfTo != null) {
             result = approximatePositionOfFrom.getDistance(approximatePositionOfTo);
         } else {
             result = null;
         }
         return result;
+    }
+
+    @Override
+    public Distance getGreatCircleDistance(TimePoint timePoint) {
+        return getGreatCircleDistance(timePoint, new NonCachingMarkPositionAtTimePointCache(getTrackedRace(), timePoint));
     }
 
     @Override
@@ -497,8 +513,10 @@ public class TrackedLegImpl implements TrackedLeg {
     }
 
     @Override
-    public Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint)
+    public Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
             throws NotEnoughDataHasBeenAddedException, NoWindException {
+        assert timepoint.equals(markPositionCache.getTimePoint());
+        assert getTrackedRace() == markPositionCache.getTrackedRace();
         Position centralPosition = trackedRace.getCenterOfCourse(timepoint);
         Wind wind = trackedRace.getWind(centralPosition, timepoint, getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         Position from = trackedRace.getApproximatePosition(leg.getFrom(), timepoint);

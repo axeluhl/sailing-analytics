@@ -58,6 +58,7 @@
         <item>PAPA</item>
         <item>INDIA</item>
         <item>BLACK</item>
+        <item>UNIFORM</item>
         <item>ZULU</item>
     </string-array>
     <string name="preference_racing_procedure_gatestart_classflag_key" translatable="false">gateStartClassFlag</string>
@@ -97,6 +98,8 @@
     <bool name="preference_allow_dependent_races_default">true</bool>
     <string name="preference_dependent_races_offset_key" translatable="false">dependentRacesOffset</string>
     <integer name="preference_dependent_races_offset_default">5</integer>
+    <string name="preference_allow_edit_race_factor_key" translatable="false">raceFactor</string>
+    <bool name="preference_allow_edit_race_factor_default">true</bool>
 
     <string name="preference_allow_demo_key" translatable="false">allow_demo</string>
     <bool name="preference_allow_demo_default">false</bool>
@@ -121,4 +124,8 @@
 
     <string name="preference_non_public_events_key" translatable="false">show_non_public_events</string>
     <bool name="preference_non_public_events_default">false</bool>
+
+    <string name="preference_config_needs_refresh_key" translatable="false">config_refresh</string>
+    <bool name="preference_config_needs_refresh_default" translatable="false">true</bool>
+
 </resources>

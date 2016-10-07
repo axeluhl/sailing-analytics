@@ -70,6 +70,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/score"
                 android:inputType="numberDecimal"
+                android:textColor="?attr/white"
                 android:textColorHint="@color/dialog_color_text"/>
         </com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout>
     </LinearLayout>
@@ -161,6 +162,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/comment"
                 android:inputType="text"
+                android:textColor="?attr/white"
                 android:textColorHint="@color/dialog_color_text"/>
         </com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout>
     </LinearLayout>

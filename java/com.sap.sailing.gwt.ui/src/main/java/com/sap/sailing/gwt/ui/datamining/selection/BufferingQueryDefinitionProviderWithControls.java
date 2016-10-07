@@ -270,6 +270,11 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     }
 
     @Override
+    public AdvancedDataMiningSettings getSettings() {
+        return settings;
+    }
+
+    @Override
     public SettingsDialogComponent<AdvancedDataMiningSettings> getSettingsDialogComponent() {
         return new AdvancedDataMiningSettingsDialogComponent(settings, getStringMessages());
     }

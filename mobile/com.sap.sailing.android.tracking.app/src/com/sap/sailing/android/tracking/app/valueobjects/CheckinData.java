@@ -1,32 +1,41 @@
 package com.sap.sailing.android.tracking.app.valueobjects;
 
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
-import com.sap.sailing.android.shared.data.CheckinUrlInfo;
-import com.sap.sailing.android.shared.data.LeaderboardInfo;
-
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class CheckinData extends AbstractCheckinData {
-    // public String gcmId;
-    public String leaderboardName;
-    public String eventId;
-    public String eventName;
-    public String eventStartDateStr;
-    public String eventEndDateStr;
-    public String eventFirstImageUrl;
-    public String eventServerUrl;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
+import com.sap.sailing.android.shared.data.CheckinUrlInfo;
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
+
+import android.net.Uri;
+
+public abstract class CheckinData extends BaseCheckinData {
+    private String leaderboardName;
+    private String eventId;
+    private String eventName;
+    private String eventStartDateStr;
+    private String eventEndDateStr;
+    private String eventFirstImageUrl;
+    private String eventServerUrl;
     public String checkinURL;
-    public String competitorName;
-    public String competitorId;
-    public String competitorSailId;
-    public String competitorNationality;
-    public String competitorCountryCode;
     public String deviceUid;
-    public String uriString;
+    private String uriString;
     public String checkinDigest;
     private boolean update;
+
+    public CheckinData(UrlData data) {
+        leaderboardName = Uri.decode(data.leaderboardName);
+        deviceUid = data.deviceUuid.getStringRepresentation();
+        eventId = data.eventId;
+        eventName = data.eventName;
+        eventStartDateStr = data.eventStartDateStr;
+        eventEndDateStr = data.eventEndDateStr;
+        eventFirstImageUrl = data.eventFirstImageUrl;
+        eventServerUrl = data.hostWithPort;
+        checkinURL = data.checkinURLStr;
+        uriString = data.uriStr;
+    }
 
     public void setCheckinDigestFromString(String checkinString) throws UnsupportedEncodingException,
             NoSuchAlgorithmException {
@@ -59,23 +68,15 @@ public class CheckinData extends AbstractCheckinData {
         return leaderboard;
     }
 
-    public CompetitorInfo getCompetitor() {
-        CompetitorInfo competitor = new CompetitorInfo();
-        competitor.name = competitorName;
-        competitor.id = competitorId;
-        competitor.sailId = competitorSailId;
-        competitor.nationality = competitorNationality;
-        competitor.countryCode = competitorCountryCode;
-        competitor.checkinDigest = checkinDigest;
-        return competitor;
-    }
-
     public CheckinUrlInfo getCheckinUrl() {
         CheckinUrlInfo checkinUrlInfo = new CheckinUrlInfo();
         checkinUrlInfo.urlString = uriString;
         checkinUrlInfo.checkinDigest = checkinDigest;
+        checkinUrlInfo.type = getCheckinType();
         return checkinUrlInfo;
     }
+
+    public abstract int getCheckinType();
 
     public boolean isUpdate() {
         return update;

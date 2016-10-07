@@ -14,7 +14,7 @@ import com.google.gwt.regexp.shared.RegExp;
 public class YoutubeApi {
     
     private static final RegExp YOUTUBE_ID_REGEX = RegExp.compile("^.*(youtu.be/|v/|u/\\w/|embed/|watch\\?v=|\\&v=)([^#\\&\\?]*).*");
-    private static final RegExp HTTP_FTP_REGEX = RegExp.compile("^(http|ftp).*"); // starting with http, https or ftp
+    private static final RegExp HTTP_FTP_FILE_REGEX = RegExp.compile("^(http|ftp|file).*"); // starting with http, https or ftp
     
     /**
      * Extracts the youtube id of the passed youtube video URL.
@@ -27,7 +27,7 @@ public class YoutubeApi {
         MatchResult match = YOUTUBE_ID_REGEX.exec(url);
         if ((match != null) && (match.getGroupCount() == 3)) {
             return match.getGroup(2);
-        } else if (HTTP_FTP_REGEX.exec(url) == null) { //--> doesn't start with either http, https or ftp --> supposed to be a naked youtube id   
+        } else if (HTTP_FTP_FILE_REGEX.exec(url) == null) { //--> doesn't start with either http, https or ftp --> supposed to be a naked youtube id   
             return url.trim();
         } else {
             return null; // --> plain http, https or ftp URL --> no youtube 

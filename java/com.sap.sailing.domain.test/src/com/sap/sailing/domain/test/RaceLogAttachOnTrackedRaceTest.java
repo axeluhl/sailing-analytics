@@ -26,8 +26,10 @@ public class RaceLogAttachOnTrackedRaceTest {
         private RaceLog raceLog;
         
         @Override
-        public void detachRaceLog(Serializable identifier) {
+        public RaceLog detachRaceLog(Serializable identifier) {
+            final RaceLog result = this.raceLog;
             this.raceLog = null;
+            return result;
         }
         
         @Override

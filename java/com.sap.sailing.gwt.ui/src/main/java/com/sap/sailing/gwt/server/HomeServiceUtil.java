@@ -449,16 +449,6 @@ public final class HomeServiceUtil {
         return result;
     }
     
-    public static TimePoint getLiveTimePoint() {
-        return new MillisecondsTimePoint(getLiveTimePointInMillis());
-    }
-    
-    public static long getLiveTimePointInMillis() {
-        // TODO better solution
-        long livePlayDelayInMillis = 15_000;
-        return System.currentTimeMillis() - livePlayDelayInMillis;
-    }
-    
     public static String getCourseAreaNameForRegattaIdThereIsMoreThanOne(EventBase event, Leaderboard leaderboard) {
         /** The course area will not be shown if there is only one course area defined for the event */
         if (Util.size(event.getVenue().getCourseAreas()) <= 1) {

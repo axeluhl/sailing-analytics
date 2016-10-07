@@ -4,7 +4,6 @@
 		xmlns:sp="urn:import:com.sap.sailing.gwt.home.shared.partials" 
 		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="i18n_ubi" type="com.sap.sailing.gwt.common.client.i18n.TextMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<g:HTMLPanel>
 		<div class="{res.mainCss.spacer} {res.mainCss.spacersmall}"></div>

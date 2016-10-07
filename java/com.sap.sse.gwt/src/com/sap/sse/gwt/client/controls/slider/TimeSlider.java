@@ -95,7 +95,6 @@ public class TimeSlider extends SliderBar {
         }
     }
 
-
     /**
      * Draw the labels along the line.
      */

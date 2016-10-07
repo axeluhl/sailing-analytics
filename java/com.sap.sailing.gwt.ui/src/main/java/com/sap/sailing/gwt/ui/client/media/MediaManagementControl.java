@@ -138,24 +138,28 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             Collection<MediaTrack> reachableAudioTracks) {
         for (MediaTrack mediaTrack : mediaPlayerManager.getAssignedMediaTracks()) {
             if (isPotentiallyPlayable(mediaTrack)) {
-                switch (mediaTrack.mimeType.mediaType) {
-                case video:
-                    reachableVideoTracks.add(mediaTrack);
-                case audio: // intentional fall through
-                    if (mediaPlayerManager.getUserAgent().getType().equals(AgentTypes.FIREFOX)) {
-                        if (mediaTrack.isYoutube()) {
-                            // only youtube audio tracks work with firefox
+                if (mediaTrack.mimeType == null) {
+                    reachableVideoTracks.add(mediaTrack); // allow user to remove this strange artifact
+                } else {
+                    switch (mediaTrack.mimeType.mediaType) {
+                    case video:
+                        reachableVideoTracks.add(mediaTrack);
+                    case audio: // intentional fall through
+                        if (mediaPlayerManager.getUserAgent().getType().equals(AgentTypes.FIREFOX)) {
+                            if (mediaTrack.isYoutube()) {
+                                // only youtube audio tracks work with firefox
+                                reachableAudioTracks.add(mediaTrack);
+                            }
+                        } else {
                             reachableAudioTracks.add(mediaTrack);
                         }
-                    } else {
-                        reachableAudioTracks.add(mediaTrack);
+                    case image: // images don't play as video tracks
+                        break;
+                    case unknown: // unknown formats won't be played either
+                        break;
+                    default:
+                        break;
                     }
-                case image: // images don't play as video tracks
-                    break;
-                case unknown: // unknown formats won't be played either
-                    break;
-                default:
-                    break;
                 }
             }
         }

@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.home.mobile.places.event;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
+import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
@@ -21,9 +23,9 @@ import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 
 public interface EventViewBase extends IsWidget {
 
-    void setQuickFinderValues(Collection<RegattaMetadataDTO> regattaMetadatas);
+    void setQuickFinderValues(Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName);
 
-    void setQuickFinderValues(String seriesName, Collection<EventReferenceDTO> eventsOfSeries);
+    void setQuickFinderValues(String seriesName, Collection<EventReferenceWithStateDTO> eventsOfSeries);
 
     void hideQuickfinder();
     
@@ -46,6 +48,8 @@ public interface EventViewBase extends IsWidget {
         PlaceNavigation<?> getMediaPageNavigation();
         
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
+        
+        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 
         String getRegattaId();
         
@@ -54,5 +58,7 @@ public interface EventViewBase extends IsWidget {
         EventViewDTO getEventDTO();
 
         boolean isMultiRegattaEvent();
+
+        boolean isSingleRegattaEvent();
     }
 }

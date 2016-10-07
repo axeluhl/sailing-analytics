@@ -28,6 +28,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment;
+import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -43,7 +44,7 @@ public class TimePanelFragment extends BasePanelFragment {
     private IntentReceiver mReceiver;
     private SimpleDateFormat dateFormat;
 
-    private View mRaceHeader;
+    private TimePanelHeaderLayout mRaceHeader;
     private View mTimeLock;
     private TextView mCurrentTime;
     private TextView mHeaderTime;
@@ -69,9 +70,12 @@ public class TimePanelFragment extends BasePanelFragment {
         mStateListener = new RaceStateChangedListener();
 
         mRaceHeader = ViewHelper.get(layout, R.id.race_content_header);
-        if (mRaceHeader != null) {
-            mRaceHeader.setOnClickListener(new RaceHeaderClick());
-        }
+        mRaceHeader.setRunnable(new Runnable() {
+            @Override
+            public void run() {
+                new RaceHeaderClick().onClick(null);
+            }
+        });
 
         mTimeLock = ViewHelper.get(layout, R.id.time_start_lock);
         mCurrentTime = ViewHelper.get(layout, R.id.current_time);

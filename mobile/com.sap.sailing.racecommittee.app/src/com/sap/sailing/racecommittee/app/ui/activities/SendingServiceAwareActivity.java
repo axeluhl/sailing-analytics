@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.lang.ref.WeakReference;
 import java.util.Date;
 
 import android.content.ComponentName;
@@ -30,33 +31,53 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity implements AuthCheckTask.AuthCheckTaskListener {
 
-    private class MessageSendingServiceConnection implements ServiceConnection, MessageSendingServiceLogger {
+    private static class MessageSendingServiceConnection implements ServiceConnection, MessageSendingServiceLogger {
+
+        WeakReference<SendingServiceAwareActivity> mActivity;
+
+        public MessageSendingServiceConnection(SendingServiceAwareActivity activity) {
+            mActivity = new WeakReference<>(activity);
+        }
+
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
-            MessageSendingBinder binder = (MessageSendingBinder) service;
-            sendingService = binder.getService();
-            boundSendingService = true;
-            sendingService.setMessageSendingServiceLogger(this);
-            updateSendingServiceInformation();
+            SendingServiceAwareActivity activity = mActivity.get();
+            if (activity != null) {
+                MessageSendingBinder binder = (MessageSendingBinder) service;
+                activity.sendingService = binder.getService();
+                activity.boundSendingService = true;
+                activity.sendingService.setMessageSendingServiceLogger(this);
+                activity.updateSendingServiceInformation();
+            }
+
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg) {
-            boundSendingService = false;
+            SendingServiceAwareActivity activity = mActivity.get();
+            if (activity != null) {
+                activity.boundSendingService = false;
+            }
         }
 
         @Override
         public void onMessageSentSuccessful() {
-            updateSendingServiceInformation();
+            SendingServiceAwareActivity activity = mActivity.get();
+            if (activity != null) {
+                activity.updateSendingServiceInformation();
+            }
         }
 
         @Override
         public void onMessageSentFailed() {
-            updateSendingServiceInformation();
+            SendingServiceAwareActivity activity = mActivity.get();
+            if (activity != null) {
+                activity.updateSendingServiceInformation();
+            }
         }
     }
 
-    protected MenuItem menuItemLive;
+    private MenuItem menuItemLive;
 
     protected boolean boundSendingService = false;
     protected MessageSendingService sendingService;
@@ -67,7 +88,7 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity impl
     private static String TAG = SendingServiceAwareActivity.class.getName();
 
     public SendingServiceAwareActivity() {
-        sendingServiceConnection = new MessageSendingServiceConnection();
+        sendingServiceConnection = new MessageSendingServiceConnection(this);
     }
 
     @Override

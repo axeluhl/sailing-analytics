@@ -3,9 +3,6 @@ package com.sap.sailing.racecommittee.app.data;
 import java.io.Serializable;
 import java.util.Collection;
 
-import android.app.LoaderManager;
-import android.app.LoaderManager.LoaderCallbacks;
-
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.CourseBase;
@@ -13,11 +10,15 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
+import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.CoursePosition;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
+
+import android.app.LoaderManager;
+import android.app.LoaderManager.LoaderCallbacks;
 
 /**
  * <p>
@@ -42,7 +43,7 @@ public interface ReadonlyDataManager {
      * 
      * @return the {@link DataStore}.
      */
-    public DataStore getDataStore();
+    DataStore getDataStore();
 
     /**
      * Creates a new {@link LoaderCallbacks} object for loading {@link EventBase}s.
@@ -53,8 +54,7 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    public LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createEventsLoader(
-            LoadClient<Collection<EventBase>> callback);
+    LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createEventsLoader(LoadClient<Collection<EventBase>> callback);
 
     /**
      * Creates a new {@link LoaderCallbacks} object for loading {@link CourseArea}s.
@@ -65,24 +65,20 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
-            Serializable parentEventId, LoadClient<Collection<CourseArea>> callback);
+    LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(Serializable parentEventId,
+        LoadClient<Collection<CourseArea>> callback);
 
-    public LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(
-            EventBase parentEvent, LoadClient<Collection<CourseArea>> callback);
-    
-    
+    LoaderCallbacks<DataLoaderResult<Collection<CourseArea>>> createCourseAreasLoader(EventBase parentEvent,
+        LoadClient<Collection<CourseArea>> callback);
+
     /**
      * Creates a new {@link LoaderCallbacks} object for loading racing referee positions.
      * 
-     * @param callback
-     *            {@link LoadClient} implementing your data handling code.
      * @return {@link LoaderCallbacks} to be used in
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    public LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(
-			PositionListFragment positionListFragment);
+    LoaderCallbacks<DataLoaderResult<Collection<CoursePosition>>> createPositionLoader(PositionListFragment positionListFragment);
     
     /**
      * Creates a new {@link LoaderCallbacks} object for loading {@link ManagedRace}s of a specific {@link CourseArea}.
@@ -95,8 +91,8 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    public LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(Serializable courseAreaId,
-            LoadClient<Collection<ManagedRace>> callback);
+    LoaderCallbacks<DataLoaderResult<Collection<ManagedRace>>> createRacesLoader(Serializable courseAreaId,
+        LoadClient<Collection<ManagedRace>> callback);
 
     /**
      * Creates a new {@link LoaderCallbacks} object for loading a race's {@link Mark}s.
@@ -109,8 +105,7 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    public LoaderCallbacks<DataLoaderResult<Collection<Mark>>> createMarksLoader(ManagedRace managedRace,
-            LoadClient<Collection<Mark>> callback);
+    LoaderCallbacks<DataLoaderResult<Collection<Mark>>> createMarksLoader(ManagedRace managedRace, LoadClient<Collection<Mark>> callback);
 
     /**
      * Creates a new {@link LoaderCallbacks} object for loading a race's {@link CourseBase}.
@@ -123,8 +118,7 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    public LoaderCallbacks<DataLoaderResult<CourseBase>> createCourseLoader(ManagedRace managedRace,
-            LoadClient<CourseBase> callback);
+    LoaderCallbacks<DataLoaderResult<CourseBase>> createCourseLoader(ManagedRace managedRace, LoadClient<CourseBase> callback);
 
     /**
      * Creates a new {@link LoaderCallbacks} object for loading {@link Competitor}s.
@@ -135,8 +129,8 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    public LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(ManagedRace managedRace,
-            LoadClient<Collection<Competitor>> callback);
+    LoaderCallbacks<DataLoaderResult<Collection<Competitor>>> createCompetitorsLoader(ManagedRace managedRace,
+        LoadClient<Collection<Competitor>> callback);
     
     /**
      * Creates a new {@link LoaderCallbacks} object for loading a client's configuration.
@@ -147,8 +141,22 @@ public interface ReadonlyDataManager {
      *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
      *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
      */
-    public LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
-            LoadClient<DeviceConfiguration> callback);
+    LoaderCallbacks<DataLoaderResult<DeviceConfiguration>> createConfigurationLoader(DeviceConfigurationIdentifier identifier,
+        LoadClient<DeviceConfiguration> callback);
 
-    public String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets, boolean showSimulation, boolean showMapControls);
+    String getMapUrl(String baseUrl, ManagedRace race, String eventId, boolean showWindCharts, boolean showStreamlets, boolean showSimulation,
+        boolean showMapControls);
+
+    /**
+     * Create a new {@link LoaderCallbacks} object for loading the race columns (e.g. factors)
+     *
+     * @param leaderboard
+     * @param race_column
+     * @param callback
+     *
+     * @return {@link LoaderCallbacks} to be used in
+     *         {@link LoaderManager#initLoader(int, android.os.Bundle, LoaderCallbacks)} or
+     *         {@link LoaderManager#restartLoader(int, android.os.Bundle, LoaderCallbacks)}.
+     */
+    LoaderCallbacks<DataLoaderResult<RaceColumnFactorImpl>> createRaceColumnFactorLoader(LoadClient<RaceColumnFactorImpl> callback);
 }

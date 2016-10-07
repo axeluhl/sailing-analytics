@@ -8,14 +8,16 @@ public class RaceLogTrackingInfoDTO implements Serializable {
     private static final long serialVersionUID = -6861382173074620168L;
     public boolean raceLogTrackerExists;
     public boolean competitorRegistrationsExists;
+    public boolean courseExists;
     public RaceLogTrackingState raceLogTrackingState;
     
     protected RaceLogTrackingInfoDTO() {}
     
-    public RaceLogTrackingInfoDTO(boolean raceLogTrackerExists, boolean competitorRegistrationsExists,
+    public RaceLogTrackingInfoDTO(boolean raceLogTrackerExists, boolean competitorRegistrationsExists, boolean courseExists,
             RaceLogTrackingState raceLogTrackingState) {
         this.raceLogTrackerExists = raceLogTrackerExists;
         this.competitorRegistrationsExists = competitorRegistrationsExists;
+        this.courseExists = courseExists;
         this.raceLogTrackingState = raceLogTrackingState;
     }
 }

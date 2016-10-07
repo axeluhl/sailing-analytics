@@ -78,7 +78,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
                 null, /* endDate */null, /* trackedRegattaRegistry */null, new LowPoint(), UUID.randomUUID(),
                 courseArea);
         regattaLeaderboard = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
-        regatta.addSeries(new SeriesImpl("Test Series", /* isMedal */false, Arrays.asList(new FleetImpl("Yellow"),
+        regatta.addSeries(new SeriesImpl("Test Series", /* isMedal */false, /* isFleetsCanRunInParallel */ true, Arrays.asList(new FleetImpl("Yellow"),
                 new FleetImpl("Blue")), Arrays.asList("R1", "R2", "R3"), /* trackedRegattaRegistry */null));
         for (int l = 0; l < NUMBER_OF_COMP_LISTS; l++) {
             compLists[l] = new ArrayList<Competitor>();

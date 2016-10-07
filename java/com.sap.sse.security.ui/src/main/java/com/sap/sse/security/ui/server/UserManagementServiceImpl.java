@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -166,11 +167,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public void updateUserProperties(final String username, String fullName, String company) throws UserManagementException {
+    public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN or is changing own user
         if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
-            getSecurityService().updateUserProperties(username, fullName, company);
+            getSecurityService().updateUserProperties(username, fullName, company,
+                    localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName));
         } else {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
@@ -302,7 +304,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }
         userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
-                user.isEmailValidated(), accountDTOs, user.getRoles(), user.getPermissions());
+                user.getLocale() != null ? user.getLocale().toLanguageTag() : null, user.isEmailValidated(),
+                accountDTOs, user.getRoles(), user.getPermissions());
         return userDTO;
     }
 

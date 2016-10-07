@@ -14,11 +14,12 @@ import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboardDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
-import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
+import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 
 /**
@@ -58,7 +59,12 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
 
     @Override
     public void start(final RegattaLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
-        contentArea.setWidget(new Placeholder());
+        if(currentPresenter.getRegattaMetadata() == null) {
+            contentArea.setWidget(new InfoPlaceholder(StringMessages.INSTANCE.noDataForEvent()));
+            return;
+        }
+        
+        contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String regattaId = currentPresenter.getRegattaId();
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;

@@ -19,7 +19,6 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
@@ -54,13 +53,13 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
-        return createRaceTracker(regatta, trackedRegattaRegistry, windStore, gpsFixStore, raceLogResolver);
+            RaceLogResolver raceLogResolver) {
+        return createRaceTracker(regatta, trackedRegattaRegistry, windStore, raceLogResolver);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
+            WindStore windStore, RaceLogResolver raceLogResolver) {
         if (regatta == null) {
             BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getBoatClass();
             regatta = service.getOrCreateDefaultRegatta(
@@ -71,7 +70,7 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
             throw new RaceNotCreatedException("No regatta for race-log tracked race");
         }
         DynamicTrackedRegatta trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
-        return new RaceLogRaceTracker(trackedRegatta, this, windStore, gpsFixStore, raceLogResolver);
+        return new RaceLogRaceTracker(trackedRegatta, this, windStore, raceLogResolver);
     }
 
     @Override

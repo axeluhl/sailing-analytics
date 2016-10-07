@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.security.Permission;
@@ -10,6 +12,7 @@ import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
@@ -20,6 +23,19 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
 
+/**
+ * A specific {@link TimePanel} that shows and manages a time slider for a race. Receives {@link RaceTimesInfoDTO}
+ * objects when registered as a {@link RaceTimesInfoProviderListener} on a {@link RaceTimesInfoProvider} and adjusts the
+ * time panel including its time slider and the marks displayed and the zoom model accordingly.
+ * <p>
+ * 
+ * It is possible to register as a "transitive" {@link RaceTimesInfoProviderListener} on this object in case a component
+ * is interested in being notified when this object is done with its adjustments based on a
+ * {@link RaceTimesInfoProviderListener} notification.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceTimesInfoProviderListener {
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     
@@ -28,6 +44,17 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private RaceTimesInfoDTO lastRaceTimesInfo;
     private boolean hasCanReplayDuringLiveRacesPermission = false;
     private final UserService userService;
+    private final RaceTimePanelLifecycle componentLifecycle;
+    
+    /**
+     * These listeners are notified transitively after this object has been
+     * {@link RaceTimesInfoProviderListener#raceTimesInfosReceived(Map, long, Date, long) notified} about race timing
+     * changes and has finished reacting accordingly. This way, e.g., a race board mode implementation can do its
+     * thing while assuming that the time slider has already been adjusted accordingly, therefore allowing for the
+     * timer to be set to a reasonable value.
+     */
+    private final Set<RaceTimesInfoProviderListener> listeners;
+    
     private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
         @Override
         public void onUserStatusChange(UserDTO user) {
@@ -42,22 +69,25 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * will be issued and the flag is cleared.
      */
     private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
-
     
-    public RaceTimePanel(UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport,
-            RegattaAndRaceIdentifier selectedRaceIdentifier) {
-        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, isScreenLargeEnoughToOfferChartSupport);
+    private final Duration initialTimeAfterRaceStartInReplayMode;
+    
+    public RaceTimePanel(RaceTimePanelLifecycle componentLifecycle, UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
+            RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
+        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, forcePaddingRightToAlignToCharts);
+        this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
+        this.listeners = new HashSet<>();
         selectedRace = null;
         autoAdjustPlayMode = true;
         selectedRace = selectedRaceIdentifier;
+        this.initialTimeAfterRaceStartInReplayMode = initialTimeAfterRaceStartInReplayMode;
         if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
             raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
         }
     }
-    
     
     @Override
     protected void onLoad() {
@@ -70,6 +100,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     protected void onUnload() {
         super.onUnload();
         userService.removeUserStatusEventHandler(userStatusEventHandler);
+    }
+    
+    public void addRaceTimesInfoProviderListener(RaceTimesInfoProviderListener listener) {
+        this.listeners.add(listener);
+    }
+    
+    public void removeRaceTimesInfoProviderListener(RaceTimesInfoProviderListener listener) {
+        this.listeners.remove(listener);
     }
     
     @Override
@@ -104,15 +142,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     @Override
     public RaceTimePanelSettings getSettings() {
-        RaceTimePanelSettings result = new RaceTimePanelSettings();
-        result.setRefreshInterval(timer.getRefreshInterval());
-        result.setRaceTimesInfo(raceTimesInfoProvider.getRaceTimesInfo(selectedRace));
-        return result;
+        return new RaceTimePanelSettings(timer.getRefreshInterval());
     }
 
     @Override
     public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent() {
-        return new RaceTimePanelSettingsDialogComponent(getSettings(), stringMessages);
+        return componentLifecycle.getSettingsDialogComponent(getSettings());
     }
 
     private void updateTimeInfo(RaceTimesInfoDTO raceTimesInfo) {
@@ -244,7 +279,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         Date max = raceMinMax.getB();
         
         // never reduce max if it was already set
-        if (min != null && max != null && (getToTime() == null || getToTime().before(max))) {
+        if (min != null && max != null &&
+                (getToTime() == null || getToTime().before(max) ||
+                 getFromTime() == null || getFromTime().after(min))) {
             setMinMax(min, max, /* fireEvent */ false); // no event because we guarantee time to be between min and max
         }
     }
@@ -282,7 +319,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         case Replay:
             // set time to start of race
             if (newRaceTimesInfo.startOfRace != null) {
-                timer.setTime(newRaceTimesInfo.startOfRace.getTime());
+                timer.setTime(newRaceTimesInfo.startOfRace.getTime() +
+                        (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
             }
             break;
         }
@@ -358,5 +396,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos, long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
         timer.adjustClientServerOffset(clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
         updateTimeInfo(raceTimesInfos.get(selectedRace));
+        for (final RaceTimesInfoProviderListener listener : listeners) {
+            listener.raceTimesInfosReceived(raceTimesInfos, clientTimeWhenRequestWasSent, serverTimeDuringRequest, clientTimeWhenResponseWasReceived);
+        }
     }
 }

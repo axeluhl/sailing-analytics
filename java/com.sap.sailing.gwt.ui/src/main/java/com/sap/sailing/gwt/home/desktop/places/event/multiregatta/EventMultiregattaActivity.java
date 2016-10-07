@@ -12,6 +12,11 @@ import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
+/**
+ * Base Activity for all desktop multi-regatta-event pages.
+ *
+ * @param <PLACE> The concrete {@link AbstractMultiregattaEventPlace} subclass, this instance is bound to.
+ */
 public class EventMultiregattaActivity extends AbstractEventActivity<AbstractMultiregattaEventPlace> implements EventMultiregattaView.Presenter {
 
     private EventMultiregattaView currentView = new TabletAndDesktopMultiRegattaEventView();

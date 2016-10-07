@@ -1,18 +1,8 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.content.OperationApplicationException;
-import android.database.Cursor;
-import android.os.RemoteException;
-import android.provider.BaseColumns;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
@@ -26,6 +16,19 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
+
+import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.content.OperationApplicationException;
+import android.database.Cursor;
+import android.os.RemoteException;
+import android.provider.BaseColumns;
+import android.support.v4.content.LocalBroadcastManager;
 
 public class DatabaseHelper {
 
@@ -85,12 +88,12 @@ public class DatabaseHelper {
         if (mc != null) {
             mc.moveToFirst();
             while (!mc.isAfterLast()) {
-                MarkInfo markInfo = new MarkInfo();
-                markInfo.setCheckinDigest(mc.getString((mc.getColumnIndex(Mark.MARK_CHECKIN_DIGEST))));
-                markInfo.setId(mc.getString((mc.getColumnIndex(Mark.MARK_ID))));
-                markInfo.setName(mc.getString((mc.getColumnIndex(Mark.MARK_NAME))));
-                markInfo.setType(mc.getString((mc.getColumnIndex(Mark.MARK_TYPE))));
-                markInfo.setClassName(mc.getString((mc.getColumnIndex(Mark.MARK_CLASS_NAME))));
+                final String markName = mc.getString((mc.getColumnIndex(Mark.MARK_NAME)));
+                final String markIdAsString = mc.getString(mc.getColumnIndex(Mark.MARK_ID));
+                final Serializable markId = Helpers.tryUuidConversion(markIdAsString);
+                MarkInfo markInfo = new MarkInfo(markId, markName,
+                        mc.getString((mc.getColumnIndex(Mark.MARK_CLASS_NAME))),
+                        checkinDigest);
                 marks.add(markInfo);
                 mc.moveToNext();
             }
@@ -106,12 +109,11 @@ public class DatabaseHelper {
         if (mpc != null) {
             mpc.moveToFirst();
             while (!mpc.isAfterLast()) {
-                MarkPingInfo markPingInfo = new MarkPingInfo();
-                markPingInfo.setMarkId(markID);
-                markPingInfo.setTimestamp(mpc.getInt((mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP))));
-                markPingInfo.setLongitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE))));
-                markPingInfo.setLatitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
-                markPingInfo.setAccuracy(mpc.getDouble((mpc.getColumnIndex(MarkPing.MARK_PING_ACCURACY))));
+                long timeStamp = Long.parseLong(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP))));
+                double longitude = Double.parseDouble(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE))));
+                double latitude = Double.parseDouble(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
+                MarkPingInfo markPingInfo = new MarkPingInfo(markID, GPSFixImpl.create(longitude, latitude, timeStamp),
+                        mpc.getDouble((mpc.getColumnIndex(MarkPing.MARK_PING_ACCURACY))));
                 marks.add(markPingInfo);
                 mpc.moveToNext();
             }
@@ -120,12 +122,12 @@ public class DatabaseHelper {
         return marks;
     }
 
-    public void deletePingsFromDataBase(Context context, String markID) {
+    public void deletePingsFromDataBase(Context context, String markIdAsString) {
         ContentResolver cr = context.getContentResolver();
-        int d1 = cr.delete(MarkPing.CONTENT_URI, MarkPing.MARK_ID + " = ?", new String[] { markID });
+        int d1 = cr.delete(MarkPing.CONTENT_URI, MarkPing.MARK_ID + " = ?", new String[] { markIdAsString });
 
         if (BuildConfig.DEBUG) {
-            ExLog.i(context, TAG, "Checkout, number of markpings for mark: " + markID + " deleted: " + d1);
+            ExLog.i(context, TAG, "Checkout, number of markpings for mark: " + markIdAsString + " deleted: " + d1);
         }
     }
 
@@ -135,7 +137,7 @@ public class DatabaseHelper {
         List<MarkInfo> marks = getMarks(context, checkinDigest);
 
         for (MarkInfo mark : marks) {
-            deletePingsFromDataBase(context, mark.getId());
+            deletePingsFromDataBase(context, mark.getId().toString());
         }
 
         int d2 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
@@ -184,9 +186,9 @@ public class DatabaseHelper {
         for (MarkInfo mark : markList) {
             ContentValues cmv = new ContentValues();
             cmv.put(Mark.MARK_CHECKIN_DIGEST, mark.getCheckinDigest());
-            cmv.put(Mark.MARK_ID, mark.getId());
+            cmv.put(Mark.MARK_ID, mark.getId().toString());
             cmv.put(Mark.MARK_NAME, mark.getName());
-            cmv.put(Mark.MARK_TYPE, mark.getType());
+            cmv.put(Mark.MARK_TYPE, mark.getType().toString());
             cmv.put(Mark.MARK_CLASS_NAME, mark.getClassName());
 
             opList.add(ContentProviderOperation.newInsert(Mark.CONTENT_URI).withValues(cmv).build());
@@ -219,7 +221,7 @@ public class DatabaseHelper {
 
     private void deleteMark(Context context, MarkInfo markInfo) {
         ContentResolver cr = context.getContentResolver();
-        cr.delete(Mark.CONTENT_URI, Mark.MARK_ID + " = ?", new String[] { markInfo.getId() });
+        cr.delete(Mark.CONTENT_URI, Mark.MARK_ID + " = ?", new String[] { markInfo.getId().toString() });
 
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Deleted mark with id: " + markInfo.getId());
@@ -246,14 +248,14 @@ public class DatabaseHelper {
         for (MarkInfo mark : markList) {
             ContentValues cmv = new ContentValues();
             cmv.put(Mark.MARK_CHECKIN_DIGEST, mark.getCheckinDigest());
-            cmv.put(Mark.MARK_ID, mark.getId());
+            cmv.put(Mark.MARK_ID, mark.getId().toString());
             cmv.put(Mark.MARK_NAME, mark.getName());
-            cmv.put(Mark.MARK_TYPE, mark.getType());
+            cmv.put(Mark.MARK_TYPE, mark.getType().toString());
             cmv.put(Mark.MARK_CLASS_NAME, mark.getClassName());
             if (!dataBaseContainsMark(context, mark)) {
                 cr.insert(Mark.CONTENT_URI, cmv);
             } else {
-                cr.update(Mark.CONTENT_URI, cmv, Mark.MARK_ID + " = ?", new String[] { mark.getId() });
+                cr.update(Mark.CONTENT_URI, cmv, Mark.MARK_ID + " = ?", new String[] { mark.getId().toString() });
             }
         }
         LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(context.getString(R.string.database_changed)));
@@ -261,7 +263,7 @@ public class DatabaseHelper {
 
     private boolean dataBaseContainsMark(Context context, MarkInfo mark) {
         Cursor contentResolver = context.getContentResolver().query(Mark.CONTENT_URI, null, Mark.MARK_CHECKIN_DIGEST + " = ?" +
-            " AND " + Mark.MARK_ID + " = ? ", new String[] { mark.getCheckinDigest(), mark.getId() }, "");
+            " AND " + Mark.MARK_ID + " = ? ", new String[] { mark.getCheckinDigest(), mark.getId().toString() }, "");
         int count = 0;
         if (contentResolver != null) {
             count = contentResolver.getCount();
@@ -273,10 +275,10 @@ public class DatabaseHelper {
 
     public void storeMarkPing(Context context, MarkPingInfo markPing) throws GeneralDatabaseHelperException {
         ContentResolver cr = context.getContentResolver();
-        deletePingsFromDataBase(context, markPing.getMarkId());
+        deletePingsFromDataBase(context, markPing.getMarkId().toString());
         ArrayList<ContentProviderOperation> opList = new ArrayList<>();
         ContentValues mpcv = new ContentValues();
-        mpcv.put(MarkPing.MARK_ID, markPing.getMarkId());
+        mpcv.put(MarkPing.MARK_ID, markPing.getMarkId().toString());
         mpcv.put(MarkPing.MARK_PING_LATITUDE, markPing.getLatitude());
         mpcv.put(MarkPing.MARK_PING_LONGITUDE, markPing.getLongitude());
         mpcv.put(MarkPing.MARK_PING_ACCURACY, markPing.getAccuracy());

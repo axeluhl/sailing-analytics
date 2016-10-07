@@ -30,6 +30,9 @@ import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * Mobile page footer with several links and the ability to switch the language.
+ */
 public class Footer extends Composite {
     private static FooterPanelUiBinder uiBinder = GWT.create(FooterPanelUiBinder.class);
 

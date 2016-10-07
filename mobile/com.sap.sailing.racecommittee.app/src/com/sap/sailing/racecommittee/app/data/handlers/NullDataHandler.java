@@ -13,7 +13,7 @@ public class NullDataHandler<T> extends DataHandler<T> {
     }
 
     @Override
-    public void onResult(T data) {
+    public void onResult(T data, boolean isCached) {
         // no operation
     }
 
