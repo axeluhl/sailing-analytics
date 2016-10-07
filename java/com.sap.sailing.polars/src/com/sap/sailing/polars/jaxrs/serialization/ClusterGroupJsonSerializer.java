@@ -1,4 +1,4 @@
-package com.sap.sailing.polars.jaxrs.api;
+package com.sap.sailing.polars.jaxrs.serialization;
 
 import java.io.Serializable;
 
@@ -9,6 +9,9 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
 import com.sap.sse.datamining.data.ClusterGroup;
+import com.sap.sse.datamining.data.restricted.ClusterBoundaryExtended;
+import com.sap.sse.datamining.data.restricted.ClusterExtended;
+import com.sap.sse.datamining.data.restricted.ClusterGroupExtended;
 
 public class ClusterGroupJsonSerializer<ElementType extends Serializable>
         implements JsonSerializer<ClusterGroup<ElementType>> {
@@ -17,14 +20,17 @@ public class ClusterGroupJsonSerializer<ElementType extends Serializable>
         JSONObject result = new JSONObject();
         JSONArray clusters = new JSONArray();
 
-        for (Cluster<ElementType> cluster : clusterGroup.getClusters()) {
+        ClusterGroupExtended<ElementType> groupExtended = (ClusterGroupExtended<ElementType>) clusterGroup;
+        for (Cluster<ElementType> cluster : groupExtended.getClusters()) {
             JSONObject jsonCluster = new JSONObject();
             JSONArray boundaries = new JSONArray();
 
-            for (ClusterBoundary<ElementType> boundary : cluster.getBoundaries()) {
+            ClusterExtended<ElementType> clusterExtended = (ClusterExtended<ElementType>) cluster;
+            for (ClusterBoundary<ElementType> boundary : clusterExtended.getBoundaries()) {
+                ClusterBoundaryExtended<ElementType> boundaryExtended = (ClusterBoundaryExtended<ElementType>) boundary;
                 JSONObject jsonBoundary = new JSONObject();
-                jsonBoundary.put("strategy", boundary.getStrategy());
-                jsonBoundary.put("boundaryValue", boundary.getBoundaryValue());
+                jsonBoundary.put("strategy", boundaryExtended.getStrategy());
+                jsonBoundary.put("boundaryValue", boundaryExtended.getBoundaryValue());
                 boundaries.add(jsonBoundary);
             }
             jsonCluster.put("boundaries", boundaries);

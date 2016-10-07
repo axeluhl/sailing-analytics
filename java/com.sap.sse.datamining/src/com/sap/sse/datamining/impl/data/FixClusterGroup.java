@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.datamining.data.Cluster;
-import com.sap.sse.datamining.data.ClusterGroup;
+import com.sap.sse.datamining.data.restricted.ClusterGroupExtended;
 
-public class FixClusterGroup<ElementType extends Serializable> implements ClusterGroup<ElementType> {
+public class FixClusterGroup<ElementType extends Serializable> implements ClusterGroupExtended<ElementType> {
     private static final long serialVersionUID = -5080331147800848136L;
     
     private final Set<Cluster<ElementType>> clusters;

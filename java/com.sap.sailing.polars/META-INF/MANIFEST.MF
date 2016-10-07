@@ -14,6 +14,8 @@ Import-Package:
 Require-Bundle: 
  com.sap.sailing.domain.common,
  com.sap.sailing.domain,
+ com.sap.sailing.polars.datamining,
+ com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sailing.server.gateway.serialization,
  com.sap.sse.datamining,
  com.sap.sse.datamining.annotations,

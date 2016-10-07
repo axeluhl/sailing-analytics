@@ -11,8 +11,10 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.polars.jaxrs.AbstractPolarResource;
+import com.sap.sailing.polars.jaxrs.serialization.ClusterGroupJsonSerializer;
+import com.sap.sailing.polars.jaxrs.serialization.GPSFixMovingWithPolarContextJsonSerializer;
+import com.sap.sailing.polars.jaxrs.serialization.PolarSheetGenerationSettingsJsonSerializer;
 import com.sap.sailing.polars.mining.GPSFixMovingWithPolarContext;
-import com.sap.sailing.server.gateway.serialization.impl.PolarSheetGenerationSettingsJsonSerializer;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 
 @Path("/polar_data")

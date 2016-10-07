@@ -6,9 +6,10 @@ import java.util.Locale;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
+import com.sap.sse.datamining.data.restricted.ClusterExtended;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public class LocalizedCluster<ElementType extends Serializable> implements Cluster<ElementType> {
+public class LocalizedCluster<ElementType extends Serializable> implements ClusterExtended<ElementType> {
     private static final long serialVersionUID = 6621306336227572117L;
     
     private final String messageKey;
@@ -36,7 +37,7 @@ public class LocalizedCluster<ElementType extends Serializable> implements Clust
 
     @Override
     public Collection<ClusterBoundary<ElementType>> getBoundaries() {
-        return cluster.getBoundaries();
+        return ((ClusterExtended<ElementType>) cluster).getBoundaries();
     }
 
 }

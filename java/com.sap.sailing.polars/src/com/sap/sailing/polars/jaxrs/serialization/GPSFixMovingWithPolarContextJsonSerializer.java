@@ -1,4 +1,4 @@
-package com.sap.sailing.polars.jaxrs.api;
+package com.sap.sailing.polars.jaxrs.serialization;
 
 import org.json.simple.JSONObject;
 

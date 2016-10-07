@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
 
-import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
+import com.sap.sse.datamining.data.restricted.ClusterExtended;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public abstract class AbstractCluster<ElementType extends Serializable> implements Cluster<ElementType> {
+public abstract class AbstractCluster<ElementType extends Serializable> implements ClusterExtended<ElementType> {
     private static final long serialVersionUID = 1606840566021644768L;
     
     private Collection<ClusterBoundary<ElementType>> boundaries;
