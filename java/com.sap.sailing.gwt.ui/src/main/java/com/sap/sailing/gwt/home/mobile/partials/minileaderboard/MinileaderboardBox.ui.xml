@@ -9,5 +9,8 @@
 		<mp:header>
 			<mp:sectionHeader.SectionHeaderContent sectionTitle="{i18n.results}" ui:field="headerUi" />
 		</mp:header>
+		<mp:footer>
+		    <mp:toggleButton.BigButton ui:field="showLeaderboardButtonUi" label="{i18n.showLeaderboard}" visible="false" />
+		</mp:footer>
   </mp:section.MobileSection>
 </ui:UiBinder>

@@ -5,9 +5,9 @@ import com.google.gwt.dom.client.Style.FontStyle;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -33,7 +33,7 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
 
     @UiField MobileSection itemContainerUi;
     @UiField SectionHeaderContent headerUi;
-    private BigButton showLeaderboardButtonUi;
+    @UiField BigButton showLeaderboardButtonUi;
     
     private PlaceNavigation<?> placeNavigation = null;
 
@@ -42,26 +42,19 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
     public MinileaderboardBox(boolean isOverall) {
         this.isOverall = isOverall;
         initWidget(uiBinder.createAndBindUi(this));
-        showLeaderboardButtonUi = new BigButton(I18N.showLeaderboard());
-        showLeaderboardButtonUi.getElement().getStyle().setBorderWidth(0, Unit.PX);
-        showLeaderboardButtonUi.getElement().getStyle().setPaddingTop(0.5, Unit.EM);
-        showLeaderboardButtonUi.setVisible(false);
-        showLeaderboardButtonUi.addClickHandler(new ClickHandler() {
-            
-            @Override
-            public void onClick(ClickEvent event) {
-                if(placeNavigation != null) {
-                    placeNavigation.goToPlace();
-                }
-            }
-        });
+    }
+    
+    @UiHandler("showLeaderboardButtonUi")
+    void onShowLeaderboardClick(ClickEvent event) {
+        if(placeNavigation != null) {
+            placeNavigation.goToPlace();
+        }
     }
     
     public void setAction(String infoText, final PlaceNavigation<?> placeNavigation) {
         headerUi.setInfoText(infoText);
         headerUi.setClickAction(placeNavigation);
         this.placeNavigation = placeNavigation;
-        showLeaderboardButtonUi.setVisible(true);
     }
     
     @Override
@@ -92,12 +85,10 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         for (MiniLeaderboardItemDTO item : data.getItems()) {
             itemContainerUi.addContent(new MinileaderboardBoxItem(item, showRaceCounts));
         }
-        if(showLeaderboardButton) {
-            itemContainerUi.addContent(showLeaderboardButtonUi);
-        }
         if (showRaceCounts) {
             itemContainerUi.addContent(new MinileaderboardBoxItemLegend());
         }
+        showLeaderboardButtonUi.setVisible(showLeaderboardButton);
     }
     
     private Widget getNoResultsInfoWidget() {
