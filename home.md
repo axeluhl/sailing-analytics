@@ -54,7 +54,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Administrator|wiki/info/mobile/racecommittee-app-administrator]]
   * [[User|wiki/info/mobile/racecommittee-app-user]]
 * [[Android and Release Build|wiki/info/mobile/android-and-release-build]]
-* [[Data consumption of mobile apps|wiki/info/mobile/data-consumption-of-mobile-apps]]
+* [[Energy consumption of mobile apps|wiki/info/mobile/energy-consumption]]
+* [[Data consumption of mobile apps|wiki/info/mobile/data-consumption]]
 * [[Mobile Sailing Analytics|wiki/info/mobile/mobilesailinganalytics]]
 * [[Push Notifications|wiki/info/mobile/push-notifications]]
 
