@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.desktop.partials.sailorinfo.SailorInfo;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
@@ -52,7 +51,7 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
     @Override
     public void navigateTabsTo(AbstractMultiregattaEventPlace place) {
         tabPanelUi.activatePlace(place);
-        StringBuilder titleBuilder = new StringBuilder(TextMessages.INSTANCE.sapSailing()).append(" - ");
+        StringBuilder titleBuilder = new StringBuilder(StringMessages.INSTANCE.sapSailing()).append(" - ");
 
         titleBuilder.append(currentPresenter.showRegattaMetadata() ? currentPresenter.getRegattaMetadata()
                 .getDisplayName() : currentPresenter.getEventDTO().getDisplayName());

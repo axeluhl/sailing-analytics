@@ -97,7 +97,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private FlowPanel createTimingDetailsPanel(DataEntryDialog<?> dialog) {
         FlowPanel timingPanel = new FlowPanel();
         timingPanel.ensureDebugId("TimingSettingsPanel");
-        refreshIntervalInSecondsBox = dialog.createLongBox(initialSettings.getDelayBetweenAutoAdvancesInMilliseconds() / 1000l, 4);
+        refreshIntervalInSecondsBox = dialog.createLongBox(
+                (initialSettings.getDelayBetweenAutoAdvancesInMilliseconds()==null ?
+                        LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS : initialSettings.getDelayBetweenAutoAdvancesInMilliseconds()) / 1000l, 4);
         refreshIntervalInSecondsBox.ensureDebugId("RefreshIntervalLongBox");
         
         timingPanel.add(dialog.createHeadline(stringMessages.timing(), true));

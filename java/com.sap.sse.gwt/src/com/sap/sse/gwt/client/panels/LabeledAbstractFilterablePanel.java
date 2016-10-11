@@ -25,6 +25,13 @@ import com.sap.sse.common.filter.AbstractListFilter;
  */
 public abstract class LabeledAbstractFilterablePanel<T> extends AbstractFilterablePanel<T> {
     
+    /**
+     * @param display
+     *            Note: when using this with a cell table obtained through {@link TableWrapper#getTable()}, obtain this
+     *            panel's {@link #getAllListDataProvider()} and pass it to the
+     *            {@link TableWrapper#registerSelectionModelOnNewDataProvider} method so that the selection is preserved
+     *            across setting and removing the filter
+     */
     public LabeledAbstractFilterablePanel(Label label, Iterable<T> all, CellTable<T> display, final ListDataProvider<T> filtered) {
         super(all, display, filtered);
         insert(label, 0);

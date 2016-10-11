@@ -33,6 +33,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -96,8 +97,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private long stepSizeInMillis = DEFAULT_STEPSIZE;
     private final Map<Pair<CompetitorDTO, DetailType>, Series> dataSeriesForDetailTypeAndCompetitor = new HashMap<>();
     private final Map<Pair<CompetitorDTO, DetailType>, Series> markPassingSeriesByCompetitor = new HashMap<>();
-    private Long timeOfEarliestRequestInMillis;
-    private Long timeOfLatestRequestInMillis;
+    
+    private final TimingHolder primary = new TimingHolder();
+    private final TimingHolder secondary = new TimingHolder();
     
     protected AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
@@ -244,15 +246,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             // If the time interval is too long and the step size too small, the number of fixes the query would have to
             // produce may exceed any reasonable limit. Therefore, we limit the number of fixes that such a query may ask
             // for:
-            doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedFirstDetailType());
+            doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedFirstDetailType(),primary);
             if (getSelectedSecondDetailType() != null) {
-                doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedSecondDetailType());
+                doLoadDataForCompetitorsAndDataType(from, to, append, competitorsToLoad, getSelectedSecondDetailType(),secondary);
             }
         }
     }
 
     private void doLoadDataForCompetitorsAndDataType(final Date from, final Date to, final boolean append,
-            ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve) {
+            ArrayList<CompetitorDTO> competitorsToLoad, final DetailType selectedDataTypeToRetrieve,final TimingHolder tholder) {
         long stepSize = Math.max(getStepSizeInMillis(),
                 from==null||to==null ? 0 : Math.abs(to.getTime()-from.getTime())/SailingServiceConstants.MAX_NUMBER_OF_FIXES_TO_QUERY);
         GetCompetitorsRaceDataAction getCompetitorsRaceDataAction = new GetCompetitorsRaceDataAction(sailingService,
@@ -267,7 +269,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                             if (result.isEmpty() && chartContainsNoData()) {
                                 setWidget(noDataFoundLabel);
                             } else {
-                                updateChartSeries(result, selectedDataTypeToRetrieve, append);
+                                updateChartSeries(result, selectedDataTypeToRetrieve, append,tholder);
                             }
                         } else {
                             if (!append) {
@@ -299,9 +301,17 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         if (isVisible()) {
             ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
             competitorsToLoad.add(competitor);
-            Date fromDate = timeOfEarliestRequestInMillis == null ? null : new Date(timeOfEarliestRequestInMillis);
-            Date toDate = timeOfLatestRequestInMillis == null ? null : new Date(timeOfLatestRequestInMillis);
-            loadData(fromDate, toDate, competitorsToLoad, false);
+            
+            {
+                Date fromDate = primary.timeOfEarliestRequestInMillis == null ? null : new Date(primary.timeOfEarliestRequestInMillis);
+                Date toDate = primary.timeOfLatestRequestInMillis == null ? null : new Date(primary.timeOfLatestRequestInMillis);
+                loadData(fromDate, toDate, competitorsToLoad, false);
+            }
+            {
+                Date fromDate = secondary.timeOfEarliestRequestInMillis == null ? null : new Date(secondary.timeOfEarliestRequestInMillis);
+                Date toDate = secondary.timeOfLatestRequestInMillis == null ? null : new Date(secondary.timeOfLatestRequestInMillis);
+                loadData(fromDate, toDate, competitorsToLoad, false);
+            }
         }
     }
 
@@ -334,7 +344,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * Fills the series for the selected competitors with the data in {@link AbstractCompetitorRaceChart#chartData}.<br />
      */
     private synchronized void updateChartSeries(CompetitorsRaceDataDTO chartData, DetailType retrievedDataType,
-            boolean append) {
+            boolean append,TimingHolder tholder) {
         // Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
         for (CompetitorDTO competitor : chartData.getCompetitors()) {
@@ -368,8 +378,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     Double dataPointValue = raceDataPoint.getB();
                     if(dataPointValue != null) {
                         long dataPointTimeAsMillis = raceDataPoint.getA().getTime();
-                        if(append == false || (timeOfEarliestRequestInMillis == null || dataPointTimeAsMillis < timeOfEarliestRequestInMillis) || 
-                                timeOfLatestRequestInMillis == null || dataPointTimeAsMillis > timeOfLatestRequestInMillis) {
+                        if(append == false || (tholder.timeOfEarliestRequestInMillis == null || dataPointTimeAsMillis < tholder.timeOfEarliestRequestInMillis) || 
+                                tholder.timeOfLatestRequestInMillis == null || dataPointTimeAsMillis > tholder.timeOfLatestRequestInMillis) {
                             raceDataPointsToAdd[currentPointIndex++] = new Point(dataPointTimeAsMillis, dataPointValue);
                         }
                     }
@@ -384,6 +394,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     newRaceDataPoints = new Point[currentPointIndex];
                     System.arraycopy(raceDataPointsToAdd, 0, newRaceDataPoints, 0, currentPointIndex);
                 }
+                
                 setSeriesPoints(competitorDataSeries, newRaceDataPoints);
                 // Adding the series if chart doesn't contain it
                 List<Series> chartSeries = Arrays.asList(chart.getSeries());
@@ -394,11 +405,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 }
             }
         }
-        if (timeOfEarliestRequestInMillis == null || timeOfEarliestRequestInMillis > chartData.getRequestedFromTime().getTime()) {
-            timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
+        if (tholder.timeOfEarliestRequestInMillis == null || tholder.timeOfEarliestRequestInMillis > chartData.getRequestedFromTime().getTime()) {
+            tholder.timeOfEarliestRequestInMillis = chartData.getRequestedFromTime().getTime();
         }
-        if (timeOfLatestRequestInMillis == null || timeOfLatestRequestInMillis < chartData.getRequestedToTime().getTime()) {
-            timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
+        if (tholder.timeOfLatestRequestInMillis == null || tholder.timeOfLatestRequestInMillis < chartData.getRequestedToTime().getTime()) {
+            tholder.timeOfLatestRequestInMillis = chartData.getRequestedToTime().getTime();
         }
         chart.redraw();
     }
@@ -500,8 +511,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * Clears the whole chart and empties cached data.
      */
     protected void clearChart() {
-        timeOfEarliestRequestInMillis = null;
-        timeOfLatestRequestInMillis = null;
+        primary.timeOfEarliestRequestInMillis = null;
+        primary.timeOfLatestRequestInMillis = null;
+        secondary.timeOfEarliestRequestInMillis = null;
+        secondary.timeOfLatestRequestInMillis = null;
         dataSeriesForDetailTypeAndCompetitor.clear();
         markPassingSeriesByCompetitor.clear();
         chart.removeAllSeries();
@@ -735,24 +748,25 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         switch (timer.getPlayMode()) {
         case Live: {
             // is date before first cache entry or is cache empty?
-            if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+            if (primary.timeOfEarliestRequestInMillis == null || newTime.getTime() < primary.timeOfEarliestRequestInMillis) {
+                GWT.log("ouside first request time");
                 updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
-            } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
-                updateChart(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
+            } else if (newTime.getTime() > primary.timeOfLatestRequestInMillis) {
+                updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
             }
             // otherwise the cache spans across date and so we don't need to load anything
             break;
         }
         case Replay: {
-            if (timeOfLatestRequestInMillis == null) {
+            if (primary.timeOfLatestRequestInMillis == null) {
                 // pure replay mode
                 updateChart(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime(), /* append */false);
             } else {
                 // replay mode during live play
-                if (timeOfEarliestRequestInMillis == null || newTime.getTime() < timeOfEarliestRequestInMillis) {
+                if (primary.timeOfEarliestRequestInMillis == null || newTime.getTime() < primary.timeOfEarliestRequestInMillis) {
                     updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
-                } else if (newTime.getTime() > timeOfLatestRequestInMillis) {
-                    updateChart(new Date(timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
+                } else if (newTime.getTime() > primary.timeOfLatestRequestInMillis) {
+                    updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
                 }
             }
             break;
@@ -783,6 +797,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     public void filterChanged(FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> oldFilterSet,
             FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
         // nothing to do; if it changes the filtered competitor list, a separate call to filteredCompetitorsListChanged will occur
+    }
+    
+    static class TimingHolder{
+        private Long timeOfEarliestRequestInMillis;
+        private Long timeOfLatestRequestInMillis;
     }
 
 }

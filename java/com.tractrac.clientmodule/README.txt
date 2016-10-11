@@ -17,6 +17,47 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.3.0 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds some new features.
+These features add methods to the API breaking the backward compatibility. These changes are:
+
+Release date: 21/09/2016
+Build number: 12933
+
+1) Features
+
+ - Adding the method IRaceCompetitor.updateRaceCompetitor that is thrown when a race
+ competitor is updated
+
+********************************************
+************* TracAPI 3.2.2 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds a some features.
+These features add methods to the API, but they keep the backward compatibility.
+This version provides a new JavaDoc version.
+
+Release date: 21/09/2016
+Build number: 12927
+
+1) Features
+
+ - Adding the method ISubscriber.isRunning() to know if the thread created by the ISubscriber.start() method
+ is running or not (Requested by Jorge Piera, 04/08/2016).
+
+ - Added attribute in the IRaceCompetitor interface: statusTime. It will contain the time when an entry has changed
+ its status to abandoned/retired.
+
+ - Added new value to the RaceCompetitorStatusType enum: NO_COLLECT. This value means that the competitor didn't
+ collected the tracker.
+
+2) Bugs
+
+ - When an static control is added (or updated), the timestamp has to be the event start time. At this moment
+  it is using the timestamp when whe control was created (Reported by Steffen Wagner, 12/09/2016)
+
+
+********************************************
 ************* TracAPI 3.2.1 ****************
 ********************************************
 This is a final version. Only fixes bugs in the implementation
