@@ -96,4 +96,9 @@ public class ExpeditionWindTrackerFactory implements WindTrackerFactory {
             windReceivers.remove(windTracker.getReceiver().getPort());
         }
     }
+
+    @Override
+    public String toString() {
+        return "ExpeditionWindTrackerFactory [defaultPort=" + defaultPort + "]";
+    }
 }

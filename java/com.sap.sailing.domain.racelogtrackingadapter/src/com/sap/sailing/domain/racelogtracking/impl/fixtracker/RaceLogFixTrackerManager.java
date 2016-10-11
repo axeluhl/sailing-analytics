@@ -120,7 +120,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         stopTrackerIfStillRunning(preemptive);
         trackedRace.removeListener(raceChangeListener);
         synchronized (knownRaceLogs) {
-            for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
+            for (RaceLog raceLog : knownRaceLogs) {
                 removeRaceLogUnlocked(raceLog);
             }
         }
@@ -142,10 +142,12 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     }
 
     boolean isForTracking() {
-        for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
-            RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
-            if (raceLogTrackingState.isForTracking()) {
-                return true;
+        synchronized (knownRaceLogs) {
+            for (RaceLog raceLog : knownRaceLogs) {
+                RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
+                if (raceLogTrackingState.isForTracking()) {
+                    return true;
+                }
             }
         }
         return false;

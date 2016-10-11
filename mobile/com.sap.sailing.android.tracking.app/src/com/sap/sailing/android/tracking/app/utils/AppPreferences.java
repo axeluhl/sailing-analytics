@@ -112,15 +112,6 @@ public class AppPreferences extends BaseAppPreferences {
         preferences.edit().putString(context.getString(R.string.preference_competitor_key), id).commit();
     }
 
-    public void setEnergySavingEnabledByUser(boolean newValue) {
-        preferences.edit().putBoolean(context.getString(R.string.preference_energy_saving_enabled_key), newValue)
-                .commit();
-    }
-
-    public boolean getEnergySavingEnabledByUser() {
-        return preferences.getBoolean(context.getString(R.string.preference_energy_saving_enabled_key), false);
-    }
-
     public void setDisplayHeadingWithSubtractedDeclination(boolean newValue) {
         preferences.edit()
                 .putBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key), newValue)
@@ -186,4 +177,5 @@ public class AppPreferences extends BaseAppPreferences {
     public void removeFailedUpload(String key) {
         pref.edit().remove(key).commit();
     }
+
 }
