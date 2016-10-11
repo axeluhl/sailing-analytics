@@ -189,8 +189,17 @@ public class CheckinManager {
                                         org.json.simple.JSONObject simplePosition;
                                         simplePosition = JsonHelper.convertToSimple(positionJson);
                                         GPSFix gpsFix = deserializer.deserialize(simplePosition);
-                                        MarkPingInfo ping = new MarkPingInfo(mark.getId(), gpsFix, positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
+                                        //accepts JSON messages without accuracy and with, without will be displayed as "n/a"
+                                        MarkPingInfo ping;
+                                        if (positionJson.has(FlatGPSFixJsonSerializer.FIELD_ACCURACY)){
+                                            ping = new MarkPingInfo(mark.getId(), gpsFix, positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
+                                        }
+                                        else {
+                                            ping = new MarkPingInfo(mark.getId(), gpsFix, MarkPingInfo.NOT_SET_BY_USER);
+                                        }
+                                        if (ping != null){
                                         pings.add(ping);
+                                        }
                                     }
                                 }
                                 marks.add(mark);
