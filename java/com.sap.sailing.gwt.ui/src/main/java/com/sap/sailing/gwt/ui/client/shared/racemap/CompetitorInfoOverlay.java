@@ -30,7 +30,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
     private int canvasWidth;
     private int canvasHeight;
     private int infoBoxHeight;
-    private int defaultInfoBoxHeight = 20;
+    private int defaultInfoBoxHeight = 14;
     public static final int X_TEXT_COORDINATE = 8;
     public static final int Y_TEXT_COORDINATE = 14;
 
@@ -58,7 +58,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             String[] textLines = infoText.split("\n");
             TextMetrics measureText = ctx.measureText(findLargestLine(textLines));
             double largestLineWidth = measureText.getWidth();
-            infoBoxHeight = defaultInfoBoxHeight + textLines.length * 11;
+            infoBoxHeight = defaultInfoBoxHeight + textLines.length * 10;
             canvasWidth = (int)largestLineWidth + infoBoxHeight;
             setCanvasSize(canvasWidth, canvasHeight);
 
@@ -128,7 +128,7 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
     
     private void drawText(String[] lines, Context2d ctx) {
         for (int i = 0; i < lines.length; i++) {
-            ctx.fillText(lines[i], X_TEXT_COORDINATE, Y_TEXT_COORDINATE + i * 15);
+            ctx.fillText(lines[i], X_TEXT_COORDINATE, Y_TEXT_COORDINATE + i * 12);
         }
     }
 
