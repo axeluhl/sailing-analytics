@@ -79,7 +79,7 @@ public class TrackingService extends Service implements  android.location.Locati
      * {@link #locationsQueuedBasedOnSendingInterval} after the send interval, and the next message sending intent
      * arriving can be forwarded to the sending service immediately, with the timer being started immediately afterwards
      * to delay the sending of messages arriving later until the resend interval has expired. If not {@code null},
-     * messages that arrive in {Link #enqueueForSending(String, JSONObject)} will be appended to
+     * messages that arrive in {@link #enqueueForSending(String, JSONObject)} will be appended to
      * {@link #locationsQueuedBasedOnSendingInterval}.
      * <p>
      *
@@ -332,7 +332,6 @@ public class TrackingService extends Service implements  android.location.Locati
         if (initialLocation) {
             storeInitialTrackingTimestamp();
         }
-        updateResendIntervalSetting();
         reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
                 location.getLatitude(), location.getLongitude(), location.getAltitude());
         final String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
