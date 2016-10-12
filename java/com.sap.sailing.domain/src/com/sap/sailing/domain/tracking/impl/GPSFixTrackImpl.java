@@ -723,7 +723,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
      * then the next fix is added to the result interval. This is because for that next fix, <code>fix</code> in that case will be relevant
      * for speed estimation because it's the closest fix.
      */
-    protected Util.Pair<TimePoint, TimePoint> getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(FixType fix) {
+    protected TimeRange getTimeIntervalWhoseEstimatedSpeedMayHaveChangedAfterAddingFix(FixType fix) {
         TimePoint intervalStart = null;
         TimePoint intervalEnd = null;
         lockForRead();
@@ -783,7 +783,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
         } finally {
             unlockAfterRead();
         }
-        return new Util.Pair<TimePoint, TimePoint>(intervalStart, intervalEnd);
+        return new TimeRangeImpl(intervalStart, intervalEnd);
     }
     
     protected FixType createDummyGPSFix(TimePoint at) {
