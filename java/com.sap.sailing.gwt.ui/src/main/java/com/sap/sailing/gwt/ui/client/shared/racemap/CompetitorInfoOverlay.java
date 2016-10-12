@@ -87,16 +87,6 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             ctx.fill();
             ctx.stroke();
             
-            // show a second measure
-//            ctx.beginPath();
-//            ctx.moveTo(1.0,26.4);
-//            ctx.lineTo(66.2,26.4);
-//            ctx.lineTo(53.1,39.3);
-//            ctx.lineTo(1.0,39.3);
-//            ctx.closePath();
-//            ctx.fill();
-//            ctx.stroke();
-
             ctx.beginPath();
             ctx.setFillStyle("black");
             drawText(textLines, ctx);
