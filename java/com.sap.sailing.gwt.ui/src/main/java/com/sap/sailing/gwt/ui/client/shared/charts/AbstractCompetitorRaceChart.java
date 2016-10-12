@@ -472,7 +472,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     @Override
     public void setVisible(boolean visible) {
-        GWT.log("Chart is visible now " + visible);
         super.setVisible(visible);
         if (visible) {
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -770,7 +769,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             // is date before first cache entry or is cache empty?
             if (primary.timeOfEarliestRequestInMillis == null
                     || newTime.getTime() < primary.timeOfEarliestRequestInMillis) {
-                GWT.log("ouside first request time");
                 updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
             } else if (newTime.getTime() > primary.timeOfLatestRequestInMillis) {
                 updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(),
