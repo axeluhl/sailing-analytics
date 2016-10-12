@@ -68,8 +68,6 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment implements
                     prefs.setMessageResendIntervalInMillis(msgSndInt * 1000);
                     break;
             }
-            if(prefs.getEnergySavingEnabledAutomatically())
-                prefs.setEnergySavingOverride(true);
             updateEnergySavingMessage(newValue.toString());
         }
         return true;
@@ -93,15 +91,10 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment implements
         String fillEvery = (entry.equals(msgSndIntPreference.getEntries()[0])) ? "" : " " + getString(R.string.preference_energy_saving_sending_interval_message_every);
         
         //set Text
-        AppPreferences prefs = new AppPreferences(getActivity());
-        if(prefs.getEnergySavingEnabledAutomatically() && !prefs.getEnergySavingOverride()){
-            msgSndIntMessage.setSummary(getString(R.string.preference_energy_saving_enabled_automatically));
-        } else {
-            msgSndIntMessage.setSummary(String.format(
+        msgSndIntMessage.setSummary(String.format(
                     getString(R.string.preference_energy_saving_sending_interval_message),
                     fillEvery,
                     entry)
             );
-        }
     }
 }
