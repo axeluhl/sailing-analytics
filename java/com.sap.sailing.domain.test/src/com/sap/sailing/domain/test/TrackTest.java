@@ -382,6 +382,8 @@ public class TrackTest {
         GPSFixMoving fast = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000), new KnotSpeedWithBearingImpl(
                 2, new DegreeBearingImpl(123)));
         track.addGPSFix(fast);
+        assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
+                getB().getKnots(), 0.001);
         track.addGPSFix(slow);
         track.lockForRead();
         try {
