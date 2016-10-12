@@ -101,17 +101,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private final TimingHolder primary = new TimingHolder();
     private final TimingHolder secondary = new TimingHolder();
     
-    protected AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
-            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, Button settingsButton,
-            final StringMessages stringMessages, ErrorReporter errorReporter, DetailType firstDetailType,
-            DetailType secondDetailType, boolean compactChart, boolean allowTimeAdjust) {
-        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer,
-                timeRangeWithZoomProvider, stringMessages, errorReporter, firstDetailType, secondDetailType,
-                compactChart, allowTimeAdjust,
-                null, null);
-    }
-
     AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
