@@ -45,11 +45,8 @@ public class TrackingFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_tracking, container, false);
-
         prefs = new AppPreferences(getActivity());
-
         return view;
     }
 
@@ -70,8 +67,9 @@ public class TrackingFragment extends BaseFragment {
             }
         };
         getActivity().registerReceiver(gpsDisabledReceiver,filter);
-        if(!isLocationEnabled(getActivity()))
+        if (!isLocationEnabled(getActivity())) {
             LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
+        }
     }
     
     @Override
