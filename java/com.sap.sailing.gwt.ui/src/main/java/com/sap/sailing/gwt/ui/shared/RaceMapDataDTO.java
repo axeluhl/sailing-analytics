@@ -15,5 +15,10 @@ public class RaceMapDataDTO implements IsSerializable {
     public LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;
     public LinkedHashMap<CompetitorDTO, Integer> competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
     public long simulationResultVersion;
+    
+    /**
+     * The competitor IDs in their {@link Object#toString()} representation, for all competitors in the race, including those
+     * that may be suppressed in a leaderboard.
+     */
     public HashSet<String> raceCompetitorIdsAsStrings;
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.util.Map;
+
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
 public interface LeaderboardGroupsRefresher {
@@ -21,4 +23,13 @@ public interface LeaderboardGroupsRefresher {
      *            the update originated in <code>origin</code> and hence no notification is required.
      */
     void updateLeaderboardGroups(Iterable<LeaderboardGroupDTO> updatedLeaderboardGroups, LeaderboardGroupsDisplayer origin);
+    
+    /**
+     * Setup the state {@link LeaderboardGroupsDisplayer} using parameters
+     * 
+     *  @param params
+     *          {@link Map} {@link String} parameters to setup the displayer
+     */
+    public void setupLeaderboardGroups(LeaderboardGroupsDisplayer displayer, Map<String, String> params);
+
 }

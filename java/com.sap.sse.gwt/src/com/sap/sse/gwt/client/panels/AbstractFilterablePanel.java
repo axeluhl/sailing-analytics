@@ -25,7 +25,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
  * sorting criteria currently active (the sorting is the only reason why the {@link CellTable} actually needs to be
  * known to an instance of this class). To be initiated the method {@link #getSearchableStrings(Object)} has to be
  * defined, which gets those Strings from a <code>T</code> that should be considered when filtering, e.g. name or
- * boatClass. The cell table can be sorted independently from the text box (e.g. after adding new objects) by calling
+ * boatClass. The cell table can be sorted independently from the text box (e.g., after adding new objects) by calling
  * the method {@link #updateAll(Iterable)} which then runs the filter over the new selection.<p>
  * 
  * Note that this panel does <em>not</em> contain the table that it filters. With this, this class's clients are free
@@ -42,7 +42,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
     
-    private final AbstractListFilter<T> filterer = new AbstractListFilter<T>(){
+    private final AbstractListFilter<T> filterer = new AbstractListFilter<T>() {
         @Override
         public Iterable<String> getStrings(T t) {
             return getSearchableStrings(t);
@@ -154,7 +154,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     
     public void filter() {
         filtered.getList().clear();
-        Util.addAll(filterer.applyFilter(Arrays.asList(getTextBox().getText().split(" ")), all.getList()),
+        Util.addAll(getFilterer().applyFilter(Arrays.asList(getTextBox().getText().split(" ")), all.getList()),
                 filtered.getList());
         filtered.refresh();
         sort();
@@ -216,5 +216,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      */
     public void setTable(AbstractCellTable<T> table) {
         display = table;
+    }
+
+    protected AbstractListFilter<T> getFilterer() {
+        return filterer;
     }
 }

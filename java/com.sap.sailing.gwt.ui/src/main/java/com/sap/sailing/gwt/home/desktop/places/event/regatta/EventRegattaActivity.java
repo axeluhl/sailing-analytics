@@ -6,7 +6,8 @@ import java.util.List;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
+import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
@@ -24,6 +25,7 @@ import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventContext;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
@@ -41,7 +43,7 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     private EventRegattaView currentView = new TabletAndDesktopRegattaEventView();
     private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
-    private final long delayBetweenAutoAdvancesInMilliseconds = 3000l;
+    private final long delayBetweenAutoAdvancesInMilliseconds = LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS;
 
     public EventRegattaActivity(AbstractEventRegattaPlace place, EventViewDTO eventDTO, EventClientFactory clientFactory,
             DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
@@ -91,9 +93,11 @@ public class EventRegattaActivity extends AbstractEventActivity<AbstractEventReg
     public void forPlaceSelection(PlaceCallback callback) {
         EventViewDTO event = eventDTO;
         if (event.getType() == EventType.SERIES_EVENT) {
-            for(EventReferenceDTO seriesEvent : event.getEventsOfSeries()) {
-                AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext().withId(seriesEvent.getId().toString()));
-                callback.forPlace(place, seriesEvent.getDisplayName(), (event.getId().equals(seriesEvent.getId())));
+            for(EventReferenceWithStateDTO seriesEvent : event.getEventsOfSeries()) {
+                if(seriesEvent.getState() != EventState.PLANNED) {
+                    AbstractEventRegattaPlace place = currentPlace.newInstanceWithContext(new EventContext().withId(seriesEvent.getId().toString()));
+                    callback.forPlace(place, seriesEvent.getDisplayName(), (event.getId().equals(seriesEvent.getId())));
+                }
             }
         } else {
             for(RegattaReferenceDTO regatta : event.getRegattas()) {

@@ -26,7 +26,7 @@ import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 
 /**
  * Handles all necessary registration for a datamining bundle. See
- * http://wiki.sapsailing.com/wiki/typical-data-mining-scenarios for more information.
+ * http://wiki.sapsailing.com/wiki/info/landscape/typical-data-mining-scenarios for more information.
  * 
  * @author D054528 (Frederik Petersen)
  *

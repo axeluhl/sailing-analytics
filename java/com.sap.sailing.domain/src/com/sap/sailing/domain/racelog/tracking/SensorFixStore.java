@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelog.tracking;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -59,8 +60,15 @@ public interface SensorFixStore {
      */
     void removeListener(FixReceivedListener<? extends Timed> listener);
     
+    /**
+     * Remove the registrations of the listener for the given device.
+     */
+    void removeListener(FixReceivedListener<? extends Timed> listener, DeviceIdentifier device);
+    
     TimeRange getTimeRangeCoveredByFixes(DeviceIdentifier device) throws TransformationException,
     NoCorrespondingServiceRegisteredException;
     
     long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException;
+    
+    <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) throws TransformationException, NoCorrespondingServiceRegisteredException;
 }
