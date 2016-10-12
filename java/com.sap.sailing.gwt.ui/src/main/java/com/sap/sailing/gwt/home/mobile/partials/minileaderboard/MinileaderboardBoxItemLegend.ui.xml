@@ -11,7 +11,7 @@
 			padding: 1em 0.75em;
 	  		font-size: 0.866666666666667em;
 	  		min-height: 4.5em;
-	  		background-color: #f2f2f2;
+	  		background-color: #fff;
 		}
 		.minileaderboard_item_legend_description, .minileaderboard_item_legend_score {
 			position: absolute;
