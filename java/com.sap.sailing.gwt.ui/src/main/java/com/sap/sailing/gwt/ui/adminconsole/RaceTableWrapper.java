@@ -9,6 +9,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
@@ -26,7 +27,7 @@ public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOA
 extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private String selectedLeaderboardName;
-    private double selectedBuoyZoneRadiusInMeters;
+    private Distance selectedBuoyZoneRadius;
 
     public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection) {
@@ -54,7 +55,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
                     Map<String, String> params = new HashMap<>();
                     params.put("leaderboardName", selectedLeaderboardName);
-                    params.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, String.valueOf(selectedBuoyZoneRadiusInMeters));
+                    params.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, String.valueOf(selectedBuoyZoneRadius.getMeters()));
                     params.put("regattaName", raceIdentifier.getRegattaName());
                     params.put("raceName", raceIdentifier.getRaceName());
                     params.put("canReplayDuringLiveRaces", "true");
@@ -93,7 +94,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
         this.selectedLeaderboardName = name;
     }
     
-    public void setSelectedBuoyZoneRadiusInMeters(double selectedBuoyZoneRadiusInMeters) {
-        this.selectedBuoyZoneRadiusInMeters = selectedBuoyZoneRadiusInMeters;
+    public void setSelectedBuoyZoneRadius(Distance selectedBuoyZoneRadius) {
+        this.selectedBuoyZoneRadius = selectedBuoyZoneRadius;
     }
 }

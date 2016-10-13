@@ -31,6 +31,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -337,11 +338,11 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races =
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());
                     races.remove(raceColumnDTOAndFleetDTO);
-                    double buoyZoneRadiusInMeters = getSelectedRegatta() == null
-                            ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS_IN_METERS
-                            : getSelectedRegatta().getCalculatedBuoyZoneRadiusInMeters();
+                    Distance buoyZoneRadius = getSelectedRegatta() == null
+                            ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
+                            : getSelectedRegatta().getCalculatedBuoyZoneRadius();
                     new CopyCourseAndCompetitorsDialog(sailingService, errorReporter, stringMessages, races,
-                            leaderboardName, buoyZoneRadiusInMeters, new DialogCallback<CourseAndCompetitorCopyOperation>() {
+                            leaderboardName, buoyZoneRadius, new DialogCallback<CourseAndCompetitorCopyOperation>() {
                                 @Override
                                 public void ok(CourseAndCompetitorCopyOperation operation) {
                                     operation.perform(leaderboardName, raceColumnDTOAndFleetDTO, /* onSuccessCallback */ new Runnable() {

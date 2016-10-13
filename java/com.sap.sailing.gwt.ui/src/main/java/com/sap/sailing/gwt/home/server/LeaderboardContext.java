@@ -15,6 +15,7 @@ import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
@@ -250,14 +251,13 @@ public class LeaderboardContext {
         RegattaRaceDataInfoCalculator regattaRaceDataInfoCalculator = new RegattaRaceDataInfoCalculator();
         forRaces(regattaRaceDataInfoCalculator);
         regattaDTO.setRaceDataInfo(regattaRaceDataInfoCalculator.getRaceDataInfo());
-        regattaDTO.setBuoyZoneRadiusInMeters(getRegattaBuoyZoneRadiusInMeters());
+        regattaDTO.setBuoyZoneRadius(getRegattaBuoyZoneRadius());
     }
 
-    private double getRegattaBuoyZoneRadiusInMeters() {
+    private Distance getRegattaBuoyZoneRadius() {
         Regatta regatta = service.getRegattaByName(getLeaderboardName());
         BoatClass boatClass = HomeServiceUtil.getBoatClass(leaderboard);
-        double boatHullLength = RegattaUtil.getCalculatedRegattaBuoyZoneRadiusInMeters(regatta, boatClass);
-        return boatHullLength; 
+        return RegattaUtil.getCalculatedRegattaBuoyZoneRadius(regatta, boatClass);
     }
 
     private static boolean hasMultipleLeaderboardGroups(EventBase event) {

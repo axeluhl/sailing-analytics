@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegattaMetadata {
@@ -18,7 +19,7 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private RegattaState state;
     private boolean flexibleLeaderboard;
     private RaceDataInfo raceDataInfo;
-    private double buoyZoneRadiusInMeters;
+    private Distance buoyZoneRadius;
     
     public RegattaMetadataDTO() {
     }
@@ -124,12 +125,12 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
         this.raceDataInfo = raceDataInfo;
     }
 
-    public double getBuoyZoneRadiusInMeters() {
-        return buoyZoneRadiusInMeters;
+    public Distance getBuoyZoneRadius() {
+        return buoyZoneRadius;
     }
 
-    public void setBuoyZoneRadiusInMeters(double buoyZoneRadiusInMeters) {
-        this.buoyZoneRadiusInMeters = buoyZoneRadiusInMeters;
+    public void setBuoyZoneRadius(Distance buoyZoneRadius) {
+        this.buoyZoneRadius = buoyZoneRadius;
     }
 
     /**

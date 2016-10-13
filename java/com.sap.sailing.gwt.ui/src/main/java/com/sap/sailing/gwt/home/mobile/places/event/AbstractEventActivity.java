@@ -12,6 +12,7 @@ import java.util.UUID;
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -275,19 +276,19 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         }
         linkParams.put("raceName", trackedRaceName);
         linkParams.put("regattaName", regattaName);
-        linkParams.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, String.valueOf(getRegattaBuoyZoneRadiusInMeters(regattaName)));
+        linkParams.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, String.valueOf(getRegattaBuoyZoneRadius(regattaName).getMeters()));
         // TODO this must only be forwarded if there is a logged-on user
         // linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         return linkParams;
     }
 
-    private double getRegattaBuoyZoneRadiusInMeters(String regattaName) {
+    private Distance getRegattaBuoyZoneRadius(String regattaName) {
         for (RegattaMetadataDTO regatta : eventDTO.getRegattas()) {
             if (regattaName != null && regattaName.equals(regatta.getId())) {
-                return regatta.getBuoyZoneRadiusInMeters();
+                return regatta.getBuoyZoneRadius();
             }
         }
-        return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS_IN_METERS;
+        return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS;
     }
 
     public String getRegattaId() {

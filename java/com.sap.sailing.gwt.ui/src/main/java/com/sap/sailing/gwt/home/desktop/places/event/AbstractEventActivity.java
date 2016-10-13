@@ -10,6 +10,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -185,13 +186,13 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         return linkParams;
     }
 
-    private double getRegattaBuoyZoneRadius(String regattaName) {
+    private Distance getRegattaBuoyZoneRadius(String regattaName) {
         for (RegattaMetadataDTO regatta : eventDTO.getRegattas()) {
             if (regattaName != null && regattaName.equals(regatta.getId())) {
-                return regatta.getBuoyZoneRadiusInMeters();
+                return regatta.getBuoyZoneRadius();
             }
         }
-        return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS_IN_METERS;
+        return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS;
     }
 
     @Override

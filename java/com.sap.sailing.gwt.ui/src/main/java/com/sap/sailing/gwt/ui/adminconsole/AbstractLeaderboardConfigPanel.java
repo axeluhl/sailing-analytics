@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -190,11 +191,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             public void onSelectionChange(SelectionChangeEvent event) {
                 leaderboardSelectionChanged();
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
-
                 RegattaDTO regatta = getSelectedRegatta();
-                double buoyZoneRadius = regatta == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS_IN_METERS
-                        : regatta.getCalculatedBuoyZoneRadiusInMeters();
-                raceColumnTable.setSelectedBuoyZoneRadiusInMeters(buoyZoneRadius);
+                Distance buoyZoneRadius = regatta == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
+                        : regatta.getCalculatedBuoyZoneRadius();
+                raceColumnTable.setSelectedBuoyZoneRadius(buoyZoneRadius);
 
             }
         });
