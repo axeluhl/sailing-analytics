@@ -93,7 +93,7 @@ public class RegattaDetailsComposite extends Composite {
         defaultCourseArea = createLabelAndValueWidget(grid, currentRow++, stringMessages.courseArea(), "CourseAreaLabel");
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
         controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "UseStartTimeInferenceLabel");
-        buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.buoyZoneRadiusInHullLengths(), "HullLengthRadiusFactorLabel");
+        buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.buoyZoneRadiusInHullLengths(), "BuoyZoneRadiusInHullLengthsLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");

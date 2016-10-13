@@ -15,14 +15,14 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     private final RegattaIdentifier regattaIdentifier;
     private final UUID newDefaultCourseAreaId;
     private final RegattaConfiguration newConfiguration;
-    private final Double hullLengthRadiusFactor;
+    private final Double buoyZoneRadiusInHullLengths;
     private final boolean useStartTimeInference;
     private final boolean controlTrackingFromStartAndFinishTimes;
     private final TimePoint startDate;
     private final TimePoint endDate;
     
     public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate, UUID newDefaultCourseAreaId,
-            RegattaConfiguration newConfiguration, Double hullLengthRadiusFactor, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
+            RegattaConfiguration newConfiguration, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
         this.regattaIdentifier = regattaIdentifier;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -30,12 +30,12 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
         this.newConfiguration = newConfiguration;
         this.useStartTimeInference = useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
-        this.hullLengthRadiusFactor = hullLengthRadiusFactor;
+        this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.updateRegatta(regattaIdentifier, startDate, endDate, newDefaultCourseAreaId, newConfiguration, null, hullLengthRadiusFactor, useStartTimeInference, controlTrackingFromStartAndFinishTimes);
+        Regatta regatta = toState.updateRegatta(regattaIdentifier, startDate, endDate, newDefaultCourseAreaId, newConfiguration, null, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes);
         return regatta;
     }
 

@@ -141,7 +141,7 @@ public class SearchServiceTest {
         pfingstbusch29er = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "29er"), "29er", 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielAlpha.getId(), /*hullLengthRadiusFactor*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
+                true, new LowPoint(), kielAlpha.getId(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R3"));
@@ -149,7 +149,7 @@ public class SearchServiceTest {
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
         pfingstbusch470 = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "470"), "470", 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), kielBravo.getId(), /*hullLengthRadiusFactor*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
+                true, new LowPoint(), kielBravo.getId(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R2"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R3"));
@@ -172,7 +172,7 @@ public class SearchServiceTest {
         aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC", 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
-                true, new LowPoint(), flensburgStandard.getId(), /*hullLengthRadiusFactor*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
+                true, new LowPoint(), flensburgStandard.getId(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R2"));
         RegattaLeaderboard aalRegattaLeaderboard = server.apply(new CreateRegattaLeaderboard(aalRegatta.getRegattaIdentifier(),

@@ -10,15 +10,15 @@ public class RegattaUtil {
     public static final Distance DEFAULT_BUOY_ZONE_RADIUS = new MeterDistance(15);
 
     public static Distance getCalculatedRegattaBuoyZoneRadius(Regatta regatta, BoatClass boatClass) {
-        final double hullLengthRadiusFactor;
-        if (regatta != null && regatta.getHullLengthRadiusFactor() != null) {
-            hullLengthRadiusFactor = regatta.getHullLengthRadiusFactor();
+        final double buoyZoneRadiusInHullLengths;
+        if (regatta != null && regatta.getBuoyZoneRadiusInHullLengths() != null) {
+            buoyZoneRadiusInHullLengths = regatta.getBuoyZoneRadiusInHullLengths();
         } else {
-            hullLengthRadiusFactor = Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS;
+            buoyZoneRadiusInHullLengths = Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS;
         }
         final Distance boatHullLength = boatClass == null ? null : boatClass.getHullLength();
         final Distance buyZoneRadius = boatHullLength == null ? DEFAULT_BUOY_ZONE_RADIUS
-                : boatHullLength.scale(hullLengthRadiusFactor);
+                : boatHullLength.scale(buoyZoneRadiusInHullLengths);
         return buyZoneRadius;
     }
 }

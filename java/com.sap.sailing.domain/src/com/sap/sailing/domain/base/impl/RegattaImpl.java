@@ -115,7 +115,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private transient RaceLogStore raceLogStore;
     private final IsRegattaLike regattaLikeHelper;
     private final RankingMetricConstructor rankingMetricConstructor;
-    private Double hullLengthRadiusFactor;
+    private Double buoyZoneRadiusInHullLengths;
 
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
@@ -205,7 +205,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections
                         .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                 /* race column names */new ArrayList<String>(), trackedRegattaRegistry)), /* persistent */false,
-                scoringScheme, id, courseArea, /*hullLengthRadiusFactor*/2.0, /* useStartTimeInference */true, controlTrackingFromStartAndFinishTimes,
+                scoringScheme, id, courseArea, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */true, controlTrackingFromStartAndFinishTimes,
                 rankingMetricConstructor);
     }
 
@@ -216,7 +216,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      */
     public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
             BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent,
-            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, Double hullLengthRadiusFactor, boolean useStartTimeInference,
+            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
         super(name);
         this.rankingMetricConstructor = rankingMetricConstructor;
@@ -242,7 +242,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         this.scoringScheme = scoringScheme;
         this.defaultCourseArea = courseArea;
         this.configuration = null;
-        this.hullLengthRadiusFactor = hullLengthRadiusFactor;
+        this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
         this.regattaLikeHelper = new BaseRegattaLikeImpl(new RegattaAsRegattaLikeIdentifier(this), regattaLogStore) {
             private static final long serialVersionUID = 8546222568682770206L;
 
@@ -575,13 +575,13 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public Double getHullLengthRadiusFactor() {
-        return hullLengthRadiusFactor;
+    public Double getBuoyZoneRadiusInHullLengths() {
+        return buoyZoneRadiusInHullLengths;
     }
 
     @Override
-    public void setHullLengthRadiusFactor(Double hullLengthRadiusFactor) {
-        this.hullLengthRadiusFactor = hullLengthRadiusFactor;
+    public void setBuoyZoneRadiusInHullLengths(Double buoyZoneRadiusInHullLengths) {
+        this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
     }
 
     @Override

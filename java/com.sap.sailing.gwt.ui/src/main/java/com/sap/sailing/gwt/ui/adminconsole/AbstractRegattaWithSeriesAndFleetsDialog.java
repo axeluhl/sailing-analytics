@@ -51,7 +51,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final ListBox sailingEventsListBox;
     protected final CheckBox useStartTimeInferenceCheckBox;
     protected final CheckBox controlTrackingFromStartAndFinishTimesCheckBox;
-    protected final DoubleBox hullLengthRadiusFactorDoubleBox;
+    protected final DoubleBox buoyZoneRadiusInHullLengthsDoubleBox;
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
 
@@ -96,8 +96,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         controlTrackingFromStartAndFinishTimesCheckBox.ensureDebugId("ControlTrackingFromStartAndFinishTimesCheckBox");
         controlTrackingFromStartAndFinishTimesCheckBox.setValue(regatta.controlTrackingFromStartAndFinishTimes);
 
-        hullLengthRadiusFactorDoubleBox = createDoubleBox(regatta.buoyZoneRadiusInHullLengths, 10);
-        hullLengthRadiusFactorDoubleBox.ensureDebugId("HullLengthRadiusFactorDoubleBox");
+        buoyZoneRadiusInHullLengthsDoubleBox = createDoubleBox(regatta.buoyZoneRadiusInHullLengths, 10);
+        buoyZoneRadiusInHullLengthsDoubleBox.ensureDebugId("BuoyZoneRadiusInHullLengthsDoubleBox");
 
         courseAreaListBox = createListBox(false);
         courseAreaListBox.ensureDebugId("CourseAreaListBox");
@@ -167,7 +167,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(7, 0, new Label(stringMessages.controlTrackingFromStartAndFinishTimes() + ":"));
         formGrid.setWidget(7, 1, controlTrackingFromStartAndFinishTimesCheckBox);
         formGrid.setWidget(8, 0, new Label(stringMessages.buoyZoneRadiusInHullLengths() + ":"));
-        formGrid.setWidget(8, 1, hullLengthRadiusFactorDoubleBox);
+        formGrid.setWidget(8, 1, buoyZoneRadiusInHullLengthsDoubleBox);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }
@@ -292,7 +292,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         result.scoringScheme = getSelectedScoringSchemeType();
         result.useStartTimeInference = useStartTimeInferenceCheckBox.getValue();
         result.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimesCheckBox.getValue();
-        result.buoyZoneRadiusInHullLengths = hullLengthRadiusFactorDoubleBox.getValue();
+        result.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsDoubleBox.getValue();
         setCourseAreaInRegatta(result);
         result.series = getSeriesEditor().getValue();
         return result;
