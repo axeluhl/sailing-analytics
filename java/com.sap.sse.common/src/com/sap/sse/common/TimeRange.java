@@ -30,7 +30,11 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     boolean startsBefore(TimeRange other);
     
+    boolean startsAfter(TimePoint timePoint);
+    
     boolean endsAfter(TimeRange other);
+    
+    boolean endsBefore(TimePoint timePoint);
     
     /**
      * Is the time range open ended towards older timepoints?
