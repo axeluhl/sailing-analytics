@@ -133,22 +133,18 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
 
     public Util.Pair<Double, Size> getMarkScaleAndSize(Position markPosition) {
         double minMarkHeight = 20;
-        
         // the original buoy vector graphics is too small (2.1m x 1.5m) for higher zoom levels
         // therefore we scale the buoys with factor 2 by default
         double buoyScaleFactor = 2.0;
-
         Size markSizeInPixel = calculateBoundingBox(mapProjection, markPosition,
-                markVectorGraphics.getMarkWidthInMeters() * buoyScaleFactor, markVectorGraphics.getMarkHeightInMeters() * buoyScaleFactor);
-        
+                markVectorGraphics.getMarkWidth().scale(buoyScaleFactor), markVectorGraphics.getMarkHeight().scale(buoyScaleFactor));
         double markHeightInPixel = markSizeInPixel.getHeight();
-        if(markHeightInPixel < minMarkHeight)
+        if (markHeightInPixel < minMarkHeight) {
             markHeightInPixel = minMarkHeight;
-
+        }
         // The coordinates of the canvas drawing methods are based on the 'centimeter' unit (1px = 1cm).
         // To calculate the display real mark size the scale factor from canvas units to the real   
-        double markSizeScaleFactor = markHeightInPixel / (markVectorGraphics.getMarkHeightInMeters() * 100);
-
+        double markSizeScaleFactor = markHeightInPixel / markVectorGraphics.getMarkHeight().scale(100).getMeters();
         return new Util.Pair<Double, Size>(markSizeScaleFactor, Size.newInstance(markHeightInPixel * 2.0, markHeightInPixel * 2.0));
     }
 

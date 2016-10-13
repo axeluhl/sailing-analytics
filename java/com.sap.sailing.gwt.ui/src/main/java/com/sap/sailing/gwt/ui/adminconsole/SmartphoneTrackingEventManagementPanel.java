@@ -623,7 +623,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
-                regatta.defaultCourseAreaUuid, configuration, regatta.hullLengthRadiusFactor, regatta.useStartTimeInference,
+                regatta.defaultCourseAreaUuid, configuration, regatta.buoyZoneRadiusInHullLengths, regatta.useStartTimeInference,
                 regatta.controlTrackingFromStartAndFinishTimes,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override

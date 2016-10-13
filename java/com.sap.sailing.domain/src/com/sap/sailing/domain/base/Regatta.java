@@ -25,7 +25,7 @@ import com.sap.sse.common.TimePoint;
  */
 public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike {
 
-    public static final double DEFAULT_HULL_LENGHT_FACTOR = 2;
+    public static final double DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS = 2;
 
     ScoringScheme getScoringScheme();
 

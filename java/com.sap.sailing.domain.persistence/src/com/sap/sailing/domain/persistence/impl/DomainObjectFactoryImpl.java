@@ -1149,7 +1149,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final Boolean controlTrackingFromStartAndFinishTimes = (Boolean) dbRegatta.get(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name());
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
             result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass, startDate, endDate, series, /* persistent */true,
-                    loadScoringScheme(dbRegatta), id, courseArea, hullLengthRadiusFactor == null ? Regatta.DEFAULT_HULL_LENGHT_FACTOR : hullLengthRadiusFactor, useStartTimeInference == null ? true
+                    loadScoringScheme(dbRegatta), id, courseArea, hullLengthRadiusFactor == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS : hullLengthRadiusFactor, useStartTimeInference == null ? true
                             : useStartTimeInference, controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
                                     rankingMetricConstructor);
             result.setRegattaConfiguration(configuration);

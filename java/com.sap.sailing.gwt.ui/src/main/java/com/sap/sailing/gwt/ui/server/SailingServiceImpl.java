@@ -822,13 +822,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         regattaDTO.endDate = regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null;
         BoatClass boatClass = regatta.getBoatClass();
         if (boatClass != null) {
-            regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength().getMeters());
+            regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength());
         }
         if (regatta.getDefaultCourseArea() != null) {
             regattaDTO.defaultCourseAreaUuid = regatta.getDefaultCourseArea().getId();
             regattaDTO.defaultCourseAreaName = regatta.getDefaultCourseArea().getName();
         }
-        regattaDTO.hullLengthRadiusFactor = regatta.getHullLengthRadiusFactor();
+        regattaDTO.buoyZoneRadiusInHullLengths = regatta.getHullLengthRadiusFactor();
         regattaDTO.useStartTimeInference = regatta.useStartTimeInference();
         regattaDTO.controlTrackingFromStartAndFinishTimes = regatta.isControlTrackingFromStartAndFinishTimes();
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
@@ -4268,7 +4268,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regatta.getName()));
         this.createRegatta(regatta.getName(), regatta.boatClass.getName(), regatta.startDate, regatta.endDate,
                         new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), 
-                        true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.hullLengthRadiusFactor, regatta.useStartTimeInference,
+                        true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.buoyZoneRadiusInHullLengths, regatta.useStartTimeInference,
                         regatta.controlTrackingFromStartAndFinishTimes, regatta.rankingMetricType);
     }
     

@@ -14,7 +14,7 @@ public class RegattaUtil {
         if (regatta != null && regatta.getHullLengthRadiusFactor() != null) {
             hullLengthRadiusFactor = regatta.getHullLengthRadiusFactor();
         } else {
-            hullLengthRadiusFactor = Regatta.DEFAULT_HULL_LENGHT_FACTOR;
+            hullLengthRadiusFactor = Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS;
         }
         final Distance boatHullLength = boatClass == null ? null : boatClass.getHullLength();
         final Distance buyZoneRadius = boatHullLength == null ? DEFAULT_BUOY_ZONE_RADIUS

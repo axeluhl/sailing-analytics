@@ -17,7 +17,6 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sse.common.Util.Pair;
 
@@ -38,7 +37,7 @@ public class RegattaDTO extends NamedDTO {
     public boolean useStartTimeInference = true;
     public boolean controlTrackingFromStartAndFinishTimes = false;
     public RankingMetrics rankingMetricType;
-    public Double hullLengthRadiusFactor;
+    public Double buoyZoneRadiusInHullLengths;
     
     public RegattaDTO() {}
     
@@ -69,7 +68,7 @@ public class RegattaDTO extends NamedDTO {
         this.configuration = other.configuration;
         this.useStartTimeInference = other.useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
-        this.hullLengthRadiusFactor = other.hullLengthRadiusFactor;
+        this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;
         
     }
     
@@ -128,8 +127,8 @@ public class RegattaDTO extends NamedDTO {
     }
 
     public Distance getCalculatedBuoyZoneRadius() {
-        Distance boatHullLength = boatClass == null ? null : new MeterDistance(boatClass.getHullLengthInMeters());
-        double hullLengthFactor = this.hullLengthRadiusFactor == null ? Regatta.DEFAULT_HULL_LENGHT_FACTOR : this.hullLengthRadiusFactor;
+        Distance boatHullLength = boatClass == null ? null : boatClass.getHullLength();
+        double hullLengthFactor = this.buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS : this.buoyZoneRadiusInHullLengths;
         return boatHullLength == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS : boatHullLength.scale(hullLengthFactor);
     }
 

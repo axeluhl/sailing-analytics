@@ -73,7 +73,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                 errorMessage = stringMessages.regattaWithThisNameAlreadyExists();
             }
 
-            if (regattaToValidate.hullLengthRadiusFactor == null) {
+            if (regattaToValidate.buoyZoneRadiusInHullLengths == null) {
                 errorMessage = stringMessages.incorrectValueForRegattaHullLengthRadiusFactor();
             }
 
@@ -114,7 +114,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             List<EventDTO> existingEvents, EventDTO correspondingEvent, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(new RegattaDTO(), Collections.<SeriesDTO>emptySet(), existingEvents, correspondingEvent, stringMessages.addRegatta(), stringMessages.ok(),
                 stringMessages, new RegattaParameterValidator(stringMessages, existingRegattas), callback);
-        hullLengthRadiusFactorDoubleBox.setValue(Regatta.DEFAULT_HULL_LENGHT_FACTOR);
+        hullLengthRadiusFactorDoubleBox.setValue(Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS);
         SeriesDTO series = new SeriesDTO();
         series.setName(Series.DEFAULT_NAME);
         series.setMedal(false);

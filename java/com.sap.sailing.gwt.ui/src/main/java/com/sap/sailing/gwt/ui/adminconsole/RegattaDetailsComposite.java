@@ -400,7 +400,7 @@ public class RegattaDetailsComposite extends Composite {
             defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
-            hullLengthRadiusFactor.setText(String.valueOf(regatta.hullLengthRadiusFactor)); 
+            hullLengthRadiusFactor.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths)); 
 
             if (regatta.configuration != null) {
                 configuration.setText(stringMessages.configured());
