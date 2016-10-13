@@ -34,12 +34,11 @@ public class MarkAdapter extends ResourceCursorAdapter {
         } else {
             final DecimalFormat df = new DecimalFormat("#.##");
             final double accuracy = markPings.get(0).getAccuracy();
-            String accuracyString= "";
+            final String accuracyString;
             //accuracy-values that are stored as -1 (meaning unknown) will simply be displayed as "set" without an accuracy
-            if(accuracy == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER){
+            if (accuracy == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER){
                 accuracyString = context.getString(R.string.set);
-            }
-            else {
+            } else {
                 accuracyString = context.getString(R.string.set) + " " +
                         String.format(context.getString(R.string.mark_list_accuracy), df.format(accuracy));
             }
