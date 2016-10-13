@@ -13,6 +13,7 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
+import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 
 public class MarkAdapter extends ResourceCursorAdapter {
 
@@ -35,7 +36,7 @@ public class MarkAdapter extends ResourceCursorAdapter {
             final double accuracy = markPings.get(0).getAccuracy();
             String accuracyString= "";
             //accuracy-values that are stored as -1 (meaning unknown) will simply be displayed as "set" without an accuracy
-            if(accuracy == MarkPingInfo.NOT_AVAILABLE_THROUGH_SERVER){
+            if(accuracy == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER){
                 accuracyString = context.getString(R.string.set);
             }
             else {

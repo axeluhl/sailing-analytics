@@ -10,6 +10,7 @@ public class FlatGPSFixJsonSerializer implements JsonSerializer<GPSFix> {
     public static final String FIELD_LAT_DEG = "latitude";
     public static final String FIELD_TIME_MILLIS = "timestamp";
     public static final String FIELD_ACCURACY = "accuracy";
+    public static final int NOT_AVAILABLE_THROUGH_SERVER = -1;
 
     @Override
     public JSONObject serialize(GPSFix object) {

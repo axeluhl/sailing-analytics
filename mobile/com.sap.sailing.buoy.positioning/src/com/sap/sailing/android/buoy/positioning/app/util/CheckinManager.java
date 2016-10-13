@@ -191,8 +191,8 @@ public class CheckinManager {
                                         GPSFix gpsFix = deserializer.deserialize(simplePosition);
                                         //accepts JSON messages without accuracy and with, without will simply be displayed as "set"
                                         MarkPingInfo ping;
-                                        if (positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY) == MarkPingInfo.NOT_AVAILABLE_THROUGH_SERVER){
-                                            ping = new MarkPingInfo(mark.getId(), gpsFix, MarkPingInfo.NOT_AVAILABLE_THROUGH_SERVER);
+                                        if (positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY) == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER) {
+                                            ping = new MarkPingInfo(mark.getId(), gpsFix, FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER);
                                         }
                                         else {
                                             ping = new MarkPingInfo(mark.getId(), gpsFix, positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
