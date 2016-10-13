@@ -61,7 +61,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label useStartTimeInference;
     private final Label controlTrackingFromStartAndFinishTimes;
     private final Label configuration;
-    private final Label hullLengthRadiusFactor;
+    private final Label buoyZoneRadiusInHullLengths;
     
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
     private final CellTable<SeriesDTO> seriesTable;
@@ -93,7 +93,7 @@ public class RegattaDetailsComposite extends Composite {
         defaultCourseArea = createLabelAndValueWidget(grid, currentRow++, stringMessages.courseArea(), "CourseAreaLabel");
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
         controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "UseStartTimeInferenceLabel");
-        hullLengthRadiusFactor = createLabelAndValueWidget(grid, currentRow++, stringMessages.hullLengthRadiusFactor(), "HullLengthRadiusFactorLabel");
+        buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.hullLengthRadiusFactor(), "HullLengthRadiusFactorLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
@@ -400,7 +400,7 @@ public class RegattaDetailsComposite extends Composite {
             defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
-            hullLengthRadiusFactor.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths)); 
+            buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths)); 
 
             if (regatta.configuration != null) {
                 configuration.setText(stringMessages.configured());
