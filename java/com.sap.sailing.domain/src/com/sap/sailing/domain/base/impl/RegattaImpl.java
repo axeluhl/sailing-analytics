@@ -115,7 +115,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private transient RaceLogStore raceLogStore;
     private final IsRegattaLike regattaLikeHelper;
     private final RankingMetricConstructor rankingMetricConstructor;
-    private double hullLengthRadiusFactor;
+    private Double hullLengthRadiusFactor;
 
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
@@ -216,7 +216,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      */
     public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
             BoatClass boatClass, TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent,
-            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, double hullLengthRadiusFactor, boolean useStartTimeInference,
+            ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, Double hullLengthRadiusFactor, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
         super(name);
         this.rankingMetricConstructor = rankingMetricConstructor;
@@ -575,12 +575,12 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public double getHullLengthRadiusFactor() {
+    public Double getHullLengthRadiusFactor() {
         return hullLengthRadiusFactor;
     }
 
     @Override
-    public void setHullLengthRadiusFactor(double hullLengthRadiusFactor) {
+    public void setHullLengthRadiusFactor(Double hullLengthRadiusFactor) {
         this.hullLengthRadiusFactor = hullLengthRadiusFactor;
     }
 

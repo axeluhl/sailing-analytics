@@ -181,17 +181,17 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         linkParams.put(RaceMapSettings.PARAM_SHOW_MAPCONTROLS, "true");
         linkParams.put(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
         linkParams.put("regattaName", regattaName);
-        linkParams.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS, String.valueOf(getRegattaBuoyZoneRadius(regattaName)));
+        linkParams.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, String.valueOf(getRegattaBuoyZoneRadius(regattaName)));
         return linkParams;
     }
 
     private double getRegattaBuoyZoneRadius(String regattaName) {
         for (RegattaMetadataDTO regatta : eventDTO.getRegattas()) {
             if (regattaName != null && regattaName.equals(regatta.getId())) {
-                return regatta.getBuoyZoneRadius();
+                return regatta.getBuoyZoneRadiusInMeters();
             }
         }
-        return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS;
+        return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS_IN_METERS;
     }
 
     @Override

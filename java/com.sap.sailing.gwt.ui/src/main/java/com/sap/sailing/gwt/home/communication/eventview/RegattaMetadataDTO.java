@@ -18,7 +18,7 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private RegattaState state;
     private boolean flexibleLeaderboard;
     private RaceDataInfo raceDataInfo;
-    private double buoyZoneRadius;
+    private double buoyZoneRadiusInMeters;
     
     public RegattaMetadataDTO() {
     }
@@ -124,12 +124,12 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
         this.raceDataInfo = raceDataInfo;
     }
 
-    public double getBuoyZoneRadius() {
-        return buoyZoneRadius;
+    public double getBuoyZoneRadiusInMeters() {
+        return buoyZoneRadiusInMeters;
     }
 
-    public void setBuoyZoneRadius(double buoyZoneRadius) {
-        this.buoyZoneRadius = buoyZoneRadius;
+    public void setBuoyZoneRadiusInMeters(double buoyZoneRadiusInMeters) {
+        this.buoyZoneRadiusInMeters = buoyZoneRadiusInMeters;
     }
 
     /**

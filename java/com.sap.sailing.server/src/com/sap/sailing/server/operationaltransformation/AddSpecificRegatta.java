@@ -29,14 +29,14 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final boolean persistent;
     private final ScoringScheme scoringScheme;
     private final Serializable defaultCourseAreaId;
-    private final double hullLengthRadiusFactor;
+    private final Double hullLengthRadiusFactor;
     private final boolean useStartTimeInference;
     private final boolean controlTrackingFromStartAndFinishTimes;
     private final RankingMetrics rankingMetricType;
     
     public AddSpecificRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
-            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, double hullLengthRadiusFactor, boolean useStartTimeInference,
+            boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double hullLengthRadiusFactor, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
         super(regattaName, boatClassName, startDate, endDate, id);
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;

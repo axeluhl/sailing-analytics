@@ -1740,4 +1740,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String lastFix();
     String filterDeviceMappings();
     String hullLengthRadiusFactor();
+
+    String incorrectValueForRegattaHullLengthRadiusFactor();
 }

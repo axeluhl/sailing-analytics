@@ -25,10 +25,27 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
     private RegattaConfigurationDTO currentRegattaConfiguration;
 
+    protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
+        private StringMessages stringMessages;
+
+        public RegattaParameterValidator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+
+        @Override
+        public String getErrorMessage(RegattaDTO regattaToValidate) {
+            String errorMessage = null;
+            if (regattaToValidate.hullLengthRadiusFactor == null) {
+                errorMessage = stringMessages.incorrectValueForRegattaHullLengthRadiusFactor();
+            }
+            return errorMessage;
+        }
+    }
+    
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, EventDTO correspondingEvent, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(regatta, regatta.series, existingEvents, correspondingEvent, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
-                null, callback);
+                new RegattaParameterValidator(stringMessages), callback);
         ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
 

@@ -434,18 +434,18 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 Boolean.toString(showNavigationPanel));
         linkParams.put("regattaName", raceIdentifier.getRegattaName());
         linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
-        linkParams.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS,
-                String.valueOf(getRegattaBuoyZoneRadius(raceIdentifier.getRegattaName())));
+        linkParams.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS,
+                String.valueOf(getRegattaBuoyZoneRadiusInMeters(raceIdentifier.getRegattaName())));
         if (viewMode != null && !viewMode.isEmpty()) {
             linkParams.put("viewMode", viewMode);
         }
         return linkParams;
     }
 
-    private double getRegattaBuoyZoneRadius(String regattaName) {
+    private double getRegattaBuoyZoneRadiusInMeters(String regattaName) {
         RegattaDTO regatta = regattasByName.get(regattaName);
-        double buoyZoneRadius = regatta == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
-                : regatta.getCalculatedBuoyZoneRadius();
+        double buoyZoneRadius = regatta == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS_IN_METERS
+                : regatta.getCalculatedBuoyZoneRadiusInMeters();
         return buoyZoneRadius;
     }
 

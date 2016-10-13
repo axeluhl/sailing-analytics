@@ -192,9 +192,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
 
                 RegattaDTO regatta = getSelectedRegatta();
-                double buoyZoneRadius = regatta == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
-                        : regatta.getCalculatedBuoyZoneRadius();
-                raceColumnTable.setSelectedRegattaHullLenghtCircleFactor(buoyZoneRadius);
+                double buoyZoneRadius = regatta == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS_IN_METERS
+                        : regatta.getCalculatedBuoyZoneRadiusInMeters();
+                raceColumnTable.setSelectedBuoyZoneRadiusInMeters(buoyZoneRadius);
 
             }
         });
