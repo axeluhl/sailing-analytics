@@ -166,7 +166,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(6, 1, useStartTimeInferenceCheckBox);
         formGrid.setWidget(7, 0, new Label(stringMessages.controlTrackingFromStartAndFinishTimes() + ":"));
         formGrid.setWidget(7, 1, controlTrackingFromStartAndFinishTimesCheckBox);
-        formGrid.setWidget(8, 0, new Label(stringMessages.hullLengthRadiusFactor() + ":"));
+        formGrid.setWidget(8, 0, new Label(stringMessages.buoyZoneRadiusInHullLengths() + ":"));
         formGrid.setWidget(8, 1, hullLengthRadiusFactorDoubleBox);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;

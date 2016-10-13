@@ -36,7 +36,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         public String getErrorMessage(RegattaDTO regattaToValidate) {
             String errorMessage = null;
             if (regattaToValidate.buoyZoneRadiusInHullLengths == null) {
-                errorMessage = stringMessages.incorrectValueForRegattaHullLengthRadiusFactor();
+                errorMessage = stringMessages.incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
             }
             return errorMessage;
         }

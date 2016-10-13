@@ -74,7 +74,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             }
 
             if (regattaToValidate.buoyZoneRadiusInHullLengths == null) {
-                errorMessage = stringMessages.incorrectValueForRegattaHullLengthRadiusFactor();
+                errorMessage = stringMessages.incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
             }
 
             if (errorMessage == null) {
