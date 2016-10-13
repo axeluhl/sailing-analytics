@@ -75,7 +75,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         TextView addPhotoText = (TextView) view.findViewById(R.id.add_photo_text);
         addPhotoText.setOnClickListener(this);
-
+        
         return view;
     }
 

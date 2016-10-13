@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
@@ -46,7 +47,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
     private static final int BATCH_SIZE = 5000;
 
-    public void importFixes(InputStream inputStream, Callback callback, String filename, String sourceName)
+    public void importFixes(InputStream inputStream, Callback callback, final String filename, String sourceName)
             throws FormatNotSupportedException, IOException {
         final TrackFileImportDeviceIdentifier trackIdentifier = new TrackFileImportDeviceIdentifierImpl(
                 UUID.randomUUID(), filename, sourceName, MillisecondsTimePoint.now());
@@ -59,12 +60,14 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
             } else {
                 isr = new InputStreamReader(inputStream);
             }
-            LOG.fine("Start parsing imu file");
+            LOG.fine("Start parsing bravo file");
+            AtomicLong lineNr = new AtomicLong();
             try (BufferedReader buffer = new BufferedReader(isr)) {
                 String headerLine = null;
                 headerSearch: while (headerLine == null) {
                     LOG.fine("Searching for header in bravo file");
                     String headerCandidate = buffer.readLine();
+                    lineNr.incrementAndGet();
                     if (headerCandidate == null) {
                         throw new RuntimeException("Missing required header in file " + filename);
                     }
@@ -79,10 +82,14 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
                 LOG.fine("Parse and store data in batches of " + BATCH_SIZE + " items");
                 final ArrayList<DoubleVectorFix> collectedFixes = new ArrayList<>(BATCH_SIZE);
                 buffer.lines().forEach(line -> {
-                    collectedFixes.add(parseLine(line, colIndices));
-                    if (collectedFixes.size() == BATCH_SIZE) {
-                        callback.addFixes(collectedFixes, trackIdentifier);
-                        collectedFixes.clear();
+                    lineNr.incrementAndGet();
+                    DoubleVectorFixImpl vectorFix = parseLine(lineNr.get(), filename, line, colIndices);
+                    if (vectorFix != null) {
+                        collectedFixes.add(vectorFix);
+                        if (collectedFixes.size() == BATCH_SIZE) {
+                            callback.addFixes(collectedFixes, trackIdentifier);
+                            collectedFixes.clear();
+                        }
                     }
                 });
                 if (!collectedFixes.isEmpty()) {
@@ -102,36 +109,42 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
      * @param colIndices
      * @return
      */
-    private DoubleVectorFixImpl parseLine(String line, Map<String, Integer> colIndices) {
-        String[] contentTokens = split(line);
-        TimePoint fixTp;
-        String epochColValue = contentTokens[2];
-        if (epochColValue != null && epochColValue.length() > 0) {
-            epochColValue = epochColValue.substring(0, epochColValue.indexOf("."));
-            long epoch = Long.parseLong(epochColValue);
-            fixTp = new MillisecondsTimePoint(epoch);
-        } else {
-            String jjLDATE = contentTokens[0].substring(0, 9);
-            StringBuilder dtb = new StringBuilder(jjLDATE);
-            String jjlTIME = contentTokens[1];
-            int offset = 6 - jjlTIME.indexOf(".");
-            IntStream.range(0, offset).forEach(n -> dtb.append("0"));
-            dtb.append(jjlTIME);
-            LocalDateTime day = DATE_FMT.parse(dtb.toString(), LocalDateTime::from);
-            Instant instant = day.toInstant(ZoneOffset.UTC);
-            fixTp = new MillisecondsTimePoint(Date.from(instant));
+    private DoubleVectorFixImpl parseLine(long lineNr, String filename, String line, Map<String, Integer> colIndices) {
+        try {
+            String[] contentTokens = split(line);
+            TimePoint fixTp;
+            String epochColValue = contentTokens[2];
+            if (epochColValue != null && epochColValue.length() > 0) {
+                epochColValue = epochColValue.substring(0, epochColValue.indexOf("."));
+                long epoch = Long.parseLong(epochColValue);
+                fixTp = new MillisecondsTimePoint(epoch);
+            } else {
+                String jjLDATE = contentTokens[0].substring(0, 9);
+                StringBuilder dtb = new StringBuilder(jjLDATE);
+                String jjlTIME = contentTokens[1];
+                int offset = 6 - jjlTIME.indexOf(".");
+                IntStream.range(0, offset).forEach(n -> dtb.append("0"));
+                dtb.append(jjlTIME);
+                LocalDateTime day = DATE_FMT.parse(dtb.toString(), LocalDateTime::from);
+                Instant instant = day.toInstant(ZoneOffset.UTC);
+                fixTp = new MillisecondsTimePoint(Date.from(instant));
+            }
+            // code for time adjustment for foiling test data
+            // long r16TP = ZonedDateTime.of(LocalDateTime.of(2016, 3, 19, 11, 55), ZoneId.of("Europe/Berlin"))
+            // .toEpochSecond() * 1000;
+            // fixTp = fixTp.plus(r16TP - 1461828459589l);
+            double[] fixData = new double[metadata.columnCount];
+            for (int columnIndexInFix = 0; columnIndexInFix < fixData.length; columnIndexInFix++) {
+                String columnName = metadata.getColumns().get(columnIndexInFix);
+                Integer columnIndexInFile = colIndices.get(columnName);
+                fixData[columnIndexInFix] = Double.parseDouble(contentTokens[columnIndexInFile]);
+            }
+            return new DoubleVectorFixImpl(fixTp, fixData);
+        } catch (Exception e) {
+            LOG.warning(
+                    "Error parsing line nr " + lineNr + " in file " + filename + "with exception: " + e.getMessage());
+            return null;
         }
-        // code for time adjustment for foiling test data
-        // long r16TP = ZonedDateTime.of(LocalDateTime.of(2016, 3, 19, 11, 55), ZoneId.of("Europe/Berlin"))
-        // .toEpochSecond() * 1000;
-        // fixTp = fixTp.plus(r16TP - 1461828459589l);
-        double[] fixData = new double[metadata.columnCount];
-        for (int columnIndexInFix = 0; columnIndexInFix < fixData.length; columnIndexInFix++) {
-            String columnName = metadata.getColumns().get(columnIndexInFix);
-            Integer columnIndexInFile = colIndices.get(columnName);
-            fixData[columnIndexInFix] = Double.parseDouble(contentTokens[columnIndexInFile]);
-        }
-        return new DoubleVectorFixImpl(fixTp, fixData);
     }
 
     private Map<String, Integer> validateAndParseHeader(String headerLine) {
