@@ -28,9 +28,9 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     /**
      * Used for blocking a range of colors around each color in {@link ColorMapImpl#blockedColors}
      */
-    private static final double MIN_COLOR_DISTANCE = 0.05;
+    private static final double MIN_COLOR_DISTANCE = 0.45;
 
-    private static final float STEP = 0.08f;
+    private static final float STEP = 0.1f;
     /*
      * Number of steps were made
      */
@@ -54,21 +54,35 @@ public class ColorMapImpl<T> implements ColorMap<T> {
 
     /** a list of already used colors which should be excluded from the automatic color assignment */
     private List<HSVColor> blockedColors;
-    
-    public ColorMapImpl() {
-        baseColors = new HSVColor[9];
-        baseColors[0] = new HSVColor(0,   1, 1); // Red
-        baseColors[1] = new HSVColor(30,  1, 1); // Orange
-        baseColors[2] = new HSVColor(45,  1, 1);
-        baseColors[3] = new HSVColor(120, 1, 1); // Green
-        baseColors[4] = new HSVColor(160, 1, 1);
-        baseColors[5] = new HSVColor(270, 1, 1); // Pink
-        baseColors[6] = new HSVColor(285, 1, 1); 
-        baseColors[7] = new HSVColor(300, 1, 1); // Magenta
-        baseColors[8] = new HSVColor(330, 1, 1); 
 
-        idColor = new HashMap<T, Color>();
-        blockedColors = new ArrayList<HSVColor>();
+    public ColorMapImpl() {
+        baseColors = new HSVColor[11];
+        idColor = new HashMap<>();
+        blockedColors = new ArrayList<>();
+        insertBaseColors();
+        insertBlockedColors();
+    }
+
+    private void insertBaseColors() {
+        baseColors[0]  = new HSVColor(0,   1, 1); // Red
+        baseColors[1]  = new HSVColor(30,  1, 1); // Orange
+        baseColors[2]  = new HSVColor(45,  1, 1);
+        baseColors[3]  = new HSVColor(120, 1, 1); // Green
+        baseColors[4]  = new HSVColor(160, 1, 1);
+        baseColors[5]  = new HSVColor(190, 1, 1);
+        baseColors[6]  = new HSVColor(240, 1, 1); // Blue
+        baseColors[7]  = new HSVColor(270, 1, 1); // Pink
+        baseColors[8]  = new HSVColor(285, 1, 1);
+        baseColors[9]  = new HSVColor(300, 1, 1); // Magenta
+        baseColors[10] = new HSVColor(330, 1, 1);
+    }
+
+    private void insertBlockedColors() {
+        //water color
+        blockedColors.add(new HSVColor(210, 0.79f, 0.34f));
+        //colors from satellite
+        blockedColors.add(new HSVColor(222, 0.52f, 0.48f));
+        blockedColors.add(new HSVColor(195, 0.58f, 0.18f));
     }
 
     /**
@@ -86,20 +100,17 @@ public class ColorMapImpl<T> implements ColorMap<T> {
                 color = createHexColor(colorCounter++);
             } while (isContainColor(blockedColors, convertColorToHSVColor(color)));
             idColor.put(object, color);
-            blockedColors.add(convertColorToHSVColor(color));
         }
         return color;
     }
     
-    /*
-     * It's used Euclidean metric for calculating the distance between two colors
-     */
     private boolean isColorsClose(HSVColor blockedColor, HSVColor newColor) {
-        double hueDifference = blockedColor.getHue() - newColor.getHue();
-        double saturationDifference = blockedColor.getSaturation() - newColor.getSaturation();
-        double brightnessDifference = blockedColor.getBrightness() - newColor.getBrightness();
-        double distance = Math.sqrt(hueDifference * hueDifference + saturationDifference * saturationDifference
-                + brightnessDifference * brightnessDifference);
+        double distanceHue = Math.abs(blockedColor.getHue() - newColor.getHue());
+        distanceHue = Math.min(distanceHue, 360 - distanceHue) / 180;
+        double distanceSaturation = Math.abs(blockedColor.getSaturation() - newColor.getSaturation());
+        double distanceBrightness = Math.abs(blockedColor.getBrightness() - newColor.getBrightness());
+        double distance = Math.sqrt(distanceHue * distanceHue + distanceSaturation * distanceSaturation
+                + distanceBrightness * distanceBrightness);
         return distance < MIN_COLOR_DISTANCE;
     }
     
@@ -117,7 +128,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
         if(color != null && !blockedColors.contains(color)) {
             result = blockedColors.add(convertColorToHSVColor(color));
         }
-        return result; 
+        return result;
     }
     
     public boolean removeBlockedColor(Color color) {
