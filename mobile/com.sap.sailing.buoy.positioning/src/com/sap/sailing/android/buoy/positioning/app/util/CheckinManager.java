@@ -190,15 +190,14 @@ public class CheckinManager {
                                         simplePosition = JsonHelper.convertToSimple(positionJson);
                                         GPSFix gpsFix = deserializer.deserialize(simplePosition);
                                         //accepts JSON messages without accuracy and with, without will simply be displayed as "set"
-                                        MarkPingInfo ping;
+                                        final MarkPingInfo ping;
                                         if (positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY) == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER) {
                                             ping = new MarkPingInfo(mark.getId(), gpsFix, FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER);
-                                        }
-                                        else {
+                                        } else {
                                             ping = new MarkPingInfo(mark.getId(), gpsFix, positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
                                         }
-                                        if (ping != null){
-                                        pings.add(ping);
+                                        if (ping != null) {
+                                            pings.add(ping);
                                         }
                                     }
                                 }

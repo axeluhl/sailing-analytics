@@ -35,7 +35,7 @@ public class MarkAdapter extends ResourceCursorAdapter {
             final DecimalFormat df = new DecimalFormat("#.##");
             final double accuracy = markPings.get(0).getAccuracy();
             final String accuracyString;
-            //accuracy-values that are stored as -1 (meaning unknown) will simply be displayed as "set" without an accuracy
+            // accuracy-values that are stored as -1 (meaning unknown) will simply be displayed as "set" without an accuracy
             if (accuracy == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER){
                 accuracyString = context.getString(R.string.set);
             } else {
