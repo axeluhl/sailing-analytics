@@ -28,7 +28,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -605,7 +604,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         operationExecutionListeners = new ConcurrentHashMap<>();
         courseListeners = new ConcurrentHashMap<>();
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
-        Executor simulatorExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
+        final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         this.raceLogReplicator = new RaceLogReplicatorAndNotifier(this);
@@ -1775,11 +1774,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
             // no action required; the update signaled by this call is implicit; the race log
             // updates that led to this change are replicated separately
-            
-            scheduler.execute(()->
-                // Notify interested users:
-                notificationService.notifyUserOnBoatClassRaceChangesStateToFinished(trackedRace.getRace().getBoatClass(), trackedRace,
-                    getMostAppropriateLeaderboard(), getMostAppropriateRaceColumn(), getMostAppropriateFleet()));
+            if (newFinishedTime.after(MillisecondsTimePoint.now().minus(Duration.ONE_HOUR))) {
+                scheduler.execute(()->
+                    // Notify interested users:
+                    notificationService.notifyUserOnBoatClassRaceChangesStateToFinished(trackedRace.getRace().getBoatClass(), trackedRace,
+                            getMostAppropriateLeaderboard(), getMostAppropriateRaceColumn(), getMostAppropriateFleet()));
+            }
         }
 
         @Override
@@ -1839,7 +1839,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             replicate(new UpdateMarkPassings(getRaceIdentifier(), competitor, markPassings));
             final MarkPassing last = Util.last(markPassings);
             if (last != null && last.getWaypoint() == trackedRace.getRace().getCourse().getLastWaypoint() &&
-                    trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.LOADING) {
+                    trackedRace.getStatus().getStatus() != TrackedRaceStatusEnum.LOADING &&
+                    last.getTimePoint().after(MillisecondsTimePoint.now().minus(Duration.ONE_HOUR))) {
                 scheduler.execute(() ->
                     // Notify interested users:
                     notificationService.notifyUserOnCompetitorPassesFinish(competitor, trackedRace,
@@ -2291,9 +2292,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception {
+    public void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) {
         for (WindTrackerFactory windTrackerFactory : getWindTrackerFactories()) {
-            windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+            try {
+                windTrackerFactory.createWindTracker(getOrCreateTrackedRegatta(regatta), race, correctByDeclination);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to track wind using wind tracker factory "+windTrackerFactory, e);
+            }
         }
     }
 
