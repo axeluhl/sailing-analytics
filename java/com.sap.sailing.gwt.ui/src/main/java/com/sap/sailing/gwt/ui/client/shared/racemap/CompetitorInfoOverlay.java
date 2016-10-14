@@ -81,7 +81,8 @@ public class CompetitorInfoOverlay extends CanvasOverlayV3 {
             ctx.beginPath();
             ctx.moveTo(1.0,1.0);
             ctx.lineTo(canvasWidth,1.0);
-            ctx.lineTo(canvasWidth-infoBoxHeight,infoBoxHeight);
+            int bottomLineWidth = X_TEXT_COORDINATE + textLines[textLines.length - 1].length() * 5 + 10;
+            ctx.lineTo(bottomLineWidth, infoBoxHeight);
             ctx.lineTo(1.0,infoBoxHeight);
             ctx.closePath();
             ctx.fill();
