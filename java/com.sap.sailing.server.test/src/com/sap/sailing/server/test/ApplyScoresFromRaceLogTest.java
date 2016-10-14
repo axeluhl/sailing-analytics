@@ -97,12 +97,12 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now);
         for (final Competitor c : competitors) {
-            assertEquals(scores.get(c)==null?competitors.indexOf(c)+1:scores.get(c), leaderboard.getTotalPoints(c, f1Column, now), 0.00000001);
+            assertEquals(scores.get(c)==null?(mprs.get(c) == null || mprs.get(c) == MaxPointsReason.NONE ? competitors.indexOf(c)+1 : competitors.size()+1):scores.get(c), leaderboard.getTotalPoints(c, f1Column, now), 0.00000001);
         }
         final List<Competitor> expectedNewOrder = new ArrayList<>(competitors);
         expectedNewOrder.sort((c1, c2)->
-            new Double(scores.get(c1)==null?competitors.indexOf(c1)+1:scores.get(c1)).compareTo(
-            new Double(scores.get(c2)==null?competitors.indexOf(c2)+1:scores.get(c2))));
+            new Double(scores.get(c1)==null?(mprs.get(c1) == null || mprs.get(c1) == MaxPointsReason.NONE ? competitors.indexOf(c1)+1 : competitors.size()+1):scores.get(c1)).compareTo(
+            new Double(scores.get(c2)==null?(mprs.get(c2) == null || mprs.get(c2) == MaxPointsReason.NONE ? competitors.indexOf(c2)+1 : competitors.size()+1):scores.get(c2))));
         final List<Competitor> rankedCompetitorsAfterApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(expectedNewOrder, rankedCompetitorsAfterApplying);
     }
@@ -162,14 +162,14 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now);
         
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(0),  MaxPointsReason.DNF,   0, /* score is corrected */ false, later);
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(1),  MaxPointsReason.OCS,   0, /* score is corrected */ false, later);
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(2),  MaxPointsReason.DNF, 0.1, /* score is corrected */  true, later);
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(3),  MaxPointsReason.OCS, 0.2, /* score is corrected */  true, later);
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(4),                 null,   6, /* score is corrected */ false, later);
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(5),                 null, 2.4, /* score is corrected */  true, later);
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(6), MaxPointsReason.NONE,   4, /* score is corrected */ false, later);
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(7), MaxPointsReason.NONE, 3.3, /* score is corrected */  true, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.DNF,    0, /* score is corrected */ false, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS,    0, /* score is corrected */ false, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(2), MaxPointsReason.DNF,  0.1, /* score is corrected */  true, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(3), MaxPointsReason.OCS,  0.2, /* score is corrected */  true, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(4), MaxPointsReason.NONE,   6, /* score is corrected */  true, later); // score corrected based on rank because no MaxPointsReason set
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(5), MaxPointsReason.NONE, 2.4, /* score is corrected */  true, later); // score corrected based on explicit score
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(6), MaxPointsReason.NONE,   4, /* score is corrected */  true, later); // score corrected based on rank because MaxPointsReason.NONE set
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(7), MaxPointsReason.NONE, 3.3, /* score is corrected */  true, later); // score corrected based on explicit score
     }
 
     private void assertScoreCorrections(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
