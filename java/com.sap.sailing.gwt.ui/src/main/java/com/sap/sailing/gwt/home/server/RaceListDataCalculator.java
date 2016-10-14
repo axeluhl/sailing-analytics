@@ -19,7 +19,7 @@ public class RaceListDataCalculator implements RaceCallback {
     @Override
     public void doForRace(RaceContext context) {
         RaceListRaceDTO finishedRace = context.getFinishedRaceOrNull();
-        if(finishedRace != null) {
+        if (finishedRace != null) {
             finishedRace.setNaturalOrder(naturalOrder++);
             races.add(finishedRace);
         }
