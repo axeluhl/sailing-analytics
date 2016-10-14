@@ -2,7 +2,10 @@ package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -16,8 +19,10 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
@@ -31,6 +36,7 @@ public class TrackingFragment extends BaseFragment {
     static final String SIS_GPS_UNSENT_FIXES = "instanceStateGpsUnsentFixes";
 
     private long lastGPSQualityUpdate;
+    private BroadcastReceiver gpsDisabledReceiver;
     private Toast gpsToast;
     private boolean gpsFound = true;
 
@@ -39,11 +45,8 @@ public class TrackingFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_tracking, container, false);
-
         prefs = new AppPreferences(getActivity());
-
         return view;
     }
 
@@ -52,7 +55,28 @@ public class TrackingFragment extends BaseFragment {
         super.onResume();
         // so it initally updates to "battery-saving" etc.
         setAPIConnectivityStatus(APIConnectivity.noAttempt);
+        
+        //setup receiver to get message from tracking service if GPS is disabled while tracking
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(TrackingService.GPS_DISABLED_MESSAGE); 
+
+        gpsDisabledReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
+            }
+        };
+        getActivity().registerReceiver(gpsDisabledReceiver,filter);
+        if (!isLocationEnabled(getActivity())) {
+            LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
+        }
     }
+    
+    @Override
+    public void onStop() {
+        super.onStop();
+        getActivity().unregisterReceiver(gpsDisabledReceiver);
+    };
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
