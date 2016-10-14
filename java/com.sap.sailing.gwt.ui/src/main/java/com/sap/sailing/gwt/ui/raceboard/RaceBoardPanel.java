@@ -232,7 +232,10 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
 
                 @Override
                 public void onFailure(Throwable caught) {
-
+                    initAllPanel(userService, leaderboardGroupName, showChartMarkEditMediaButtonsAndVideo, mainPanel,
+                            raceMapLifecycle, raceTimePanelLifecycle, raceTimePanelSettings, defaultRaceMapSettings,
+                            RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS);
+                    scheduledCommand.execute();
                 }
             });
         } else {
