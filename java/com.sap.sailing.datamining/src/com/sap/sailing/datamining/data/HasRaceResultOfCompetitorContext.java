@@ -19,7 +19,7 @@ public interface HasRaceResultOfCompetitorContext {
     /**
      * 0 means the competitor won the race, 1 means the competitor ranked last
      */
-    @Statistic(messageKey="RelativeScoreInRace", ordinal=1, resultDecimals=2)
+    @Statistic(messageKey="RelativeScore", ordinal=1, resultDecimals=2)
     public double getRelativeRank();
     
     @Statistic(messageKey="AbsoluteRank", ordinal=2, resultDecimals=2)

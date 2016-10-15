@@ -25,5 +25,11 @@ public interface HasTrackedLegOfCompetitorContext {
     
     @Statistic(messageKey="RankGainsOrLosses", resultDecimals=2, ordinal=1)
     public Double getRankGainsOrLosses();
+    
+    @Statistic(messageKey="RelativeScore", resultDecimals=2, ordinal=2)
+    public Double getRelativeRank();
+    
+    @Statistic(messageKey="AbsoluteRank", resultDecimals=2, ordinal=3)
+    public Double getAbsoluteRank();
 
 }
