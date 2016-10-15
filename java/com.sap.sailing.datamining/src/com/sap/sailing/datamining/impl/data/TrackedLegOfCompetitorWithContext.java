@@ -35,6 +35,11 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     public Competitor getCompetitor() {
         return competitor;
     }
+
+    @Override
+    public String getCompetitorSearchTag() {
+        return getCompetitor().getSearchTag();
+    }
     
     @Override
     public Distance getDistanceTraveled() {

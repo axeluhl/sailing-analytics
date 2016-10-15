@@ -13,6 +13,9 @@ public interface HasRaceResultOfCompetitorContext {
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
     
+    @Dimension(messageKey="CompetitorSearchTag", ordinal=11) // TODO Clean me: Move Dimension to Competitor when possible
+    public String getCompetitorSearchTag();
+    
     /**
      * 0 means the competitor won the race, 1 means the competitor ranked last
      */

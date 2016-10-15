@@ -62,6 +62,11 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
+    public String getCompetitorSearchTag() {
+        return getCompetitor().getSearchTag();
+    }
+
+    @Override
     public double getRelativeRank() {
         Leaderboard leaderboard = getLeaderboard();
         final TimePoint now = MillisecondsTimePoint.now();

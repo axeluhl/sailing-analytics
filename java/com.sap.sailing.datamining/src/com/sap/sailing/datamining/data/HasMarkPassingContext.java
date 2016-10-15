@@ -26,4 +26,7 @@ public interface HasMarkPassingContext {
     
     @Dimension(messageKey="LegType", ordinal=6)
     String getPreviousLegTypeSignifier() throws NoWindException;
+    
+    @Dimension(messageKey="CompetitorSearchTag", ordinal=11) // TODO Clean me: Move Dimension to Competitor when possible
+    public String getCompetitorSearchTag();
 }
