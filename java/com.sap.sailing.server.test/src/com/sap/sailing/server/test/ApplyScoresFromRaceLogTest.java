@@ -1,6 +1,7 @@
 package com.sap.sailing.server.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.junit.Test;
 
@@ -96,15 +98,19 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final List<Competitor> rankedCompetitorsBeforeApplying = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now);
+        final Function<Competitor, Double> expectedPoints = (c)->scores.get(c)==null?(mprs.get(c) == null || mprs.get(c) == MaxPointsReason.NONE ? competitors.indexOf(c)+1 : competitors.size()+1):scores.get(c);
         for (final Competitor c : competitors) {
-            assertEquals(scores.get(c)==null?(mprs.get(c) == null || mprs.get(c) == MaxPointsReason.NONE ? competitors.indexOf(c)+1 : competitors.size()+1):scores.get(c), leaderboard.getTotalPoints(c, f1Column, now), 0.00000001);
+            assertEquals(expectedPoints.apply(c), leaderboard.getTotalPoints(c, f1Column, now), 0.00000001);
         }
         final List<Competitor> expectedNewOrder = new ArrayList<>(competitors);
-        expectedNewOrder.sort((c1, c2)->
-            new Double(scores.get(c1)==null?(mprs.get(c1) == null || mprs.get(c1) == MaxPointsReason.NONE ? competitors.indexOf(c1)+1 : competitors.size()+1):scores.get(c1)).compareTo(
-            new Double(scores.get(c2)==null?(mprs.get(c2) == null || mprs.get(c2) == MaxPointsReason.NONE ? competitors.indexOf(c2)+1 : competitors.size()+1):scores.get(c2))));
+        expectedNewOrder.sort((c1, c2)->new Double(expectedPoints.apply(c1)).compareTo(new Double(expectedPoints.apply(c1))));
         final List<Competitor> rankedCompetitorsAfterApplying = leaderboard.getCompetitorsFromBestToWorst(later);
-        assertEquals(expectedNewOrder, rankedCompetitorsAfterApplying);
+        double lastScore = 0;
+        for (final Competitor c : rankedCompetitorsAfterApplying) {
+            assertEquals(expectedPoints.apply(c), leaderboard.getTotalPoints(c, f1Column, later));
+            assertTrue(leaderboard.getTotalPoints(c, f1Column, later) >= lastScore);
+            lastScore = leaderboard.getTotalPoints(c, f1Column, later);
+        }
     }
 
     /**
