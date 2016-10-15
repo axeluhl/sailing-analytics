@@ -72,6 +72,15 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         final double result = relativeLowPoints / competitorCount;
         return result;
     }
+    
+    @Override
+    public double getAbsoluteRank() {
+        try {
+            return getLeaderboard().getTotalRankOfCompetitor(competitor, MillisecondsTimePoint.now());
+        } catch (NoWindException e) {
+            throw new IllegalStateException("No wind calculating the absoulte rank", e);
+        }
+    }
 
     @Override
     public int getAverageWindSpeedInRoundedBeaufort() {

@@ -18,6 +18,9 @@ public interface HasRaceResultOfCompetitorContext {
      */
     @Statistic(messageKey="RelativeScoreInRace", ordinal=1, resultDecimals=2)
     public double getRelativeRank();
+    
+    @Statistic(messageKey="AbsoluteRank", ordinal=2, resultDecimals=2)
+    public double getAbsoluteRank();
 
     @Dimension(messageKey="WindSpeedInBeaufort")
     int getAverageWindSpeedInRoundedBeaufort();
@@ -25,9 +28,9 @@ public interface HasRaceResultOfCompetitorContext {
     @Dimension(messageKey="Regatta")
     String getRegattaName();
     
-    @Statistic(messageKey="NumberOfPodiumFinish", ordinal=2)
+    @Statistic(messageKey="NumberOfPodiumFinish", ordinal=3)
     public Boolean isPodiumFinish();
     
-    @Statistic(messageKey="NumberOfWins", ordinal=3)
+    @Statistic(messageKey="NumberOfWins", ordinal=4)
     public Boolean isWin();
 }
