@@ -62,25 +62,15 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
-    public String getCompetitorSearchTag() {
-        return getCompetitor().getSearchTag();
+    public String getRegattaName() {
+        Leaderboard leaderboard = getLeaderboard();;
+        final String result = leaderboard.getName();
+        return result;
     }
 
     @Override
-    public double getRelativeRank() {
-        Leaderboard leaderboard = getLeaderboard();
-        final TimePoint now = MillisecondsTimePoint.now();
-        double competitorCount = Util.size(leaderboard.getCompetitors());
-        double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
-        double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ?
-                competitorCount - points : points;
-        final double result = relativeLowPoints / competitorCount;
-        return result;
-    }
-    
-    @Override
-    public double getAbsoluteRank() throws NoWindException {
-        return getLeaderboard().getTotalPoints(competitor, raceColumn, MillisecondsTimePoint.now());
+    public String getCompetitorSearchTag() {
+        return getCompetitor().getSearchTag();
     }
 
     @Override
@@ -167,10 +157,20 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
-    public String getRegattaName() {
-        Leaderboard leaderboard = getLeaderboard();;
-        final String result = leaderboard.getName();
+    public double getRelativeRank() {
+        Leaderboard leaderboard = getLeaderboard();
+        final TimePoint now = MillisecondsTimePoint.now();
+        double competitorCount = Util.size(leaderboard.getCompetitors());
+        double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
+        double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ?
+                competitorCount - points : points;
+        final double result = relativeLowPoints / competitorCount;
         return result;
+    }
+    
+    @Override
+    public double getAbsoluteRank() {
+        return getLeaderboard().getTotalPoints(competitor, raceColumn, MillisecondsTimePoint.now());
     }
 
     @Override
