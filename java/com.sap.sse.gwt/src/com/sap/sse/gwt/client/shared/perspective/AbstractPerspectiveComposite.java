@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentContext;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -32,37 +32,9 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     protected void addChildComponent(Component<? extends Settings> childComponent) {
         childComponents.put(childComponent.getId(), childComponent);
         childComponent.getComponentTreeNodeInfo().setParentPerspective(this);
+        childComponent.getComponentTreeNodeInfo().setComponentContext(getComponentTreeNodeInfo().getComponentContext());
     }
     
-    @Override
-    public void childComponentDefaultSettingsChanged(Component<? extends Settings> childComponent, Settings childSettings) {
-        Map<Serializable, Settings> originalSettingsPerComponent = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsPerComponentId();
-        Map<Serializable, Settings> newSettingsPerComponent = new HashMap<>();
-        for (Entry<Serializable, Settings> entry : originalSettingsPerComponent.entrySet()) {
-            Serializable componentId = entry.getKey();
-            if(childComponent.getId().equals(componentId)) {
-                newSettingsPerComponent.put(childComponent.getId(), childSettings);
-            } else {
-                newSettingsPerComponent.put(componentId, entry.getValue());
-            }
-        }
-        
-        PerspectiveCompositeSettings<PS> allSettings = new PerspectiveCompositeSettings<>(perspectiveOwnSettings, newSettingsPerComponent);
-        perspectiveLifecycleWithAllSettings.setAllSettings(allSettings);
-        
-        Perspective<? extends Settings> parentPerspective = getComponentTreeNodeInfo().getParentPerspective();
-        if(parentPerspective != null) {
-            parentPerspective.childComponentDefaultSettingsChanged(childComponent, childSettings);
-        } else {
-            storeNewDefaultSettings();
-        }
-    }
-    
-    private void storeNewDefaultSettings() {
-        // TODO store on backend and on localstorage
-        Window.alert("Default Settings got saved by perspective");
-    }
-
     @Override
     public Collection<Component<? extends Settings>> getComponents() {
         return childComponents.values();
@@ -72,10 +44,11 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
         return perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(perspectiveSettings);
     }
 
-    public AbstractPerspectiveComposite(PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings) {
+    public AbstractPerspectiveComposite(ComponentContext componentContext, PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings) {
         this.perspectiveLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle();
         this.perspectiveOwnSettings = perspectiveLifecycleWithAllSettings.getPerspectiveSettings();
         this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;
+        getComponentTreeNodeInfo().setComponentContext(componentContext);
     }
 
     @Override
@@ -143,6 +116,11 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     
     public <C extends ComponentLifecycle<S,?>, S extends Settings> S findComponentSettingsByLifecycle(C componentLifecycle) {
         return perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(componentLifecycle);
+    }
+    
+    @Override
+    public PerspectiveLifecycleWithAllSettings<PL, PS> getPerspectiveLifecycleWithAllSettings() {
+        return perspectiveLifecycleWithAllSettings;
     }
 
 }

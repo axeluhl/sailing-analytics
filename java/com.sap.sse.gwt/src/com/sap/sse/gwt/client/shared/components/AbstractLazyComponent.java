@@ -8,7 +8,7 @@ import com.sap.sse.common.settings.AbstractSettings;
 
 public abstract class AbstractLazyComponent<SettingsType extends AbstractSettings> extends LazyPanel implements LazyComponent<SettingsType> {
 
-    private ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = new ComponentTreeNodeInfo<>(this);
+    private ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = new ComponentTreeNodeInfo<>();
     
     @Override
     public Serializable getId() {

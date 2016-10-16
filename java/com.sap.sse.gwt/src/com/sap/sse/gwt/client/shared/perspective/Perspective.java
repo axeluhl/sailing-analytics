@@ -20,5 +20,5 @@ public interface Perspective<PS extends Settings> extends Component<PerspectiveC
     
     boolean hasPerspectiveOwnSettings();
 
-    void childComponentDefaultSettingsChanged(Component<? extends Settings> component, Settings newDefaultSettings);
+    PerspectiveLifecycleWithAllSettings<? extends PerspectiveLifecycle<PS>, PS> getPerspectiveLifecycleWithAllSettings();
 }

@@ -27,7 +27,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
+import com.sap.sse.gwt.client.shared.perspective.AbstractRootPerspectiveComposite;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
@@ -38,7 +38,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag
  *
  */
-public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle,
+public class LeaderboardWithHeaderPerspective extends AbstractRootPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle,
     LeaderboardWithHeaderPerspectiveSettings> implements LeaderboardUpdateProvider {
     private final DockLayoutPanel dockPanel;
     private final static int SAP_HEADER_HEIGHT = 75;

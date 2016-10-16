@@ -80,7 +80,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 //TODO send notification
-                component.getComponentTreeNodeInfo().makeSettingsDefault(getResult());
+                component.getComponentTreeNodeInfo().getComponentContext().makeSettingsDefault(component, getResult());
             }
         });
     }

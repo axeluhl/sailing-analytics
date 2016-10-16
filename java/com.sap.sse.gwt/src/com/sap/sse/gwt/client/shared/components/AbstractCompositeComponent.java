@@ -7,7 +7,7 @@ import com.sap.sse.common.settings.Settings;
 
 public abstract class AbstractCompositeComponent<SettingsType extends Settings> extends Composite implements Component<SettingsType> {
 
-    private ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = new ComponentTreeNodeInfo<>(this);
+    private ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = new ComponentTreeNodeInfo<>();
     
     @Override
     public Serializable getId() {
