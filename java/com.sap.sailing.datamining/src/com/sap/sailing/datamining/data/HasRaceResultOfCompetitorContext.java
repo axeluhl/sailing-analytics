@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
@@ -23,7 +24,7 @@ public interface HasRaceResultOfCompetitorContext {
     public double getRelativeRank();
     
     @Statistic(messageKey="AbsoluteRank", ordinal=2, resultDecimals=2)
-    public double getAbsoluteRank();
+    public double getAbsoluteRank() throws NoWindException;
 
     @Dimension(messageKey="WindSpeedInBeaufort")
     int getAverageWindSpeedInRoundedBeaufort();

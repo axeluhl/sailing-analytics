@@ -79,12 +79,8 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
     
     @Override
-    public double getAbsoluteRank() {
-        try {
-            return getLeaderboard().getTotalRankOfCompetitor(competitor, MillisecondsTimePoint.now());
-        } catch (NoWindException e) {
-            throw new IllegalStateException("No wind calculating the absoulte rank", e);
-        }
+    public double getAbsoluteRank() throws NoWindException {
+        return getLeaderboard().getTotalPoints(competitor, raceColumn, MillisecondsTimePoint.now());
     }
 
     @Override
