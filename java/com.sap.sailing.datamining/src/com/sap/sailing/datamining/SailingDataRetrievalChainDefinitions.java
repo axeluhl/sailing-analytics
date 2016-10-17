@@ -50,11 +50,6 @@ public class SailingDataRetrievalChainDefinitions {
         trackedRaceRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class,
                 HasTrackedRaceContext.class, "Race");
         dataRetrieverChainDefinitions.add(trackedRaceRetrieverChainDefinition);
-
-        final DataRetrieverChainDefinition<RacingEventService, HasMarkPassingContext> markPassingRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                trackedRaceRetrieverChainDefinition, HasMarkPassingContext.class, "MarkPassingSailingDomainRetrieverChain");
-        markPassingRetrieverChainDefinition.endWith(TrackedRaceRetrievalProcessor.class, MarkPassingRetrievalProcessor.class, HasMarkPassingContext.class, "MarkPassing");
-        dataRetrieverChainDefinitions.add(markPassingRetrieverChainDefinition);
         
         final DataRetrieverChainDefinition<RacingEventService, HasRaceOfCompetitorContext> raceOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 trackedRaceRetrieverChainDefinition, HasRaceOfCompetitorContext.class, "RaceOfCompetitorSailingDomainRetrieverChain");
@@ -79,6 +74,11 @@ public class SailingDataRetrievalChainDefinitions {
         maneuverRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, ManeuverRetrievalProcessor.class,
                 HasManeuverContext.class, "Maneuver");
         dataRetrieverChainDefinitions.add(maneuverRetrieverChainDefinition);
+
+        final DataRetrieverChainDefinition<RacingEventService, HasMarkPassingContext> markPassingRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                legOfCompetitorRetrieverChainDefinition, HasMarkPassingContext.class, "MarkPassingSailingDomainRetrieverChain");
+        markPassingRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, MarkPassingRetrievalProcessor.class, HasMarkPassingContext.class, "MarkPassing");
+        dataRetrieverChainDefinitions.add(markPassingRetrieverChainDefinition);
     }
 
     public Iterable<DataRetrieverChainDefinition<?, ?>> get() {
