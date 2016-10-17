@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -125,24 +124,21 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                 public void onSuccess(RaceboardDataDTO result) {
                     playerView.clearContent();
 
-                    final RaceBoardPanel raceboardPerspective = new RaceBoardPanel(raceboardPerspectiveLifecycleWithAllSettings,
-                            sailingService, mediaService, asyncActionsExecutor, result.getCompetitorAndTheirBoats(), raceboardTimer,
-                            currentLiveRace, autoPlayerConfiguration.getLeaderboardName(), /** eventId */ null, errorReporter,
-                            StringMessages.INSTANCE, userAgent, raceTimesInfoProvider);
-                    raceboardPerspective.init(userService, /** leaderboardGroupName */ null, true, new ScheduledCommand() {// executes after RaceBoardPanel will initialized
-                        @Override
-                        public void execute() {
-                            playerView.setContent(raceboardPerspective);
+                    RaceBoardPanel raceboardPerspective = new RaceBoardPanel(raceboardPerspectiveLifecycleWithAllSettings,
+                            sailingService, mediaService, userService, asyncActionsExecutor,
+                            result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, autoPlayerConfiguration.getLeaderboardName(), 
+                            /** leaderboardGroupName */ null, /** eventId */ null, errorReporter,
+                            StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, true);
 
-                            activeTvView = AutoPlayModes.Raceboard;
-                            leaderboardTimer.pause();
-                            raceboardTimer.setPlayMode(PlayModes.Live);
+                    playerView.setContent(raceboardPerspective);
 
-                            isInitialScreen = false;
-                        }
-                    });
+                    activeTvView = AutoPlayModes.Raceboard;
+                    leaderboardTimer.pause();
+                    raceboardTimer.setPlayMode(PlayModes.Live);
+                    
+                    isInitialScreen = false;
                 }
-
+                
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error while loading data for raceboard: " + caught.getMessage());

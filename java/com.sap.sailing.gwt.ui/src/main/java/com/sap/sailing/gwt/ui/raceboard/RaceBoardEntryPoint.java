@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -167,17 +166,12 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle,
                 perspectiveCompositeSettings);
 
-        final RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(raceboardPerspectiveLifecyclesAndSettings,
-                sailingService, mediaService, asyncActionsExecutor, raceboardData.getCompetitorAndTheirBoats(), timer,
-                selectedRace.getRaceIdentifier(), leaderboardName, eventId, RaceBoardEntryPoint.this,
-                getStringMessages(), userAgent, raceTimesInfoProvider);
-        raceBoardPerspective.init(getUserService(), leaderboardGroupName, showChartMarkEditMediaButtonsAndVideo, new ScheduledCommand() {// executes after RaceBoardPanel will initialized
-            @Override
-            public void execute() {
-                RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
-            }
-        });
-
+        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(raceboardPerspectiveLifecyclesAndSettings,
+                sailingService, mediaService, getUserService(), asyncActionsExecutor,
+                raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,
+                leaderboardGroupName, eventId, RaceBoardEntryPoint.this, getStringMessages(), userAgent,
+                raceTimesInfoProvider, showChartMarkEditMediaButtonsAndVideo);
+        RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
         return raceBoardPerspective;
     }  
 }

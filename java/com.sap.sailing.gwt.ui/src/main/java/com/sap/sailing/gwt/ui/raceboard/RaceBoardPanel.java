@@ -115,7 +115,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     private final ErrorReporter errorReporter;
     private String raceBoardName;
         
-    private RaceTimePanel racetimePanel;
+    private final RaceTimePanel racetimePanel;
     private final Timer timer;
     private final UserAgentDetails userAgent;
     private final CompetitorSelectionProvider competitorSelectionProvider;
@@ -123,15 +123,15 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     private final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
     private final String leaderboardName;
-    private LeaderboardPanel leaderboardPanel;
+    private final LeaderboardPanel leaderboardPanel;
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
     private MediaPlayerManagerComponent mediaPlayerManagerComponent;
     private EditMarkPassingsPanel editMarkPassingPanel;
     private EditMarkPositionPanel editMarkPositionPanel;
 
-    private DockLayoutPanel dockPanel;
-    private ResizableFlowPanel timePanelWrapper;
+    private final DockLayoutPanel dockPanel;
+    private final ResizableFlowPanel timePanelWrapper;
     private final static int TIMEPANEL_COLLAPSED_HEIGHT = 67;
     private final static int TIMEPANEL_EXPANDED_HEIGHT = 96;
     
@@ -143,7 +143,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     private final AsyncActionsExecutor asyncActionsExecutor;
     
     private final RaceTimesInfoProvider raceTimesInfoProvider;
-    private RaceMap raceMap;
+    private final RaceMap raceMap;
     
     private final FlowPanel raceInformationHeader;
     private final FlowPanel regattaAndRaceTimeInformationHeader;
@@ -156,19 +156,27 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
     private final PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleWithAllSettings;
-
+    
     /**
      * @param eventId
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
      *            context of an event; may be <code>null</code>.
+     * @param isScreenLargeEnoughToOfferChartSupport
+     *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
+     *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
+     *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint} class.
+     * @param showChartMarkEditMediaButtonsAndVideo
+     *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark 
+     *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that
+     *            aligns its right border with that of the chart. Otherwise those components will be hidden.
      */
-    public RaceBoardPanel(
-            PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleWithAllSettings,
-            SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+    public RaceBoardPanel(PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleWithAllSettings, 
+            SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,
             AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
-            Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, UUID eventId,
-            ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentDetails userAgent,
-            RaceTimesInfoProvider raceTimesInfoProvider) {
+            Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
+            String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
+            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
+            boolean showChartMarkEditMediaButtonsAndVideo) {
         super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(), perspectiveLifecycleWithAllSettings.getPerspectiveSettings());
         this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;
         this.sailingService = sailingService;
@@ -184,6 +192,8 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
         this.asyncActionsExecutor = asyncActionsExecutor;
+        FlowPanel mainPanel = new ResizableFlowPanel();
+        mainPanel.setSize("100%", "100%");
         raceInformationHeader = new FlowPanel();
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
@@ -194,80 +204,29 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
 
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
-    }
-
-    /**
-     * @param showChartMarkEditMediaButtonsAndVideo
-     *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark
-     *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that aligns
-     *            its right border with that of the chart. Otherwise those components will be hidden.
-     * @param scheduledCommand
-     *            executes when all panels was initialized
-     */
-    public void init(final UserService userService, final String leaderboardGroupName,
-            final boolean showChartMarkEditMediaButtonsAndVideo, final ScheduledCommand scheduledCommand) {
-        final FlowPanel mainPanel = new ResizableFlowPanel();
-        mainPanel.setSize("100%", "100%");
+                
         raceMapResources.raceMapStyle().ensureInjected();
-        final RaceMapLifecycle raceMapLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle()
-                .getRaceMapLifecycle();
-        final RaceMapSettings defaultRaceMapSettings = perspectiveLifecycleWithAllSettings
-                .findComponentSettingsByLifecycle(raceMapLifecycle);
+        RaceMapLifecycle raceMapLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getRaceMapLifecycle();
+        RaceMapSettings defaultRaceMapSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(raceMapLifecycle);
 
-        final RaceTimePanelLifecycle raceTimePanelLifecycle = perspectiveLifecycleWithAllSettings
-                .getPerspectiveLifecycle().getRaceTimePanelLifecycle();
-        final RaceTimePanelSettings raceTimePanelSettings = perspectiveLifecycleWithAllSettings
-                .findComponentSettingsByLifecycle(raceTimePanelLifecycle);
-
-        if (GwtHttpRequestUtils.getStringParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, null) == null) {
-            sailingService.getRegattaByName(selectedRaceIdentifier.getRegattaName(), new AsyncCallback<RegattaDTO>() {
-                @Override
-                public void onSuccess(RegattaDTO regattaDTO) {
-                    Distance buoyZoneRadiusInMeters = regattaDTO.getCalculatedBuoyZoneRadius();
-                    initAllPanel(userService, leaderboardGroupName, showChartMarkEditMediaButtonsAndVideo, mainPanel,
-                            raceMapLifecycle, raceTimePanelLifecycle, raceTimePanelSettings, defaultRaceMapSettings,
-                            buoyZoneRadiusInMeters);
-                    scheduledCommand.execute();
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    initAllPanel(userService, leaderboardGroupName, showChartMarkEditMediaButtonsAndVideo, mainPanel,
-                            raceMapLifecycle, raceTimePanelLifecycle, raceTimePanelSettings, defaultRaceMapSettings,
-                            RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS);
-                    scheduledCommand.execute();
-                }
-            });
-        } else {
-            Distance buoyZoneRadiusInMeters = new MeterDistance(
-                    GwtHttpRequestUtils.getDoubleParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS,
-                            RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS.getMeters() /* default */));
-            initAllPanel(userService, leaderboardGroupName, showChartMarkEditMediaButtonsAndVideo, mainPanel,
-                    raceMapLifecycle, raceTimePanelLifecycle, raceTimePanelSettings, defaultRaceMapSettings,
-                    buoyZoneRadiusInMeters);
-            scheduledCommand.execute();
-        }
-    }
-
-    private void initAllPanel(UserService userService, String leaderboardGroupName,
-            boolean showChartMarkEditMediaButtonsAndVideo, FlowPanel mainPanel, RaceMapLifecycle raceMapLifecycle,
-            RaceTimePanelLifecycle raceTimePanelLifecycle, RaceTimePanelSettings raceTimePanelSettings,
-            RaceMapSettings defaultRaceMapSettings, Distance buoyZoneRadiusInMeters) {
-        RaceMapSettings raceMapSettings = new RaceMapSettings(defaultRaceMapSettings.getZoomSettings(),
-                defaultRaceMapSettings.getHelpLinesSettings(), defaultRaceMapSettings.getTransparentHoverlines(),
-                defaultRaceMapSettings.getHoverlineStrokeWeight(), defaultRaceMapSettings.getTailLengthInMilliseconds(),
-                defaultRaceMapSettings.isWindUp(), buoyZoneRadiusInMeters,
-                defaultRaceMapSettings.isShowOnlySelectedCompetitors(),
-                defaultRaceMapSettings.isShowSelectedCompetitorsInfo(),
-                defaultRaceMapSettings.isShowWindStreamletColors(), defaultRaceMapSettings.isShowWindStreamletOverlay(),
-                defaultRaceMapSettings.isShowSimulationOverlay(), defaultRaceMapSettings.isShowMapControls(),
-                defaultRaceMapSettings.getManeuverTypesToShow(), defaultRaceMapSettings.isShowDouglasPeuckerPoints());
-        raceMap = new RaceMap(raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter,
-                timer, competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources,
+        RaceTimePanelLifecycle raceTimePanelLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getRaceTimePanelLifecycle();
+        RaceTimePanelSettings raceTimePanelSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(raceTimePanelLifecycle);
+        
+        final Distance buoyZoneRadiusInMeters = new MeterDistance(GwtHttpRequestUtils.getDoubleParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS.getMeters() /* default */));
+        final RaceMapSettings raceMapSettings = new RaceMapSettings(defaultRaceMapSettings.getZoomSettings(), defaultRaceMapSettings.getHelpLinesSettings(),
+                defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
+                defaultRaceMapSettings.getTailLengthInMilliseconds(), defaultRaceMapSettings.isWindUp(),
+                buoyZoneRadiusInMeters, defaultRaceMapSettings.isShowOnlySelectedCompetitors(),
+                defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
+                defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
+                defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
+                defaultRaceMapSettings.isShowDouglasPeuckerPoints());
+        
+        raceMap = new RaceMap(raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter, timer,
+                competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
                 /* showHeaderPanel */ true) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
-
             @Override
             public void onResize() {
                 super.onResize();
@@ -275,12 +234,11 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
                     @Override
                     public void execute() {
                         // Show/hide the leaderboard panels toggle button text based on the race map height
-                        leaderboardAndMapViewer.setLeftComponentToggleButtonTextVisibilityAndDraggerPosition(
-                                raceMap.getOffsetHeight() > 400);
+                        leaderboardAndMapViewer.setLeftComponentToggleButtonTextVisibilityAndDraggerPosition(raceMap.getOffsetHeight() > 400);
                     }
                 });
             }
-
+            
             @Override
             protected String getLeftControlsIndentStyle() {
                 // Calculate style name for left control indent based on race map height an leaderboard panel visibility
@@ -293,8 +251,36 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
                 return super.getLeftControlsIndentStyle();
             }
         };
-        CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionProvider,
-                stringMessages, raceMap, new LeaderboardFetcher() {
+
+        if (GwtHttpRequestUtils.getStringParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, null) == null) {
+            sailingService.getRegattaByName(selectedRaceIdentifier.getRegattaName(), new AsyncCallback<RegattaDTO>() {
+                @Override
+                public void onSuccess(RegattaDTO regattaDTO) {
+                    Distance buoyZoneRadiusInMeters = regattaDTO.getCalculatedBuoyZoneRadius();
+                    RaceMapSettings existingMapSettings = raceMap.getSettings();
+                    final RaceMapSettings newRaceMapSettings = new RaceMapSettings(
+                            existingMapSettings.getZoomSettings(), existingMapSettings.getHelpLinesSettings(),
+                            existingMapSettings.getTransparentHoverlines(),
+                            existingMapSettings.getHoverlineStrokeWeight(),
+                            existingMapSettings.getTailLengthInMilliseconds(), existingMapSettings.isWindUp(),
+                            buoyZoneRadiusInMeters, existingMapSettings.isShowOnlySelectedCompetitors(),
+                            existingMapSettings.isShowSelectedCompetitorsInfo(),
+                            existingMapSettings.isShowWindStreamletColors(),
+                            existingMapSettings.isShowWindStreamletOverlay(),
+                            existingMapSettings.isShowSimulationOverlay(), existingMapSettings.isShowMapControls(),
+                            existingMapSettings.getManeuverTypesToShow(),
+                            existingMapSettings.isShowDouglasPeuckerPoints());
+                    raceMap.updateSettings(newRaceMapSettings);
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+            });
+        }
+
+        CompetitorFilterPanel competitorSearchTextBox = new CompetitorFilterPanel(competitorSelectionProvider, stringMessages, raceMap,
+                new LeaderboardFetcher() {
                     @Override
                     public LeaderboardDTO getLeaderboard() {
                         return leaderboardPanel.getLeaderboard();
@@ -307,23 +293,20 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
-        leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox,
-                isScreenLargeEnoughToInitiallyDisplayLeaderboard);
+        leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox, isScreenLargeEnoughToInitiallyDisplayLeaderboard);
         components.add(leaderboardPanel);
 
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
         leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel,
-                isScreenLargeEnoughToInitiallyDisplayLeaderboard, raceMap, userService,
-                showChartMarkEditMediaButtonsAndVideo); // initializes the raceMap field
+        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel, isScreenLargeEnoughToInitiallyDisplayLeaderboard,
+                raceMap, userService, showChartMarkEditMediaButtonsAndVideo); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
-        // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed);
-        // pass on the parameters to the LeaderboardPanel and see what it does with it
+        // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
         if (getPerspectiveSettings().getActiveCompetitorsFilterSetName() != null) {
-            for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : competitorSearchTextBox
-                    .getCompetitorsFilterSets().getFilterSets()) {
+            for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : competitorSearchTextBox.getCompetitorsFilterSets()
+                    .getFilterSets()) {
                 if (filterSet.getName().equals(getPerspectiveSettings().getActiveCompetitorsFilterSetName())) {
                     competitorSearchTextBox.getCompetitorsFilterSets().setActiveFilterSet(filterSet);
                     break;
@@ -339,7 +322,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(racetimePanel);
 
         this.timePanelWrapper = createTimePanelLayoutWrapper();
-
+  
         boolean advanceTimePanelEnabled = true;
         if (advanceTimePanelEnabled) {
             manageTimePanelToggleButton(advanceTimePanelEnabled);
@@ -352,7 +335,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
 
         initWidget(dockPanel);
     }
-
+    
     /**
      * @param event
      *            an optional event; may be <code>null</code> or else can be used to show some context information in
