@@ -43,11 +43,9 @@ public abstract class CustomizableFilterablePanel<T> extends AbstractFilterableP
     @Override
     public void filter() {
         super.filter();
-
         for (Widget widget: widgetsFilterMap.keySet()) {
             filtered.setList(Util.createList(widgetsFilterMap.get(widget).applyFilter(Arrays.asList(getFilterValue(widget)), filtered.getList())));
         }
-
         filtered.refresh();
         sort();
     }
@@ -56,5 +54,4 @@ public abstract class CustomizableFilterablePanel<T> extends AbstractFilterableP
         filtered.getList().clear();
         Util.addAll(all.getList(), filtered.getList());
     }
-
 }
