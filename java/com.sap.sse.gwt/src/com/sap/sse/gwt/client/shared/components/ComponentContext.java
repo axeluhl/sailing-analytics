@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import com.google.gwt.user.client.Window;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.gwt.client.shared.defaultsettings.DefaultSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
@@ -29,6 +30,21 @@ public class ComponentContext {
         PerspectiveCompositeSettings<?> newRootPerspectiveSettings = updatePerspectiveLifecycleWithAllSettings(parentPerspective, component, newDefaultSettings);
         storeNewDefaultSettings(newRootPerspectiveSettings);
     }
+    
+    //TODO use this method to get initial default settings instead of Lifecycle.createDefaultSettings,
+    //or call it directly in Lifecycle.createDefaultSettings
+    //or something different
+    public<T extends Settings> T getDefaultSettingsForComponent(Component<T> component) {
+        GenericSerializableSettings defaultSettings = defaultSettingsStorage.getDefaultSettings();
+        //TODO traverse settings tree to find component id with its settings
+        T componentSettings = null;
+        return componentSettings;
+    }
+    
+//    @SuppressWarnings("unchecked")
+//    public<S extends Settings> S getDefaultSettingsForComponent(Component<S> component) {
+//        return (S) component.getComponentTreeNodeInfo().getParentPerspective().getSettings().findSettingsByComponentId(component.getId());
+//    }
     
     private void storeNewDefaultSettings(PerspectiveCompositeSettings<?> newRootPerspectiveSettings) {
         // TODO implement storage pipeline
@@ -62,11 +78,6 @@ public class ComponentContext {
     
     public Perspective<? extends Settings> getRootPerspective() {
         return rootPerspective;
-    }
-
-    @SuppressWarnings("unchecked")
-    public<S extends Settings> S getDefaultSettingsForComponent(Component<S> component) {
-        return (S) component.getComponentTreeNodeInfo().getParentPerspective().getSettings().findSettingsByComponentId(component.getId());
     }
 
 }
