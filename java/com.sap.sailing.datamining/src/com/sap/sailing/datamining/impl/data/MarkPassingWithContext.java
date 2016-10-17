@@ -36,6 +36,11 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     }
 
     @Override
+    public String getCompetitorSearchTag() {
+        return getCompetitor().getSearchTag();
+    }
+
+    @Override
     public Speed getSpeed() {
         return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(getMarkPassing().getTimePoint());
     }
