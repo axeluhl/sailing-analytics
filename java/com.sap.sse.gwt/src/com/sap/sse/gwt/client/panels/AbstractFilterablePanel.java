@@ -160,10 +160,14 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     
     public void filter() {
         filtered.getList().clear();
-        Util.addAll(getFilterer().applyFilter(Arrays.asList(getTextBox().getText().split(" ")), all.getList()),
-                filtered.getList());
+        retainElementsInFilteredThatPassFilter();
         filtered.refresh();
         sort();
+    }
+
+    protected void retainElementsInFilteredThatPassFilter() {
+        Util.addAll(getFilterer().applyFilter(Arrays.asList(getTextBox().getText().split(" ")), all.getList()),
+                filtered.getList());
     }
    
     protected void sort() {

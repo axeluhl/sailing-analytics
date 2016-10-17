@@ -39,23 +39,17 @@ public abstract class CustomizableFilterablePanel<T> extends AbstractFilterableP
     }
 
     @Override
-    public void filter() {
-        super.filter();
-        boolean needRefresh = false;
+    protected void retainElementsInFilteredThatPassFilter() {
+        super.retainElementsInFilteredThatPassFilter();
         for (final Iterator<T> i = filtered.getList().iterator(); i.hasNext(); ) {
             final T t = i.next();
             for (final Filter<T> filter : filters) {
                 if (!filter.matches(t)) {
                     i.remove();
-                    needRefresh = true;
                     break;
                 }
             }
         }
-        if (needRefresh) {
-            filtered.refresh();
-        }
-        // no additional sorting required because super.filter() has already sorted all entries, and removing will leave sorting stable
     }
 
     public void clearFilter() {
