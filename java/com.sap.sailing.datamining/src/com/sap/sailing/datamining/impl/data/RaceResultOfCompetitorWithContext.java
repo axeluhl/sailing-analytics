@@ -62,6 +62,11 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
+    public String getCompetitorSearchTag() {
+        return getCompetitor().getSearchTag();
+    }
+
+    @Override
     public double getRelativeRank() {
         Leaderboard leaderboard = getLeaderboard();
         final TimePoint now = MillisecondsTimePoint.now();
@@ -71,6 +76,15 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
                 competitorCount - points : points;
         final double result = relativeLowPoints / competitorCount;
         return result;
+    }
+    
+    @Override
+    public double getAbsoluteRank() {
+        try {
+            return getLeaderboard().getTotalRankOfCompetitor(competitor, MillisecondsTimePoint.now());
+        } catch (NoWindException e) {
+            throw new IllegalStateException("No wind calculating the absoulte rank", e);
+        }
     }
 
     @Override
