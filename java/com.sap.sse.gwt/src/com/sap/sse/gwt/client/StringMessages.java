@@ -26,4 +26,7 @@ public interface StringMessages extends Messages {
     //TODO add to properties files
     @DefaultMessage("Make default")
     String makeDefault();
+  //TODO add to properties files
+    @DefaultMessage("Restore default")
+    String restoreDefault();
 }

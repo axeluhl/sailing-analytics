@@ -83,6 +83,17 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
                 component.getComponentTreeNodeInfo().getComponentContext().makeSettingsDefault(component, getResult());
             }
         });
+        
+        Button restoreDefaultButton = new Button(stringMessages.restoreDefault());
+        restoreDefaultButton.getElement().getStyle().setMargin(3, Unit.PX);
+        restoreDefaultButton.ensureDebugId("RestoreDefaultButton");
+        getLeftButtonPannel().add(restoreDefaultButton);
+        restoreDefaultButton.addClickHandler(new ClickHandler() {
+            public void onClick(ClickEvent event) {
+                //TODO apply settings - add update method?
+                SettingsType defaultSettings = component.getComponentTreeNodeInfo().getComponentContext().getDefaultSettingsForComponent(component);
+            }
+        });
     }
 
     @Override

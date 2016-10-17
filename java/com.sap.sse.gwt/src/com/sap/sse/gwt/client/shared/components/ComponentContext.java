@@ -64,4 +64,9 @@ public class ComponentContext {
         return rootPerspective;
     }
 
+    @SuppressWarnings("unchecked")
+    public<S extends Settings> S getDefaultSettingsForComponent(Component<S> component) {
+        return (S) component.getComponentTreeNodeInfo().getParentPerspective().getSettings().findSettingsByComponentId(component.getId());
+    }
+
 }

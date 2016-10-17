@@ -1,19 +1,15 @@
 package com.sap.sse.gwt.client.shared.defaultsettings;
 
-import java.io.Serializable;
-
 import com.sap.sse.gwt.client.shared.components.ComponentContext;
 
 public class DefaultSettingsStorage {
     
     private final ComponentContext componentContext;
-    private final Serializable rootPerspectiveId;
     
 //    private final SettingsToJsonSerializer serializer = new SettingsToJsonSerializer();
 
     public DefaultSettingsStorage(ComponentContext componentContext) {
         this.componentContext = componentContext;
-        this.rootPerspectiveId = componentContext.getRootPerspective().getId();
     }
     
     public void storeDefaultSettings() {
