@@ -291,12 +291,10 @@ public class Util {
     
     public static <T> List<T> createList(Iterable<T> iterable) {
         List<T> list = new ArrayList<>();
-        
         Iterator<T> iterator = iterable.iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             list.add(iterator.next());
         }
-        
         return list;
     }
 
