@@ -109,7 +109,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
 
     public void setRegattaFilterValue(String regattaName) {
         for (int i = 0; i < listBoxRegattas.getItemCount(); i++) {
-            if (listBoxRegattas.getItemText(i).equals(regattaName)) {
+            if (listBoxRegattas.getValue(i).equals(regattaName)) {
                 listBoxRegattas.setSelectedIndex(i);
                 // Firing change event on combobox to filter
                 DomEvent.fireNativeEvent(Document.get().createChangeEvent(), listBoxRegattas);
@@ -149,8 +149,7 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
         filterPanel.add(lblFilterRaces);
         filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
 
-        filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceTable,
-                raceList) {            
+        filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceTable, raceList) {            
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();
