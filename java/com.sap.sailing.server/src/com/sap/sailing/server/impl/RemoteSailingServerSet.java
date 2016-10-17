@@ -74,34 +74,23 @@ public class RemoteSailingServerSet {
     }
 
     public void clear() {
-        LockUtil.executeWithWriteLock(lock, new Runnable() {
-            @Override
-            public void run() {
-                remoteSailingServers.clear();
-                cachedEventsForRemoteSailingServers.clear();
-            }
+        LockUtil.executeWithWriteLock(lock, () -> {
+            remoteSailingServers.clear();
+            cachedEventsForRemoteSailingServers.clear();
         });
     }
 
     public void add(RemoteSailingServerReference remoteSailingServerReference) {
-        LockUtil.executeWithWriteLock(lock, new Runnable() {
-
-            @Override
-            public void run() {
-                remoteSailingServers.put(remoteSailingServerReference.getName(), remoteSailingServerReference);
-                triggerAsynchronousEventCacheUpdate(remoteSailingServerReference);
-            }
+        LockUtil.executeWithWriteLock(lock, () -> {
+            remoteSailingServers.put(remoteSailingServerReference.getName(), remoteSailingServerReference);
+            triggerAsynchronousEventCacheUpdate(remoteSailingServerReference);
         });
     }
 
     private void updateRemoteSailingServerReferenceEventCaches() {
-        LockUtil.executeWithReadLock(lock, new Runnable() {
-            
-            @Override
-            public void run() {
-                for (RemoteSailingServerReference ref : remoteSailingServers.values()) {
-                    triggerAsynchronousEventCacheUpdate(ref);
-                }
+        LockUtil.executeWithReadLock(lock, () -> {
+            for (RemoteSailingServerReference ref : remoteSailingServers.values()) {
+                triggerAsynchronousEventCacheUpdate(ref);
             }
         });
     }
@@ -115,12 +104,7 @@ public class RemoteSailingServerSet {
     }
 
     private void triggerAsynchronousEventCacheUpdate(final RemoteSailingServerReference ref) {
-        new Thread("Event Cache Updater for remote server " + ref) {
-            @Override
-            public void run() {
-                updateRemoteServerEventCacheSynchronously(ref);
-            }
-        }.start();
+        new Thread(() -> updateRemoteServerEventCacheSynchronously(ref), "Event Cache Updater for remote server " + ref).start();
     }
 
     private Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
@@ -156,19 +140,13 @@ public class RemoteSailingServerSet {
                     e);
             result = new Util.Pair<Iterable<EventBase>, Exception>(/* events */ null, e);
         }
-
         final Pair<Iterable<EventBase>, Exception> finalResult = result;
-
-        LockUtil.executeWithWriteLock(lock, new Runnable() {
-
-            @Override
-            public void run() {
-                // check that the server was not removed while no lock was held
-                if (remoteSailingServers.containsValue(ref)) {
-                    cachedEventsForRemoteSailingServers.put(ref, finalResult);
-                }else{
-                    logger.fine("Omitted update for " + ref + " as it was removed");
-                }
+        LockUtil.executeWithWriteLock(lock, () -> {
+            // check that the server was not removed while no lock was held
+            if (remoteSailingServers.containsValue(ref)) {
+                cachedEventsForRemoteSailingServers.put(ref, finalResult);
+            } else {
+                logger.fine("Omitted update for " + ref + " as it was removed");
             }
         });
         return result;
@@ -225,8 +203,7 @@ public class RemoteSailingServerSet {
         List<RemoteSailingServerReference> result = new ArrayList<>();
         LockUtil.lockForRead(lock);
         try {
-            for (Map.Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> e : cachedEventsForRemoteSailingServers
-                    .entrySet()) {
+            for (Map.Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> e : cachedEventsForRemoteSailingServers.entrySet()) {
                 if (e.getValue().getB() == null) {
                     // no exception; reference considered live
                     result.add(e.getKey());
