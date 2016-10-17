@@ -17,6 +17,7 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     private final MarkPassingManeuver maneuver;
     
     private Double absoluteRank;
+    private boolean rankHasBeenInitialized;
 
     public MarkPassingWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, MarkPassingManeuver maneuver) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
@@ -62,15 +63,17 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     public Double getRelativeRank() {
         Leaderboard leaderboard = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getLeaderboardContext().getLeaderboard();
         double competitorCount = Util.size(leaderboard.getCompetitors());
-        return getAbsoluteRank() / competitorCount;
+        return getAbsoluteRank() == null ? null : getAbsoluteRank() / competitorCount;
     }
 
     @Override
     public Double getAbsoluteRank() {
-        if (absoluteRank == null) {
+        if (!rankHasBeenInitialized) {
             TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
             Competitor competitor = getTrackedLegOfCompetitorContext().getCompetitor();
-            absoluteRank = Double.valueOf(trackedRace.getRank(competitor, getManeuver().getTimePoint()));
+            int rank = trackedRace.getRank(competitor, getManeuver().getTimePoint());
+            absoluteRank = rank == 0 ? null : Double.valueOf(rank);
+            rankHasBeenInitialized = true;
         }
         return absoluteRank;
     }

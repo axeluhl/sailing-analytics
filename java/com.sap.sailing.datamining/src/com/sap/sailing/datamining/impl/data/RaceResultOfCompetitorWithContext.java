@@ -157,19 +157,22 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
-    public double getRelativeRank() {
+    public Double getRelativeRank() {
         Leaderboard leaderboard = getLeaderboard();
         final TimePoint now = MillisecondsTimePoint.now();
         double competitorCount = Util.size(leaderboard.getCompetitors());
-        double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
-        double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ?
-                competitorCount - points : points;
-        final double result = relativeLowPoints / competitorCount;
-        return result;
+        Double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
+        if (points != null) {
+            double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ? competitorCount - points
+                    : points;
+            final double result = relativeLowPoints / competitorCount;
+            return result;
+        }
+        return null;
     }
     
     @Override
-    public double getAbsoluteRank() {
+    public Double getAbsoluteRank() {
         return getLeaderboard().getTotalPoints(competitor, raceColumn, MillisecondsTimePoint.now());
     }
 

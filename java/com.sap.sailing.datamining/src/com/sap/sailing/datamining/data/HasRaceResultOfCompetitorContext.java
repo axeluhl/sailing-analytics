@@ -26,10 +26,10 @@ public interface HasRaceResultOfCompetitorContext {
      * 0 means the competitor won the race, 1 means the competitor ranked last
      */
     @Statistic(messageKey="RelativeScore", ordinal=1, resultDecimals=2)
-    public double getRelativeRank();
+    public Double getRelativeRank();
     
     @Statistic(messageKey="AbsoluteRank", ordinal=2, resultDecimals=2)
-    public double getAbsoluteRank();
+    public Double getAbsoluteRank();
     
     @Statistic(messageKey="NumberOfPodiumFinish", ordinal=3)
     public Boolean isPodiumFinish();

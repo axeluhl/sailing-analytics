@@ -18,7 +18,9 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     private final Competitor competitor;
 
     private Double rankAtStart;
+    private boolean isRankAtStartInitialized;
     private Double rankAtFinish;
+    private boolean isRankAtFinishInitialized;
 
     public TrackedLegOfCompetitorWithContext(HasTrackedLegContext trackedLegContext, TrackedLegOfCompetitor trackedLegOfCompetitor) {
         this.trackedLegContext = trackedLegContext;
@@ -54,13 +56,17 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     
     @Override
     public Double getRankGainsOrLosses() {
-        return getRankAtStart() - getRankAtFinish();
+        Double rankAtStart = getRankAtStart();
+        Double rankAtFinish = getRankAtFinish();
+        return rankAtStart != null && rankAtFinish != null ? rankAtStart - rankAtFinish : null;
     }
     
     private Double getRankAtStart() {
-        if (rankAtStart == null) {
+        if (!isRankAtStartInitialized) {
             TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-            rankAtStart = Double.valueOf(trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime()));
+            int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
+            rankAtStart = rank == 0 ? null : Double.valueOf(rank);
+            isRankAtStartInitialized = true;
         }
         return rankAtStart;
     }
@@ -69,7 +75,8 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     public Double getRelativeRank() {
         Leaderboard leaderboard = getTrackedLegContext().getTrackedRaceContext().getLeaderboardContext().getLeaderboard();
         double competitorCount = Util.size(leaderboard.getCompetitors());
-        return getRankAtFinish() / competitorCount;
+        Double rankAtFinish = getRankAtFinish();
+        return rankAtFinish == null ? null : rankAtFinish / competitorCount;
     }
 
     @Override
@@ -78,9 +85,11 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     }
     
     private Double getRankAtFinish() {
-        if (rankAtStart == null) {
+        if (!isRankAtFinishInitialized) {
             TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-            rankAtFinish = Double.valueOf(trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getFinishTime()));
+            int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getFinishTime());
+            rankAtFinish = rank == 0 ? null : Double.valueOf(rank);
+            isRankAtFinishInitialized = true;
         }
         return rankAtFinish;
     }
