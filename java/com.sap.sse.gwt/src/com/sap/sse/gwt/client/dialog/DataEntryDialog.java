@@ -22,6 +22,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
@@ -63,7 +64,9 @@ public abstract class DataEntryDialog<T> {
     private final Button cancelButton;
     private final Label statusLabel;
     private final FlowPanel panelForAdditionalWidget;
-    private final FlowPanel buttonPanel;
+    private final DockPanel buttonPanel;
+    private final FlowPanel rightButtonPanel;
+    private final FlowPanel leftButtonPanel;
 
     public static interface Validator<T> {
         /**
@@ -126,14 +129,20 @@ public abstract class DataEntryDialog<T> {
         panelForAdditionalWidget = new FlowPanel();
         panelForAdditionalWidget.setWidth("100%");
         dialogFPanel.add(panelForAdditionalWidget);
-        buttonPanel = new FlowPanel();
+        buttonPanel = new DockPanel();
+        buttonPanel.setWidth("100%");
         dialogFPanel.add(buttonPanel);
-        buttonPanel.setStyleName("additionalWidgets");
-        buttonPanel.add(okButton);
+        rightButtonPanel = new FlowPanel();
+        leftButtonPanel = new FlowPanel();
+        leftButtonPanel.setStyleName("additionalWidgetsLeft");
+        rightButtonPanel.setStyleName("additionalWidgetsRight");
+        rightButtonPanel.add(okButton);
+        buttonPanel.add(rightButtonPanel, DockPanel.EAST);
+        buttonPanel.add(leftButtonPanel, DockPanel.WEST);
         cancelButton = new Button(cancelButtonName);
         cancelButton.getElement().getStyle().setMargin(3, Unit.PX);
         cancelButton.ensureDebugId("CancelButton");
-        buttonPanel.add(cancelButton);
+        rightButtonPanel.add(cancelButton);
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -591,7 +600,11 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.addAutoHidePartner(element);
     }
     
-    protected FlowPanel getButtonPannel() {
-        return buttonPanel;
+    protected FlowPanel getLeftButtonPannel() {
+        return leftButtonPanel;
+    }
+    
+    protected FlowPanel getRightButtonPannel() {
+        return rightButtonPanel;
     }
 }

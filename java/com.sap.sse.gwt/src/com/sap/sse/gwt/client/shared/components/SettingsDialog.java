@@ -73,10 +73,10 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
                     });
         this.settingsDialogComponent = dialogComponent;
         
-        Button makeDefaultButton = new Button("");
+        Button makeDefaultButton = new Button(stringMessages.makeDefault());
         makeDefaultButton.getElement().getStyle().setMargin(3, Unit.PX);
         makeDefaultButton.ensureDebugId("MakeDefaultButton");
-        getButtonPannel().add(makeDefaultButton);
+        getLeftButtonPannel().add(makeDefaultButton);
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 //TODO send notification

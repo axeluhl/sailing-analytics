@@ -244,6 +244,7 @@ public class RaceBoardPanel extends AbstractRootPerspectiveComposite<RaceBoardPe
         raceMap.getLeftHeaderPanel().add(raceInformationHeader);
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
+        addChildComponent(raceMap);
 
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
