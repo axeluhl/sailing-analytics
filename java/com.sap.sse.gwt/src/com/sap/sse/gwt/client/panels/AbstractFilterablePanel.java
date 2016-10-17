@@ -54,6 +54,12 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *            the sequence of all objects that may be displayed in the table and from which the filter may choose.
      *            This panel keeps a copy, so modifications to the <code>all</code> object do not reflect in the table
      *            contents. Use {@link #updateAll(Iterable)} instead to update the sequence of available objects.
+     * @param drawTextBox
+     *            if {@code true}, the default text box will be shown that can be used to provide the filter text; if {@code false},
+     *            the box may optionally be added later using the {@link #addDefaultTextBox()} method. This way, subclasses may choose
+     *            to add other filter elements before the default text filter box. Filtering will still use the text box contents,
+     *            even if the box is ultimately not shown; but under normal circumstances the text box will be empty in this case,
+     *            not making filtering any stricter.
      */
     public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered, boolean drawTextBox) {
         setSpacing(5);
@@ -70,7 +76,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     }
     
     public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
-        this(all, display, filtered, true);
+        this(all, display, filtered, /* show default filter text box */ true);
     }
     
     private void setAll(Iterable<T> all) {

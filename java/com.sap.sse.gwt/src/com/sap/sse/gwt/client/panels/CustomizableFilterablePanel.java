@@ -25,7 +25,7 @@ public abstract class CustomizableFilterablePanel<T> extends AbstractFilterableP
     private Map<Widget, AbstractListFilter<T>> widgetsFilterMap;
 
     public CustomizableFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, ListDataProvider<T> filtered) {
-        super(all, display, filtered, false);
+        super(all, display, filtered, /* show default filter text box */ false);
         this.widgetsFilterMap = new HashMap<>();
     }
 
@@ -43,7 +43,7 @@ public abstract class CustomizableFilterablePanel<T> extends AbstractFilterableP
     @Override
     public void filter() {
         super.filter();
-        for (Widget widget: widgetsFilterMap.keySet()) {
+        for (Widget widget : widgetsFilterMap.keySet()) {
             filtered.setList(Util.createList(widgetsFilterMap.get(widget).applyFilter(Arrays.asList(getFilterValue(widget)), filtered.getList())));
         }
         filtered.refresh();
