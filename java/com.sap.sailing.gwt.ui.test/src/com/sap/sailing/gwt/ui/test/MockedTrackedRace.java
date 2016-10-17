@@ -50,6 +50,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
@@ -352,7 +353,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
+    public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint, MarkPositionAtTimePointCache markPositionCache) {
         return null;
     }
 
@@ -645,6 +646,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void addStartTimeChangedListener(StartTimeChangedListener listener) {
+    }
+
+    @Override
+    public void removeStartTimeChangedListener(StartTimeChangedListener listener) {
     }
 
     @Override

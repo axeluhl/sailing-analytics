@@ -619,6 +619,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
                 regatta.defaultCourseAreaUuid, configuration, regatta.useStartTimeInference,
+                regatta.controlTrackingFromStartAndFinishTimes,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -775,7 +776,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             public void ok(Triple<EventDTO, String, String> result) {
                 sailingService.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderboardName, result.getC(),
                         null,
-                        stringMessages.playStoreBuoypositioningApp(),
+                        stringMessages.playStoreBuoyPingerApp(),
                         getLocaleInfo(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {

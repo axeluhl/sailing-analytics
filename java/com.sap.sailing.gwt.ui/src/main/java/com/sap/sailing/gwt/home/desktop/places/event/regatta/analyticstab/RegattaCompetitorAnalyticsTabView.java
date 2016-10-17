@@ -24,7 +24,6 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDat
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
-import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
@@ -70,7 +69,7 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
             return;
         }
         
-        contentArea.setWidget(new Placeholder());
+        contentArea.setWidget(currentPresenter.getErrorAndBusyClientFactory().createBusyView());
         String regattaId = currentPresenter.getRegattaId();
 
         if (regattaId != null && !regattaId.isEmpty()) {

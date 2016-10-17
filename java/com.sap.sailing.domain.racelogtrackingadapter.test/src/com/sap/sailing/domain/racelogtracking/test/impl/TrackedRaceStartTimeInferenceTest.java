@@ -37,6 +37,7 @@ import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -82,9 +83,9 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         
         // test inference via race start/end time in racelog
         MillisecondsTimePoint startOfRaceInRaceLog = new MillisecondsTimePoint(10000);
-        TimePoint expectedStartOfTracking = startOfRaceInRaceLog.minus(Duration.ONE_MINUTE.times(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES));
+        TimePoint expectedStartOfTracking = startOfRaceInRaceLog.minus(TrackedRace.START_TRACKING_THIS_MUCH_BEFORE_RACE_START);
         MillisecondsTimePoint endOfRaceInRaceLog = new MillisecondsTimePoint(20000);
-        TimePoint expectedEndOfTracking = endOfRaceInRaceLog.plus(Duration.ONE_MINUTE.times(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES));
+        TimePoint expectedEndOfTracking = endOfRaceInRaceLog.plus(TrackedRace   .STOP_TRACKING_THIS_MUCH_AFTER_RACE_FINISH);
         assertEquals(expectedStartOfTracking, trackedRace.getStartOfTracking());
         assertEquals(expectedEndOfTracking, trackedRace.getEndOfTracking());
         

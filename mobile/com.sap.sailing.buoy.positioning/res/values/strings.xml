@@ -12,6 +12,7 @@
     <string name="reset_position">Reset Position</string>
     <string name="getting_marks">Getting race marks&#8230;</string>
     <string name="set">set</string>
+    <string name="unknown">n/a</string>
     <string name="not_set">not set</string>
     <string name="mark_list_accuracy">(Accurary ca. %1$sm)</string>
     <string name="buoy_detail_accuracy_ca" translatable="false">ca. %1$.02fm</string>

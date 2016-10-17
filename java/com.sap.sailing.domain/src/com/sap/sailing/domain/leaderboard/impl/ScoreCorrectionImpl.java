@@ -308,21 +308,6 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         return result;
     }
     
-    private boolean appliesAtStartOfRace(MaxPointsReason maxPointsReason) {
-        final boolean result;
-        switch (maxPointsReason) {
-        case DNS:
-        case DNC:
-        case OCS:
-        case BFD:
-            result = true;
-            break;
-        default:
-            result = false;
-        }
-        return result;
-    }
-
     @Override
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         return getAnnotatedMaxPointsReason(competitor, raceColumn, timePoint).getMaxPointsReason();
@@ -361,7 +346,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     }
 
     private boolean isMaxPointsReasonApplicable(MaxPointsReason maxPointsReason, TimePoint timePoint, RaceColumn raceColumn, Competitor competitor) {
-        return (appliesAtStartOfRace(maxPointsReason) && !isCertainlyBeforeRaceStart(timePoint, raceColumn, competitor))
+        return (maxPointsReason.isAppliesAtStartOfRace() && !isCertainlyBeforeRaceStart(timePoint, raceColumn, competitor))
                 || !isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor);
     }
 

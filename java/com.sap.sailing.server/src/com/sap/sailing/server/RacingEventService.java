@@ -189,7 +189,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @throws SocketException
      *             thrown, e.g., in case there is already another listener on the port requested
      */
-    void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination) throws Exception;
+    void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination);
 
     void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException;
 
@@ -311,12 +311,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * @param series the series must not have any {@link RaceColumn}s yet
+     * @param controlTrackingFromStartAndFinishTimes TODO
      */
     Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId,
-            boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor);
+            boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
     
-    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate, Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration, Iterable<? extends Series> series, boolean useStartTimeInference);
+    Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
+            Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
+            Iterable<? extends Series> series, boolean useStartTimeInference,
+            boolean controlTrackingFromStartAndFinishTimes);
 
     /**
      * Adds <code>raceDefinition</code> to the {@link Regatta} such that it will appear in {@link Regatta#getAllRaces()}
@@ -453,6 +457,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
+     * @param controlTrackingFromStartAndFinishTimes TODO
      * @param rankingMetricConstructor TODO
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
@@ -460,7 +465,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
             TimePoint startDate, TimePoint endDate, Serializable id, 
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, boolean useStartTimeInference, RankingMetricConstructor rankingMetricConstructor);
+            Serializable defaultCourseAreaId, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
 
     /**
      * @return map where keys are the toString() representation of the {@link RaceDefinition#getId() IDs} of races passed to
@@ -622,8 +627,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     /**
      * Gets the {@link RaceTracker} associated with a given {@link RegattaAndRaceIdentifier}. If the {@link RaceTracker}
-     * isn't available yet, the given callback will be informed asynchronously on registration of the RaceTracker in
-     * question.
+     * is already available, the {@code callback} is invoked immediately. If the {@link RaceTracker} isn't available
+     * yet, the given callback will be informed asynchronously on registration of the RaceTracker in question.
      */
     void getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier, Consumer<RaceTracker> callback);
 }

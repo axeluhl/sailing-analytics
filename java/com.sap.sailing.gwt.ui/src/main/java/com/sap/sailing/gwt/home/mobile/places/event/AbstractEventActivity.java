@@ -15,6 +15,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
+import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
@@ -89,7 +91,13 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         if(showQuickfinder && event.getType() == EventType.MULTI_REGATTA) {
             view.setQuickFinderValues(getRegattasByLeaderboardGroupName());
         } else if(showQuickfinder && event.getType() == EventType.SERIES_EVENT) {
-            view.setQuickFinderValues(event.getSeriesName(), event.getEventsOfSeries());
+            List<EventReferenceWithStateDTO> seriesEventToShow = new ArrayList<>(event.getEventsOfSeries().size());
+            for (EventReferenceWithStateDTO seriesEvent : event.getEventsOfSeries()) {
+                if(seriesEvent.getState() != EventState.PLANNED) {
+                    seriesEventToShow.add(seriesEvent);
+                }
+            }
+            view.setQuickFinderValues(event.getSeriesName(), seriesEventToShow);
         } else {
             view.hideQuickfinder();
         }

@@ -37,6 +37,9 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;enumeration value="SCP"/>
  *     &lt;enumeration value="ZFP"/>
  *     &lt;enumeration value="RTD"/>
+ *     &lt;enumeration value="UFD"/>
+ *     &lt;enumeration value="TLE"/>
+ *     &lt;enumeration value="STP"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -147,8 +150,21 @@ public enum IFBoatStatus {
      * Retired
      * 
      */
-    RTD;
+    RTD,
 
+    /** 
+     * Uniform Flag Disqualification 
+     */
+    UFD,
+    /**
+     *  Time limit Expired 
+     */
+    TLE,
+    /** 
+     * Standard Penalty by Race Committee; gives a certain number of penalty points on top of rank-inferred score 
+     */
+    STP;
+    
     public String value() {
         return name();
     }
