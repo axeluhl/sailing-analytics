@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -47,7 +46,6 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -55,6 +53,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.panels.CustomizableFilterablePanel;
+import com.sap.sse.gwt.client.panels.CustomizableFilterablePanel.Filter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -168,10 +167,10 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel
                 filterablePanelRaces.filter();
             }
         });
-        filterablePanelRaces.add(lblFilterByRegatta, listBoxRegattas, new AbstractListFilter<RaceDTO>() {
+        filterablePanelRaces.add(lblFilterByRegatta, listBoxRegattas, new Filter<RaceDTO>() {
             @Override
-            public Iterable<String> getStrings(RaceDTO t) {
-                return Arrays.asList(t.getRegattaName());
+            public boolean matches(RaceDTO t) {
+                return listBoxRegattas.getSelectedIndex() == 0 /* All */ || Util.equalsWithNull(listBoxRegattas.getSelectedValue(), t.getRegattaName());
             }
         });
 

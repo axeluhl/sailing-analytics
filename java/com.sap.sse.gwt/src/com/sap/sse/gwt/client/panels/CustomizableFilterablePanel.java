@@ -1,8 +1,8 @@
 package com.sap.sse.gwt.client.panels;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.filter.AbstractListFilter;
 
 /**
  * Customizable filter panel which allows to create a flexible filter panel with various number of filter inputs (e.g.
@@ -21,33 +20,42 @@ import com.sap.sse.common.filter.AbstractListFilter;
  * 
  */
 public abstract class CustomizableFilterablePanel<T> extends AbstractFilterablePanel<T> {
+    public static interface Filter<T> {
+        boolean matches(T t);
+    }
 
-    private Map<Widget, AbstractListFilter<T>> widgetsFilterMap;
+    private Set<Filter<T>> filters;
 
     public CustomizableFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, ListDataProvider<T> filtered) {
         super(all, display, filtered, /* show default filter text box */ false);
-        this.widgetsFilterMap = new HashMap<>();
+        this.filters = new HashSet<>();
     }
 
-    private String getFilterValue(Widget widget) {
-        return widget.getElement().getPropertyString("value");
-    }
-
-    public void add(Label label, Widget widget, AbstractListFilter<T> filterer) {
-        widgetsFilterMap.put(widget, filterer);
+    public void add(Label label, Widget widget, Filter<T> filter) {
         add(label);
         add(widget);
+        filters.add(filter);
         setCellVerticalAlignment(label, HasVerticalAlignment.ALIGN_MIDDLE);
     }
 
     @Override
     public void filter() {
         super.filter();
-        for (Widget widget : widgetsFilterMap.keySet()) {
-            filtered.setList(Util.createList(widgetsFilterMap.get(widget).applyFilter(Arrays.asList(getFilterValue(widget)), filtered.getList())));
+        boolean needRefresh = false;
+        for (final Iterator<T> i = filtered.getList().iterator(); i.hasNext(); ) {
+            final T t = i.next();
+            for (final Filter<T> filter : filters) {
+                if (!filter.matches(t)) {
+                    i.remove();
+                    needRefresh = true;
+                    break;
+                }
+            }
         }
-        filtered.refresh();
-        sort();
+        if (needRefresh) {
+            filtered.refresh();
+        }
+        // no additional sorting required because super.filter() has already sorted all entries, and removing will leave sorting stable
     }
 
     public void clearFilter() {
