@@ -80,7 +80,7 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
             }
             Collections.sort(fakeSeriesEvents, new Comparator<Event>() {
                 public int compare(Event e1, Event e2) {
-                    return e1.getStartDate().compareTo(e2.getEndDate());
+                    return e2.getStartDate().compareTo(e1.getStartDate());
                 }
             });
             for(Event eventInSeries: fakeSeriesEvents) {
