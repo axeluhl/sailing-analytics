@@ -13,11 +13,17 @@ public interface HasRaceResultOfCompetitorContext {
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
     
+    @Dimension(messageKey="CompetitorSearchTag", ordinal=11) // TODO Clean me: Move Dimension to Competitor when possible
+    public String getCompetitorSearchTag();
+    
     /**
      * 0 means the competitor won the race, 1 means the competitor ranked last
      */
-    @Statistic(messageKey="RelativeScoreInRace", ordinal=1, resultDecimals=2)
+    @Statistic(messageKey="RelativeScore", ordinal=1, resultDecimals=2)
     public double getRelativeRank();
+    
+    @Statistic(messageKey="AbsoluteRank", ordinal=2, resultDecimals=2)
+    public double getAbsoluteRank();
 
     @Dimension(messageKey="WindSpeedInBeaufort")
     int getAverageWindSpeedInRoundedBeaufort();
@@ -25,9 +31,9 @@ public interface HasRaceResultOfCompetitorContext {
     @Dimension(messageKey="Regatta")
     String getRegattaName();
     
-    @Statistic(messageKey="NumberOfPodiumFinish", ordinal=2)
+    @Statistic(messageKey="NumberOfPodiumFinish", ordinal=3)
     public Boolean isPodiumFinish();
     
-    @Statistic(messageKey="NumberOfWins", ordinal=3)
+    @Statistic(messageKey="NumberOfWins", ordinal=4)
     public Boolean isWin();
 }
