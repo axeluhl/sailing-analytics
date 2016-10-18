@@ -33,10 +33,10 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -65,8 +65,8 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.Component;
 
 /**
- * AbstractCompetitorChart is a chart that can show one sort of competitor data (e.g. current speed over ground, windward
- * distance to leader) for different races in a chart.
+ * AbstractCompetitorChart is a chart that can show one sort of competitor data (e.g. current speed over ground,
+ * windward distance to leader) for different races in a chart.
  * 
  * When calling the constructor a chart is created that creates a final amount of series (so the maximum number of
  * competitors cannot be changed in one chart) which are connected to competitors, when the sailing service returns the
@@ -100,17 +100,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     
     private final TimingHolder primary = new TimingHolder();
     private final TimingHolder secondary = new TimingHolder();
-    
-    protected AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
-            Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, Button settingsButton,
-            final StringMessages stringMessages, ErrorReporter errorReporter, DetailType firstDetailType,
-            DetailType secondDetailType, boolean compactChart, boolean allowTimeAdjust) {
-        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer,
-                timeRangeWithZoomProvider, stringMessages, errorReporter, firstDetailType, secondDetailType,
-                compactChart, allowTimeAdjust,
-                null, null);
-    }
 
     AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
@@ -195,15 +184,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
             }
         }));
-        timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
-
-        if (compactChart) {
-            chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(20)
-                    .setOption("legend/margin", 2).setOption("title/margin", 5).setChartSubtitle(null).getXAxis()
-                    .setAxisTitleText(null);
-            chart.setTitle("");
-        }
-
+        timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5)
+                .setDashStyle(DashStyle.SOLID);
         return chart;
     }
 
@@ -483,10 +465,36 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         if (visible) {
-            // Workaround for a highcharts bug: Set a chart title, overwrite the title, 
-            // switch chart to invisible and visible again -> the old title appears
-            chart.setTitle(hasSecondYAxis() ? null : new ChartTitle().setText(chartTitleFromDetailTypes()), null);
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+
+                @Override
+                public void execute() {
+                    // Workaround for a highcharts bug: Set a chart title, overwrite the title,
+                    // switch chart to invisible and visible again -> the old title appears
+                    if (compactChart) {
+                        applyCompactTitle(chartTitleFromDetailTypes());
+                    } else {
+                        chart.setTitle(hasSecondYAxis() ? null : new ChartTitle().setText(chartTitleFromDetailTypes()),
+                                null);
+                    }
+
+                    chart.setSizeToMatchContainer();
+                    // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox
+                    // positions
+                    // (nativeAdjustCheckboxPosition)
+                    // in the BaseChart class would not be called
+                    chart.redraw();
+                }
+            });
         }
+
+    }
+
+    private void applyCompactTitle(String title) {
+        chart.setSpacingLeft(10).setSpacingRight(10).setSpacingTop(20).setOption("legend/margin", 2)
+                .setChartSubtitle(null).getXAxis().setAxisTitleText(null);
+        chart.setTitle(hasSecondYAxis() ? null : new ChartTitle().setText(title).setOption("floating",true), null);
+        chart.redraw();
     }
 
     private int yAxisIndex(DetailType seriesDetailType) {
@@ -610,12 +618,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             final String unitY1 = hasSecondYAxis() ? DetailTypeFormatter.getUnit(getSelectedSecondDetailType()) : null;
             final String labelY1 = hasSecondYAxis() ? (unitY1.isEmpty() ? "" : "[" + unitY1 + "]") : null;
 
-            chart.setTitle(hasSecondYAxis() ? null : new ChartTitle().setText(chartTitleFromDetailTypes()), null);
+            if (compactChart) {
+                applyCompactTitle(chartTitleFromDetailTypes());
+            } else {
+                chart.setTitle(hasSecondYAxis() ? null : new ChartTitle().setText(chartTitleFromDetailTypes()), null);
+            }
             if (hasSecondYAxis()) {
-                chart.getYAxis(0).setAxisTitleText(
-                        DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
-                chart.getYAxis(1).setAxisTitleText(
-                        DetailTypeFormatter.format(selectedSecondDetailType) + " " + labelY1);
+                chart.getYAxis(0).setAxisTitleText(DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
+                chart.getYAxis(1)
+                        .setAxisTitleText(DetailTypeFormatter.format(selectedSecondDetailType) + " " + labelY1);
             } else {
                 chart.getYAxis(0).setAxisTitleText(labelY0);
             }
@@ -695,6 +706,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 || detailType == DetailType.GAP_TO_LEADER_IN_SECONDS || detailType == DetailType.RACE_RANK
                 || detailType == DetailType.REGATTA_RANK || detailType == DetailType.OVERALL_RANK;
     }
+
     /**
      * Checks the relation of the mark passings to the selection range.
      * 
@@ -748,8 +760,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         switch (timer.getPlayMode()) {
         case Live: {
             // is date before first cache entry or is cache empty?
-            if (primary.timeOfEarliestRequestInMillis == null || newTime.getTime() < primary.timeOfEarliestRequestInMillis) {
-                GWT.log("ouside first request time");
+            if (primary.timeOfEarliestRequestInMillis == null
+                    || newTime.getTime() < primary.timeOfEarliestRequestInMillis) {
                 updateChart(timeRangeWithZoomProvider.getFromTime(), newTime, /* append */true);
             } else if (newTime.getTime() > primary.timeOfLatestRequestInMillis) {
                 updateChart(new Date(primary.timeOfLatestRequestInMillis), timeRangeWithZoomProvider.getToTime(), /* append */true);
