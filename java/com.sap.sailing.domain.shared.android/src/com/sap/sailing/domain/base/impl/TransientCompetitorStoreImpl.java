@@ -250,7 +250,7 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
                               c.getFlagImage() == null ? null : c.getFlagImage().toString(),
                             new BoatDTO(c.getBoat().getName(), c.getBoat().getSailID(), c.getBoat().getColor()),  
                             new BoatClassDTO(c.getBoat().getBoatClass()
-                            .getName(), c.getBoat().getBoatClass().getDisplayName(), c.getBoat().getBoatClass().getHullLength().getMeters()),
+                            .getName(), c.getBoat().getBoatClass().getDisplayName(), c.getBoat().getBoatClass().getHullLength()),
                             c.getTimeOnTimeFactor(), c.getTimeOnDistanceAllowancePerNauticalMile(), c.getSearchTag());
                     weakCompetitorDTOCache.put(c, competitorDTO);
                 }
