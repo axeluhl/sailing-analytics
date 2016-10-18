@@ -437,9 +437,9 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         EventDTO result = null;
         int selIndex = sailingEventsListBox.getSelectedIndex();
         if (selIndex > 0) { // the zero index represents the 'no selection' text
-            String itemText = sailingEventsListBox.getItemText(selIndex);
+            String itemValue = sailingEventsListBox.getValue(selIndex);
             for (EventDTO eventDTO : existingEvents) {
-                if (eventDTO.getName().equals(itemText)) {
+                if (eventDTO.getName().equals(itemValue)) {
                     result = eventDTO;
                     break;
                 }

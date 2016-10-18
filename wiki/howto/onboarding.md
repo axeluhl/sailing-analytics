@@ -66,11 +66,14 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * Clone the repository to your local file system from `ssh://[SAP-User]@git.wdf.sap.corp:29418/SAPSail/sapsailingcapture.git`  or `ssh://[user]@sapsailing.com/home/trac/git`  User "trac" has all public ssh keys.
 2. Check out the 'master' branch from the git repository. The 'master' branch is the main development branch. Please check that you start your work on this branch.
 3. Setup and configure Eclipse
-  * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Fortmatter)
+  * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Formatter)
   * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
   * Install the Google Android SDK from the same Google Plugin for Eclipse update site
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> Google -> Web Toolkit -> Add...)
+  * In "Window->Preferences->General->Editors->TextEditors" check Insert Spaces for Tabs 
+  * In "Window->Preferences->Web->HTML Files->Editor" indent using Spaces
+  * In "Window->Preferences->General->Content Types" select on the right side CSS, now add in the lower file association list *.gss to get limited syntax highlighting and content assist in GSS files
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)
   * Check that JDK 1.8 is available and has been set for compilation in Eclipse
@@ -78,7 +81,7 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * Check that JDK 1.7 has been matched to JavaSE-1.7 and that JDK 1.8 has been matched to JavaSE-1.8 (...>Installed JREs>Execution Environments)
   * It is also possible to match the SAPJVM 7 or 8 to JavaSE-1.7 / JavaSE-1.8 (for profiling purposes)
   * Go to Windows->Preferences->Google->Errors/Warnings and set "Missing SDK" to "Ignore"
-  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import as a git project in eclipse)
+  * Import all Race Analysis projects from the `java/` subdirectory of the git main folder (make sure to import as a git project in eclipse) (make sure to scan for nested projects)
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
@@ -96,11 +99,11 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * Press List Races
 
 #### Maven Setup
-Copy the settings.xml from the top-level git folder to your ~/.m2 directory and adjust the proxy settings accordingly. Make sure the mvn executable you installed above is in your path. Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.
+Copy the settings.xml **and** the toolchains.xml from the top-level git folder to your ~/.m2 directory. Adjust the proxy settings in settings.xml accordingly (suggested settings for corporate network inside). Set the paths inside of toolchains.xml to your JDKs depending on where you installed them (this is like setting the compiler for your IDE, but for Maven; This makes it possible to build with the same Maven configuration on every system). Make sure the mvn executable you installed above is in your path. Open a shell (preferrably a git bash or a cygwin bash), cd to the git workspace's root folder and issue "./configuration/buildAndUpdateProduct.sh build". This should build the software and run all the tests. If you want to avoid the tests being executed, use the -t option. If you only want to build one GWT permutation (Chrome/English), use the -b option. When inside the SAP VPN, add the -p option for proxy use. Run the build script without arguments to get usage hints.
 
 #### Further hints
 - Configure Eclipse to use Chrome or Firefox as the default browser
-- Install the GWT Browser Plugin (Chrome or Firefox; as of this writing (2013-11-05), Firefox is the only platform where the plug-in runs stably) for the GWT Development mode
+- Install the GWT Browser Plugin for the GWT Development mode <del>(Chrome or Firefox; as of this writing (2013-11-05), Firefox is the only platform where the plug-in runs stably)</del> (As of 2016-08-31 Firefox is the only browser supporting the GWT plugin, you have to download Firefox version 24 for it to work)
 
 #### Additional steps required for Android projects
 
@@ -184,4 +187,4 @@ If git is not in the Path system environment variable, the gradle build will not
 2. choose git in the drop down
 3. if everything is correct, you'll see the current branch at the bottom line
 
-See [RaceCommittee App](racecommittee-app) for more information regarding the mobile app.
+See [RaceCommittee App](/wiki/info/mobile/racecommittee-app) for more information regarding the mobile app.

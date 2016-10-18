@@ -21,7 +21,13 @@ Export-Package: com.sap.sailing.domain.tractracadapter,
    com.sap.sailing.server.test,
    com.sap.sailing.mongodb.test"
 Bundle-ActivationPolicy: lazy
-Import-Package: org.json.simple,
+Import-Package: org.apache.http,
+ org.apache.http.client,
+ org.apache.http.client.entity,
+ org.apache.http.client.methods,
+ org.apache.http.impl.client,
+ org.apache.http.message,
+ org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.7.0"
 Bundle-Activator: com.sap.sailing.domain.tractracadapter.impl.Activator

@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
@@ -82,7 +83,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
 
         asyncActionsExecutor = new AsyncActionsExecutor();
         currentLeaderboard = null;
-        leaderboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
+        leaderboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
         leaderboardTimer.setLivePlayDelayInMillis(delayToLiveInMillis);
         leaderboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD);
         leaderboardTimer.play();
@@ -100,7 +101,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
             playerView.clearContent();
             boolean withFullscreenButton = autoPlayerConfiguration.isFullscreenMode() && isInitialScreen;
             LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(leaderboardPerspectiveLifecycleWithAllSettings, 
-                    sailingService, asyncActionsExecutor,
+                    sailingService, userService, asyncActionsExecutor,
                     new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
                     autoPlayerConfiguration.getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
                     userAgent, withFullscreenButton);

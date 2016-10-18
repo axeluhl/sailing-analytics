@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelog.tracking;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -18,6 +19,10 @@ public enum EmptySensorFixStore implements SensorFixStore {
 
     @Override
     public void removeListener(FixReceivedListener<? extends Timed> listener) {
+    }
+
+    @Override
+    public void removeListener(FixReceivedListener<? extends Timed> listener, DeviceIdentifier device) {
     }
 
     @Override
@@ -42,5 +47,10 @@ public enum EmptySensorFixStore implements SensorFixStore {
 
     @Override
     public <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes) {
+    }
+
+    @Override
+    public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) {
+        return null;
     }
 }

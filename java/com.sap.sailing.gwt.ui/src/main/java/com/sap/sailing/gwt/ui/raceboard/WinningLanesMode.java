@@ -131,8 +131,8 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
         if (!adjustedCompetitorSelection && getLeaderboardForSpecificTimePoint() != null && getCompetitorsInRace() != null) {
             stopReceivingCompetitorsInRace();
             adjustedCompetitorSelection = true;
-            updateCompetitorSelection();
         }
+        updateCompetitorSelection();
     }
 
 }

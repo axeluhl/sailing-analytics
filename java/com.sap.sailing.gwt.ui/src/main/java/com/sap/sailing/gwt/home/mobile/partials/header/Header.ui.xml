@@ -4,7 +4,7 @@
 	xmlns:s="urn:import:com.sap.sailing.gwt.home.mobile.partials"
 	>
 	<ui:with field="i18n" 
-		type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+		type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res"
 		type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" 

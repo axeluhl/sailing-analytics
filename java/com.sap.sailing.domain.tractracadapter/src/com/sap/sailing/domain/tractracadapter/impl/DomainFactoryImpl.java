@@ -551,12 +551,14 @@ public class DomainFactoryImpl implements DomainFactory {
         trackedRace.addCourseDesignChangedListener(courseDesignHandler);
         TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
-                raceDefinition.getId());
+                raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta());
         trackedRace.addStartTimeChangedListener(startTimeHandler);
         TracTracRaceAbortedHandler raceAbortedHandler = new TracTracRaceAbortedHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
                 raceDefinition.getId());
         trackedRace.addRaceAbortedListener(raceAbortedHandler);
+        trackedRace.addListener(new TracTracFinishTimeUpdateHandler(tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta()).getListener());
     }
 
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race,

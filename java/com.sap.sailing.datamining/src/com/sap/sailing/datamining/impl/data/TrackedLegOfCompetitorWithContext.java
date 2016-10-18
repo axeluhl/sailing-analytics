@@ -4,9 +4,11 @@ import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompetitorContext {
 
@@ -14,6 +16,11 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     
     private final TrackedLegOfCompetitor trackedLegOfCompetitor;
     private final Competitor competitor;
+
+    private Double rankAtStart;
+    private boolean isRankAtStartInitialized;
+    private Double rankAtFinish;
+    private boolean isRankAtFinishInitialized;
 
     public TrackedLegOfCompetitorWithContext(HasTrackedLegContext trackedLegContext, TrackedLegOfCompetitor trackedLegOfCompetitor) {
         this.trackedLegContext = trackedLegContext;
@@ -35,6 +42,11 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     public Competitor getCompetitor() {
         return competitor;
     }
+
+    @Override
+    public String getCompetitorSearchTag() {
+        return getCompetitor().getSearchTag();
+    }
     
     @Override
     public Distance getDistanceTraveled() {
@@ -44,10 +56,42 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     
     @Override
     public Double getRankGainsOrLosses() {
-        TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
-        Double rankAtStart = Double.valueOf(trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime()));
-        Double rankAtFinish = Double.valueOf(trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getFinishTime()));
-        return rankAtStart - rankAtFinish;
+        Double rankAtStart = getRankAtStart();
+        Double rankAtFinish = getRankAtFinish();
+        return rankAtStart != null && rankAtFinish != null ? rankAtStart - rankAtFinish : null;
+    }
+    
+    private Double getRankAtStart() {
+        if (!isRankAtStartInitialized) {
+            TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+            int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getStartTime());
+            rankAtStart = rank == 0 ? null : Double.valueOf(rank);
+            isRankAtStartInitialized = true;
+        }
+        return rankAtStart;
     }
 
+    @Override
+    public Double getRelativeRank() {
+        Leaderboard leaderboard = getTrackedLegContext().getTrackedRaceContext().getLeaderboardContext().getLeaderboard();
+        double competitorCount = Util.size(leaderboard.getCompetitors());
+        Double rankAtFinish = getRankAtFinish();
+        return rankAtFinish == null ? null : rankAtFinish / competitorCount;
+    }
+
+    @Override
+    public Double getAbsoluteRank() {
+        return getRankAtFinish();
+    }
+    
+    private Double getRankAtFinish() {
+        if (!isRankAtFinishInitialized) {
+            TrackedRace trackedRace = getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+            int rank = trackedRace.getRank(getCompetitor(), getTrackedLegOfCompetitor().getFinishTime());
+            rankAtFinish = rank == 0 ? null : Double.valueOf(rank);
+            isRankAtFinishInitialized = true;
+        }
+        return rankAtFinish;
+    }
+    
 }

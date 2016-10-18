@@ -8,14 +8,14 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.shared.app.HasLocationTitle;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitle, HasMobileVersion {
 
     public enum SolutionsNavigationTabs {
-        SapInSailing, SailingAnalytics, RaceCommitteeApp, PostRaceAnalytics, TrainingDiary, SailingSimulator
+        SapInSailing, SailingAnalytics, RaceManagerApp, InSightApp, BuoyPingerApp, PostRaceAnalytics, SailingSimulator
     };
     private final SolutionsNavigationTabs navigationTab;
     private final static String PARAM_NAVIGATION_TAB = "navigationTab";
@@ -78,7 +78,7 @@ public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitl
     
     @Override
     public String getLocationTitle() {
-        return TextMessages.INSTANCE.solutions();
+        return StringMessages.INSTANCE.solutions();
     }
 
     public static class Tokenizer implements PlaceTokenizer<SolutionsPlace> {

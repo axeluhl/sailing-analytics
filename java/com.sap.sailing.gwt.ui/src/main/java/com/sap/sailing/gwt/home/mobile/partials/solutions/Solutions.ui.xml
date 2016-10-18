@@ -1,8 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
-	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
-    <ui:with field="smI18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.solutions.SolutionsResources" />
      <ui:style>
@@ -75,7 +74,7 @@
 					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
 					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
 						<h2 class="{local_res.css.solutions_item_header_title}">
-							<ui:text from='{i18n.sapSailingAnalytics}' />
+							<ui:text from='{i18n.sapSailingAnalyticsTitle}' />
 						</h2>
 						<img src="images/mobile/arrow-down-grey.png" alt=""
 							class="{local_res.css.solutions_item_header_arrow}"></img>
@@ -88,6 +87,9 @@
 						<p>
 							<ui:text from='{i18n.contentSapSailingAnalytics2}' />
 						</p>
+						<a class="{res.mainCss.button}" ui:field="sailingAnalyticsDetailsAnchor">
+						   <ui:text from="{i18n.sapSailingAnalyticsReadMore}"/>
+						</a>
 					</div>
 				</div>
 				<div ui:field="raceCommitteeAppUi"
@@ -108,14 +110,89 @@
                             class="{style.storeBadgesContainer}"
                             >
                             <a  ui:field="raceManagerPlayStoreLinkUi"
-                                href="{smI18n.playstoreRacecommitteeApp}"
+                                href="{i18n.playstoreRacecommitteeApp}"
                                 target="_blank"
                                 ><img
                                     ui:field="raceManagerPlayStoreImgUi" 
                                     alt="Get it on Google Play" 
-                                    src="{smI18n.playstoreBadge}" 
+                                    src="{i18n.playstoreBadge}" 
                                     /></a>
                         </div>
+                        <a class="{res.mainCss.button}" ui:field="raceManagerAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailingRaceManagerReadMore}"/>
+                        </a>
+					</div>
+				</div>
+				<div ui:field="inSightAppUi"
+					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+						<h2 class="{local_res.css.solutions_item_header_title}">
+							<ui:text from='{i18n.sapSailInSight}' />
+						</h2>
+						<img src="images/mobile/arrow-down-grey.png" alt=""
+							class="{local_res.css.solutions_item_header_arrow}"></img>
+					</div>
+					<div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+						<img src="images/mobile/solutions-sap-sailing-insight.png" alt="{i18n.sapSailInSight}"></img>
+						<p>
+							<ui:text from='{i18n.contentSapSailInSight}' />
+						</p>
+                        <div class="{style.storeBadgesContainer}">
+							<a  ui:field="inSightAppStoreLinkUi"
+								href="{i18n.appstoreSapSailInsight}"
+								target="_blank"
+							><img
+								ui:field="inSightAppStoreImgUi"
+								alt="Get it on AppStore"
+								src="images/home/appstore{i18n.appstoreBadgeSuffix}.svg"
+							/></a>
+						</div>
+						<div
+                            class="{style.storeBadgesContainer}"
+                            >
+                            <a  ui:field="inSightPlayStoreLinkUi"
+                                href="{i18n.playstoreInsightApp}"
+                                target="_blank"
+                                ><img
+                                    ui:field="inSightPlayStoreImgUi"
+                                    alt="Get it on Google Play"
+                                    src="{i18n.playstoreBadge}"
+                                    /></a>
+                        </div>
+                        <a class="{res.mainCss.button}" ui:field="sailInSightAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailInSightReadMore}"/>
+                        </a>
+					</div>
+				</div>
+				<div ui:field="buoyPingerAppUi"
+					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
+					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
+						<h2 class="{local_res.css.solutions_item_header_title}">
+							<ui:text from='{i18n.sapSailingBuoyPinger}' />
+						</h2>
+						<img src="images/mobile/arrow-down-grey.png" alt=""
+							class="{local_res.css.solutions_item_header_arrow}"></img>
+					</div>
+					<div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
+						<img src="images/mobile/solutions-sap-sailing-buoy-pinger.png" alt="{i18n.sapSailingBuoyPinger}"></img>
+						<p>
+							<ui:text from='{i18n.contentSapSailingBuoyPinger}' />
+						</p>
+                        <div
+                            class="{style.storeBadgesContainer}"
+                            >
+                            <a  ui:field="buoyPingerPlayStoreLinkUi"
+                                href="{i18n.playStoreBuoyPingerApp}"
+                                target="_blank"
+                                ><img
+                                    ui:field="buoyPingerPlayStoreImgUi"
+                                    alt="Get it on Google Play"
+                                    src="{i18n.playstoreBadge}"
+                                    /></a>
+                        </div>
+                        <a class="{res.mainCss.button}" ui:field="buoyPingerAppDetailsAnchor">
+                           <ui:text from="{i18n.sapSailingBuoyPingerReadMore}"/>
+                        </a>
 					</div>
 				</div>
 				<div ui:field="postRaceAnalyticsUi"
@@ -137,32 +214,6 @@
 						</p>
 					</div>
 				</div>
-				<div ui:field="stgTrainingDiaryUi"
-					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
-					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
-						<h2 class="{local_res.css.solutions_item_header_title}">
-							<ui:text from='{i18n.i18nDeSolutionsTrainingHeadline}' />
-						</h2>
-						<img src="images/mobile/arrow-down-grey.png" alt=""
-							class="{local_res.css.solutions_item_header_arrow}"></img>
-					</div>
-					<div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
-						<img src="images/mobile/solutions-training.png" alt="{i18n.i18nDeSolutionsTrainingHeadline}"></img>
-						<p>
-							<ui:text from='{i18n.i18nDeSolutionsTrainingText}' />
-						</p>
-                        <div 
-                            class="{style.storeBadgesContainer}"
-                            >
-                            <a
-                                alt="Get it on Appstore" 
-                                href="{smI18n.appstoreStgTrainingstagebuch}"
-                                target="_blank" >
-                                <img src="images/home/appstore{smI18n.appstoreBadgeSuffix}.svg"></img>
-                            </a>
-                        </div>
-					</div>
-				</div>
 				<div ui:field="strategySimulatorUi"
 					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
 					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
@@ -177,6 +228,9 @@
 						<p>
 							<ui:text from='{i18n.contentStrategySimulator}' />
 						</p>
+						<a class="{res.mainCss.button}" ui:field="simulatorAppDetailsAnchor">
+                           <ui:text from="{i18n.strategySimulatorReadMore}"/>
+                        </a>
 					</div>
 				</div>
 			</div>
