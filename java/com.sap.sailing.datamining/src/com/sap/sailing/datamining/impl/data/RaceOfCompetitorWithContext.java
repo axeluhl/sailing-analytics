@@ -38,6 +38,11 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     public Competitor getCompetitor() {
         return competitor;
     }
+
+    @Override
+    public String getCompetitorSearchTag() {
+        return getCompetitor().getSearchTag();
+    }
     
     @Override
     public Distance getDistanceToStartLineAtStart() {
@@ -59,7 +64,8 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         Course course = getTrackedRace().getRace().getCourse();
         Waypoint firstMark = course.getFirstLeg().getTo();
         Competitor competitor = getCompetitor();
-        return Double.valueOf(getTrackedRace().getRank(competitor, getTrackedRace().getMarkPassing(competitor, firstMark).getTimePoint()));
+        int rank = getTrackedRace().getRank(competitor, getTrackedRace().getMarkPassing(competitor, firstMark).getTimePoint());
+        return rank == 0 ? null : Double.valueOf(rank);
     }
     
     @Override
@@ -97,11 +103,12 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     public Double getRankGainsOrLossesBetweenFirstMarkAndFinish() {
         Double rankAtFirstMark = getRankAtFirstMark();
         Double rankAtFinish = getRankAtFinish();
-        return rankAtFirstMark - rankAtFinish;
+        return rankAtFirstMark != null && rankAtFinish != null ? rankAtFirstMark - rankAtFinish : null;
     }
 
     private Double getRankAtFinish() {
-        return Double.valueOf(getTrackedRace().getRank(getCompetitor(), getTrackedRace().getEndOfTracking()));
+        int rank = getTrackedRace().getRank(getCompetitor(), getTrackedRace().getEndOfTracking());
+        return rank == 0 ? null : Double.valueOf(rank);
     }
     
     @Override
