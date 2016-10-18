@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
+import com.sap.sailing.datamining.data.HasManeuverContext;
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
@@ -15,6 +16,7 @@ import com.sap.sailing.datamining.impl.components.CompetitorOfRaceInLeaderboardR
 import com.sap.sailing.datamining.impl.components.GPSFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.LeaderboardGroupRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.LeaderboardRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.ManeuverRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.MarkPassingRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.RaceOfCompetitorRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrievalProcessor;
@@ -48,11 +50,6 @@ public class SailingDataRetrievalChainDefinitions {
         trackedRaceRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class,
                 HasTrackedRaceContext.class, "Race");
         dataRetrieverChainDefinitions.add(trackedRaceRetrieverChainDefinition);
-
-        final DataRetrieverChainDefinition<RacingEventService, HasMarkPassingContext> markPassingRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
-                trackedRaceRetrieverChainDefinition, HasMarkPassingContext.class, "MarkPassingSailingDomainRetrieverChain");
-        markPassingRetrieverChainDefinition.endWith(TrackedRaceRetrievalProcessor.class, MarkPassingRetrievalProcessor.class, HasMarkPassingContext.class, "MarkPassing");
-        dataRetrieverChainDefinitions.add(markPassingRetrieverChainDefinition);
         
         final DataRetrieverChainDefinition<RacingEventService, HasRaceOfCompetitorContext> raceOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 trackedRaceRetrieverChainDefinition, HasRaceOfCompetitorContext.class, "RaceOfCompetitorSailingDomainRetrieverChain");
@@ -71,6 +68,17 @@ public class SailingDataRetrievalChainDefinitions {
         gpsFixRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, GPSFixRetrievalProcessor.class,
                 HasGPSFixContext.class, "GpsFix");
         dataRetrieverChainDefinitions.add(gpsFixRetrieverChainDefinition);
+
+        final DataRetrieverChainDefinition<RacingEventService, HasManeuverContext> maneuverRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                legOfCompetitorRetrieverChainDefinition, HasManeuverContext.class, "ManeuverSailingDomainRetrieverChain");
+        maneuverRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, ManeuverRetrievalProcessor.class,
+                HasManeuverContext.class, "Maneuver");
+        dataRetrieverChainDefinitions.add(maneuverRetrieverChainDefinition);
+
+        final DataRetrieverChainDefinition<RacingEventService, HasMarkPassingContext> markPassingRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                legOfCompetitorRetrieverChainDefinition, HasMarkPassingContext.class, "MarkPassingSailingDomainRetrieverChain");
+        markPassingRetrieverChainDefinition.endWith(TrackedLegOfCompetitorRetrievalProcessor.class, MarkPassingRetrievalProcessor.class, HasMarkPassingContext.class, "MarkPassing");
+        dataRetrieverChainDefinitions.add(markPassingRetrieverChainDefinition);
     }
 
     public Iterable<DataRetrieverChainDefinition<?, ?>> get() {

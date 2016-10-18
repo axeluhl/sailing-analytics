@@ -49,7 +49,7 @@ public class RegattaDetailsComposite extends Composite {
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final RegattaRefresher regattaRefresher;
-    
+
     private final Label regattaId;
     private final Label regattaName;
     private final Label startDate;
@@ -61,7 +61,8 @@ public class RegattaDetailsComposite extends Composite {
     private final Label useStartTimeInference;
     private final Label controlTrackingFromStartAndFinishTimes;
     private final Label configuration;
-
+    private final Label buoyZoneRadiusInHullLengths;
+    
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
     private final CellTable<SeriesDTO> seriesTable;
     private ListDataProvider<SeriesDTO> seriesListDataProvider;
@@ -79,7 +80,7 @@ public class RegattaDetailsComposite extends Composite {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 11;
+        int rows = 12;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
@@ -92,10 +93,11 @@ public class RegattaDetailsComposite extends Composite {
         defaultCourseArea = createLabelAndValueWidget(grid, currentRow++, stringMessages.courseArea(), "CourseAreaLabel");
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
         controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "UseStartTimeInferenceLabel");
+        buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.buoyZoneRadiusInHullLengths(), "BuoyZoneRadiusInHullLengthsLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
-        
+
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
@@ -398,6 +400,8 @@ public class RegattaDetailsComposite extends Composite {
             defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
+            buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths)); 
+
             if (regatta.configuration != null) {
                 configuration.setText(stringMessages.configured());
             } else {
