@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class SolutionsPlace extends AbstractBasePlace implements HasLocationTitle, HasMobileVersion {
 
     public enum SolutionsNavigationTabs {
-        SapInSailing, SailingAnalytics, RaceManagerApp, InSightApp, BuoyPingerApp, PostRaceAnalytics, TrainingDiary, SailingSimulator
+        SapInSailing, SailingAnalytics, RaceManagerApp, InSightApp, BuoyPingerApp, PostRaceAnalytics, SailingSimulator
     };
     private final SolutionsNavigationTabs navigationTab;
     private final static String PARAM_NAVIGATION_TAB = "navigationTab";
