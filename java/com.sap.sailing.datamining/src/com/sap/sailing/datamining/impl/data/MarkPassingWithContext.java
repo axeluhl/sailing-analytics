@@ -4,6 +4,7 @@ import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -42,6 +43,11 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     @Override
     public Waypoint getWaypoint() {
         return getManeuver().getWaypointPassed();
+    }
+    
+    @Override
+    public NauticalSide getPassingSide() {
+        return getManeuver().getSide();
     }
 
     @Override
