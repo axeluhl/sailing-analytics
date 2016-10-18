@@ -42,7 +42,10 @@ public interface HasRaceOfCompetitorContext {
     public Speed getSpeedTenSecondsAfterStart();
     
     @Statistic(messageKey="RankThirtySecondsAfterStart", resultDecimals=2, ordinal=5)
-    public Double getAbsoluteRankThirtySecondsAfterStart();
+    public Double getRankThirtySecondsAfterStart();
+    
+    @Statistic(messageKey="RankAfterHalfOfTheFirstLeg", resultDecimals=2, ordinal=6)
+    public Double getRankAfterHalfOfTheFirstLeg();
     
     @Statistic(messageKey="RankAtFirstMark", resultDecimals=2, ordinal=6)
     public Double getRankAtFirstMark();

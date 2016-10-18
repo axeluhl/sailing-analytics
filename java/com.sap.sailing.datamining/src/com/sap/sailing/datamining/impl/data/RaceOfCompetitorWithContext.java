@@ -91,13 +91,28 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
-    public Double getAbsoluteRankThirtySecondsAfterStart() {
+    public Double getRankThirtySecondsAfterStart() {
         TimePoint startOfRace = getTrackedRace().getStartOfRace();
         if (startOfRace == null) {
             return null;
         }
         
         int rank = getTrackedRace().getRank(getCompetitor(), startOfRace.plus(TimeUnit.SECONDS.toMillis(30)));
+        return rank == 0 ? null : Double.valueOf(rank);
+    }
+    
+    @Override
+    public Double getRankAfterHalfOfTheFirstLeg() {
+        Course course = getTrackedRace().getRace().getCourse();
+        TrackedLegOfCompetitor trackedLeg = getTrackedRace().getTrackedLeg(getCompetitor(), course.getFirstLeg());
+        TimePoint startTime = trackedLeg.getStartTime();
+        TimePoint finishTime = trackedLeg.getFinishTime();
+        if (startTime == null || finishTime == null) {
+            return null;
+        }
+        
+        long halfOffset = (finishTime.asMillis() - startTime.asMillis()) / 2;
+        int rank = getTrackedRace().getRank(getCompetitor(), startTime.plus(halfOffset));
         return rank == 0 ? null : Double.valueOf(rank);
     }
     
