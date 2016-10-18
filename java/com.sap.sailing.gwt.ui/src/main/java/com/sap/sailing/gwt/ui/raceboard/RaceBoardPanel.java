@@ -77,6 +77,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -211,17 +212,20 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
 
         RaceTimePanelLifecycle raceTimePanelLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getRaceTimePanelLifecycle();
         RaceTimePanelSettings raceTimePanelSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(raceTimePanelLifecycle);
-        
-        final Distance buoyZoneRadiusInMeters = new MeterDistance(GwtHttpRequestUtils.getDoubleParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS.getMeters() /* default */));
-        final RaceMapSettings raceMapSettings = new RaceMapSettings(defaultRaceMapSettings.getZoomSettings(), defaultRaceMapSettings.getHelpLinesSettings(),
-                defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
-                defaultRaceMapSettings.getTailLengthInMilliseconds(), defaultRaceMapSettings.isWindUp(),
-                buoyZoneRadiusInMeters, defaultRaceMapSettings.isShowOnlySelectedCompetitors(),
-                defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
-                defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
-                defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
-                defaultRaceMapSettings.isShowDouglasPeuckerPoints());
-        
+        final RaceMapSettings raceMapSettings;
+        if (GwtHttpRequestUtils.getStringParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, null) != null) {
+            final Distance buoyZoneRadiusInMeters = new MeterDistance(GwtHttpRequestUtils.getDoubleParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS.getMeters() /* default */));
+            raceMapSettings = new RaceMapSettings(defaultRaceMapSettings.getZoomSettings(), defaultRaceMapSettings.getHelpLinesSettings(),
+                    defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
+                    defaultRaceMapSettings.getTailLengthInMilliseconds(), defaultRaceMapSettings.isWindUp(),
+                    buoyZoneRadiusInMeters, defaultRaceMapSettings.isShowOnlySelectedCompetitors(),
+                    defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
+                    defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
+                    defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
+                    defaultRaceMapSettings.isShowDouglasPeuckerPoints());
+        } else {
+            raceMapSettings = defaultRaceMapSettings;
+        }
         raceMap = new RaceMap(raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
                 /* showHeaderPanel */ true) {
@@ -251,26 +255,29 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
                 return super.getLeftControlsIndentStyle();
             }
         };
-
+        // now that the raceMap field has been initialized, check whether the buoy zone radius shall be looked up from
+        // the regatta model on the server:
         if (GwtHttpRequestUtils.getStringParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, null) == null) {
             sailingService.getRegattaByName(selectedRaceIdentifier.getRegattaName(), new AsyncCallback<RegattaDTO>() {
                 @Override
                 public void onSuccess(RegattaDTO regattaDTO) {
-                    Distance buoyZoneRadiusInMeters = regattaDTO.getCalculatedBuoyZoneRadius();
+                    Distance buoyZoneRadius = regattaDTO.getCalculatedBuoyZoneRadius();
                     RaceMapSettings existingMapSettings = raceMap.getSettings();
-                    final RaceMapSettings newRaceMapSettings = new RaceMapSettings(
-                            existingMapSettings.getZoomSettings(), existingMapSettings.getHelpLinesSettings(),
-                            existingMapSettings.getTransparentHoverlines(),
-                            existingMapSettings.getHoverlineStrokeWeight(),
-                            existingMapSettings.getTailLengthInMilliseconds(), existingMapSettings.isWindUp(),
-                            buoyZoneRadiusInMeters, existingMapSettings.isShowOnlySelectedCompetitors(),
-                            existingMapSettings.isShowSelectedCompetitorsInfo(),
-                            existingMapSettings.isShowWindStreamletColors(),
-                            existingMapSettings.isShowWindStreamletOverlay(),
-                            existingMapSettings.isShowSimulationOverlay(), existingMapSettings.isShowMapControls(),
-                            existingMapSettings.getManeuverTypesToShow(),
-                            existingMapSettings.isShowDouglasPeuckerPoints());
-                    raceMap.updateSettings(newRaceMapSettings);
+                    if (!Util.equalsWithNull(buoyZoneRadius, existingMapSettings.getBuoyZoneRadius())) {
+                        final RaceMapSettings newRaceMapSettings = new RaceMapSettings(
+                                existingMapSettings.getZoomSettings(), existingMapSettings.getHelpLinesSettings(),
+                                existingMapSettings.getTransparentHoverlines(),
+                                existingMapSettings.getHoverlineStrokeWeight(),
+                                existingMapSettings.getTailLengthInMilliseconds(), existingMapSettings.isWindUp(),
+                                buoyZoneRadius, existingMapSettings.isShowOnlySelectedCompetitors(),
+                                existingMapSettings.isShowSelectedCompetitorsInfo(),
+                                existingMapSettings.isShowWindStreamletColors(),
+                                existingMapSettings.isShowWindStreamletOverlay(),
+                                existingMapSettings.isShowSimulationOverlay(), existingMapSettings.isShowMapControls(),
+                                existingMapSettings.getManeuverTypesToShow(),
+                                existingMapSettings.isShowDouglasPeuckerPoints());
+                        raceMap.updateSettings(newRaceMapSettings);
+                    }
                 }
 
                 @Override

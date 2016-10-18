@@ -69,7 +69,6 @@ public class RegattaDTO extends NamedDTO {
         this.useStartTimeInference = other.useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
         this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;
-        
     }
     
     public Pair<SeriesDTO, FleetDTO> getSeriesAndFleet(RegattaAndRaceIdentifier raceIdentifier) {
