@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Distance;
@@ -107,7 +108,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> implements LeaderboardUpdateListener, PopupPositionProvider
+public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> implements LeaderboardUpdateListener, PopupPositionProvider,RequiresResize
 {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
@@ -688,6 +689,11 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     @Override
     public boolean hasPerspectiveOwnSettings() {
         return true;
+    }
+
+    @Override
+    public void onResize() {
+        dockPanel.onResize();        
     }
 }
 

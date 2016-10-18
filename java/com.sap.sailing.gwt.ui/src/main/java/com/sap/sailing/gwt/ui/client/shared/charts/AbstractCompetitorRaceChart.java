@@ -136,6 +136,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
         Chart chart = new Chart().setZoomType(BaseChart.ZoomType.X)
                 .setPersistent(true)
+                .setReflow(false)
                 .setWidth100()
                 .setAlignTicks(true)
                 .setHeight100()
