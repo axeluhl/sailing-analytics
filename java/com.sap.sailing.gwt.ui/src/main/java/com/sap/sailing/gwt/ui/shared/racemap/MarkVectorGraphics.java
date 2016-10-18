@@ -48,47 +48,46 @@ public class MarkVectorGraphics {
         ctx.restore();
     }
 
-    protected void drawMark(Context2d ctx, boolean isSelected, String color) {
-        final MarkType markType = type==null ? MarkType.BUOY : type;
-        switch(markType) {
-            case BUOY:
-                if(isSelected) {
-                    drawMarkSelection(ctx);
-                }
-                if(shape != null) {
-                    if(Shape.CYLINDER.name().equalsIgnoreCase(shape) && pattern != null && Pattern.CHECKERED.name().equalsIgnoreCase(pattern)) {
-                        drawBuoyWithFinishFlag(ctx, isSelected, color);
-                    } else if (Shape.CONICAL.name().equalsIgnoreCase(shape)) {
-                        drawConicalBuoy(ctx, isSelected, color);
-                    } else {
-                        drawSimpleBuoy(ctx, isSelected, color);
-                    }
-                } else {
-                    drawSimpleBuoy(ctx, isSelected, color);
-                }
-                break;
-            case FINISHBOAT:
-                drawFinishBoat(ctx, isSelected, color);
-                break;
-            case LANDMARK:
-                if(isSelected) {
-                    drawMarkSelection(ctx);
-                }
-                drawLandmark(ctx, isSelected, color);
-                break;
-            case STARTBOAT:
-            	drawStartboat(ctx, "#000000");
-            	break;
-            case UMPIREBOAT:
-            case CAMERABOAT:
-                // umpire and camera boats are not course marks -> see TrackedAssetVectorGraphics 
-                break;
-            default:
-                break;
-        }
-    }
+	protected void drawMark(Context2d ctx, boolean isSelected, String color) {
+		final MarkType markType = type == null ? MarkType.BUOY : type;
+		if (isSelected) {
+			drawMarkSelection(ctx);
+	    }
+		switch (markType) {
+		case BUOY:
+			if (shape != null) {
+				if (Shape.CYLINDER.name().equalsIgnoreCase(shape) && pattern != null
+						&& Pattern.CHECKERED.name().equalsIgnoreCase(pattern)) {
+					drawBuoyWithFinishFlag(ctx, isSelected, color);
+				} else if (Shape.CONICAL.name().equalsIgnoreCase(shape)) {
+					drawConicalBuoy(ctx, isSelected, color);
+				} else {
+					drawSimpleBuoy(ctx, isSelected, color);
+				}
+			} else {
+				drawSimpleBuoy(ctx, isSelected, color);
+			}
+			break;
+		case FINISHBOAT:
+			drawBoatmark(ctx, "#000000");
+			break;
+		case LANDMARK:
+			drawLandmark(ctx, isSelected, color);
+			break;
+		case STARTBOAT:
+			drawBoatmark(ctx, "#000000");
+			break;
+		case UMPIREBOAT:
+		case CAMERABOAT:
+			// umpire and camera boats are not course marks -> see
+			// TrackedAssetVectorGraphics
+			break;
+		default:
+			break;
+		}
+	}
 
-    private void drawMarkSelection(Context2d ctx) {
+    protected void drawMarkSelection(Context2d ctx) {
             ctx.save();
 
             ctx.scale(1.2,1.2);
@@ -520,7 +519,7 @@ public class MarkVectorGraphics {
         ctx.restore();
     }
     
-    private void drawStartboat(Context2d ctx, String color) {
+    private void drawBoatmark(Context2d ctx, String color) {
     	ctx.beginPath();
     	ctx.setFillStyle(color);
     	ctx.setStrokeStyle("#FFFFFF");
