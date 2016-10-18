@@ -26,7 +26,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.NoSelectionModel;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -435,19 +434,10 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 Boolean.toString(showNavigationPanel));
         linkParams.put("regattaName", raceIdentifier.getRegattaName());
         linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
-        linkParams.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS,
-                String.valueOf(getRegattaBuoyZoneRadius(raceIdentifier.getRegattaName()).getMeters()));
         if (viewMode != null && !viewMode.isEmpty()) {
             linkParams.put("viewMode", viewMode);
         }
         return linkParams;
-    }
-
-    private Distance getRegattaBuoyZoneRadius(String regattaName) {
-        RegattaDTO regatta = regattasByName.get(regattaName);
-        final Distance buoyZoneRadius = regatta == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
-                : regatta.getCalculatedBuoyZoneRadius();
-        return buoyZoneRadius;
     }
 
     private SafeHtml getAnchor(String link, String linkText, String style) {

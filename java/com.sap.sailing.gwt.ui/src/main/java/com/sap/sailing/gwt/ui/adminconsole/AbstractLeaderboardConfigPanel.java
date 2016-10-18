@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -45,7 +44,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
@@ -191,11 +189,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             public void onSelectionChange(SelectionChangeEvent event) {
                 leaderboardSelectionChanged();
                 raceColumnTable.setSelectedLeaderboardName(getSelectedLeaderboardName());
-                RegattaDTO regatta = getSelectedRegatta();
-                Distance buoyZoneRadius = regatta == null ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
-                        : regatta.getCalculatedBuoyZoneRadius();
-                raceColumnTable.setSelectedBuoyZoneRadius(buoyZoneRadius);
-
             }
         });
         filteredLeaderboardList.addDataDisplay(leaderboardTable);

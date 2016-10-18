@@ -42,7 +42,6 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
         racesTable = new RaceTableWrapper<RefreshableMultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingService, stringMessages, errorReporter, /* multiSelection */ true);
         racesTable.setSelectedLeaderboardName(leaderboardName);
-        racesTable.setSelectedBuoyZoneRadius(buoyZoneRadius);
         racesTable.getDataProvider().getList().addAll(races);
         racesTable.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override

@@ -10,7 +10,6 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -19,7 +18,6 @@ import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
-import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.media.GetMediaForEventAction;
 import com.sap.sailing.gwt.home.communication.media.MediaDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
@@ -182,17 +180,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         linkParams.put(RaceMapSettings.PARAM_SHOW_MAPCONTROLS, "true");
         linkParams.put(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_NAVIGATION_PANEL, "true");
         linkParams.put("regattaName", regattaName);
-        linkParams.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, String.valueOf(getRegattaBuoyZoneRadius(regattaName)));
         return linkParams;
-    }
-
-    private Distance getRegattaBuoyZoneRadius(String regattaName) {
-        for (RegattaMetadataDTO regatta : eventDTO.getRegattas()) {
-            if (regattaName != null && regattaName.equals(regatta.getId())) {
-                return regatta.getBuoyZoneRadius();
-            }
-        }
-        return RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS;
     }
 
     @Override

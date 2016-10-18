@@ -9,7 +9,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
@@ -17,7 +16,6 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorTemplate
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -27,7 +25,6 @@ public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOA
 extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private String selectedLeaderboardName;
-    private Distance selectedBuoyZoneRadius;
 
     public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection) {
@@ -55,7 +52,6 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
                     Map<String, String> params = new HashMap<>();
                     params.put("leaderboardName", selectedLeaderboardName);
-                    params.put(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, String.valueOf(selectedBuoyZoneRadius.getMeters()));
                     params.put("regattaName", raceIdentifier.getRegattaName());
                     params.put("raceName", raceIdentifier.getRaceName());
                     params.put("canReplayDuringLiveRaces", "true");
@@ -92,9 +88,5 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     
     public void setSelectedLeaderboardName(String name) {
         this.selectedLeaderboardName = name;
-    }
-    
-    public void setSelectedBuoyZoneRadius(Distance selectedBuoyZoneRadius) {
-        this.selectedBuoyZoneRadius = selectedBuoyZoneRadius;
     }
 }
