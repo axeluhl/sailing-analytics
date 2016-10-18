@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
@@ -23,6 +24,9 @@ public interface HasMarkPassingContext {
     
     @Connector(messageKey="Waypoint", ordinal=13)
     Waypoint getWaypoint();
+    
+    @Dimension(messageKey="PassingSide", ordinal=13)
+    NauticalSide getPassingSide();
 
     @Connector(messageKey="SpeedBefore", ordinal=0)
     SpeedWithBearing getSpeedBefore();
