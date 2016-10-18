@@ -2,7 +2,9 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.CanvasGradient;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 
 /**
  * A class for course mark graphics based on SVG graphics drawn to a HTML5 canvas
@@ -12,8 +14,8 @@ import com.sap.sailing.domain.common.MarkType;
  *
  */
 public class MarkVectorGraphics {
-    protected double markHeightInMeters;
-    protected double markWidthInMeters;
+    protected Distance markHeightInMeters;
+    protected Distance markWidthInMeters;
     
     private final String color;
     private final String shape;
@@ -33,8 +35,8 @@ public class MarkVectorGraphics {
         this.color = color;
         this.shape = shape;
         this.pattern = pattern;
-        this.markHeightInMeters = 2.1;
-        this.markWidthInMeters = 1.5;
+        this.markHeightInMeters = new MeterDistance(2.1);
+        this.markWidthInMeters = new MeterDistance(1.5);
     }
     
     public void drawMarkToCanvas(Context2d ctx, boolean isSelected, double width, double height, double scaleFactor) {
@@ -732,12 +734,12 @@ public class MarkVectorGraphics {
         ctx.restore();
     }
 
-	public double getMarkHeightInMeters() {
-		return markHeightInMeters;
-	}
+    public Distance getMarkHeight() {
+        return markHeightInMeters;
+    }
 
-    public double getMarkWidthInMeters() {
-		return markWidthInMeters;
+    public Distance getMarkWidth() {
+        return markWidthInMeters;
     }
     
     public String getColor() {

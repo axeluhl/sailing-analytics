@@ -10,6 +10,12 @@
     border: 1px solid #C9CACA;
 }
 
+html,
+body {
+	font-size: 100%;
+	line-height: 1;
+}
+
 .raceMapIndicatorPanelTextLabel {
 	height: 12px;
 	width: 55px;

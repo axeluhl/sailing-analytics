@@ -7,14 +7,11 @@
 	<g:HTMLPanel styleName="{local_res.css.section}">
 		<div class="{res.mediaCss.grid}">
 			<div ui:field="sectionHeaderHolderUi" class="{local_res.css.sectionHeader} {res.mediaCss.small12} {res.mediaCss.columns}">
-				<g:SimplePanel
-					ui:field="sectionHeaderUi" 
-					/>
+				<g:SimplePanel ui:field="sectionHeaderUi" />
 			</div>
 			<div ui:field="sectionContentHolderUi" class="{local_res.css.sectionContentHolder} {res.mediaCss.small12} {res.mediaCss.columns}">
-				<g:FlowPanel 
-					ui:field="sectionContentUi" 
-					styleName="{local_res.css.sectionContent}" />
+				<g:FlowPanel ui:field="sectionContentUi" styleName="{local_res.css.sectionContent}" />
+			    <g:SimplePanel ui:field="sectionFooterUi" />
 			</div>
 		</div>
 	</g:HTMLPanel>

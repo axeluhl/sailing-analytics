@@ -2,17 +2,19 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.CanvasGradient;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 
 public class BoatMarkVectorGraphics extends MarkVectorGraphics {
 
-	private final static double BOAT_MARK_HEIGHT_IN_METERS = 6.2;
-	private final static double BOAT_MARK_WIDTH_IN_METERS = 3.5;
+	private final static Distance BOAT_MARK_HEIGHT_IN_METERS = new MeterDistance(6.2);
+	private final static Distance BOAT_MARK_WIDTH_IN_METERS = new MeterDistance(3.5);
 
 	public BoatMarkVectorGraphics(MarkType type, String color, String shape, String pattern) {
 		super(type, color, shape, pattern);
-		this.anchorPointX = BOAT_MARK_HEIGHT_IN_METERS / 2;
-		this.anchorPointY = BOAT_MARK_WIDTH_IN_METERS / 2;
+		this.anchorPointX = BOAT_MARK_HEIGHT_IN_METERS.getMeters() / 2;
+		this.anchorPointY = BOAT_MARK_WIDTH_IN_METERS.getMeters() / 2;
 		this.markHeightInMeters = BOAT_MARK_HEIGHT_IN_METERS;
 		this.markWidthInMeters = BOAT_MARK_WIDTH_IN_METERS;
 	}

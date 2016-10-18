@@ -80,13 +80,6 @@ public class AppPreferences extends BaseAppPreferences {
         return value == null ? -1 : Integer.valueOf(value);
     }
 
-    public int getGPSFixFastestInterval() {
-        // EditTextPreference saves value as string, even if android:inputType="number" is set
-        String value = PrefUtils.getString(context, R.string.preference_gps_fix_fastest_interval_ms_key,
-                R.string.preference_gps_fastest_fix_interval_ms_default);
-        return value == null ? -1 : Integer.valueOf(value);
-    }
-
     public String getEventId() {
         return PrefUtils.getString(context, R.string.preference_eventid_key, R.string.preference_eventid_default);
     }
@@ -110,15 +103,6 @@ public class AppPreferences extends BaseAppPreferences {
 
     public void setCompetitorId(String id) {
         preferences.edit().putString(context.getString(R.string.preference_competitor_key), id).commit();
-    }
-
-    public void setEnergySavingEnabledByUser(boolean newValue) {
-        preferences.edit().putBoolean(context.getString(R.string.preference_energy_saving_enabled_key), newValue)
-                .commit();
-    }
-
-    public boolean getEnergySavingEnabledByUser() {
-        return preferences.getBoolean(context.getString(R.string.preference_energy_saving_enabled_key), false);
     }
 
     public void setDisplayHeadingWithSubtractedDeclination(boolean newValue) {
@@ -186,4 +170,5 @@ public class AppPreferences extends BaseAppPreferences {
     public void removeFailedUpload(String key) {
         pref.edit().remove(key).commit();
     }
+
 }

@@ -1,21 +1,18 @@
 package com.sap.sse.util.impl;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class ThreadPoolUtilImpl implements ThreadPoolUtil {
-    private static final int REASONABLE_THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()/2, 3);
+    private static final int REASONABLE_THREAD_POOL_SIZE = Math.max(Runtime.getRuntime().availableProcessors()-1, 3);
 
     private final ScheduledExecutorService defaultBackgroundTaskThreadPoolExecutor;
     private final ScheduledExecutorService defaultForegroundTaskThreadPoolExecutor;
     
     public ThreadPoolUtilImpl() {
-        defaultBackgroundTaskThreadPoolExecutor = Executors.newScheduledThreadPool(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
-                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY-1, /* daemon */ true));
-        defaultForegroundTaskThreadPoolExecutor = Executors.newScheduledThreadPool(/* corePoolSize */ Math.max(Runtime.getRuntime().availableProcessors()-1, 6),
-                new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
+        defaultBackgroundTaskThreadPoolExecutor = createBackgroundTaskThreadPoolExecutor("Default background executor");
+        defaultForegroundTaskThreadPoolExecutor = createForegroundTaskThreadPoolExecutor(2*REASONABLE_THREAD_POOL_SIZE, "Default foreground executor");
     }
     
     @Override
@@ -29,18 +26,26 @@ public class ThreadPoolUtilImpl implements ThreadPoolUtil {
     }
 
     @Override
-    public ScheduledExecutorService createBackgroundTaskThreadPoolExecutor() {
-        return createThreadPoolExecutor(Thread.NORM_PRIORITY-1);
+    public ScheduledExecutorService createBackgroundTaskThreadPoolExecutor(String name) {
+        return createThreadPoolExecutor(name, Thread.NORM_PRIORITY-1);
     }
 
     @Override
-    public ScheduledExecutorService createForegroundTaskThreadPoolExecutor() {
-        return createThreadPoolExecutor(Thread.NORM_PRIORITY);
+    public ScheduledExecutorService createForegroundTaskThreadPoolExecutor(String name) {
+        return createThreadPoolExecutor(name, Thread.NORM_PRIORITY);
     }
 
-    private ScheduledExecutorService createThreadPoolExecutor(final int priority) {
-        return Executors.newScheduledThreadPool(/* corePoolSize */ REASONABLE_THREAD_POOL_SIZE,
-                new ThreadFactoryWithPriority(priority, /* daemon */ true));
+    @Override
+    public ScheduledExecutorService createForegroundTaskThreadPoolExecutor(int size, String name) {
+        return createThreadPoolExecutor(name, Thread.NORM_PRIORITY, size);
+    }
+
+    private ScheduledExecutorService createThreadPoolExecutor(String name, final int priority) {
+        return createThreadPoolExecutor(name, priority, /* corePoolSize */ REASONABLE_THREAD_POOL_SIZE);
+    }
+
+    private ScheduledExecutorService createThreadPoolExecutor(String name, final int priority, final int size) {
+        return new NamedTracingScheduledThreadPoolExecutor(name, /* corePoolSize */ size, new ThreadFactoryWithPriority(priority, /* daemon */ true));
     }
 
     @Override

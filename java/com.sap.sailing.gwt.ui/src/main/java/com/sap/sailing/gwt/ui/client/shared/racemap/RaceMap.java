@@ -73,6 +73,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Bounds;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -82,6 +83,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.gwt.ui.actions.GetBoatPositionsAction;
@@ -1125,7 +1127,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     if (courseMarkOverlay == null) {
                         courseMarkOverlay = new CourseMarkOverlay(map, RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX, markDTO, coordinateSystem, courseDTO);
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
-                        courseMarkOverlay.setBuoyZoneRadiusInMeter(settings.getBuoyZoneRadiusInMeters());
+                        courseMarkOverlay.setBuoyZoneRadius(settings.getBuoyZoneRadius());
                         courseMarkOverlay.setSelected(isSelected);
                         courseMarkOverlays.put(markDTO.getName(), courseMarkOverlay);
                         markDTOs.put(markDTO.getName(), markDTO);
@@ -1134,7 +1136,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     } else {
                         courseMarkOverlay.setMarkPosition(markDTO.position, transitionTimeInMillis);
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
-                        courseMarkOverlay.setBuoyZoneRadiusInMeter(settings.getBuoyZoneRadiusInMeters());
+                        courseMarkOverlay.setBuoyZoneRadius(settings.getBuoyZoneRadius());
                         courseMarkOverlay.setSelected(isSelected);
                         courseMarkOverlay.draw();
                         toRemoveCourseMarks.remove(markDTO.getName());
@@ -1216,9 +1218,11 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             if (competitorInfoOverlay == null) {
                                 competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, competitorDTO);
                                 competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
+                                competitorInfoOverlay.setInfoText(createInfoText(competitorDTO, lastBoatFix));
                                 competitorInfoOverlay.setPosition(lastBoatFix.position, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.addToMap();
                             } else {
+                                competitorInfoOverlay.setInfoText(createInfoText(competitorDTO, lastBoatFix));
                                 competitorInfoOverlay.setPosition(lastBoatFix.position, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.draw();
                             }
@@ -1315,15 +1319,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * quarter of the circumference of the earth in longitude. A completely general, but more complicated algorithm is
      * necessary if greater distances are allowed.
      */
-    public LatLng calculatePositionAlongRhumbline(LatLng position, double bearingDeg, double distanceInKm) {
-        double distianceRad = distanceInKm / 6371.0;  // r = 6371 means earth's radius in km 
+    public LatLng calculatePositionAlongRhumbline(LatLng position, double bearingDeg, Distance distance) {
+        double distanceRad = distance.getCentralAngleRad(); 
         double lat1 = position.getLatitude() / 180. * Math.PI;
         double lon1 = position.getLongitude() / 180. * Math.PI;
         double bearingRad = bearingDeg / 180. * Math.PI;
-        double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distianceRad) + 
-                        Math.cos(lat1) * Math.sin(distianceRad) * Math.cos(bearingRad));
-        double lon2 = lon1 + Math.atan2(Math.sin(bearingRad)*Math.sin(distianceRad)*Math.cos(lat1), 
-                       Math.cos(distianceRad)-Math.sin(lat1)*Math.sin(lat2));
+        double lat2 = Math.asin(Math.sin(lat1) * Math.cos(distanceRad) + 
+                        Math.cos(lat1) * Math.sin(distanceRad) * Math.cos(bearingRad));
+        double lon2 = lon1 + Math.atan2(Math.sin(bearingRad)*Math.sin(distanceRad)*Math.cos(lat1), 
+                       Math.cos(distanceRad)-Math.sin(lat1)*Math.sin(lat2));
         lon2 = (lon2+3*Math.PI) % (2*Math.PI) - Math.PI;  // normalize to -180..+180�
         // position is already in LatLng space, so no mapping through coordinateSystem is required here
         return LatLng.newInstance(lat2 / Math.PI * 180., lon2  / Math.PI * 180.);
@@ -1349,6 +1353,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return null;
     }
 
+    final static Distance advantageLineLength = new MeterDistance(1000); // TODO this should probably rather scale with the visible area of the map; bug 616
     private void showAdvantageLine(Iterable<CompetitorDTO> competitorsToShow, Date date, long timeForPositionTransitionMillis) {
         if (map != null && lastRaceTimesInfo != null && quickRanks != null && lastCombinedWindTrackInfoDTO != null) {
             boolean drawAdvantageLine = false;
@@ -1377,10 +1382,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     lastBoatFix = getBoatFix(visibleLeaderInfo.getB(), date);
                 }
                 if (isVisibleLeaderInfoComplete && isLegTypeKnown && lastBoatFix != null && lastBoatFix.speedWithBearing != null) {
-                    double advantageLineLengthInKm = 1.0; // TODO this should probably rather scale with the visible
-                                                          // area of the map; bug 616
-                    double distanceFromBoatPositionInKm = visibleLeaderInfo.getB().getBoatClass()
-                            .getHullLengthInMeters() / 1000.; // one hull length
+                    Distance distanceFromBoatPositionInKm = visibleLeaderInfo.getB().getBoatClass().getHullLength(); // one hull length
                     // implement and use Position.translateRhumb()
                     double bearingOfBoatInDeg = lastBoatFix.speedWithBearing.bearingInDegrees;
                     LatLng boatPosition = coordinateSystem.toLatLng(lastBoatFix.position);
@@ -1417,9 +1419,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     }
                     MVCArray<LatLng> nextPath = MVCArray.newInstance();
                     LatLng advantageLinePos1 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
-                            coordinateSystem.mapDegreeBearing(rotatedBearingDeg1), advantageLineLengthInKm / 2.0);
+                            coordinateSystem.mapDegreeBearing(rotatedBearingDeg1), advantageLineLength.scale(0.5));
                     LatLng advantageLinePos2 = calculatePositionAlongRhumbline(posAheadOfFirstBoat,
-                            coordinateSystem.mapDegreeBearing(rotatedBearingDeg2), advantageLineLengthInKm / 2.0);
+                            coordinateSystem.mapDegreeBearing(rotatedBearingDeg2), advantageLineLength.scale(0.5));
                     if (advantageLine == null) {
                         PolylineOptions options = PolylineOptions.newInstance();
                         options.setClickable(true);
@@ -1938,8 +1940,20 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
 
     private CompetitorInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO) {
-        String infoText = competitorDTO.getSailID() == null || competitorDTO.getSailID().isEmpty() ? competitorDTO.getName() : competitorDTO.getSailID();
-        return new CompetitorInfoOverlay(map, zIndex, competitorSelection.getColor(competitorDTO, raceIdentifier), infoText, coordinateSystem);
+        GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO = getBoatFix(competitorDTO, timer.getTime());
+        return new CompetitorInfoOverlay(map, zIndex, competitorSelection.getColor(competitorDTO, raceIdentifier), createInfoText(competitorDTO, gpsFixDTO), coordinateSystem);
+    }
+    
+    private String createInfoText(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO) {
+        StringBuilder infoText = new StringBuilder();
+        infoText.append(competitorDTO.getSailID()).append("\n");
+        infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(gpsFixDTO.speedWithBearing.speedInKnots))
+                .append(" ").append(stringMessages.knotsUnit()).append("\n");
+        QuickRankDTO quickRankDTO = quickRanks.get(competitorDTO);
+        if (quickRankDTO != null) {
+            infoText.append(stringMessages.rank()).append(" : ").append(quickRanks.get(competitorDTO).rank);
+        }
+        return infoText.toString();
     }
     
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
@@ -2491,7 +2505,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         if (newSettings.getTailLengthInMilliseconds() != settings.getTailLengthInMilliseconds()) {
             requiresRedraw = true;
         }
-        if (newSettings.getBuoyZoneRadiusInMeters() != settings.getBuoyZoneRadiusInMeters()) {
+        if (newSettings.getBuoyZoneRadius() != settings.getBuoyZoneRadius()) {
             requiresRedraw = true;
         }
         if (newSettings.isShowOnlySelectedCompetitors() != settings.isShowOnlySelectedCompetitors()) {

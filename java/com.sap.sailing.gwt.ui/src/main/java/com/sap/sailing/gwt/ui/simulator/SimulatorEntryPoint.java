@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.client.SimulatorService;
@@ -21,7 +22,6 @@ import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorat
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
-import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
 
@@ -187,8 +187,7 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void createSimulatorPanel() {
-        SAPHeaderWithAuthentication header  = new SAPHeaderWithAuthentication(getStringMessages()
-                .sapSailingAnalytics(), getStringMessages().strategySimulatorTitle());
+        SAPSailingHeaderWithAuthentication header  = new SAPSailingHeaderWithAuthentication(getStringMessages().strategySimulatorTitle());
         
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
