@@ -143,9 +143,17 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         if (positioningList != null) {
             for (CompetitorResult positionedCompetitor : positioningList) {
                 Competitor competitor = service.getBaseDomainFactory().getExistingCompetitorById(positionedCompetitor.getCompetitorId());
-                int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
-                correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
-                        competitor, rankByRaceCommittee, positionedCompetitor.getScore());
+                // The score is updated when explicitly provided or when no penalty was set;
+                // in turn, this means that when a penalty is set and no score is explicitly provided,
+                // it is up to the scoring scheme to infer a penalty score for the MaxPointsReason.
+                // See also bug 3955.
+                if (positionedCompetitor.getScore() != null
+                        || positionedCompetitor.getMaxPointsReason() == null
+                        || positionedCompetitor.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
+                    int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
+                    correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, competitor,
+                            rankByRaceCommittee, positionedCompetitor.getScore());
+                }
                 setMaxPointsReasonInLeaderboardIfNecessary(leaderboard, raceColumn, timePoint, positionedCompetitor.getMaxPointsReason(), competitor);
             }
             // Since the metadata update is used by the Sailing suite to determine the final state of a race, it has to
