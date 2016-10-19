@@ -10,6 +10,6 @@
 			<div class="{local_res.css.regattacompetition_phase_fleet_race_state}" ui:field="raceStateUi"></div>
 			<div class="{local_res.css.regattacompetition_phase_fleet_race_date}" ui:field="raceDateUi"></div>
 		</div>
-		<img src="images/home/launch-loupe.svg" class="{local_res.css.regattacompetition_phase_fleet_race_arrow}"></img>
+        <div class="{local_res.css.regattacompetition_phase_fleet_race_arrow}"></div>
 	</div>
 </ui:UiBinder>

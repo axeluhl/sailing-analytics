@@ -41,7 +41,7 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
                 Window.alert(stringMessages.notCapableOfGeneratingACodeForIdentifier());
             } else if (!identifierBox.getValue().isEmpty() && !serverBox.getValue().isEmpty()) {
                 String apkUrl = getServerUrlWithoutFinalSlash() + rcAppApkPath;
-                return DeviceConfigurationQRCodeUtils.composeQRContent(URL.encodeQueryString(identifierBox.getValue()), apkUrl, accessToken);
+                return DeviceConfigurationQRCodeUtils.composeQRContent(URL.encodeQueryString(identifierBox.getValue()), apkUrl, URL.encodeQueryString(accessToken));
             }
             return null;
         }   

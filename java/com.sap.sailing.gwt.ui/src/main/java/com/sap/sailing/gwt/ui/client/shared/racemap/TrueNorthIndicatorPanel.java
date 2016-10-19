@@ -49,7 +49,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
                 final RaceMapSettings newRaceMapSettings = new RaceMapSettings(oldRaceMapSettings.getZoomSettings(),
                         oldRaceMapSettings.getHelpLinesSettings(), oldRaceMapSettings.getTransparentHoverlines(), 
                         oldRaceMapSettings.getHoverlineStrokeWeight(), oldRaceMapSettings.getTailLengthInMilliseconds(), newWindUpSettings,
-                        oldRaceMapSettings.getBuoyZoneRadiusInMeters(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
+                        oldRaceMapSettings.getBuoyZoneRadius(), oldRaceMapSettings.isShowOnlySelectedCompetitors(),
                         oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
                         oldRaceMapSettings.isShowWindStreamletOverlay(), oldRaceMapSettings.isShowSimulationOverlay(),
                         oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
