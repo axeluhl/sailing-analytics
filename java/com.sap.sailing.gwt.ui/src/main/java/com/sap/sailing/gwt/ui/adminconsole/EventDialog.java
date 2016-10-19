@@ -220,7 +220,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(rowIndex++, 1, baseURLEntryField);
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
         tabPanel.ensureDebugId("EventDialogTabs");
-        tabPanel.setHeight("525px");
+        tabPanel.setHeight("400px");
         panel.add(tabPanel);
         final ScrollPanel eventTab = new ScrollPanel(formGrid);
         eventTab.ensureDebugId("EventTab");
