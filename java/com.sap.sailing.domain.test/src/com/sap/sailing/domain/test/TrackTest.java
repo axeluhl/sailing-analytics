@@ -375,6 +375,27 @@ public class TrackTest {
     }
     
     @Test
+    public void testMaxSpeedForFixOverwrittenWithLowerSpeed() {
+        DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        GPSFixMoving slow = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000), new KnotSpeedWithBearingImpl(
+                1, new DegreeBearingImpl(123)));
+        GPSFixMoving fast = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(3600000), new KnotSpeedWithBearingImpl(
+                2, new DegreeBearingImpl(123)));
+        track.addGPSFix(fast);
+        assertEquals(2., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
+                getB().getKnots(), 0.001);
+        track.addGPSFix(slow);
+        track.lockForRead();
+        try {
+            assertEquals(1, track.getFixes().size());
+        } finally {
+            track.unlockAfterRead();
+        }
+        assertEquals(1., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(10800000)).
+                getB().getKnots(), 0.001);
+    }
+    
+    @Test
     public void testMaxSpeedForMovingTrackWithFixAtIntervalBoundaryAfterQuery() {
         DynamicGPSFixMovingTrackImpl<Object> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
         GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(

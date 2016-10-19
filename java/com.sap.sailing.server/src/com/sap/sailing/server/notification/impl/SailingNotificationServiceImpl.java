@@ -294,7 +294,6 @@ public class SailingNotificationServiceImpl implements SailingNotificationServic
     public void notifyUserOnCompetitorPassesFinish(Competitor competitor, TrackedRace trackedRace,
             Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet) {
         doWithEvent(leaderboard, (event, leaderboardGroup) -> {
-
             mailQueue.addNotification(new NotificationSetNotification<Competitor>(competitor, competitorResults) {
                 @Override
                 protected NotificationMailTemplate getMailTemplate(Competitor objectToNotifyAbout, Locale locale) {

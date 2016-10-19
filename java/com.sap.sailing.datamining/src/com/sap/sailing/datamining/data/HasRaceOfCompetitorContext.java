@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasRaceOfCompetitorContext {
@@ -13,6 +14,9 @@ public interface HasRaceOfCompetitorContext {
     
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();
+    
+    @Dimension(messageKey="CompetitorSearchTag", ordinal=11) // TODO Clean me: Move Dimension to Competitor when possible
+    public String getCompetitorSearchTag();
     
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
     public Distance getDistanceToStartLineAtStart();

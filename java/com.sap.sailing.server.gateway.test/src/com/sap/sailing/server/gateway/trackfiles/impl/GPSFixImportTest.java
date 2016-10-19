@@ -4,11 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.commons.fileupload.FileItem;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -30,32 +34,33 @@ public class GPSFixImportTest {
     
     @Test
     public void testReReadingEOFFromBufferedInputStream() throws IOException {
-        InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx");
-        BufferedInputStreamWithPublicBuffer bis = new BufferedInputStreamWithPublicBuffer(in);
-        bis.mark(10*1024*1024); // the file has ~2MB, so 10MB is much more than twice the size, so should never be required
-        int size = 0;
-        while (bis.read() != -1) {
-            size++;
+        try (InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx");
+                BufferedInputStreamWithPublicBuffer bis = new BufferedInputStreamWithPublicBuffer(in)) {
+            bis.mark(10 * 1024 * 1024); // the file has ~2MB, so 10MB is much more than twice the size, so should never
+                                        // be required
+            int size = 0;
+            while (bis.read() != -1) {
+                size++;
+            }
+            bis.reset();
+            int secondSize = 0;
+            while (bis.read() != -1) {
+                secondSize++;
+            }
+            assertEquals(size, secondSize);
+            assertTrue(bis.getBuffer().length < 8 * 1024 * 1024);
+            bis.reset();
+            int thirdSize = 0;
+            while (bis.read() != -1) {
+                thirdSize++;
+            }
+            assertEquals(size, thirdSize);
+            assertTrue(bis.getBuffer().length < 8 * 1024 * 1024);
+            // Now try to read EOF multiple times
+            for (int i = 1; i < 1000; i++) {
+                assertEquals(-1, bis.read());
+            }
         }
-        bis.reset();
-        int secondSize = 0;
-        while (bis.read() != -1) {
-            secondSize++;
-        }
-        assertEquals(size, secondSize);
-        assertTrue(bis.getBuffer().length < 8*1024*1024);
-        bis.reset();
-        int thirdSize = 0;
-        while (bis.read() != -1) {
-            thirdSize++;
-        }
-        assertEquals(size, thirdSize);
-        assertTrue(bis.getBuffer().length < 8*1024*1024);
-        // Now try to read EOF multiple times
-        for (int i=1; i<1000; i++) {
-            assertEquals(-1, bis.read());
-        }
-        bis.close();
     }
     
     @Test
@@ -73,8 +78,81 @@ public class GPSFixImportTest {
             public void storeFix(GPSFix fix, DeviceIdentifier deviceIdentifier) {
             }
         };
-        InputStream in = getClass().getResourceAsStream("/Cardiff Race17 - COMPETITORS.gpx");
-        servlet.importFiles(Arrays.asList(new Pair<>("test.gpx", in)), new AlwaysFailingGPSFixImporter(-1));
+        FileItem fi = new FileItem() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void write(File file) throws Exception {
+            }
+
+            @Override
+            public void setFormField(boolean state) {
+            }
+
+            @Override
+            public void setFieldName(String name) {
+            }
+
+            @Override
+            public boolean isInMemory() {
+                return false;
+            }
+
+            @Override
+            public boolean isFormField() {
+                return false;
+            }
+
+            @Override
+            public String getString(String encoding) throws UnsupportedEncodingException {
+                return null;
+            }
+
+            @Override
+            public String getString() {
+                return null;
+            }
+
+            @Override
+            public long getSize() {
+                return 0;
+            }
+
+            @Override
+            public OutputStream getOutputStream() throws IOException {
+                return null;
+            }
+
+            @Override
+            public String getName() {
+                return "Cardiff Race17 - COMPETITORS.gpx";
+            }
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return getClass().getResourceAsStream("/" + getName());
+            }
+
+            @Override
+            public String getFieldName() {
+                return null;
+            }
+
+            @Override
+            public String getContentType() {
+                return null;
+            }
+
+            @Override
+            public byte[] get() {
+                return null;
+            }
+
+            @Override
+            public void delete() {
+            }
+        };
+        servlet.importFiles(Arrays.asList(new Pair<>("test.gpx", fi)), new AlwaysFailingGPSFixImporter(-1));
         // getting to here without errors is good enough
     }
 }

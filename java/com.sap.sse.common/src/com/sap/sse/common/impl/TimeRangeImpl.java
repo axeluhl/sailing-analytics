@@ -76,8 +76,18 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
     }
 
     @Override
+    public boolean startsAfter(TimePoint timePoint) {
+        return from().after(timePoint);
+    }
+
+    @Override
     public boolean endsAfter(TimeRange other) {
         return to().after(other.to());
+    }
+
+    @Override
+    public boolean endsBefore(TimePoint timePoint) {
+        return to().before(timePoint);
     }
 
     @Override
