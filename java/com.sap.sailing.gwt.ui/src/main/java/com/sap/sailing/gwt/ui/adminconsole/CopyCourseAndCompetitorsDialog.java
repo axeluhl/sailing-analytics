@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,7 +28,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     
     public CopyCourseAndCompetitorsDialog(SailingServiceAsync sailingService, ErrorReporter errorReporter, final StringMessages stringMessages,
             Collection<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
-            String leaderboardName, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
+            String leaderboardName, Distance buoyZoneRadius, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
         super(stringMessages.selectRaces(), stringMessages.selectRaces(), stringMessages.ok(), stringMessages.cancel(),
                 new Validator<CourseAndCompetitorCopyOperation>() {
                     @Override

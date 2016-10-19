@@ -937,6 +937,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
         return null;
     }
+
     private String createRegattaLink(RegattaOverviewEntryDTO entryDTO) {
         String leaderboardLink = EntryPointLinkFactory.createLeaderboardTabLink(eventId.toString(), entryDTO.regattaName);
         return leaderboardLink;

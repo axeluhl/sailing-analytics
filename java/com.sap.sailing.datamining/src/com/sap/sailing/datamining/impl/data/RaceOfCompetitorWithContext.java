@@ -9,7 +9,9 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -45,8 +47,28 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
+    public Tack getTackAtStart() throws NoWindException {
+        TimePoint startOfRace = getTrackedRace().getStartOfRace();
+        return startOfRace == null ? null : getTrackedRace().getTack(getCompetitor(), startOfRace);
+    }
+    
+    @Override
     public Distance getDistanceToStartLineAtStart() {
         return getTrackedRace().getDistanceToStartLine(getCompetitor(), 0);
+    }
+    
+    @Override
+    public Double getNormalizedDistanceToStarboardSideAtStart() {
+        TrackedRace trackedRace = getTrackedRace();
+        TrackedLegOfCompetitor firstTrackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, trackedRace.getRace().getCourse().getFirstLeg());
+        TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
+        if (competitorStartTime == null) {
+            return null;
+        }
+        
+        Double distance = trackedRace.getDistanceFromStarboardSideOfStartLine(getCompetitor(), competitorStartTime).getMeters();
+        Double length = trackedRace.getStartLine(competitorStartTime).getLength().getMeters();
+        return distance / length;
     }
     
     @Override
@@ -60,11 +82,43 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
+    public Speed getSpeedTenSecondsAfterStart() {
+        TimePoint startOfRace = getTrackedRace().getStartOfRace();
+        if (startOfRace == null) {
+            return null;
+        }
+        return getTrackedRace().getTrack(getCompetitor()).getEstimatedSpeed(startOfRace.plus(TimeUnit.SECONDS.toMillis(10)));
+    }
+    
+    @Override
+    public Double getAbsoluteRankThirtySecondsAfterStart() {
+        TimePoint startOfRace = getTrackedRace().getStartOfRace();
+        if (startOfRace == null) {
+            return null;
+        }
+        
+        int rank = getTrackedRace().getRank(getCompetitor(), startOfRace.plus(TimeUnit.SECONDS.toMillis(30)));
+        return rank == 0 ? null : Double.valueOf(rank);
+    }
+    
+    @Override
     public Double getRankAtFirstMark() {
         Course course = getTrackedRace().getRace().getCourse();
         Waypoint firstMark = course.getFirstLeg().getTo();
         Competitor competitor = getCompetitor();
         int rank = getTrackedRace().getRank(competitor, getTrackedRace().getMarkPassing(competitor, firstMark).getTimePoint());
+        return rank == 0 ? null : Double.valueOf(rank);
+    }
+    
+    @Override
+    public Double getRankGainsOrLossesBetweenFirstMarkAndFinish() {
+        Double rankAtFirstMark = getRankAtFirstMark();
+        Double rankAtFinish = getRankAtFinish();
+        return rankAtFirstMark != null && rankAtFinish != null ? rankAtFirstMark - rankAtFinish : null;
+    }
+
+    private Double getRankAtFinish() {
+        int rank = getTrackedRace().getRank(getCompetitor(), getTrackedRace().getEndOfTracking());
         return rank == 0 ? null : Double.valueOf(rank);
     }
     
@@ -97,28 +151,6 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
             }
         }
         return number;
-    }
-    
-    @Override
-    public Double getRankGainsOrLossesBetweenFirstMarkAndFinish() {
-        Double rankAtFirstMark = getRankAtFirstMark();
-        Double rankAtFinish = getRankAtFinish();
-        return rankAtFirstMark != null && rankAtFinish != null ? rankAtFirstMark - rankAtFinish : null;
-    }
-
-    private Double getRankAtFinish() {
-        int rank = getTrackedRace().getRank(getCompetitor(), getTrackedRace().getEndOfTracking());
-        return rank == 0 ? null : Double.valueOf(rank);
-    }
-    
-    @Override
-    public Double getNormalizedDistanceToStarboardSideAtStart() {
-        TrackedRace trackedRace = getTrackedRace();
-        TrackedLegOfCompetitor firstTrackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor, trackedRace.getRace().getCourse().getFirstLeg());
-        TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
-        Double distance = trackedRace.getDistanceFromStarboardSideOfStartLine(getCompetitor(), competitorStartTime).getMeters();
-        Double length = trackedRace.getStartLine(competitorStartTime).getLength().getMeters();
-        return distance / length;
     }
 
 }
