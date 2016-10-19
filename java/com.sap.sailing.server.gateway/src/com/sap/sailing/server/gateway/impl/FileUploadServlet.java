@@ -60,6 +60,7 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
             try {
                 if (fileItem.getSize() > 1024 * 1024 * MAX_SIZE_IN_MB) {
                     final String errorMessage = "Image is larger than " + MAX_SIZE_IN_MB + "MB";
+                    logger.warning("Ignoring file storage request because file "+fileItem.getName()+" is larger than "+MAX_SIZE_IN_MB+"MB");
                     result.put("status", Status.INTERNAL_SERVER_ERROR.name());
                     result.put("message", errorMessage);
                 } else {
