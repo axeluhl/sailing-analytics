@@ -2828,15 +2828,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private Triple<RGBColor, Integer, Integer> convertFromColorToHSL(Color color) {
         Triple<Integer, Integer, Integer> asRgb = color.getAsRGB();
-        double r = asRgb.getA() / 255.0;
-        double g = asRgb.getB() / 255.0;
-        double b = asRgb.getC() / 255.0;
+        int red = asRgb.getA();
+        int green = asRgb.getB();
+        int blue = asRgb.getC();
+        int minRGB = Math.min(Math.min(red, green), blue);
+        int maxRGB = Math.max(Math.max(red, green), blue);
 
-        double min = Math.min(Math.min(r, g), b);
-        double max = Math.max(Math.max(r, g), b);
+        double min = minRGB / 255.0;
+        double max = maxRGB / 255.0;
         double L = ((max + min) / 2) * 100;
         double S;
-        if (max == min) {
+        if (minRGB == maxRGB) {
             S = 0;
         } else {
             if (L < 50) {
