@@ -111,6 +111,7 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
         header.getElement().getStyle().setPosition(Position.FIXED);
         header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);
+        header.getElement().getStyle().setZIndex(100);
         return header;
     }
 
