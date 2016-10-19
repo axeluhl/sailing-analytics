@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.ColorMap;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.HSVColor;
+import com.sap.sse.common.impl.RGBColor;
 
 
 /**
@@ -28,7 +29,9 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     /**
      * Used for blocking a range of colors around each color in {@link ColorMapImpl#blockedColors}
      */
-    private static final double MIN_COLOR_DISTANCE = 0.45;
+    private static final double MIN_COLOR_DISTANCE = 0.2;
+    
+    public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
 
     private static final float STEP = 0.1f;
     /*
@@ -60,7 +63,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
         idColor = new HashMap<>();
         blockedColors = new ArrayList<>();
         insertBaseColors();
-        insertBlockedColors();
+        blockedColors.add(convertFromColorToHSV(WATER_COLOR));
     }
 
     private void insertBaseColors() {
@@ -77,14 +80,6 @@ public class ColorMapImpl<T> implements ColorMap<T> {
         baseColors[10] = new HSVColor(330, 1, 1);
     }
 
-    private void insertBlockedColors() {
-        //water color
-        blockedColors.add(new HSVColor(210, 0.79f, 0.34f));
-        //colors from satellite
-        blockedColors.add(new HSVColor(222, 0.52f, 0.48f));
-        blockedColors.add(new HSVColor(195, 0.58f, 0.18f));
-    }
-
     /**
      * Returns a color that is computed once.
      * 
@@ -97,8 +92,8 @@ public class ColorMapImpl<T> implements ColorMap<T> {
         Color color = idColor.get(object);
         if (color == null) {
             do {
-                color = createHexColor(colorCounter++);
-            } while (isContainColor(blockedColors, convertColorToHSVColor(color)));
+                color = generateColor(colorCounter++);
+            } while (isContainColor(blockedColors, convertFromColorToHSV(color)));
             idColor.put(object, color);
         }
         return color;
@@ -126,7 +121,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     public boolean addBlockedColor(Color color) {
         boolean result = false;
         if(color != null && !blockedColors.contains(color)) {
-            result = blockedColors.add(convertColorToHSVColor(color));
+            result = blockedColors.add(convertFromColorToHSV(color));
         }
         return result;
     }
@@ -134,7 +129,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     public boolean removeBlockedColor(Color color) {
         boolean result = false;
         if(color != null) {
-            result = blockedColors.remove(convertColorToHSVColor(color));
+            result = blockedColors.remove(convertFromColorToHSV(color));
         }
         return result;
     }
@@ -143,7 +138,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
         blockedColors.clear();
     }
     
-    private HSVColor convertColorToHSVColor(Color color) {
+    private HSVColor convertFromColorToHSV(Color color) {
         Triple<Float, Float, Float> hsvColor = color.getAsHSV();
         return new HSVColor(hsvColor.getA(), hsvColor.getB(), hsvColor.getC());
     }
@@ -158,8 +153,9 @@ public class ColorMapImpl<T> implements ColorMap<T> {
      * @param index
      *            The index of e.g. a competitor. Make sure, that each competitor has a unique index.
      * @return A color computed using the {@code index}.
+     * @author Stsiapan_Tsybulski
      */
-    private Color createHexColor(int index) {
+    private Color generateColor(int index) {
         int baseColorsCount = baseColors.length;
         int currentColorIndex = index % baseColorsCount;
         float saturationDecrease = STEP;

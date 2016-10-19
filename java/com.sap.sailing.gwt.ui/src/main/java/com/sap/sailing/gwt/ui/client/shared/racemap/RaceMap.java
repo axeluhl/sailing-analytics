@@ -80,6 +80,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
@@ -150,6 +151,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
+    
     
     private MapWidget map;
     
@@ -2803,7 +2805,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           // To play with the styles, check out http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html.
           // To convert an RGB color into the strange hue/saturation/lightness model used by the Google Map use
           // http://software.stadtwerk.org/google_maps_colorizr/#water/all/123456/.
-          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), 0, -70);
+          Triple<RGBColor, Integer, Integer> hslColor = convertFromColorToHSL(ColorMapImpl.WATER_COLOR);
+          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, hslColor.getA(), hslColor.getB(), hslColor.getC());
           
           MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
           mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
@@ -2821,6 +2824,52 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setPanControlOptions(panControlOptions);
           }
         return mapOptions;
+    }
+
+    private Triple<RGBColor, Integer, Integer> convertFromColorToHSL(Color color) {
+        Triple<Integer, Integer, Integer> asRgb = color.getAsRGB();
+        double r = asRgb.getA() / 255.0;
+        double g = asRgb.getB() / 255.0;
+        double b = asRgb.getC() / 255.0;
+
+        double min = Math.min(Math.min(r, g), b);
+        double max = Math.max(Math.max(r, g), b);
+        double L = ((max + min) / 2) * 100;
+        double S;
+        if (max == min) {
+            S = 0;
+        } else {
+            if (L < 50) {
+                S = ((max - min) / (max + min)) * 100;
+            } else {
+                S = ((max - min) / (2 - max - min)) * 100;
+            }
+        }
+
+        // google maps's water color values
+        int Lbase = 76;
+        int Sbase = 45;
+
+        // merge HSL and base values
+        double googleL;
+        double googleS;
+        if (L < Lbase) {
+            googleL = L * 100 / Lbase - 100;
+        } else if (L > Lbase) {
+            googleL = (L - Lbase) * 100 / (100 - Lbase);
+        } else {
+            googleL = Lbase;
+        }
+
+        if (S < Sbase) {
+            googleS = S * 100 / Sbase - 100;
+        } else if (S > Sbase) {
+            googleS = (S - Sbase) * 100 / (100 - Sbase);
+        } else {
+            googleS = Sbase;
+        }
+        return new Triple<RGBColor, Integer, Integer>(new RGBColor(asRgb.getA(), asRgb.getB(), asRgb.getC()),
+                (int) Math.round(googleS), (int) Math.round(googleL));
     }
 
     /**
