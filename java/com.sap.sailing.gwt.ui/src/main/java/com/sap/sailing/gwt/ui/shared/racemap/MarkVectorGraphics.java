@@ -27,6 +27,12 @@ public class MarkVectorGraphics {
     protected double anchorPointX = 0.44;
     protected double anchorPointY = 1.67;
     
+    protected double markSelectionScaleX = 1.2;
+    protected double markSelectionScaleY = 1.2;
+    
+    protected double markSelectionTranslateX = -10;
+    protected double markSelectionTranslateY = -30;
+    
     private final static String DEFAULT_MARK_COLOR = "#f9ac00";
     private final static String DEFAULT_MARK_BG_COLOR = "#f0f0f0";
 
@@ -92,8 +98,8 @@ public class MarkVectorGraphics {
     protected void drawMarkSelection(Context2d ctx) {
             ctx.save();
 
-            ctx.scale(1.2,1.2);
-            ctx.translate(-10,-30);
+            ctx.scale(markSelectionScaleX, markSelectionScaleY);
+            ctx.translate(markSelectionTranslateX, markSelectionTranslateY);
 
             CanvasGradient g1=ctx.createLinearGradient(77.8,188,165,219);
             g1.addColorStop(0,"rgba(240, 240, 240, 1)");
