@@ -37,4 +37,5 @@
 	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole" />
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
+	<inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
 </module>
