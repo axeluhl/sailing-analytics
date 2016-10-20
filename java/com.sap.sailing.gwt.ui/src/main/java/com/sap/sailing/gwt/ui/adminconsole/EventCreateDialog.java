@@ -37,14 +37,11 @@ public class EventCreateDialog extends EventDialog {
         endDateBox = createDateTimeBox(now);
         endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
         endDateBox.ensureDebugId("EndDateTimeBox");
-        officialWebsiteURLEntryField = createTextBox(null);
-        officialWebsiteURLEntryField.setVisibleLength(50);
-        baseURLEntryField = createTextBox(null);
-        baseURLEntryField.setVisibleLength(50);
-        sailorsInfoWebsiteURLEntryFields = createTextBoxesForLocalesAndDefault(Collections.<String, String> emptyMap());
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(false);
         isPublicCheckBox.ensureDebugId("IsPublicCheckBox");
+        baseURLEntryField = createTextBox(null);
+        baseURLEntryField.setVisibleLength(50);
         imagesListComposite.fillImages(Collections.<ImageDTO>emptyList());
         videosListComposite.fillVideos(Collections.<VideoDTO>emptyList());
         // add default course area
