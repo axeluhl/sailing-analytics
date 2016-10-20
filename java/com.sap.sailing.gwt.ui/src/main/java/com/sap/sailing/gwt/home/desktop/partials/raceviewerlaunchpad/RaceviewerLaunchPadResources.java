@@ -18,6 +18,7 @@ public interface RaceviewerLaunchPadResources extends ClientBundle {
         String raceviewerlaunchpad_date();
         String raceviewerlaunchpad_cta();
         String raceviewerlaunchpadlive();
+        String raceviewerlaunchpadplanned();
         String raceviewerlaunchpad_content_item();
         String raceviewerlaunchpad_content_item_icon();
         String raceviewerlaunchpad_icon();

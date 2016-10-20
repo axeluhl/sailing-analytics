@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -187,7 +188,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), 0);
+        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), Distance.NULL);
         BoatDTO boat = new BoatDTO(name.getText(), sailId.getText());
         CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color, email.getText(),
                 /* twoLetterIsoCountryCode */ null,
