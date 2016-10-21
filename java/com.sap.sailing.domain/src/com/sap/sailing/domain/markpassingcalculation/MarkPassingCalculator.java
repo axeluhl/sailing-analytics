@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,6 +61,8 @@ public class MarkPassingCalculator {
      * started and then terminated again.
      */
     private final Thread listenerThread;
+
+    private Listen listenThread;
     
     /**
      * Synchronized using the {@link #listenerThread} as monitor object.
@@ -76,7 +79,8 @@ public class MarkPassingCalculator {
         finder = new CandidateFinderImpl(race, executor);
         chooser = new CandidateChooserImpl(race);
         if (listen) {
-            listenerThread = new Thread(new Listen(race.getRace().getName()), "MarkPassingCalculator for race " + race.getRace().getName());
+            listenThread = new Listen(race.getRace().getName());
+            listenerThread = new Thread(listenThread, "MarkPassingCalculator for race " + race.getRace().getName());
         } else {
             listenerThread = null;
         }
@@ -131,6 +135,14 @@ public class MarkPassingCalculator {
         }
     }
 
+    public void lockListenForRead() {
+        listenThread.readWriteLock.readLock().lock();
+    }
+    
+    public void unlockListenForRead() {
+        listenThread.readWriteLock.readLock().unlock();
+    }
+
     /**
      * Waits until an object is in the queue, then drains it entirely. After that the information is sorted depending on
      * whether it is a fix, an updated waypoint or an updated fixed markpassing. Finally, if <code>suspended</code> is
@@ -142,9 +154,11 @@ public class MarkPassingCalculator {
      */
     private class Listen implements Runnable {
         private final String raceName;
+        private final ReentrantReadWriteLock readWriteLock;
         
         public Listen(String raceName) {
             this.raceName = raceName;
+            readWriteLock = new ReentrantReadWriteLock();
         }
 
         @Override
@@ -167,6 +181,7 @@ public class MarkPassingCalculator {
                         List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                         try {
                             allNewFixInsertions.add(listener.getQueue().take());
+                            readWriteLock.writeLock().lock();
                         } catch (InterruptedException e) {
                             logger.log(Level.SEVERE, "MarkPassingCalculator for "+raceName+" threw exception " + e.getMessage()
                                     + " while waiting for new GPSFixes");
@@ -225,6 +240,8 @@ public class MarkPassingCalculator {
                         }
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+": " + e.getMessage(), e);
+                    } finally {
+                        readWriteLock.writeLock().unlock();
                     }
                 }
             } finally {

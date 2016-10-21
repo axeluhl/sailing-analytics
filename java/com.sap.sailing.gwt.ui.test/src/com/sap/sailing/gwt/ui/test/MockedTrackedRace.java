@@ -860,4 +860,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Iterable<RaceLog> getAttachedRaceLogs() {
         return Collections.emptySet();
     }
+
+    @Override
+    public NavigableSet<MarkPassing> getUpdatedMarkPassings(Competitor competitor) {
+        return null;
+    }
 }

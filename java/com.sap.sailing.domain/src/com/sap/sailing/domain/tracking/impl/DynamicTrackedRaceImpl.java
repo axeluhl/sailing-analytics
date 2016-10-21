@@ -1177,4 +1177,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         });
         notifyListeners(track);
     }
+
+    @Override
+    public NavigableSet<MarkPassing> getUpdatedMarkPassings(Competitor competitor) {
+        markPassingCalculator.lockListenForRead();
+        try {
+            return getMarkPassings(competitor);
+        } finally {
+            markPassingCalculator.unlockListenForRead();
+        }
+    }
 }

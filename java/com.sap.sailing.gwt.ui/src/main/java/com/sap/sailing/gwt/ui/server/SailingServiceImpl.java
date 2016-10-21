@@ -5806,10 +5806,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO) {
         Map<Integer, Date> result = new HashMap<>();
-        final TrackedRace trackedRace = getExistingTrackedRace(race);
+        final DynamicTrackedRace trackedRace = (DynamicTrackedRace) getExistingTrackedRace(race);
         if (trackedRace != null) {
             Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(), competitorDTO.getIdAsString());
-            Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+            Set<MarkPassing> competitorMarkPassings = trackedRace.getUpdatedMarkPassings(competitor);
             Iterable<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints();
             if (competitorMarkPassings != null) {
                 for (MarkPassing markPassing : competitorMarkPassings) {
