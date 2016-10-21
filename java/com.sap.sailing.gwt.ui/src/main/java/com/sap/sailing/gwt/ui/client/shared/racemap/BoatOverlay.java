@@ -155,20 +155,20 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 boatClassMasterdata.getHullLength(), boatClassMasterdata.getHullBeam());
         // the minimum boat length is related to the hull of the boat, not the overall length
         double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
-        double ratioHullBeanLenght = boatClassMasterdata.getHullBeam().divide(boatClassMasterdata.getHullLength());
+        double ratioHullBeanLength = boatClassMasterdata.getHullBeam().divide(boatClassMasterdata.getHullLength());
         if (boatSizeInPixel.getWidth() < minBoatHullLengthInPx) {
             boatSizeInPixel.setWidth(minBoatHullLengthInPx);
-            boatSizeInPixel.setHeight(minBoatHullLengthInPx * ratioHullBeanLenght);
+            boatSizeInPixel.setHeight(minBoatHullLengthInPx * ratioHullBeanLength);
         }
 
-        double boatWidthScaleFactor = boatSizeInPixel.getWidth() / (boatVectorGraphics.getHullLengthInPx());
+        double boatHullScaleFactor = boatSizeInPixel.getWidth() / (boatVectorGraphics.getHullLengthInPx());
         double boatBeamScaleFactor = boatSizeInPixel.getHeight() / (boatVectorGraphics.getBeamInPx());
 
         // as the canvas contains the whole boat the canvas size relates to the overall length, not the hull length
-        double scaledWidthSize = (boatVectorGraphics.getOverallLengthInPx()) * boatWidthScaleFactor;
+        double scaledWidthSize = (boatVectorGraphics.getOverallLengthInPx()) * boatHullScaleFactor;
         double scaledBeamSize = (boatVectorGraphics.getOverallLengthInPx()) * boatBeamScaleFactor;
 
-        return new Util.Pair<Size, Size>(Size.newInstance(boatWidthScaleFactor, boatBeamScaleFactor),
+        return new Util.Pair<Size, Size>(Size.newInstance(boatHullScaleFactor, boatBeamScaleFactor),
                 Size.newInstance(scaledWidthSize + scaledWidthSize / 2.0, scaledBeamSize + scaledBeamSize / 2.0));
     }
 }
