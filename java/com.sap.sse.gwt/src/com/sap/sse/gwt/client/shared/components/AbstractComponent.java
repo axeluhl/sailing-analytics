@@ -1,7 +1,5 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.io.Serializable;
-
 import com.sap.sse.common.settings.Settings;
 
 public abstract class AbstractComponent<SettingsType extends Settings> implements Component<SettingsType> {
@@ -9,7 +7,7 @@ public abstract class AbstractComponent<SettingsType extends Settings> implement
     private ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = new ComponentTreeNodeInfo<>();
     
     @Override
-    public Serializable getId() {
+    public String getId() {
         return getLocalizedShortName();
     }
     

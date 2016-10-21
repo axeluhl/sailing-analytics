@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,22 +15,22 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
  * {@link Perspective}s and the perspective's {@link PerspectiveCompositeSettings composite settings}.
  */
 public class CompositeSettings extends AbstractSettings implements SettingsMap {
-    private final Map<Serializable, Settings> settingsPerComponentId;
+    private final Map<String, Settings> settingsPerComponentId;
 
-    public CompositeSettings(Map<Serializable, Settings> settingsPerComponentId) {
+    public CompositeSettings(Map<String, Settings> settingsPerComponentId) {
         this.settingsPerComponentId = new HashMap<>(settingsPerComponentId);
     }
     
     @Override
-    public Map<Serializable, Settings> getSettingsByKey() {
+    public Map<String, Settings> getSettingsByKey() {
         return getSettingsPerComponentId();
     }
 
-    public Map<Serializable, Settings> getSettingsPerComponentId() {
+    public Map<String, Settings> getSettingsPerComponentId() {
         return Collections.unmodifiableMap(settingsPerComponentId);
     }
     
-    public <C extends ComponentLifecycle<S,?>, S extends Settings> Settings findSettingsByComponentId(Serializable componentId) {
+    public <C extends ComponentLifecycle<S,?>, S extends Settings> Settings findSettingsByComponentId(String componentId) {
         return settingsPerComponentId.get(componentId);
     }
 }

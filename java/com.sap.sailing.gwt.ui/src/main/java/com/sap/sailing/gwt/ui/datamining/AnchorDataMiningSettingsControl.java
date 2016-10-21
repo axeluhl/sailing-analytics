@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.datamining;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -92,21 +91,21 @@ public class AnchorDataMiningSettingsControl extends AbstractComponent<Composite
 
     @Override
     public void updateSettings(CompositeSettings newSettings) {
-        for (Entry<Serializable, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
+        for (Entry<String, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
             updateSettings(componentAndSettings);
         }
     }
 
     @Override 
     public CompositeSettings getSettings() {
-        Map<Serializable, Settings> settings = new HashMap<>();
+        Map<String, Settings> settings = new HashMap<>();
         for (Component<?> component : components) {
             settings.put(component.getId(), component.hasSettings() ? component.getSettings() : null);
         }
         return new CompositeSettings(settings);
     }
     
-    private <S extends Settings> void updateSettings(Entry<Serializable, S> componentIdAndSettings) {
+    private <S extends Settings> void updateSettings(Entry<String, S> componentIdAndSettings) {
         // we assume that the component to which the ID resolves matches with the settings type provided
         @SuppressWarnings("unchecked")
         Component<S> component = (Component<S>) findComponentById(componentIdAndSettings.getKey());
@@ -116,7 +115,7 @@ public class AnchorDataMiningSettingsControl extends AbstractComponent<Composite
         }
     }
     
-    private Component<?> findComponentById(Serializable componentId) {
+    private Component<?> findComponentById(String componentId) {
         for (Component<?> component : components) {
             if (component.getId().equals(componentId)) {
                 return component;

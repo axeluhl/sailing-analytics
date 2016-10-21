@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +26,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     private PS perspectiveOwnSettings;
     private final PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings;
 
-    private final Map<Serializable, Component<? extends Settings>> childComponents = new HashMap<>();
+    private final Map<String, Component<? extends Settings>> childComponents = new HashMap<>();
     
     protected void addChildComponent(Component<? extends Settings> childComponent) {
         childComponents.put(childComponent.getId(), childComponent);
@@ -53,7 +52,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     @Override
     public PerspectiveCompositeSettings<PS> getSettings() {
-        Map<Serializable, Settings> settingsPerComponent = new HashMap<>();
+        Map<String, Settings> settingsPerComponent = new HashMap<>();
         for (Component<?> c : getComponents()) {
             if (c.hasSettings()) {
                 settingsPerComponent.put(c.getId(), c.getSettings());
@@ -64,13 +63,13 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     @Override
     public void updateSettings(PerspectiveCompositeSettings<PS> newSettings) {
-        for (Entry<Serializable, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
+        for (Entry<String, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
             updateSettings(componentAndSettings);
         }
         this.perspectiveOwnSettings = newSettings.getPerspectiveOwnSettings();
     }
 
-    private <S extends Settings> void updateSettings(Entry<Serializable, S> componentIdAndSettings) {
+    private <S extends Settings> void updateSettings(Entry<String, S> componentIdAndSettings) {
         @SuppressWarnings("unchecked")
         Component<S> component = (Component<S>) findComponentById(componentIdAndSettings.getKey());
         if (component != null) {
@@ -78,7 +77,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
         }
     }
 
-    private Component<?> findComponentById(Serializable componentId) {
+    private Component<?> findComponentById(String componentId) {
         for (Component<?> component : getComponents()) {
             if (component.getId().equals(componentId)) {
                 return component;

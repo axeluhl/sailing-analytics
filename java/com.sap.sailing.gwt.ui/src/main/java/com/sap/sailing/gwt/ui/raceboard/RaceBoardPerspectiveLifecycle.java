@@ -94,4 +94,9 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public RaceTimePanelLifecycle getRaceTimePanelLifecycle() {
         return raceTimePanelLifecycle;
     }
+
+    @Override
+    public String getComponentId() {
+        return "RaceBoard";
+    }
 }

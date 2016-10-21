@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,8 +51,8 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
     }
 
     @Override
-    public Serializable getComponentId() {
-        return getLocalizedShortName();
+    public String getComponentId() {
+        return "LeaderboardPanel";
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,19 +27,19 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     implements SettingsDialogComponent<PerspectiveCompositeSettings<PS>> {
     
     public static class ComponentIdWithSettingsAndDialogComponent<S extends Settings> {
-        private final Serializable componentId;
+        private final String componentId;
         private final S settings;
         private final SettingsDialogComponent<S> settingsDialog;
         private final String componentName;
 
-        public ComponentIdWithSettingsAndDialogComponent(String componentName, Serializable componentId, S settings, SettingsDialogComponent<S> settingsDialog) {
+        public ComponentIdWithSettingsAndDialogComponent(String componentName, String componentId, S settings, SettingsDialogComponent<S> settingsDialog) {
             this.componentName = componentName;
             this.componentId = componentId;
             this.settings = settings;
             this.settingsDialog = settingsDialog;
         }
         
-        public Serializable getComponentId() {
+        public String getComponentId() {
             return componentId;
         }
 
@@ -179,7 +178,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     @Override
     public PerspectiveCompositeSettings<PS> getResult() {
         PS perspectiveOwnSettings = perspectiveIdsAndSettingsDialog != null ? getPerspectiveOwnSettings(perspectiveIdsAndSettingsDialog) : null;
-        Map<Serializable, Settings> settings = new HashMap<>();
+        Map<String, Settings> settings = new HashMap<>();
         for (ComponentIdWithSettingsAndDialogComponent<?> componentAndDialog : componentIdsAndDialogComponents) {
             settings.put(componentAndDialog.getComponentId(), componentAndDialog.getSettingsDialog().getResult());
         }

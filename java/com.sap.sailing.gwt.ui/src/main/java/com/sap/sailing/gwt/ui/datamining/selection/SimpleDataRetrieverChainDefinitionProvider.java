@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -243,7 +242,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     @Override
     public void updateSettings(CompositeSettings newSettings) {
         Map<DataRetrieverLevelDTO, SerializableSettings> chainSettings = settingsMap.get(getDataRetrieverChainDefinition());
-        for (Entry<Serializable, Settings> settingsPerComponent : newSettings.getSettingsPerComponentId().entrySet()) {
+        for (Entry<String, Settings> settingsPerComponent : newSettings.getSettingsPerComponentId().entrySet()) {
             RetrieverLevelSettingsComponent component = (RetrieverLevelSettingsComponent) findComponentById(settingsPerComponent.getKey());
             SerializableSettings settings = (SerializableSettings) settingsPerComponent.getValue();
             chainSettings.put(component.getRetrieverLevel(), settings);
@@ -251,7 +250,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
         notifyListeners();
     }
 
-    private Component<?> findComponentById(Serializable componentId) {
+    private Component<?> findComponentById(String componentId) {
         for (Component<?> component : retrieverLevelSettingsComponents) {
             if (component.getId().equals(componentId)) {
                 return component;
@@ -262,7 +261,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     
     @Override 
     public CompositeSettings getSettings() {
-        Map<Serializable, Settings> settings = new HashMap<>();
+        Map<String, Settings> settings = new HashMap<>();
         for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap.get(getDataRetrieverChainDefinition()).entrySet()) {
             final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
             final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();

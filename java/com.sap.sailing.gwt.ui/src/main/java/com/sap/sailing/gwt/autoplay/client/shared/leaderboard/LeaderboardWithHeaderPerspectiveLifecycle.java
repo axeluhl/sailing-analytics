@@ -60,4 +60,9 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
         return leaderboardPanelLifecycle;
     }
 
+    @Override
+    public String getComponentId() {
+        return "LeaderboardWithHeader";
+    }
+
 }

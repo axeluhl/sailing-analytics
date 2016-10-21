@@ -1,6 +1,5 @@
 package com.sap.sse.common.settings.generic;
 
-import java.io.Serializable;
 import java.util.Map;
 
 import com.sap.sse.common.settings.Settings;
@@ -14,5 +13,5 @@ import com.sap.sse.common.settings.Settings;
  * or GWT-RPC-serialized.
  */
 public interface SettingsMap extends Settings {
-    Map<Serializable, Settings> getSettingsByKey();
+    Map<String, Settings> getSettingsByKey();
 }

@@ -1,7 +1,5 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.io.Serializable;
-
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
@@ -14,7 +12,7 @@ public interface Component<SettingsType extends Settings> {
      * constraint applies only to the single level (in a composite pattern of components, such as
      * {@link Perspective}) in which this component instance is used.
      */
-    Serializable getId();
+    String getId();
     
     /**
      * @return the name to display to a user for quick navigation to this component

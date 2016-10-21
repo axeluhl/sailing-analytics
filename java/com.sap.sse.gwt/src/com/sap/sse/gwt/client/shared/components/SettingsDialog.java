@@ -80,7 +80,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 //TODO send notification
-                component.getComponentTreeNodeInfo().getComponentContext().makeSettingsDefault(component, getResult());
+//                component.getComponentTreeNodeInfo().getComponentContext().makeSettingsDefault(component, getResult());
             }
         });
         
@@ -91,7 +91,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
         restoreDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 //TODO apply settings - add update method?
-                SettingsType defaultSettings = component.getComponentTreeNodeInfo().getComponentContext().getDefaultSettingsForComponent(component);
+//                SettingsType defaultSettings = component.getComponentTreeNodeInfo().getComponentContext().getDefaultSettingsForComponent(component);
             }
         });
     }

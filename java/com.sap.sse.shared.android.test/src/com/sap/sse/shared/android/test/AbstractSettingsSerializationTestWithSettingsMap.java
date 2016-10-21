@@ -2,7 +2,6 @@ package com.sap.sse.shared.android.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +30,7 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         
         final GenericSerializableSettings settingsValues1 = createTestSettingsWithValues();
         final GenericSerializableSettings settingsValues2 = createTestSettingsWithValues2();
-        Map<Serializable, Settings> settings = new HashMap<>();
+        Map<String, Settings> settings = new HashMap<>();
         settings.put("aaa", settingsValues1);
         settings.put("bbb", settingsValues2);
         
@@ -65,7 +64,7 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         SettingsMap childSettingsMap = new SettingsMapImpl("aaa", childSettingsValues);
         
         final GenericSerializableSettings settingsValues = createTestSettingsWithValues();
-        Map<Serializable, Settings> settings = new HashMap<>();
+        Map<String, Settings> settings = new HashMap<>();
         settings.put("aaa", settingsValues);
         settings.put("bbb", childSettingsMap);
         final SettingsMap settingsMapToSave = new SettingsMapImpl(settings);
@@ -100,7 +99,7 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         
         final GenericSerializableSettings childSettingsValues = createTestSettingsWithValues();
         final Settings childSettingsValuesNonSerializable = createNonSerializableTestSettingsWithChangedValues();
-        Map<Serializable, Settings> settings = new HashMap<>();
+        Map<String, Settings> settings = new HashMap<>();
         settings.put("aaa", childSettingsValues);
         settings.put("bbb", childSettingsValuesNonSerializable);
         
@@ -119,7 +118,7 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         
         final GenericSerializableSettings childSettingsValues = createTestSettingsWithValues();
         final Settings childSettingsNonSerializable = createNonSerializableTestSettingsWithChangedValues();
-        Map<Serializable, Settings> childSettings = new HashMap<>();
+        Map<String, Settings> childSettings = new HashMap<>();
         childSettings.put("aaa", childSettingsValues);
         childSettings.put("bbb", childSettingsNonSerializable);
         
@@ -127,7 +126,7 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         
         final GenericSerializableSettings settingsValues = createTestSettingsWithValues();
         final Settings settingsValuesNonSerializable = createNonSerializableTestSettingsWithChangedValues();
-        Map<Serializable, Settings> settings = new HashMap<>();
+        Map<String, Settings> settings = new HashMap<>();
         settings.put("aaa", childSettingsMap);
         settings.put("bbb", settingsValuesNonSerializable);
         settings.put("ccc", settingsValues);
@@ -152,19 +151,19 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
     }
     
     private static class SettingsMapImpl implements SettingsMap {
-        private final Map<Serializable, Settings> innerSettings;
+        private final Map<String, Settings> innerSettings;
         
         public SettingsMapImpl(String key, Settings settings) {
             innerSettings = new HashMap<>();
             innerSettings.put(key, settings);
         }
         
-        public SettingsMapImpl(Map<Serializable, Settings> settings) {
+        public SettingsMapImpl(Map<String, Settings> settings) {
             innerSettings = new HashMap<>(settings);
         }
 
         @Override
-        public Map<Serializable, Settings> getSettingsByKey() {
+        public Map<String, Settings> getSettingsByKey() {
             return innerSettings;
         }
 
@@ -210,8 +209,8 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
     }
 
     private SettingsMap reconstructSettingsMap(SettingsMap settingsMap) throws Exception {
-        Map<Serializable, Settings> innerMap = new HashMap<>();
-        for(Map.Entry<Serializable, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
+        Map<String, Settings> innerMap = new HashMap<>();
+        for(Map.Entry<String, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
             Settings innerSettings = entry.getValue();
             Settings copiedSettings;
             if(innerSettings instanceof SettingsMap) {

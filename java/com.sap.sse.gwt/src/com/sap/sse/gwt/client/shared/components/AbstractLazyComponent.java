@@ -1,7 +1,5 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import java.io.Serializable;
-
 import com.google.gwt.user.client.ui.LazyPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -11,7 +9,7 @@ public abstract class AbstractLazyComponent<SettingsType extends AbstractSetting
     private ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = new ComponentTreeNodeInfo<>();
     
     @Override
-    public Serializable getId() {
+    public String getId() {
         return getLocalizedShortName();
     }
     

@@ -1,6 +1,5 @@
 package com.sap.sse.common.settings.serializer;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,7 +34,7 @@ public class SettingsToStringMapSerializer {
     }
     
     private void serialize(String prefix, SettingsMap settingsMap, Map<String, Iterable<String>> serialized) {
-        for (Map.Entry<Serializable, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
+        for (Map.Entry<String, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
             String childPrefix = prefix + entry.getKey() + GenericSerializableSettings.PATH_SEPARATOR;
             Settings settings = entry.getValue();
             if(settings instanceof SettingsMap) {
@@ -104,7 +103,7 @@ public class SettingsToStringMapSerializer {
     
     public <T extends SettingsMap> T deserialize(T settingsMap, Map<String, Iterable<String>> values) {
         Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
-        for (Map.Entry<Serializable, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
+        for (Map.Entry<String, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
             Settings settings = entry.getValue();
             Map<String, Iterable<String>> innerValues = mappedInnerValues.get(entry.getKey().toString());
             if(innerValues != null) {

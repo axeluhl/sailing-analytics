@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +38,7 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
     }
     
     protected CompositeSettings getComponentIdsAndDefaultSettings() {
-        Map<Serializable, Settings> componentIdsAndSettings = new HashMap<>();
+        Map<String, Settings> componentIdsAndSettings = new HashMap<>();
         for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
             componentIdsAndSettings.put(componentLifecycle.getComponentId(), componentLifecycle.createDefaultSettings());
         }
@@ -51,8 +50,4 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
         return componentLifecycles;
     }
 
-    @Override
-    public Serializable getComponentId() {
-        return getLocalizedShortName();
-    }
 }
