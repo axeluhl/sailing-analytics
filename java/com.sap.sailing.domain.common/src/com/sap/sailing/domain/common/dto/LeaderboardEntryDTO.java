@@ -3,10 +3,13 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * Holds a single competitor's scoring details for a single race. It may optionally contain
@@ -133,6 +136,44 @@ public class LeaderboardEntryDTO implements Serializable {
     
     public boolean hasScoreCorrection() {
         return totalPointsCorrected || (reasonForMaxPoints != null && reasonForMaxPoints != MaxPointsReason.NONE);
+    }
+    
+    public Duration getTimeSailedInMillis() {
+        final Duration result;
+        if (legDetails != null) {
+            long timeInMilliseconds = 0;
+            for (LegEntryDTO legDetail : legDetails) {
+                if (legDetail != null) {
+                    if (legDetail.distanceTraveledInMeters != null && legDetail.timeInMilliseconds != null) {
+                        timeInMilliseconds += legDetail.timeInMilliseconds;
+                    } else {
+                        timeInMilliseconds = 0;
+                        break;
+                    }
+                }
+            }
+            result = new MillisecondsDurationImpl(timeInMilliseconds);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public Distance getDistanceTraveledInMeters() {
+        Distance result = null;
+        if (legDetails != null) {
+            for (LegEntryDTO legDetail : legDetails) {
+                if (legDetail != null) {
+                    if (legDetail.distanceTraveledInMeters != null) {
+                        if (result == null) {
+                            result = Distance.NULL;
+                        }
+                        result = result.add(new MeterDistance(legDetail.distanceTraveledInMeters));
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     @Override

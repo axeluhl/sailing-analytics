@@ -58,6 +58,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -76,7 +77,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
-import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -98,12 +98,12 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -1100,26 +1100,13 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         private class RaceAverageSpeedInKnots implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    double distanceTraveledInMeters = 0;
-                    long timeInMilliseconds = 0;
-                    for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
-                        if (legDetail != null) {
-                            if (legDetail.distanceTraveledInMeters != null && legDetail.timeInMilliseconds != null) {
-                                distanceTraveledInMeters += legDetail.distanceTraveledInMeters;
-                                timeInMilliseconds += legDetail.timeInMilliseconds;
-                            } else {
-                                distanceTraveledInMeters = 0;
-                                timeInMilliseconds = 0;
-                                break;
-                            }
-                        }
-                    }
-                    if (timeInMilliseconds != 0) {
-                        result = distanceTraveledInMeters / (double) timeInMilliseconds * 1000 * 3600 / 1852;
-                    }
+                final Distance distanceTraveledInMeters = row.getDistanceTraveledInMeters(getRaceColumnName());
+                final Duration time = row.getTimeSailed(getRaceColumnName());
+                final Double result;
+                if (distanceTraveledInMeters != null && time != null) {
+                    result = distanceTraveledInMeters.inTime(time).getKnots();
+                } else {
+                    result = null;
                 }
                 return result;
             }
@@ -1301,21 +1288,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         private class RaceDistanceTraveledInMeters implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
-                        if (legDetail != null) {
-                            if (legDetail.distanceTraveledInMeters != null) {
-                                if (result == null) {
-                                    result = 0.0;
-                                }
-                                result += legDetail.distanceTraveledInMeters;
-                            }
-                        }
-                    }
-                }
-                return result;
+                return row.getDistanceTraveledInMeters(getRaceColumnName()).getMeters();
             }
         }
 
@@ -1472,7 +1445,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
 
             @Override
             protected Double getAfterLastLegFinished(LeaderboardRowDTO row) {
-                return new MeterDistance(row.totalDistanceTraveledInMeters).inTime(new MillisecondsDurationImpl((long) (1000.*row.totalTimeSailedInSeconds))).getKnots();
+                return new RaceAverageSpeedInKnots().get(row);
             }
         }
         
