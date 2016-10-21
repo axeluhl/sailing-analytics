@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common.tracking;
 
+import com.sap.sailing.domain.common.Distance;
+
 /**
  * Specific {@link SensorFix} for bravo devices (http://www.bravosystems.es/).
  * 
@@ -12,5 +14,5 @@ public interface BravoFix extends SensorFix {
      * 
      * @return the ride height
      */
-    double getRideHeight();
+    Distance getRideHeight();
 }

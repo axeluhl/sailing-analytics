@@ -686,7 +686,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalysis) throws NoWindException;
 
-    public Double getAverageRideHeight(Competitor competitor, TimePoint timePoint);
+    public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint);
 
     WindStore getWindStore();
 

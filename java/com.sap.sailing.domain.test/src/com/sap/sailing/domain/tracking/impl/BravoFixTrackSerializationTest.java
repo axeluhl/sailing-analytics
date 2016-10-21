@@ -82,8 +82,8 @@ public class BravoFixTrackSerializationTest {
         assertRideHeight(track, testFixData.timePoint, testFixData.rideHeight);
     }
     
-    private void assertRideHeight(BravoFixTrack<Competitor> track, TimePoint timePoint, double expected) {
-        assertEquals(expected, track.getRideHeight(timePoint), 0.0);
+    private void assertRideHeight(BravoFixTrack<Competitor> track, TimePoint timePoint, double expectedRideHeightInMeters) {
+        assertEquals(expectedRideHeightInMeters, track.getRideHeight(timePoint).getMeters(), 0.0);
     }
     
     @SuppressWarnings("unchecked")

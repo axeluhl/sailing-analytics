@@ -183,7 +183,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public Double getAverageRideHeight(TimePoint timePoint) {
+    public Distance getAverageRideHeight(TimePoint timePoint) {
         MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart != null) {
             BravoFixTrack<Competitor> track = getTrackedRace()
@@ -676,15 +676,17 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
     
     @Override
-    public Double getRideHeight(TimePoint at) {
+    public Distance getRideHeight(TimePoint at) {
+        final Distance result;
         if (hasStartedLeg(at)) {
             TimePoint timePoint =hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
             BravoFixTrack<Competitor> track = getTrackedRace()
                     .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
-            return track == null ? null : track.getRideHeight(timePoint);
+            result = track == null ? null : track.getRideHeight(timePoint);
         } else {
-            return null;
+            result = null;
         }
+        return result;
     }
     
     @Override

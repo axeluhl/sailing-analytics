@@ -683,7 +683,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public Double getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
+    public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
         return null;
     }
 }

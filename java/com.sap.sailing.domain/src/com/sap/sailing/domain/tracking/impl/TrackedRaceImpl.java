@@ -1539,8 +1539,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Double getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
-        final Double result;
+    public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
         BravoFixTrack<Competitor> track = getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
         final Leg firstLeg;
         final TrackedLegOfCompetitor firstTrackedLeg;
