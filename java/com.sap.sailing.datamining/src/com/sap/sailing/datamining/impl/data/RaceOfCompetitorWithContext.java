@@ -3,6 +3,7 @@ package com.sap.sailing.datamining.impl.data;
 import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.datamining.Activator;
+import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.Competitor;
@@ -63,8 +64,9 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
             return null;
         }
         
-        Cluster<Double> cluster = Activator.getClusterGroups().getPercentageClusterGroup().getClusterFor(normalizedDistance);
-        return new ClusterDTO(cluster.toString());
+        SailingClusterGroups clusterGroups = Activator.getClusterGroups();
+        Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(normalizedDistance);
+        return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
     }
     
     @Override
@@ -94,8 +96,9 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         }
         
         int competitorCount = Util.size(getTrackedRace().getRace().getCompetitors());
-        Cluster<Double> cluster = Activator.getClusterGroups().getPercentageClusterGroup().getClusterFor(rankAtFinish / competitorCount);
-        return new ClusterDTO(cluster.toString());
+        SailingClusterGroups clusterGroups = Activator.getClusterGroups();
+        Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(rankAtFinish / competitorCount);
+        return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
     }
     
     @Override

@@ -27,7 +27,7 @@ public interface HasRaceOfCompetitorContext {
     @Dimension(messageKey="DistanceToStarboardSideAtStart", ordinal=13)
     public ClusterDTO getPercentageClusterForDistanceToStarboardSideAtStart();
     
-    @Dimension(messageKey="RelativeScore", ordinal=14)
+    @Dimension(messageKey="RelativeScoreInPercent", ordinal=14)
     public ClusterDTO getPercentageClusterForRelativeScore();
     
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
