@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.maps.client.base.Size;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
@@ -29,7 +30,10 @@ public abstract class BoatClassVectorGraphics {
     protected static final String SAIL_STROKECOLOR = "#000000";
 
     /** the minimal length of the hull in pixel when the boat is drawn */
-    private static final double minHullLengthInPx = 25;
+    public static final double MIN_HULL_LENGTH_IN_PX = 25;
+    
+    /** the minimal length of the beam in pixel when the boat is drawn */
+    public static final double MIN_BEAM_LENGTH_IN_PX = 12;
 
     private final double overallLengthInPx;
     private final double hullLengthInPx;
@@ -109,11 +113,11 @@ public abstract class BoatClassVectorGraphics {
     }
 
     public void drawBoatToCanvas(Context2d ctx, LegType legType, Tack tack, boolean isSelected, double width,
-            double height, double scaleFactor, Color color) {
+            double height, Size scaleFactor, Color color) {
         ctx.save();
         ctx.clearRect(0, 0, width, height);
         ctx.translate(width / 2.0, height / 2.0);
-        ctx.scale(scaleFactor, scaleFactor);
+        ctx.scale(scaleFactor.getWidth(), scaleFactor.getHeight());
         ctx.translate(-hullLengthInPx / 2.0, -beamInPx / 2.0);
         drawBoat(ctx, isSelected, color.getAsHtml());
         drawSails(ctx, legType, tack);
@@ -135,9 +139,4 @@ public abstract class BoatClassVectorGraphics {
     public boolean isBoatClassNameCompatible(String boatClassName) {
         return compatibleBoatClasses.contains(BoatClassMasterdata.resolveBoatClass(boatClassName));
     }
-
-    public double getMinHullLengthInPx() {
-        return minHullLengthInPx;
-    }
-
 }
