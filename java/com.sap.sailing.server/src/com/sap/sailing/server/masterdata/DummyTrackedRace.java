@@ -656,4 +656,9 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public Iterable<RaceLog> getAttachedRaceLogs() {
         return Collections.emptySet();
     }
+
+    @Override
+    public Double getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
+        return null;
+    }
 }

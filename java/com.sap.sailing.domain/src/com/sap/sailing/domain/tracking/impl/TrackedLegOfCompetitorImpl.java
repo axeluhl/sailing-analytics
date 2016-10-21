@@ -174,8 +174,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             }
             if (timePointToUse != null) {
                 Distance d = getDistanceTraveled(timePointToUse);
-                long millis = timePointToUse.asMillis() - legStart.getTimePoint().asMillis();
-                result = d.inTime(millis);
+                result = d.inTime(legStart.getTimePoint().until(timePointToUse));
             } else {
                 result = null;
             }

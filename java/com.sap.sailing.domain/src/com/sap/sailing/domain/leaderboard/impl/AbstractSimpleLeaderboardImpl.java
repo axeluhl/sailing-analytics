@@ -1437,6 +1437,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             } else {
                 entryDTO.timeSinceLastPositionFixInSeconds = null;  
             }
+            entryDTO.averageRideHeightInMeters = trackedRace.getAverageRideHeight(competitor, timePoint);
         }
         if (addLegDetails && trackedRace != null) {
             try {

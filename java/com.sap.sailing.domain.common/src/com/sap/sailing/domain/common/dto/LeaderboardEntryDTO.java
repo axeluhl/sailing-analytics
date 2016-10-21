@@ -78,6 +78,8 @@ public class LeaderboardEntryDTO implements Serializable {
      */
     public Duration averageSamplingInterval;
     
+    public Double averageRideHeightInMeters;
+    
     /**
      * The time gap to the competitor leading the race; for one-design races this is the time the competitor is expected
      * to need to reach the leader's (windward) position (if in the same leg) or the difference between the time at
@@ -174,6 +176,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result
                 + ((speedOverGroundAtStartOfRaceInKnots == null) ? 0 : speedOverGroundAtStartOfRaceInKnots.hashCode());
         result = prime * result + ((startTack == null) ? 0 : startTack.hashCode());
+        result = prime * result + ((averageRideHeightInMeters == null) ? 0 : averageRideHeightInMeters.hashCode());
         result = prime * result + ((averageSamplingInterval == null) ? 0 : averageSamplingInterval.hashCode());
         result = prime * result + ((timeSinceLastPositionFixInSeconds == null) ? 0 : timeSinceLastPositionFixInSeconds.hashCode());
         result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
@@ -281,6 +284,11 @@ public class LeaderboardEntryDTO implements Serializable {
         } else if (!speedOverGroundAtStartOfRaceInKnots.equals(other.speedOverGroundAtStartOfRaceInKnots))
             return false;
         if (startTack != other.startTack)
+            return false;
+        if (averageRideHeightInMeters == null) {
+            if (other.averageRideHeightInMeters != null)
+                return false;
+        } else if (!averageRideHeightInMeters.equals(other.averageRideHeightInMeters))
             return false;
         if (averageSamplingInterval == null) {
             if (other.averageSamplingInterval != null)
