@@ -1736,4 +1736,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String lastFix();
     String filterDeviceMappings();
     String raceStartAnalysis();
+    String urlForLanguage(String language);
+    String urlForAllLanguages();
+    String externalLinks();
+    String buoyZoneRadiusInHullLengths();
+    String incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
 }

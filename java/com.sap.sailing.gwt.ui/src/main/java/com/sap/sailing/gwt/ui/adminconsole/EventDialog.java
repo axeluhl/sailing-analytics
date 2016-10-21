@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,7 +31,6 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
-import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
@@ -48,14 +46,13 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected BetterDateTimeBox endDateBox;
     protected CheckBox isPublicCheckBox;
     protected UUID id;
-    protected TextBox officialWebsiteURLEntryField;
     protected TextBox baseURLEntryField;
-    protected Map<String, TextBox> sailorsInfoWebsiteURLEntryFields = new HashMap<>();
     protected CourseAreaListInlineEditorComposite courseAreaNameList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
     protected Map<String, LeaderboardGroupDTO> availableLeaderboardGroupsByName;
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
+    protected ExternalLinksComposite externalLinksComposite;
     
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -162,6 +159,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         
         imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
         videosListComposite = new VideosListComposite(stringMessages);
+        externalLinksComposite = new ExternalLinksComposite(stringMessages);
     }
 
     @Override
@@ -176,13 +174,9 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
-        result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());
+        result.setOfficialWebsiteURL(externalLinksComposite.getOfficialWebsiteURLValue());
         result.setBaseURL(baseURLEntryField.getText().trim().isEmpty() ? null : baseURLEntryField.getText().trim());
-        for (Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
-            TextBox sailorsInfoWebsiteURLEntryField = sailorsInfoWebsiteUrlEntry.getValue();
-            String sailorsInfoWebsiteURL = sailorsInfoWebsiteURLEntryField.getText().trim();
-            result.setSailorsInfoWebsiteURL(sailorsInfoWebsiteUrlEntry.getKey(), sailorsInfoWebsiteURL.isEmpty() ? null : sailorsInfoWebsiteURLEntryField.getText().trim());
-        }
+        result.setSailorsInfoWebsiteURLs(externalLinksComposite.getSailorsInfoWebsiteURLs());
         result.startDate = startDateBox.getValue();
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
@@ -206,7 +200,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(10 + GWTLocaleUtil.getLanguageCountWithDefault(), 2);
+        Grid formGrid = new Grid(8, 2);
         int rowIndex = 0;
         formGrid.setWidget(rowIndex,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(rowIndex++, 1, nameEntryField);
@@ -222,24 +216,18 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(rowIndex++, 1, endDateBox);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.isPublic() + ":"));
         formGrid.setWidget(rowIndex++, 1, isPublicCheckBox);
-        formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
-        formGrid.setWidget(rowIndex++, 1, officialWebsiteURLEntryField);
         formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventBaseURL() + ":"));
         formGrid.setWidget(rowIndex++, 1, baseURLEntryField);
-        for (Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
-            String suffix = " ["+ (sailorsInfoWebsiteUrlEntry.getKey() == null ? stringMessages.defaultLocale() + "*" : sailorsInfoWebsiteUrlEntry.getKey()) + "]";
-            formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + suffix + ":"));
-            formGrid.setWidget(rowIndex, 1, sailorsInfoWebsiteUrlEntry.getValue());
-            rowIndex++;
-        }
-        formGrid.setText(rowIndex, 1, "[*] " + stringMessages.defaultSailorsInfoLinkInfoText());
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
         tabPanel.ensureDebugId("EventDialogTabs");
-        tabPanel.setHeight("525px");
+        tabPanel.setHeight("400px");
         panel.add(tabPanel);
         final ScrollPanel eventTab = new ScrollPanel(formGrid);
         eventTab.ensureDebugId("EventTab");
         tabPanel.add(eventTab, stringMessages.event());
+        final ScrollPanel externalLinksCompositeTab = new ScrollPanel(externalLinksComposite);
+        externalLinksCompositeTab.ensureDebugId("ExternalLinksCompositeTab");
+        tabPanel.add(externalLinksCompositeTab, stringMessages.externalLinks());
         final ScrollPanel leaderboardGroupTab = new ScrollPanel(leaderboardGroupList);
         leaderboardGroupTab.ensureDebugId("LeaderboardGroupsTab");
         tabPanel.add(leaderboardGroupTab, stringMessages.leaderboardGroups());
@@ -258,15 +246,5 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     @Override
     protected FocusWidget getInitialFocusWidget() {
         return nameEntryField;
-    }
-    
-    protected Map<String, TextBox> createTextBoxesForLocalesAndDefault(Map<String, String> initialValues) {
-        Map<String, TextBox> result = new LinkedHashMap<>();
-        for(String localeName : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
-            TextBox sailorsInfoWebsiteURLEntryField = createTextBox(initialValues.get(localeName));
-            sailorsInfoWebsiteURLEntryField.setVisibleLength(50);
-            result.put(localeName, sailorsInfoWebsiteURLEntryField);
-        }
-        return result;
     }
 }
