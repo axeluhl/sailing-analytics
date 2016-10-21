@@ -448,6 +448,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
+                    public Double getBuoyZoneRadiusInHullLengths(){
+                        return 1.0;
+                    }
+
+                    @Override
+                    public void setBuoyZoneRadiusInHullLengths(Double buoyZoneRadiusInHullLengths){
+                    }
+
+                    @Override
                     public RegattaLikeIdentifier getRegattaLikeIdentifier() {
                         return null;
                     }

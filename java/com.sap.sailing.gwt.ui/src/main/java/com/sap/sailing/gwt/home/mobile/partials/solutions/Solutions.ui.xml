@@ -214,32 +214,6 @@
 						</p>
 					</div>
 				</div>
-				<div ui:field="stgTrainingDiaryUi"
-					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
-					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">
-						<h2 class="{local_res.css.solutions_item_header_title}">
-							<ui:text from='{i18n.i18nDeSolutionsTrainingHeadline}' />
-						</h2>
-						<img src="images/mobile/arrow-down-grey.png" alt=""
-							class="{local_res.css.solutions_item_header_arrow}"></img>
-					</div>
-					<div class="{local_res.css.solutions_item_body} {local_res.css.accordion_content}">
-						<img src="images/mobile/solutions-training.png" alt="{i18n.i18nDeSolutionsTrainingHeadline}"></img>
-						<p>
-							<ui:text from='{i18n.i18nDeSolutionsTrainingText}' />
-						</p>
-                        <div 
-                            class="{style.storeBadgesContainer}"
-                            >
-                            <a
-                                alt="Get it on Appstore" 
-                                href="{i18n.appstoreStgTrainingstagebuch}"
-                                target="_blank" >
-                                <img src="images/home/appstore{i18n.appstoreBadgeSuffix}.svg"></img>
-                            </a>
-                        </div>
-					</div>
-				</div>
 				<div ui:field="strategySimulatorUi"
 					class="{local_res.css.solutions_item} {res.mediaCss.small12} {res.mediaCss.columns}">
 					<div class="{local_res.css.solutions_item_header} {local_res.css.accordion_trigger}">

@@ -4,6 +4,22 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
     <div class="innerContent">
+        <h5 class="articleSubheadline">October 2016</h5>
+        <ul class="bulletList">
+           <li>An issue with live re-calculation of the maximum speed over ground (SOG) values has been fixed.
+               In some circumstances it was possible that new live data did not properly update the MaxSOG figures.
+               Since this depended on the timing of read and write access it could have led to different values
+               for different server instances, giving confusing results. The fix provided now ensures that
+               the MaxSOG values are properly evaluated when new data has arrived.  
+           </li>
+           <li>The buoy zone radius is now determined by a configurable regatta property. By default, it is
+               set to two hull lengths, and a regatta administrator may choose to change it to any other factor
+               such as 3 or 2.5. This determines the default used in the race viewer (RaceBoard.html). Users can
+               still change the radius in the map settings to any arbitrary number, deviating from what has
+               "officially" been set for the regatta.
+           </li>
+        </ul>
+        
         <h5 class="articleSubheadline">August 2016</h5>
         <ul class="bulletList">
            <li>In order to prepare user-specific configuration support in the <tt>/gwt/Simulator.html</tt>, this

@@ -13,7 +13,7 @@ import com.sap.sse.common.Duration;
  *
  */
 public interface Distance extends Comparable<Distance>, Serializable {
-    static final Distance NULL = new Distance() {
+    static class NullDistance implements Distance {
         private static final long serialVersionUID = -3167560884686340893L;
 
         @Override
@@ -96,7 +96,9 @@ public interface Distance extends Comparable<Distance>, Serializable {
         public Distance abs() {
             return this;
         }
-    };
+    }
+    
+    static final NullDistance NULL = new NullDistance();
     
     double getGeographicalMiles();
 

@@ -228,7 +228,7 @@ public final class HomeServiceUtil {
         return boatClass == null ? null : boatClass.getName();
     }
 
-    private static BoatClass getBoatClass(Leaderboard leaderboard) {
+    public static BoatClass getBoatClass(Leaderboard leaderboard) {
         if(leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) leaderboard;
             BoatClass boatClassFromRegatta = regattaLeaderboard.getRegatta().getBoatClass();

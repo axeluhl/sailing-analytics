@@ -62,15 +62,15 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
-    public double getRelativeRank() {
-        Leaderboard leaderboard = getLeaderboard();
-        final TimePoint now = MillisecondsTimePoint.now();
-        double competitorCount = Util.size(leaderboard.getCompetitors());
-        double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
-        double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ?
-                competitorCount - points : points;
-        final double result = relativeLowPoints / competitorCount;
+    public String getRegattaName() {
+        Leaderboard leaderboard = getLeaderboard();;
+        final String result = leaderboard.getName();
         return result;
+    }
+
+    @Override
+    public String getCompetitorSearchTag() {
+        return getCompetitor().getSearchTag();
     }
 
     @Override
@@ -157,10 +157,23 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     }
 
     @Override
-    public String getRegattaName() {
-        Leaderboard leaderboard = getLeaderboard();;
-        final String result = leaderboard.getName();
-        return result;
+    public Double getRelativeRank() {
+        Leaderboard leaderboard = getLeaderboard();
+        final TimePoint now = MillisecondsTimePoint.now();
+        double competitorCount = Util.size(leaderboard.getCompetitors());
+        Double points = leaderboard.getTotalPoints(competitor, raceColumn, now);
+        if (points != null) {
+            double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ? competitorCount - points
+                    : points;
+            final double result = relativeLowPoints / competitorCount;
+            return result;
+        }
+        return null;
+    }
+    
+    @Override
+    public Double getAbsoluteRank() {
+        return getLeaderboard().getTotalPoints(competitor, raceColumn, MillisecondsTimePoint.now());
     }
 
     @Override
