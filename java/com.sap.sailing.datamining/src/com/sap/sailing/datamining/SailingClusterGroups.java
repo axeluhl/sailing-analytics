@@ -3,6 +3,7 @@ package com.sap.sailing.datamining;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.sap.sailing.datamining.impl.data.LinearDoubleClusterGroup;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sse.datamining.data.Cluster;
@@ -17,7 +18,8 @@ import com.sap.sse.datamining.impl.data.LocalizedCluster;
 
 public class SailingClusterGroups {
     
-    private final ClusterGroup<Speed> windStrengthInBeaufortCluster;
+    private final ClusterGroup<Speed> windStrengthInBeaufortClusterGroup;
+    private final ClusterGroup<Double> percentageClusterGroup;
     
     public SailingClusterGroups() {
         Collection<Cluster<Speed>> clusters = new ArrayList<>();
@@ -98,11 +100,17 @@ public class SailingClusterGroups {
         lowerBound = new ComparableClusterBoundary<Speed>(lowerBoundWindSpeed, ComparisonStrategy.GREATER_EQUALS_THAN);
         clusters.add(new LocalizedCluster<Speed>("Bft12", new ClusterWithSingleBoundary<Speed>(lowerBound)));
         
-        windStrengthInBeaufortCluster = new FixClusterGroup<Speed>(clusters);
+        windStrengthInBeaufortClusterGroup = new FixClusterGroup<Speed>(clusters);
+        
+        percentageClusterGroup = new LinearDoubleClusterGroup(0.0, 1.0, 0.1, true);
     }
     
-    public ClusterGroup<Speed> getWindStrengthInBeaufortCluster() {
-        return windStrengthInBeaufortCluster;
+    public ClusterGroup<Speed> getWindStrengthInBeaufortClusterGroup() {
+        return windStrengthInBeaufortClusterGroup;
+    }
+
+    public ClusterGroup<Double> getPercentageClusterGroup() {
+        return percentageClusterGroup;
     }
 
 }

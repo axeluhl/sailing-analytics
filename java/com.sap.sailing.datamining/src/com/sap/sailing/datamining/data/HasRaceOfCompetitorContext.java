@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
+import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public interface HasRaceOfCompetitorContext {
     
@@ -22,6 +23,12 @@ public interface HasRaceOfCompetitorContext {
     
     @Dimension(messageKey="TackAtStart", ordinal=12)
     public Tack getTackAtStart() throws NoWindException;
+    
+    @Dimension(messageKey="DistanceToStarboardSideAtStart", ordinal=13)
+    public ClusterDTO getPercentageClusterForDistanceToStarboardSideAtStart();
+    
+    @Dimension(messageKey="RelativeScore", ordinal=14)
+    public ClusterDTO getPercentageClusterForRelativeScore();
     
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
     public Distance getDistanceToStartLineAtStart();

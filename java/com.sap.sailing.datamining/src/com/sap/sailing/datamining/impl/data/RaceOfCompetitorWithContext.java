@@ -2,6 +2,7 @@ package com.sap.sailing.datamining.impl.data;
 
 import java.util.concurrent.TimeUnit;
 
+import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.Competitor;
@@ -16,6 +17,9 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.datamining.data.Cluster;
+import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
 
@@ -53,6 +57,17 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     }
     
     @Override
+    public ClusterDTO getPercentageClusterForDistanceToStarboardSideAtStart() {
+        Double normalizedDistance = getNormalizedDistanceToStarboardSideAtStart();
+        if (normalizedDistance == null) {
+            return null;
+        }
+        
+        Cluster<Double> cluster = Activator.getClusterGroups().getPercentageClusterGroup().getClusterFor(normalizedDistance);
+        return new ClusterDTO(cluster.toString());
+    }
+    
+    @Override
     public Distance getDistanceToStartLineAtStart() {
         return getTrackedRace().getDistanceToStartLine(getCompetitor(), 0);
     }
@@ -69,6 +84,18 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         Double distance = trackedRace.getDistanceFromStarboardSideOfStartLine(getCompetitor(), competitorStartTime).getMeters();
         Double length = trackedRace.getStartLine(competitorStartTime).getLength().getMeters();
         return distance / length;
+    }
+    
+    @Override
+    public ClusterDTO getPercentageClusterForRelativeScore() {
+        Double rankAtFinish = getRankAtFinish();
+        if (rankAtFinish == null) {
+            return null;
+        }
+        
+        int competitorCount = Util.size(getTrackedRace().getRace().getCompetitors());
+        Cluster<Double> cluster = Activator.getClusterGroups().getPercentageClusterGroup().getClusterFor(rankAtFinish / competitorCount);
+        return new ClusterDTO(cluster.toString());
     }
     
     @Override
