@@ -125,5 +125,20 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
         }
         return number;
     }
+    
+    // Convenience methods for race dependent calculation to avoid code duplication
+    public Double getRelativeScoreForCompetitor(Competitor competitor) {
+        Double rankAtFinish = getRankAtFinishForCompetitor(competitor);
+        if (rankAtFinish == null) {
+            return null;
+        }
+        return rankAtFinish / Util.size(getTrackedRace().getRace().getCompetitors());
+    }
+    
+    @Override
+    public Double getRankAtFinishForCompetitor(Competitor competitor) {
+        int rank = getTrackedRace().getRank(competitor, getTrackedRace().getEndOfTracking());
+        return rank == 0 ? null : Double.valueOf(rank);
+    }
 
 }

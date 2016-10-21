@@ -6,6 +6,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
+import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public interface HasTrackedLegOfCompetitorContext {
     
@@ -16,6 +17,9 @@ public interface HasTrackedLegOfCompetitorContext {
     
     @Dimension(messageKey="CompetitorSearchTag", ordinal=11) // TODO Clean me: Move Dimension to Competitor when possible
     public String getCompetitorSearchTag();
+    
+    @Dimension(messageKey="RelativeScoreInRaceInPercent", ordinal=12)
+    public ClusterDTO getPercentageClusterForRelativeScoreInRace();
 
     @Connector(messageKey="Competitor")
     public Competitor getCompetitor();

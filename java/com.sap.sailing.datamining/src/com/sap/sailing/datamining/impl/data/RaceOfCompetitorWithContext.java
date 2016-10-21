@@ -18,7 +18,6 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
@@ -90,14 +89,13 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     
     @Override
     public ClusterDTO getPercentageClusterForRelativeScore() {
-        Double rankAtFinish = getRankAtFinish();
-        if (rankAtFinish == null) {
+        Double relativeScore = getTrackedRaceContext().getRelativeScoreForCompetitor(getCompetitor());
+        if (relativeScore == null) {
             return null;
         }
         
-        int competitorCount = Util.size(getTrackedRace().getRace().getCompetitors());
         SailingClusterGroups clusterGroups = Activator.getClusterGroups();
-        Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(rankAtFinish / competitorCount);
+        Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(relativeScore);
         return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
     }
     
@@ -158,15 +156,10 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     @Override
     public Double getRankGainsOrLossesBetweenFirstMarkAndFinish() {
         Double rankAtFirstMark = getRankAtFirstMark();
-        Double rankAtFinish = getRankAtFinish();
+        Double rankAtFinish = getTrackedRaceContext().getRankAtFinishForCompetitor(getCompetitor());
         return rankAtFirstMark != null && rankAtFinish != null ? rankAtFirstMark - rankAtFinish : null;
     }
 
-    private Double getRankAtFinish() {
-        int rank = getTrackedRace().getRank(getCompetitor(), getTrackedRace().getEndOfTracking());
-        return rank == 0 ? null : Double.valueOf(rank);
-    }
-    
     @Override
     public int getNumberOfManeuvers() {
         return getNumberOfTacks() + getNumberOfJibes();

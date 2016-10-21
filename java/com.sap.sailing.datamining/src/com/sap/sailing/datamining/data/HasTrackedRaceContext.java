@@ -1,6 +1,7 @@
 package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -43,5 +44,10 @@ public interface HasTrackedRaceContext {
     
     @Statistic(messageKey="NumberOfMarkFixes", resultDecimals=0, ordinal=1)
     public int getNumberOfMarkFixes();
+    
+    // Convenience methods for race dependent calculation to avoid code duplication
+    public Double getRelativeScoreForCompetitor(Competitor competitor);
+    
+    public Double getRankAtFinishForCompetitor(Competitor competitor);
     
 }
