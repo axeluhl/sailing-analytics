@@ -11,9 +11,11 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -89,6 +91,12 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(time.asDate());
         return calendar.get(Calendar.YEAR);
+    }
+    
+    @Override
+    public NauticalSide getAdvantageousEndOfLine() {
+        LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
+        return startLine.getAdvantageousSideWhileApproachingLine();
     }
 
     @Override

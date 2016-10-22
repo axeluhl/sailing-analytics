@@ -36,40 +36,40 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="DistanceToStarboardSideAtStart", resultDecimals=2, ordinal=1)
     public Double getNormalizedDistanceToStarboardSideAtStart();
     
-//    @Statistic(messageKey="StartAdvantage", resultDecimals=2, ordinal=2)
-//    public Double getNormalizedDistanceToFavoredEndAtStart();
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLine", resultDecimals=2, ordinal=2)
+    public Distance getWindwardDistanceToAdvantageousLineEndAtStart();
     
-    @Connector(messageKey="SpeedWhenStarting", ordinal=2)
+    @Connector(messageKey="SpeedWhenStarting", ordinal=3)
     public Speed getSpeedWhenStarting();
     
-    @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=3)
+    @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=4)
     public Speed getSpeedTenSecondsBeforeStart();
     
-    @Connector(messageKey="SpeedTenSecondsAfterStart", ordinal=4)
+    @Connector(messageKey="SpeedTenSecondsAfterStart", ordinal=5)
     public Speed getSpeedTenSecondsAfterStart();
     
-    @Statistic(messageKey="RankThirtySecondsAfterStart", resultDecimals=2, ordinal=5)
+    @Statistic(messageKey="RankThirtySecondsAfterStart", resultDecimals=2, ordinal=6)
     public Double getRankThirtySecondsAfterStart();
     
-    @Statistic(messageKey="RankAfterHalfOfTheFirstLeg", resultDecimals=2, ordinal=6)
+    @Statistic(messageKey="RankAfterHalfOfTheFirstLeg", resultDecimals=2, ordinal=7)
     public Double getRankAfterHalfOfTheFirstLeg();
     
-    @Statistic(messageKey="RankAtFirstMark", resultDecimals=2, ordinal=6)
+    @Statistic(messageKey="RankAtFirstMark", resultDecimals=2, ordinal=8)
     public Double getRankAtFirstMark();
     
-    @Statistic(messageKey="RankGainsOrLossesBetweenFirstMarkAndFinish", resultDecimals=2, ordinal=7)
+    @Statistic(messageKey="RankGainsOrLossesBetweenFirstMarkAndFinish", resultDecimals=2, ordinal=9)
     public Double getRankGainsOrLossesBetweenFirstMarkAndFinish();
     
-    @Statistic(messageKey="NumberOfManeuvers", resultDecimals=0, ordinal=8)
+    @Statistic(messageKey="NumberOfManeuvers", resultDecimals=0, ordinal=10)
     public int getNumberOfManeuvers();
 
-    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=9)
+    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=11)
     public int getNumberOfTacks();
 
-    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=10)
+    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=12)
     public int getNumberOfJibes();
 
-    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=11)
+    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=13)
     public int getNumberOfPenaltyCircles();
     
 }

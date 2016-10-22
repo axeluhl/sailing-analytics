@@ -8,15 +8,23 @@ import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
@@ -85,6 +93,34 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         Double distance = trackedRace.getDistanceFromStarboardSideOfStartLine(getCompetitor(), competitorStartTime).getMeters();
         Double length = trackedRace.getStartLine(competitorStartTime).getLength().getMeters();
         return distance / length;
+    }
+    
+    @Override
+    public Distance getWindwardDistanceToAdvantageousLineEndAtStart() {
+        TrackedRace trackedRace = getTrackedRace();
+        TimePoint startOfRace = trackedRace.getStartOfRace();
+        LineDetails startLine = trackedRace.getStartLine(startOfRace);
+        Mark advantageousMark = null;
+        switch (startLine.getAdvantageousSideWhileApproachingLine()) {
+        case PORT:
+            advantageousMark = startLine.getPortMarkWhileApproachingLine();
+            break;
+        case STARBOARD:
+            advantageousMark = startLine.getStarboardMarkWhileApproachingLine();
+            break;
+        }
+        if (advantageousMark == null) {
+            return null;
+        }
+        
+        GPSFixTrack<Mark, GPSFix> advantageousMarkTrack = trackedRace.getOrCreateTrack(advantageousMark);
+        Position advantageousMarkPosition = advantageousMarkTrack.getEstimatedPosition(startOfRace, false);
+        GPSFixTrack<Competitor, GPSFixMoving> competitorTrack = trackedRace.getTrack(getCompetitor());
+        Position competitorPosition = competitorTrack.getEstimatedPosition(startOfRace, false);
+
+        TrackedLeg trackedLeg = trackedRace.getTrackedLeg(trackedRace.getRace().getCourse().getFirstLeg());
+        Distance distance = trackedLeg.getWindwardDistance(competitorPosition, advantageousMarkPosition, startOfRace, WindPositionMode.LEG_MIDDLE);
+        return distance;
     }
     
     @Override
