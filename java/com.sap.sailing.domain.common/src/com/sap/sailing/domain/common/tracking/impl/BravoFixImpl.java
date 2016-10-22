@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
@@ -32,8 +34,8 @@ public class BravoFixImpl implements BravoFix {
     }
 
     @Override
-    public double getRideHeight() {
-        return fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightColumn);
+    public Distance getRideHeight() {
+        return new MeterDistance(fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightColumn));
     }
 
 }
