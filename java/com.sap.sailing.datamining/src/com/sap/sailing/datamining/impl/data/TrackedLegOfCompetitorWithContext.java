@@ -110,4 +110,15 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         return rankAtFinish;
     }
     
+    @Override
+    public Long getTimeTakenInSeconds() {
+        TimePoint startTime = getTrackedLegOfCompetitor().getStartTime();
+        TimePoint finishTime = getTrackedLegOfCompetitor().getFinishTime();
+        if (startTime == null || finishTime == null) {
+            return null;
+        }
+        
+        return (finishTime.asMillis() - startTime.asMillis()) / 1000;
+    }
+    
 }

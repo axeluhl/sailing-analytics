@@ -35,5 +35,8 @@ public interface HasTrackedLegOfCompetitorContext {
     
     @Statistic(messageKey="AbsoluteRank", resultDecimals=2, ordinal=3)
     public Double getAbsoluteRank();
+    
+    @Statistic(messageKey="TimeSpentInSeconds", resultDecimals=0, ordinal=4)
+    public Long getTimeTakenInSeconds();
 
 }
