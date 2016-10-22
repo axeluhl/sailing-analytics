@@ -23,11 +23,9 @@ import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMa
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMedianAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMinAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceSumAggregationProcessor;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
-import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.AbstractDataMiningActivatorWithPredefinedQueries;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
@@ -126,9 +124,9 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         dataSourceProviders = new HashSet<>();
         dataSourceProviders.add(new RacingEventServiceProvider(context));
     }
-
-    public static ClusterGroup<Speed> getWindStrengthInBeaufortClusterGroup() {
-        return clusterGroups.getWindStrengthInBeaufortCluster();
+    
+    public static SailingClusterGroups getClusterGroups() {
+        return clusterGroups;
     }
     
     public static Activator getDefault() {

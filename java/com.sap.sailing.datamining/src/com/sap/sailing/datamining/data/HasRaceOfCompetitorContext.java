@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
+import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public interface HasRaceOfCompetitorContext {
     
@@ -23,43 +24,52 @@ public interface HasRaceOfCompetitorContext {
     @Dimension(messageKey="TackAtStart", ordinal=12)
     public Tack getTackAtStart() throws NoWindException;
     
+    @Dimension(messageKey="DistanceToStarboardSideAtStart", ordinal=13)
+    public ClusterDTO getPercentageClusterForDistanceToStarboardSideAtStart();
+    
+    @Dimension(messageKey="RelativeScoreInPercent", ordinal=14)
+    public ClusterDTO getPercentageClusterForRelativeScore();
+    
     @Statistic(messageKey="DistanceAtStart", resultDecimals=2, ordinal=0)
     public Distance getDistanceToStartLineAtStart();
 
     @Statistic(messageKey="DistanceToStarboardSideAtStart", resultDecimals=2, ordinal=1)
     public Double getNormalizedDistanceToStarboardSideAtStart();
     
-//    @Statistic(messageKey="StartAdvantage", resultDecimals=2, ordinal=2)
-//    public Double getNormalizedDistanceToFavoredEndAtStart();
+    @Statistic(messageKey="WindwardDistanceToAdvantageousEndOfLine", resultDecimals=2, ordinal=2)
+    public Distance getWindwardDistanceToAdvantageousLineEndAtStart();
     
-    @Connector(messageKey="SpeedWhenStarting", ordinal=2)
+    @Connector(messageKey="SpeedWhenStarting", ordinal=3)
     public Speed getSpeedWhenStarting();
     
-    @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=3)
+    @Connector(messageKey="SpeedTenSecondsBeforeStart", ordinal=4)
     public Speed getSpeedTenSecondsBeforeStart();
     
-    @Connector(messageKey="SpeedTenSecondsAfterStart", ordinal=4)
+    @Connector(messageKey="SpeedTenSecondsAfterStart", ordinal=5)
     public Speed getSpeedTenSecondsAfterStart();
     
-    @Statistic(messageKey="RankThirtySecondsAfterStart", resultDecimals=2, ordinal=5)
-    public Double getAbsoluteRankThirtySecondsAfterStart();
+    @Statistic(messageKey="RankThirtySecondsAfterStart", resultDecimals=2, ordinal=6)
+    public Double getRankThirtySecondsAfterStart();
     
-    @Statistic(messageKey="RankAtFirstMark", resultDecimals=2, ordinal=6)
+    @Statistic(messageKey="RankAfterHalfOfTheFirstLeg", resultDecimals=2, ordinal=7)
+    public Double getRankAfterHalfOfTheFirstLeg();
+    
+    @Statistic(messageKey="RankAtFirstMark", resultDecimals=2, ordinal=8)
     public Double getRankAtFirstMark();
     
-    @Statistic(messageKey="RankGainsOrLossesBetweenFirstMarkAndFinish", resultDecimals=2, ordinal=7)
+    @Statistic(messageKey="RankGainsOrLossesBetweenFirstMarkAndFinish", resultDecimals=2, ordinal=9)
     public Double getRankGainsOrLossesBetweenFirstMarkAndFinish();
     
-    @Statistic(messageKey="NumberOfManeuvers", resultDecimals=0, ordinal=8)
+    @Statistic(messageKey="NumberOfManeuvers", resultDecimals=0, ordinal=10)
     public int getNumberOfManeuvers();
 
-    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=9)
+    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=11)
     public int getNumberOfTacks();
 
-    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=10)
+    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=12)
     public int getNumberOfJibes();
 
-    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=11)
+    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=13)
     public int getNumberOfPenaltyCircles();
     
 }
