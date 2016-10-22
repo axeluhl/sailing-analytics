@@ -8,16 +8,16 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.datamining.data.Cluster;
-import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;
+import com.sap.sse.datamining.impl.data.ClusterWithSingleBoundary;
 import com.sap.sse.datamining.impl.data.ComparableClusterBoundary;
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 
 // TODO Move to sse bundle, after 49er analysis
 public class TestLinearDoubleClusterGroup {
     
-    private ClusterGroup<Double> hardPercentageClusterGroup;
-    private ClusterGroup<Double> softLinearClusterGroup;
+    private LinearDoubleClusterGroup hardPercentageClusterGroup;
+    private LinearDoubleClusterGroup softLinearClusterGroup;
     
     @Before
     public void initialize() {
@@ -34,49 +34,53 @@ public class TestLinearDoubleClusterGroup {
         assertThat(cluster, nullValue());
         
         cluster = softLinearClusterGroup.getClusterFor(-0.1);
-        Cluster<Double> expectedCluster = createCluster(0, 0, 10);
+        Cluster<Double> expectedCluster = createCluster(softLinearClusterGroup.getStepSize(), ComparisonStrategy.LOWER_THAN);
         assertThat(cluster, is(expectedCluster));
         
         cluster = softLinearClusterGroup.getClusterFor(100.1);
-        expectedCluster = createCluster(9, 0, 10);
+        expectedCluster = createCluster(softLinearClusterGroup.getUpperGroupBound() - softLinearClusterGroup.getStepSize(), ComparisonStrategy.GREATER_EQUALS_THAN);
         assertThat(cluster, is(expectedCluster));
     }
     
     @Test
     public void testGetClusterForBoundaryValues() {
         Cluster<Double> cluster = hardPercentageClusterGroup.getClusterFor(0.0);
-        Cluster<Double> expectedCluster = createCluster(0, 0, 0.1);
+        Cluster<Double> expectedCluster = createCluster(hardPercentageClusterGroup.getLowerGroupBound(), ComparisonStrategy.GREATER_EQUALS_THAN,
+                hardPercentageClusterGroup.getLowerGroupBound() + hardPercentageClusterGroup.getStepSize(), ComparisonStrategy.LOWER_THAN);
         assertThat(cluster, is(expectedCluster));
         
         cluster = hardPercentageClusterGroup.getClusterFor(1.0);
-        expectedCluster = createCluster(9, 0, 0.1);
+        expectedCluster = createCluster(hardPercentageClusterGroup.getUpperGroupBound() - hardPercentageClusterGroup.getStepSize(), ComparisonStrategy.GREATER_EQUALS_THAN,
+                                        hardPercentageClusterGroup.getUpperGroupBound(), ComparisonStrategy.LOWER_EQUALS_THAN);
         assertThat(cluster, is(expectedCluster));
         
         cluster = softLinearClusterGroup.getClusterFor(0.0);
-        expectedCluster = createCluster(0, 0, 10);
+        expectedCluster = createCluster(softLinearClusterGroup.getStepSize(), ComparisonStrategy.LOWER_THAN);
         assertThat(cluster, is(expectedCluster));
         
         cluster = softLinearClusterGroup.getClusterFor(100.0);
-        expectedCluster = createCluster(9, 0, 10);
+        expectedCluster = createCluster(softLinearClusterGroup.getUpperGroupBound() - softLinearClusterGroup.getStepSize(), ComparisonStrategy.GREATER_EQUALS_THAN);
         assertThat(cluster, is(expectedCluster));
     }
     
     @Test
     public void testGetClusterFor() {
-        double value = -0.05;
-        double stepSize = 0.1;
-        for (int index = 0; index < 10; index++) {
-            value += stepSize;
-            Cluster<Double> cluster = hardPercentageClusterGroup.getClusterFor(value);
-            Cluster<Double> expectedCluster = createCluster(index, 0, stepSize);
-            assertThat(cluster, is(expectedCluster));
-        }
+        LinearDoubleClusterGroup clusterGroup = softLinearClusterGroup;
+        double value = (clusterGroup.getUpperGroupBound() + clusterGroup.getStepSize()) / 2;
+        Cluster<Double> cluster = clusterGroup.getClusterFor(value);
+        Cluster<Double> expectedCluster = createCluster(clusterGroup.getUpperGroupBound() / 2, ComparisonStrategy.GREATER_EQUALS_THAN,
+                (clusterGroup.getUpperGroupBound() / 2) + clusterGroup.getStepSize(), ComparisonStrategy.LOWER_THAN);
+        assertThat(cluster, is(expectedCluster));
     }
 
-    private Cluster<Double> createCluster(int index, double lowerBoundValue, double stepSize) {
-        ComparableClusterBoundary<Double> lowerBound = new ComparableClusterBoundary<Double>(lowerBoundValue + stepSize * index, ComparisonStrategy.GREATER_EQUALS_THAN);
-        ComparableClusterBoundary<Double> upperBound = new ComparableClusterBoundary<Double>(lowerBoundValue + stepSize * (index + 1), ComparisonStrategy.LOWER_THAN);
+    private Cluster<Double> createCluster(double lowerBoundValue, ComparisonStrategy lowerComparisonStrategy, double upperBoundValue, ComparisonStrategy upperComparisonStrategy) {
+        ComparableClusterBoundary<Double> lowerBound = new ComparableClusterBoundary<>(lowerBoundValue, lowerComparisonStrategy);
+        ComparableClusterBoundary<Double> upperBound = new ComparableClusterBoundary<>(upperBoundValue, upperComparisonStrategy);
         return new ClusterWithLowerAndUpperBoundaries<>(lowerBound, upperBound);
+    }
+    
+    private Cluster<Double> createCluster(double boundValue, ComparisonStrategy comparisonStrategy) {
+        return new ClusterWithSingleBoundary<>(new ComparableClusterBoundary<>(boundValue, comparisonStrategy));
     }
 
 }

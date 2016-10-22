@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;
+import com.sap.sse.datamining.impl.data.ClusterWithSingleBoundary;
 import com.sap.sse.datamining.impl.data.ComparableClusterBoundary;
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 
@@ -19,6 +20,7 @@ public class LinearDoubleClusterGroup implements ClusterGroup<Double> {
     private final boolean hardBounds;
     
     private final transient Map<Integer, Cluster<Double>> clusterCache;
+    private final int lastClusterIndex;
 
     public LinearDoubleClusterGroup(double lowerBound, double upperBound, double stepSize, boolean hardBounds) {
         this.lowerBound = lowerBound;
@@ -27,35 +29,10 @@ public class LinearDoubleClusterGroup implements ClusterGroup<Double> {
         this.hardBounds = hardBounds;
         
         clusterCache = new HashMap<>();
+        lastClusterIndex = calculateLastClusterIndex(this.upperBound, this.stepSize);
     }
 
-    @Override
-    public Cluster<Double> getClusterFor(Double valueObject) {
-        double value = valueObject.doubleValue();
-        if (value < lowerBound) {
-            return hardBounds ? null : getCluster(0);
-        }
-        if (value > upperBound) {
-            return hardBounds ? null : getCluster(getLastClusterIndex());
-        }
-
-        if (Math.abs(upperBound - value) < 0.0001) {
-            return getCluster(getLastClusterIndex());
-        }
-        return getCluster((int) (value / stepSize));
-    }
-
-    private Cluster<Double> getCluster(int index) {
-        if (!clusterCache.containsKey(index)) {
-            ComparableClusterBoundary<Double> lowerBound = new ComparableClusterBoundary<Double>(this.lowerBound + stepSize * index, ComparisonStrategy.GREATER_EQUALS_THAN);
-            ComparableClusterBoundary<Double> upperBound = new ComparableClusterBoundary<Double>(this.lowerBound + stepSize * (index + 1), ComparisonStrategy.LOWER_THAN);
-            Cluster<Double> cluster = new ClusterWithLowerAndUpperBoundaries<>(lowerBound, upperBound);
-            clusterCache.put(index, cluster);
-        }
-        return clusterCache.get(index);
-    }
-
-    private int getLastClusterIndex() {
+    private static int calculateLastClusterIndex(double upperBound, double stepSize) {
         double doubleIndex = upperBound / stepSize;
         int index = (int) doubleIndex;
         double fractionalPart = doubleIndex - index;
@@ -66,8 +43,68 @@ public class LinearDoubleClusterGroup implements ClusterGroup<Double> {
     }
 
     @Override
+    public Cluster<Double> getClusterFor(Double valueObject) {
+        double value = valueObject.doubleValue();
+        if (value < lowerBound) {
+            return hardBounds ? null : getCluster(0);
+        }
+        if (value > upperBound) {
+            return hardBounds ? null : getCluster(lastClusterIndex);
+        }
+
+        if (Math.abs(upperBound - value) < 0.0001) {
+            return getCluster(lastClusterIndex);
+        }
+        return getCluster((int) (value / stepSize));
+    }
+
+    private Cluster<Double> getCluster(int index) {
+        if (!clusterCache.containsKey(index)) {
+            clusterCache.put(index, createCluster(index));
+        }
+        return clusterCache.get(index);
+    }
+
+    private Cluster<Double> createCluster(int index) {
+        if (index == 0 && !hardBounds) {
+            return new ClusterWithSingleBoundary<>(createUpperBound(index, ComparisonStrategy.LOWER_THAN));
+        }
+        if (index == lastClusterIndex && !hardBounds) {
+            return new ClusterWithSingleBoundary<>(createLowerBound(index, ComparisonStrategy.GREATER_EQUALS_THAN));
+        }
+
+        ComparisonStrategy upperComparisonStrategy = index == lastClusterIndex ? ComparisonStrategy.LOWER_EQUALS_THAN : ComparisonStrategy.LOWER_THAN;
+        return new ClusterWithLowerAndUpperBoundaries<>(createLowerBound(index, ComparisonStrategy.GREATER_EQUALS_THAN),
+                                                        createUpperBound(index, upperComparisonStrategy));
+    }
+
+    private ComparableClusterBoundary<Double> createLowerBound(int index, ComparisonStrategy comparisonStrategy) {
+        return new ComparableClusterBoundary<Double>(this.lowerBound + stepSize * index, comparisonStrategy);
+    }
+
+    private ComparableClusterBoundary<Double> createUpperBound(int index, ComparisonStrategy comparisonStrategy) {
+        return new ComparableClusterBoundary<Double>(this.lowerBound + stepSize * (index + 1.0), comparisonStrategy);
+    }
+
+    @Override
     public Class<Double> getClusterElementsType() {
         return Double.class;
+    }
+
+    public double getLowerGroupBound() {
+        return lowerBound;
+    }
+
+    public double getUpperGroupBound() {
+        return upperBound;
+    }
+
+    public double getStepSize() {
+        return stepSize;
+    }
+
+    public boolean isHardBounds() {
+        return hardBounds;
     }
 
 }
