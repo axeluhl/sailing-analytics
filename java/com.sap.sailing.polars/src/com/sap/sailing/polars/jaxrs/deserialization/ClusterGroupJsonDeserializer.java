@@ -23,7 +23,7 @@ public class ClusterGroupJsonDeserializer<ElementType extends Serializable>
         implements JsonDeserializer<ClusterGroup<ElementType>> {
     public static final String FIELD_CLUSTERS = "clusters";
     public static final String FIELD_BOUNDARIES = "boundaries";
-    public static final String FIELD_VALUE = "value";
+    public static final String FIELD_VALUE = "boundaryValue";
     public static final String FIELD_STRATEGY = "strategy";
     
     private Comparator<ElementType> comparator;

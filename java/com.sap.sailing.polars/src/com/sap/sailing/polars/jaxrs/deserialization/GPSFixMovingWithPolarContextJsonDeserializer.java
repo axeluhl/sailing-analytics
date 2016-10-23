@@ -1,8 +1,5 @@
 package com.sap.sailing.polars.jaxrs.deserialization;
 
-import java.io.Serializable;
-import java.util.Comparator;
-
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -11,6 +8,7 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.jaxrs.BearingComparator;
 import com.sap.sailing.polars.mining.GPSFixMovingWithPolarContext;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -39,14 +37,5 @@ public class GPSFixMovingWithPolarContextJsonDeserializer implements JsonDeseria
 
         return new GPSFixMovingWithPolarContext(fixMoving, race, competitor, angleClusterGroup);
     }
-
-    private static class BearingComparator implements Comparator<Bearing>, Serializable {
-        private static final long serialVersionUID = -3773171643340188785L;
-
-        @Override
-        public int compare(Bearing left, Bearing right) {
-            return new Double(left.getDegrees()).compareTo(new Double(right.getDegrees()));
-        }
-    };
 
 }

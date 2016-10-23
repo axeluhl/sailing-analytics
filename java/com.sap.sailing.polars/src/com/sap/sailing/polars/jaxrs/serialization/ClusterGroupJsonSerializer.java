@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.polars.jaxrs.deserialization.ClusterGroupJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
@@ -29,15 +30,15 @@ public class ClusterGroupJsonSerializer<ElementType extends Serializable>
             for (ClusterBoundary<ElementType> boundary : clusterExtended.getBoundaries()) {
                 ClusterBoundaryExtended<ElementType> boundaryExtended = (ClusterBoundaryExtended<ElementType>) boundary;
                 JSONObject jsonBoundary = new JSONObject();
-                jsonBoundary.put("strategy", boundaryExtended.getStrategy());
+                jsonBoundary.put(ClusterGroupJsonDeserializer.FIELD_STRATEGY, boundaryExtended.getStrategy());
                 //toString is used to serialize value as string like "5.0°"
-                jsonBoundary.put("boundaryValue", boundaryExtended.getBoundaryValue().toString());
+                jsonBoundary.put(ClusterGroupJsonDeserializer.FIELD_VALUE, boundaryExtended.getBoundaryValue().toString());
                 boundaries.add(jsonBoundary);
             }
-            jsonCluster.put("boundaries", boundaries);
+            jsonCluster.put(ClusterGroupJsonDeserializer.FIELD_BOUNDARIES, boundaries);
             clusters.add(jsonCluster);
         }
-        result.put("clusters", clusters);
+        result.put(ClusterGroupJsonDeserializer.FIELD_CLUSTERS, clusters);
 
         return result;
     }
