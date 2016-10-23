@@ -42,6 +42,10 @@ public interface WindTrack extends DynamicTrack<Wind> {
 
     long getMillisecondsOverWhichToAverageWind();
     
+    boolean isUseSpeed();
+    
+    String getNameForReadWriteLock();
+    
     /**
      * The {@link #getAveragedWindWithConfidence(Position, TimePoint)} method will usually try to produce a result even
      * if this track has only fixes that are spatially or time-wise not close to the position and time point requested,

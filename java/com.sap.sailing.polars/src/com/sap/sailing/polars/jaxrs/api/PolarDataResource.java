@@ -11,6 +11,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.polars.jaxrs.AbstractPolarResource;
+import com.sap.sailing.polars.jaxrs.deserialization.GPSFixMovingWithPolarContextJsonDeserializer;
 import com.sap.sailing.polars.jaxrs.serialization.ClusterGroupJsonSerializer;
 import com.sap.sailing.polars.jaxrs.serialization.GPSFixMovingWithPolarContextJsonSerializer;
 import com.sap.sailing.polars.jaxrs.serialization.PolarSheetGenerationSettingsJsonSerializer;
@@ -19,6 +20,10 @@ import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 
 @Path("/polar_data")
 public class PolarDataResource extends AbstractPolarResource {
+    
+    public static final String FIELD_KEY = "key";
+    public static final String FIELD_REGRESSION = "cubicRegressionPerCourse";
+    public static final String FIELD_ENTRY = "dataEntry";
 
     @GET
     @Path("cubic_regression")
@@ -34,11 +39,11 @@ public class PolarDataResource extends AbstractPolarResource {
             
             JSONObject jsonEntry = new JSONObject();
             GPSFixMovingWithPolarContextJsonSerializer serializer = new GPSFixMovingWithPolarContextJsonSerializer();
-            jsonEntry.put("key", entry.getKey());
-            jsonEntry.put("dataEntry", serializer.serialize(entry.getDataEntry()));
+            jsonEntry.put(FIELD_KEY, entry.getKey().toString());
+            jsonEntry.put(FIELD_ENTRY, serializer.serialize(entry.getDataEntry()));
             cubicRegressionPerCourse.add(jsonEntry);
         }
-        jsonCubicRegression.put("cubicRegressionPerCourse", cubicRegressionPerCourse);
+        jsonCubicRegression.put(FIELD_REGRESSION, cubicRegressionPerCourse);
         String json = jsonCubicRegression.toJSONString();
         return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
@@ -48,7 +53,7 @@ public class PolarDataResource extends AbstractPolarResource {
     @Produces("application/json;charset=UTF-8")
     public Response getSpeedRegression() {
         JSONObject jsonSpeedRegression = new JSONObject();
-        jsonSpeedRegression.put("angleClusterGroup",
+        jsonSpeedRegression.put(GPSFixMovingWithPolarContextJsonDeserializer.FIELD_CLUSTER_GROUP,
                 new ClusterGroupJsonSerializer<Bearing>().serialize(getPolarDataServiceImpl().getPolarDataMiner()
                         .getSpeedRegressionPerAngleClusterProcessor().getAngleCluster()));
         String json = jsonSpeedRegression.toJSONString();
