@@ -94,7 +94,16 @@ public class PolarDataServiceImpl implements PolarDataService,
         this.operationsSentToMasterForReplication = new HashSet<>();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
     }
-
+    
+    /**
+     * Allows us create service with concrete miner
+     */
+    public PolarDataServiceImpl(PolarDataMiner polarDataMiner) {
+        this.polarDataMiner = polarDataMiner;
+        this.operationsSentToMasterForReplication = new HashSet<>();
+        this.operationExecutionListeners = new ConcurrentHashMap<>();
+    }
+    
     private ClusterGroup<Bearing> createAngleClusterGroup() {
         return new BearingClusterGroup(0, 180, 5);
     }

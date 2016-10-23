@@ -30,7 +30,8 @@ public class ClusterGroupJsonSerializer<ElementType extends Serializable>
                 ClusterBoundaryExtended<ElementType> boundaryExtended = (ClusterBoundaryExtended<ElementType>) boundary;
                 JSONObject jsonBoundary = new JSONObject();
                 jsonBoundary.put("strategy", boundaryExtended.getStrategy());
-                jsonBoundary.put("boundaryValue", boundaryExtended.getBoundaryValue());
+                //toString is used to serialize value as string like "5.0°"
+                jsonBoundary.put("boundaryValue", boundaryExtended.getBoundaryValue().toString());
                 boundaries.add(jsonBoundary);
             }
             jsonCluster.put("boundaries", boundaries);

@@ -28,6 +28,10 @@ public class PolarDataResource extends AbstractPolarResource {
         JSONArray cubicRegressionPerCourse = new JSONArray();
         for (GroupedDataEntry<GPSFixMovingWithPolarContext> entry : getPolarDataServiceImpl().getPolarDataMiner()
                 .getCubicRegressionPerCourseProcessor().getDataEntries()) {
+            if (entry == null) {
+                continue;
+            }
+            
             JSONObject jsonEntry = new JSONObject();
             GPSFixMovingWithPolarContextJsonSerializer serializer = new GPSFixMovingWithPolarContextJsonSerializer();
             jsonEntry.put("key", entry.getKey());
