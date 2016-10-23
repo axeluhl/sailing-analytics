@@ -6,6 +6,7 @@ import java.io.Reader;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
@@ -14,8 +15,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.common.PolarSheetGenerationSettings;
 import com.sap.sailing.polars.jaxrs.api.PolarDataResource;
 import com.sap.sailing.polars.jaxrs.deserialization.GPSFixMovingWithPolarContextJsonDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.PolarSheetGenerationSettingsJsonDeserializer;
 import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
 import com.sap.sailing.polars.mining.GPSFixMovingWithPolarContext;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -50,6 +53,16 @@ public class PolarDataClient {
         }
 
         return processor;
+    }
+    
+    public PolarSheetGenerationSettings getPolarSheetGenerationSettings() throws ClientProtocolException, IOException, IllegalStateException, ParseException {
+        HttpClient client = new SystemDefaultHttpClient();
+        HttpGet getProcessor = new HttpGet(HOST + "/backend_polar_settings");
+        HttpResponse processorResponse = client.execute(getProcessor);
+
+        JSONObject json = getJsonFromResponse(processorResponse);
+        
+        return new PolarSheetGenerationSettingsJsonDeserializer().deserialize(json);
     }
 
     private JSONObject getJsonFromResponse(HttpResponse response)
