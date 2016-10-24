@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -306,7 +305,7 @@ public class TestProcessorQuery {
     
     @Test
     public void testQueryAdditionalData() {
-        AdditionalQueryData additionalData = new AdditionalStatisticQueryData(UUID.randomUUID());
+        AdditionalQueryData additionalData = new AdditionalStatisticQueryData();
         Query<?> query = new ProcessorQuery<Double, Double>(0.0, Double.class, additionalData) {
             @Override
             protected Processor<Double, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {
@@ -317,7 +316,7 @@ public class TestProcessorQuery {
         assertThat(query.getAdditionalData(AdditionalStatisticQueryData.class), is(additionalData));
         assertThat(query.getAdditionalData(AdditionalDimensionValuesQueryData.class), nullValue());
         
-        additionalData = new AdditionalDimensionValuesQueryData(UUID.randomUUID(), new ArrayList<Function<?>>());
+        additionalData = new AdditionalDimensionValuesQueryData(new ArrayList<Function<?>>());
         query = new ProcessorQuery<Double, Double>(0.0, Double.class, additionalData) {
             @Override
             protected Processor<Double, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, Double>, Void> resultReceiver) {

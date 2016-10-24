@@ -134,11 +134,7 @@ public class SmallTransparentInfoOverlay extends CanvasOverlayV3 {
      */
 
     public void setPosition(Position position, long timeForPositionTransitionMillis) {
-        if (timeForPositionTransitionMillis == -1) {
-            removeCanvasPositionAndRotationTransition();
-        } else {
-            setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
-        }
+        updateTransition(timeForPositionTransitionMillis);
         this.position = position;
     }
     

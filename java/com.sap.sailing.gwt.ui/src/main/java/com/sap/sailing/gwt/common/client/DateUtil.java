@@ -31,11 +31,11 @@ public class DateUtil {
     }
 
     public static boolean isSameDayOfMonth(Date date1, Date date2) {
-        return getMonth(date1) == getMonth(date2);
+        return isSameMonth(date1, date2) && getDayOfMonth(date1) == getDayOfMonth(date2);
     }
 
     public static boolean isSameMonth(Date date1, Date date2) {
-        return getMonth(date1) == getMonth(date2);
+        return isSameYear(date1, date2) && getMonth(date1) == getMonth(date2);
     }
 
     public static boolean isSameYear(Date date1, Date date2) {

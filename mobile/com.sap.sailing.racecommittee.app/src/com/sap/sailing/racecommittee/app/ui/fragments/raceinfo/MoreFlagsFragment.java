@@ -1,12 +1,21 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.graphics.drawable.Drawable;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -14,13 +23,11 @@ import com.sap.sailing.racecommittee.app.domain.impl.Result;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick {
 
@@ -59,12 +66,12 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
     @Override
     public void showMore(MoreFlag flag) {
         switch (flag.flag) {
-        case BLUE:
-            replaceFragment(FinishTimeFragment.newInstance(0), R.id.race_frame);
-            break;
+            case BLUE:
+                replaceFragment(FinishTimeFragment.newInstance(0), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, true));
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
@@ -83,8 +90,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
     }
 
     public static class FinishTimeFragment extends BaseFragment implements View.OnClickListener {
-
-        public static final String START_MODE = "startMode";
 
         private SimpleDateFormat mDateFormat;
         private TimePicker mTimePicker;
@@ -111,6 +116,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             mTimePicker = ViewHelper.get(layout, R.id.time_picker);
             if (mTimePicker != null) {
                 Calendar calendar = Calendar.getInstance();
+                ViewHelper.disableSave(mTimePicker);
                 ThemeHelper.setPickerColor(getActivity(), mTimePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
                     .getColor(getActivity(), R.attr.sap_yellow_1));
                 mTimePicker.setIs24HourView(true);
@@ -136,33 +142,44 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
+            View header = ViewHelper.get(getView(), R.id.header_text);
+            if (header != null) {
+                header.setOnClickListener(this);
+            }
+
+            View back = ViewHelper.get(getView(), R.id.header_back);
+            if (back != null) {
+                back.setVisibility(View.VISIBLE);
+            }
+
             switch (getArguments().getInt(START_MODE, 0)) {
-            case 1: // Race-State: Finishing -> End Finishing
-                View header = ViewHelper.get(getView(), R.id.header_text);
-                if (header != null) {
-                    header.setOnClickListener(this);
-                }
+                case 0: // Race-State: Running -> Start Finishing
+                    if (AppUtils.with(getActivity()).isLand()) {
+                        if (header != null) {
+                            header.setOnClickListener(null);
+                        }
 
-                View back = ViewHelper.get(getView(), R.id.header_back);
-                if (back != null) {
-                    back.setVisibility(View.VISIBLE);
-                }
+                        if (back != null) {
+                            back.setVisibility(View.GONE);
+                        }
+                    }
+                    break;
 
-                ImageView flag = ViewHelper.get(getView(), R.id.header_flag);
-                if (flag != null) {
-                    int resId = R.drawable.flag_blue_48dp;
-                    Drawable drawable = BitmapHelper.getDrawable(getActivity(), resId);
-                    flag.setImageDrawable(drawable);
-                }
+                case 1: // Race-State: Finishing -> End Finishing
+                    ImageView flag = ViewHelper.get(getView(), R.id.header_flag);
+                    if (flag != null) {
+                        flag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), getResources().getInteger(R.integer.flag_size)));
+                    }
 
-                TextView headline = ViewHelper.get(getView(), R.id.header_headline);
-                if (headline != null) {
-                    headline.setText(getString(R.string.race_end_finish_header, mDateFormat.format(getRaceState().getFinishingTime().asMillis())));
-                }
-                break;
+                    TextView headline = ViewHelper.get(getView(), R.id.header_headline);
+                    if (headline != null) {
+                        headline
+                            .setText(getString(R.string.race_end_finish_header, mDateFormat.format(getRaceState().getFinishingTime().asMillis())));
+                    }
+                    break;
 
-            default: // Race-State: Running -> Start Finishing
-                break;
+                default:
+                    break;
             }
         }
 
@@ -183,17 +200,18 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         @Override
         public void onClick(View view) {
             switch (view.getId()) {
-            case R.id.finish_current:
-                setFinishTime();
-                break;
+                case R.id.finish_current:
+                    setFinishTime();
+                    break;
 
-            case R.id.finish_custom:
-                setFinishTime(getCustomFinishTime());
-                break;
+                case R.id.finish_custom:
+                    setFinishTime(TimeUtils.getTime(mTimePicker));
+                    break;
 
-            default:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                default:
+                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
             }
         }
 
@@ -207,15 +225,6 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             }
         }
 
-        private TimePoint getCustomFinishTime() {
-            Calendar time = Calendar.getInstance();
-            time.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
-            time.set(Calendar.MINUTE, mTimePicker.getCurrentMinute());
-            time.set(Calendar.SECOND, 0);
-            time.set(Calendar.MILLISECOND, 0);
-            return new MillisecondsTimePoint(time.getTime());
-        }
-
         private void setFinishTime() {
             setFinishTime(MillisecondsTimePoint.now());
         }
@@ -223,25 +232,25 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
         private void setFinishTime(TimePoint finishTime) {
             Result result = new Result();
             switch (getArguments().getInt(START_MODE, 0)) {
-            case 1: // Race-State: Finishing -> End Finishing
-                if (RaceLogRaceStatus.FINISHING.equals(getRace().getStatus())) {
-                    result = getRace().setFinishedTime(finishTime);
-                } else {
-                    result.setError(R.string.error_wrong_race_state, RaceLogRaceStatus.FINISHING.name(), getRace().getStatus().name());
-                }
-                break;
+                case 1: // Race-State: Finishing -> End Finishing
+                    if (RaceLogRaceStatus.FINISHING.equals(getRace().getStatus())) {
+                        result = getRace().setFinishedTime(finishTime);
+                    } else {
+                        result.setError(R.string.error_wrong_race_state, RaceLogRaceStatus.FINISHING.name(), getRace().getStatus().name());
+                    }
+                    break;
 
-            default: // Race-State: Running -> Start Finishing
-                if (RaceLogRaceStatus.RUNNING.equals(getRace().getStatus())) {
-                    result = getRace().setFinishingTime(finishTime);
-                } else {
-                    result.setError(R.string.error_wrong_race_state, RaceLogRaceStatus.RUNNING.name(), getRace().getStatus().name());
-                }
-                break;
+                default: // Race-State: Running -> Start Finishing
+                    if (RaceLogRaceStatus.RUNNING.equals(getRace().getStatus())) {
+                        result = getRace().setFinishingTime(finishTime);
+                    } else {
+                        result.setError(R.string.error_wrong_race_state, RaceLogRaceStatus.RUNNING.name(), getRace().getStatus().name());
+                    }
+                    break;
             }
 
             if (result.hasError()) {
-                Toast.makeText(getActivity(), result.getMessageId(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), result.getMessage(getActivity()), Toast.LENGTH_LONG).show();
             }
         }
     }

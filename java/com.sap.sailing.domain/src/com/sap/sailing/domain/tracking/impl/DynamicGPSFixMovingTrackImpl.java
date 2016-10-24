@@ -9,6 +9,8 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
@@ -24,7 +26,7 @@ import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.TimePoint;
 
-public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFixMoving> implements DynamicGPSFixTrack<ItemType, GPSFixMoving>{
+public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFixMoving> implements DynamicGPSFixTrack<ItemType, GPSFixMoving> {
     private static final long serialVersionUID = 9111448573301259784L;
     private static final double MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING = 2;
 
@@ -45,12 +47,43 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
      */
     @Override
     public void addGPSFix(GPSFixMoving gpsFix) {
-        add(gpsFix);
+        add(gpsFix, /* replace */ true);
     }
     
     @Override
     public boolean add(GPSFixMoving fix) {
-        return super.add(new CompactGPSFixMovingImpl(fix));
+        return super.add(fix); // ends up calling this.add(fix, false) where conversion in CompactGPSFixMovingImpl will happen
+    }
+
+    @Override
+    public boolean add(GPSFixMoving fix, boolean replace) {
+        return super.add(new CompactGPSFixMovingImpl(fix), replace);
+    }
+
+    /**
+     * Interpolates linearly between the two fixes based on their time difference and distance. This
+     * intentionally ignores the {@link GPSFixMoving#getSpeed() speed values} provided by the fixes
+     * themselves for performance reasons.
+     */
+    @Override
+    protected Position getEstimatedPositionBetweenTwoValidFixes(TimePoint timePoint, GPSFixMoving lastFixAtOrBefore, GPSFixMoving firstFixAtOrAfter) {
+        assert lastFixAtOrBefore != null;
+        assert firstFixAtOrAfter != null;
+        assert !timePoint.before(lastFixAtOrBefore.getTimePoint());
+        assert !timePoint.after(firstFixAtOrAfter.getTimePoint());
+        final Position result;
+        final SpeedWithBearing estimatedSpeed = estimateSpeedOnTimeDifferenceAndDistanceOnly(lastFixAtOrBefore, firstFixAtOrAfter);
+        Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
+        result = lastFixAtOrBefore.getPosition().translateGreatCircle(
+                estimatedSpeed.getBearing(), distance);
+        return result;
+    }
+
+    private SpeedWithBearing estimateSpeedOnTimeDifferenceAndDistanceOnly(GPSFixMoving fix1, GPSFixMoving fix2) {
+        assert fix1 != null && fix2 != null;
+        final Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
+        return new KnotSpeedWithBearingImpl(distance.inTime(fix1.getTimePoint().until(fix2.getTimePoint())).getKnots(),
+                fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
     }
 
     @Override

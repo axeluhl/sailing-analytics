@@ -8,46 +8,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.MapWithValueCollectionReducer;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.SetReducer;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceMarkMappingEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -58,31 +51,21 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
-import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.AbstractRaceTrackerBaseImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
-import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.PatchFailedException;
@@ -96,53 +79,35 @@ import difflib.PatchFailedException;
  * Otherwise, the tracker waits until a {@link RaceLogStartTrackingEvent} is received to perform these tasks.
  * 
  * @author Fredrik Teschke
- * 
  */
-public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
+public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
+    
+    private static final String LOGGER_AND_LOGAUTHOR_NAME = RaceLogRaceTracker.class.getName();
+    private static final Logger logger = Logger.getLogger(LOGGER_AND_LOGAUTHOR_NAME);
+    
+    private final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl(LOGGER_AND_LOGAUTHOR_NAME, 0);
+    private final Map<AbstractLog<?, ?>, Object> visitors = new HashMap<AbstractLog<?, ?>, Object>();
+    
     private final RaceLogConnectivityParams params;
     private final WindStore windStore;
-    private final GPSFixStore gpsFixStore;
-    private final DynamicTrackedRegatta regatta;
+    private final DynamicTrackedRegatta trackedRegatta;
     private final RaceLogResolver raceLogResolver;
-    private final Map<AbstractLog<?, ?>, Object> visitors = new HashMap<AbstractLog<?, ?>, Object>();
-
-    private final ConcurrentHashMap<Competitor, List<DeviceMapping<Competitor>>> competitorMappings = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Mark, List<DeviceMapping<Mark>>> markMappings = new ConcurrentHashMap<>();
-
-    private final Map<DeviceIdentifier, List<DeviceMapping<Mark>>> markMappingsByDevices = new HashMap<>();
-    private final Map<DeviceIdentifier, List<DeviceMapping<Competitor>>> competitorMappingsByDevices = new HashMap<>();
 
     private DynamicTrackedRace trackedRace;
-
-    private static final Logger logger = Logger.getLogger(RaceLogRaceTracker.class.getName());
+    private StartOfTrackingController startOfTrackingController;
+    private EndOfTrackingController endOfTrackingController;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
+            RaceLogResolver raceLogResolver) {
         this.params = params;
         this.windStore = windStore;
-        this.gpsFixStore = gpsFixStore;
-        this.regatta = regatta;
+        this.trackedRegatta = regatta;
         this.raceLogResolver = raceLogResolver;
 
         // add log listeners
         for (AbstractLog<?, ?> log : params.getLogHierarchy()) {
             if (log instanceof RaceLog) {
                 RaceLogEventVisitor visitor = new BaseRaceLogEventVisitor() {
-                    @Override
-                    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
-                        RaceLogRaceTracker.this.onDeviceCompetitorMappingEvent(event);
-                    }
-
-                    @Override
-                    public void visit(RaceLogDeviceMarkMappingEvent event) {
-                        RaceLogRaceTracker.this.onDeviceMarkMappingEvent(event);
-                    }
-                    
-                    @Override
-                    public void visit(RaceLogDefineMarkEvent event) {
-                        RaceLogRaceTracker.this.onDefineMarkEvent(event);
-                    }
-
                     @Override
                     public void visit(RaceLogStartTrackingEvent event) {
                         RaceLogRaceTracker.this.onStartTrackingEvent(event);
@@ -160,20 +125,28 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
                     public void visit(RaceLogEndOfTrackingEvent event) {
                         RaceLogRaceTracker.this.onEndOfTrackingEvent(event);
                     }
+                    
+                    @Override
+                    public void visit(RaceLogStartTimeEvent event) {
+                        trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogRaceStatusEvent event) {
+                        if (event.getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
+                            trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
+                        }
+                    }
                 };
                 visitors.put(log, visitor);
                 ((RaceLog) log).addListener(visitor);
             } else if (log instanceof RegattaLog) {
                 RegattaLogEventVisitor visitor = new BaseRegattaLogEventVisitor() {
                     @Override
-                    public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
-                        RaceLogRaceTracker.this.onDeviceCompetitorMappingEvent(event);
+                    public void visit(RegattaLogDefineMarkEvent event) {
+                        RaceLogRaceTracker.this.onDefineMarkEvent(event);
                     }
 
-                    @Override
-                    public void visit(RegattaLogDeviceMarkMappingEvent event) {
-                        RaceLogRaceTracker.this.onDeviceMarkMappingEvent(event);
-                    }
                 };
                 visitors.put(log, visitor);
                 ((RegattaLog) log).addListener(visitor);
@@ -190,18 +163,26 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     }
 
     @Override
-    public void stop(boolean preemptive) {
-        // mark passing calculator is automatically stopped, when the race status is set to {@link
-        // TrackedRaceStatusEnum#FINISHED}
-        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 100));
-
+    protected void onStop(boolean preemptive) {
+        RaceLog raceLog = params.getRaceLog();
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
+        if (!trackedRegatta.getRegatta().isControlTrackingFromStartAndFinishTimes() &&
+                (trackingTimes == null || trackingTimes.getB() == null || trackingTimes.getB().getTimePoint() == null)) {
+            // seems the first time tracking for this race is stopped; enter "now" as end of tracking
+            // into the race log
+            raceLog.add(new RaceLogEndOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, raceLog.getCurrentPassId()));
+        }
+        
         // remove listeners on logs
         for (Entry<AbstractLog<?, ?>, Object> visitor : visitors.entrySet()) {
             visitor.getKey().removeListener(visitor.getValue());
         }
-
-        // remove listener for fixes
-        gpsFixStore.removeListener(this);
+        if (startOfTrackingController != null && trackedRace != null) {
+            trackedRace.removeStartTimeChangedListener(startOfTrackingController);
+        }
+        if (endOfTrackingController != null && trackedRace != null) {
+            trackedRace.removeListener(endOfTrackingController);
+        }
 
         logger.info(String.format("Stopped tracking race-log race %s %s %s", params.getLeaderboard(),
                 params.getRaceColumn(), params.getFleet()));
@@ -209,7 +190,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
 
     @Override
     public Regatta getRegatta() {
-        return regatta.getRegatta();
+        return trackedRegatta.getRegatta();
     }
 
     @Override
@@ -229,7 +210,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
 
     @Override
     public DynamicTrackedRegatta getTrackedRegatta() {
-        return regatta;
+        return trackedRegatta;
     }
 
     @Override
@@ -238,133 +219,8 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     }
 
     @Override
-    public GPSFixStore getGPSFixStore() {
-        return gpsFixStore;
-    }
-
-    @Override
     public Object getID() {
         return params.getRaceLog().getId();
-    }
-
-    private Map<Competitor, List<DeviceMapping<Competitor>>> getNewCompetitorMappings() {
-        return new MultiLogAnalyzer<>(new DeviceCompetitorMappingFinder.Factory(),
-                new MapWithValueCollectionReducer<>(), params.getLogHierarchy()).analyze();
-    }
-
-    private Map<Mark, List<DeviceMapping<Mark>>> getNewMarkMappings() {
-        return new MultiLogAnalyzer<>(new DeviceMarkMappingFinder.Factory(), new MapWithValueCollectionReducer<>(),
-                params.getLogHierarchy()).analyze();
-    }
-
-    /**
-     * Use mapping time ranges to set time start and end of tracking time for race
-     */
-    private void updateStartAndEndOfTracking() {
-        // TODO bug 3196: this would need to be evaluated lazily in TrackedRaceImpl.getStartOfTracking / getEndOfTracking
-        final Pair<TimePoint, TimePoint> trackingTimesFromRaceLog = trackedRace.getTrackingTimesFromRaceLogs();
-        if (trackingTimesFromRaceLog == null) {
-            TimePoint earliestMappingStart = new MillisecondsTimePoint(Long.MAX_VALUE);
-            TimePoint latestMappingEnd = new MillisecondsTimePoint(Long.MIN_VALUE);
-    
-            for (List<? extends DeviceMapping<?>> list : competitorMappings.values()) {
-                for (DeviceMapping<?> mapping : list) {
-                    if (mapping.getTimeRange().from().before(earliestMappingStart)) {
-                        earliestMappingStart = mapping.getTimeRange().from();
-                    }
-                    if (mapping.getTimeRange().to().after(latestMappingEnd)) {
-                        latestMappingEnd = mapping.getTimeRange().to();
-                    }
-                }
-            }
-    
-            for (List<? extends DeviceMapping<?>> list : markMappings.values()) {
-                for (DeviceMapping<?> mapping : list) {
-                    if (mapping.getTimeRange().from().before(earliestMappingStart)) {
-                        earliestMappingStart = mapping.getTimeRange().from();
-                    }
-                    if (mapping.getTimeRange().to().after(latestMappingEnd)) {
-                        latestMappingEnd = mapping.getTimeRange().to();
-                    }
-                }
-            }
-    
-            trackedRace.setStartOfTrackingReceived(earliestMappingStart);
-            trackedRace.setEndOfTrackingReceived(latestMappingEnd);
-        }
-    }
-
-    private <ItemT extends WithID, FixT extends GPSFix> boolean hasMappingAlreadyBeenLoaded(
-            DeviceMapping<ItemT> newMapping, List<DeviceMapping<ItemT>> oldMappings) {
-        if (oldMappings == null) {
-            return false;
-        }
-        for (DeviceMapping<ItemT> oldMapping : oldMappings) {
-            if (newMapping.getDevice() == oldMapping.getDevice()
-                    && newMapping.getTimeRange().liesWithin(oldMapping.getTimeRange())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private <ItemT extends WithID, FixT extends GPSFix> Map<DeviceIdentifier, List<DeviceMapping<ItemT>>> transformToMappingsByDevice(
-            Map<ItemT, List<DeviceMapping<ItemT>>> mappings) {
-
-        Map<DeviceIdentifier, List<DeviceMapping<ItemT>>> result = new HashMap<>();
-        for (ItemT item : mappings.keySet()) {
-            for (DeviceMapping<ItemT> mapping : mappings.get(item)) {
-                List<DeviceMapping<ItemT>> list = result.get(mapping.getDevice());
-                if (list == null) {
-                    list = new ArrayList<>();
-                    result.put(mapping.getDevice(), list);
-                }
-                list.add(mapping);
-            }
-        }
-
-        return result;
-    }
-
-    private void updateMarkMappings(boolean loadIfNotCovered) {
-        assert trackedRace != null;
-        // TODO remove fixes, if mappings have been removed
-        // check if there are new time ranges not covered so far
-        Map<Mark, List<DeviceMapping<Mark>>> newMappings = getNewMarkMappings();
-
-        if (loadIfNotCovered) {
-            for (Mark mark : newMappings.keySet()) {
-                DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
-                List<DeviceMapping<Mark>> oldMappings = markMappings.get(mark);
-
-                if (oldMappings != null) {
-                    for (DeviceMapping<Mark> newMapping : newMappings.get(mark)) {
-                        if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
-                            try {
-                                gpsFixStore.loadMarkTrack(track, newMapping);
-                            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                                logger.log(Level.WARNING, "Could not load mark track " + newMapping.getMappedTo());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        markMappings.clear();
-        markMappings.putAll(newMappings);
-
-        markMappingsByDevices.clear();
-        markMappingsByDevices.putAll(transformToMappingsByDevice(markMappings));
-
-        updateStartAndEndOfTracking();
-    }
-
-    private void onDeviceMarkMappingEvent(DeviceMarkMappingEvent<?> event) {
-        if (trackedRace != null) {
-            updateMarkMappings(true);
-            gpsFixStore.addListener(this, event.getDevice());
-        }
     }
     
     /**
@@ -373,46 +229,10 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
      * {@link RaceLogDefineMarkEvent} is received, the existence of the track for that mark in the {@link TrackedRace}
      * has to be ensured, also ensuring that the mark will exist in the mark tracks map key set.
      */
-    private void onDefineMarkEvent(RaceLogDefineMarkEvent event) {
+    private void onDefineMarkEvent(RegattaLogDefineMarkEvent event) {
         if (trackedRace != null) {
             trackedRace.getOrCreateTrack(event.getMark());
         }
-    }
-
-    private void onDeviceCompetitorMappingEvent(DeviceCompetitorMappingEvent<?> event) {
-        if (trackedRace != null) {
-            updateCompetitorMappings(true);
-            gpsFixStore.addListener(this, event.getDevice());
-        }
-    }
-
-    private void updateCompetitorMappings(boolean loadIfNotCovered) {
-        // TODO remove fixes, if mappings have been removed
-
-        // check if there are new time ranges not covered so far
-        Map<Competitor, List<DeviceMapping<Competitor>>> newMappings = getNewCompetitorMappings();
-
-        if (loadIfNotCovered) {
-            for (Competitor competitor : newMappings.keySet()) {
-                DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                List<DeviceMapping<Competitor>> oldMappings = competitorMappings.get(competitor);
-
-                for (DeviceMapping<Competitor> newMapping : newMappings.get(competitor)) {
-                    if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
-                        try {
-                            gpsFixStore.loadCompetitorTrack(track, newMapping);
-                        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                            logger.log(Level.WARNING, "Could not load competitor track " + newMapping.getMappedTo());
-                        }
-                    }
-                }
-            }
-        }
-        competitorMappings.clear();
-        competitorMappings.putAll(newMappings);
-        competitorMappingsByDevices.clear();
-        competitorMappingsByDevices.putAll(transformToMappingsByDevice(competitorMappings));
-        updateStartAndEndOfTracking();
     }
 
     private void onStartTrackingEvent(RaceLogStartTrackingEvent event) {
@@ -422,16 +242,20 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     }
     
     private void onStartOfTrackingEvent(RaceLogStartOfTrackingEvent event) {
-        trackedRace.setStartOfTrackingReceived(event.getLogicalTimePoint());
+        if (trackedRace != null) {
+            trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
+        }
     }
     
     private void onEndOfTrackingEvent(RaceLogEndOfTrackingEvent event) {
-        trackedRace.setEndOfTrackingReceived(event.getLogicalTimePoint());
+        if (trackedRace != null) {
+            trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
+        }
     }
 
     private void onCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent event) {
         if (trackedRace != null) {
-            CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
+            CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog(), /* onlyCoursesWithValidWaypointList */ true).analyze();
             List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
             for (Waypoint waypoint : base.getWaypoints()) {
                 update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
@@ -449,94 +273,49 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         RaceColumn raceColumn = params.getRaceColumn();
         Fleet fleet = params.getFleet();
         RaceLogDenoteForTrackingEvent denoteEvent = new RaceInformationFinder(raceLog).analyze();
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
+        if (!trackedRegatta.getRegatta().isControlTrackingFromStartAndFinishTimes() &&
+                (trackingTimes == null || trackingTimes.getA() == null || trackingTimes.getA().getTimePoint() == null)) {
+            // the start of tracking interval is unset or set to null; enter "now" as start of tracking into the race log
+            raceLog.add(new RaceLogStartOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, raceLog.getCurrentPassId()));
+        }
         BoatClass boatClass = denoteEvent.getBoatClass();
         String raceName = denoteEvent.getRaceName();
-        CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog).analyze();
+        CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true).analyze();
         if (courseBase == null) {
             courseBase = new CourseDataImpl("Default course for " + raceName);
             logger.log(Level.FINE, "Using empty course in creation of race " + raceName);
         }
-        Course course = new CourseImpl(raceName + " course", courseBase.getWaypoints());
+        final Course course = new CourseImpl(raceName + " course", courseBase.getWaypoints());
         if (raceColumn.getTrackedRace(fleet) != null) {
-            try {
-                raceLog.revokeEvent(params.getService().getServerAuthor(), event,
-                        "could not start tracking because tracked race already exists");
-            } catch (NotRevokableException e) {
-                logger.log(Level.WARNING, "Couldn't revoke event "+event, e);
+            if (event != null) {
+                try {
+                    raceLog.revokeEvent(params.getService().getServerAuthor(), event,
+                            "could not start tracking because tracked race already exists");
+                } catch (NotRevokableException e) {
+                    logger.log(Level.WARNING, "Couldn't revoke event "+event, e);
+                }
             }
             throw new RaceNotCreatedException(String.format("Race for racelog (%s) has already been created", raceLog));
         }
-        // check both the racelog and regattalog for registered competitors
-        Set<Competitor> competitors = new MultiLogAnalyzer<>(RegisteredCompetitorsAnalyzer.Factory.INSTANCE,
-                new SetReducer<Competitor>(), params.getLogHierarchy()).analyze();
+        Iterable<Competitor> competitors = raceColumn.getAllCompetitors(params.getFleet());
         Serializable raceId = denoteEvent.getRaceId();
         final RaceDefinition raceDef = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
         Iterable<Sideline> sidelines = Collections.<Sideline> emptyList();
         // set race definition, so race is linked to leaderboard automatically
-        regatta.getRegatta().addRace(raceDef);
-        raceColumn.setRaceIdentifier(fleet, regatta.getRegatta().getRaceIdentifier(raceDef));
-        trackedRace = regatta.createTrackedRace(raceDef, sidelines, windStore, gpsFixStore,
+        trackedRegatta.getRegatta().addRace(raceDef);
+        raceColumn.setRaceIdentifier(fleet, trackedRegatta.getRegatta().getRaceIdentifier(raceDef));
+        trackedRace = trackedRegatta.createTrackedRace(raceDef, sidelines, windStore,
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver);
-        trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
-        //attach regatta logs
-        for (AbstractLog<?, ?> log : params.getLogHierarchy()) {
-            if (log instanceof RegattaLog) {
-                trackedRace.attachRegattaLog((RegattaLog) log);
-            }
-        }
-        // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
-        updateCompetitorMappings(false);
-        updateMarkMappings(false);
-        // add listeners for devices in mappings already present
-        addListeners(competitorMappings);
-        addListeners(markMappings);
+        startOfTrackingController = new StartOfTrackingController(trackedRace, raceLog, raceLogEventAuthor);
+        trackedRace.addStartTimeChangedListener(startOfTrackingController);
+        endOfTrackingController = new EndOfTrackingController(trackedRace, raceLog, raceLogEventAuthor);
+        trackedRace.addListener(endOfTrackingController);
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles
         synchronized (this) {
             this.notifyAll();
-        }
-    }
-
-    private <T extends WithID> void addListeners(Map<T, List<DeviceMapping<T>>> mappings) {
-        for (List<DeviceMapping<T>> list : mappings.values()) {
-            for (DeviceMapping<T> mapping : list) {
-                gpsFixStore.addListener(this, mapping.getDevice());
-            }
-        }
-    }
-
-    public RaceLogConnectivityParams getParams() {
-        return params;
-    }
-
-    @Override
-    public void fixReceived(DeviceIdentifier device, GPSFix fix) {
-        TimePoint timePoint = fix.getTimePoint();
-        if (markMappingsByDevices.get(device) != null) {
-            for (DeviceMapping<Mark> mapping : markMappingsByDevices.get(device)) {
-                Mark mark = mapping.getMappedTo();
-                if (mapping.getTimeRange().includes(timePoint)) {
-                    trackedRace.recordFix(mark, fix);
-                }
-            }
-        }
-
-        if (competitorMappingsByDevices.get(device) != null) {
-            for (DeviceMapping<Competitor> mapping : competitorMappingsByDevices.get(device)) {
-                Competitor comp = mapping.getMappedTo();
-                if (mapping.getTimeRange().includes(timePoint)) {
-                    if (fix instanceof GPSFixMoving) {
-                        trackedRace.recordFix(comp, (GPSFixMoving) fix);
-                    } else {
-                        logger.log(
-                                Level.WARNING,
-                                String.format(
-                                        "Could not add fix for competitor (%s) in race (%s), as it is no GPSFixMoving, meaning it is missing COG/SOG values",
-                                        comp, params.getRaceLog()));
-                    }
-                }
-            }
         }
     }
 }

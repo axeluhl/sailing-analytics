@@ -73,4 +73,9 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
 
     protected abstract void internalShowNumberResult(Map<GroupKey, Number> resultValues);
 
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
+
 }

@@ -21,9 +21,9 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
-import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
-import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -38,12 +38,13 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
+    public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
+
     private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
 
     private String leaderboardName;
     private String leaderboardGroupName;
     private LeaderboardType leaderboardType;
-    private GlobalNavigationPanel globalNavigationPanel;
     private EventDTO event;
     
     @Override
@@ -119,33 +120,18 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     private void createUI(boolean showRaceDetails, boolean embedded, boolean hideToolbar, EventDTO event) {
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
-        LogoAndTitlePanel logoAndTitlePanel = null;
         if (!embedded) {
             // Hack to shorten the leaderboardName in case of overall leaderboards
             String leaderboardDisplayName = Window.Location.getParameter("displayName");
             if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            globalNavigationPanel = new GlobalNavigationPanel(getStringMessages(), true, null, leaderboardGroupName, event, null);
-            logoAndTitlePanel = new LogoAndTitlePanel(leaderboardGroupName, leaderboardDisplayName, getStringMessages(), this, getUserService()) {
-                @Override
-                public void onResize() {
-                    super.onResize();
-                    if (isSmallWidth()) {
-                        remove(globalNavigationPanel);
-                    } else {
-                        add(globalNavigationPanel);
-                    }
-                }
-            };
-            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            if (!isSmallWidth()) {
-                logoAndTitlePanel.add(globalNavigationPanel);
-            }
-            mainPanel.addNorth(logoAndTitlePanel, 68);
+            SAPSailingHeaderWithAuthentication header  = new SAPSailingHeaderWithAuthentication(leaderboardDisplayName);
+            new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+            mainPanel.addNorth(header, 75);
         }
         ScrollPanel contentScrollPanel = new ScrollPanel();
-        long delayBetweenAutoAdvancesInMilliseconds = 3000l;
+        long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
         Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
@@ -160,7 +146,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         String chartDetailParam = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_CHART_DETAIL, null);
         final DetailType chartDetailType;
         if (chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam) || DetailType.OVERALL_RANK.name().equals(chartDetailParam) || 
-                DetailType.REGATTA_TOTAL_POINTS_SUM.name().equals(chartDetailParam))) {
+                DetailType.REGATTA_NET_POINTS_SUM.name().equals(chartDetailParam))) {
             chartDetailType = DetailType.valueOf(chartDetailParam);
         } else {
             chartDetailType = leaderboardType.isMetaLeaderboard() ?  DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
@@ -258,7 +244,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
                     /* overallDetails */ overallDetails, null,
                     /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
-                    raceColumnSelectionStrategy);
+                    raceColumnSelectionStrategy, /* showCompetitorSailIdColumns */ true, /*showCompetitorFullNameColumn*/ true);
         }
         return result;
     }

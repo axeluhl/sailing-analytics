@@ -23,6 +23,10 @@ public class AggregationProcessorDefinitionDTO implements Serializable, Comparab
         this.aggregatedTypeName = aggregatedTypeName;
         this.displayName = displayName;
     }
+    
+    public String getMessageKey() {
+        return messageKey;
+    }
 
     public String getExtractedTypeName() {
         return extractedTypeName;
@@ -34,6 +38,11 @@ public class AggregationProcessorDefinitionDTO implements Serializable, Comparab
 
     public String getDisplayName() {
         return displayName;
+    }
+    
+    @Override
+    public String toString() {
+        return getExtractedTypeName() + " -> " + getAggregatedTypeName() + "[messageKey: " + messageKey + "]";
     }
 
     @Override

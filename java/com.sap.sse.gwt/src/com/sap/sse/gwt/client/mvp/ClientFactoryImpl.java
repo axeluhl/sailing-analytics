@@ -14,23 +14,27 @@ import com.sap.sse.gwt.client.ErrorReporter;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class ClientFactoryImpl implements ClientFactory {
+public abstract class ClientFactoryImpl<TLV extends TopLevelView> implements ClientFactory {
     private final EventBus eventBus;
     private final PlaceController placeController;
-    private final TopLevelView root;
+    private final TLV root;
     
-    public ClientFactoryImpl(TopLevelView root) {
+    public ClientFactoryImpl(TLV root) {
         this(root, new SimpleEventBus());
     }
     
-    protected ClientFactoryImpl(TopLevelView root, EventBus eventBus) {
+    protected ClientFactoryImpl(TLV root, EventBus eventBus) {
         this(root, eventBus, new PlaceController(eventBus));
     }
     
-    protected ClientFactoryImpl(TopLevelView root, EventBus eventBus, PlaceController placeController) {
+    protected ClientFactoryImpl(TLV root, EventBus eventBus, PlaceController placeController) {
         this.root = root;
         this.eventBus = eventBus;
         this.placeController = placeController;
+    }
+    
+    protected TLV getTopLevelView() {
+        return root;
     }
 
     @Override

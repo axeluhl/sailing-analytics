@@ -1,15 +1,10 @@
 package com.sap.sailing.domain.abstractlog.race;
 
-import java.io.Serializable;
-import java.util.List;
-
-import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sse.common.Util;
 
 /**
- * A triple holding the competitor ID, the competitor name and the {@link MaxPointReason} documenting the score for the
- * competitor
+ * A set of competitor results; order does not tell anything about the finishing order which can be seen from
+ * the {@link CompetitorResult#getRank}.
  */
-public interface CompetitorResults extends List<Util.Triple<Serializable, String, MaxPointsReason>> {
-
+public interface CompetitorResults extends Iterable<CompetitorResult> {
+    boolean add(CompetitorResult result);
 }

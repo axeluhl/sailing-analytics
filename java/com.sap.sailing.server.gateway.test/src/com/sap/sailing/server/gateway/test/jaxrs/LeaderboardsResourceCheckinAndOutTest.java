@@ -17,8 +17,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
@@ -31,6 +31,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
+import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
@@ -47,14 +48,14 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         Competitor c = createCompetitors(1).get(0);
         competitor = racingEventService.getBaseDomainFactory().getOrCreateCompetitor(c.getId(), c.getName(),
                 c.getColor(), c.getEmail(), c.getFlagImage(), (DynamicTeam) c.getTeam(), (DynamicBoat) c.getBoat(),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), MillisecondsTimePoint.now(),
-                MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, Collections
+                MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections
                         .singleton(new FleetImpl("fleet")), Arrays.asList("column"), racingEventService)), false,
                 new HighPoint(), 0, null, OneDesignRankingMetric::new);
         racingEventService.addRegattaWithoutReplication(regatta);
         leaderboard = racingEventService.addRegattaLeaderboard(regatta.getRegattaIdentifier(), "regatta", new int[] {});
-
+        regatta.registerCompetitor(competitor);
         log = leaderboard.getRegattaLike().getRegattaLog();
     }
 
@@ -73,12 +74,13 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         Response response = resource.postCheckin(json.toString(), leaderboard.getName());
         assertThat("checkin returns OK", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
 
-        Set<Competitor> registeredCompetitors = new RegisteredCompetitorsAnalyzer<>(log).analyze();
-        Map<Competitor, List<DeviceMapping<Competitor>>> mappings = new DeviceCompetitorMappingFinder<>(log).analyze();
+        Set<Competitor> registeredCompetitors = new CompetitorsInLogAnalyzer<>(log).analyze();
+        Map<Competitor, List<DeviceMappingWithRegattaLogEvent<Competitor>>> mappings = new RegattaLogDeviceCompetitorMappingFinder(
+                log).analyze();
 
         assertThat("competitor was registered", registeredCompetitors.size(), equalTo(1));
         assertThat("device mappings for competitor exist", mappings.size(), equalTo(1));
-        List<DeviceMapping<Competitor>> mappingsForC = mappings.get(competitor);
+        List<DeviceMappingWithRegattaLogEvent<Competitor>> mappingsForC = mappings.get(competitor);
         assertThat("exactly one device mapping for competitor exists", mappingsForC.size(), equalTo(1));
         DeviceMapping<Competitor> mappingForC = mappingsForC.get(0);
         assertThat("that mapping is for the correct device",
@@ -97,7 +99,7 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         response = resource.postCheckout(json.toString(), leaderboard.getName());
         assertThat("checkout returns OK", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
 
-        mappings = new DeviceCompetitorMappingFinder<>(log).analyze();
+        mappings = new RegattaLogDeviceCompetitorMappingFinder(log).analyze();
         mappingForC = mappings.get(competitor).get(0);
         assertThat("mapping now ends at checkout timepoint", mappingForC.getTimeRange().to().asMillis(),
                 equalTo(toMillis));

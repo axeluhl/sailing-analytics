@@ -3,18 +3,13 @@ package com.sap.sailing.gwt.ui.client;
 import com.sap.sse.common.settings.AbstractSettings;
 
 public class TimePanelSettings extends AbstractSettings {
-    private long refreshInterval;
+    private final long refreshInterval;
 
-    public TimePanelSettings() {
-        refreshInterval = 1000;
+    public TimePanelSettings(long refreshInterval) {
+        this.refreshInterval = refreshInterval;
     }
 
     public long getRefreshInterval() {
         return refreshInterval;
     }
-
-    public void setRefreshInterval(long refreshInterval) {
-        this.refreshInterval = refreshInterval;
-    }
-
 }

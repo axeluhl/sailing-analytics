@@ -1,13 +1,10 @@
 package com.sap.sailing.domain.abstractlog.race;
 
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 
 
 public interface RaceLogEventVisitor {
@@ -39,19 +36,11 @@ public interface RaceLogEventVisitor {
     
     public void visit(RaceLogWindFixEvent event);
     
-    public void visit(RaceLogDeviceCompetitorMappingEvent event);
-    
-    public void visit(RaceLogDeviceMarkMappingEvent event);
-    
     public void visit(RaceLogDenoteForTrackingEvent event);
     
     public void visit(RaceLogStartTrackingEvent event);
     
     public void visit(RaceLogRegisterCompetitorEvent event);
-    
-    public void visit(RaceLogDefineMarkEvent event);
-    
-    public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event);
 
     public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation);
     
@@ -64,4 +53,6 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogStartOfTrackingEvent event);
     
     public void visit(RaceLogEndOfTrackingEvent event);
+
+    public void visit(RaceLogUseCompetitorsFromRaceLogEvent event);
 }

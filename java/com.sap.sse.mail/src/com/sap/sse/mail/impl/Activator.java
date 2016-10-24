@@ -14,6 +14,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sse.mail.MailService;
+import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.util.ClearStateTestSupport;
 
@@ -34,7 +35,8 @@ public class Activator implements BundleActivator {
             logger.log(Level.SEVERE, "Couldn't read mail properties from " + propertiesfile.getCanonicalPath(), ioe);
         }
 
-        MailService mailService = new MailServiceImpl(mailProperties);
+        MailService mailService = new MailServiceImpl(mailProperties, new MailServiceResolverAgainstOsgiRegistryImpl(
+                new CachedOsgiTypeBasedServiceFinderFactory(context).createServiceFinder(MailService.class)));
         registration = context.registerService(MailService.class, mailService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, mailService.getId()

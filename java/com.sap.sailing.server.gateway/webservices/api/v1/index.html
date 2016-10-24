@@ -5,10 +5,10 @@
 	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
 	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
 	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
-	<title>SAP Sailing Analytics Webservices API Version 1.0 Beta</title>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
 </head>
 <body>
-<h1>SAP Sailing Analytics Webservices API Version 1.0 Beta - Overview</h1>
+<h1>SAP Sailing Analytics Webservices API Version 1.0 - Overview</h1>
 
 <p>
 A number of web services are available to query the state of a SAP Sailing Analytics server instance.
@@ -61,6 +61,10 @@ name to make sure you get to the event you're interested in.
 		<td>Gets the entries of a regatta</td>
 	</tr>
 	<tr>
+		<td><a href="raceEntriesGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/entries</a></td>
+		<td>Gets the entries of a race</td>
+	</tr>
+	<tr>
 		<td><a href="raceBearingOfFirstLegGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/firstlegbearing</a></td>
 		<td>Gets the bearing of the first leg</td>
 	</tr>
@@ -70,7 +74,11 @@ name to make sure you get to the event you're interested in.
 	</tr>
 	<tr>
 		<td><a href="raceCompetitorPositionsGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/competitors/positions</a></td>
-		<td>Gets all GPS positions of the competitors of a race</td>
+		<td>Gets the GPS positions of the competitors of a race</td>
+	</tr>
+	<tr>
+		<td><a href="raceCompetitorLiveGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/competitors/live</a></td>
+		<td>Gets some competitor information (e.g current rank, current leg) for a live race</td>
 	</tr>
 	<tr>
 		<td><a href="raceCompetitorLegsGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/competitors/legs</a></td>
@@ -85,12 +93,29 @@ name to make sure you get to the event you're interested in.
 		<td>Gets the course of a race</td>
 	</tr>
 	<tr>
+		<td><a href="raceTimesGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/times</a></td>
+		<td>Gets the timing data for a race, including the start/end times, the tracking start/end times
+		    as well as the "split times" or "mark passing times" of the first competitor rounding each mark.</td>
+	</tr>
+	<tr>
 		<td><a href="raceTargetTimeGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/targettime</a></td>
 		<td>Gets the estimated target time of a race</td>
 	</tr>
 	<tr>
 		<td><a href="raceWindGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/wind</a></td>
 		<td>Gets all GPS positions and data values for the wind of a race</td>
+	</tr>
+	<tr>
+		<td><a href="regattasDataMiningGetDoc.html">/api/v1/regattas/datamining</a></td>
+		<td>Gets all query identifiers for regattas</td>
+	</tr>
+	<tr>
+		<td><a href="regattaRunQueryGetDoc.html">/api/v1/regattas/{regattaname}/datamining/{queryidentifier}</a></td>
+		<td>Executes the query for the regatta and gets the result</td>
+	</tr>
+	<tr>
+		<td><a href="raceRunQueryGetDoc.html">/api/v1/regattas/{regattaname}/races/{racename}/datamining/{queryidentifier}</a></td>
+		<td>Executes the query for the race and gets the result</td>
 	</tr>
 	<tr>
 		<td><a href="leaderboardgroupsGetDoc.html">/api/v1/leaderboardgroups</a></td>

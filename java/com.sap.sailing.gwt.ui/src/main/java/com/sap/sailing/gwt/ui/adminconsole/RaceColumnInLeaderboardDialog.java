@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -134,13 +135,21 @@ public class RaceColumnInLeaderboardDialog extends DataEntryDialog<RaceColumnInL
     }
 
     @Override
+    protected FocusWidget getInitialFocusWidget() {
+        final FocusWidget result;
+        if (isRegattaLeaderboard) {
+            result = explicitFactorBox;
+        } else {
+            result = raceNameBox;
+        }
+        return result;
+    }
+
+    @Override
     public void show() {
         super.show();
         if (isRegattaLeaderboard) {
-            explicitFactorBox.setFocus(true);
             explicitFactorBox.selectAll();
-        } else {
-            raceNameBox.setFocus(true);
         }
     }
 }

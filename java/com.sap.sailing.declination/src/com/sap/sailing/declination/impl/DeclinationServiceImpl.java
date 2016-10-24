@@ -101,9 +101,15 @@ public class DeclinationServiceImpl implements DeclinationService {
     private QuadTree<Declination> getYearStore(int year) throws IOException, ParseException {
         QuadTree<Declination> result = yearStore.get(year);
         if (result == null) {
-            result = persistentStore.getStoredDeclinations(year);
-            if (result != null) {
-                yearStore.put(year, result);
+            synchronized (this) {
+                // make sure we only trigger one invocation of persistentStore.getStoredDeclinations(year) even for multiple threads
+                result = yearStore.get(year);
+                if (result == null) {
+                    result = persistentStore.getStoredDeclinations(year);
+                    if (result != null) {
+                        yearStore.put(year, result);
+                    }
+                }
             }
         }
         return result;

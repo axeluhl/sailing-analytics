@@ -1,6 +1,6 @@
 package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
-import com.sap.sailing.android.shared.data.AbstractCheckinData;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 
@@ -9,7 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-public class CheckinData extends AbstractCheckinData {
+public class CheckinData extends BaseCheckinData {
     public String leaderboardName;
     public String deviceUid;
     public String uriString;

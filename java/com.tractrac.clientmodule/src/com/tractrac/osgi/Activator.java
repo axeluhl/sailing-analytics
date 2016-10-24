@@ -6,8 +6,8 @@ import org.osgi.framework.BundleContext;
 import com.tractrac.dataflow.lib.api.DataflowLocator;
 import com.tractrac.dataflow.lib.impl.DefaultDataProviderFactory;
 import com.tractrac.dataflow.lib.prov.live.tcp.provider.TCPLiveProviderFactory;
+import com.tractrac.dataflow.lib.prov.stored.mtb.MTBStoredDataProviderFactory;
 import com.tractrac.dataflow.lib.prov.stored.tcp.TCPStoredProviderFactory;
-import com.tractrac.dataflow.lib.prov.stored.url.URLStoredProviderFactory;
 import com.tractrac.dataflow.lib.spi.DataflowProviderLocator;
 import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.impl.attachment.DefaultAttachmentManager;
@@ -30,7 +30,7 @@ public class Activator implements BundleActivator {
         DataflowLocator.registerDataProviderFactory(new DefaultDataProviderFactory());
         DataflowProviderLocator.registerLiveDataProviderFactory(new TCPLiveProviderFactory());
         DataflowProviderLocator.registerStoredDataProviderFactory(new TCPStoredProviderFactory());
-        DataflowProviderLocator.registerStoredDataProviderFactory(new URLStoredProviderFactory());
+        DataflowProviderLocator.registerStoredDataProviderFactory(new MTBStoredDataProviderFactory());
         ModelLocator.registerAttachmentManager(new DefaultAttachmentManager());
         ModelLocator.registerEventFactory(new EventFactory());
         ModelLocator.registerPositionFactory(new DefaultPositionFactory());

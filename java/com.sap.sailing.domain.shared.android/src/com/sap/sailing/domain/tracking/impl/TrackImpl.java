@@ -107,12 +107,12 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     }
 
     /**
-     * Callers that want to iterate over the collection returned need to synchronize on <code>this</code> object to
-     * avoid {@link ConcurrentModificationException}s.
+     * Callers that want to iterate over the collection returned need to use {@link #lockForRead()} and
+     * {@link #unlockAfterRead()} to avoid {@link ConcurrentModificationException}s.
      * 
-     * @return the smoothened fixes ordered by their time points; this implementation simply delegates to {@link #getInternalRawFixes()} because for
-     *         only {@link Timed} fixes we can't know how to remove outliers. Subclasses that constrain the
-     *         <code>FixType</code> may provide smoothening implementations.
+     * @return the smoothened fixes ordered by their time points; this implementation simply delegates to
+     *         {@link #getInternalRawFixes()} because for only {@link Timed} fixes we can't know how to remove outliers.
+     *         Subclasses that constrain the <code>FixType</code> may provide smoothening implementations.
      */
     protected NavigableSet<FixType> getInternalFixes() {
         NavigableSet<FixType> result = getInternalRawFixes();
@@ -313,19 +313,36 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     }
 
     protected boolean add(FixType fix) {
+        return add(fix, /* replace */ false);
+    }
+
+    protected boolean add(FixType fix, boolean replace) {
         lockForWrite();
         try {
-            return addWithoutLocking(fix);
+            return addWithoutLocking(fix, replace);
         } finally {
             unlockAfterWrite();
         }
     }
 
     /**
-     * The caller must ensure to hold the write lock for this track when calling this methos
+     * The caller must ensure to hold the write lock for this track when calling this method.
+     * 
+     * @param replace
+     *            whether or not to replace an existing fix in the track that is equal to {@link #fix} as defined by the
+     *            comparator used for the {@link #fixes} set. By default this is a comparator only comparing the
+     *            fixes' time stamps. Subclasses may use different comparator implementations.
      */
-    protected boolean addWithoutLocking(FixType fix) {
-        return getInternalRawFixes().add(fix);
+    protected boolean addWithoutLocking(FixType fix, boolean replace) {
+        final boolean result;
+        final boolean added = getInternalRawFixes().add(fix);
+        if (!added && replace) {
+            getInternalRawFixes().remove(fix);
+            result = getInternalRawFixes().add(fix);
+        } else {
+            result = added;
+        }
+        return result;
     }
 
     @Override

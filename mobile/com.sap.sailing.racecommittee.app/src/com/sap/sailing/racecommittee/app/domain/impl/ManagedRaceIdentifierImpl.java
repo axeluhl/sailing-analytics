@@ -1,31 +1,35 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 
 public class ManagedRaceIdentifierImpl extends FleetIdentifierImpl implements ManagedRaceIdentifier {
 
-    private String raceName;
+    private String raceColumnName;
 
-    public ManagedRaceIdentifierImpl(String raceName, Fleet fleetWithRaceNames, SeriesBase series, RaceGroup raceGroup) {
+    public ManagedRaceIdentifierImpl(String raceColumnName, Fleet fleetWithRaceNames, SeriesWithRows series, RaceGroup raceGroup) {
         super(fleetWithRaceNames, series, raceGroup);
-        this.raceName = raceName;
+        this.raceColumnName = raceColumnName;
     }
 
-    public ManagedRaceIdentifierImpl(String raceName, FleetIdentifier identifier) {
-        this(raceName, identifier.getFleet(), identifier.getSeries(), identifier.getRaceGroup());
+    public ManagedRaceIdentifierImpl(String raceColumnName, FleetIdentifier identifier) {
+        this(raceColumnName, identifier.getFleet(), identifier.getSeries(), identifier.getRaceGroup());
     }
 
-    public String getRaceName() {
-        return raceName;
+    public String getRaceColumnName() {
+        return raceColumnName;
     }
 
     @Override
     public String getId() {
-        return String.format("%s.%s", super.getId(), escapeIdentifierFragment(getRaceName()));
+        return String.format("%s.%s", super.getId(), escapeIdentifierFragment(getRaceColumnName()));
     }
 
+    @Override
+    public String toString() {
+        return getRaceColumnName() + " - " + getFleet().getName();
+    }
 }

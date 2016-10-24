@@ -34,9 +34,12 @@ public abstract class ObjectInputStreamResolvingAgainstCache<C> extends ObjectIn
     /**
      * Package protected on purpose; instances to be created using a factory method on the {@link Replicable}. This
      * constructor {@link #enableResolveObject(boolean) enables resolving} by default.
+     * 
+     * @param cache must not be {@code null}
      */
     protected ObjectInputStreamResolvingAgainstCache(InputStream in, C cache) throws IOException {
         super(in);
+        assert cache != null;
         this.cache = cache;
         enableResolveObject(true);
     }

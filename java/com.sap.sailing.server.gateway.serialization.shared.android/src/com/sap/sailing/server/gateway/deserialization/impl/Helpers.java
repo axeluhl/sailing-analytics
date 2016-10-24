@@ -63,6 +63,11 @@ public class Helpers {
         return result;
     }
 
+    /**
+     * If the {@link Object#toString() string representation} of {@code serializableId} {@link UUID#fromString(String) parses}
+     * as a {@link UUID}, the resulting {@link UUID} is returned. Otherwise, the {@code serializableId} parameter's value
+     * is returned unchanged.
+     */
     public static Serializable tryUuidConversion(Serializable serializableId) {
         try {
             return UUID.fromString(serializableId.toString());

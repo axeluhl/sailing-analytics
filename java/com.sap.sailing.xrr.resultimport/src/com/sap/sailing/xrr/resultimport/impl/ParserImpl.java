@@ -69,11 +69,7 @@ public class ParserImpl implements Parser {
 
     @Override
     public String getBoatClassName(Division division) {
-        String result = division.getIFClassID();
-        if (result == null || result.isEmpty()) {
-            result = division.getTitle();
-        }
-        return result;
+        return XRRParserUtil.getBoatClassName(division);
     }
 
     @Override

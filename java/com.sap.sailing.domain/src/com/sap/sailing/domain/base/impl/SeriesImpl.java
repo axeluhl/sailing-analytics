@@ -36,9 +36,20 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     private final List<Fleet> fleetsInAscendingOrder;
     private final List<RaceColumnInSeries> raceColumns;
     private boolean isMedal;
+    private boolean isFleetsCanRunInParallel;
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
+
+    /**
+     * If not {@code null}, defines an upper inclusive limit for the number of races that may be discarded from
+     * this series. For example, when setting this to {@code 1} for a final series in a regatta that has a
+     * qualification and a final series, when the second discard becomes available and the series don't define
+     * their own discarding rules, two discards may be picked from the qualification series, but at most one
+     * could be selected in the final even if another final race has a score worse than that of all
+     * qualification races.
+     */
+    private Integer maximumNumberOfDiscards;
     
     /**
      * If set, the series doesn't take over the scores from any previous series but starts with zero scores for all its
@@ -71,7 +82,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
+    public SeriesImpl(String name, boolean isMedal, boolean isFleetsCanRunInParallel, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
             TrackedRegattaRegistry trackedRegattaRegistry) {
         super(name);
         if (fleets == null || Util.isEmpty(fleets)) {
@@ -86,6 +97,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         Collections.sort(fleetsInAscendingOrder);
         this.raceColumns = new ArrayList<RaceColumnInSeries>();
         this.isMedal = isMedal;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel; 
         this.raceColumnListeners = new RaceColumnListeners();
         for (String raceColumnName : raceColumnNames) {
             addRaceColumn(raceColumnName, trackedRegattaRegistry);
@@ -285,6 +297,22 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public boolean isFleetsCanRunInParallel() {
+        return isFleetsCanRunInParallel;
+    }
+
+    @Override
+    public void setIsFleetsCanRunInParallel(boolean isFleetsCanRunInParallel) {
+        boolean oldIsFleetsCanRunInParallel = this.isFleetsCanRunInParallel;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
+        if (oldIsFleetsCanRunInParallel != isFleetsCanRunInParallel) {
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, isFleetsCanRunInParallel);
+            }
+        }
+    }
+
+    @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         raceColumnListeners.notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
     }
@@ -299,6 +327,10 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
     }
 
+    @Override
+    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        raceColumnListeners.notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
+    }
     @Override
     public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
@@ -367,6 +399,16 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
             raceColumnListeners.notifyListenersAboutResultDiscardingRuleChanged(oldResultDiscardingRule, resultDiscardingRule);
         }
         this.resultDiscardingRule = resultDiscardingRule;
+    }
+
+    @Override
+    public Integer getMaximumNumberOfDiscards() {
+        return maximumNumberOfDiscards;
+    }
+
+    @Override
+    public void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards) {
+        this.maximumNumberOfDiscards = maximumNumberOfDiscards;
     }
 
     @Override

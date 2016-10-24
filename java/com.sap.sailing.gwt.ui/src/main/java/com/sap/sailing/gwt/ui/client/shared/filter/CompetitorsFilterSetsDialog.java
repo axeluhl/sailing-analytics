@@ -275,10 +275,4 @@ public class CompetitorsFilterSetsDialog extends DataEntryDialog<CompetitorsFilt
         }
         parentPanel.insert(competitorsFilterSetsGrid, widgetIndex);
     }
-
-    @Override
-    public void show() {
-        super.show();
-        getOkButton().setFocus(true);
-    }
 }

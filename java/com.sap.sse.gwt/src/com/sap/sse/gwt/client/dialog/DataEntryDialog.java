@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.FontWeight;
@@ -12,6 +14,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -20,6 +24,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -30,6 +35,7 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -43,7 +49,10 @@ import com.sap.sse.gwt.client.controls.IntegerBox;
  * An abstract data entry dialog class, capturing data of type <code>T</code>, with generic OK/Cancel buttons, title and
  * message. Subclasses may override the {@link #show()} method to set the focus on their favorable initial entry field.
  * Subclasses can specify a widget to show in the dialog to capture properties specific to the result type <code>T</code> by
- * overriding the {@link #getAdditionalWidget()} method.
+ * overriding the {@link #getAdditionalWidget()} method.<p>
+ * 
+ * Subclasses can override which elements initially gets the focus by redefining the {@link #getInitialFocusWidget} method.
+ * By default, the OK button will have the focus.
  * 
  * @author Axel Uhl (d043530)
  */
@@ -168,16 +177,52 @@ public abstract class DataEntryDialog<T> {
         return createTextBoxInternal(initialValue, 30);
     }
 
-    public SuggestBox createSuggestBox(Iterable<String> suggestValues) {
+    /**
+     * This methods creates a {@link MultiWordSuggestOracle} where the given suggest values are
+     * {@link MultiWordSuggestOracle#addAll(java.util.Collection) added} and
+     * {@link MultiWordSuggestOracle#setDefaultSuggestionsFromText(java.util.Collection) set as default suggestions},
+     * first. Afterwards, this oracle is used to {@link #createSuggestBox(SuggestOracle) create} as {@link SuggestBox}.
+     * 
+     * @param suggestValues the plain text suggestions to use
+     * @return the new {@link SuggestBox} instance
+     * 
+     * @see #createSuggestBox(SuggestOracle)
+     */
+    protected SuggestBox createSuggestBox(Iterable<String> suggestValues) {
         List<String> suggestValuesAsCollection = new ArrayList<>();
         Util.addAll(suggestValues, suggestValuesAsCollection);
         final MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
         oracle.addAll(suggestValuesAsCollection);
         oracle.setDefaultSuggestionsFromText(suggestValuesAsCollection);
-        final SuggestBox result = new SuggestBox(oracle);
+        return createSuggestBox(oracle);
+    }
+    
+    /**
+     * Creates a {@link SuggestBox} using the given {@link SuggestOracle}, a {@link TextBox} and the
+     * {@link com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay DefaultSuggestionDisplay} 
+     * 
+     * @param suggestOracle the {@link SuggestOracle} to in the {@link SuggestBox}
+     * @return the new {@link SuggestBox} instance
+     * 
+     * @see SuggestBox#SuggestBox(SuggestOracle)
+     */
+    protected SuggestBox createSuggestBox(SuggestOracle suggestOracle) {
+        final SuggestBox result = new SuggestBox(suggestOracle);
+        result.getValueBox().addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                validate();
+            }
+        });
         result.getValueBox().addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
+                validate();
+            }
+        });
+        result.getValueBox().addKeyUpHandler(new KeyUpHandler() {
+            @Override
+            public void onKeyUp(KeyUpEvent event) {
                 validate();
             }
         });
@@ -508,6 +553,10 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.getElement().getStyle().setCursor(cursor);
     }
 
+    public void center() {
+        dateEntryDialog.center();
+    }
+
     public void show() {
         Widget additionalWidget = getAdditionalWidget();
         if (additionalWidget != null) {
@@ -515,6 +564,18 @@ public abstract class DataEntryDialog<T> {
         }
         validate();
         dateEntryDialog.center();
+        final FocusWidget focusWidget = getInitialFocusWidget();
+        if (focusWidget != null) {
+            Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { focusWidget.setFocus(true); }});
+        }
+    }
+
+    /**
+     * Defines the {@link #okButton} as the default initial focus widget. Subclasses may redefine. Return
+     * {@code null} to not set the focus on any widget.
+     */
+    protected FocusWidget getInitialFocusWidget() {
+        return okButton;
     }
 
     protected DialogBox getDialogBox() {

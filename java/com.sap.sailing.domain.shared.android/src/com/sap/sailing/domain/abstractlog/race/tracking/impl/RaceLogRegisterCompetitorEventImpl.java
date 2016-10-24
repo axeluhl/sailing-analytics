@@ -22,11 +22,21 @@ public class RaceLogRegisterCompetitorEventImpl extends BaseRegisterCompetitorEv
      * @throws IllegalArgumentException
      *             if {@code competitor} is null
      */
-    public RaceLogRegisterCompetitorEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, int passId, Competitor competitor)
+    public RaceLogRegisterCompetitorEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable id, int passId, Competitor competitor)
             throws IllegalArgumentException {
-        super(createdAt, author, logicalTimePoint, id, competitor);
+        super(createdAt, logicalTimePoint, author, id, competitor);
         this.raceLogEventData = new RaceLogEventDataImpl(null, passId);
+    }
+
+    /**
+     * @throws IllegalArgumentException
+     *             if {@code competitor} is null
+     */
+    public RaceLogRegisterCompetitorEventImpl(TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, int passId, Competitor competitor)
+            throws IllegalArgumentException {
+        this(now(), logicalTimePoint, author, randId(), passId, competitor);
     }
 
     @Override

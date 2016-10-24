@@ -9,8 +9,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.fileupload.FileItem;
@@ -40,7 +38,7 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
     /**
      * The maximum size of an image uploaded by a user as a team image, in megabytes (1024*1024 bytes)
      */
-    private static final int MAX_SIZE_IN_MB = 5;
+    private static final int MAX_SIZE_IN_MB = 500;
 
     @Override
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException, IOException {
@@ -49,24 +47,28 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
          */
         final JSONArray resultList = new JSONArray();
         for (FileItem fileItem : fileItems) {
-            JSONObject result = new JSONObject();
-            String fileExtension = "";
-            String fileType = fileItem.getContentType();
+            final JSONObject result = new JSONObject();
+            final String fileExtension;
+            final String fileType = fileItem.getContentType();
             if (fileType.equals("image/jpeg")) {
                 fileExtension = ".jpg";
             } else if (fileType.equals("image/png")) {
                 fileExtension = ".png";
+            } else {
+                fileExtension = "";
             }
-            URI fileUri;
             try {
                 if (fileItem.getSize() > 1024 * 1024 * MAX_SIZE_IN_MB) {
-                    throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                            .entity("Image is larger than " + MAX_SIZE_IN_MB + "MB").build());
+                    final String errorMessage = "Image is larger than " + MAX_SIZE_IN_MB + "MB";
+                    logger.warning("Ignoring file storage request because file "+fileItem.getName()+" is larger than "+MAX_SIZE_IN_MB+"MB");
+                    result.put("status", Status.INTERNAL_SERVER_ERROR.name());
+                    result.put("message", errorMessage);
+                } else {
+                    final URI fileUri = getService().getFileStorageManagementService().getActiveFileStorageService()
+                            .storeFile(fileItem.getInputStream(), fileExtension, fileItem.getSize());
+                    result.put(JSON_FILE_NAME, fileItem.getName());
+                    result.put(JSON_FILE_URI, fileUri.toString());
                 }
-                fileUri = getService().getFileStorageManagementService().getActiveFileStorageService()
-                        .storeFile(fileItem.getInputStream(), fileExtension, fileItem.getSize());
-                result.put(JSON_FILE_NAME, fileItem.getName());
-                result.put(JSON_FILE_URI, fileUri.toString());
             } catch (IOException | OperationFailedException | InvalidPropertiesException | NoCorrespondingServiceRegisteredException e) {
                 final String errorMessage = "Could not store file"+ (e.getMessage()==null?"":(": " + e.getMessage()));
                 logger.log(Level.WARNING, "Could not store file", e);
@@ -75,6 +77,12 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
             }
             resultList.add(result);
         }
-        resp.getOutputStream().write(resultList.toJSONString().getBytes("UTF-8"));
+        // surprise, surprise: see https://www.sencha.com/forum/showthread.php?132949-Fileupload-Invalid-JSON-string
+        // When sending a JSON response for a file upload, don't use application/json as the content type. It would lead
+        // to wrapping the content by a <pre> tag. Use text/html instead which should deliver the content to the app running
+        // in the browser unchanged.
+        resp.setContentType("text/html");
+        resp.setCharacterEncoding("UTF-8");
+        resp.getWriter().append(resultList.toJSONString());
     }
 }

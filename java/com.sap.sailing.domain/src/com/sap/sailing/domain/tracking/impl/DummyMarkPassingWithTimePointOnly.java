@@ -100,6 +100,16 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             public Duration getTimeOnDistanceAllowancePerNauticalMile() {
                 return null;
             }
+
+            @Override
+            public String getSearchTag() {
+                return null;
+            }
         };
+    }
+
+    @Override
+    public MarkPassing getOriginal() {
+        return this;
     }
 }

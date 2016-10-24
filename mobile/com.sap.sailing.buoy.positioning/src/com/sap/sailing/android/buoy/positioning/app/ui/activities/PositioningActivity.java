@@ -3,6 +3,7 @@ package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 import java.util.List;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -11,19 +12,19 @@ import android.view.MenuItem;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.BuoyFragment;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.BuoyFragment.pingListener;
+import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
-import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 
 public class PositioningActivity extends BaseActivity implements pingListener {
 
     private MarkInfo markInfo;
     private MarkPingInfo markPing;
     private LeaderboardInfo leaderBoard;
-    private String markerID;
+    private String markIdAsString;
     private String checkinDigest;
 
     @Override
@@ -31,7 +32,7 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_container);
         Intent intent = getIntent();
-        markerID = intent.getExtras().getString(getString(R.string.mark_id));
+        markIdAsString = intent.getExtras().getString(getString(R.string.mark_id));
         checkinDigest = intent.getExtras().getString(getString(R.string.checkin_digest));
 
         loadDataFromDatabase();
@@ -41,14 +42,16 @@ public class PositioningActivity extends BaseActivity implements pingListener {
             toolbar.hideSubtitle();
             toolbar.setTitleSize(20);
             setSupportActionBar(toolbar);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
         }
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
-            toolbar.setPadding(20, 0, 0, 0);
-            getSupportActionBar().setTitle(getString(R.string.set_position));
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
+            getSupportActionBar().setTitle(markInfo.getName());
         }
         BuoyFragment fragment = new BuoyFragment();
         fragment.setPingListener(this);
@@ -60,13 +63,13 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this, checkinDigest);
         setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest));
         for (MarkInfo mark : marks) {
-            if (mark.getId().equals(markerID)) {
+            if (mark.getId().toString().equals(markIdAsString)) {
                 setMarkInfo(mark);
                 break;
             }
         }
         if (markInfo != null) {
-            setPingFromDatabase(markerID);
+            setPingFromDatabase(markIdAsString);
         }
     }
 
@@ -80,15 +83,14 @@ public class PositioningActivity extends BaseActivity implements pingListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.about:
-            AboutDialog aboutDialog = new AboutDialog(this);
-            aboutDialog.show();
-            return true;
-        case R.id.settings:
-            startActivity(new Intent(this, SettingActivity.class));
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.about:
+                AboutHelper.showInfoActivity(this);
+                return true;
+            case R.id.settings:
+                startActivity(new Intent(this, SettingActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -112,6 +114,11 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         if (fragment != null) {
             fragment.setPingListener(this);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public MarkInfo getMarkInfo() {
@@ -140,6 +147,6 @@ public class PositioningActivity extends BaseActivity implements pingListener {
 
     @Override
     public void updatePing() {
-        setPingFromDatabase(markInfo.getId());
+        setPingFromDatabase(markInfo.getId().toString());
     }
 }

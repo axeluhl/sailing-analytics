@@ -30,15 +30,15 @@ public class LeaderboardEntryDTO implements Serializable {
      */
     public MaxPointsReason reasonForMaxPoints;
     
-    public Double netPoints;
-    public Double netPointsUncorrected;
+    public Double totalPoints;
+    public Double totalPointsUncorrected;
     
     /**
-     * Tells if the net points have been overridden by a score correction. Can be used to render differently in editing environment.
+     * Tells if the total points have been overridden by a score correction. Can be used to render differently in editing environment.
      */
-    public boolean netPointsCorrected;
+    public boolean totalPointsCorrected;
     
-    public Double totalPoints;
+    public Double netPoints;
     
     public boolean discarded;
     
@@ -130,7 +130,7 @@ public class LeaderboardEntryDTO implements Serializable {
     public LeaderboardEntryDTO() { }
     
     public boolean hasScoreCorrection() {
-        return netPointsCorrected || (reasonForMaxPoints != null && reasonForMaxPoints != MaxPointsReason.NONE);
+        return totalPointsCorrected || (reasonForMaxPoints != null && reasonForMaxPoints != MaxPointsReason.NONE);
     }
 
     @Override
@@ -162,9 +162,9 @@ public class LeaderboardEntryDTO implements Serializable {
                         .hashCode());
         result = prime * result + ((fleet == null) ? 0 : fleet.hashCode());
         result = prime * result + ((legDetails == null) ? 0 : legDetails.hashCode());
-        result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
-        result = prime * result + ((netPointsUncorrected == null) ? 0 : netPointsUncorrected.hashCode());
-        result = prime * result + (netPointsCorrected ? 1231 : 1237);
+        result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
+        result = prime * result + ((totalPointsUncorrected == null) ? 0 : totalPointsUncorrected.hashCode());
+        result = prime * result + (totalPointsCorrected ? 1231 : 1237);
         result = prime * result + ((race == null) ? 0 : race.hashCode());
         result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
         result = prime
@@ -176,7 +176,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((startTack == null) ? 0 : startTack.hashCode());
         result = prime * result + ((averageSamplingInterval == null) ? 0 : averageSamplingInterval.hashCode());
         result = prime * result + ((timeSinceLastPositionFixInSeconds == null) ? 0 : timeSinceLastPositionFixInSeconds.hashCode());
-        result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
+        result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
         result = prime
                 * result
                 + ((windwardDistanceToCompetitorFarthestAheadInMeters == null) ? 0 : windwardDistanceToCompetitorFarthestAheadInMeters
@@ -250,17 +250,17 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!legDetails.equals(other.legDetails))
             return false;
-        if (netPoints == null) {
-            if (other.netPoints != null)
+        if (totalPoints == null) {
+            if (other.totalPoints != null)
                 return false;
-        } else if (!netPoints.equals(other.netPoints))
+        } else if (!totalPoints.equals(other.totalPoints))
             return false;
-        if (netPointsUncorrected == null) {
-            if (other.netPointsUncorrected != null)
+        if (totalPointsUncorrected == null) {
+            if (other.totalPointsUncorrected != null)
                 return false;
-        } else if (!netPointsUncorrected.equals(other.netPointsUncorrected))
+        } else if (!totalPointsUncorrected.equals(other.totalPointsUncorrected))
             return false;
-        if (netPointsCorrected != other.netPointsCorrected)
+        if (totalPointsCorrected != other.totalPointsCorrected)
             return false;
         if (race == null) {
             if (other.race != null)
@@ -292,10 +292,10 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!timeSinceLastPositionFixInSeconds.equals(other.timeSinceLastPositionFixInSeconds))
             return false;
-        if (totalPoints == null) {
-            if (other.totalPoints != null)
+        if (netPoints == null) {
+            if (other.netPoints != null)
                 return false;
-        } else if (!totalPoints.equals(other.totalPoints))
+        } else if (!netPoints.equals(other.netPoints))
             return false;
         if (windwardDistanceToCompetitorFarthestAheadInMeters == null) {
             if (other.windwardDistanceToCompetitorFarthestAheadInMeters != null)

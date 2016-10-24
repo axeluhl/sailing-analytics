@@ -11,7 +11,9 @@
   
   <!-- Other module inherits                                      -->
   <inherits name="com.sap.sse.gwt.EmulatedJRE" /> -->
+  <inherits name='com.sap.sse.gwt.Settings'/>
   <inherits name="com.sap.sse.gwt.SSESharedGWT" />
+  <inherits name="com.sap.sse.gwt.Settings" />
   <inherits name="com.sap.sse.SSECommon" />
   <inherits name="com.sap.sse.Security" />
   <inherits name="com.sap.sse.security.SSESecuritySerializers" />

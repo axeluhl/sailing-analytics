@@ -29,7 +29,7 @@ public class DesktopApplicationClientFactory extends AbstractApplicationClientFa
     
     @Override
     public StartView createStartView() {
-        return new DesktopStartView(getPlaceNavigator(), getEventBus());
+        return new DesktopStartView(getPlaceNavigator(), getEventBus(), getUserService());
     }
 
     @Override
@@ -41,4 +41,5 @@ public class DesktopApplicationClientFactory extends AbstractApplicationClientFa
     public ErrorView createErrorView(String errorMessage, Throwable errorReason) {
         return null;
     }
+
 }

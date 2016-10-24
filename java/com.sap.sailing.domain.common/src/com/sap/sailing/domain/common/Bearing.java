@@ -2,7 +2,13 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+
 public interface Bearing extends Serializable {
+    Bearing NORTH = new DegreeBearingImpl(0);
+    Bearing EAST = new DegreeBearingImpl(90);
+    Bearing SOUTH = new DegreeBearingImpl(180);
+    Bearing WEST = new DegreeBearingImpl(270);
 
     double getDegrees();
 

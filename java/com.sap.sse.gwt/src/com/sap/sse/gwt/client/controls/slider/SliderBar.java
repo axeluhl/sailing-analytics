@@ -655,17 +655,21 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         if (!isMinMaxInitialized() || curValue == null) {
             return;
         }
-        this.curValue = Math.max(minValue, Math.min(maxValue, curValue));
-        double remainder = (this.curValue - minValue) % stepSize;
-        this.curValue -= remainder;
+
+        Double newValue = Math.max(minValue, Math.min(maxValue, curValue));
+        double remainder = (newValue - minValue) % stepSize;
+        newValue -= remainder;
         // Go to next step if more than halfway there
-        if ((remainder > (stepSize / 2)) && ((this.curValue + stepSize) <= maxValue)) {
-            this.curValue += stepSize;
+        if ((remainder > (stepSize / 2)) && ((newValue + stepSize) <= maxValue)) {
+            newValue += stepSize;
         }
+
+        boolean isValueChanged = !newValue.equals(this.curValue) && this.curValue != null;
+        this.curValue = newValue;
         // Redraw the knob
         drawKnob();
         // Fire the ValueChangeEvent if the value actually changed
-        if (fireEvent && !curValue.equals(this.curValue)) {
+        if (fireEvent && isValueChanged) {
             ValueChangeEvent.fire(this, this.curValue);
         }
     }
@@ -730,9 +734,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @param minValue
      *            the current value for min
      * @param maxValue
-     *            the current valuefor max
+     *            the current value for max
+     * @return whether min or max have changed
      */
-    public void setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+    public boolean setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
         boolean changed = false;
         if (!Util.equalsWithNull(minValue, this.minValue)) {
             this.minValue = minValue;
@@ -745,6 +750,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         if (changed) {
             onMinMaxValueChanged(fireEvent);
         }
+        return changed;
     }
     
     /**
@@ -1083,13 +1089,13 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label = DOM.createDiv();
                         label.getStyle().setPosition(Position.ABSOLUTE);
                         label.getStyle().setDisplay(Display.NONE);
-                        if (enabled) {
-                            label.setPropertyString("className", "gwt-SliderBar-markerlabel");
-                        } else {
-                            label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
-                        }
                         DOM.appendChild(getElement(), label);
                         markerLabelElements.add(label);
+                    }
+                    if (enabled) {
+                        label.setPropertyString("className", "gwt-SliderBar-markerlabel");
+                    } else {
+                        label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
                     }
 
                     // Set the marker label text

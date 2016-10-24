@@ -37,6 +37,13 @@ public class LegEntryDTO implements Serializable {
     
     /**
      * If the competitor has already finished the leg at the time point for which this entry was created, contains the
+     * <em>average</em> ride height (foiling), otherwise the current ride height. If the competitor hasn't started the
+     * leg yet, it's <code>null</code>.
+     */
+    public Double currentRideHeightInMeters;
+    
+    /**
+     * If the competitor has already finished the leg at the time point for which this entry was created, contains the
      * <em>average</em> VMG, otherwise the current VMG. If the competitor hasn't started the leg yet, it's
      * <code>null</code>.
      */
@@ -68,6 +75,7 @@ public class LegEntryDTO implements Serializable {
         result = prime * result + ((averageManeuverLossInMeters == null) ? 0 : averageManeuverLossInMeters.hashCode());
         result = prime * result
                 + ((averageSpeedOverGroundInKnots == null) ? 0 : averageSpeedOverGroundInKnots.hashCode());
+        result = prime * result + ((currentRideHeightInMeters == null) ? 0 : currentRideHeightInMeters.hashCode());
         result = prime * result
                 + ((currentSpeedOverGroundInKnots == null) ? 0 : currentSpeedOverGroundInKnots.hashCode());
         result = prime * result + ((distanceTraveledInMeters == null) ? 0 : distanceTraveledInMeters.hashCode());
@@ -121,6 +129,11 @@ public class LegEntryDTO implements Serializable {
             if (other.averageSpeedOverGroundInKnots != null)
                 return false;
         } else if (!averageSpeedOverGroundInKnots.equals(other.averageSpeedOverGroundInKnots))
+            return false;
+        if (currentRideHeightInMeters == null) {
+            if (other.currentRideHeightInMeters != null)
+                return false;
+        } else if (!currentRideHeightInMeters.equals(other.currentRideHeightInMeters))
             return false;
         if (currentSpeedOverGroundInKnots == null) {
             if (other.currentSpeedOverGroundInKnots != null)

@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.text.SimpleDateFormat;
+
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -8,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
@@ -15,8 +18,6 @@ import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.text.SimpleDateFormat;
 
 public class RaceFinishingFragment extends BaseFragment {
 
@@ -40,7 +41,7 @@ public class RaceFinishingFragment extends BaseFragment {
 
         ImageView flag = ViewHelper.get(layout, R.id.flag);
         if (flag != null) {
-            flag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), 96));
+            flag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.BLUE.name(), getResources().getInteger(R.integer.flag_size_xlarge)));
         }
 
         Button down = ViewHelper.get(layout, R.id.flag_down);
@@ -48,7 +49,7 @@ public class RaceFinishingFragment extends BaseFragment {
             down.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(1), R.id.race_frame);
+                    replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(1), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false));
                 }
             });
         }
@@ -73,7 +74,7 @@ public class RaceFinishingFragment extends BaseFragment {
     public void notifyTick(TimePoint now) {
         super.notifyTick(now);
 
-        if (mFinishingSince != null) {
+        if (mFinishingSince != null && getRaceState().getFinishingTime() != null) {
             String timeDiff = TimeUtils.formatDurationSince(now.minus(getRaceState().getFinishingTime().asMillis()).asMillis());
             mFinishingSince.setText(getString(R.string.finishing_started_since, timeDiff));
         }

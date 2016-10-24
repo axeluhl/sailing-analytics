@@ -39,11 +39,12 @@ public class RaceRecord {
     private final List<String> boatClassNames;
     private final String raceStatus;
     private final String raceVisibility;
+    private final boolean hasReplay;
     private final URL jsonUrl;
     
     public RaceRecord(URL jsonURL, String regattaName, String name, String replayURL, String paramURLAsString,
             String ID, String trackingstarttime, String trackingendtime, String racestarttime,
-            String commaSeparatedBoatClassNames, String status, String visibility, boolean loadLiveAndStoredURI)
+            String commaSeparatedBoatClassNames, String status, String visibility, boolean hasReplay, boolean loadLiveAndStoredURI)
             throws URISyntaxException, IOException {
         super();
         this.regattaName = regattaName;
@@ -51,6 +52,7 @@ public class RaceRecord {
         this.replayURL = replayURL;
         this.raceStatus = status;
         this.raceVisibility = visibility;
+        this.hasReplay = hasReplay;
         this.ID = ID;
         this.jsonUrl = jsonURL;
         this.boatClassNames = new ArrayList<String>();
@@ -107,16 +109,16 @@ public class RaceRecord {
             throw e;
         }
         if (loadLiveAndStoredURI) {
-                Map<String, String> paramURLContents = parseParams(paramURL);
-                String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
-                liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
-                String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
-                if (storedURIAsString == null || storedURIAsString.startsWith("tcp:") || storedURIAsString.startsWith("http:") ||
-                        storedURIAsString.startsWith("https:")) {
-                    storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
-                } else {
-                    storedURI = new URI(baseURL+"/"+storedURIAsString);
-                }
+            Map<String, String> paramURLContents = parseParams(paramURL);
+            String liveURIAsString = paramURLContents.get(LIVE_URI_PROPERTY);
+            liveURI = liveURIAsString == null ? null : new URI(liveURIAsString);
+            String storedURIAsString = paramURLContents.get(STORED_URI_PROPERTY);
+            if (storedURIAsString == null || storedURIAsString.startsWith("tcp:") || storedURIAsString.startsWith("http:") ||
+                    storedURIAsString.startsWith("https:")) {
+                storedURI = storedURIAsString == null ? null : new URI(storedURIAsString);
+            } else {
+                storedURI = new URI(baseURL+"/"+storedURIAsString);
+            }
         } else {
             paramURLAsString = null;
             liveURI = null;
@@ -140,6 +142,10 @@ public class RaceRecord {
     
     public boolean hasLiveAndStoredURI() {
         return liveURI != null;
+    }
+    
+    public boolean hasReplay() {
+        return hasReplay;
     }
 
     public String getName() {

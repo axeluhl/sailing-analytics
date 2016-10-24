@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.websocket;
 
+import java.net.InetSocketAddress;
+
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 
@@ -44,5 +46,10 @@ public class LiveDataConnectionWrapper implements LiveDataConnection {
      */
     LiveDataConnection getActualConnection() {
         return actualConnection;
+    }
+
+    @Override
+    public InetSocketAddress getRemoteAddress() {
+        return actualConnection.getRemoteAddress();
     }
 }

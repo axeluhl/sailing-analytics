@@ -30,7 +30,7 @@ public class LineAnalysisTest extends TrackBasedTest {
     public void setUp() {
         final List<Competitor> emptyCompetitorList = Collections.emptyList();
         now = MillisecondsTimePoint.now();
-        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", emptyCompetitorList, now);
+        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", emptyCompetitorList, now, /* useMarkPassingCalculator */ false);
     }
     
     @Test

@@ -63,6 +63,7 @@ public class CompactGPSFixMovingImpl extends CompactGPSFixImpl implements GPSFix
         public String toString() {
             return super.toString()+" to "+getBearing().getDegrees()+"°";
         }
+        
         @Override
         public int hashCode() {
             return super.hashCode() ^ getBearing().hashCode();

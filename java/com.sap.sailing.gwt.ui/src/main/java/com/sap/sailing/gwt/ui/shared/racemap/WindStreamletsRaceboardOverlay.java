@@ -6,9 +6,13 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -56,6 +60,8 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     private final StringMessages stringMessages;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final Scheduler scheduler;
+    private Canvas streamletLegend;
+    private boolean firstColoring = true;
     
     private long latitudeCount;
     private double latitudeSum;
@@ -77,6 +83,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         this.windField = new WindInfoForRaceVectorField(windInfoForRace, /* frames per second */ 1000.0/animationIntervalMillis, coordinateSystem);
         this.timer = timer;
         getCanvas().getElement().setId("swarm-display");
+        createStreamletLegend(map);
     }
 
     public double getAverageLatitudeDeg() {
@@ -94,6 +101,74 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         }
         if (latitudeCount > 0) {
             windField.setAverageLatitudeDeg(latitudeSum/latitudeCount);
+        }
+    }
+    
+    private void createStreamletLegend(MapWidget map) {
+        streamletLegend = Canvas.createIfSupported();
+        streamletLegend.addStyleName("MapStreamletLegend");
+        //streamletLegend.setTitle(stringMessages.simulationLegendTooltip());
+        /*streamletLegend.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                int clickPixelY = event.getRelativeY(streamletLegend.getElement());
+                int legendRow = clickPixelY / ((int) rectHeight);
+                int pathRow = legendRow - (racePath!=null ? 1 : 0);
+                //Window.alert("clickPixelY: " + clickPixelY + "\nlegendRow: " + legendRow);
+                visiblePaths[pathRow] = !visiblePaths[pathRow];
+                clearCanvas();
+                drawPaths();
+            }
+        });*/
+        map.setControls(ControlPosition.LEFT_BOTTOM, streamletLegend);
+        int canvasWidth = 500;
+        int canvasHeight = 60;
+        streamletLegend.getParent().addStyleName("MapStreamletLegendParentDiv");
+        streamletLegend.setWidth(String.valueOf(canvasWidth));
+        streamletLegend.setHeight(String.valueOf(canvasHeight));
+        streamletLegend.setCoordinateSpaceWidth(canvasWidth);
+        streamletLegend.setCoordinateSpaceHeight(canvasHeight);    }
+
+    private void drawLegend() {
+        double x, y;
+        x=100;
+        y=16;
+        double w = 1;
+        double h = 20;
+        int maxIdx = 300;
+        Context2d context2d = streamletLegend.getContext2d();
+        context2d.setFillStyle("rgba(0,0,0,.3)");
+        context2d.setLineWidth(1.0);
+        context2d.beginPath();
+        context2d.fillRect(x-7.0, y-16.0, w*maxIdx+15.0, 56.0);
+        context2d.closePath();
+        context2d.stroke();
+        context2d.setFillStyle("white");
+        String label = "Wind Speed in Knots";
+        TextMetrics txtmet;
+        txtmet = context2d.measureText(label);
+        context2d.fillText(label, x + (w*maxIdx - txtmet.getWidth())/2.0, y - 5.0);
+        for(int idx=0; idx <= maxIdx; idx++) {
+            //double speed = idx * 24.0 / maxIdx;
+            double speed = 4.0 + idx * 16.0 / maxIdx;
+            context2d.setFillStyle(windField.getColor(speed));
+            context2d.beginPath();
+            context2d.fillRect(x + idx*w, y, w, h);
+            context2d.closePath();
+            context2d.stroke();
+            if (Math.abs(speed % 2.0) < (12.0/maxIdx)) {
+                context2d.setStrokeStyle("white");
+                context2d.setLineWidth(1.0);
+                context2d.beginPath();
+                context2d.moveTo(x + idx*w, y + h);
+                context2d.lineTo(x + idx*w, y + h + 7.0);
+                context2d.closePath();
+                context2d.stroke();
+                context2d.setFillStyle("white");
+                label = ""+Math.round(speed);
+                txtmet = context2d.measureText(label);
+                context2d.fillText(label, x + idx*w - txtmet.getWidth()/2.0, y + h + 8.0 + 8.0);
+            }
         }
     }
 
@@ -218,15 +293,30 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     public void setVisible(boolean isVisible) {
         if (getCanvas() != null) {
             if (isVisible) {
+                if (this.windField.getColors()) {
+                    this.streamletLegend.setVisible(true);
+                }
                 this.startStreamlets();
                 this.visible = isVisible;
             } else {
+                if (this.windField.getColors()) {
+                    this.streamletLegend.setVisible(false);
+                }
                 this.stopStreamlets();
                 this.visible = isVisible;
             }
         }
     }
 
+    public void setColors(boolean isColored) {
+        this.windField.setColors(isColored);
+        if ((isColored) && (firstColoring)) {
+            firstColoring = false;
+            this.drawLegend();
+        }
+        this.streamletLegend.setVisible(isColored);
+    }
+    
     @Override
     public void removeFromMap() {
         this.setVisible(false);

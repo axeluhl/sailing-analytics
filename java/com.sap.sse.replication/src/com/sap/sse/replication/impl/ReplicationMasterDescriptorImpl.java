@@ -78,7 +78,8 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
             UnsupportedEncodingException {
         return new URL("http", getHostname(), servletPort, REPLICATION_SERVLET + "?" + ReplicationServlet.ACTION + "="
                 + ReplicationServlet.Action.REGISTER.name() + "&" + ReplicationServlet.SERVER_UUID + "="
-                + uuid.toString() + "&" + ReplicationServlet.ADDITIONAL_INFORMATION + "="
+                + java.net.URLEncoder.encode(uuid.toString(), "UTF-8") + "&"
+                + ReplicationServlet.ADDITIONAL_INFORMATION + "="
                 + java.net.URLEncoder.encode(ServerInfo.getBuildVersion(), "UTF-8"));
     }
 

@@ -1,11 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.List;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
@@ -19,8 +27,6 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.util.List;
 
 public class RaceFlagViewerFragment extends BaseFragment {
 
@@ -36,6 +42,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
 
     private ProcedureChangedListener mProcedureListener;
     private FlagsCache mFlagCache;
+    private int mFlagSize;
 
     public RaceFlagViewerFragment() {
         mProcedureListener = new ProcedureChangedListener();
@@ -55,6 +62,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
 
         mLayout = ViewHelper.get(layout, R.id.flags);
         mRecall = ViewHelper.get(layout, R.id.individual_recall);
+        mFlagSize = getResources().getInteger(R.integer.flag_size_xlarge);
 
         mXrayButton = ViewHelper.get(layout, R.id.flag_down);
         if (mXrayButton != null) {
@@ -68,7 +76,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
         }
         mXrayFlag = ViewHelper.get(layout, R.id.flag);
         if (mXrayFlag != null) {
-            mXrayFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.XRAY.name(), 96));
+            mXrayFlag.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), Flags.XRAY.name(), mFlagSize));
         }
         mXrayCountdown = ViewHelper.get(layout, R.id.xray_down);
 
@@ -79,6 +87,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
     public void onStart() {
         super.onStart();
 
+        mFlagCache = null;
         getRaceState().getRacingProcedure().addChangedListener(mProcedureListener);
     }
 
@@ -124,10 +133,12 @@ public class RaceFlagViewerFragment extends BaseFragment {
                     for (FlagPole flagPole : currentState) {
                         size++;
                         flag = flagPole.getUpperFlag();
-                        mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag), currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
+                        mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag),
+                            currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
                         if (!flagPole.getLowerFlag().equals(Flags.NONE)) {
                             flag = flagPole.getLowerFlag();
-                            mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag), currentState.size() == size, false, LOWER_FLAG));
+                            mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag),
+                                currentState.size() == size, false, LOWER_FLAG));
                         }
                     }
                 } else {
@@ -183,7 +194,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
             line.setVisibility(View.GONE);
         }
 
-        flagView.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.name(), 96));
+        flagView.setImageDrawable(FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize));
         flagView.setTag(flag);
         if (flag == Flags.CLASS && getRace().getFleet().getColor() != null) {
             flagView.setBackgroundColor(getFleetColorId());
@@ -242,8 +253,8 @@ public class RaceFlagViewerFragment extends BaseFragment {
     }
 
     private class FlagsCache {
-        private TimePoint mChange;
         public FlagPole nextPole;
+        private TimePoint mChange;
 
         public FlagsCache(TimePoint change, FlagPole pole) {
             mChange = change;

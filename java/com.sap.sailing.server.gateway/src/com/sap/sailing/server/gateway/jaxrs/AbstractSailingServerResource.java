@@ -18,9 +18,19 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.DateParser;
+import com.sun.jersey.api.core.ResourceContext;
 
 public abstract class AbstractSailingServerResource {
     @Context ServletContext servletContext;
+    @Context ResourceContext resourceContext;
+    
+    protected ServletContext getServletContext() {
+        return servletContext;
+    }
+    
+    protected ResourceContext getResourceContext() {
+        return resourceContext;
+    }
     
     protected <T> T getService(Class<T> clazz) {
         BundleContext context = (BundleContext) servletContext
@@ -66,8 +76,8 @@ public abstract class AbstractSailingServerResource {
         TrackedRace trackedRace = null;
         if (regatta != null && race != null) {
             DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
-            if(trackedRegatta != null) {
-                trackedRace = trackedRegatta.getTrackedRace(race);
+            if (trackedRegatta != null) {
+                trackedRace = trackedRegatta.getExistingTrackedRace(race);
             }
         }
         return trackedRace;

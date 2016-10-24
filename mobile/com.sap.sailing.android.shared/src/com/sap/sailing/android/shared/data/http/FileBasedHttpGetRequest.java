@@ -33,7 +33,7 @@ public class FileBasedHttpGetRequest extends HttpGetRequest {
                 return null;
             }
         } finally {
-            outputStream.close();
+            safeClose(outputStream);
         }
         return new FileInputStream(outputFile);
     }

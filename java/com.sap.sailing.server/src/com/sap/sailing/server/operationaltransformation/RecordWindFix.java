@@ -17,7 +17,7 @@ public class RecordWindFix extends AbstractWindOperation {
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        trackedRace.recordWind(getWind(), getWindSource());
+        trackedRace.recordWind(getWind(), getWindSource(), /* applyFilter */ false);
         return null;
     }
 

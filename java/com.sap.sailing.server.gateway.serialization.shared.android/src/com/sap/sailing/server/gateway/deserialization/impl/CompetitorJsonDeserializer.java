@@ -57,6 +57,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
             String name = (String) object.get(CompetitorJsonConstants.FIELD_NAME);
             String displayColorAsString = (String) object.get(CompetitorJsonConstants.FIELD_DISPLAY_COLOR);
             String email = (String) object.get(CompetitorJsonConstants.FIELD_EMAIL);
+            String searchTag = (String) object.get(CompetitorJsonConstants.FIELD_SEARCHTAG);
             
             URI flagImageURI = null;
             String flagImageURIAsString = (String) object.get(CompetitorJsonConstants.FIELD_FLAG_IMAGE_URI);
@@ -90,7 +91,7 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<Competitor> 
             Competitor competitor = competitorStore.getOrCreateCompetitor(competitorId, name, displayColor, email,
                     flagImageURI, team, boat, timeOnTimeFactor,
                     timeOnDistanceAllowanceInSecondsPerNauticalMile == null ? null :
-                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)));
+                        new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
             return competitor;
         } catch (Exception e) {
             throw new JsonDeserializationException(e);

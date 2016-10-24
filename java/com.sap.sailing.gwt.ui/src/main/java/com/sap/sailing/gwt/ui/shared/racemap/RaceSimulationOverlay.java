@@ -56,6 +56,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
     private final SailingServiceAsync sailingService;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ColorPalette colors;
+    private final PathNameFormatter pathNameFormatter;
     private SimulatorResultsDTO simulationResult;
     private Boolean[] visiblePaths;
     private PathDTO racePath;
@@ -70,6 +71,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         this.stringMessages = stringMessages;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.colors = new ColorPaletteGenerator();
+        this.pathNameFormatter = new PathNameFormatter(stringMessages);
     }
     
     public void updateLeg(int newLeg, boolean clearCanvas, long newVersion) {
@@ -225,7 +227,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         double timewidth = txtmet.getWidth();
         double txtmaxwidth = 0.0;
         if (racePath != null) {
-            txtmet = context2d.measureText(racePath.getName().split("#")[1]);
+            txtmet = context2d.measureText(stringMessages.raceLeader());
             txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
         }
         boolean containsTimeOut = false;
@@ -238,7 +240,7 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
             if (path.getMixedLeg()) {
                 containsMixedLeg = true;
             }
-            txtmet = context2d.measureText(path.getName().split("#")[1]);
+            txtmet = context2d.measureText(pathNameFormatter.format(path));
             txtmaxwidth = Math.max(txtmaxwidth, txtmet.getWidth());
         }
         double newwidth = 0;
@@ -268,13 +270,13 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
         int canvasHeight = (int)Math.ceil(yOffset + rectHeight*(paths.length + (racePath == null? 0 : 1)));
         setCanvasSize(canvas, canvasWidth, canvasHeight);
         if (racePath != null) {
-            drawRectangleWithText(context2d, xOffset, yOffset, null,
-                racePath.getName().split("#")[1], getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth, deltaTime, true);
+            drawRectangleWithText(context2d, xOffset, yOffset, null, stringMessages.raceLeader(),
+                getFormattedTime(racePath.getPathTime()), txtmaxwidth, timewidth, deltaTime, true);
         }
         for (PathDTO path : paths) {
             String timeText = (path.getMixedLeg() ? mixedLegText : (path.getAlgorithmTimedOut() ? algorithmTimedOutText : getFormattedTime(path.getPathTime())));
             drawRectangleWithText(context2d, xOffset, yOffset + (paths.length-index-(racePath==null?1:0)) * rectHeight, this.colors.getColor(paths.length-1-index),
-                path.getName().split("#")[1], timeText, txtmaxwidth, timewidth, (path.getMixedLeg()?deltaMixedLeg:(path.getAlgorithmTimedOut()?deltaTimeOut:deltaTime)), visiblePaths[paths.length-1-index]);
+                pathNameFormatter.format(path), timeText, txtmaxwidth, timewidth, (path.getMixedLeg()?deltaMixedLeg:(path.getAlgorithmTimedOut()?deltaTimeOut:deltaTime)), visiblePaths[paths.length-1-index]);
             index++;
         }
     }
@@ -350,12 +352,11 @@ public class RaceSimulationOverlay extends FullCanvasOverlay {
                                 simulationResult = result;
                                 PathDTO[] paths = result.getPaths();
                                 if (result.getLegDuration() > 0) {
-                                    racePath = new PathDTO();
+                                    racePath = new PathDTO("0#Race Leader");
                                     List<SimulatorWindDTO> racePathPoints = new ArrayList<SimulatorWindDTO>();
                                     racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint));
                                     racePathPoints.add(new SimulatorWindDTO(null, 0, 0, paths[0].getPoints().get(0).timepoint + result.getLegDuration()));
                                     racePath.setPoints(racePathPoints);
-                                    racePath.setName("0#Race Leader");
                                 } else {
                                     racePath = null;
                                 }

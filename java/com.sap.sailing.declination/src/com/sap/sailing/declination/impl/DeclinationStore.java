@@ -89,7 +89,9 @@ public class DeclinationStore {
     }
     
     public void writeExternal(Declination record, Writer out) throws IOException {
-        out.write(dateFormatter.format(record.getTimePoint().asDate()));
+        synchronized (dateFormatter) {
+            out.write(dateFormatter.format(record.getTimePoint().asDate()));
+        }
         out.write("|"+record.getPosition().getLatDeg());
         out.write("|"+record.getPosition().getLngDeg());
         out.write("|"+record.getBearing().getDegrees());
@@ -103,7 +105,10 @@ public class DeclinationStore {
             String line = in.readLine();
             if (line != null && line.length() > 0) {
                 String[] fields = line.split("\\|");
-                TimePoint timePoint = new MillisecondsTimePoint(dateFormatter.parse(fields[0]).getTime());
+                final TimePoint timePoint;
+                synchronized (dateFormatter) {
+                    timePoint = new MillisecondsTimePoint(dateFormatter.parse(fields[0]).getTime());
+                }
                 double lat = Double.valueOf(fields[1]);
                 double lng = Double.valueOf(fields[2]);
                 Position position = new DegreePosition(lat, lng);

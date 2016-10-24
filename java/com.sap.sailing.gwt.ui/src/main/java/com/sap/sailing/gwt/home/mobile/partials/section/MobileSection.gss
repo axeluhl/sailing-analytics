@@ -13,7 +13,9 @@
   background: #f2f2f2;
   border-top: 1px solid #ccc;
 }
-
+.sectionHeaderNoBorder {
+  border-top: none;
+}
 .sectionContent {
   padding: 0;
 }

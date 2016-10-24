@@ -64,7 +64,7 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
         this.hullLength = hullLength;
         this.hullBeam = hullBeam;
         this.hullType = hullType;
-        approximateManeuverDurationInMilliseconds = 8000; // as discussed with Dennis Gehrlein
+        approximateManeuverDurationInMilliseconds = APPROXIMATE_AVERAGE_MANEUVER_DURATION.asMillis();
     }    
 
     @Override

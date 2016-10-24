@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.common.settings.SerializableSettings;
@@ -15,35 +14,26 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implements
         DataRetrieverChainDefinition<DataSourceType, DataType> {
-
-    private final UUID id;
-    private final String nameMessageKey;
     
     private final Class<DataSourceType> dataSourceType;
     private final Class<DataType> retrievedDataType;
     private final List<DataRetrieverLevel<?, ?>> dataRetrieverTypesWithInformation;
-    
+
+    private final String nameMessageKey;
     protected boolean isComplete;
 
     public SimpleDataRetrieverChainDefinition(Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType, String nameMessageKey) {
-        id = UUID.randomUUID();
-        this.nameMessageKey = nameMessageKey;
-        
         this.dataSourceType = dataSourceType;
         this.retrievedDataType = retrievedDataType;
         dataRetrieverTypesWithInformation = new ArrayList<>();
-        
+
+        this.nameMessageKey = nameMessageKey;
         isComplete = false;
     }
 
     public SimpleDataRetrieverChainDefinition(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, Class<DataType> retrievedDataType, String nameMessageKey) {
         this(dataRetrieverChainDefinition.getDataSourceType(), retrievedDataType, nameMessageKey);
         dataRetrieverTypesWithInformation.addAll(dataRetrieverChainDefinition.getDataRetrieverLevels());
-    }
-    
-    @Override
-    public UUID getID() {
-        return id;
     }
     
     @Override
@@ -184,7 +174,7 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
     @Override
     public String toString() {
         return getDataSourceType().getSimpleName() + " -> " + getRetrievedDataType().getSimpleName() +
-               "[ID: " + getID() + ", messageKey: " + nameMessageKey + ", isComplete: " + isComplete + "]";
+               "[messageKey: " + nameMessageKey + ", isComplete: " + isComplete + "]";
     }
 
     @Override
@@ -195,7 +185,6 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
                 + ((dataRetrieverTypesWithInformation == null) ? 0 : dataRetrieverTypesWithInformation.hashCode());
         result = prime * result + ((dataSourceType == null) ? 0 : dataSourceType.hashCode());
         result = prime * result + ((retrievedDataType == null) ? 0 : retrievedDataType.hashCode());
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
@@ -222,11 +211,6 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
             if (other.retrievedDataType != null)
                 return false;
         } else if (!retrievedDataType.equals(other.retrievedDataType))
-            return false;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
             return false;
         return true;
     }

@@ -247,6 +247,11 @@ public class CourseImpl extends NamedImpl implements Course {
     }
 
     @Override
+    public Leg getLeg(int zeroBasedIndexOfWaypoint) {
+        return legs.get(zeroBasedIndexOfWaypoint);
+    }
+
+    @Override
     public String toString() {
         lockForRead();
         try {

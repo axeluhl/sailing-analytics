@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.sap.sailing.domain.base.BoatChangeListener;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
 
@@ -14,12 +15,18 @@ public class BoatImpl extends NamedImpl implements DynamicBoat {
     private static final long serialVersionUID = 3489730487528955788L;
     private final BoatClass boatClass;
     private String sailID;
+    private final Color color;
     private transient Set<BoatChangeListener> listeners;
-    
+
     public BoatImpl(String name, BoatClass boatClass, String sailID) {
+        this(name, boatClass, sailID, null);
+    }
+
+    public BoatImpl(String name, BoatClass boatClass, String sailID, Color color) {
         super(name);
         this.boatClass = boatClass;
         this.sailID = sailID;
+        this.color = color;
         this.listeners = new HashSet<BoatChangeListener>();
     }
     
@@ -38,6 +45,11 @@ public class BoatImpl extends NamedImpl implements DynamicBoat {
         return sailID;
     }
 
+    @Override
+    public Color getColor() {
+        return color;
+    }
+    
     @Override
     public void setSailId(String newSailId) {
         final String oldSailId = this.sailID;

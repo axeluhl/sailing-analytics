@@ -13,6 +13,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -65,7 +66,7 @@ public class FileStorageResource extends AbstractSailingServerResource {
             getService().getFileStorageManagementService().getActiveFileStorageService()
                     .removeFile(new URI(uri));
             result.put("status", Status.OK.name());
-            response = Response.ok().entity(result.toJSONString()).build();
+            response = Response.ok().entity(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
                 | URISyntaxException | IOException e) {
             final String errorMessage = "Could not delete file with URI "+uri+": "+e.getMessage();

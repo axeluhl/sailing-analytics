@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client.component;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
@@ -117,11 +118,9 @@ public class AbstractUserDialog extends DataEntryDialog<UserData> {
     }
 
     @Override
-    public void show() {
-        super.show();
-        nameBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return nameBox;
     }
-    
     protected StringMessages getStringMessages() {
         return stringMessages;
     }

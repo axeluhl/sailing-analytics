@@ -1,0 +1,51 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:client="urn:import:com.sap.sailing.dashboards.gwt.client"
+	xmlns:header="urn:import:com.sap.sailing.dashboards.gwt.client.header"
+	xmlns:windbot="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.windbot"
+	xmlns:startlineadvantagegeometry="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.course"
+	xmlns:startlineadvantagewind="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.wind"
+	xmlns:startanalysis="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.startanalysis"
+	xmlns:mgwtcarousel="urn:import:com.googlecode.mgwt.ui.client.widget.carousel"
+	xmlns:mgwtpanel="urn:import:com.googlecode.mgwt.ui.client.widget.panel">
+
+	<ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.dashboardpanel.DashboardPanelResources"/>
+
+	<g:LayoutPanel ui:field="root">
+		<g:layer left="0%" top="0%" right="0%" height="55px">
+		    <header:DashboardHeader ui:field="header" styleName="{resources.style.header}"></header:DashboardHeader>
+		</g:layer>
+		<g:layer left="0pt" top="55px" right="0pt" bottom="0pt">
+			<mgwtcarousel:Carousel ui:field="carousel">
+				<mgwtpanel:Panel styleName="{resources.style.page}">
+					<g:HTMLPanel ui:field="leftwindbotcontainer" styleName="{resources.style.collumn} {resources.style.left}">
+					    <windbot:WindBotWidget ui:field="leftWindBotWidget"></windbot:WindBotWidget>
+					</g:HTMLPanel>
+					<g:HTMLPanel ui:field="rightwindbotcontainer" styleName="{resources.style.collumn} {resources.style.right}">
+					    <windbot:WindBotWidget ui:field="rightWindBotWidget"></windbot:WindBotWidget>
+					</g:HTMLPanel>
+					<g:HTMLPanel ui:field="windcharthint" styleName="{resources.style.windcharthint}"></g:HTMLPanel>
+				</mgwtpanel:Panel>
+				<mgwtpanel:Panel styleName="{resources.style.page}">
+					<g:HTMLPanel styleName="{resources.style.collumn} {resources.style.startanalysiscollumn}">
+						<startanalysis:StartAnalysisWidget ui:field="startanalysisComponent"></startanalysis:StartAnalysisWidget>
+					</g:HTMLPanel>
+					<g:HTMLPanel styleName="{resources.style.collumn} {resources.style.collumnthree}">
+							<g:HTMLPanel styleName="{resources.style.startline_advantage_by_geometry_container}">
+						<startlineadvantagegeometry:StartlineAdvantageByGeometryWidget ui:field="startlineAdvantageByGeometryWidget"></startlineadvantagegeometry:StartlineAdvantageByGeometryWidget>
+						</g:HTMLPanel>
+							<g:HTMLPanel styleName="{resources.style.startline_advantage_by_wind_container}">
+							<startlineadvantagewind:StartlineAdvantagesByWindWidget ui:field="startlineAdvantagesByWindComponent"></startlineadvantagewind:StartlineAdvantagesByWindWidget>
+							</g:HTMLPanel>
+					</g:HTMLPanel>
+				</mgwtpanel:Panel>
+			</mgwtcarousel:Carousel>
+		</g:layer>
+		<g:layer left="0%" bottom="0%" right="0%" height="50px">
+			<g:HTMLPanel ui:field="bottombar">
+			    <g:Image ui:field="eventLogo" styleName="{resources.style.event_logo}"></g:Image>
+			</g:HTMLPanel>
+		</g:layer>
+	</g:LayoutPanel>
+
+</ui:UiBinder>

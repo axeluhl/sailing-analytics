@@ -25,8 +25,8 @@ public class ParallelGroupedNumberDataMaxAggregationProcessor
     }
 
     @Override
-    protected Number compareValuesAndReturnNewValue(Number previousValue, Number newValue) {
-        return previousValue.doubleValue() >= newValue.doubleValue() ? previousValue : newValue;
+    protected Number compareValuesAndReturnNewResult(Number currentResult, Number newValue) {
+        return currentResult.doubleValue() >= newValue.doubleValue() ? currentResult : newValue;
     }
 
 }

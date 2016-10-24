@@ -8,8 +8,9 @@ public class DataRetrieverLevel<InputType, RetrievedDataType> {
     private final int retrieverLevel;
     private final Class<? extends Processor<InputType, RetrievedDataType>> retrieverType;
     private final Class<RetrievedDataType> retrievedDataType;
-    private final String retrievedDataTypeMessageKey;
     private final Class<?> settingsType;
+
+    private final String retrievedDataTypeMessageKey;
     private final SerializableSettings defaultSettings;
 
     public DataRetrieverLevel(int retrieverLevel,
@@ -19,8 +20,9 @@ public class DataRetrieverLevel<InputType, RetrievedDataType> {
         this.retrieverLevel = retrieverLevel;
         this.retrieverType = retrieverType;
         this.retrievedDataType = retrievedDataType;
-        this.retrievedDataTypeMessageKey = retrievedDataTypeMessageKey;
         this.settingsType = settingsType;
+        
+        this.retrievedDataTypeMessageKey = retrievedDataTypeMessageKey;
         this.defaultSettings = defaultSettings;
     }
     
@@ -65,7 +67,6 @@ public class DataRetrieverLevel<InputType, RetrievedDataType> {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((retrievedDataType == null) ? 0 : retrievedDataType.hashCode());
-        result = prime * result + ((retrievedDataTypeMessageKey == null) ? 0 : retrievedDataTypeMessageKey.hashCode());
         result = prime * result + retrieverLevel;
         result = prime * result + ((retrieverType == null) ? 0 : retrieverType.hashCode());
         result = prime * result + ((settingsType == null) ? 0 : settingsType.hashCode());
@@ -85,11 +86,6 @@ public class DataRetrieverLevel<InputType, RetrievedDataType> {
             if (other.retrievedDataType != null)
                 return false;
         } else if (!retrievedDataType.equals(other.retrievedDataType))
-            return false;
-        if (retrievedDataTypeMessageKey == null) {
-            if (other.retrievedDataTypeMessageKey != null)
-                return false;
-        } else if (!retrievedDataTypeMessageKey.equals(other.retrievedDataTypeMessageKey))
             return false;
         if (retrieverLevel != other.retrieverLevel)
             return false;

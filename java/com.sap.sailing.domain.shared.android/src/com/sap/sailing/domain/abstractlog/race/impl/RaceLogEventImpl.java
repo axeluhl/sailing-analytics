@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -15,10 +16,23 @@ public abstract class RaceLogEventImpl extends AbstractLogEventImpl<RaceLogEvent
     private static final long serialVersionUID = -2557594972618769182L;
     private final RaceLogEventData raceLogEventData;
 
-    public RaceLogEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
+    public RaceLogEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId, List<Competitor> pInvolvedBoats, int pPassId) {
-        super(createdAt, author, logicalTimePoint, pId);
+        super(createdAt, logicalTimePoint, author, pId);
         this.raceLogEventData = new RaceLogEventDataImpl(pInvolvedBoats, pPassId);
+    }
+
+    public RaceLogEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            Serializable pId, int pPassId) {
+        this(createdAt, logicalTimePoint, author, pId, Collections.<Competitor>emptyList(), pPassId);
+    }
+
+    public RaceLogEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, Competitor competitor, int pPassId) {
+        this(now(), logicalTimePoint, author, randId(), Collections.singletonList(competitor), pPassId);
+    }
+
+    public RaceLogEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
+        this(now(), logicalTimePoint, author, randId(), Collections.<Competitor>emptyList(), pPassId);
     }
     
     @Override

@@ -15,8 +15,9 @@ import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 
-public class SortedCellTable<T> extends CellTable<T> {
+public class SortedCellTable<T> extends BaseCelltable<T> {
 
     /**
      * The currently sorted column

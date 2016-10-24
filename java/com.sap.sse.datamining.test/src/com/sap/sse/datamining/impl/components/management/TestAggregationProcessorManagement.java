@@ -3,6 +3,7 @@ package com.sap.sse.datamining.impl.components.management;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.Date;
@@ -128,6 +129,14 @@ public class TestAggregationProcessorManagement {
         assertThat(server.getAggregationProcessorDefinitionForDTO(competitorAggregatorDefinitionDTO), nullValue());
         
         assertThat(server.getAggregationProcessorDefinitionForDTO(null), nullValue());
+        
+        AggregationProcessorDefinitionDTO aggregatorDTO = new AggregationProcessorDefinitionDTO("Not relevant", "Impossible Class", "Impossible Class", "Not relevant");
+        try {
+            server.getAggregationProcessorDefinitionForDTO(aggregatorDTO);
+            fail("An IllegalArgumentException is expected.");
+        } catch (IllegalArgumentException e) {
+            // Exception is expected
+        }
     }
 
 }

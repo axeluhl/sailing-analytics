@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
@@ -186,7 +187,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.protestTimeAnalyzer = new ProtestStartTimeFinder(raceLog);
         this.finishPositioningListAnalyzer = new FinishPositioningListFinder(raceLog);
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
-        this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
+        this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ false);
         this.lastWindFixAnalyzer = new LastWindFixFinder(raceLog);
 
         this.raceStateToObserveListener = new BaseRaceStateChangedListener() {
@@ -218,32 +219,24 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         } else {
             dependentRaceStatesAndMe = dependentRaceStates;
         }
-        registerListenerOnDependentRaceIfDependentStartTime(dependentRaceStatesAndMe);
-    }
-
-    protected void registerListenerOnDependentRaceIfDependentStartTime(Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         // Check whether the latest known StartTimeEvent is a non-dependent or dependent start time in case of a
         // dependent startTime setup listeners
-        this.raceLog.lockForRead();
-        try {
-            for (RaceLogEvent event : this.raceLog.getFixesDescending()) {
-                if (event instanceof RaceLogStartTimeEvent) {
-                    break;
-                } else if (event instanceof RaceLogDependentStartTimeEvent) {
-                    setupListenersOnDependentRace(event, dependentRaceStates);
-                    break;
-                }
-            }
-        } finally {
-            this.raceLog.unlockAfterRead();
-        }
+        adjustObserverForRelativeStartTime();
+    }
+    
+    protected ReadonlyRaceState getRaceStateToObserve() {
+        return raceStateToObserve;
     }
 
     protected RacingProcedureType determineInitialProcedureType() {
         // Let's ensure there is a valid RacingProcedureType set, since a RaceState cannot live without a
         // RacingProcedure we need to have a fallback
-        RegattaConfiguration configuration = getConfiguration();
         RacingProcedureType inRaceLogType = racingProcedureAnalyzer.analyze();
+        return determineInitialProcedureType(inRaceLogType);
+    }
+    
+    private RacingProcedureType determineInitialProcedureType(RacingProcedureType inRaceLogType) {
+        RegattaConfiguration configuration = getConfiguration();
         if (inRaceLogType != RacingProcedureType.UNKNOWN) {
             return inRaceLogType;
         } else {
@@ -366,25 +359,40 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     @Override
     public void eventAdded(RaceLogEvent event) {
-        if (event instanceof RaceLogDependentStartTimeEvent) {
-            setupListenersOnDependentRace(event, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
-        } else if (event instanceof RaceLogStartTimeEvent) {
-            if (raceStateToObserve != null) {
-                raceStateToObserve.removeChangedListener(raceStateToObserveListener);
-                raceStateToObserve = null;
-            }
+        // if a pass change or a start time-setting event, the observer relation to a race state of a
+        // race on which this race state's race's start time has depended or now depends needs to be
+        // re-assessed, and the observer relation needs to be established or canceled, respectively.
+        if (event instanceof RaceLogDependentStartTimeEvent ||
+                event instanceof RaceLogStartTimeEvent ||
+                event instanceof RaceLogPassChangeEvent) {
+            adjustObserverForRelativeStartTime();
         }
         update();
     }
 
-    private void setupListenersOnDependentRace(RaceLogEvent event, Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+    private void adjustObserverForRelativeStartTime() {
+        final StartTimeFinderResult startTimeAnalysisResult = startTimeAnalyzer.analyze();
+        adjustObserverForRelativeStartTime(startTimeAnalysisResult);
+    }
+    
+    private void adjustObserverForRelativeStartTime(final StartTimeFinderResult startTimeAnalysisResult) {
+        if (startTimeAnalysisResult.isDependentStartTime()) {
+            setupListenersOnDependentRace(startTimeAnalysisResult, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
+        } else if (raceStateToObserve != null) {
+            raceStateToObserve.removeChangedListener(raceStateToObserveListener);
+            raceStateToObserve = null;
+        }
+    }
+
+    private void setupListenersOnDependentRace(StartTimeFinderResult startTimeAnalysisResult, Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        assert startTimeAnalysisResult.isDependentStartTime();
+        assert !Util.isEmpty(startTimeAnalysisResult.getDependingOnRaces());
         if (raceStateToObserve != null) {
             // Remove previous listeners
             raceStateToObserve.removeChangedListener(raceStateToObserveListener);
             raceStateToObserve = null;
         }
-        RaceLogDependentStartTimeEvent dependentStartTimeEvent = (RaceLogDependentStartTimeEvent) event;
-        final SimpleRaceLogIdentifier dependentOnRaceIdentifier = dependentStartTimeEvent.getDependentOnRaceIdentifier();
+        final SimpleRaceLogIdentifier dependentOnRaceIdentifier = startTimeAnalysisResult.getDependingOnRaces().iterator().next();
         if (dependentRaceStates.containsKey(dependentOnRaceIdentifier)) {
             raceStateToObserve = dependentRaceStates.get(dependentOnRaceIdentifier);
             raceStateToObserve.addChangedListener(raceStateToObserveListener);
@@ -412,6 +420,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         RacingProcedureType type = racingProcedureAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedRacingProcedureType, type) && type != RacingProcedureType.UNKNOWN) {
             cachedRacingProcedureType = type;
+            cachedRacingProcedureTypeNoFallback = determineInitialProcedureType(type);
             recreateRacingProcedure();
             changedListeners.onRacingProcedureChanged(this);
         }
@@ -428,6 +437,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             changedListeners.onAdvancePass(this);
             // reset racing procedure to force recreate on next event!
             cachedRacingProcedureType = null;
+            cachedRacingProcedureTypeNoFallback = null;
         }
 
         StartTimeFinderResult startTimeFinderResult = startTimeAnalyzer.analyze();
@@ -435,6 +445,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedStartTimeFinderResult = startTimeFinderResult;
             changedListeners.onStartTimeChanged(this);
         }
+        adjustObserverForRelativeStartTime(startTimeFinderResult);
 
         TimePoint finishingTime = finishingTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedFinishingTime, finishingTime)) {

@@ -32,9 +32,4 @@ public class EditCompetitorNameDialog extends DataEntryDialog<String> {
         grid.setWidget(0, 1, competitorNameBox);
         return grid;
     }
-
-    @Override
-    public void show() {
-        super.show();
-    }
 }

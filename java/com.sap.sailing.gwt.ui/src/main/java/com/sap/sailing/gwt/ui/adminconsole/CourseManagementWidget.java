@@ -16,11 +16,9 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SetSelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,12 +28,14 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class CourseManagementWidget implements IsWidget {
-    protected final MarkTableWrapper<MultiSelectionModel<MarkDTO>> marks;
-    protected final ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>> multiMarkControlPoints;
-    protected final WaypointTableWrapper<SingleSelectionModel<WaypointDTO>> waypoints;
+    protected final MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>> marks;
+    protected final ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>> multiMarkControlPoints;
+    protected final WaypointTableWrapper<RefreshableSingleSelectionModel<WaypointDTO>> waypoints;
     
     protected final Grid mainPanel;
     
@@ -46,7 +46,6 @@ public abstract class CourseManagementWidget implements IsWidget {
     protected final HorizontalPanel waypointsBtnsPanel;
     protected final HorizontalPanel controlPointsBtnsPanel;
     protected final HorizontalPanel marksBtnsPanel;
-    protected final HorizontalPanel buttonsPanel;
     
     protected final Button insertWaypointBefore;
     protected final Button insertWaypointAfter;
@@ -68,12 +67,19 @@ public abstract class CourseManagementWidget implements IsWidget {
         mainPanel.setCellPadding(5);
         mainPanel.getRowFormatter().setVerticalAlign(0, HasVerticalAlignment.ALIGN_TOP);
         
-        waypoints = new WaypointTableWrapper<SingleSelectionModel<WaypointDTO>>(
+        waypoints = new WaypointTableWrapper<RefreshableSingleSelectionModel<WaypointDTO>>(
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
-        multiMarkControlPoints = new ControlPointTableWrapper<SingleSelectionModel<ControlPointDTO>>(
+        multiMarkControlPoints = new ControlPointTableWrapper<RefreshableSingleSelectionModel<ControlPointDTO>>(
                 /* multiSelection */ false, sailingService, stringMessages, errorReporter);
-        marks = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
+        marks = new MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>>(
                 /* multiSelection */ true, sailingService, stringMessages, errorReporter);
+        
+        marks.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                markSelectionChanged();
+            }
+        });
         
         CaptionPanel waypointsPanel = new CaptionPanel(stringMessages.waypoints());
         CaptionPanel controlPointsPanel = new CaptionPanel(stringMessages.twoMarkControlPoint());
@@ -155,27 +161,11 @@ public abstract class CourseManagementWidget implements IsWidget {
             }
         });
         controlPointsBtnsPanel.add(addControlPoint);
-        
-        buttonsPanel = new HorizontalPanel();
-        mainPanel.setWidget(2, 2, buttonsPanel);
-        Button refreshBtn = new Button(stringMessages.refresh());
-        refreshBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                refresh();
-            }
-        });
-        buttonsPanel.add(refreshBtn);
-        Button saveBtn = new Button(stringMessages.save());
-        saveBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                save();
-            }
-        });
-        buttonsPanel.add(saveBtn);
     }
     
+    protected void markSelectionChanged() {
+    }
+
     private void removeWaypoint(WaypointDTO waypoint) {
         waypoints.getDataProvider().getList().remove(waypoint);
     }
@@ -194,7 +184,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         }
     }
 
-    protected abstract void save();
+    protected void save(){};
     
     private <T> T getFirstSelected(SetSelectionModel<T> selectionModel) {
         if (selectionModel.getSelectedSet().isEmpty()) {
@@ -246,7 +236,7 @@ public abstract class CourseManagementWidget implements IsWidget {
         }).show();
     }
 
-    public abstract void refresh();
+    public void refresh(){};
 
     protected void updateWaypointsAndControlPoints(RaceCourseDTO raceCourseDTO) {
         waypoints.getDataProvider().getList().clear();

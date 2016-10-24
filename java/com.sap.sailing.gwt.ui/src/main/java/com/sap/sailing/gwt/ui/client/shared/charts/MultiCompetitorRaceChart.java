@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -32,13 +32,17 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private boolean hasOverallLeaderboard;
     
-    public MultiCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+    private final MultiCompetitorRaceChartLifecycle lifeycycle;
+    
+    public MultiCompetitorRaceChart(MultiCompetitorRaceChartLifecycle lifeycycle, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
             final String leaderboardGroupName, String leaderboardName) {
-        super(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
-                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, compactChart, allowTimeAdjust, leaderboardGroupName, leaderboardName);
+        super(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
+                /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
+                allowTimeAdjust, leaderboardGroupName, leaderboardName);
+        this.lifeycycle = lifeycycle;
         if (leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupName, false,
                     new AsyncCallback<LeaderboardGroupDTO>() {
@@ -65,13 +69,16 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
 
     @Override
     public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent() {
-        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages(), hasOverallLeaderboard);
+        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(
+                getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType()),
+                getStringMessages(), hasOverallLeaderboard);
     }
 
     @Override
     public void updateSettings(MultiCompetitorRaceChartSettings newSettings) {
         boolean settingsChanged = updateSettingsOnly(newSettings);
-        boolean selectedDetailTypeChanged = setSelectedDetailType(newSettings.getDetailType());
+        boolean selectedDetailTypeChanged = setSelectedDetailTypes(newSettings.getFirstDetailType(),
+                newSettings.getSecondDetailType());
         if (selectedDetailTypeChanged || settingsChanged) {
             clearChart();
             timeChanged(timer.getTime(), null);
@@ -79,13 +86,18 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     }
 
     @Override
+    public MultiCompetitorRaceChartSettings getSettings() {
+        return new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType());
+    }
+    
+    @Override
     protected Component<MultiCompetitorRaceChartSettings> getComponent() {
         return this;
     }
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.competitorCharts();
+        return lifeycycle.getLocalizedShortName();
     }
 
     @Override

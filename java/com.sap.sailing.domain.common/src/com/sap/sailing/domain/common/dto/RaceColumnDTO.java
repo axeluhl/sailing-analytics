@@ -129,6 +129,24 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         return start;
     }
     
+    public Date getStartOfTracking(FleetDTO fleet){
+        Date start = null;
+        RaceDTO raceDTO = racesPerFleet.get(fleet);
+        if (raceDTO != null && raceDTO.isTracked) {
+            start = raceDTO.trackedRace.startOfTracking;
+        }
+        return start;
+    }
+    
+    public Date getEndOfTracking(FleetDTO fleet){
+        Date start = null;
+        RaceDTO raceDTO = racesPerFleet.get(fleet);
+        if (raceDTO != null && raceDTO.isTracked) {
+            start = raceDTO.trackedRace.endOfTracking;
+        }
+        return start;
+    }
+    
     /**
      * @return The {@link PlacemarkOrderDTO places} or <code>null</code>, if no places are available
      */
@@ -157,7 +175,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
     public boolean isLive(FleetDTO fleet, long serverTimePointAsMillis) {
         boolean result = false;
         final RaceDTO raceDTO = racesPerFleet.get(fleet);
-        if(raceDTO != null) {
+        if (raceDTO != null) {
             result = raceDTO.isLive(serverTimePointAsMillis);
         }
         return result;
@@ -169,7 +187,7 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
 
     public boolean hasLiveRaces(long serverTimePointAsMillis) {
         boolean result = false;
-        for(FleetDTO fleet: fleets) {
+        for (FleetDTO fleet: fleets) {
             result |= isLive(fleet, serverTimePointAsMillis);
         }
         return result;

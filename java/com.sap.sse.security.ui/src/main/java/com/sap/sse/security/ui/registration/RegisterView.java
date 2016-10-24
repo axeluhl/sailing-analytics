@@ -77,6 +77,7 @@ public class RegisterView extends Composite {
     @UiHandler("signUpButton")
     void signUpButtonClicked(ClickEvent e) {
         userManagementService.createSimpleUser(usernameTextBox.getText(), emailTextBox.getText(), passwordTextBox.getText(),
+                /* fullName */ null, /* company */ null,
                 EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), new AsyncCallback<UserDTO>() {
             @Override
             public void onFailure(Throwable caught) {

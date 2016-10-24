@@ -33,6 +33,7 @@ public class ConnectivityUtils {
             reader = new InputStreamReader(response.getEntity().getContent(), contentEncoding.getValue());
         }
         JSONObject json = (JSONObject) jsonParser.parse(reader);
+        reader.close();
         return json;
     }
     

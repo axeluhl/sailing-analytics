@@ -14,12 +14,21 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PositionTest {
+    @Test
+    public void testDistanceAcrossDateline() {
+        Position p1 = new DegreePosition(0, 179);
+        Position p2 = new DegreePosition(0, -179);
+        assertEquals(120., p1.getDistance(p2).getNauticalMiles(), 0.1);
+        assertEquals(120., p2.getDistance(p1).getNauticalMiles(), 0.1);
+    }
+    
     @Test
     public void testEqualityBetweenCompactAndVerbosePosition() {
         Position p1 = new DegreePosition(49.2, 008.3);
@@ -57,6 +66,12 @@ public class PositionTest {
         Position northPole = new DegreePosition(90, 0);
         Position southPole = new DegreePosition(-90, 0);
         assertEquals(20004, Math.abs(southPole.getDistance(northPole).getKilometers()), 0.0001);
+    }
+    
+    @Test
+    public void radTest() {
+        assertEquals(180, new MeterDistance(20005000).getCentralAngleDeg(), 0.01);
+        assertEquals(Math.PI, new MeterDistance(20005000).getCentralAngleRad(), 0.01);
     }
     
     @Test

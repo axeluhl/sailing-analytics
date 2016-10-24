@@ -3,7 +3,7 @@
     android:shape="rectangle">
 
     <solid
-        android:color="?sap_gray"/>
+        android:color="?attr/sap_gray"/>
 
     <stroke
         android:width="@dimen/thin_line"

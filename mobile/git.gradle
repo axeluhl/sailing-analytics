@@ -42,7 +42,9 @@ preBuild.doLast {
     // save the combined build info into assets/build.info file
     def result_line = git_branch_or_tag + "-" + git_version + " (" +
             build_time + ")\n"
-    def assetsDir = android.sourceSets.main.assets.srcDirs.toArray()[0]
-    def buildInfoFile = new File(assetsDir, 'build.info').getAbsolutePath()
+    def assetsDir = android.sourceSets.main.assets.srcDirs.toArray()[1]
+    delete(assetsDir)
+    mkdir(assetsDir)
+    def buildInfoFile = new File(assetsDir, 'build_gradle.info').getAbsolutePath()
     new File(buildInfoFile).write(result_line)
 }

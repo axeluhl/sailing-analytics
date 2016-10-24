@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfiguration
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -64,19 +65,15 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private CheckBox overwriteRegattaConfigurationBox;
     private RegattaConfigurationDTO currentRegattaConfiguration;
     
-    
     public DeviceConfigurationDetailComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages,
             final DeviceConfigurationCloneListener listener) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        
         this.cloneListener = listener;
-        
         this.matcher = null;
         this.originalConfiguration = null;
         this.currentRegattaConfiguration = null;
-        
         captionPanel = new CaptionPanel(stringMessages.configuration());
         VerticalPanel verticalPanel = new VerticalPanel();
         contentPanel = new VerticalPanel();
@@ -96,14 +93,11 @@ public class DeviceConfigurationDetailComposite extends Composite {
             }
         });
         verticalPanel.add(contentPanel);
-        
         verticalPanel.add(new HTML("<hr  style=\"width:100%;\" />"));
-        
         HorizontalPanel actionPanel = new HorizontalPanel();
         actionPanel.add(cloneButton);
         actionPanel.add(updateButton);
         verticalPanel.add(actionPanel);
-        
         captionPanel.add(verticalPanel);
         initWidget(captionPanel);
     }
@@ -285,7 +279,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
         DeviceConfigurationDTO dto = getResult();
         sailingService.createOrUpdateDeviceConfiguration(matcher, dto, 
-                new AsyncCallback<DeviceConfigurationMatcherDTO>() {
+                new MarkedAsyncCallback<>(new AsyncCallback<DeviceConfigurationMatcherDTO>() {
             @Override
             public void onSuccess(DeviceConfigurationMatcherDTO matcher) {
                 markAsDirty(false);
@@ -295,7 +289,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
             }
-        });
+        }));
     }
 
     private KeyUpHandler dirtyMarker = new KeyUpHandler() {

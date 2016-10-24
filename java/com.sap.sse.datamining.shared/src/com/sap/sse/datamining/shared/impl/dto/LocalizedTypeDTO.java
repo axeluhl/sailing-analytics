@@ -29,7 +29,7 @@ public class LocalizedTypeDTO implements Serializable {
     
     @Override
     public String toString() {
-        return getTypeName() + "[" + getDisplayName() + "]";
+        return "[typeName: " + getTypeName() + ", displayName: " + getDisplayName() + "]";
     }
 
     @Override

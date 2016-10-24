@@ -1,6 +1,8 @@
 package com.sap.sse.security.ui.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.sap.sse.gwt.client.StringMessages;
 
 /**
@@ -15,8 +17,17 @@ import com.sap.sse.gwt.client.StringMessages;
 public abstract class AbstractSecureEntryPoint<S extends StringMessages> extends com.sap.sse.gwt.client.AbstractEntryPoint<S> implements WithSecurity {
     private WithSecurity securityProvider;
 
+    /**
+     * Initializes the {@link UserManagementService} and removes the optional loading indicator from the DOM which is
+     * identified by the "loading" ID. See the Home.html or AdminConsole.html entry point implementations for examples
+     * of how such a loading indicator can nicely be implemented.
+     */
     protected void doOnModuleLoad() {
         securityProvider = new DefaultWithSecurityImpl();
+        final Element optionalLoadingIndicator = Document.get().getElementById("loading");
+        if (optionalLoadingIndicator != null) {
+            optionalLoadingIndicator.removeFromParent();
+        }
     }
 
     @Override

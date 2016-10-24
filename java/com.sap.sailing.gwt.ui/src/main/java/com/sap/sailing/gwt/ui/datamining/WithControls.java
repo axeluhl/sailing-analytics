@@ -6,4 +6,6 @@ public interface WithControls {
     
     public void addControl(Widget controlWidget);
 
+    public void removeControl(Widget controlWidget);
+
 }

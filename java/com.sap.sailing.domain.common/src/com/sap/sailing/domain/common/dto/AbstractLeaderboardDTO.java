@@ -26,6 +26,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public Map<CompetitorDTO, LeaderboardRowDTO> rows;
     public boolean hasCarriedPoints;
     public int[] discardThresholds;
+    
+    /**
+     * Set to the non-<code>null</code> regatta name if this DTO represents a <code>RegattaLeaderboard</code>.
+     */
     public String regattaName;
     public String displayName;
     public UUID defaultCourseAreaId;
@@ -102,23 +106,23 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public boolean scoredInMedalRace(CompetitorDTO competitor) {
         LeaderboardRowDTO row = rows.get(competitor);
         for (RaceColumnDTO race : races) {
-            if (race.isMedalRace() && row.fieldsByRaceColumnName.get(race.getRaceColumnName()).totalPoints > 0) {
+            if (race.isMedalRace() && row.fieldsByRaceColumnName.get(race.getRaceColumnName()).netPoints > 0) {
                 return true;
             }
         }
         return false;
     }
 
-    public Double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
-        Double netPoints = null;
-        LeaderboardRowDTO row = rows.get(competitor);
+    public Double getTotalPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
+        Double totalPoints = null;
+        final LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
             LeaderboardEntryDTO field = row.fieldsByRaceColumnName.get(nameOfLastRaceSoFar);
-            if (field != null &&  field.netPoints != null) {
-                netPoints = field.netPoints;
+            if (field != null &&  field.totalPoints != null) {
+                totalPoints = field.totalPoints;
             }
         }
-        return netPoints;
+        return totalPoints;
     }
 
     public boolean raceIsTracked(String raceColumnName) {
@@ -163,12 +167,13 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
      *            must not be null
      */
     public RaceColumnDTO addRace(String raceColumnName, Double explicitFactor, double effectiveFactor,
-            String regattaName, String seriesName, FleetDTO fleetDTO, boolean medalRace, RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race) {
+            String regattaName, String seriesName, FleetDTO fleetDTO, boolean medalRace,
+            RegattaAndRaceIdentifier trackedRaceIdentifier, RaceDTO race, boolean isMetaLeaderboardColumn) {
         assert fleetDTO != null;
         RaceColumnDTO raceColumnDTO = getRaceColumnByName(raceColumnName);
         if (raceColumnDTO == null) {
             raceColumnDTO = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName, medalRace,
-                explicitFactor, regattaName, seriesName);
+                explicitFactor, regattaName, seriesName, isMetaLeaderboardColumn);
             races.add(raceColumnDTO);
         }
         raceColumnDTO.setEffectiveFactor(effectiveFactor);
@@ -187,9 +192,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return raceColumnDTO;
     }
 
-    public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace, String regattaName, String seriesName) {
+    public RaceColumnDTO createEmptyRaceColumn(String raceColumnName, boolean medalRace, String regattaName,
+            String seriesName, boolean isMetaLeaderboardColumn) {
         final RaceColumnDTO raceColumn = RaceColumnDTOFactory.INSTANCE.createRaceColumnDTO(raceColumnName,
-                medalRace, /* explicit factor */ null, regattaName, seriesName);
+                medalRace, /* explicit factor */ null, regattaName, seriesName, isMetaLeaderboardColumn);
         races.add(raceColumn);
         return raceColumn;
     }
@@ -341,6 +347,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         result = prime * result + ((competitorDisplayNames == null) ? 0 : competitorDisplayNames.hashCode());
         result = prime * result + Arrays.hashCode(discardThresholds);
         result = prime * result + (hasCarriedPoints ? 1231 : 1237);
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((scoringScheme == null) ? 0 : scoringScheme.hashCode());
         if (races == null) {

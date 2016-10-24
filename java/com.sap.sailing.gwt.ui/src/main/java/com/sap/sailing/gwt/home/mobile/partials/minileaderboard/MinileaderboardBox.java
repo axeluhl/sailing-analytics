@@ -4,21 +4,24 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.FontStyle;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.event.regatta.tabs.reload.RefreshableWidget;
+import com.sap.sailing.gwt.home.communication.event.LabelType;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.mobile.partials.toggleButton.BigButton;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
-import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class MinileaderboardBox extends Composite implements RefreshableWidget<GetMiniLeaderboardDTO> {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -30,22 +33,41 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
 
     @UiField MobileSection itemContainerUi;
     @UiField SectionHeaderContent headerUi;
+    @UiField BigButton showLeaderboardButtonUi;
+    
+    private PlaceNavigation<?> placeNavigation = null;
 
+    private boolean isOverall;
+    
     public MinileaderboardBox(boolean isOverall) {
+        this.isOverall = isOverall;
         initWidget(uiBinder.createAndBindUi(this));
-        headerUi.setSectionTitle(isOverall ? I18N.overallStandings() : I18N.results());
-        headerUi.setInfoText(StringMessages.INSTANCE.details());
-
-
+    }
+    
+    @UiHandler("showLeaderboardButtonUi")
+    void onShowLeaderboardClick(ClickEvent event) {
+        if(placeNavigation != null) {
+            placeNavigation.goToPlace();
+        }
     }
     
     public void setAction(String infoText, final PlaceNavigation<?> placeNavigation) {
         headerUi.setInfoText(infoText);
         headerUi.setClickAction(placeNavigation);
+        this.placeNavigation = placeNavigation;
     }
-
+    
     @Override
     public void setData(final GetMiniLeaderboardDTO data) {
+        String headerText = isOverall ? I18N.overallStandings() : I18N.results();
+        int itemCount = data.getItems().size();
+        boolean showLeaderboardButton = false;
+        if (itemCount > 0 && data.getTotalCompetitorCount() > itemCount) {
+            headerText += " (" + StringMessages.INSTANCE.topN(itemCount) + ")";
+            showLeaderboardButton = true;
+        }
+        headerUi.setSectionTitle(headerText);
+        
         itemContainerUi.clearContent();
         
         if(data.getItems().isEmpty()) {
@@ -66,6 +88,7 @@ public class MinileaderboardBox extends Composite implements RefreshableWidget<G
         if (showRaceCounts) {
             itemContainerUi.addContent(new MinileaderboardBoxItemLegend());
         }
+        showLeaderboardButtonUi.setVisible(showLeaderboardButton);
     }
     
     private Widget getNoResultsInfoWidget() {

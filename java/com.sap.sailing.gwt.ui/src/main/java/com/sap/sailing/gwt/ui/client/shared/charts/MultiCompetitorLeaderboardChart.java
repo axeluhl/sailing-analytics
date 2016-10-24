@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -25,6 +26,11 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
     }
 
     @Override
+    public MultiCompetitorLeaderboardChartSettings getSettings() {
+        return settings;
+    }
+    
+    @Override
     public SettingsDialogComponent<MultiCompetitorLeaderboardChartSettings> getSettingsDialogComponent() {
         MultiCompetitorLeaderboardChartSettings chartSettings = new MultiCompetitorLeaderboardChartSettings(settings.getDetailType());
         return new MultiCompetitorLeaderboardChartSettingsDialogComponent(chartSettings, stringMessages);
@@ -49,5 +55,16 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
     @Override
     public String getLocalizedShortName() {
         return stringMessages.showCharts();
+    }
+    
+    public void forceMaximumChartSize() {
+        chart.setWidth100();
+        chart.setHeight100();
+        chart.redraw();
+    }
+    
+    public void forceChartToClientHeight() {
+        chart.setSize(chart.getOffsetWidth(), Window.getClientHeight());
+        chart.redraw();
     }
 }

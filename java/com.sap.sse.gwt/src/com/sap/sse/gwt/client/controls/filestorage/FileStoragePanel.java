@@ -29,6 +29,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.controls.TabbingTextInputCell;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
@@ -93,7 +94,7 @@ public class FileStoragePanel extends FlowPanel {
         serviceDescriptionLabel = new Label();
         editServicePanelContent.add(serviceDescriptionLabel);
 
-        propertiesTable = new CellTable<>();
+        propertiesTable = new BaseCelltable<>();
         propertiesTable.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED); //allow for default tabbing behaviour
         propertiesListDataProvider = new ListDataProvider<>(new ArrayList<FileStorageServicePropertyDTO>());
         properties = propertiesListDataProvider.getList();

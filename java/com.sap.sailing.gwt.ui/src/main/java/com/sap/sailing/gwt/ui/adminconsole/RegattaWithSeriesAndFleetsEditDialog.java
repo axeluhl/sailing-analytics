@@ -9,6 +9,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -24,10 +25,27 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
 
     private RegattaConfigurationDTO currentRegattaConfiguration;
 
+    protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
+        private StringMessages stringMessages;
+
+        public RegattaParameterValidator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+
+        @Override
+        public String getErrorMessage(RegattaDTO regattaToValidate) {
+            String errorMessage = null;
+            if (regattaToValidate.buoyZoneRadiusInHullLengths == null) {
+                errorMessage = stringMessages.incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
+            }
+            return errorMessage;
+        }
+    }
+    
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(regatta, regatta.series, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
-                null, callback);
+            List<EventDTO> existingEvents, EventDTO correspondingEvent, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
+        super(regatta, regatta.series, existingEvents, correspondingEvent, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
+                new RegattaParameterValidator(stringMessages), callback);
         ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
 
@@ -74,9 +92,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     }
 
     @Override
-    public void show() {
-        super.show();
-        courseAreaListBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return courseAreaListBox;
     }
 
     @Override

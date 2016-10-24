@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
@@ -58,7 +57,7 @@ public class OldLeaderboard extends Composite implements LeaderboardUpdateListen
                 String lastUpdate = DateAndTimeFormatterUtil.defaultDateFormatter.render(lastCorrectionDate) + ", "
                         + DateAndTimeFormatterUtil.longTimeFormatter.render(lastCorrectionDate);
                 lastScoringUpdateTimeDiv.setInnerText(lastUpdate);
-                lastScoringUpdateTextDiv.setInnerText(TextMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
+                lastScoringUpdateTextDiv.setInnerText(StringMessages.INSTANCE.eventRegattaLeaderboardLastScoreUpdate());
             } else {
                 lastScoringUpdateTimeDiv.setInnerText("");
                 lastScoringUpdateTextDiv.setInnerText("");

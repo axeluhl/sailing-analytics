@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.mobile.partials.stage;
 
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.shared.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
+import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * Teaser band for a live event on the homepage stage
@@ -13,14 +13,14 @@ import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
  */
 public class LiveStageTeaserBand extends StageTeaserBand {
 
-    public LiveStageTeaserBand(EventStageDTO event, MobilePlacesNavigator placeNavigator) {
+    public LiveStageTeaserBand(EventLinkAndMetadataDTO event, MobilePlacesNavigator placeNavigator) {
         super(event, placeNavigator);
  
         bandTitle.setInnerText(event.getDisplayName());
         bandSubtitle.setInnerText(EventDatesFormatterUtil.formatDateRangeWithYear(event.getStartDate(), event.getEndDate()));
 
         actionLink.setVisible(true);
-        actionLink.setText(TextMessages.INSTANCE.watchNow());
+        actionLink.setText(StringMessages.INSTANCE.watchNow());
         actionLink.setHref(getEventNavigation().getTargetUrl());
     }
 

@@ -90,6 +90,9 @@
 		background-color: #fcfcfc;
 	}
 	
+	.slider .slick-slide:focus {
+		outline: 0;
+	}
 	
 	.slider .slick-prev, .slider .slick-next {
 		position: absolute;

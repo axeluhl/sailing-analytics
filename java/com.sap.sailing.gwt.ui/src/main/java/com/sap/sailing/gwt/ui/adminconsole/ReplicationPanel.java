@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -273,7 +274,8 @@ public class ReplicationPanel extends FlowPanel {
                     errorReporter.reportPersistentInformation(stringMessages.warningServerIsReplica());
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
-                            replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort())));
+                            replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort(),
+                            replicatingFromMaster.getMessagingHostname(), replicatingFromMaster.getExchangeName())));
                     i++;
                     addButton.setEnabled(false);
                     stopReplicationButton.setEnabled(true);
@@ -351,9 +353,8 @@ public class ReplicationPanel extends FlowPanel {
         }
         
         @Override
-        public void show() {
-            super.show();
-            hostnameEntryField.setFocus(true);
+        protected FocusWidget getInitialFocusWidget() {
+            return hostnameEntryField;
         }
 
         @Override

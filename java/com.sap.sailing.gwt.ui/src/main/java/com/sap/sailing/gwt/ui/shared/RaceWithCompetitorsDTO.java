@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 
 public class RaceWithCompetitorsDTO extends RaceDTO {
     private static final long serialVersionUID = 5389509649915599951L;
-    public Iterable<CompetitorDTO> competitors;
+    private Iterable<CompetitorDTO> competitors;
 
     /**
      * Constructor for GWT serialization.
@@ -23,5 +23,9 @@ public class RaceWithCompetitorsDTO extends RaceDTO {
     public RaceWithCompetitorsDTO(RegattaAndRaceIdentifier raceIdentifier, Iterable<CompetitorDTO> competitors) {
         super(raceIdentifier);
         this.competitors = competitors;
+    }
+
+    public Iterable<CompetitorDTO> getCompetitors() {
+        return competitors;
     }
 }

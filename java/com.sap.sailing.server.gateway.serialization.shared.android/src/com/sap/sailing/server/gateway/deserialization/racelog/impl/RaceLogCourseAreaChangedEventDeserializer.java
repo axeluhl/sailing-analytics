@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -24,7 +25,7 @@ public class RaceLogCourseAreaChangedEventDeserializer extends BaseRaceLogEventD
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
         Serializable courseAreaId = (Serializable) object.get(RaceLogCourseAreaChangedEventSerializer.FIELD_COURSE_AREA_ID);
-        return factory.createCourseAreaChangedEvent(createdAt, author, timePoint, id, competitors, 
+        return new RaceLogCourseAreaChangeEventImpl(createdAt, timePoint, author, id, 
                 passId, Helpers.tryUuidConversion(courseAreaId));
     }
 

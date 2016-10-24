@@ -54,7 +54,6 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             
             @Override
             public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-                System.out.println("Received fix "+fix);
                 synchronized (semaphor) {
                     if (first) {
                         firstTracked[0] = competitor;
@@ -89,6 +88,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                         null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false)) {
             receiver.subscribe();
             getRaceSubscriber().start();
+            addReceiverToStopDuringTearDown(receiver);
         }
         addListenersForStoredDataAndStartController(domainFactory
                 .getUpdateReceivers(trackedRegatta, /* delayToLiveInMillis */0l, null, /* simulator */

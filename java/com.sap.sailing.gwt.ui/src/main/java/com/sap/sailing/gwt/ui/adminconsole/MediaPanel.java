@@ -4,7 +4,6 @@ import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYUP;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +36,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaUtil;
@@ -50,9 +48,13 @@ import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -76,6 +78,7 @@ public class MediaPanel extends FlowPanel {
     private CellTable<MediaTrack> mediaTracksTable;
     private ListDataProvider<MediaTrack> mediaTrackListDataProvider = new ListDataProvider<MediaTrack>();
     private Date latestDate;
+    private RefreshableSingleSelectionModel<MediaTrack> refreshableSelectionModel;
 
     public MediaPanel(Set<RegattasDisplayer> regattasDisplayers, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, MediaServiceAsync mediaService, ErrorReporter errorReporter,
@@ -109,39 +112,44 @@ public class MediaPanel extends FlowPanel {
         });
         buttonAndFilterPanel.add(addUrlButton);
         add(buttonAndFilterPanel);
-        createMediaTracksTable();
+        
         Label lblFilterRaces = new Label(stringMessages.filterMediaByName() + ":");
         lblFilterRaces.setWordWrap(false);
         buttonAndFilterPanel.setSpacing(5);
         buttonAndFilterPanel.add(lblFilterRaces);
         buttonAndFilterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
-        this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrack>(lblFilterRaces, allMediaTracks, mediaTracksTable, mediaTrackListDataProvider) {
+        this.filterableMediaTracks = new LabeledAbstractFilterablePanel<MediaTrack>(lblFilterRaces, allMediaTracks,
+                new CellTable<MediaTrack>(), mediaTrackListDataProvider) {
             @Override
             public List<String> getSearchableStrings(MediaTrack t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.title);
-                strings.add(t.startTime.toString());
+                if (t.startTime == null) {
+                    GWT.log("startTime of media track "+t.title+" undefined");
+                } else {
+                    strings.add(t.startTime.toString());
+                }
                 return strings;
             }
         };
+        createMediaTracksTable();
+        filterableMediaTracks.setTable(mediaTracksTable);
         filterableMediaTracks.getTextBox().ensureDebugId("MediaTracksFilterTextBox");
         buttonAndFilterPanel.add(filterableMediaTracks);
     }
 
     protected void loadMediaTracks() {
         mediaTrackListDataProvider.getList().clear();
-        mediaService.getAllMediaTracks(new AsyncCallback<Collection<MediaTrack>>() {
+        mediaService.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrack>>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError(t.toString());
             }
 
             @Override
-            public void onSuccess(Collection<MediaTrack> allMediaTracks) {
-                mediaTrackListDataProvider.getList().addAll(allMediaTracks);
-                allMediaTracks.clear();
-                allMediaTracks.addAll(mediaTrackListDataProvider.getList());
-                filterableMediaTracks.updateAll(allMediaTracks);
+            public void onSuccess(Iterable<MediaTrack> allMediaTracks) {
+                Util.addAll(allMediaTracks, mediaTrackListDataProvider.getList());
+                filterableMediaTracks.updateAll(mediaTrackListDataProvider.getList());
                 mediaTrackListDataProvider.refresh();
             }
         });
@@ -156,7 +164,7 @@ public class MediaPanel extends FlowPanel {
         // Set a key provider that provides a unique key for each contact. If key is
         // used to identify contacts when fields (such as the name and address)
         // change.
-        mediaTracksTable = new CellTable<MediaTrack>(1000, tableResources);
+        mediaTracksTable = new BaseCelltable<MediaTrack>(1000, tableResources);
         mediaTracksTable.setWidth("100%");
 
         // Attach a column sort handler to the ListDataProvider to sort the list.
@@ -164,12 +172,21 @@ public class MediaPanel extends FlowPanel {
         mediaTracksTable.addColumnSortHandler(sortHandler);
 
         // Add a selection model so we can select cells.
-        final SelectionModel<MediaTrack> selectionModel = new SingleSelectionModel<MediaTrack>();
-        mediaTracksTable.setSelectionModel(selectionModel,
+        refreshableSelectionModel = new RefreshableSingleSelectionModel<>(new EntityIdentityComparator<MediaTrack>() {
+            @Override
+            public boolean representSameEntity(MediaTrack dto1, MediaTrack dto2) {
+                return dto1.dbId.equals(dto2.dbId);
+            }
+            @Override
+            public int hashCode(MediaTrack t) {
+                return t.dbId.hashCode();
+            }
+        }, filterableMediaTracks.getAllListDataProvider());
+        mediaTracksTable.setSelectionModel(refreshableSelectionModel,
                 DefaultSelectionEventManager.<MediaTrack> createDefaultManager());
 
         // Initialize the columns.
-        initTableColumns(selectionModel, sortHandler);
+        initTableColumns(refreshableSelectionModel, sortHandler);
 
         mediaTrackListDataProvider.addDataDisplay(mediaTracksTable);
         add(mediaTracksTable);
@@ -523,20 +540,21 @@ public class MediaPanel extends FlowPanel {
     }
 
     private String listAssignedRaces(MediaTrack mediaTrack) {
-
+        final String result;
         if (mediaTrack.assignedRaces.size() > 1) {
-            return String.valueOf(mediaTrack.assignedRaces.size());
+            result = String.valueOf(mediaTrack.assignedRaces.size());
         } else {
             String value = "";
             for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
                 value += assignedRace.getRegattaName() + " " + assignedRace.getRaceName() + ", ";
             }
             if (value.length() > 1) {
-                return value.substring(0, value.length() - 2);
-            } else
-                return value;
-
+                result = value.substring(0, value.length() - 2);
+            } else {
+                result = value;
+            }
         }
+        return result;
     }
 
     public void onShow() {

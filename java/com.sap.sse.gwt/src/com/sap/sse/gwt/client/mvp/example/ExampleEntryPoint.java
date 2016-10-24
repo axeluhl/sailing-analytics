@@ -10,7 +10,7 @@ import com.sap.sse.gwt.client.mvp.AbstractMvpEntryPoint;
  * 
  * @author Axel Uhl (d043530)
  */
-public class ExampleEntryPoint<S extends StringMessages> extends AbstractMvpEntryPoint<S> {
+public class ExampleEntryPoint<S extends StringMessages> extends AbstractMvpEntryPoint<S, AppClientFactory> {
     
     @Override
     protected void doOnModuleLoad() {

@@ -7,8 +7,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -20,16 +21,16 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     protected TextBox nameEntryField;
     protected SuggestBox boatClassEntryField;
 
-    public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents,
+    public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO defaultEvent,
             String title, String okButton, StringMessages stringMessages,
             Validator<RegattaDTO> validator, DialogCallback<RegattaDTO> callback) {
-        super(regatta, series, existingEvents, title, okButton, stringMessages, validator, callback);
+        super(regatta, series, existingEvents, defaultEvent, title, okButton, stringMessages, validator, callback);
         this.stringMessages = stringMessages;
         nameEntryField = createTextBox(null);
         nameEntryField.ensureDebugId("NameTextBox");
         nameEntryField.setVisibleLength(40);
         nameEntryField.setText(regatta.getName());
-        boatClassEntryField = createSuggestBox(BoatClassMasterdata.getAllBoatClassNames(/* include alternative names */ true));
+        boatClassEntryField = createSuggestBox(new BoatClassMasterdataSuggestOracle());
         boatClassEntryField.getValueBox().ensureDebugId("BoatClassTextBox");
         if (regatta.boatClass != null) {
             boatClassEntryField.setText(regatta.boatClass.getName());
@@ -46,8 +47,8 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     @Override
     protected RegattaDTO getResult() {
         RegattaDTO result = getRegattaDTO();
-        result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing slashes
-        result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
+        result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing blanks
+        result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), Distance.NULL);
         return result;
     }
     

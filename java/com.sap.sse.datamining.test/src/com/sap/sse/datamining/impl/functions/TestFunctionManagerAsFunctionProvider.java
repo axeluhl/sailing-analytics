@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,6 +20,8 @@ import org.junit.Test;
 import com.sap.sse.datamining.ModifiableDataMiningServer;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.factories.DataMiningDTOFactory;
+import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.SimpleDataRetrieverChainDefinition;
@@ -29,6 +32,7 @@ import com.sap.sse.datamining.test.data.Test_HasRaceContext;
 import com.sap.sse.datamining.test.data.Test_HasRaceContextImpl;
 import com.sap.sse.datamining.test.data.impl.SimpleClassWithMarkedMethods;
 import com.sap.sse.datamining.test.data.impl.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.test.domain.Test_Leg;
 import com.sap.sse.datamining.test.domain.Test_Named;
 import com.sap.sse.datamining.test.domain.Test_Regatta;
 import com.sap.sse.datamining.test.util.ExpectedFunctionRegistryUtil;
@@ -149,33 +153,102 @@ public class TestFunctionManagerAsFunctionProvider {
         assertThat(server.getFunctionsFor(Test_HasLegOfCompetitorContextImpl.class), is(expectedFunctions));
     }
     
+    @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
     @Test
-    public void testGetFunctionForDTO() throws NoSuchMethodException, SecurityException {
+    public void testGetFunctionForDimensionDTO() throws NoSuchMethodException, SecurityException {
+        FunctionFactory functionFactory = FunctionTestsUtil.getFunctionFactory();
+        DataMiningDTOFactory dtoFactory = FunctionTestsUtil.getDTOFactory();
+        
         Method getRegattaMethod = Test_HasRaceContext.class.getMethod("getRace", new Class<?>[0]);
-        Function<?> getRegatta = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getRegattaMethod);
+        Function<?> getRegatta = functionFactory.createMethodWrappingFunction(getRegattaMethod);
         Method getNameMethod = Test_Named.class.getMethod("getName", new Class<?>[0]);
-        Function<?> getName = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getNameMethod);
-        Function<Object> getRegattaName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRegatta, getName));
+        Function<?> getName = functionFactory.createMethodWrappingFunction(getNameMethod);
+        Function<Object> getRegattaName = functionFactory.createCompoundFunction(Arrays.asList(getRegatta, getName));
         
-        FunctionDTO getRegattaNameDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(getRegattaName, stringMessages, Locale.ENGLISH);
-        
-        @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
-        Function<Object> providedFunction = (Function<Object>) server.getFunctionForDTO(getRegattaNameDTO);
+        FunctionDTO getRegattaNameDTO_English = dtoFactory.createFunctionDTO(getRegattaName, stringMessages, Locale.ENGLISH);
+        Function<Object> providedFunction = (Function<Object>) server.getFunctionForDTO(getRegattaNameDTO_English);
         assertThat(providedFunction, is(getRegattaName));
+        FunctionDTO getRegattaNameDTO_German = dtoFactory.createFunctionDTO(getRegattaName, stringMessages, Locale.GERMAN);
+        providedFunction = (Function<Object>) server.getFunctionForDTO(getRegattaNameDTO_German);
+        assertThat(providedFunction, is(getRegattaName));
+        FunctionDTO getRegattaNameDTO = dtoFactory.createFunctionDTO(getRegattaName);
+        providedFunction = (Function<Object>) server.getFunctionForDTO(getRegattaNameDTO);
+        assertThat(providedFunction, is(getRegattaName));
+    }
+    
+    @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
+    @Test
+    public void testGetFunctionForStatisticDTO() {
+        FunctionFactory functionFactory = FunctionTestsUtil.getFunctionFactory();
+        DataMiningDTOFactory dtoFactory = FunctionTestsUtil.getDTOFactory();
+        
+        Method getLegMethod = FunctionTestsUtil.getMethodFromClass(Test_HasLegOfCompetitorContext.class, "getLeg");
+        Function<?> getLeg = functionFactory.createMethodWrappingFunction(getLegMethod);
+        Method getDistanceTraveledMethod = FunctionTestsUtil.getMethodFromClass(Test_Leg.class, "getDistanceTraveled");
+        Function<?> getDistanceTraveled = functionFactory.createMethodWrappingFunction(getDistanceTraveledMethod);
+        Function<Object> getLegDistanceTraveled = functionFactory.createCompoundFunction(Arrays.asList(getLeg, getDistanceTraveled));
+        
+        FunctionDTO getLegDistanceTraveledDTO_English = dtoFactory.createFunctionDTO(getLegDistanceTraveled, stringMessages, Locale.ENGLISH);
+        Function<Object> providedFunction = (Function<Object>) server.getFunctionForDTO(getLegDistanceTraveledDTO_English);
+        assertThat(providedFunction, is(getLegDistanceTraveled));
+        FunctionDTO getLegDistanceTraveledDTO_German = dtoFactory.createFunctionDTO(getLegDistanceTraveled, stringMessages, Locale.GERMAN);
+        providedFunction = (Function<Object>) server.getFunctionForDTO(getLegDistanceTraveledDTO_German);
+        assertThat(providedFunction, is(getLegDistanceTraveled));
+        FunctionDTO getLegDistanceTraveledDTO = dtoFactory.createFunctionDTO(getLegDistanceTraveled);
+        providedFunction = (Function<Object>) server.getFunctionForDTO(getLegDistanceTraveledDTO);
+        assertThat(providedFunction, is(getLegDistanceTraveled));
+    }
+    
+    @SuppressWarnings("unchecked") // Hamcrest requires type matching of actual and expected type, so the Functions have to be specific (without <?>)
+    @Test
+    public void testGetFunctionForExternalFunctionDTO() {
+        FunctionFactory functionFactory = FunctionTestsUtil.getFunctionFactory();
+        DataMiningDTOFactory dtoFactory = FunctionTestsUtil.getDTOFactory();
+        
+        Method fooMethod = FunctionTestsUtil.getMethodFromClass(Test_ExternalLibraryClass.class, "foo");
+        Function<Object> foo = functionFactory.createMethodWrappingFunction(fooMethod);
+        
+        FunctionDTO fooDTO_English = dtoFactory.createFunctionDTO(foo, stringMessages, Locale.ENGLISH);
+        Function<Object> providedFunction = (Function<Object>) server.getFunctionForDTO(fooDTO_English);
+        assertThat(providedFunction, is(foo));
+        FunctionDTO fooDTO_German = dtoFactory.createFunctionDTO(foo, stringMessages, Locale.GERMAN);
+        providedFunction = (Function<Object>) server.getFunctionForDTO(fooDTO_German);
+        assertThat(providedFunction, is(foo));
+        FunctionDTO fooDTO = dtoFactory.createFunctionDTO(foo);
+        providedFunction = (Function<Object>) server.getFunctionForDTO(fooDTO);
+        assertThat(providedFunction, is(foo));
     }
     
     @Test
     public void testGetFunctionForUnregisteredDTO() {
-        Method illegalDimensionMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "illegalDimension");
-        Function<Object> illegalDimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(illegalDimensionMethod);
-        FunctionDTO illegalDimensionDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(illegalDimension, stringMessages, Locale.ENGLISH);
-        
-        assertThat(server.getFunctionForDTO(illegalDimensionDTO), is(nullValue()));
+        Method dimensionMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "dimension");
+        Function<Object> dimension = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(dimensionMethod);
+        FunctionDTO dimensionDTO_English = FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimension, stringMessages, Locale.ENGLISH);
+        assertThat(server.getFunctionForDTO(dimensionDTO_English), is(nullValue()));
+        FunctionDTO dimensionDTO_German = FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimension, stringMessages, Locale.GERMAN);
+        assertThat(server.getFunctionForDTO(dimensionDTO_German), is(nullValue()));
+        FunctionDTO dimensionDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(dimension);
+        assertThat(server.getFunctionForDTO(dimensionDTO), is(nullValue()));
+
+        Method sideEffectFreeValueMethod = FunctionTestsUtil.getMethodFromClass(SimpleClassWithMarkedMethods.class, "sideEffectFreeValue");
+        Function<Object> sideEffectFreeValue = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(sideEffectFreeValueMethod);
+        FunctionDTO sideEffectFreeValueDTO_English = FunctionTestsUtil.getDTOFactory().createFunctionDTO(sideEffectFreeValue, stringMessages, Locale.ENGLISH);
+        assertThat(server.getFunctionForDTO(sideEffectFreeValueDTO_English), is(nullValue()));
+        FunctionDTO sideEffectFreeValueDTO_German = FunctionTestsUtil.getDTOFactory().createFunctionDTO(sideEffectFreeValue, stringMessages, Locale.GERMAN);
+        assertThat(server.getFunctionForDTO(sideEffectFreeValueDTO_German), is(nullValue()));
+        FunctionDTO sideEffectFreeValueDTO = FunctionTestsUtil.getDTOFactory().createFunctionDTO(sideEffectFreeValue);
+        assertThat(server.getFunctionForDTO(sideEffectFreeValueDTO), is(nullValue()));
     }
     
     @Test
     public void testGetFunctionForNullDTO() {
         assertThat(server.getFunctionForDTO(null), is(nullValue()));
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testGetFunctionForDTOWithNonExistingClass() {
+        FunctionDTO functionDTO = new FunctionDTO(false, "Not relevant", "Impossible Class", "Impossible Class", new ArrayList<String>(), "Not relevant", 0);
+        server.getFunctionForDTO(functionDTO);
     }
 
 }

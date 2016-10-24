@@ -51,7 +51,6 @@ public class MediaDBImpl implements MediaDB {
     @Override
     public String insertMediaTrack(String title, String url, TimePoint startTime, Duration duration, MimeType mimeType,
             Set<RegattaAndRaceIdentifier> assignedRaces) {
-
         BasicDBObject dbMediaTrack = new BasicDBObject();
         dbMediaTrack.put(DbNames.Fields.MEDIA_TITLE.name(), title);
         dbMediaTrack.put(DbNames.Fields.MEDIA_URL.name(), url);
@@ -76,7 +75,6 @@ public class MediaDBImpl implements MediaDB {
     @Override
     public void insertMediaTrackWithId(String dbId, String title, String url, TimePoint startTime, Duration duration,
             MimeType mimeType, Set<RegattaAndRaceIdentifier> assignedRaces) {
-
         BasicDBObject dbMediaTrack = new BasicDBObject();
         dbMediaTrack.put(DbNames.Fields._id.name(), new ObjectId(dbId));
         dbMediaTrack.put(DbNames.Fields.MEDIA_TITLE.name(), title);
@@ -92,8 +90,6 @@ public class MediaDBImpl implements MediaDB {
                 object.put(DbNames.Fields.RACE_NAME.name(), assignedRace.getRaceName());
                 assignedRacesDb.add(object);
             }
-        } else {
-            System.currentTimeMillis();
         }
         dbMediaTrack.put(DbNames.Fields.ASSIGNED_RACES.name(), assignedRacesDb);
         DBCollection dbVideos = getVideoCollection();

@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
 
 import java.util.ArrayList;
@@ -20,26 +22,28 @@ public class CourseMarkAdapter extends RecyclerView.Adapter<CourseMarkAdapter.Vi
     private List<Mark> mMarks;
     private MarkImageHelper mImageHelper;
     private MarkClick mListener;
+    private int mType;
+    private CourseListDataElementWithIdImpl mElement;
 
-    public CourseMarkAdapter(Context context, ArrayList<Mark> marks, MarkImageHelper imageHelper) {
+    public CourseMarkAdapter(Context context, ArrayList<Mark> marks, MarkImageHelper imageHelper, int type, CourseListDataElementWithIdImpl element) {
         mContext = context;
         mMarks = marks;
         mImageHelper = imageHelper;
+        mType = type;
+        mElement = element;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View layout = LayoutInflater.from(mContext).inflate(R.layout.ess_course_item, parent, false);
+        View layout = LayoutInflater.from(mContext).inflate(R.layout.course_marks_item, parent, false);
         return new ViewHolder(layout);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-
         Mark mark = mMarks.get(position);
 
-        int drawable = mImageHelper.resolveMarkImage(mark);
-        holder.imageView.setImageResource(drawable);
+        holder.imageView.setImageDrawable(mImageHelper.resolveMarkImage(mContext, mark));
         holder.textView.setText(mark.getName());
     }
 
@@ -56,7 +60,7 @@ public class CourseMarkAdapter extends RecyclerView.Adapter<CourseMarkAdapter.Vi
     }
 
     public interface MarkClick {
-        void onItemClick(Mark mark);
+        void onItemClick(Mark mark, int type, CourseListDataElementWithIdImpl element);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -75,7 +79,7 @@ public class CourseMarkAdapter extends RecyclerView.Adapter<CourseMarkAdapter.Vi
         @Override
         public void onClick(View v) {
             if (mListener != null) {
-                mListener.onItemClick(mMarks.get(getAdapterPosition()));
+                mListener.onItemClick(mMarks.get(getAdapterPosition()), mType, mElement);
             }
         }
     }

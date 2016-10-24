@@ -1,0 +1,52 @@
+@CHARSET "UTF-8";
+
+.cellTableHeader {
+	padding: 7px;
+	padding-left: 10px;
+	color: black;
+	background-image: none;
+	background-color: white;
+	font-family: 'Open Sans' !important;
+	font-size: 13px;
+	font-weight: bold;
+	text-shadow: 0 1px 1px rgba(255, 255, 255, .7);
+	border-bottom-color: lightgrey !important;
+	border: none !important;
+	vertical-align: bottom;
+}
+
+.cellTableCell {
+	padding-bottom: 8px;
+	padding-left: 10px;
+	overflow: hidden;
+	font-family: 'Open Sans' !important;
+	font-size: 13px;
+	color: #848484;
+	background-color: white;
+	border: none !important;
+	margin: 100px !important;
+	border-spacing: 0px !important;
+}
+
+.cellTableOddRowCell {
+	background-color: white;
+	border: none !important;
+	padding: 0px;
+    padding-left: 10px;
+	padding-bottom: 10px;
+	margin: 0px !important;
+	border-spacing: 0px !important;
+	font-family: 'Open Sans' !important;
+}
+
+.cellTableEvenRowCell {
+	background-color: white;
+	border: none !important;
+	padding: 0px;
+	padding-left: 10px;
+	padding-bottom: 10px;
+	maring: 0px !important;
+	border-spacing: 0px !important;
+	font-family: 'Open Sans' !important;
+}
+

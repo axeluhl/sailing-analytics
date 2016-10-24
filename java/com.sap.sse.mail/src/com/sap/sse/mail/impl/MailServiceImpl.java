@@ -5,11 +5,13 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,12 +23,16 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 
+import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.mail.MailServiceResolver;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class MailServiceImpl implements ReplicableMailService {
     private static final Logger logger = Logger.getLogger(MailServiceImpl.class.getName());
@@ -38,14 +44,17 @@ public class MailServiceImpl implements ReplicableMailService {
      * currently replicated from any master.
      */
     private ReplicationMasterDescriptor replicatingFromMaster;
-    private final ConcurrentHashMap<OperationExecutionListener<ReplicableMailService>, OperationExecutionListener<ReplicableMailService>> operationExecutionListeners;
+    private final ConcurrentMap<OperationExecutionListener<ReplicableMailService>, OperationExecutionListener<ReplicableMailService>> operationExecutionListeners;
     private final Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication = new HashSet<>();
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
             .withInitial(() -> false);
 
-    public MailServiceImpl(Properties mailProperties) {
+    private final MailServiceResolver mailServiceResolver;
+
+    public MailServiceImpl(Properties mailProperties, MailServiceResolver mailServiceResolver) {
         this.mailProperties = mailProperties;
         this.operationExecutionListeners = new ConcurrentHashMap<>();
+        this.mailServiceResolver = mailServiceResolver;
     }
 
     private class SMTPAuthenticator extends javax.mail.Authenticator {
@@ -64,7 +73,7 @@ public class MailServiceImpl implements ReplicableMailService {
         return mailProperties != null && mailProperties.containsKey("mail.transport.protocol");
     }
 
-    //protected for testing purposes
+    // protected for testing purposes
     protected void internalSendMail(String toAddress, String subject, ContentSetter contentSetter) throws MailException {
         if (canSendMail()) {
             if (toAddress != null) {
@@ -73,7 +82,11 @@ public class MailServiceImpl implements ReplicableMailService {
                 ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
                     msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
-                    msg.setSubject(subject);
+                    try {
+                        msg.setSubject(MimeUtility.encodeText(subject, "utf-8", "B"));
+                    } catch (UnsupportedEncodingException e) {
+                        msg.setSubject(subject);
+                    }
                     msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
                     
                     // this fixes the DCH MIME type error 
@@ -98,11 +111,9 @@ public class MailServiceImpl implements ReplicableMailService {
                 }
             }
         } else {
-            logger.warning("No mail properties provided. Cannot send e-mail about "
-                    + subject
-                    + " to "
-                    + toAddress
-                    + ". This could also mean that this is running on a replica server in which case this is perfectly fine.");
+            logger.warning("No mail properties provided. Cannot send e-mail about " + subject + " to " + toAddress
+                    + ". This could also mean that this is running on a replica server in which case this is perfectly fine. "
+                    + "The master "+getMasterDescriptor()+" will handle the mail sending operation in this case.");
         }
     }
 
@@ -156,7 +167,12 @@ public class MailServiceImpl implements ReplicableMailService {
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStream(is);
+        return new ObjectInputStreamResolvingAgainstCache<MailServiceResolver>(is, mailServiceResolver) {};
+    }
+
+    @Override
+    public IsManagedByCache<MailServiceResolver> resolve(MailServiceResolver cache) {
+        return cache.getMailService();
     }
 
     @Override

@@ -23,13 +23,14 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
@@ -183,6 +184,20 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
+    public Double getAverageRideHeight(TimePoint timePoint) {
+        MarkPassing legStart = getMarkPassingForLegStart();
+        if (legStart != null) {
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
+            if (track != null) {
+                TimePoint endTimePoint = hasFinishedLeg(timePoint) ? getMarkPassingForLegEnd().getTimePoint() : timePoint;
+                return track.getAverageRideHeight(legStart.getTimePoint(), endTimePoint);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint) {
         // fetch all fixes on this leg so far and determine their maximum speed
         MarkPassing legStart = getMarkPassingForLegStart();
@@ -302,15 +317,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     /**
-     * For now, we have an incredibly simple wind "model" which assigns a single common wind force and bearing to all
-     * positions on the course, only variable over time.
-     * 
-     * @param windPositionMode
-     *            For {@link WindPositionMode#EXACT}, the wind at position <code>p</code> is determined. For type
-     *            {@link WindPositionMode#LEG_MIDDLE}, the {@link TrackedLeg#getMiddleOfLeg middle of the tracked leg}
-     *            is determined and used as position. If the mode is {@link WindPositionMode#GLOBAL_AVERAGE}, <code>null</code>
-     *            is passed as position to {@link TrackedRace#getWind(Position, TimePoint)} which yields a general average
-     *            of the various wind sources available for the race, independent of any position.
+     * Calculates the competitor's rank at {@code timePoint} based on the {@link WindPositionMode#LEG_MIDDLE} wind
+     * direction for upwind and downwind legs, or based on the leg's rhumb line for reaching legs.
      */
     @Override
     public int getRank(TimePoint timePoint) {
@@ -443,16 +451,24 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         if (leaderLeg == null || leg != leaderLeg.getLeg()) {
                             // add distance to next mark
                             Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
-                            Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
-                                    .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode, cache);
-                            result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                            if (nextMarkPosition == null) {
+                                result = null;
+                                break;
+                            } else {
+                                Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
+                                        .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode, cache);
+                                result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                            }
                             currentPosition = nextMarkPosition;
                         } else {
                             // we're now in the same leg with leader; compute windward distance to leader
-                            result = new MeterDistance(result.getMeters()
-                                    + getTrackedRace().getTrackedLeg(leg)
-                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint, windPositionMode, cache)
-                                            .getMeters());
+                            final Distance absoluteWindwardDistance = getTrackedRace().getTrackedLeg(leg)
+                                    .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint, windPositionMode, cache);
+                            if (absoluteWindwardDistance != null) {
+                                result = new MeterDistance(result.getMeters() + absoluteWindwardDistance.getMeters());
+                            } else {
+                                result = null;
+                            }
                             break;
                         }
                     }
@@ -659,7 +675,19 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
             return null;
         }
     }
-
+    
+    @Override
+    public Double getRideHeight(TimePoint at) {
+        if (hasStartedLeg(at)) {
+            TimePoint timePoint =hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            return track == null ? null : track.getRideHeight(timePoint);
+        } else {
+            return null;
+        }
+    }
+    
     @Override
     public Duration getEstimatedTimeToNextMark(TimePoint timePoint, WindPositionMode windPositionMode) {
         return getEstimatedTimeToNextMark(timePoint, windPositionMode, new LeaderboardDTOCalculationReuseCache(timePoint));

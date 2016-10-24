@@ -37,9 +37,6 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
-import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -49,6 +46,7 @@ import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.TrackRegatta;
+import com.sap.sailing.server.operationaltransformation.UpdateStartOfTracking;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -57,7 +55,7 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
 
 /**
- * Runs the same tests as {@link TrackedRaceContentsReplicationTest}, but with a non-empty {@link MongoGPSFixStore} that
+ * Runs the same tests as {@link TrackedRaceContentsReplicationTest}, but with a non-empty {@link GPSFixStore} that
  * has special serialization requirements.
  * 
  * @author Axel Uhl (d043530)
@@ -71,8 +69,6 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
     
     @Before
     public void setUp() throws Exception, UnknownHostException, InterruptedException {
-        final GPSFixStore gpsFixStore = MongoGPSFixStoreFactory.INSTANCE.getMongoGPSFixStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), /* serviceFinderFactory */ null);
         Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptors = super.basicSetUp(
                 /* dropDB */true, /* master=null means create a new one */null,
                 /* replica=null means create a new one */null);
@@ -84,7 +80,7 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
                 new PersonImpl("Tina Lutz", DomainFactory.INSTANCE.getOrCreateNationality("GER"), null, null) }),
                 new PersonImpl("Rigo de Mas", DomainFactory.INSTANCE.getOrCreateNationality("NED"), null, null)),
                 new BoatImpl("GER 61", DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true), "GER 61"),
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
         final String baseEventName = "Test Event";
         AddDefaultRegatta addEventOperation = new AddDefaultRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID());
@@ -102,8 +98,9 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
         trackedRegatta = master.apply(new TrackRegatta(raceIdentifier));
         trackedRace = (DynamicTrackedRace) master.apply(new CreateTrackedRace(raceIdentifier,
                 MongoWindStoreFactory.INSTANCE.getMongoWindStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                        PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()), gpsFixStore, /* delayToLiveInMillis */ 5000,
+                        PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory()), /* delayToLiveInMillis */ 5000,
                 /* millisecondsOverWhichToAverageWind */ 10000, /* millisecondsOverWhichToAverageSpeed */10000));
+        master.apply(new UpdateStartOfTracking(raceIdentifier, new MillisecondsTimePoint(0)));
         trackedRace.waitUntilLoadingFromWindStoreComplete();
         // set up the tracked race on the master with a non-empty GPS fix store before starting replication; this shall
         // test serialization with a non-empty GPS fix store set on the tracked race. See also bug 2986.

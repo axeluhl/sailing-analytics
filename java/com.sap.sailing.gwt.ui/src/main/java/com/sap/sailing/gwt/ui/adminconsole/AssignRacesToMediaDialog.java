@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.user.client.ui.Button;
@@ -14,7 +13,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -36,11 +34,12 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
     public AssignRacesToMediaDialog(SailingServiceAsync sailingService, final MediaTrack mediaTrack,
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, StringMessages stringMessages,
             Validator<Set<RegattaAndRaceIdentifier>> validator, DialogCallback<Set<RegattaAndRaceIdentifier>> callback) {
-        super(stringMessages.linkedRaces(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
+        super(stringMessages.linkedRaces(), stringMessages.selectFromRacesWithOverlappingTimeRange(),
+                stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.mediaTrack = mediaTrack;
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
-                new RaceSelectionModel(), stringMessages, /* multiselection */true, /* actionButtonsEnabled */ false) {
+                stringMessages, /* multiselection */true, /* actionButtonsEnabled */ false) {
             @Override
             protected boolean raceIsToBeAddedToList(RaceDTO race) {
                 if (mediaTrackIsInTimerangeOf(race.trackedRace)) {
@@ -54,11 +53,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
             protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
                 btnRefresh = (Button)trackedRacesButtonPanel.getWidget(0);
             }
-
-            @Override
-            protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces) {
-            }
-
+            
             @Override
             protected void makeControlsReactToFillRegattas(Iterable<RegattaDTO> regattas) {
             }
@@ -69,7 +64,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         Grid formGrid = new Grid(2, 2);
         panel.add(formGrid);
         Label message = new Label();
-        message.setText("Loading Regattas and Races");
+        message.setText(stringMessages.loadingRegattasAndRaces());
         formGrid.setWidget(0, 0, message);    
         formGrid.setWidget(1, 1, trackedRacesListComposite);
         formGrid.getWidget(1, 1).setVisible(false);
@@ -82,7 +77,6 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         return panel;
     }
     
-
     @Override
     protected Set<RegattaAndRaceIdentifier> getResult() {
         return getAssignedRaces();
@@ -98,15 +92,15 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         updateUI();
     }
 
-    public void updateUI() {
+    private void updateUI() {
         Grid grid = (Grid) panel.getWidget(0);
         if (hasRaceCandidates) {
             grid.getWidget(0, 0).setVisible(false);
             grid.getWidget(1, 1).setVisible(true);
             this.getOkButton().setVisible(true);
         } else {
-            Label label = (Label)grid.getWidget(0, 0);
-            label.setText("No Races available");
+            Label label = (Label) grid.getWidget(0, 0);
+            label.setText(stringMessages.noRacesAvailable());
             grid.getWidget(0, 0).setVisible(true);
             grid.getWidget(1, 1).setVisible(false);
             this.getOkButton().setVisible(false);
@@ -114,7 +108,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
     }
 
     public Set<RegattaAndRaceIdentifier> getAssignedRaces() {
-        List<RaceDTO> races = trackedRacesListComposite.getSelectedRaces();
+        Set<RaceDTO> races = trackedRacesListComposite.getSelectionModel().getSelectedSet();
         Set<RegattaAndRaceIdentifier> assignedRaces = new HashSet<RegattaAndRaceIdentifier>();
         for (RaceDTO race : races) {
             assignedRaces.add(race.getRaceIdentifier());

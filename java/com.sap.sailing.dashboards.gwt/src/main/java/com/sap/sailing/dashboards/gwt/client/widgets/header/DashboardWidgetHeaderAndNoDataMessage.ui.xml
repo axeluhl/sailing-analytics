@@ -1,0 +1,17 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+    <ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.widgets.header.DashboardWidgetHeaderAndNoDataMessageResources"/>
+    
+	<g:HTMLPanel>
+		<g:HTMLPanel ui:field="header" styleName="{resources.gss.dashboard_widget_header}">
+		</g:HTMLPanel>
+		<div class="{resources.gss.dashboard_widget_no_data_message_container}">
+		    <div>
+				<div ui:field="noDataMessageHeader" class="{resources.gss.dashboard_widget_no_data_message_header}"></div>
+				<div ui:field="noDataMessage" class="{resources.gss.dashboard_widget_no_data_message}"></div>
+			</div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder> 

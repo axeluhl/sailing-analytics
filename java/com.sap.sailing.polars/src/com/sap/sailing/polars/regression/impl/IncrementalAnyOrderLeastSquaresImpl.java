@@ -24,7 +24,7 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  * <a href=
  * "http://erikerlandson.github.io/blog/2012/07/05/deriving-an-incremental-form-of-the-polynomial-regression-equations/"
  * > http://erikerlandson.github.io/blog/2012/07/05/deriving-an-incremental-form-of-the-polynomial-regression-equations/
- * </a>
+ * </a><p>
  * 
  * It can be used in parallel, because it uses locking for adding and reading data.
  * 

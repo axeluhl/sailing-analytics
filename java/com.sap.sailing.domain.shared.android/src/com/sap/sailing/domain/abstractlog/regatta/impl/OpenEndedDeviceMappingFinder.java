@@ -6,7 +6,7 @@ import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sse.common.WithID;
 
 
@@ -29,8 +29,8 @@ public class OpenEndedDeviceMappingFinder extends BaseLogAnalyzer<RegattaLog, Re
     @Override
     protected Serializable performAnalysis() {
         for (RegattaLogEvent regattaLogEvent : log.getUnrevokedEvents()) {
-            if (regattaLogEvent instanceof RegattaLogDeviceCompetitorMappingEvent) {
-                RegattaLogDeviceCompetitorMappingEvent deviceMappingEvent = (RegattaLogDeviceCompetitorMappingEvent) regattaLogEvent;
+            if (regattaLogEvent instanceof RegattaLogDeviceMappingEvent<?>) {
+                RegattaLogDeviceMappingEvent<?> deviceMappingEvent = (RegattaLogDeviceMappingEvent<?>) regattaLogEvent;
                 if (deviceMappingEvent.getMappedTo().equals(mappedTo) &&
                         deviceMappingEvent.getDevice().getStringRepresentation().equals(deviceUuid)) {
                     return deviceMappingEvent.getId();

@@ -30,4 +30,9 @@ public class DummyMarkPassingWithTimePointAndCompetitor implements MarkPassing {
     public Competitor getCompetitor() {
         return competitor;
     }
+
+    @Override
+    public MarkPassing getOriginal() {
+        return this;
+    }
 }

@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
@@ -8,17 +11,61 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceLogListener;
 import com.sap.sse.common.TimePoint;
 
 public interface DynamicTrackedRace extends TrackedRace {
-    void recordFix(Competitor competitor, GPSFixMoving fix);
-    
-    void recordFix(Mark mark, GPSFix fix);
+    /**
+     * Records a position and speed and course over ground fix for a competitor, but only if the fix's {@link GPSFixMoving#getTimePoint()}
+     * is within this race's {@link #getStartOfTracking() start} and {@link #getEndOfTracking() end} of tracking time interval.
+     */
+    default void recordFix(Competitor competitor, GPSFixMoving fix) {
+        recordFix(competitor, fix, /* onlyWhenInTrackingTimeInterval */ true);
+    }
+
+    /**
+     * Records a position and speed and course over ground fix for a competitor. If
+     * {@code onlyWhenInTrackingTimeInterval} is {@code true}, the fix is recorded only if the fix's
+     * {@link GPSFixMoving#getTimePoint()} is within this race's {@link #getStartOfTracking() start} and
+     * {@link #getEndOfTracking() end} of tracking time interval. If {@code onlyWhenInTrackingTimeInterval} is
+     * {@code false}, the fix is recorded regardless of this race's tracking times interval.
+     */
+    void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimeInterval);
     
     /**
+     * Records a position fix for a mark, but only if the fix's {@link GPSFixMoving#getTimePoint()} is within this
+     * race's {@link #getStartOfTracking() start} and {@link #getEndOfTracking() end} of tracking time interval.
+     */
+    default void recordFix(Mark mark, GPSFix fix) {
+        recordFix(mark, fix, /* onlyWhenInTrackingTimeInterval */ true);
+    }
+    
+    /**
+     * Records a position fix for a mark. If {@code onlyWhenInTrackingTimeInterval} is {@code true}, the fix is recorded
+     * only if the fix's {@link GPSFixMoving#getTimePoint()} is within this race's {@link #getStartOfTracking() start}
+     * and {@link #getEndOfTracking() end} of tracking time interval. If {@code onlyWhenInTrackingTimeInterval} is
+     * {@code false}, the fix is recorded regardless of this race's tracking times interval.
+     */
+    void recordFix(Mark mark, GPSFix fix, boolean onlyWhenInTrackingTimeInterval);
+
+    /**
+     * Inserts a <code>wind</code> fix into a {@link WindTrack} for the <code>windSource</code> if the current filtering
+     * rules accept the wind fix. Filtering applies based upon timing considerations, assuming that wind fixes are not
+     * relevant if they are outside of the tracking interval. There may be exceptions for races acting as default wind
+     * acceptors in case no other race in the regatta would accept the wind fix.
+     * 
      * @return True if the specified wind has been accepted and added to this race's wind track and database, else false.
      */
-    boolean recordWind(Wind wind, WindSource windSource);
+    default boolean recordWind(Wind wind, WindSource windSource) {
+        return recordWind(wind, windSource, /* applyFilter */ true);
+    }
+    
+    /**
+     * Like {@link #recordWind(Wind, WindSource)}, only that filtering may be disabled by setting
+     * <code>applyFilter</code> to <code>false</code>.
+     */
+    boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter);
 
     void removeWind(Wind wind, WindSource windSource);
 
@@ -32,15 +79,54 @@ public interface DynamicTrackedRace extends TrackedRace {
      * new track will be created in case no track was present for <code>mark</code> so far.
      */
     DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
+    
+    /**
+     * Gets an existing {@link DynamicSensorFixTrack} or creates and returns a new one if there is none yet.
+     * @see #getDynamicSensorTrack(Competitor, String)
+     * 
+     * @param competitor the competitor to get the track for
+     * @param trackName the name of the track to get
+     * @param newTrackFactory factory to create a new track instance if there isn't one yet for the competitor and the given track name.
+     * @return the track for the competitor and track name
+     */
+    <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
+            Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory);
+    
+    /**
+     * @see TrackedRace#getSensorTrack(Competitor, String)
+     * 
+     * @param competitor the competitor to get the track for
+     * @param trackName the name of the track to get
+     * @return the track associated to the given Competitor and name or <code>null</code> if there is none.
+     */
+    <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getDynamicSensorTrack(
+            Competitor competitor, String trackName);
+
+    void recordSensorFix(Competitor competitor, String trackName, SensorFix fix, boolean onlyWhenInTrackingTimeInterval);
 
     /**
-     * Updates all mark passings for <code>competitor</code> for this race. The
-     * mark passings must be provided in the order of the race's course and in
-     * increasing time stamps. Calling this method replaces all previous mark passings
-     * for this race for <code>competitor</code> and ensures that the "leaderboard"
-     * and all other derived information are updated accordingly. 
+     * Updates all mark passings for <code>competitor</code> for this race. The mark passings must be provided in the
+     * order of the race's course and in increasing time stamps. Calling this method replaces all previous mark passings
+     * for this race for <code>competitor</code> and ensures that the "leaderboard" and all other derived information
+     * are updated accordingly.
+     * <p>
+     * 
+     * When an attached {@link RaceLog} has a {@link RaceLogFinishPositioningConfirmedEvent} that sets a
+     * {@link CompetitorResult#getFinishingTime() finishing time} for a competitor, it will be used to override the
+     * {@link MarkPassing#getTimePoint() time point} of the finishing waypoint's mark passing or, if no mark passing for
+     * the finishing waypoint exists yet for that competitor, create one. This can, in particular, be helpful when
+     * determining the time sailed for the {@code competitor} in order to determine the calculated time after applying
+     * any handicap rules and metrics.<p>
      */
     void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings);
+    
+    /**
+     * When there is a significant change in the race logs attached to this race, such as adding another race log or
+     * removing a race log or switching to another pass in one of the race logs attached, the effects on the
+     * valid {@link RaceLogFinishPositioningConfirmedEvent} are analyzed, and if relevant, the mark passings
+     * for the finish line that are affected will be {@link #updateMarkPassings(Competitor, Iterable) updated}.
+     */
+    void updateMarkPassingsAfterRaceLogChanges();
 
     /**
      * Sets the start time as received from the tracking infrastructure. This isn't necessarily
@@ -48,6 +134,14 @@ public interface DynamicTrackedRace extends TrackedRace {
      * significantly off.
      */
     void setStartTimeReceived(TimePoint start);
+
+    /**
+     * A new finished time has been received by the {@link DynamicTrackedRaceLogListener} and is announced to this race
+     * by calling this method. The {@link RaceChangeListener}s will be
+     * {@link RaceChangeListener#finishedTimeChanged(TimePoint, TimePoint) notified} about this change, and the result
+     * of {@link #getFinishedTime()} will return the {@code newFinishedTime} after this call returns.
+     */
+    void setFinishedTime(final TimePoint newFinishedTime);
     
     /** Sets the start of tracking as received from the tracking infrastructure.
      * This isn't necessarily what {@link #getStartOfTracking()} will deliver because we might consider other values to
@@ -60,6 +154,12 @@ public interface DynamicTrackedRace extends TrackedRace {
      * calculate the end of tracking.
      */
     void setEndOfTrackingReceived(TimePoint endOfTrackingReceived);
+    
+    /**
+     * A time point is considered "in" if it is (inclusively) between {@link #getStartOfTracking()} and {@link #getEndOfTracking()}.
+     * A <code>null</code> value for one of the two interval demarcations means an open-ended interval.
+     */
+    boolean isWithinStartAndEndOfTracking(TimePoint timePoint);
 
     void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed);
 
@@ -86,6 +186,8 @@ public interface DynamicTrackedRace extends TrackedRace {
     void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind);
     
     void setStatus(TrackedRaceStatus newStatus);
+    
+    void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus status);
 
     /**
      * whenever a new course design is published by the race committee and the appropriate event occurs in the race log,
@@ -103,4 +205,10 @@ public interface DynamicTrackedRace extends TrackedRace {
     void invalidateStartTime();
     
     void invalidateEndTime();
+
+    /**
+     * Adds a {@link DynamicSensorFixTrack} for the given Competitor and track name.
+     * @see #getDynamicSensorTrack(Competitor, String)
+     */
+    void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track);
 }

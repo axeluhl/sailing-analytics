@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -23,7 +24,7 @@ public class RaceLogEndOfTrackingEventDeserializer extends BaseRaceLogEventDeser
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
             throws JsonDeserializationException {
-        return factory.createEndOfTrackingEvent(timePoint, author, id, competitors, passId);
+        return new RaceLogEndOfTrackingEventImpl(createdAt, timePoint, author, id, passId);
     }
 
 }

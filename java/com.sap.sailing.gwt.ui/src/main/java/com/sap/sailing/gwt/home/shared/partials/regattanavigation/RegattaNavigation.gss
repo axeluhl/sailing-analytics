@@ -1,0 +1,45 @@
+.regattanavigation_legend {
+  font-size: 1rem;
+  width: 100%;
+  margin-top: 1.333333333333333em;
+}
+@media (min-width: 61em) {
+  .regattanavigation_legend {
+    text-align: right;
+    margin-top: 0;
+  }
+  .regattanavigation_legend_item {
+    margin-right: 0;
+    margin-left: 0.666666666666667em;
+  }
+}
+.regattanavigation_legend_item {
+  display: inline-block;
+  padding: 0.4em 0.666666666666667em;
+  margin: 0.333333333333333em 0.666666666666667em 0.333333333333333em 0;
+  font-size: 0.666em;
+  font-weight: 700;
+  line-height: 0.666666666666667em;
+  border: 1px solid #008fcc;
+  text-transform: capitalize;
+}
+.regattanavigation_legend_itemtracked {
+  color: #fff;
+  border-color: #008fcc;
+  background-color: #008fcc;
+}
+.regattanavigation_legend_itemuntracked {
+  color: #fff;
+  border-color: #ccc;
+  background-color: #666;
+}
+.regattanavigation_legend_itemlive {
+  color: #fff;
+  border-color: #e94a1b;
+  background-color: #e94a1b;
+}
+.regattanavigation_legend_itemplanned {
+  color: #ccc;
+  border-color: #ccc;
+  background-color: #fff;
+}

@@ -84,15 +84,15 @@ public class TimeRangeTest {
     	two = create(11, 16);
     	assertNull(one.union(two));
     	
-    	two = create(7, Long.MAX_VALUE);
+    	two = create(7, TimePoint.EndOfTime.asMillis());
     	union = two.union(one);
     	TimeRange union2 = one.union(two);
     	assertEquals(5, union.from().asMillis());
     	assertEquals(5, union2.from().asMillis());
-    	assertEquals(Long.MAX_VALUE, union.to().asMillis());
-    	assertEquals(Long.MAX_VALUE, union2.to().asMillis());
+    	assertEquals(TimePoint.EndOfTime.asMillis(), union.to().asMillis());
+    	assertEquals(TimePoint.EndOfTime.asMillis(), union2.to().asMillis());
     	
-    	one = create(Long.MIN_VALUE, 10);
+    	one = create(TimePoint.BeginningOfTime.asMillis(), 10);
     	union = two.union(one);
     	assertTrue(union.hasOpenBeginning());
     	assertTrue(union.hasOpenEnd());

@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 
-public abstract class RetrieverLevelSettingsComponent implements Component<SerializableSettings> {
+public abstract class RetrieverLevelSettingsComponent extends AbstractComponent<SerializableSettings> {
 
     private final DataRetrieverLevelDTO retrieverLevel;
     private final String localizedName;
@@ -47,6 +47,11 @@ public abstract class RetrieverLevelSettingsComponent implements Component<Seria
     @Override
     public String getDependentCssClassName() {
         return null;
+    }
+
+    @Override
+    public SerializableSettings getSettings() {
+        return retrieverLevel.getDefaultSettings();
     }
 
 }

@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
@@ -32,7 +32,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
     /**
      * The current GPS fix used to draw the boat.
      */
-    private GPSFixDTO boatFix;
+    private GPSFixDTOWithSpeedWindTackAndLegType boatFix;
 
     /** 
      * The rotation angle of the original boat image in degrees
@@ -142,19 +142,15 @@ public class BoatOverlay extends CanvasOverlayV3 {
         }
     }
 
-    public void setBoatFix(GPSFixDTO boatFix, long timeForPositionTransitionMillis) {
-        if (timeForPositionTransitionMillis == -1) {
-            removeCanvasPositionAndRotationTransition();
-        } else {
-            setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
-        }
+    public void setBoatFix(GPSFixDTOWithSpeedWindTackAndLegType boatFix, long timeForPositionTransitionMillis) {
+        updateTransition(timeForPositionTransitionMillis);
         this.boatFix = boatFix;
     }
 
     public Util.Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
         // the minimum boat length is related to the hull of the boat, not the overall length 
         double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
-        double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection, boatFix.position, boatClass.getHullLengthInMeters());
+        double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection, boatFix.position, boatClass.getHullLength());
         if (boatHullLengthInPixel < minBoatHullLengthInPx) {
             boatHullLengthInPixel = minBoatHullLengthInPx;
         }

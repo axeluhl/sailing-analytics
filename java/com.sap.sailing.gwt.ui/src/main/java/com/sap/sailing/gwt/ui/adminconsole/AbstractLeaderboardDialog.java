@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -25,16 +26,15 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
 
     @Override
     protected LeaderboardDescriptor getResult() {
-        leaderboardDescriptor.setName(nameTextBox.getValue());
+        leaderboardDescriptor.setName(nameTextBox.getValue().trim()); // avoid trailing blank issues; leaderboard names may appear in URLs
         leaderboardDescriptor.setDisplayName(displayNameTextBox.getValue().trim().isEmpty() ? null : displayNameTextBox.getValue());
         leaderboardDescriptor.setDiscardThresholds(discardThresholdBoxes==null?null:discardThresholdBoxes.getDiscardThresholds());
         return leaderboardDescriptor;
     }
 
     @Override
-    public void show() {
-        super.show();
-        nameTextBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return nameTextBox;
     }
 
     protected static ListBox createScoringSchemeListBox(DataEntryDialog<?> dialog, StringMessages stringMessages) {

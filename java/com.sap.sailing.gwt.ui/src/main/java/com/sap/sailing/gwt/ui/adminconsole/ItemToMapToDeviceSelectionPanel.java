@@ -16,10 +16,11 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 public class ItemToMapToDeviceSelectionPanel implements IsWidget {
-    private final CompetitorTableWrapper<SingleSelectionModel<CompetitorDTO>> competitorTable;
-    private final MarkTableWrapper<SingleSelectionModel<MarkDTO>> markTable;
+    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
+    private final MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>> markTable;
     private MappableToDevice selected;
     private final VerticalPanel mainPanel;
     private final ErrorReporter errorReporter;
@@ -34,7 +35,7 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
         this.selected = selected;
         this.errorReporter = errorReporter;
         competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
-        markTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(/* multiSelection */ false, sailingService,
+        markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(/* multiSelection */ false, sailingService,
                 stringMessages, errorReporter);
         final SingleSelectionModel<MarkDTO> markSelectionModel = markTable.getSelectionModel();
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
