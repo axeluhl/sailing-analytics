@@ -325,7 +325,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
         clearInfo();
         competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         // Get current mark passings
-        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, new AsyncCallback<Map<Integer, Date>>() {
+        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, true, new AsyncCallback<Map<Integer, Date>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorTryingToObtainMarkPassing(caught.getMessage()));

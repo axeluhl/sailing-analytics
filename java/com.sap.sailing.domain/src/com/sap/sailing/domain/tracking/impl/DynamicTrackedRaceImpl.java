@@ -1180,11 +1180,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public NavigableSet<MarkPassing> getUpdatedMarkPassings(Competitor competitor) {
-        markPassingCalculator.lockListenForRead();
+        markPassingCalculator.lockForRead();
         try {
             return getMarkPassings(competitor);
         } finally {
-            markPassingCalculator.unlockListenForRead();
+            markPassingCalculator.unlockForRead();
         }
     }
 }

@@ -530,6 +530,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO);
 
+    Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
+            boolean waitForCalculations);
+
     /**
      * Obtains fixed mark passings and mark passing suppressions from the race log identified by
      * <code>leaderboardName</code>, <code>raceColumnDTO</code> and <code>fleet</code>. The result contains

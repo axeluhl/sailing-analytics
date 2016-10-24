@@ -695,6 +695,9 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
      */
     void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
+    
+    void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
+            boolean waitForCalculations, AsyncCallback<Map<Integer, Date>> callback);
 
     void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
             AsyncCallback<Map<Integer, Date>> callback);

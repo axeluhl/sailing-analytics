@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -135,12 +136,18 @@ public class MarkPassingCalculator {
         }
     }
 
-    public void lockListenForRead() {
-        listenThread.readWriteLock.readLock().lock();
+    /**
+     * It's used for locking the calculation thread for read. You will be blocked if there is a current calculation.
+     */
+    public void lockForRead() {
+        listenThread.lock.readLock().lock();
     }
     
-    public void unlockListenForRead() {
-        listenThread.readWriteLock.readLock().unlock();
+    /**
+     * Unlocks the calculation thread for read.
+     */
+    public void unlockForRead() {
+        listenThread.lock.readLock().unlock();
     }
 
     /**
@@ -154,11 +161,11 @@ public class MarkPassingCalculator {
      */
     private class Listen implements Runnable {
         private final String raceName;
-        private final ReentrantReadWriteLock readWriteLock;
+        private final ReadWriteLock lock;
         
         public Listen(String raceName) {
             this.raceName = raceName;
-            readWriteLock = new ReentrantReadWriteLock();
+            lock = new ReentrantReadWriteLock();
         }
 
         @Override
@@ -181,7 +188,7 @@ public class MarkPassingCalculator {
                         List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                         try {
                             allNewFixInsertions.add(listener.getQueue().take());
-                            readWriteLock.writeLock().lock();
+                            lock.writeLock().lock();
                         } catch (InterruptedException e) {
                             logger.log(Level.SEVERE, "MarkPassingCalculator for "+raceName+" threw exception " + e.getMessage()
                                     + " while waiting for new GPSFixes");
@@ -241,7 +248,7 @@ public class MarkPassingCalculator {
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+": " + e.getMessage(), e);
                     } finally {
-                        readWriteLock.writeLock().unlock();
+                        lock.writeLock().unlock();
                     }
                 }
             } finally {

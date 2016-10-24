@@ -72,8 +72,8 @@ public interface DynamicTrackedRace extends TrackedRace {
     void removeWind(Wind wind, WindSource windSource);
     
     /**
-     * Returns competitor's mark passings after all calculations
-     * @param competitor
+     * Returns competitor's mark passings after all calculations. The method uses a lock to block the thread until all
+     * calculations will be finished.
      */
     NavigableSet<MarkPassing> getUpdatedMarkPassings(Competitor competitor);
 
