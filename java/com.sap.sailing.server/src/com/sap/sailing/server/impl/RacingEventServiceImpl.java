@@ -3484,6 +3484,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         trackedRace.setPolarDataService(service);
                         service.insertExistingFixes(trackedRace);
                     }
+                } catch (Throwable e) {
+                    logger.log(Level.SEVERE, "Error reconstructing the polars for tracked races", e);
                 } finally {
                     trackedRegatta.unlockTrackedRacesAfterRead();
                 }

@@ -3,10 +3,13 @@ package com.sap.sailing.domain.common.dto;
 import java.io.Serializable;
 import java.util.List;
 
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 
 /**
  * Holds a single competitor's scoring details for a single race. It may optionally contain
@@ -78,6 +81,8 @@ public class LeaderboardEntryDTO implements Serializable {
      */
     public Duration averageSamplingInterval;
     
+    public Double averageRideHeightInMeters;
+    
     /**
      * The time gap to the competitor leading the race; for one-design races this is the time the competitor is expected
      * to need to reach the leader's (windward) position (if in the same leg) or the difference between the time at
@@ -132,6 +137,44 @@ public class LeaderboardEntryDTO implements Serializable {
     public boolean hasScoreCorrection() {
         return totalPointsCorrected || (reasonForMaxPoints != null && reasonForMaxPoints != MaxPointsReason.NONE);
     }
+    
+    public Duration getTimeSailedInMillis() {
+        final Duration result;
+        if (legDetails != null) {
+            long timeInMilliseconds = 0;
+            for (LegEntryDTO legDetail : legDetails) {
+                if (legDetail != null) {
+                    if (legDetail.distanceTraveledInMeters != null && legDetail.timeInMilliseconds != null) {
+                        timeInMilliseconds += legDetail.timeInMilliseconds;
+                    } else {
+                        timeInMilliseconds = 0;
+                        break;
+                    }
+                }
+            }
+            result = new MillisecondsDurationImpl(timeInMilliseconds);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public Distance getDistanceTraveledInMeters() {
+        Distance result = null;
+        if (legDetails != null) {
+            for (LegEntryDTO legDetail : legDetails) {
+                if (legDetail != null) {
+                    if (legDetail.distanceTraveledInMeters != null) {
+                        if (result == null) {
+                            result = Distance.NULL;
+                        }
+                        result = result.add(new MeterDistance(legDetail.distanceTraveledInMeters));
+                    }
+                }
+            }
+        }
+        return result;
+    }
 
     @Override
     public int hashCode() {
@@ -174,6 +217,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result
                 + ((speedOverGroundAtStartOfRaceInKnots == null) ? 0 : speedOverGroundAtStartOfRaceInKnots.hashCode());
         result = prime * result + ((startTack == null) ? 0 : startTack.hashCode());
+        result = prime * result + ((averageRideHeightInMeters == null) ? 0 : averageRideHeightInMeters.hashCode());
         result = prime * result + ((averageSamplingInterval == null) ? 0 : averageSamplingInterval.hashCode());
         result = prime * result + ((timeSinceLastPositionFixInSeconds == null) ? 0 : timeSinceLastPositionFixInSeconds.hashCode());
         result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
@@ -281,6 +325,11 @@ public class LeaderboardEntryDTO implements Serializable {
         } else if (!speedOverGroundAtStartOfRaceInKnots.equals(other.speedOverGroundAtStartOfRaceInKnots))
             return false;
         if (startTack != other.startTack)
+            return false;
+        if (averageRideHeightInMeters == null) {
+            if (other.averageRideHeightInMeters != null)
+                return false;
+        } else if (!averageRideHeightInMeters.equals(other.averageRideHeightInMeters))
             return false;
         if (averageSamplingInterval == null) {
             if (other.averageSamplingInterval != null)

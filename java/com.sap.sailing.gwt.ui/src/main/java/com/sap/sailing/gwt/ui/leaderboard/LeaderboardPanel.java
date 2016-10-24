@@ -58,6 +58,7 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.MaxPointsReason;
@@ -97,6 +98,7 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.DetailTypeColumn.LegDetailField;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.BinaryOperator;
@@ -972,10 +974,10 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS, new RaceGapToLeaderInSeconds(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
-                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new CurrentSpeedOverGroundInKnots(),
+                    new FormattedDoubleDetailTypeColumn(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS, new RaceCurrentSpeedOverGroundInKnots(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS, new RideHeightColumn(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS,
-                    new CurrentRideHeightInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
+                    new RaceCurrentRideHeightInMeters(), LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
             result.put(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS,
                     new FormattedDoubleDetailTypeColumn(DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, new RaceDistanceToCompetitorFarthestAheadInMeters(),
                             LEG_COLUMN_HEADER_STYLE, LEG_COLUMN_STYLE, LeaderboardPanel.this));
@@ -1098,26 +1100,13 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         private class RaceAverageSpeedInKnots implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    double distanceTraveledInMeters = 0;
-                    long timeInMilliseconds = 0;
-                    for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
-                        if (legDetail != null) {
-                            if (legDetail.distanceTraveledInMeters != null && legDetail.timeInMilliseconds != null) {
-                                distanceTraveledInMeters += legDetail.distanceTraveledInMeters;
-                                timeInMilliseconds += legDetail.timeInMilliseconds;
-                            } else {
-                                distanceTraveledInMeters = 0;
-                                timeInMilliseconds = 0;
-                                break;
-                            }
-                        }
-                    }
-                    if (timeInMilliseconds != 0) {
-                        result = distanceTraveledInMeters / (double) timeInMilliseconds * 1000 * 3600 / 1852;
-                    }
+                final Distance distanceTraveledInMeters = row.getDistanceTraveledInMeters(getRaceColumnName());
+                final Duration time = row.getTimeSailed(getRaceColumnName());
+                final Double result;
+                if (distanceTraveledInMeters != null && time != null) {
+                    result = distanceTraveledInMeters.inTime(time).getKnots();
+                } else {
+                    result = null;
                 }
                 return result;
             }
@@ -1299,21 +1288,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         private class RaceDistanceTraveledInMeters implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                Double result = null;
-                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
-                if (fieldsForRace != null && fieldsForRace.legDetails != null) {
-                    for (LegEntryDTO legDetail : fieldsForRace.legDetails) {
-                        if (legDetail != null) {
-                            if (legDetail.distanceTraveledInMeters != null) {
-                                if (result == null) {
-                                    result = 0.0;
-                                }
-                                result += legDetail.distanceTraveledInMeters;
-                            }
-                        }
-                    }
-                }
-                return result;
+                return row.getDistanceTraveledInMeters(getRaceColumnName()).getMeters();
             }
         }
 
@@ -1446,27 +1421,48 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                             lastLegDetail = fieldsForRace.legDetails.get(--lastLegIndex);
                         }
                         if (lastLegDetail != null) {
-                            result = get(lastLegDetail);
+                            if (lastLegDetail.finished) {
+                                result = getAfterLastLegFinished(row);
+                            } else {
+                                result = getBeforeLastLegFinished(lastLegDetail);
+                            }
                         }
                     }
                 }
                 return result;
             }
             
-            protected abstract T get(LegEntryDTO lastLegDetail);
+            protected abstract T getBeforeLastLegFinished(LegEntryDTO currentLegDetail);
+            
+            protected abstract T getAfterLastLegFinished(LeaderboardRowDTO row);
         }
         
-        private class CurrentSpeedOverGroundInKnots extends AbstractLastLegDetailField<Double> {
+        private class RaceCurrentSpeedOverGroundInKnots extends AbstractLastLegDetailField<Double> {
             @Override
-            protected Double get(LegEntryDTO lastLegDetail) {
-                return lastLegDetail.currentSpeedOverGroundInKnots;
+            protected Double getBeforeLastLegFinished(LegEntryDTO currentLegDetail) {
+                return currentLegDetail.currentSpeedOverGroundInKnots;
+            }
+
+            @Override
+            protected Double getAfterLastLegFinished(LeaderboardRowDTO row) {
+                return new RaceAverageSpeedInKnots().get(row);
             }
         }
         
-        private class CurrentRideHeightInMeters extends AbstractLastLegDetailField<Double> {
+        private class RaceCurrentRideHeightInMeters extends AbstractLastLegDetailField<Double> {
             @Override
-            protected Double get(LegEntryDTO lastLegDetail) {
-                return lastLegDetail.currentRideHeightInMeters;
+            protected Double getBeforeLastLegFinished(LegEntryDTO currentLegDetail) {
+                return currentLegDetail.currentRideHeightInMeters;
+            }
+
+            @Override
+            protected Double getAfterLastLegFinished(LeaderboardRowDTO row) {
+                Double result = null;
+                LeaderboardEntryDTO fieldsForRace = row.fieldsByRaceColumnName.get(getRaceColumnName());
+                if (fieldsForRace != null) {
+                    result = fieldsForRace.averageRideHeightInMeters;
+                }
+                return result;
             }
         }
     }

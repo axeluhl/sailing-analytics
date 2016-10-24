@@ -2941,7 +2941,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
-                    result = bravoFixTrack.getRideHeight(timePoint);
+                    final Distance rideHeight = bravoFixTrack.getRideHeight(timePoint);
+                    result = rideHeight == null ? null : rideHeight.getMeters();
                 }
                 break;
             default:

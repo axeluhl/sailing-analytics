@@ -1222,9 +1222,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             if (competitorInfoOverlay == null) {
                                 competitorInfoOverlay = createCompetitorInfoOverlay(RaceMapOverlaysZIndexes.INFO_OVERLAY_ZINDEX, competitorDTO);
                                 competitorInfoOverlays.put(competitorDTO, competitorInfoOverlay);
+                                competitorInfoOverlay.setInfoText(createInfoText(competitorDTO, lastBoatFix));
                                 competitorInfoOverlay.setPosition(lastBoatFix.position, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.addToMap();
                             } else {
+                                competitorInfoOverlay.setInfoText(createInfoText(competitorDTO, lastBoatFix));
                                 competitorInfoOverlay.setPosition(lastBoatFix.position, timeForPositionTransitionMillis);
                                 competitorInfoOverlay.draw();
                             }
@@ -1942,8 +1944,20 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     private CompetitorInfoOverlay createCompetitorInfoOverlay(int zIndex, final CompetitorDTO competitorDTO) {
-        String infoText = competitorDTO.getSailID() == null || competitorDTO.getSailID().isEmpty() ? competitorDTO.getName() : competitorDTO.getSailID();
-        return new CompetitorInfoOverlay(map, zIndex, competitorSelection.getColor(competitorDTO, raceIdentifier), infoText, coordinateSystem);
+        GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO = getBoatFix(competitorDTO, timer.getTime());
+        return new CompetitorInfoOverlay(map, zIndex, competitorSelection.getColor(competitorDTO, raceIdentifier), createInfoText(competitorDTO, gpsFixDTO), coordinateSystem);
+    }
+    
+    private String createInfoText(CompetitorDTO competitorDTO, GPSFixDTOWithSpeedWindTackAndLegType gpsFixDTO) {
+        StringBuilder infoText = new StringBuilder();
+        infoText.append(competitorDTO.getSailID()).append("\n");
+        infoText.append(NumberFormatterFactory.getDecimalFormat(1).format(gpsFixDTO.speedWithBearing.speedInKnots))
+                .append(" ").append(stringMessages.knotsUnit()).append("\n");
+        QuickRankDTO quickRankDTO = quickRanks.get(competitorDTO);
+        if (quickRankDTO != null) {
+            infoText.append(stringMessages.rank()).append(" : ").append(quickRanks.get(competitorDTO).rank);
+        }
+        return infoText.toString();
     }
     
     private BoatOverlay createBoatOverlay(int zIndex, final CompetitorDTO competitorDTO, boolean highlighted) {
