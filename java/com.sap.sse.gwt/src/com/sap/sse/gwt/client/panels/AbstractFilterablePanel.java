@@ -1,6 +1,8 @@
 package com.sap.sse.gwt.client.panels;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -12,25 +14,28 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.AbstractKeywordFilter;
 import com.sap.sse.common.filter.AbstractListFilter;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 /**
- * This Panel contains a text box. Text entered into the text box filters the {@link CellTable} passed to
- * the constructor by adjusting the cell table's {@link ListDataProvider}'s contents using the {@link
- * applyFilter(String, List)} of the {@link AbstractListFilter} and then sorting the table again according the the
- * sorting criteria currently active (the sorting is the only reason why the {@link CellTable} actually needs to be
- * known to an instance of this class). To be initiated the method {@link #getSearchableStrings(Object)} has to be
- * defined, which gets those Strings from a <code>T</code> that should be considered when filtering, e.g. name or
- * boatClass. The cell table can be sorted independently from the text box (e.g., after adding new objects) by calling
- * the method {@link #updateAll(Iterable)} which then runs the filter over the new selection.<p>
+ * This Panel contains a text box. Text entered into the text box filters the {@link CellTable} passed to the
+ * constructor by adjusting the cell table's {@link ListDataProvider}'s contents using the {@link applyFilter(String,
+ * List)} of the {@link AbstractListFilter} and then sorting the table again according the the sorting criteria
+ * currently active (the sorting is the only reason why the {@link CellTable} actually needs to be known to an instance
+ * of this class). To be initiated the method {@link #getSearchableStrings(Object)} has to be defined, which gets those
+ * Strings from a <code>T</code> that should be considered when filtering, e.g. name or boatClass. The cell table can be
+ * sorted independently from the text box (e.g., after adding new objects) by calling the method
+ * {@link #updateAll(Iterable)} which then runs the filter over the new selection.
+ * <p>
  * 
- * Note that this panel does <em>not</em> contain the table that it filters. With this, this class's clients are free
- * to position the table wherever they want, not necessarily related to the text box provided by this panel in any
- * specific way.
+ * Note that this panel does <em>not</em> contain the table that it filters. With this, this class's clients are free to
+ * position the table wherever they want, not necessarily related to the text box provided by this panel in any specific
+ * way.
  * 
  * @param <T>
  * @author Nicolas Klose, Axel Uhl
@@ -41,27 +46,28 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected AbstractCellTable<T> display;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
-    
-    protected final AbstractListFilter<T> filterer = new AbstractListFilter<T>() {
+
+    protected final AbstractKeywordFilter<T> filterer = new AbstractKeywordFilter<T>() {
         @Override
         public Iterable<String> getStrings(T t) {
             return getSearchableStrings(t);
         }
     };
-    
+
     /**
      * @param all
      *            the sequence of all objects that may be displayed in the table and from which the filter may choose.
      *            This panel keeps a copy, so modifications to the <code>all</code> object do not reflect in the table
      *            contents. Use {@link #updateAll(Iterable)} instead to update the sequence of available objects.
      * @param drawTextBox
-     *            if {@code true}, the default text box will be shown that can be used to provide the filter text; if {@code false},
-     *            the box may optionally be added later using the {@link #addDefaultTextBox()} method. This way, subclasses may choose
-     *            to add other filter elements before the default text filter box. Filtering will still use the text box contents,
-     *            even if the box is ultimately not shown; but under normal circumstances the text box will be empty in this case,
-     *            not making filtering any stricter.
+     *            if {@code true}, the default text box will be shown that can be used to provide the filter text; if
+     *            {@code false}, the box may optionally be added later using the {@link #addDefaultTextBox()} method.
+     *            This way, subclasses may choose to add other filter elements before the default text filter box.
+     *            Filtering will still use the text box contents, even if the box is ultimately not shown; but under
+     *            normal circumstances the text box will be empty in this case, not making filtering any stricter.
      */
-    public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered, boolean drawTextBox) {
+    public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered,
+            boolean drawTextBox) {
         setSpacing(5);
         this.all = new ListDataProvider<>();
         this.display = display;
@@ -74,11 +80,11 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
             addDefaultTextBox();
         }
     }
-    
+
     public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
         this(all, display, filtered, /* show default filter text box */ true);
     }
-    
+
     private void setAll(Iterable<T> all) {
         this.all.getList().clear();
         if (all != null) {
@@ -99,14 +105,13 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public abstract Iterable<String> getSearchableStrings(T t);
 
     /**
-     * Updates the set of all objects to be shown in the table and applies the search filter to update the
-     * table view.
+     * Updates the set of all objects to be shown in the table and applies the search filter to update the table view.
      */
-    public void updateAll(Iterable<T> all){
+    public void updateAll(Iterable<T> all) {
         setAll(all);
         filter();
     }
-    
+
     /**
      * Adds an object and applies the search filter.
      */
@@ -122,14 +127,15 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         all.getList().add(index, object);
         filter();
     }
-    
+
     /**
-     * Returns the index of the first occurrence of the specified element in this list, or -1 if this list does not contain the element.
+     * Returns the index of the first occurrence of the specified element in this list, or -1 if this list does not
+     * contain the element.
      */
     public int indexOf(T object) {
         return all.getList().indexOf(object);
     }
-    
+
     /**
      * Removes an object and applies the search filter.
      */
@@ -137,12 +143,12 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         all.getList().remove(object);
         filter();
     }
-    
+
     public void addAll(Iterable<T> objects) {
         Util.addAll(objects, all.getList());
         filter();
     }
-    
+
     /**
      * Would better be called {@code clear()}, but {@link #clear} is already the method inherited from {@link Panel}...
      * This method removes all entries from this filterable panel. The effect is the same as invoking
@@ -152,12 +158,12 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         all.getList().clear();
         filter();
     }
-    
+
     public void removeAll(Iterable<T> objects) {
         Util.removeAll(objects, all.getList());
         filter();
     }
-    
+
     public void filter() {
         filtered.getList().clear();
         retainElementsInFilteredThatPassFilter();
@@ -166,21 +172,27 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     }
 
     protected void retainElementsInFilteredThatPassFilter() {
-        Util.addAll(getFilterer().applyFilter(Arrays.asList(getTextBox().getText().split(" ")), all.getList()),
-                filtered.getList());
+        List<T> filteredElements = new ArrayList<>();
+        for (T t : all.getList()) {
+            if (getFilter().matches(t)) {
+                filteredElements.add(t);
+            }
+        }
+        Util.addAll(filteredElements, filtered.getList());
     }
-   
+
     protected void sort() {
         if (display != null) {
             ColumnSortEvent.fire(display, display.getColumnSortList());
         }
     }
-    
+
     public void addDefaultTextBox() {
         add(getTextBox());
         getTextBox().addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
+                getFilterer().setKeywords(Arrays.asList(getTextBox().getText().split(" ")));
                 filter();
             }
         });
@@ -189,15 +201,15 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public TextBox getTextBox() {
         return textBox;
     }
-    
+
     public Iterable<T> getAll() {
         return all.getList();
     }
-    
+
     /**
      * Registers a {@link RefreshableSelectionModel} on the all data structure. So the selection can be maintained when
-     * the {@link CellTable} is filtered. You can use the {@link RefreshableSelectionModel} returned by this method
-     * e.g. for a {@link CellTable} using {@link CellTable#setSelectionModel(com.google.gwt.view.client.SelectionModel)}
+     * the {@link CellTable} is filtered. You can use the {@link RefreshableSelectionModel} returned by this method e.g.
+     * for a {@link CellTable} using {@link CellTable#setSelectionModel(com.google.gwt.view.client.SelectionModel)}
      * 
      * @param comp
      *            {@link EntityIdentityComparator Comperator} to create the {@link RefreshableSelectionModel selection
@@ -226,19 +238,33 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public ListDataProvider<T> getAllListDataProvider() {
         return all;
     }
-    
+
     /**
      * This method can be used to set the CellTable, when the {@link CellTable} on which this Panel should work is
      * created after this Panel. When the table isn't set correctly the order of elements, could be wrong after
      * filtering the data.
      * 
-     * @param table {@link AbstractCellTable} on which this panel works.
+     * @param table
+     *            {@link AbstractCellTable} on which this panel works.
      */
     public void setTable(AbstractCellTable<T> table) {
         display = table;
     }
 
-    protected AbstractListFilter<T> getFilterer() {
+    /**
+     * @return the AbstractKeywordFilter to use for keyword-based filtering
+     */
+    protected AbstractKeywordFilter<T> getFilterer() {
         return filterer;
+    }
+
+    /**
+     * Returns the {@link Filter} to be used for filtering the result list. By default, this is just the keyword filter
+     * returned by {@link #getFilterer()}.
+     * 
+     * May be overwritten by subclasses to e.g. define a composite filter or completely exchange the filter.
+     */
+    protected Filter<T> getFilter() {
+        return getFilterer();
     }
 }

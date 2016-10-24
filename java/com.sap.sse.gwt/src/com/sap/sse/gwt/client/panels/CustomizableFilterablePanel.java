@@ -1,7 +1,6 @@
 package com.sap.sse.gwt.client.panels;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import com.google.gwt.user.cellview.client.AbstractCellTable;
@@ -9,7 +8,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.Filter;
 
 /**
  * Customizable filter panel which allows to create a flexible filter panel with various number of filter inputs (e.g.
@@ -20,11 +19,10 @@ import com.sap.sse.common.Util;
  * 
  */
 public abstract class CustomizableFilterablePanel<T> extends AbstractFilterablePanel<T> {
-    public static interface Filter<T> {
-        boolean matches(T t);
-    }
 
-    private Set<Filter<T>> filters;
+    private final Set<Filter<T>> filters;
+
+    private final Filter<T> compositeFilter = new CompositeFilter();
 
     public CustomizableFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, ListDataProvider<T> filtered) {
         super(all, display, filtered, /* show default filter text box */ false);
@@ -39,21 +37,27 @@ public abstract class CustomizableFilterablePanel<T> extends AbstractFilterableP
     }
 
     @Override
-    protected void retainElementsInFilteredThatPassFilter() {
-        super.retainElementsInFilteredThatPassFilter();
-        for (final Iterator<T> i = filtered.getList().iterator(); i.hasNext(); ) {
-            final T t = i.next();
-            for (final Filter<T> filter : filters) {
-                if (!filter.matches(t)) {
-                    i.remove();
-                    break;
-                }
-            }
-        }
+    protected Filter<T> getFilter() {
+        return compositeFilter;
     }
 
-    public void clearFilter() {
-        filtered.getList().clear();
-        Util.addAll(all.getList(), filtered.getList());
+    public boolean matches(T t) {
+        boolean matches = super.getFilter().matches(t);
+        for (final Filter<T> filter : filters) {
+            matches &= filter.matches(t);
+        }
+        return matches;
+    }
+
+    private class CompositeFilter implements Filter<T> {
+        @Override
+        public boolean matches(T object) {
+            return CustomizableFilterablePanel.this.matches(object);
+        }
+
+        @Override
+        public String getName() {
+            return getClass().getSimpleName();
+        }
     }
 }
