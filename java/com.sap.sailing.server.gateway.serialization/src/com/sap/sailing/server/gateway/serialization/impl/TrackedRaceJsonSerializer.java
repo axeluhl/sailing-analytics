@@ -49,7 +49,9 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
         JSONObject jsonRace = new JSONObject();
 
         jsonRace.put(FIELD_NAME, trackedRace.getRace().getName());
-        jsonRace.put(FIELD_REGATTA, new RegattaJsonSerializer().serialize(trackedRace.getTrackedRegatta().getRegatta()));
+        if (trackedRace.getTrackedRegatta() != null) {
+            jsonRace.put(FIELD_REGATTA, new RegattaJsonSerializer().serialize(trackedRace.getTrackedRegatta().getRegatta()));
+        }
         jsonRace.put(FIELD_COURSE, new CourseBaseJsonSerializer(new WaypointJsonSerializer(
                                                                 new ControlPointJsonSerializer(
                                                                         new MarkJsonSerializer(), 

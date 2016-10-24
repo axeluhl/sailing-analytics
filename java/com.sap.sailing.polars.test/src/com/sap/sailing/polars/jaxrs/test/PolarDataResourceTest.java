@@ -46,15 +46,9 @@ public class PolarDataResourceTest extends AbstractJaxRsApiTest {
 
         JSONArray clusters = (JSONArray) ((JSONObject) json.get("angleClusterGroup")).get("clusters");
         JSONArray boundaries = (JSONArray) ((JSONObject) clusters.get(0)).get("boundaries");
-        JSONObject lowBoundary = (JSONObject) boundaries.get(0);
-        JSONObject highBoundary = (JSONObject) boundaries.get(1);
 
         assertThat("clusters amount is correct", clusters.size(), equalTo(36));
         assertThat("boundaries amount is correct", boundaries.size(), equalTo(2));
-        assertThat("low boundary strategy is correct", lowBoundary.get("strategy"), equalTo("GREATER_THAN"));
-        assertThat("low boundary value is correct", lowBoundary.get("boundaryValue"), equalTo("5.0°"));
-        assertThat("high boundary strategy is correct", highBoundary.get("strategy"), equalTo("LOWER_EQUALS_THAN"));
-        assertThat("high boundary value is correct", highBoundary.get("boundaryValue"), equalTo("10.0°"));
     }
 
     @Test
@@ -66,15 +60,9 @@ public class PolarDataResourceTest extends AbstractJaxRsApiTest {
 
         JSONArray clusters = (JSONArray) json.get("clusters");
         JSONArray boundaries = (JSONArray) ((JSONObject) clusters.get(0)).get("boundaries");
-        JSONObject lowBoundary = (JSONObject) boundaries.get(0);
-        JSONObject highBoundary = (JSONObject) boundaries.get(1);
 
         assertThat("clusters amount is correct", clusters.size(), equalTo(36));
         assertThat("boundaries amount is correct", boundaries.size(), equalTo(2));
-        assertThat("low boundary strategy is correct", lowBoundary.get("strategy"), equalTo("GREATER_THAN"));
-        assertThat("low boundary value is correct", lowBoundary.get("boundaryValue"), equalTo("5.0°"));
-        assertThat("high boundary strategy is correct", highBoundary.get("strategy"), equalTo("LOWER_EQUALS_THAN"));
-        assertThat("high boundary value is correct", highBoundary.get("boundaryValue"), equalTo("10.0°"));
     }
 
     @Test
