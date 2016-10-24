@@ -274,12 +274,9 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         }
         linkParams.put("raceName", trackedRaceName);
         linkParams.put("regattaName", regattaName);
-        // TODO this must only be forwarded if there is a logged-on user
-        // linkParams.put(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         return linkParams;
     }
 
-    
     public String getRegattaId() {
         String regattaId = place.getRegattaId();
         if(regattaId  != null) {

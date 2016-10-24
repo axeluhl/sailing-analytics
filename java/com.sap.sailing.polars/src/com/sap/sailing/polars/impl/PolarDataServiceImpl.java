@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.PolarDataOperation;
 import com.sap.sailing.polars.mining.BearingClusterGroup;
@@ -236,8 +237,14 @@ public class PolarDataServiceImpl implements PolarDataService,
     @Override
     public void insertExistingFixes(TrackedRace trackedRace) {
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
-            for (GPSFixMoving fix : trackedRace.getTrack(competitor).getFixes()) {
-                competitorPositionChanged(fix, competitor, trackedRace);
+            GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
+            track.lockForRead();
+            try {
+                for (GPSFixMoving fix : track.getFixes()) {
+                    competitorPositionChanged(fix, competitor, trackedRace);
+                }
+            } finally {
+                track.unlockAfterRead();
             }
         }
     }

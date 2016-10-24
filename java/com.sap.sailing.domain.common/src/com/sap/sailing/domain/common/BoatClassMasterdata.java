@@ -113,20 +113,20 @@ public enum BoatClassMasterdata {
 
     private final String displayName;
     private final String[] alternativeNames;
-    private final double hullLengthInMeter;
-    private final double hullBeamInMeter;
+    private final double hullLengthInMeters;
+    private final double hullBeamInMeters;
     private final BoatHullType hullType;
     private final boolean typicallyStartsUpwind;
     private final boolean hasAdditionalDownwindSail;
 
     private static Map<String, BoatClassMasterdata> fromUnifiedDisplayAndAlternativeNamesToBoatClassMasterdata; 
 
-    private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeter,
-            double hullBeamInMeter, BoatHullType hullType, boolean hasAdditionalDownwindSail, String... alternativeNames) {
+    private BoatClassMasterdata(String displayName, boolean typicallyStartsUpwind, double hullLengthInMeters,
+            double hullBeamInMeters, BoatHullType hullType, boolean hasAdditionalDownwindSail, String... alternativeNames) {
         this.displayName = displayName;
         this.typicallyStartsUpwind = typicallyStartsUpwind;
-        this.hullLengthInMeter = hullLengthInMeter;
-        this.hullBeamInMeter = hullBeamInMeter;
+        this.hullLengthInMeters = hullLengthInMeters;
+        this.hullBeamInMeters = hullBeamInMeters;
         this.hullType = hullType;
         this.hasAdditionalDownwindSail = hasAdditionalDownwindSail;
         this.alternativeNames = alternativeNames;
@@ -147,8 +147,8 @@ public enum BoatClassMasterdata {
             double hullBeamInMeter, BoatHullType hullType, boolean hasAdditionalDownwindSail) {
         this.displayName = displayName;
         this.typicallyStartsUpwind = typicallyStartsUpwind;
-        this.hullLengthInMeter = hullLengthInMeter;
-        this.hullBeamInMeter = hullBeamInMeter;
+        this.hullLengthInMeters = hullLengthInMeter;
+        this.hullBeamInMeters = hullBeamInMeter;
         this.hullType = hullType;
         this.hasAdditionalDownwindSail = hasAdditionalDownwindSail;
         this.alternativeNames = null;
@@ -192,7 +192,7 @@ public enum BoatClassMasterdata {
     }
     
     public Distance getHullLength() {
-        return new MeterDistance(hullLengthInMeter);
+        return new MeterDistance(hullLengthInMeters);
     }
 
     public String getDisplayName() {
@@ -204,7 +204,7 @@ public enum BoatClassMasterdata {
     }
 
     public Distance getHullBeam() {
-        return new MeterDistance(hullBeamInMeter);
+        return new MeterDistance(hullBeamInMeters);
     }
 
     public BoatHullType getHullType() {
