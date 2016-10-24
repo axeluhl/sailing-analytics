@@ -116,4 +116,16 @@ public class AngleAndSpeedRegression implements Serializable {
         return angleRegression.getOrCreatePolynomialFunction();
     }
 
+    public IncrementalAnyOrderLeastSquaresImpl getSpeedRegression() {
+        return (IncrementalAnyOrderLeastSquaresImpl) speedRegression;
+    }
+
+    public IncrementalAnyOrderLeastSquaresImpl getAngleRegression() {
+        return (IncrementalAnyOrderLeastSquaresImpl) angleRegression;
+    }
+
+    public double getMaxWindSpeedInKnots() {
+        return maxWindSpeedInKnots;
+    }
+    
 }

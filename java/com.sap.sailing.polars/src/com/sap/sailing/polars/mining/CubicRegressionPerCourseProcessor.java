@@ -221,4 +221,8 @@ public class CubicRegressionPerCourseProcessor implements
         return null;
     }
 
+    public Map<GroupKey, AngleAndSpeedRegression> getRegressions() {
+        return regressions;
+    }
+    
 }

@@ -321,4 +321,24 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
         return numberOfPointsAdded.get();
     }
 
+    public double[][] getMatrixOfXSums() {
+        return matrixOfXSums;
+    }
+
+    public double[] getVectorOfXYMultSums() {
+        return vectorOfXYMultSums;
+    }
+
+    public int getPolynomialOrder() {
+        return polynomialOrder;
+    }
+
+    public boolean isHasIntercept() {
+        return hasIntercept;
+    }
+
+    public boolean isUseSymbollicInversionIfPossible() {
+        return useSymbollicInversionIfPossible;
+    }
+
 }
