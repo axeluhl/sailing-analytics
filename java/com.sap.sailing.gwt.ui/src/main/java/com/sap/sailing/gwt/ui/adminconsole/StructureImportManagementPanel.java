@@ -35,6 +35,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -341,7 +342,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      */
     private RegattaDTO createRegattaDefaults(RegattaDTO regatta) {
         RegattaDTO result = new RegattaDTO("Default", ScoringSchemeType.LOW_POINT);
-        result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length in meters */ 5);
+        result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length */ new MeterDistance(5));
         result.series = regatta.series;
         result.rankingMetricType = RankingMetrics.ONE_DESIGN;
         return result;

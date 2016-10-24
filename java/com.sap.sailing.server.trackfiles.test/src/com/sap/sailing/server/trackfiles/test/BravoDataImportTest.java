@@ -19,12 +19,12 @@ public class BravoDataImportTest {
     
     private final DoubleVectorFixImporter bravoDataImporter = new BravoDataImporterImpl();
     private int callbackCallCount = 0;
-    private double sumRideHeight = 0.0;
+    private double sumRideHeightInMeters = 0.0;
     
     @Before
     public void setUp() {
         this.callbackCallCount = 0;
-        this.sumRideHeight = 0.0;
+        this.sumRideHeightInMeters = 0.0;
     }
     
     @Test
@@ -51,12 +51,12 @@ public class BravoDataImportTest {
         bravoDataImporter.importFixes(importData.getInputStream(), (fixes, device) -> {
             for (DoubleVectorFix fix : fixes) {
                 callbackCallCount++;
-                sumRideHeight += new BravoFixImpl(fix).getRideHeight();
+                sumRideHeightInMeters += new BravoFixImpl(fix).getRideHeight().getMeters();
             }
-        }, "source");
+        }, "filename", "source");
         Assert.assertEquals(importData.expectedFixesCount, callbackCallCount);
         Assert.assertEquals(importData.expectedAverageRideHeight, 
-                callbackCallCount == 0 ? sumRideHeight : sumRideHeight / callbackCallCount, 0.00001);
+                callbackCallCount == 0 ? sumRideHeightInMeters : sumRideHeightInMeters / callbackCallCount, 0.00001);
     }
     
     private enum ImportData {

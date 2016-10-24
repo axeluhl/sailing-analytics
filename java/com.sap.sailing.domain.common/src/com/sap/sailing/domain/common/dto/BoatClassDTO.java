@@ -2,6 +2,8 @@ package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.Distance;
+
 public class BoatClassDTO extends NamedDTO implements Serializable, Comparable<BoatClassDTO> {
     private static final long serialVersionUID = 1981789833769906676L;
     
@@ -11,24 +13,24 @@ public class BoatClassDTO extends NamedDTO implements Serializable, Comparable<B
      */
     public static final String DEFAULT_NAME = "Default";
     
-    private double hullLengthInMeters;
+    private Distance hullLength;
     private String displayName;
     
     BoatClassDTO() {}
 
-    public BoatClassDTO(String name, String displayName, double hullLengthInMeters) {
+    public BoatClassDTO(String name, String displayName, Distance hullLength) {
         super(name);
-        this.hullLengthInMeters = hullLengthInMeters;
+        this.hullLength = hullLength;
     }
 
-    public BoatClassDTO(String name, double hullLengthInMeters) {
+    public BoatClassDTO(String name, Distance hullLength) {
         super(name);
-        this.hullLengthInMeters = hullLengthInMeters;
+        this.hullLength = hullLength;
         this.displayName = null;
     }
 
-    public double getHullLengthInMeters() {
-        return hullLengthInMeters;
+    public Distance getHullLength() {
+        return hullLength;
     }
 
     public String getDisplayName() {

@@ -439,7 +439,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         }
         return linkParams;
     }
-    
+
     private SafeHtml getAnchor(String link, String linkText, String style) {
         if (isEmbedded) {
             return ANCHORTEMPLATE.anchorWithTarget(link, linkText, style, "_blank");

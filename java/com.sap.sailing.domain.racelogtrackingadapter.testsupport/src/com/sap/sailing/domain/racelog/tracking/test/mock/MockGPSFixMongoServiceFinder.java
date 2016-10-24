@@ -6,11 +6,13 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.DoubleVectorFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -20,6 +22,7 @@ public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<FixM
     private final DomainObjectFactoryImpl dof = new DomainObjectFactoryImpl(null, null);
     private final FixMongoHandler<?> movingHandler = new GPSFixMovingMongoHandlerImpl(mof, dof);
     private final FixMongoHandler<?> handler = new GPSFixMongoHandlerImpl(mof, dof);
+    private final FixMongoHandler<?> doubleVectorFixHandler = new DoubleVectorFixMongoHandlerImpl(mof, dof);
 
     @Override
     public FixMongoHandler<?> findService(String fixType) {
@@ -27,6 +30,7 @@ public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<FixM
                 fixType.equals(CompactGPSFixMovingImpl.class.getName())) return movingHandler;
         if (fixType.equals(GPSFixImpl.class.getName()) ||
                 fixType.equals(CompactGPSFixImpl.class.getName()))  return handler;
+        if (fixType.equals(DoubleVectorFixImpl.class.getName()))  return doubleVectorFixHandler;
         return null;
     }
 

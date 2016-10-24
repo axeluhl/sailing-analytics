@@ -21,7 +21,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -97,6 +96,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.ThreadPoolUtil;
+import com.sap.sse.util.impl.FutureTaskWithTracingGet;
 
 /**
  * Base implementation for various types of leaderboards. The {@link RaceColumnListener} implementation forwards events
@@ -311,7 +311,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         this.suppressedCompetitors = new HashSet<Competitor>();
         this.suppressedCompetitorsLock = new NamedReentrantReadWriteLock("suppressedCompetitorsLock", /* fair */ false);
         this.raceColumnListeners = new RaceColumnListeners();
-        this.raceDetailsAtEndOfTrackingCache = new HashMap<com.sap.sse.common.Util.Pair<TrackedRace, Competitor>, RunnableFuture<RaceDetails>>();
+        this.raceDetailsAtEndOfTrackingCache = new HashMap<>();
         initTransientFields();
     }
     
@@ -330,7 +330,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     private void initTransientFields() {
-        this.raceDetailsAtEndOfTrackingCache = new HashMap<com.sap.sse.common.Util.Pair<TrackedRace,Competitor>, RunnableFuture<RaceDetails>>();
+        this.raceDetailsAtEndOfTrackingCache = new HashMap<>();
         this.cacheInvalidationListeners = new HashSet<CacheInvalidationListener>();
         // When many updates are triggered in a short period of time by a single thread, ensure that the single thread
         // providing the updates is not outperformed by all the re-calculations happening here. Leave at least one
@@ -1225,7 +1225,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         }
         // Now create the race columns and, as a future task, set their competitorsFromBestToWorst, then wait for all these
         // futures to finish:
-        Map<RaceColumn, FutureTask<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
+        Map<RaceColumn, Future<List<CompetitorDTO>>> competitorsFromBestToWorstTasks = new HashMap<>();
         for (final RaceColumn raceColumn : this.getRaceColumns()) {
             boolean isMetaLeaderboardColumn = raceColumn instanceof MetaLeaderboardColumn;
             RaceColumnDTO raceColumnDTO = result.createEmptyRaceColumn(raceColumn.getName(), raceColumn.isMedalRace(),
@@ -1253,13 +1253,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, race, isMetaLeaderboardColumn);
             }
-            FutureTask<List<CompetitorDTO>> task = new FutureTask<List<CompetitorDTO>>(
+            Future<List<CompetitorDTO>> task = executor.submit(
                     () -> baseDomainFactory.getCompetitorDTOList(AbstractSimpleLeaderboardImpl.this.getCompetitorsFromBestToWorst(raceColumn, timePoint)));
-            executor.execute(task);
             competitorsFromBestToWorstTasks.put(raceColumn, task);
         }
         // wait for the competitor orderings to have been computed for all race columns before continuing; subsequent tasks may depend on these data
-        for (Map.Entry<RaceColumn, FutureTask<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
+        for (Map.Entry<RaceColumn, Future<List<CompetitorDTO>>> raceColumnAndTaskToJoin : competitorsFromBestToWorstTasks.entrySet()) {
             try {
                 result.setCompetitorsFromBestToWorst(raceColumnAndTaskToJoin.getKey().getName(), raceColumnAndTaskToJoin.getValue().get());
             } catch (InterruptedException e) {
@@ -1323,7 +1322,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             Map<String, Future<LeaderboardEntryDTO>> futuresForColumnName = new HashMap<String, Future<LeaderboardEntryDTO>>();
             final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule().getDiscardedRaceColumns(competitor, this, getRaceColumns(), timePoint);
             for (final RaceColumn raceColumn : this.getRaceColumns()) {
-                RunnableFuture<LeaderboardEntryDTO> future = new FutureTask<LeaderboardEntryDTO>(() -> {
+                Future<LeaderboardEntryDTO> future = executor.submit(() -> {
                         Entry entry = AbstractSimpleLeaderboardImpl.this.getEntry(competitor, raceColumn, timePoint, discardedRaceColumns);
                         return getLeaderboardEntryDTO(entry, raceColumn, competitor, timePoint,
                                 namesOfRaceColumnsForWhichToLoadLegDetails != null
@@ -1331,7 +1330,6 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                                 .getName()), waitForLatestAnalyses, legRanksCache, baseDomainFactory,
                                                 fillTotalPointsUncorrected, cache);
                     });
-                executor.execute(future);
                 futuresForColumnName.put(raceColumn.getName(), future);
             }
             for (Map.Entry<String, Future<LeaderboardEntryDTO>> raceColumnNameAndFuture : futuresForColumnName.entrySet()) {
@@ -1439,6 +1437,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             } else {
                 entryDTO.timeSinceLastPositionFixInSeconds = null;  
             }
+            final Distance averageRideHeight = trackedRace.getAverageRideHeight(competitor, timePoint);
+            entryDTO.averageRideHeightInMeters = averageRideHeight == null ? null : averageRideHeight.getMeters();
         }
         if (addLegDetails && trackedRace != null) {
             try {
@@ -1611,7 +1611,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             raceDetails = raceDetailsAtEndOfTrackingCache.get(key);
             if (raceDetails == null) {
                 needToRunRaceDetails = true;
-                raceDetails = new FutureTask<RaceDetails>(new Callable<RaceDetails>() {
+                raceDetails = new FutureTaskWithTracingGet<RaceDetails>("RaceDetails for "+trackedRace, new Callable<RaceDetails>() {
                     @Override
                     public RaceDetails call() throws Exception {
                         TimePoint end = trackedRace.getEndOfRace();
@@ -1723,11 +1723,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             Double speedOverGroundInKnots;
             if (trackedLeg.hasFinishedLeg(timePoint))  {
                 speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
-                result.currentRideHeightInMeters = trackedLeg.getAverageRideHeight(timePoint);
+                final Distance averageRideHeight = trackedLeg.getAverageRideHeight(timePoint);
+                result.currentRideHeightInMeters = averageRideHeight == null ? null : averageRideHeight.getMeters();
             } else {
                 final SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(timePoint);
                 speedOverGroundInKnots = speedOverGround == null ? null : speedOverGround.getKnots();
-                result.currentRideHeightInMeters = trackedLeg.getRideHeight(timePoint);
+                final Distance rideHeight = trackedLeg.getRideHeight(timePoint);
+                result.currentRideHeightInMeters = rideHeight == null ? null : rideHeight.getMeters();
             }
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);

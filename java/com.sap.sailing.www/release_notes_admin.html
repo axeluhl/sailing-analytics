@@ -23,6 +23,19 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">October 2016</h2>
+                    <ul class="bulletList">
+			<li>A regatta now has an additional property: "Buoy zone radius in hull lengths." It
+			    can be used to determine the radius of the zone around the marks in terms of
+			    hull lengths. This sets the default for the race viewer (RaceBoard.html entry point)
+			    based on the hull length as known from the boat class.</li>
+			<li>When producing the QR code for the Race Management App's device configurations,
+			    the access token parameter was not properly URL-encoded. In case the access token
+			    contains a '+' character it is incorrectly decoded by the app, letting the authentication
+			    fail. This issue has now been fixed in the AdminConsole, and the access token parameter is
+			    now properly URL-encoded.</li>
+                    </ul>
+
                     <h2 class="articleSubheadline">September 2016</h2>
                     <ul class="bulletList">
 			<li>When denoting a regatta for smartphone tracking, the "By Marks" course designer is

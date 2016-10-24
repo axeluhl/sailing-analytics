@@ -110,12 +110,12 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     }
 
     /**
-     * Callers that want to iterate over the collection returned need to synchronize on <code>this</code> object to
-     * avoid {@link ConcurrentModificationException}s.
+     * Callers that want to iterate over the collection returned need to use {@link #lockForRead()} and
+     * {@link #unlockAfterRead()} to avoid {@link ConcurrentModificationException}s.
      * 
-     * @return the smoothened fixes ordered by their time points; this implementation simply delegates to {@link #getInternalRawFixes()} because for
-     *         only {@link Timed} fixes we can't know how to remove outliers. Subclasses that constrain the
-     *         <code>FixType</code> may provide smoothening implementations.
+     * @return the smoothened fixes ordered by their time points; this implementation simply delegates to
+     *         {@link #getInternalRawFixes()} because for only {@link Timed} fixes we can't know how to remove outliers.
+     *         Subclasses that constrain the <code>FixType</code> may provide smoothening implementations.
      */
     protected NavigableSet<FixType> getInternalFixes() {
         NavigableSet<FixType> result = getInternalRawFixes();
