@@ -6,6 +6,7 @@ import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
+import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.common.settings.serializer.SettingsToStringMapSerializer;
 
 /**
@@ -58,6 +59,12 @@ public class SettingsToUrlSerializer {
     }
     
     public <T extends GenericSerializableSettings> T deserializeFromCurrentLocation(T settings) {
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        Map<String, Iterable<String>> values = (Map) Window.Location.getParameterMap();
+        return settingsToStringMapSerializer.deserialize(settings, values);
+    }
+    
+    public <T extends SettingsMap> T deserializeFromCurrentLocation(T settings) {
         @SuppressWarnings({ "rawtypes", "unchecked" })
         Map<String, Iterable<String>> values = (Map) Window.Location.getParameterMap();
         return settingsToStringMapSerializer.deserialize(settings, values);

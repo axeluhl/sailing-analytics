@@ -8,6 +8,7 @@ public abstract class AbstractRootPerspectiveComposite<PL extends PerspectiveLif
     public AbstractRootPerspectiveComposite(
             PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings) {
         super(null, perspectiveLifecycleWithAllSettings);
+        //TODO implement it right
         getComponentTreeNodeInfo().setComponentContext(new ComponentContext<>(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle()));
     }
     
