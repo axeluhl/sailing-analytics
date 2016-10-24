@@ -681,4 +681,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Iterable<RaceLog> getAttachedRaceLogs() {
         return Collections.emptySet();
     }
+
+    @Override
+    public NavigableSet<MarkPassing> getUpdatedMarkPassings(Competitor competitor) {
+        return null;
+    }
 }

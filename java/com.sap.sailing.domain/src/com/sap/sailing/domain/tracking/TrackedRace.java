@@ -434,6 +434,12 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *         lock.
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
+    
+    /**
+     * Returns competitor's mark passings after all calculations. The method uses a lock to block the thread until all
+     * calculations will be finished.
+     */
+    NavigableSet<MarkPassing> getUpdatedMarkPassings(Competitor competitor);
 
     /**
      * This obtains the course's read lock before asking for the read lock for the <code>markPassings</code> structure.

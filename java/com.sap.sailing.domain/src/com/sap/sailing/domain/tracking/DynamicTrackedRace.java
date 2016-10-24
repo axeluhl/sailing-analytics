@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.tracking;
 
-import java.util.NavigableSet;
-
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
@@ -70,12 +68,6 @@ public interface DynamicTrackedRace extends TrackedRace {
     boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter);
 
     void removeWind(Wind wind, WindSource windSource);
-    
-    /**
-     * Returns competitor's mark passings after all calculations. The method uses a lock to block the thread until all
-     * calculations will be finished.
-     */
-    NavigableSet<MarkPassing> getUpdatedMarkPassings(Competitor competitor);
 
     /**
      * The raw, updating feed of a single competitor participating in this race

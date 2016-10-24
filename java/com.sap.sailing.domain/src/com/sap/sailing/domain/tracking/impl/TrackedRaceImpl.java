@@ -709,6 +709,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
         return markPassingsForCompetitor.get(competitor);
     }
+    
+    @Override
+    public NavigableSet<MarkPassing> getUpdatedMarkPassings(Competitor competitor) {
+        markPassingCalculator.lockForRead();
+        try {
+            return getMarkPassings(competitor);
+        } finally {
+            markPassingCalculator.unlockForRead();
+        }
+    }
 
     protected NavigableSet<MarkPassing> getMarkPassingsInOrderAsNavigableSet(Waypoint waypoint) {
         return markPassingsForWaypoint.get(waypoint);
