@@ -1549,7 +1549,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
 
     String playstoreBadge();
     String appstoreSapSailInsight();
-    String appstoreStgTrainingstagebuch();
     String appstoreBadgeSuffix();
     
     String markFixes();
@@ -1700,7 +1699,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String solutionsInSightHeadline();
     String solutionsBuoyPingerHeadline();
     String solutionsPostHeadline();
-    String solutionsTrainingHeadline();
     String solutionsSimulatorHeadline();
     String sapInSailing();
     String contentSapInSailing1();
@@ -1731,12 +1729,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String postRaceAnalytics();
     String contentPostRaceAnalytics1();
     String contentPostRaceAnalytics2();
-    String i18nDeSolutionsTrainingHeadline();
-    String i18nDeSolutionsTrainingText();
     String strategySimulator();
     String contentStrategySimulator();
     String strategySimulatorReadMore();
     String impressum();
     String lastFix();
     String filterDeviceMappings();
+    String raceStartAnalysis();
+    String urlForLanguage(String language);
+    String urlForAllLanguages();
+    String externalLinks();
+    String buoyZoneRadiusInHullLengths();
+    String incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
 }

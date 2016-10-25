@@ -36,7 +36,7 @@ public class GPSFixWithContext implements HasGPSFixContext {
     @Override
     public ClusterDTO getWindStrengthAsBeaufortCluster(Locale locale, ResourceBundleStringMessages stringMessages) {
         Wind wind = getWind();
-        Cluster<?> cluster = Activator.getWindStrengthInBeaufortClusterGroup().getClusterFor(wind);
+        Cluster<?> cluster = Activator.getClusterGroups().getWindStrengthInBeaufortClusterGroup().getClusterFor(wind);
         return new ClusterDTO(cluster.asLocalizedString(locale, stringMessages));
     }
 

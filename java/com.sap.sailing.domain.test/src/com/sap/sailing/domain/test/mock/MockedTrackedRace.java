@@ -448,6 +448,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
+                    public Double getBuoyZoneRadiusInHullLengths(){
+                        return 1.0;
+                    }
+
+                    @Override
+                    public void setBuoyZoneRadiusInHullLengths(Double buoyZoneRadiusInHullLengths){
+                    }
+
+                    @Override
                     public RegattaLikeIdentifier getRegattaLikeIdentifier() {
                         return null;
                     }
@@ -532,15 +541,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public boolean isControlTrackingFromStartAndFinishTimes() {
-                        // TODO Auto-generated method stub
                         return false;
                     }
 
                     @Override
                     public void setControlTrackingFromStartAndFinishTimes(
                             boolean controlTrackingFromStartAndFinishTimes) {
-                        // TODO Auto-generated method stub
-                        
                     }
                 };
             }
@@ -1120,5 +1126,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public Iterable<RaceLog> getAttachedRaceLogs() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
+        return null;
     }
 }

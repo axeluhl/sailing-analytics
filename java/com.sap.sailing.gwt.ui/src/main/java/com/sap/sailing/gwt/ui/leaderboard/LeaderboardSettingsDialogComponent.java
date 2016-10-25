@@ -70,6 +70,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         dialogPanel.add(createSelectedRacesPanel(dialog));
         dialogPanel.add(createOverallDetailPanel(dialog));
         dialogPanel.add(createRaceDetailPanel(dialog));
+        dialogPanel.add(createRaceStartAnalysisPanel(dialog));
         dialogPanel.add(createLegDetailsPanel(dialog));
         dialogPanel.add(createManeuverDetailsPanel(dialog));
         dialogPanel.add(createTimingDetailsPanel(dialog));
@@ -147,6 +148,28 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         addedScoresFlowPanel.add(showAddedScoresCheckBox);
         raceDetailDialog.add(addedScoresFlowPanel);
         return raceDetailDialog;
+    }
+
+    private FlowPanel createRaceStartAnalysisPanel(DataEntryDialog<?> dialog) {
+        FlowPanel raceStartAnalysisDialog = new FlowPanel();
+        raceStartAnalysisDialog.ensureDebugId("RaceStartAnalysisDialog");
+        raceStartAnalysisDialog.add(dialog.createHeadline(stringMessages.raceStartAnalysis(), true));
+        raceStartAnalysisDialog.addStyleName("SettingsDialogComponent");
+        int detailCountInCurrentFlowPanel = 0;
+        List<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
+        FlowPanel raceStartAnalysisDialogContent = null;
+        for (DetailType type : LeaderboardPanel.getAvailableRaceStartAnalysisColumnTypes()) {
+            if (detailCountInCurrentFlowPanel % 8 == 0) {
+                raceStartAnalysisDialogContent = new FlowPanel();
+                raceStartAnalysisDialogContent.addStyleName("dialogInnerContent");
+                raceStartAnalysisDialog.add(raceStartAnalysisDialogContent);
+            }
+            CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
+                    raceDetailCheckboxes);
+            raceStartAnalysisDialogContent.add(checkbox);
+            detailCountInCurrentFlowPanel++;
+        }
+        return raceStartAnalysisDialog;
     }
 
     private FlowPanel createOverallDetailPanel(DataEntryDialog<?> dialog) {

@@ -27,12 +27,9 @@ public class EventEditDialog extends EventDialog {
         endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(event.isPublic);
-        id = event.id;
-        officialWebsiteURLEntryField = createTextBox(event.getOfficialWebsiteURL());
-        officialWebsiteURLEntryField.setVisibleLength(50);
         baseURLEntryField = createTextBox(event.getBaseURL());
         baseURLEntryField.setVisibleLength(50);
-        sailorsInfoWebsiteURLEntryFields = createTextBoxesForLocalesAndDefault(event.getSailorsInfoWebsiteURLs());
+        id = event.id;
         courseAreaNameList.setValue(new ArrayList<>(event.venue.getCourseAreas()));
         List<String> leaderboardGroupNames = new ArrayList<>();
         for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {
@@ -41,5 +38,6 @@ public class EventEditDialog extends EventDialog {
         leaderboardGroupList.setValue(leaderboardGroupNames);
         imagesListComposite.fillImages(event.getImages());
         videosListComposite.fillVideos(event.getVideos());
+        externalLinksComposite.fillExternalLinks(event);
     }
 }
