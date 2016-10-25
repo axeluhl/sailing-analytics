@@ -23,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
+import com.sap.sailing.domain.racelog.tracking.ProgressCallback;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
@@ -130,8 +131,12 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         }
     
     protected void updateMappings() {
+        updateMappings((progress) -> {});
+    }
+    
+    protected final void updateMappings(ProgressCallback progressCallback) {
         try {
-            updateMappingsInternal();
+            updateMappingsInternal(progressCallback);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Could not update device mappings", e);
         }
@@ -236,7 +241,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * 
      * @throws DoesNotHaveRegattaLogException
      */
-    private final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappingsInternal() {
+    private final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappingsInternal(ProgressCallback progressCallback) {
         final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings = calculateMappings();
         final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> oldMappings = new HashMap<>();
         LockUtil.lockForWrite(mappingsLock);
@@ -259,7 +264,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         } finally {
             LockUtil.unlockAfterWrite(mappingsLock);
         }
-        calculateDiff(oldMappings, newMappings);
+        calculateDiff(oldMappings, newMappings, progressCallback);
     }
     
     /**
@@ -267,10 +272,16 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * and by loading and adding the fixes for extended or added mappings.
      */
     private void calculateDiff(Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
-            Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings) {
+            Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings, ProgressCallback progressCallback) {
         Set<ItemT> itemsToProcess = new HashSet<ItemT>(previousMappings.keySet());
         itemsToProcess.addAll(newMappings.keySet());
+        int numberOfItemsToProcess = itemsToProcess.size();
+        double progressPerItem = numberOfItemsToProcess < 1 ? 1 : 1 / numberOfItemsToProcess;
+        int itemIndex = 0;
         for (ItemT item : itemsToProcess) {
+            double baseProgress = itemIndex * progressPerItem;
+            progressCallback.progressChange(baseProgress);
+            
             if (!newMappings.containsKey(item)) {
                 previousMappings.get(item).forEach(this::mappingRemovedInternal);
             } else {
@@ -288,6 +299,8 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
                 }
                 oldMappings.forEach(this::mappingRemovedInternal);
             }
+            
+            itemIndex ++;
         }
     }
         
