@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.shared.GWT;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
@@ -235,7 +236,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             // neither do we know about the end time if both, startOfTracking and endOfTracking are null
             // and we have neither a valid newestTrackingEvent nor an endOfRace value; if we do, we would
             // have to be before the later one plus some leeway.
-            final Date endTimeOfLivePeriod;
+            Date endTimeOfLivePeriod;
             if (lastRaceTimesInfo.startOfTracking == null && lastRaceTimesInfo.endOfTracking == null) {
                 Date latestOfNewestTrackingEventAndEndOfRace = lastRaceTimesInfo.newestTrackingEvent;
                 if (latestOfNewestTrackingEventAndEndOfRace == null || (lastRaceTimesInfo.endOfRace != null && lastRaceTimesInfo.endOfRace.after(latestOfNewestTrackingEventAndEndOfRace))) {
@@ -245,7 +246,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     new Date(latestOfNewestTrackingEventAndEndOfRace.getTime() + RaceTimesCalculationUtil.TIME_AFTER_LIVE);
             } else {
                 endTimeOfLivePeriod = lastRaceTimesInfo.endOfTracking == null ? null : lastRaceTimesInfo.endOfTracking;
-            }
+                if(lastRaceTimesInfo.endOfRace != null){
+                    //this is a failsafe, if the tracking was never finsihed, the race was always assumed to be live.
+                    Date latestAllowedTime = new Date(lastRaceTimesInfo.endOfRace.getTime()+RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END);
+                    if(endTimeOfLivePeriod == null || endTimeOfLivePeriod.after(latestAllowedTime)){
+                        endTimeOfLivePeriod = latestAllowedTime;
+                    }
+                }
+;            }
             isLiveModeToBeMadePossible = endTimeOfLivePeriod == null /* meaning we don't know an end time */ ||
                                          endTimeOfLivePeriod.getTime() >= liveTimePointInMillis;
         } else {
