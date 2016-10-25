@@ -188,7 +188,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     // competitor retrieved from the mapping event does not have a track in trackedRace
                     try {
                         sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(),
-                                timeRangeToLoad.from(), timeRangeToLoad.to(), true,dummy);
+                                timeRangeToLoad.from(), timeRangeToLoad.to(), true, dummy);
                     } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
                         logger.log(Level.WARNING, "Could not load track for competitor: " + mapping.getMappedTo()
                                 + "; device: " + mapping.getDevice());
@@ -207,7 +207,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         @SuppressWarnings({ "unchecked" })
                         DeviceMapping<Competitor> competitorMapping = (DeviceMapping<Competitor>) mapping;
                         gpsFixStore.loadCompetitorTrack(track, competitorMapping, timeRangeToLoad.from(),
-                                timeRangeToLoad.to(),dummy);
+                                timeRangeToLoad.to(), dummy);
                     } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                         logger.log(Level.WARNING, "Could not load competitor track " + mapping.getMappedTo());
                     }
@@ -228,7 +228,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         // by start/end of tracking to at least attempt to get fixes at all in case there were any
                         // within the device mapping interval specified
                         gpsFixStore.loadMarkTrack(track, markMapping, /* startOfTimeWindowToLoad */ null,
-                                /* endOfTimeWindowToLoad */ null,dummy);
+                                /* endOfTimeWindowToLoad */ null, dummy);
                     }
                 } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                     logger.log(Level.WARNING, "Could not load mark track " + mapping.getMappedTo());
