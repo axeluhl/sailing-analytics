@@ -140,14 +140,18 @@ public class MarkPassingCalculator {
      * It's used for locking the calculation thread for read. You will be blocked if there is a current calculation.
      */
     public void lockForRead() {
-        listenThread.lockRead();
+        if (listenThread != null) {
+            listenThread.lockRead();
+        }
     }
     
     /**
      * Unlocks the calculation thread for read.
      */
     public void unlockForRead() {
-        listenThread.unlockRead();
+        if (listenThread != null) {
+            listenThread.unlockRead();
+        }
     }
 
     /**

@@ -528,6 +528,12 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     PolarSheetsXYDiagramData createXYDiagramForBoatClass(String itemText);
 
+    /**
+     * Returns mark passings for the competitor. It doesn't wait for the end of an active calculation which will update
+     * competitor's mark passings. If you want to wait the end of calculations then call
+     * {@code SailingService#getCompetitorMarkPassings(RegattaAndRaceIdentifier, CompetitorDTO, boolean)} with true flag
+     * of waitForCalculations parameter
+     */      
     Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO);
 
     Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
