@@ -145,6 +145,7 @@ public class SensorFixStoreTest {
             last = progress;
         }
         //validate that 0-100 updates do exist
+        Assert.assertFalse(progressData.isEmpty());
         Assert.assertTrue(progressData.size() <= 100);
     }
 
