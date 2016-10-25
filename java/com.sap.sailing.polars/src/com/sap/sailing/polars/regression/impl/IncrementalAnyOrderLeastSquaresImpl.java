@@ -82,6 +82,17 @@ public class IncrementalAnyOrderLeastSquaresImpl implements IncrementalLeastSqua
 
     private final boolean hasIntercept;
     private final boolean useSymbollicInversionIfPossible;
+    
+    public IncrementalAnyOrderLeastSquaresImpl(double[][] matrixOfXSums, double[] vectorOfXYMultSums, int polynomialOrder, boolean hasIntercept,
+            boolean useSymbollicInversionIfPossible) {
+        this.hasIntercept = hasIntercept;
+        this.polynomialOrder = polynomialOrder;
+        this.useSymbollicInversionIfPossible = useSymbollicInversionIfPossible;
+        this.matrixOfXSums = matrixOfXSums;
+        this.vectorOfXYMultSums = vectorOfXYMultSums;
+        functionNeedsUpdate.set(true);
+        numberOfPointsAdded.set(vectorOfXYMultSums.length);
+    }
 
     public IncrementalAnyOrderLeastSquaresImpl(int polynomialOrder, boolean hasIntercept,
             boolean useSymbollicInversionIfPossible) {

@@ -7,10 +7,10 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 
-
 public abstract class AbstractPolarResource {
-    @Context ServletContext servletContext;
-    
+    @Context
+    ServletContext servletContext;
+
     // Working with concrete implementation not to create new dependencies between domain and datamining
     // (PolarDataMiner is unavailable in com.sap.sailing.domain)
     public PolarDataServiceImpl getPolarDataServiceImpl() {

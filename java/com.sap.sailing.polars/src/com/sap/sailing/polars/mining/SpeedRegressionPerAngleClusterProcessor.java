@@ -240,5 +240,9 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         
         return map;
     }
+
+    public Map<GroupKey, IncrementalLeastSquares> getRegressions() {
+        return regressions;
+    }
     
 }
