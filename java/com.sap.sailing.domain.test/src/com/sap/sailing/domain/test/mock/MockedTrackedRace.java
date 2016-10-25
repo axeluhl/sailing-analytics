@@ -541,15 +541,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
                     @Override
                     public boolean isControlTrackingFromStartAndFinishTimes() {
-                        // TODO Auto-generated method stub
                         return false;
                     }
 
                     @Override
                     public void setControlTrackingFromStartAndFinishTimes(
                             boolean controlTrackingFromStartAndFinishTimes) {
-                        // TODO Auto-generated method stub
-                        
                     }
                 };
             }
@@ -1133,6 +1130,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public NavigableSet<MarkPassing> getUpdatedMarkPassings(Competitor competitor) {
+        return null;
+    }
+    
+    @Override
+    public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
         return null;
     }
 }
