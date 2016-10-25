@@ -9,8 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,6 +26,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.IntHolder;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -140,14 +140,14 @@ public class MarkPassingCalculator {
      * It's used for locking the calculation thread for read. You will be blocked if there is a current calculation.
      */
     public void lockForRead() {
-        listenThread.lock.readLock().lock();
+        listenThread.lockRead();
     }
     
     /**
      * Unlocks the calculation thread for read.
      */
     public void unlockForRead() {
-        listenThread.lock.readLock().unlock();
+        listenThread.unlockRead();
     }
 
     /**
@@ -161,11 +161,19 @@ public class MarkPassingCalculator {
      */
     private class Listen implements Runnable {
         private final String raceName;
-        private final ReadWriteLock lock;
+        private final NamedReentrantReadWriteLock lock;
         
         public Listen(String raceName) {
             this.raceName = raceName;
-            lock = new ReentrantReadWriteLock();
+            lock = new NamedReentrantReadWriteLock("lock for calculation thread (" + Listen.class.getSimpleName() + ")", /* fair */ false);
+        }
+        
+        public void lockRead() {
+            LockUtil.lockForRead(lock);
+        }
+        
+        public void unlockRead() {
+            LockUtil.unlockAfterRead(lock);
         }
 
         @Override
@@ -188,7 +196,7 @@ public class MarkPassingCalculator {
                         List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                         try {
                             allNewFixInsertions.add(listener.getQueue().take());
-                            lock.writeLock().lock();
+                            LockUtil.lockForWrite(lock);
                         } catch (InterruptedException e) {
                             logger.log(Level.SEVERE, "MarkPassingCalculator for "+raceName+" threw exception " + e.getMessage()
                                     + " while waiting for new GPSFixes");
@@ -248,7 +256,7 @@ public class MarkPassingCalculator {
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+": " + e.getMessage(), e);
                     } finally {
-                        lock.writeLock().unlock();
+                        LockUtil.unlockAfterWrite(lock);
                     }
                 }
             } finally {
