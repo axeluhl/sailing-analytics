@@ -12,7 +12,6 @@ import com.sap.sailing.polars.jaxrs.AbstractPolarResource;
 import com.sap.sailing.polars.jaxrs.serialization.AngleAndSpeedRegressionSerializer;
 import com.sap.sailing.polars.jaxrs.serialization.IncrementalAnyOrderLeastSquaresImplSerializer;
 import com.sap.sailing.polars.mining.AngleAndSpeedRegression;
-import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sailing.server.gateway.serialization.impl.MapEntrySerializer;
 import com.sap.sse.datamining.shared.GroupKey;
@@ -22,7 +21,6 @@ public class PolarDataResource extends AbstractPolarResource {
 
     private MapEntrySerializer<GroupKey, AngleAndSpeedRegression> cubicSerializer;
     private MapEntrySerializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedSerializer;
-    private PolarDataMiner dataMiner;
 
     public PolarDataResource() {
         cubicSerializer = new MapEntrySerializer<>();
@@ -30,8 +28,6 @@ public class PolarDataResource extends AbstractPolarResource {
 
         cubicSerializer.setValueSerializer(new AngleAndSpeedRegressionSerializer());
         speedSerializer.setValueSerializer(new IncrementalAnyOrderLeastSquaresImplSerializer());
-
-        dataMiner = getPolarDataServiceImpl().getPolarDataMiner();
     }
 
     @GET
@@ -39,8 +35,8 @@ public class PolarDataResource extends AbstractPolarResource {
     @Produces("application/json;charset=UTF-8")
     public Response getCubicRegression() {
         JSONArray regressionsJSON = new JSONArray();
-        Map<GroupKey, AngleAndSpeedRegression> regressions = dataMiner.getCubicRegressionPerCourseProcessor()
-                .getRegressions();
+        Map<GroupKey, AngleAndSpeedRegression> regressions = getPolarDataServiceImpl().getPolarDataMiner()
+                .getCubicRegressionPerCourseProcessor().getRegressions();
 
         regressions.entrySet().stream().forEach(entry -> regressionsJSON.add(cubicSerializer.serialize(entry)));
 
@@ -53,7 +49,7 @@ public class PolarDataResource extends AbstractPolarResource {
     @Produces("application/json;charset=UTF-8")
     public Response getSpeedRegression() {
         JSONArray regressionsJSON = new JSONArray();
-        Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> regressions = dataMiner
+        Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> regressions = getPolarDataServiceImpl().getPolarDataMiner()
                 .getSpeedRegressionPerAngleClusterProcessor().getRegressionsImpl();
 
         regressions.entrySet().stream().forEach(entry -> regressionsJSON.add(speedSerializer.serialize(entry)));

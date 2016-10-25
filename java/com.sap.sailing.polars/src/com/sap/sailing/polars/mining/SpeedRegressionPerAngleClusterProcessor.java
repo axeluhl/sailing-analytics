@@ -236,7 +236,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     public Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> getRegressionsImpl() {
         Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> map = new HashMap<>();
         
-        map.keySet().stream().forEach(key -> map.put(key, (IncrementalAnyOrderLeastSquaresImpl) regressions.get(key)));
+        regressions.keySet().stream().forEach(key -> map.put(key, (IncrementalAnyOrderLeastSquaresImpl) regressions.get(key)));
         
         return map;
     }
