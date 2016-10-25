@@ -40,6 +40,9 @@ public interface HasTrackedRaceContext {
     @Dimension(messageKey="AdvantageousEndOfLine", ordinal=6)
     public NauticalSide getAdvantageousEndOfLine();
     
+    @Dimension(messageKey="MedalRace", ordinal=7)
+    public Boolean isMedalRace();
+    
     @Dimension(messageKey="IsTracked", ordinal=7)
     public Boolean isTracked();
     

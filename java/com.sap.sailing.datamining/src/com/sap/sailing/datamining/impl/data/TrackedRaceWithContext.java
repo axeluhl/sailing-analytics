@@ -98,6 +98,11 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
         LineDetails startLine = getTrackedRace().getStartLine(getTrackedRace().getStartOfRace());
         return startLine.getAdvantageousSideWhileApproachingLine();
     }
+    
+    @Override
+    public Boolean isMedalRace() {
+        return getLeaderboardContext().getLeaderboard().getRaceColumnAndFleet(getTrackedRace()).getA().isMedalRace();
+    }
 
     @Override
     public Boolean isTracked() {
