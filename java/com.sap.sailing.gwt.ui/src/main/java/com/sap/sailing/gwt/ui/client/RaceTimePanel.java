@@ -245,14 +245,15 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                     new Date(latestOfNewestTrackingEventAndEndOfRace.getTime() + RaceTimesCalculationUtil.TIME_AFTER_LIVE);
             } else {
                 endTimeOfLivePeriod = lastRaceTimesInfo.endOfTracking == null ? null : lastRaceTimesInfo.endOfTracking;
-                if(lastRaceTimesInfo.endOfRace != null){
-                    //this is a failsafe, if the tracking was never finsihed, the race was always assumed to be live.
-                    Date latestAllowedTime = new Date(lastRaceTimesInfo.endOfRace.getTime()+RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END);
-                    if(endTimeOfLivePeriod == null || endTimeOfLivePeriod.after(latestAllowedTime)){
+                if (lastRaceTimesInfo.endOfRace != null) {
+                    // this is a failsafe, if the tracking was never finsihed, the race was always assumed to be live.
+                    Date latestAllowedTime = new Date(
+                            lastRaceTimesInfo.endOfRace.getTime() + RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END);
+                    if (endTimeOfLivePeriod == null || endTimeOfLivePeriod.after(latestAllowedTime)) {
                         endTimeOfLivePeriod = latestAllowedTime;
                     }
                 }
-;            }
+            }
             isLiveModeToBeMadePossible = endTimeOfLivePeriod == null /* meaning we don't know an end time */ ||
                                          endTimeOfLivePeriod.getTime() >= liveTimePointInMillis;
         } else {
