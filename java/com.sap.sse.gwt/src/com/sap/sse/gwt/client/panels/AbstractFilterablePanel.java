@@ -2,7 +2,9 @@ package com.sap.sse.gwt.client.panels;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -46,6 +48,8 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected AbstractCellTable<T> display;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
+    
+    private final Set<Filter<T>> filters = new HashSet<>();
 
     protected final AbstractKeywordFilter<T> filterer = new AbstractKeywordFilter<T>() {
         @Override
@@ -68,6 +72,8 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      */
     public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered,
             boolean drawTextBox) {
+        filters.add(filterer);
+        
         setSpacing(5);
         this.all = new ListDataProvider<>();
         this.display = display;
@@ -92,6 +98,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
                 this.all.getList().add(t);
             }
         }
+    }
+    
+    public void addFilter(Filter<T> filterToAdd) {
+        filters.add(filterToAdd);
     }
 
     /**
@@ -174,11 +184,20 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected void retainElementsInFilteredThatPassFilter() {
         List<T> filteredElements = new ArrayList<>();
         for (T t : all.getList()) {
-            if (getFilter().matches(t)) {
+            if (matches(t)) {
                 filteredElements.add(t);
             }
         }
         Util.addAll(filteredElements, filtered.getList());
+    }
+
+    private boolean matches(T t) {
+        for(Filter<T> filter : filters) {
+            if(!filter.matches(t)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     protected void sort() {
@@ -192,7 +211,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         getTextBox().addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                getFilterer().setKeywords(Arrays.asList(getTextBox().getText().split(" ")));
+                filterer.setKeywords(Arrays.asList(getTextBox().getText().split(" ")));
                 filter();
             }
         });
@@ -249,22 +268,5 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      */
     public void setTable(AbstractCellTable<T> table) {
         display = table;
-    }
-
-    /**
-     * @return the AbstractKeywordFilter to use for keyword-based filtering
-     */
-    protected AbstractKeywordFilter<T> getFilterer() {
-        return filterer;
-    }
-
-    /**
-     * Returns the {@link Filter} to be used for filtering the result list. By default, this is just the keyword filter
-     * returned by {@link #getFilterer()}.
-     * 
-     * May be overwritten by subclasses to e.g. define a composite filter or completely exchange the filter.
-     */
-    protected Filter<T> getFilter() {
-        return getFilterer();
     }
 }
