@@ -192,8 +192,8 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     }
 
     private boolean matches(T t) {
-        for(Filter<T> filter : filters) {
-            if(!filter.matches(t)) {
+        for (Filter<T> filter : filters) {
+            if (!filter.matches(t)) {
                 return false;
             }
         }
