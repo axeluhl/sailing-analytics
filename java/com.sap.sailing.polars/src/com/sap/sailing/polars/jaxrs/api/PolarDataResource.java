@@ -23,11 +23,8 @@ public class PolarDataResource extends AbstractPolarResource {
     private MapEntrySerializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedSerializer;
 
     public PolarDataResource() {
-        cubicSerializer = new MapEntrySerializer<>();
-        speedSerializer = new MapEntrySerializer<>();
-
-        cubicSerializer.setValueSerializer(new AngleAndSpeedRegressionSerializer());
-        speedSerializer.setValueSerializer(new IncrementalAnyOrderLeastSquaresImplSerializer());
+        cubicSerializer = new MapEntrySerializer<>(/* no specific key serializer; use toString */ null, new AngleAndSpeedRegressionSerializer());
+        speedSerializer = new MapEntrySerializer<>(/* no specific key serializer; use toString */ null, new IncrementalAnyOrderLeastSquaresImplSerializer());
     }
 
     @GET
