@@ -166,7 +166,12 @@ public class BoatOverlay extends CanvasOverlayV3 {
     private Size getCorrelatedBoatSize(BoatClassMasterdata boatClassMasterdata) {
         Size boatSizeInPixel = calculateBoundingBox(mapProjection, boatFix.position,
                 boatClassMasterdata.getHullLength(), boatClassMasterdata.getHullBeam());
+        changeBoatSizeIfTooShortHull(boatSizeInPixel, boatClassMasterdata);
+        changeBoatSizeIfTooNarrowBeam(boatSizeInPixel, boatClassMasterdata);
+        return boatSizeInPixel;
+    }
 
+    private void changeBoatSizeIfTooShortHull(Size boatSizeInPixel, BoatClassMasterdata boatClassMasterdata) {
         // the minimum boat length is related to the hull of the boat, not the overall length
         double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
         if (boatSizeInPixel.getWidth() < minBoatHullLengthInPx) {
@@ -174,7 +179,9 @@ public class BoatOverlay extends CanvasOverlayV3 {
             boatSizeInPixel.setHeight(minBoatHullLengthInPx * ratioBeanHullLength);
             boatSizeInPixel.setWidth(minBoatHullLengthInPx);
         }
+    }
 
+    private void changeBoatSizeIfTooNarrowBeam(Size boatSizeInPixel, BoatClassMasterdata boatClassMasterdata) {
         // if the boat gets too narrow, use the minimum beam and scale the hull length according to aspect
         double minBoatBeamLengthInPx = boatVectorGraphics.getMinBeamLengthInPx();
         if (boatSizeInPixel.getHeight() < minBoatBeamLengthInPx) {
@@ -182,6 +189,6 @@ public class BoatOverlay extends CanvasOverlayV3 {
             boatSizeInPixel.setWidth(minBoatBeamLengthInPx * ratioHullBeanLength);
             boatSizeInPixel.setHeight(minBoatBeamLengthInPx);
         }
-        return boatSizeInPixel;
     }
+
 }
