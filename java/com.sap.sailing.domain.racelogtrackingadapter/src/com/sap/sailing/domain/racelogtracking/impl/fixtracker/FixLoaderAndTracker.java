@@ -329,14 +329,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         });
     }
 
-    /**
-     * Tells if currently the race is loading GPS fixes from the {@link GPSFixStore}. Clients may {@link Object#wait()}
-     * on <code>this</code> object and will be notified whenever a change of this flag's value occurs.
-     */
-    public boolean isLoadingFromGPSFixStore() {
-        return activeLoaders.get() > 0;
-    }
-
     private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
         trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(status, progress));
     }
