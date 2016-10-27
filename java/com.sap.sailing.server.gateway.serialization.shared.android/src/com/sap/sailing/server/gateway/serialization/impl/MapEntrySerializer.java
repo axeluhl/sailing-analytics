@@ -15,10 +15,12 @@ public class MapEntrySerializer<K, V> implements JsonSerializer<Entry<K, V>> {
     private final JsonSerializer<V> valueSerializer;
 
     /**
-     * @param keySerializer if {@code null}, {@link Object#toString()} will be used to serialize the keys.
-     * @param keySerializer if {@code null}, {@link Object#toString()} will be used to serialize the values.
+     * @param keySerializer must not be {@code null}
+     * @param keySerializer must not be {@code null}
      */
     public MapEntrySerializer(JsonSerializer<K> keySerializer, JsonSerializer<V> valueSerializer) {
+        assert keySerializer != null;
+        assert valueSerializer != null;
         this.keySerializer = keySerializer;
         this.valueSerializer = valueSerializer;
     }
@@ -26,19 +28,8 @@ public class MapEntrySerializer<K, V> implements JsonSerializer<Entry<K, V>> {
     @Override
     public JSONObject serialize(Entry<K, V> entry) {
         JSONObject entryJSON = new JSONObject();
-
-        if (keySerializer != null) {
-            entryJSON.put(FIELD_KEY, keySerializer.serialize(entry.getKey()));
-        } else {
-            entryJSON.put(FIELD_KEY, entry.getKey().toString());
-        }
-
-        if (valueSerializer != null) {
-            entryJSON.put(FIELD_VALUE, valueSerializer.serialize(entry.getValue()));
-        } else {
-            entryJSON.put(FIELD_VALUE, entry.getValue().toString());
-        }
-
+        entryJSON.put(FIELD_KEY, keySerializer.serialize(entry.getKey()));
+        entryJSON.put(FIELD_VALUE, valueSerializer.serialize(entry.getValue()));
         return entryJSON;
     }
 

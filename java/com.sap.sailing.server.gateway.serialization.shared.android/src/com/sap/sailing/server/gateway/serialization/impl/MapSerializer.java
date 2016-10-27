@@ -13,12 +13,8 @@ public class MapSerializer<K, V> implements JsonSerializer<Map<K, V>> {
     public static final String FIELD_VALUE = "value";
     public static final String FIELD_KEY = "key";
     
-    private MapEntrySerializer<K, V> mapEntrySerializer;
-    private String mapName;
-
-    public MapSerializer(String mapName) {
-        this(mapName, null, null);
-    }
+    private final MapEntrySerializer<K, V> mapEntrySerializer;
+    private final String mapName;
 
     public MapSerializer(String mapName, JsonSerializer<K> keySerializer, JsonSerializer<V> valueSerializer) {
         this.mapEntrySerializer = new MapEntrySerializer<>(keySerializer, valueSerializer);
@@ -36,14 +32,6 @@ public class MapSerializer<K, V> implements JsonSerializer<Map<K, V>> {
         mapJSON.put(mapName, entriesJSON);
 
         return mapJSON;
-    }
-
-    public void setKeySerializer(JsonSerializer<K> keySerializer) {
-        mapEntrySerializer.setKeySerializer(keySerializer);
-    }
-
-    public void setValueSerializer(JsonSerializer<V> valueSerializer) {
-        mapEntrySerializer.setValueSerializer(valueSerializer);
     }
 
     public JsonSerializer<K> getKeySerializer() {
