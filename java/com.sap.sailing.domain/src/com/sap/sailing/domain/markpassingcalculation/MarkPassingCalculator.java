@@ -137,7 +137,9 @@ public class MarkPassingCalculator {
     }
 
     /**
-     * It's used for locking the calculation thread for read. You will be blocked if there is a current calculation.
+     * It's used for locking the calculation thread for read. You will be blocked if the calculation is in progress.
+     * Make sure that you unlock the thread with the method {@link MarkPassingCalculator#unlockForRead()} once you don't
+     * need it any more.
      */
     public void lockForRead() {
         if (listenThread != null) {
