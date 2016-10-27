@@ -226,11 +226,7 @@ public class CubicRegressionPerCourseProcessor implements
         return Collections.unmodifiableMap(regressions);
     }
     
-    public void updateRegressions(Map<GroupKey, AngleAndSpeedRegression> regressionsToUpdate, boolean clean) {
-        if (clean) {
-            regressions.clear();
-        }
-
+    public void updateRegressions(Map<GroupKey, AngleAndSpeedRegression> regressionsToUpdate) {
         regressions.putAll(regressionsToUpdate);
     }
     

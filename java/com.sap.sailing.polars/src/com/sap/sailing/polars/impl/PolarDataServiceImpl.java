@@ -381,9 +381,9 @@ public class PolarDataServiceImpl implements PolarDataService,
      * @param clean specifies whether to clean regression maps or not
      */
     public void updateRegressions(Map<GroupKey, AngleAndSpeedRegression> cubicRegression,
-            Map<GroupKey, ? extends IncrementalLeastSquares> speedRegression, boolean clean) {
-        polarDataMiner.getCubicRegressionPerCourseProcessor().updateRegressions(cubicRegression, clean);
-        polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().updateRegressions(speedRegression, clean);
+            Map<GroupKey, ? extends IncrementalLeastSquares> speedRegression) {
+        polarDataMiner.getCubicRegressionPerCourseProcessor().updateRegressions(cubicRegression);
+        polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().updateRegressions(speedRegression);
     }
     
     public Map<GroupKey, AngleAndSpeedRegression> getCubicRegressionsPerCourse() {

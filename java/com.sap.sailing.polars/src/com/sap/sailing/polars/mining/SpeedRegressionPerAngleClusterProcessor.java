@@ -246,11 +246,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         return Collections.unmodifiableMap(regressions);
     }
 
-    public void updateRegressions(Map<GroupKey, ? extends IncrementalLeastSquares> regressionsToUpdate, boolean clean) {
-        if (clean) {
-            regressions.clear();
-        }
-
+    public void updateRegressions(Map<GroupKey, ? extends IncrementalLeastSquares> regressionsToUpdate) {
         regressions.putAll(regressionsToUpdate);
     }
     

@@ -15,43 +15,28 @@ public class MapDeserializer<K, V> implements JsonArrayDeserializer<Map<K, V>> {
 
     public static final String FIELD_VALUE = "value";
     public static final String FIELD_KEY = "key";
-    
+
     private final MapEntryDeserializer<K, V> mapEntryDeserializer;
 
-    public MapDeserializer() {
-        this(null, null);
-    }
-
+    /**
+     * @param keyDeserializer must not be {@code null}
+     * @param valueDeserializer must not be {@code null}
+     */
     public MapDeserializer(JsonDeserializer<K> keyDeserializer, JsonDeserializer<V> valueDeserializer) {
+        assert keyDeserializer != null;
+        assert valueDeserializer != null;
         this.mapEntryDeserializer = new MapEntryDeserializer<>(keyDeserializer, valueDeserializer);
     }
 
     @Override
     public Map<K, V> deserialize(JSONArray arrayJSON) throws JsonDeserializationException {
         Map<K, V> map = new HashMap<>();
-        
+
         for (int i = 0; i < arrayJSON.size(); i++) {
             Entry<K, V> entry = mapEntryDeserializer.deserialize((JSONObject) arrayJSON.get(i));
             map.put(entry.getKey(), entry.getValue());
         }
-        
+
         return map;
     }
-
-    public void setKeyDeserializer(JsonDeserializer<K> keyDeserializer) {
-        mapEntryDeserializer.setKeyDeserializer(keyDeserializer);
-    }
-
-    public void setValueDeserializer(JsonDeserializer<V> valueDeserializer) {
-        mapEntryDeserializer.setValueDeserializer(valueDeserializer);
-    }
-
-    public JsonDeserializer<K> getKeyDeserializer() {
-        return mapEntryDeserializer.getKeyDeserializer();
-    }
-
-    public JsonDeserializer<V> getValueDeserializer() {
-        return mapEntryDeserializer.getValueDeserializer();
-    }
-
 }

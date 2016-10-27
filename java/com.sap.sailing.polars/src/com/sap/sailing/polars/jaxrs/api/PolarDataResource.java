@@ -21,8 +21,8 @@ import com.sap.sse.datamining.shared.GroupKey;
 @Path("/polar_data")
 public class PolarDataResource extends AbstractPolarResource {
 
-    private static final String FIELD_SPEED_REGRESSIONS = "speed_regressions";
-    private static final String FIELD_CUBIC_REGRESSION = "cubic_regressions";
+    public static final String FIELD_SPEED_REGRESSION = "speed_regressions";
+    public static final String FIELD_CUBIC_REGRESSION = "cubic_regressions";
 
     private final MapSerializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedSerializer;
     private final MapSerializer<GroupKey, AngleAndSpeedRegression> cubicSerializer;
@@ -35,7 +35,7 @@ public class PolarDataResource extends AbstractPolarResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getCubicRegression() {
+    public Response getRegressions() {
         Map<GroupKey, AngleAndSpeedRegression> cubicRegressions = getPolarDataServiceImpl()
                 .getCubicRegressionsPerCourse();
         Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedRegressions = getPolarDataServiceImpl()
@@ -43,7 +43,7 @@ public class PolarDataResource extends AbstractPolarResource {
 
         JSONObject regressions = new JSONObject();
         regressions.put(FIELD_CUBIC_REGRESSION, cubicSerializer.serialize(cubicRegressions));
-        regressions.put(FIELD_SPEED_REGRESSIONS, speedSerializer.serialize(speedRegressions));
+        regressions.put(FIELD_SPEED_REGRESSION, speedSerializer.serialize(speedRegressions));
 
         return Response.ok(regressions.toJSONString())
                 .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
