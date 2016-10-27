@@ -378,7 +378,6 @@ public class PolarDataServiceImpl implements PolarDataService,
      * 
      * @param cubicRegression new map of cubic regressions
      * @param speedRegression new map of speed regressions
-     * @param clean specifies whether to clean regression maps or not
      */
     public void updateRegressions(Map<GroupKey, AngleAndSpeedRegression> cubicRegression,
             Map<GroupKey, ? extends IncrementalLeastSquares> speedRegression) {

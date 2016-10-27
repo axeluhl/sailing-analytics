@@ -44,7 +44,7 @@ public class PolarDataClient {
     // MOCKING
     private static final String HOST = "http://127.0.0.1:8888/polars/api/polar_data";
 
-    private PolarDataServiceImpl polarDataServiceImpl;
+    private final PolarDataServiceImpl polarDataServiceImpl;
 
     /**
      * Default constructor is missing because we need {@link PolarDataServiceImpl} to reach regressions
