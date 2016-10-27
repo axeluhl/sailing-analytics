@@ -87,7 +87,7 @@ public class PolarDataClient {
             logger.log(Level.INFO, "Loading polar regression data from remote server " + HOST + " succeeded");
         } catch (ClientProtocolException e) {
             // Catching ClientProtocolException to indicate problems with HTTP protocol
-            logger.log(Level.INFO,
+            logger.log(Level.WARNING,
                     "Failed to load polar regression data from remote server " + HOST + ", " + e.getMessage());
         }
     }
