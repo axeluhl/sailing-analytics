@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -38,12 +39,16 @@ import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.polars.PolarDataOperation;
+import com.sap.sailing.polars.mining.AngleAndSpeedRegression;
 import com.sap.sailing.polars.mining.BearingClusterGroup;
 import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
 import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.mining.SpeedRegressionPerAngleClusterProcessor;
+import com.sap.sailing.polars.regression.IncrementalLeastSquares;
+import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.data.ClusterGroup;
+import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -368,8 +373,25 @@ public class PolarDataServiceImpl implements PolarDataService,
         }
     }
 
-    public PolarDataMiner getPolarDataMiner() {
-        return polarDataMiner;
+    /**
+     * This method is used to update polar data miner processors' regressions
+     * 
+     * @param cubicRegression new map of cubic regressions
+     * @param speedRegression new map of speed regressions
+     * @param clean specifies whether to clean regression maps or not
+     */
+    public void updateRegressions(Map<GroupKey, AngleAndSpeedRegression> cubicRegression,
+            Map<GroupKey, ? extends IncrementalLeastSquares> speedRegression, boolean clean) {
+        polarDataMiner.getCubicRegressionPerCourseProcessor().updateRegressions(cubicRegression, clean);
+        polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().updateRegressions(speedRegression, clean);
+    }
+    
+    public Map<GroupKey, AngleAndSpeedRegression> getCubicRegressionsPerCourse() {
+        return polarDataMiner.getCubicRegressionPerCourseProcessor().getRegressions();
+    }
+    
+    public Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> getSpeedRegressionsPerAngle() {
+        return polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().getRegressionsImpl();
     }
 
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.polars.mining;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -238,11 +239,19 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         
         regressions.keySet().stream().forEach(key -> map.put(key, (IncrementalAnyOrderLeastSquaresImpl) regressions.get(key)));
         
-        return map;
+        return Collections.unmodifiableMap(map);
     }
 
     public Map<GroupKey, IncrementalLeastSquares> getRegressions() {
-        return regressions;
+        return Collections.unmodifiableMap(regressions);
+    }
+
+    public void updateRegressions(Map<GroupKey, ? extends IncrementalLeastSquares> regressionsToUpdate, boolean clean) {
+        if (clean) {
+            regressions.clear();
+        }
+
+        regressions.putAll(regressionsToUpdate);
     }
     
 }

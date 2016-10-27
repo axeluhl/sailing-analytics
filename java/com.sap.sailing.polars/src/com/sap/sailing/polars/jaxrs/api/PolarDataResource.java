@@ -7,6 +7,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.simple.JSONObject;
+
 import com.sap.sailing.polars.jaxrs.AbstractPolarResource;
 import com.sap.sailing.polars.jaxrs.serialization.AngleAndSpeedRegressionSerializer;
 import com.sap.sailing.polars.jaxrs.serialization.GroupKeySerializer;
@@ -19,35 +21,31 @@ import com.sap.sse.datamining.shared.GroupKey;
 @Path("/polar_data")
 public class PolarDataResource extends AbstractPolarResource {
 
-    private MapSerializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedSerializer;
-    private MapSerializer<GroupKey, AngleAndSpeedRegression> cubicSerializer;
+    private static final String FIELD_SPEED_REGRESSIONS = "speed_regressions";
+    private static final String FIELD_CUBIC_REGRESSION = "cubic_regressions";
+
+    private final MapSerializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedSerializer;
+    private final MapSerializer<GroupKey, AngleAndSpeedRegression> cubicSerializer;
 
     public PolarDataResource() {
-        cubicSerializer = new MapSerializer<>("cubic_regression", new GroupKeySerializer(),
-                new AngleAndSpeedRegressionSerializer());
-        speedSerializer = new MapSerializer<>("speed_regression", new GroupKeySerializer(),
+        cubicSerializer = new MapSerializer<>(new GroupKeySerializer(), new AngleAndSpeedRegressionSerializer());
+        speedSerializer = new MapSerializer<>(new GroupKeySerializer(),
                 new IncrementalAnyOrderLeastSquaresImplSerializer());
     }
 
     @GET
-    @Path("cubic_regression")
     @Produces("application/json;charset=UTF-8")
     public Response getCubicRegression() {
-        Map<GroupKey, AngleAndSpeedRegression> regressions = getPolarDataServiceImpl().getPolarDataMiner()
-                .getCubicRegressionPerCourseProcessor().getRegressions();
+        Map<GroupKey, AngleAndSpeedRegression> cubicRegressions = getPolarDataServiceImpl()
+                .getCubicRegressionsPerCourse();
+        Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedRegressions = getPolarDataServiceImpl()
+                .getSpeedRegressionsPerAngle();
 
-        return Response.ok(cubicSerializer.serialize(regressions).toJSONString())
-                .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
-    }
+        JSONObject regressions = new JSONObject();
+        regressions.put(FIELD_CUBIC_REGRESSION, cubicSerializer.serialize(cubicRegressions));
+        regressions.put(FIELD_SPEED_REGRESSIONS, speedSerializer.serialize(speedRegressions));
 
-    @GET
-    @Path("speed_regression")
-    @Produces("application/json;charset=UTF-8")
-    public Response getSpeedRegression() {
-        Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> regressions = getPolarDataServiceImpl().getPolarDataMiner()
-                .getSpeedRegressionPerAngleClusterProcessor().getRegressionsImpl();
-
-        return Response.ok(speedSerializer.serialize(regressions).toJSONString())
+        return Response.ok(regressions.toJSONString())
                 .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 

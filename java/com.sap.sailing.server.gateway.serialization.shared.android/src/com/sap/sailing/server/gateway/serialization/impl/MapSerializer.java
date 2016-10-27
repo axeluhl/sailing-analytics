@@ -4,35 +4,39 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
+import com.sap.sailing.server.gateway.serialization.JsonArraySerializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
-public class MapSerializer<K, V> implements JsonSerializer<Map<K, V>> {
+
+public class MapSerializer<K, V> implements JsonArraySerializer<Map<K, V>> {
 
     public static final String FIELD_VALUE = "value";
     public static final String FIELD_KEY = "key";
     
-    private final MapEntrySerializer<K, V> mapEntrySerializer;
-    private final String mapName;
+    private MapEntrySerializer<K, V> mapEntrySerializer;
 
-    public MapSerializer(String mapName, JsonSerializer<K> keySerializer, JsonSerializer<V> valueSerializer) {
+    public MapSerializer() {
+        this(null, null);
+    }
+    /**
+     * @param keySerializer if {@code null}, {@link Object#toString()} will be used to serialize the keys.
+     * @param keySerializer if {@code null}, {@link Object#toString()} will be used to serialize the values.
+     */
+    public MapSerializer(JsonSerializer<K> keySerializer, JsonSerializer<V> valueSerializer) {
         this.mapEntrySerializer = new MapEntrySerializer<>(keySerializer, valueSerializer);
-        this.mapName = mapName;
     }
 
     @Override
-    public JSONObject serialize(Map<K, V> map) {
-        JSONObject mapJSON = new JSONObject();
-        
+
+    public JSONArray serialize(Map<K, V> map) {
         JSONArray entriesJSON = new JSONArray();
         for (Entry<K, V> entry: map.entrySet()) {
             entriesJSON.add(mapEntrySerializer.serialize(entry));
         }
-        mapJSON.put(mapName, entriesJSON);
 
-        return mapJSON;
+        return entriesJSON;
     }
+
 
     public JsonSerializer<K> getKeySerializer() {
         return mapEntrySerializer.getKeySerializer();

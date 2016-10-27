@@ -7,30 +7,28 @@ import java.util.Map.Entry;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.server.gateway.deserialization.JsonArrayDeserializer;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 
-public class MapDeserializer<K, V> implements JsonDeserializer<Map<K, V>> {
+public class MapDeserializer<K, V> implements JsonArrayDeserializer<Map<K, V>> {
 
     public static final String FIELD_VALUE = "value";
     public static final String FIELD_KEY = "key";
     
-    private MapEntryDeserializer<K, V> mapEntryDeserializer;
-    private String mapName;
+    private final MapEntryDeserializer<K, V> mapEntryDeserializer;
 
-    public MapDeserializer(String mapName) {
-        this(mapName, null, null);
+    public MapDeserializer() {
+        this(null, null);
     }
 
-    public MapDeserializer(String mapName, JsonDeserializer<K> keyDeserializer, JsonDeserializer<V> valueDeserializer) {
+    public MapDeserializer(JsonDeserializer<K> keyDeserializer, JsonDeserializer<V> valueDeserializer) {
         this.mapEntryDeserializer = new MapEntryDeserializer<>(keyDeserializer, valueDeserializer);
-        this.mapName = mapName;
     }
 
     @Override
-    public Map<K, V> deserialize(JSONObject object) throws JsonDeserializationException {
+    public Map<K, V> deserialize(JSONArray arrayJSON) throws JsonDeserializationException {
         Map<K, V> map = new HashMap<>();
-        JSONArray arrayJSON = (JSONArray) object.get(mapName);
         
         for (int i = 0; i < arrayJSON.size(); i++) {
             Entry<K, V> entry = mapEntryDeserializer.deserialize((JSONObject) arrayJSON.get(i));
