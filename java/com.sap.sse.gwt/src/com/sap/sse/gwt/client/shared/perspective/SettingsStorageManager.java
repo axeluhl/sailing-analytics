@@ -1,11 +1,10 @@
-package com.sap.sse.gwt.client.shared.defaultsettings;
+package com.sap.sse.gwt.client.shared.perspective;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
@@ -16,10 +15,12 @@ import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
  * @param <R>
  * @param <S>
  */
-public class DefaultSettingsStorage<PS extends Settings> {
+public class SettingsStorageManager<PS extends Settings> {
     
-    private static final String SETTINGS_STORAGE_KEY_PREFIX = "SETTINGS-";
-    private final String storageRootPerspectiveKey;
+    private final String storageGlobalKey;
+    private final String storageContextSpecificKey;
+    private Throwable lastError = null;
+
     
     //TODO replace userService with real implementation
     private WithAuthenticationManager clientFactory = mockWithAuthenticationManager();
@@ -30,33 +31,49 @@ public class DefaultSettingsStorage<PS extends Settings> {
     private final SettingsToJsonSerializerGWT jsonSerializer = new SettingsToJsonSerializerGWT();
     private final SettingsToUrlSerializer urlSerializer = new SettingsToUrlSerializer();
     
-    public DefaultSettingsStorage(String rootPerspectiveId) {
-        storageRootPerspectiveKey = SETTINGS_STORAGE_KEY_PREFIX + rootPerspectiveId;
+    public SettingsStorageManager(String globalDefinitionId, String contextDefinitionId) {
+        this.storageGlobalKey = "#" + globalDefinitionId;
+        this.storageContextSpecificKey = this.storageGlobalKey + "~" + contextDefinitionId;
     }
     
     public void storeGlobalSettings(PerspectiveCompositeSettings<PS> globalSettings) {
         String serializedSettings = jsonSerializer.serializeToString(globalSettings);
         if(clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn()) {
-            storeDefaultSettingsOnServer(serializedSettings);
+            storeGlobalSettingsOnServer(serializedSettings);
         }
-        storeDefaultSettingsOnLocalStorage(serializedSettings);
+        storeGlobalSettingsOnLocalStorage(serializedSettings);
     }
     
     public void storeContextSpecificSettings(PerspectiveCompositeSettings<PS> contextSpecificSettings) {
-        // TODO Auto-generated method stub
-        
+        String serializedSettings = jsonSerializer.serializeToString(contextSpecificSettings);
+        if(clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn()) {
+            storeContextSpecificSettingsOnServer(serializedSettings);
+        }
+        storeContextSpecificSettingsOnLocalStorage(serializedSettings);
     }
     
-    private void storeDefaultSettingsOnLocalStorage(String serializedDefaultSettings) {
+    private void storeContextSpecificSettingsOnLocalStorage(String serializedContextSpecificSettings) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
-            localStorage.removeItem(storageRootPerspectiveKey);
-            localStorage.setItem(storageRootPerspectiveKey, serializedDefaultSettings);
+            localStorage.removeItem(storageContextSpecificKey);
+            localStorage.setItem(storageContextSpecificKey, serializedContextSpecificSettings);
         }
     }
 
-    private void storeDefaultSettingsOnServer(String serializedDefaultSettings) {
-        userService.setPreference(storageRootPerspectiveKey, serializedDefaultSettings);
+    private void storeContextSpecificSettingsOnServer(String serializedContextSpecificSettings) {
+        userService.setPreference(storageContextSpecificKey, serializedContextSpecificSettings);
+    }
+
+    private void storeGlobalSettingsOnLocalStorage(String serializedGlobalSettings) {
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        if (localStorage != null) {
+            localStorage.removeItem(storageGlobalKey);
+            localStorage.setItem(storageGlobalKey, serializedGlobalSettings);
+        }
+    }
+
+    private void storeGlobalSettingsOnServer(String serializedGlobalSettings) {
+        userService.setPreference(storageGlobalKey, serializedGlobalSettings);
     }
 
     public void retrieveDefaultSettings(PerspectiveCompositeSettings<PS> defaultSettings, final DefaultSettingsLoadedCallback<PS> asyncCallback) {
@@ -69,14 +86,15 @@ public class DefaultSettingsStorage<PS extends Settings> {
             AsyncCallback<String> globalSettingsAsyncCallback = new AsyncCallback<String>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    settingsJsonRetrievement.setError(caught);
+                    lastError = caught;
+                    settingsJsonRetrievement.receiveError(caught);
                     onSuccess(null);
                 }
                 
                 @Override
                 public void onSuccess(String globalSettingsJson) {
                     settingsJsonRetrievement.receiveGlobalSettingsJson(globalSettingsJson);
-                    if(settingsJsonRetrievement.isRetrievementComplete()) {
+                    if(settingsJsonRetrievement.hasAllCallbacksReceived()) {
                         continueRetrieveDefaultSettings(settingsJsonRetrievement, asyncCallback);
                     }
                 }
@@ -86,14 +104,15 @@ public class DefaultSettingsStorage<PS extends Settings> {
             AsyncCallback<String> contextSpecificSettingsAsyncCallback = new AsyncCallback<String>() {
                 @Override
                 public void onFailure(Throwable caught) {
-                    settingsJsonRetrievement.setError(caught);
+                    lastError = caught;
+                    settingsJsonRetrievement.receiveError(caught);
                     onSuccess(null);
                 }
                 
                 @Override
                 public void onSuccess(String contextSpecificSettingsJson) {
                     settingsJsonRetrievement.receiveContextSpecificSettingsJson(contextSpecificSettingsJson);
-                    if(settingsJsonRetrievement.isRetrievementComplete()) {
+                    if(settingsJsonRetrievement.hasAllCallbacksReceived()) {
                         continueRetrieveDefaultSettings(settingsJsonRetrievement, asyncCallback);
                     }
                 }
@@ -107,7 +126,7 @@ public class DefaultSettingsStorage<PS extends Settings> {
     }
     
     private void continueRetrieveDefaultSettings(
-            DefaultSettingsStorage<PS>.SettingsJsonRetrievement settingsJsonRetrievement, DefaultSettingsLoadedCallback<PS> callback) {
+            SettingsStorageManager<PS>.SettingsJsonRetrievement settingsJsonRetrievement, DefaultSettingsLoadedCallback<PS> callback) {
         PerspectiveCompositeSettings<PS> defaultSettings = settingsJsonRetrievement.getDefaultSettings();
         if(settingsJsonRetrievement.getGlobalSettingsJson() != null) {
             defaultSettings = jsonSerializer.deserialize(defaultSettings, settingsJsonRetrievement.getGlobalSettingsJson());
@@ -127,71 +146,59 @@ public class DefaultSettingsStorage<PS extends Settings> {
     private PerspectiveCompositeSettings<PS> retrieveGlobalSettingsFromLocalStorage(PerspectiveCompositeSettings<PS> defaultSettings) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
-            String serializedSettings = localStorage.getItem(storageRootPerspectiveKey);
+            String serializedSettings = localStorage.getItem(storageGlobalKey);
             defaultSettings = jsonSerializer.deserialize(defaultSettings, serializedSettings);
         }
         return defaultSettings;
     }
     
     private PerspectiveCompositeSettings<PS> retrieveContextSpecificSettingsFromLocalStorage(PerspectiveCompositeSettings<PS> defaultSettings) {
-        //TODO retrieve context specific settings accordingly
+        Storage localStorage = Storage.getLocalStorageIfSupported();
+        if (localStorage != null) {
+            String serializedSettings = localStorage.getItem(storageContextSpecificKey);
+            defaultSettings = jsonSerializer.deserialize(defaultSettings, serializedSettings);
+        }
         return defaultSettings;
     }
 
     private void retrieveGlobalSettingsJsonFromServer(AsyncCallback<String> asyncCallback) {
-        userService.getPreference(storageRootPerspectiveKey, asyncCallback);
+        userService.getPreference(storageGlobalKey, asyncCallback);
     }
     
     private void retrieveContextSpecificSettingsJsonFromServer(AsyncCallback<String> asyncCallback) {
-        //TODO retrieve context specific settings accordingly
-        asyncCallback.onSuccess(null);
+        userService.getPreference(storageContextSpecificKey, asyncCallback);
     }
 
     private PerspectiveCompositeSettings<PS> retrieveDefaultSettingsFromUrl(PerspectiveCompositeSettings<PS> defaultSettings) {
         return urlSerializer.deserializeFromCurrentLocation(defaultSettings);
     }
     
-    private class SettingsJsonRetrievement {
+    private class SettingsJsonRetrievement extends CallbacksJoinerHelper<String, String> {
         private PerspectiveCompositeSettings<PS> defaultSettings;
-        private boolean globalSettingsReceived = false;
-        private boolean contextSpecificSettingsReceived = false;
-        private String globalSettingsJson;
-        private String contextSpecificSettingsJson;
-        private Throwable caught;
         
         public SettingsJsonRetrievement(PerspectiveCompositeSettings<PS> defaultSettings) {
             this.defaultSettings = defaultSettings;
         }
         
         public String getGlobalSettingsJson() {
-            return globalSettingsJson;
+            return getFirstCallbackResult();
         }
         public void receiveGlobalSettingsJson(String globalSettingsJson) {
-            this.globalSettingsJson = globalSettingsJson;
-            this.globalSettingsReceived = true;
+            receiveFirstCallbackResult(globalSettingsJson);
         }
         public String getContextSpecificSettingsJson() {
-            return contextSpecificSettingsJson;
+            return getSecondCallbackResult();
         }
         public void receiveContextSpecificSettingsJson(String contextSpecificSettingsJson) {
-            this.contextSpecificSettingsJson = contextSpecificSettingsJson;
-            this.contextSpecificSettingsReceived = true;
-        }
-        public boolean isRetrievementComplete() {
-            return globalSettingsReceived && contextSpecificSettingsReceived;
+            receiveContextSpecificSettingsJson(contextSpecificSettingsJson);
         }
         public PerspectiveCompositeSettings<PS> getDefaultSettings() {
             return defaultSettings;
         }
-        public void setError(Throwable caught) {
-            this.caught = caught;
-        }
-        public boolean isErrorOccurred() {
-            return caught != null;
-        }
-        public Throwable getCaught() {
-            return caught;
-        }
+    }
+    
+    public Throwable getLastServerError() {
+        return lastError;
     }
 
     //TODO replace mockups with real implementation

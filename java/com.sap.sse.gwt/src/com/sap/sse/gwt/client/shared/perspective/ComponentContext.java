@@ -1,31 +1,28 @@
-package com.sap.sse.gwt.client.shared.components;
+package com.sap.sse.gwt.client.shared.perspective;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.defaultsettings.DefaultSettingsLoadedCallback;
-import com.sap.sse.gwt.client.shared.defaultsettings.DefaultSettingsStorage;
-import com.sap.sse.gwt.client.shared.perspective.AbstractRootPerspectiveComposite;
-import com.sap.sse.gwt.client.shared.perspective.Perspective;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
+import com.sap.sse.gwt.client.shared.components.Component;
 
-public class ComponentContext<PS extends Settings> {
+public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS extends Settings> {
     
-    private final DefaultSettingsStorage<PS> defaultSettingsStorage;
-    private final PerspectiveLifecycle<PS> rootPerspectiveLifecycle;
+    private final SettingsStorageManager<PS> settingsStorageManager;
+    private final PL rootPerspectiveLifecycle;
     
     /**
      * Settings tree with defaults for all components.
      */
     private PerspectiveCompositeSettings<PS> currentDefaultSettings = null;
     
-    public ComponentContext(PerspectiveLifecycle<PS> rootPerspectiveLifecycle) {
+    private PerspectiveLifecycleWithAllSettings<PL, PS> rootPerspectiveLifecycleWithCurrentDefaultSettings = null;
+    
+    public ComponentContext(String entryPointId, PL rootPerspectiveLifecycle, String...contextDefinitionParameters) {
         this.rootPerspectiveLifecycle = rootPerspectiveLifecycle;
-        this.defaultSettingsStorage = new DefaultSettingsStorage<>(rootPerspectiveLifecycle.getComponentId());
+        this.settingsStorageManager = new SettingsStorageManager<>(entryPointId + "+" + rootPerspectiveLifecycle.getComponentId(), buildContextDefinitionId(contextDefinitionParameters));
     }
     
     public void initDefaultSettings(final DefaultSettingsLoadedCallback<PS> asyncCallback) {
@@ -33,7 +30,7 @@ public class ComponentContext<PS extends Settings> {
             throw new IllegalStateException("Settings have been already initialized. You may only call this method once.");
         }
         PerspectiveCompositeSettings<PS> systemDefaultSettings = rootPerspectiveLifecycle.createDefaultSettings();
-        defaultSettingsStorage.retrieveDefaultSettings(systemDefaultSettings, new DefaultSettingsLoadedCallback<PS>() {
+        settingsStorageManager.retrieveDefaultSettings(systemDefaultSettings, new DefaultSettingsLoadedCallback<PS>() {
 
             @Override
             public void onError(Throwable caught, PerspectiveCompositeSettings<PS> fallbackDefaultSettings) {
@@ -43,6 +40,7 @@ public class ComponentContext<PS extends Settings> {
             @Override
             public void onSuccess(PerspectiveCompositeSettings<PS> result) {
                 currentDefaultSettings = result;
+                rootPerspectiveLifecycleWithCurrentDefaultSettings = new PerspectiveLifecycleWithAllSettings<>(rootPerspectiveLifecycle, result);
                 //assure, the defaults are not modified outside of context
                 asyncCallback.onSuccess(rootPerspectiveLifecycle.cloneSettings(result));
             }
@@ -70,22 +68,24 @@ public class ComponentContext<PS extends Settings> {
         storeNewDefaultSettings(newRootPerspectiveSettings);
     }
     
+    public PL getRootPerspectiveLifecycle() {
+        return rootPerspectiveLifecycle;
+    }
+    
+    public PerspectiveLifecycleWithAllSettings<PL, PS> getRootPerspectiveLifecycleWithCurrentDefaultSettings() {
+        return rootPerspectiveLifecycleWithCurrentDefaultSettings;
+    }
+    
     private void storeNewDefaultSettings(PerspectiveCompositeSettings<PS> newRootPerspectiveSettings) {
         // TODO split settings in global settings and context specific
-        defaultSettingsStorage.storeGlobalSettings(extractGlobalSettings(newRootPerspectiveSettings));
-        defaultSettingsStorage.storeContextSpecificSettings(extractContextSpecificSettings(newRootPerspectiveSettings));
+        settingsStorageManager.storeGlobalSettings(extractGlobalSettings(newRootPerspectiveSettings));
+        settingsStorageManager.storeContextSpecificSettings(extractContextSpecificSettings(newRootPerspectiveSettings));
     }
 
-    private PerspectiveCompositeSettings<PS> extractContextSpecificSettings(PerspectiveCompositeSettings<PS> newRootPerspectiveSettings) {
-        // TODO Auto-generated method stub
-        return newRootPerspectiveSettings;
-    }
+    protected abstract PerspectiveCompositeSettings<PS> extractContextSpecificSettings(PerspectiveCompositeSettings<PS> newRootPerspectiveSettings);
 
-    private PerspectiveCompositeSettings<PS> extractGlobalSettings(
-            PerspectiveCompositeSettings<PS> newRootPerspectiveSettings) {
-        // TODO Auto-generated method stub
-        return newRootPerspectiveSettings;
-    }
+    protected abstract PerspectiveCompositeSettings<PS> extractGlobalSettings(
+            PerspectiveCompositeSettings<PS> newRootPerspectiveSettings);
 
     private<T extends Settings> PerspectiveCompositeSettings<?> updatePerspectiveLifecycleWithAllSettings(Perspective<T> perspective, Component<? extends Settings> replaceComponent, Settings replaceComponentNewDefaultSettings) {
         PerspectiveLifecycleWithAllSettings<?,T> perspectiveLifecycleWithAllSettings = perspective.getPerspectiveLifecycleWithAllSettings();
@@ -109,6 +109,41 @@ public class ComponentContext<PS extends Settings> {
         } else {
             return allSettings;
         }
+    }
+    
+    public Throwable getLastServerError() {
+        return settingsStorageManager.getLastServerError();
+    }
+    
+    public PerspectiveCompositeSettings<PS> getDefaultSettingsForRootPerspective() {
+        return rootPerspectiveLifecycle.cloneSettings(currentDefaultSettings);
+    }
+    
+    private static String buildContextDefinitionId(String[] contextDefinitionParameters) {
+        StringBuilder str = new StringBuilder("<");
+        for(String contextDefinitionParameter : contextDefinitionParameters) {
+            if(contextDefinitionParameter != null) {
+                str.append(contextDefinitionParameter);
+            }
+            str.append(";");
+        }
+        str.append(">");
+        return str.toString();
+    }
+
+    public<T> AsyncCallbackWithSettingsRetrievementJoiner<T, PS> createAsyncCallbackJoiner(
+            AsyncCallback<T> callbackToWrap) {
+        return new AsyncCallbackWithSettingsRetrievementJoiner<>(this, callbackToWrap);
+    }
+    
+    public static<PS1 extends Settings, PS2 extends Settings> void initMultipleDefaultSettings(ComponentContext<?, PS1> context1, ComponentContext<?, PS2> context2, final IOnDefaultSettingsLoaded onDefaultSettingsLoaded) {
+        DoubleSettingsRetrievementJoiner<PS1, PS2> joiner = new DoubleSettingsRetrievementJoiner<PS1, PS2>(context1, context2) {
+            @Override
+            public void onAllDefaultSettingsLoaded() {
+                onDefaultSettingsLoaded.onLoaded();
+            }
+        };
+        joiner.startSettingsRetrievementAndJoinAsyncCallback();
     }
     
 }
