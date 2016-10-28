@@ -63,7 +63,7 @@ public class MarkPassingCalculator {
      */
     private final Thread listenerThread;
 
-    private Listen listenThread;
+    private final Listen listenThread;
     
     /**
      * Synchronized using the {@link #listenerThread} as monitor object.
@@ -84,6 +84,7 @@ public class MarkPassingCalculator {
             listenerThread = new Thread(listenThread, "MarkPassingCalculator for race " + race.getRace().getName());
         } else {
             listenerThread = null;
+            listenThread = null;
         }
         Thread t = new Thread(() -> {
             final Set<Callable<Void>> tasks = new HashSet<>();
