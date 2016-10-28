@@ -285,7 +285,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         layoutTable.setWidget(++row, 1, ignoreTracTracMarkPassingsCheckbox);
         
         // Filter
-        Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
+        Label racesFilterLabel = new Label(stringMessages.filterRaces() + ":");
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         racesTable = new FlushableCellTable<TracTracRaceRecordDTO>(10000, tableResources);
         racesTable.ensureDebugId("TrackableRacesCellTable");
