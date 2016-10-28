@@ -143,7 +143,7 @@ public class MarkPassingCalculator {
      */
     public void lockForRead() {
         if (listenThread != null) {
-            listenThread.lockRead();
+            listenThread.lockForRead();
         }
     }
     
@@ -152,7 +152,7 @@ public class MarkPassingCalculator {
      */
     public void unlockForRead() {
         if (listenThread != null) {
-            listenThread.unlockRead();
+            listenThread.unlockAfterRead();
         }
     }
 
@@ -174,11 +174,11 @@ public class MarkPassingCalculator {
             lock = new NamedReentrantReadWriteLock("lock for calculation thread (" + Listen.class.getSimpleName() + ")", /* fair */ false);
         }
         
-        public void lockRead() {
+        public void lockForRead() {
             LockUtil.lockForRead(lock);
         }
         
-        public void unlockRead() {
+        public void unlockAfterRead() {
             LockUtil.unlockAfterRead(lock);
         }
 
