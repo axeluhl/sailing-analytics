@@ -5811,11 +5811,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (trackedRace != null) {
             Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(), competitorDTO.getIdAsString());
             Set<MarkPassing> competitorMarkPassings;
-            if (waitForCalculations) {
-                competitorMarkPassings = trackedRace.getMarkPassings(competitor, /* waitForLatestUpdates */ true);
-            } else {
-                competitorMarkPassings = trackedRace.getMarkPassings(competitor);    
-            }
+            competitorMarkPassings = trackedRace.getMarkPassings(competitor, waitForCalculations);
             Iterable<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints();
             if (competitorMarkPassings != null) {
                 for (MarkPassing markPassing : competitorMarkPassings) {
