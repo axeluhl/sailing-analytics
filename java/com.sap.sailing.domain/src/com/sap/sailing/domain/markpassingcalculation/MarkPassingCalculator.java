@@ -63,15 +63,15 @@ public class MarkPassingCalculator {
      */
     private final Thread listenerThread;
 
-    private final Listen listenThread;
+    private final Listen listen;
     
     /**
      * Synchronized using the {@link #listenerThread} as monitor object.
      */
     private boolean listenerThreadStarted;
 
-    public MarkPassingCalculator(DynamicTrackedRace race, boolean listen, boolean waitForInitialMarkPassingCalculation) {
-        if (listen) {
+    public MarkPassingCalculator(DynamicTrackedRace race, boolean doListen, boolean waitForInitialMarkPassingCalculation) {
+        if (doListen) {
             listener = new MarkPassingUpdateListener(race);
         } else {
             listener = null;
@@ -79,12 +79,12 @@ public class MarkPassingCalculator {
         this.race = race;
         finder = new CandidateFinderImpl(race, executor);
         chooser = new CandidateChooserImpl(race);
-        if (listen) {
-            listenThread = new Listen(race.getRace().getName());
-            listenerThread = new Thread(listenThread, "MarkPassingCalculator for race " + race.getRace().getName());
+        if (doListen) {
+            listen = new Listen(race.getRace().getName());
+            listenerThread = new Thread(listen, "MarkPassingCalculator for race " + race.getRace().getName());
         } else {
             listenerThread = null;
-            listenThread = null;
+            listen = null;
         }
         Thread t = new Thread(() -> {
             final Set<Callable<Void>> tasks = new HashSet<>();
@@ -100,7 +100,7 @@ public class MarkPassingCalculator {
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to compute initial set of mark passings for race "+race.getRace().getName(), e);
             }
-            if (listen) {
+            if (doListen) {
                 listenerThread.setDaemon(true);
                 listenerThread.start();
                 synchronized (listenerThread) {
@@ -140,20 +140,22 @@ public class MarkPassingCalculator {
     /**
      * It's used for locking the calculation thread for read. You will be blocked if the calculation is in progress.
      * Make sure that you unlock the thread with the method {@link MarkPassingCalculator#unlockForRead()} once you don't
-     * need it any more.
+     * need it any more, using a {@code finally} clause to ensure unlocking even with abnormal termination.
      */
     public void lockForRead() {
-        if (listenThread != null) {
-            listenThread.lockForRead();
+        if (listen != null) {
+            listen.lockForRead();
         }
     }
     
     /**
      * Unlocks the calculation thread for read.
+     * 
+     * @see #lockForRead
      */
     public void unlockForRead() {
-        if (listenThread != null) {
-            listenThread.unlockAfterRead();
+        if (listen != null) {
+            listen.unlockAfterRead();
         }
     }
 
@@ -203,11 +205,11 @@ public class MarkPassingCalculator {
                         List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                         try {
                             allNewFixInsertions.add(listener.getQueue().take());
-                            LockUtil.lockForWrite(lock);
                         } catch (InterruptedException e) {
                             logger.log(Level.SEVERE, "MarkPassingCalculator for "+raceName+" threw exception " + e.getMessage()
                                     + " while waiting for new GPSFixes");
                         }
+                        LockUtil.lockForWrite(lock);
                         listener.getQueue().drainTo(allNewFixInsertions);
                         logger.fine("MPC for "+raceName+" received "+ allNewFixInsertions.size()+" new updates.");
                         for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
