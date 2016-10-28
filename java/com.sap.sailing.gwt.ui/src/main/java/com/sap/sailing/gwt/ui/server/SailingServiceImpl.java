@@ -5812,7 +5812,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(), competitorDTO.getIdAsString());
             Set<MarkPassing> competitorMarkPassings;
             if (waitForCalculations) {
-                competitorMarkPassings = trackedRace.getUpdatedMarkPassings(competitor);
+                competitorMarkPassings = trackedRace.getMarkPassings(competitor, /* waitForLatestUpdates */ true);
             } else {
                 competitorMarkPassings = trackedRace.getMarkPassings(competitor);    
             }

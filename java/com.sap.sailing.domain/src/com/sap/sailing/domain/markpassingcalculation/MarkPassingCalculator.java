@@ -170,6 +170,13 @@ public class MarkPassingCalculator {
      */
     private class Listen implements Runnable {
         private final String raceName;
+        
+        /**
+         * The write lock is being held by the thread running this {@link Runnable} after successfully having
+         * waited for the next update to be pushed to the {@link MarkPassingUpdateListener#getQueue() queue},
+         * before draining the queue starts and until the processing of all events from the queue has completed.
+         * This way, trying to obtain the read lock will block until all pending updates have been processed.
+         */
         private final NamedReentrantReadWriteLock lock;
         
         public Listen(String raceName) {

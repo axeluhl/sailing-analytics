@@ -862,7 +862,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public NavigableSet<MarkPassing> getUpdatedMarkPassings(Competitor competitor) {
+    public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates) {
         return null;
     }
 
