@@ -697,16 +697,12 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
     
     /**
-     * Returns mark passings for the competitor. It doesn't wait for the end of an active calculation which will update
-     * competitor's mark passings. If you want to wait the end of calculations then call
-     * {@code SailingService#getCompetitorMarkPassings(RegattaAndRaceIdentifier, CompetitorDTO, boolean)} with true flag
-     * of waitForCalculations parameter
+     * Returns mark passings for the competitor. Using the {@code waitForCalculations} parameter callers can control
+     * whether to obtain a snapshot immediately of wait for pending updates. Waiting may be desirable, e.g., when having
+     * submitted a fixed mark passing into a race log which triggers the re-calculations asynchronously.
      */
     void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
             boolean waitForCalculations, AsyncCallback<Map<Integer, Date>> callback);
-
-    void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
-            AsyncCallback<Map<Integer, Date>> callback);
 
     void getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName, String fleetName,
             CompetitorDTO competitor, AsyncCallback<Map<Integer, Date>> callback);
