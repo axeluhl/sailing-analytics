@@ -716,7 +716,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             markPassingCalculator.lockForRead();
         }
         try {
-            return getMarkPassings(competitor);
+            return markPassingsForCompetitor.get(competitor);
         } finally {
             if (waitForLatestUpdates && markPassingCalculator != null) {
                 markPassingCalculator.unlockForRead();
