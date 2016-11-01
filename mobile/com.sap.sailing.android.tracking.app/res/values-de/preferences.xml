@@ -4,8 +4,7 @@
     
     <string name="preference_energy_saving_sending_interval">Sendeintervall für GPS-Updates auswählen</string> 
     <string name="preference_energy_saving_sending_interval_summary">Wählen Sie den größtmöglichen Wert, der dennoch eine dem Anwendungsfall entsprechend hohe Aktualisierungsrate ermöglicht.</string>
-    <string name="preference_energy_saving_enabled_automatically">Der Energiesparmodus wurde automatisch aktiviert, GPS Updates werden alle 20 Sekunden an den Server gesendet. Diese Einstellung wird überschrieben, wenn Sie oben ein anderes Intervall auswählen.</string>
-    
+   
     <string name="preference_energy_saving_sending_interval_message">GPS Updates werden%1$s %2$s an den Server gesendet.</string>
     <string name="preference_energy_saving_sending_interval_message_every">alle</string>
     <string-array name="preference_energy_saving_sending_interval_entries">

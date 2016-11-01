@@ -14,6 +14,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
@@ -65,6 +66,12 @@ public class PositionTest {
         Position northPole = new DegreePosition(90, 0);
         Position southPole = new DegreePosition(-90, 0);
         assertEquals(20004, Math.abs(southPole.getDistance(northPole).getKilometers()), 0.0001);
+    }
+    
+    @Test
+    public void radTest() {
+        assertEquals(180, new MeterDistance(20005000).getCentralAngleDeg(), 0.01);
+        assertEquals(Math.PI, new MeterDistance(20005000).getCentralAngleRad(), 0.01);
     }
     
     @Test

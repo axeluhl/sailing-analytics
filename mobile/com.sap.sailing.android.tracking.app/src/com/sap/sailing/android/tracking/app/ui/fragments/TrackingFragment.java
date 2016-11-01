@@ -2,7 +2,10 @@ package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -16,8 +19,10 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.services.TrackingService;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
@@ -30,8 +35,8 @@ public class TrackingFragment extends BaseFragment {
     static final String SIS_GPS_ACCURACY = "instanceStateGpsAccuracy";
     static final String SIS_GPS_UNSENT_FIXES = "instanceStateGpsUnsentFixes";
 
-    private AppPreferences prefs;
     private long lastGPSQualityUpdate;
+    private BroadcastReceiver gpsDisabledReceiver;
     private Toast gpsToast;
     private boolean gpsFound = true;
 
@@ -40,11 +45,8 @@ public class TrackingFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_tracking, container, false);
-
         prefs = new AppPreferences(getActivity());
-
         return view;
     }
 
@@ -53,7 +55,28 @@ public class TrackingFragment extends BaseFragment {
         super.onResume();
         // so it initally updates to "battery-saving" etc.
         setAPIConnectivityStatus(APIConnectivity.noAttempt);
+        
+        //setup receiver to get message from tracking service if GPS is disabled while tracking
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(TrackingService.GPS_DISABLED_MESSAGE); 
+
+        gpsDisabledReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
+            }
+        };
+        getActivity().registerReceiver(gpsDisabledReceiver,filter);
+        if (!isLocationEnabled(getActivity())) {
+            LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
+        }
     }
+    
+    @Override
+    public void onStop() {
+        super.onStop();
+        getActivity().unregisterReceiver(gpsDisabledReceiver);
+    };
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -116,7 +139,6 @@ public class TrackingFragment extends BaseFragment {
     public void updateTrackingStatus(GPSQuality quality) {
         if (isAdded()) {
             TextView textView = (TextView) getActivity().findViewById(R.id.tracking_status);
-
             if (quality == GPSQuality.noSignal) {
                 textView.setText(getString(R.string.tracking_status_no_gps_signal));
                 textView.setTextColor(getResources().getColor(R.color.sap_red));
@@ -129,7 +151,9 @@ public class TrackingFragment extends BaseFragment {
             } else {
                 textView.setText(getString(R.string.tracking_status_tracking));
                 textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
-                gpsToast.cancel();
+                if (gpsToast == null) {
+                    gpsToast.cancel();
+                }
                 //GPS was lost before but is available again now --> show gpsFound toast
                 if (!gpsFound) {
                     gpsToast = Toast.makeText(getActivity(),getString(R.string.tracking_status_gps_found), Toast.LENGTH_SHORT);
@@ -152,14 +176,8 @@ public class TrackingFragment extends BaseFragment {
                 public void run() {
                     TextView textView = (TextView) getActivity().findViewById(R.id.mode);
                     if (apiConnectivity == APIConnectivity.transmissionSuccess) {
-                        if (prefs.getEnergySavingEnabledAutomatically() && !prefs.getEnergySavingOverride()) {
-                            textView.setText(getString(R.string.tracking_mode_battery_saving));
-                            textView.setTextColor(getResources().getColor(R.color.sap_red));
-                        } else {
-                            textView.setText(getString(R.string.tracking_mode_live));
-                            textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
-                        }
-
+                        textView.setText(getString(R.string.tracking_mode_live));
+                        textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
                     } else if (apiConnectivity == APIConnectivity.noAttempt) {
                         textView.setText(getString(R.string.tracking_mode_offline));
                         textView.setTextColor(getResources().getColor(R.color.fiori_text_color));
