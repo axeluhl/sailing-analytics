@@ -13,12 +13,15 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -375,6 +378,33 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             @Override
             public void onSuccess(Void result) {
                 Window.alert(stringMessages.successfullyAllowedCompetitorReset(competitors.toString()));
+            }
+        });
+    }
+
+    /**
+     * Use this method if you want to make some rows grayed out with a tool tip
+     */
+    public void grayOutCompetitors(final List<CompetitorWithToolTipDTO> competitors) {
+        table.addCellPreviewHandler(new CellPreviewEvent.Handler<CompetitorDTO>() {
+            @Override
+            public void onCellPreview(CellPreviewEvent<CompetitorDTO> event) {
+                for (CompetitorWithToolTipDTO competitor : competitors) {
+                    if (competitor.getCompetitor().equals(event.getValue())) {
+                        table.getRowElement(event.getIndex()).setTitle(competitor.getToolTipMessage());
+                    }
+                }
+            }
+        });
+        table.setRowStyles(new RowStyles<CompetitorDTO>() {
+            @Override
+            public String getStyleNames(CompetitorDTO row, int rowIndex) {
+                for (CompetitorWithToolTipDTO competitor : competitors) {
+                    if (competitor.getCompetitor().equals(row)) {
+                        return tableRes.cellTableStyle().cellTableDisabledRow();
+                    }
+                }
+                return "";
             }
         });
     }

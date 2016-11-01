@@ -1,7 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -10,8 +16,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
+import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -20,9 +29,11 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     private String fleetName;
     private String raceColumnName;
     private CheckBox competitorRegistrationInRaceLogCheckBox;
+    private final Map<String, Set<CompetitorDTO>> fleetNameWithCompetitors;
     
     private static class Validator implements com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<Set<CompetitorDTO>> {
         private CheckBox competitorRegistrationInRaceLogCheckBox;
+        private Map<String, Set<CompetitorDTO>> fleetsWithCompetitors;
         private final StringMessages stringMessages;
         
         public Validator(StringMessages stringMessages) {
@@ -31,12 +42,35 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
 
         @Override
         public String getErrorMessage(Set<CompetitorDTO> valueToValidate) {
-            final String result;
+            String result = null;
             if (getCompetitorRegistrationInRaceLogCheckBox() != null && !getCompetitorRegistrationInRaceLogCheckBox().getValue()) {
                 result = stringMessages.competitorRegistrationsOnRaceDisabled();
             } else {
-                result = null;
+                Set<CompetitorDTO> difference = new HashSet<>();
+                for (Set<CompetitorDTO> competitors : fleetsWithCompetitors.values()) {
+                    difference.addAll(intersection(valueToValidate, competitors));
+                }
+                if (!difference.isEmpty()) {
+                    result = stringMessages.warningForDisabledCompetitors(createLineOfCompetitors(difference));
+                }
             }
+            return result;
+        }
+        
+        private String createLineOfCompetitors(Set<CompetitorDTO> competitors) {
+            StringBuilder lineOfCompetitors = new StringBuilder();
+            if (!competitors.isEmpty()) {
+                for (CompetitorDTO competitor : competitors) {
+                    lineOfCompetitors.append(competitor.getName()).append(", ");
+                }
+                lineOfCompetitors.delete(lineOfCompetitors.length() - 2, lineOfCompetitors.length() - 1);
+            }
+            return lineOfCompetitors.toString();
+        }
+        
+        private Set<CompetitorDTO> intersection(Set<CompetitorDTO> firstSet, Set<CompetitorDTO> secondSet) {
+            Set<CompetitorDTO> result = new LinkedHashSet<>(firstSet);
+            result.retainAll(secondSet);
             return result;
         }
         
@@ -46,6 +80,10 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
 
         public void setCompetitorRegistrationInRaceLogCheckBox(CheckBox competitorRegistrationInRaceLogCheckBox) {
             this.competitorRegistrationInRaceLogCheckBox = competitorRegistrationInRaceLogCheckBox;
+        }
+
+        public void setFleetWithCompetitors(Map<String, Set<CompetitorDTO>> fleetNameWithCompetitors) {
+            this.fleetsWithCompetitors = fleetNameWithCompetitors;
         }
     }
 
@@ -64,9 +102,64 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass, validator);
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
+        fleetNameWithCompetitors = new HashMap<>();
+        findCompetitorsFromTheSameRaceColumn();
         competitorRegistrationInRaceLogCheckBox = new CheckBox(stringMessages.registerCompetitorsOnRace());
         validator.setCompetitorRegistrationInRaceLogCheckBox(competitorRegistrationInRaceLogCheckBox);
+        validator.setFleetWithCompetitors(fleetNameWithCompetitors);
         setupCompetitorRegistationsOnRaceCheckbox();
+    }
+
+    private void findCompetitorsFromTheSameRaceColumn() {
+        fleetNameWithCompetitors.clear();
+        sailingService.getLeaderboard(leaderboardName, new AsyncCallback<StrippedLeaderboardDTO>() {
+            @Override
+            public void onSuccess(StrippedLeaderboardDTO result) {
+                final List<FleetDTO> fleets = result.getRaceColumnByName(raceColumnName).getFleets();
+                for (FleetDTO fleetDTO : fleets) {
+                    final String curFleetName = fleetDTO.getName();
+                    if (!curFleetName.equals(fleetName)) {
+                        sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName,
+                                curFleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
+        
+                                    @Override
+                                    public void onSuccess(Collection<CompetitorDTO> result) {
+                                        fleetNameWithCompetitors.put(curFleetName, new HashSet<>(result));
+                                        //if the data was gained completely then gray out specific rows
+                                        if (fleetNameWithCompetitors.size() == fleets.size() - 1) {
+                                            grayOutRows();
+                                        }
+                                    }
+                                    
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        errorReporter.reportError("Could not load already registered competitors: "
+                                                + caught.getMessage());
+                                    }
+                                });
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Could not load leaderboard: " + caught.getMessage());
+            }
+        });
+    }
+
+    private void grayOutRows() {
+        List<CompetitorWithToolTipDTO> competitors = new ArrayList<>();
+        for (Map.Entry<String, Set<CompetitorDTO>> entry : fleetNameWithCompetitors.entrySet()) {
+            if (!entry.getKey().equals(fleetName)) {
+                for (CompetitorDTO competitor : entry.getValue()) {
+                    competitors.add(new CompetitorWithToolTipDTO(competitor,
+                            stringMessages.toolTipMessage(competitor.getName(), fleetName, entry.getKey(), raceColumnName)));
+                }
+            }
+        }
+        allCompetitorsTable.grayOutCompetitors(competitors);
+        registeredCompetitorsTable.grayOutCompetitors(competitors);
     }
 
     @Override
