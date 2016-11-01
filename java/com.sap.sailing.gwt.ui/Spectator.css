@@ -162,6 +162,7 @@ input.magnifier {
 .mainPanel {
 	width: 100%;
 	margin-left: 13px;
+	margin-bottom: 120px;
 }
 
 .leaderboardGroupPanel-GroupName {
@@ -209,8 +210,8 @@ input.magnifier {
     padding: 5px;
 	display: block;
 	float: left;
-	width: 8px;
-	height: 8px;
+	width: 18px;
+	height: 18px;
 	border-radius: 4px;
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
