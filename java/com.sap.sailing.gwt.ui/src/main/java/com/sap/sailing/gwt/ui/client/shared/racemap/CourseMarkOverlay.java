@@ -21,9 +21,9 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
-import com.sap.sailing.gwt.ui.shared.racemap.BoatMarkVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphics;
+import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphicsFactory;
 import com.sap.sse.common.Util;
 
 /**
@@ -55,6 +55,8 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     private Boolean lastShowBuoyZone;
     private Boolean lastIsSelected;
     private Distance lastBuoyZoneRadius;
+    
+    private MarkVectorGraphicsFactory markVectorGraphicsFactory;
 
     public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO, CoordinateSystem coordinateSystem, CoursePositionsDTO coursePositionsDTO) {
         super(map, zIndex, coordinateSystem);
@@ -63,12 +65,9 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         this.position = markDTO.position;
         this.buoyZoneRadius = new MeterDistance(0.0);
         this.showBuoyZone = false;
-        if(markDTO.type == MarkType.STARTBOAT || markDTO.type == MarkType.FINISHBOAT) {
-        	this.markVectorGraphics = new BoatMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
-        } else {
-        	this.markVectorGraphics = new MarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
-        }
         this.markScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
+        this.markVectorGraphicsFactory = new MarkVectorGraphicsFactory();
+        this.markVectorGraphics = markVectorGraphicsFactory.getMarkVectorGraphics(markDTO.type, markDTO);
         setCanvasSize(50, 50);
     }
     
