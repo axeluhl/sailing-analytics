@@ -55,6 +55,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.competitorimport.CompetitorDescriptor;
+import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
@@ -106,6 +108,7 @@ import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
+import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -182,11 +185,13 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTOFactory;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -301,6 +306,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrack
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -505,6 +511,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private final ServiceTracker<ScoreCorrectionProvider, ScoreCorrectionProvider> scoreCorrectionProviderServiceTracker;
 
+    private final ServiceTracker<CompetitorProvider, CompetitorProvider> competitorProviderServiceTracker;
+
     private final MongoObjectFactory mongoObjectFactory;
 
     private final SwissTimingAdapterPersistence swissTimingAdapterPersistence;
@@ -581,6 +589,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 /* raceLogResolver */ getService());
         scoreCorrectionProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context,
                 ScoreCorrectionProvider.class);
+        competitorProviderServiceTracker = ServiceTrackerFactory.createAndOpen(context, CompetitorProvider.class);
         tractracDomainObjectFactory = com.sap.sailing.domain.tractracadapter.persistence.PersistenceFactory.INSTANCE
                 .createDomainObjectFactory(mongoObjectFactory.getDatabase(), getTracTracAdapter()
                         .getTracTracDomainFactory());
@@ -679,6 +688,96 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             hasResultsForBoatClassFromDateByEventName.put(e.getKey(), set);
         }
         return new ScoreCorrectionProviderDTO(scoreCorrectionProvider.getName(), hasResultsForBoatClassFromDateByEventName);
+    }
+
+    @Override
+    public Iterable<String> getCompetitorProviderNames() {
+        List<String> result = new ArrayList<String>();
+        for (CompetitorProvider competitorProvider : getAllCompetotorProviders()) {
+            result.add(competitorProvider.getName());
+        }
+        return result;
+    }
+
+    private Iterable<CompetitorProvider> getAllCompetotorProviders() {
+        final Object[] services = competitorProviderServiceTracker.getServices();
+        List<CompetitorProvider> result = new ArrayList<CompetitorProvider>();
+        if (services != null) {
+            for (Object service : services) {
+                result.add((CompetitorProvider) service);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public CompetitorProviderDTO getCompetitorProviderDTOByName(String providerName) throws Exception {
+        CompetitorProviderDTO result = null;
+        for (CompetitorProvider competitorProvider : getAllCompetotorProviders()) {
+            if (competitorProvider.getName().equals(providerName)) {
+                result = convertToCompetitorProviderDTO(competitorProvider);
+                break;
+            }
+        }
+        return result;
+    }
+
+    private CompetitorProviderDTO convertToCompetitorProviderDTO(CompetitorProvider competitorProvider)
+            throws Exception {
+        Map<String, Set<String>> hasResultsForRegattaByEventName = new HashMap<String, Set<String>>();
+        for (Map.Entry<String, Set<String>> entry : competitorProvider
+                .getHasCompetitorsForRegattasInEvent().entrySet()) {
+            Set<String> regattas = new HashSet<>(entry.getValue());
+            hasResultsForRegattaByEventName.put(entry.getKey(), regattas);
+        }
+        return new CompetitorProviderDTO(competitorProvider.getName(), hasResultsForRegattaByEventName);
+    }
+
+    @Override
+    public Iterable<CompetitorDescriptorDTO> getCompetitorDescriptors(String competitorProviderName, String eventName,
+            String regattaName) throws Exception {
+        for (CompetitorProvider cp : getAllCompetotorProviders()) {
+            if (cp.getName().equals(competitorProviderName)) {
+                Iterable<CompetitorDescriptor> competitorDescriptors = cp.getCompetitorDescriptors(eventName, regattaName);
+                Set<CompetitorDescriptorDTO> competitorDescriptorDTOs = getCompetitorProviderDTOs(competitorDescriptors);
+                return competitorDescriptorDTOs;
+            }
+        }
+        return Collections.emptySet();
+    }
+
+    private Set<CompetitorDescriptorDTO> getCompetitorProviderDTOs(
+            Iterable<CompetitorDescriptor> competitorDescriptors) {
+        Set<CompetitorDescriptorDTO> competitorDescriptorDTOs = new HashSet<>();
+        for (CompetitorDescriptor cd : competitorDescriptors) {
+            CompetitorDescriptorDTO cdDTO = convertToCompetitorDescriptorDTO(cd);
+            competitorDescriptorDTOs.add(cdDTO);
+        }
+        return competitorDescriptorDTOs;
+    }
+
+    private CompetitorDescriptorDTO convertToCompetitorDescriptorDTO(CompetitorDescriptor competitorDescriptor) {
+        Set<PersonDTO> persons = new HashSet<>();
+        for (Person person : competitorDescriptor.getPersons()) {
+            String nationalityThreeLetterIOCAcronym = person.getNationality() != null
+                    ? person.getNationality().getThreeLetterIOCAcronym() : null;
+            PersonDTO personDTO = new PersonDTO(person.getName(), person.getDateOfBirth(), person.getDescription(),
+                    nationalityThreeLetterIOCAcronym);
+            persons.add(personDTO);
+        }
+
+        CountryCode countryCode = competitorDescriptor.getCountryCode();
+        String countryName = countryCode == null ? null : countryCode.getName();
+        String twoLetterIsoCountryCode = countryCode == null ? null : countryCode.getTwoLetterISOCode();
+        String threeLetterIocCountryCode = countryCode == null ? null : countryCode.getThreeLetterIOCCode();
+
+        CompetitorDescriptorDTO competitorDescriptorDTO = new CompetitorDescriptorDTO(
+                competitorDescriptor.getEventName(), competitorDescriptor.getRegattaName(),
+                competitorDescriptor.getRaceName(), competitorDescriptor.getFleetName(),
+                competitorDescriptor.getSailNumber(), competitorDescriptor.getCompetitorName(), countryName,
+                twoLetterIsoCountryCode, threeLetterIocCountryCode, persons);
+
+        return competitorDescriptorDTO;
     }
 
     /**

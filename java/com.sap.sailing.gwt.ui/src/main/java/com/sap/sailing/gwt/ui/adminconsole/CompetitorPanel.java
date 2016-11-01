@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -12,10 +13,13 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
+import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
 /**
  * Allows an administrator to view and edit the set of competitors currently maintained by the server.
@@ -23,10 +27,12 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
  * @author Axel Uhl (d043530)
  * 
  */
-public class CompetitorPanel extends SimplePanel {
+public class CompetitorPanel extends SimplePanel implements BusynessPanel{
     private final CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> competitorTable;
     private final RefreshableMultiSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
     private final String leaderboardName;
+
+    private final BusyIndicator busyIndicator;
 
     public CompetitorPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
@@ -39,6 +45,9 @@ public class CompetitorPanel extends SimplePanel {
         this.leaderboardName = leaderboardName;
         this.competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ false);
         this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) competitorTable.getSelectionModel();
+
+        busyIndicator = new SimpleBusyIndicator(false, 0.8f);
+
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -85,6 +94,45 @@ public class CompetitorPanel extends SimplePanel {
         });
         buttonPanel.add(selectAllButton);
 
+        Button competitorImportButton = new Button(stringMessages.importCompetitors());
+        competitorImportButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                sailingService.getCompetitorProviderNames(new AsyncCallback<Iterable<String>>() {
+                    @Override
+                    public void onSuccess(Iterable<String> providerNames) {
+
+                        CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
+                                CompetitorPanel.this, providerNames, sailingService, stringMessages, errorReporter) {
+
+                            @Override
+                            protected ApplyImportedCompetitorsDialogFactory getApplyImportedCompetitorsDialogFactory() {
+                                ApplyImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = new ApplyImportedCompetitorsDialogFactory() {
+
+                                    @Override
+                                    public ApplyImportedCompetitorsDialog createApplyImportedCompetitorsDialog(
+                                            final Iterable<CompetitorDescriptorDTO> competitorDescriptors,
+                                            final Iterable<CompetitorDTO> competitors) {
+                                        return new ApplyImportedCompetitorsDialog(competitorDescriptors,
+                                                competitors, stringMessages, sailingService, errorReporter);
+                                    }
+                                };
+                                return matchCompetitorsDialogFactory;
+                            }
+                        };
+                        dialog.show();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(
+                                stringMessages.errorLoadingCompetitorImportProviders(caught.getMessage()));
+                    }
+                });
+            }
+        });
+        buttonPanel.add(competitorImportButton);
+
         //only if this competitor panel is connected to a leaderboard, we want to enable invitations
         if (leaderboardName != null) {
             final Button inviteCompetitorsButton = new Button(stringMessages.inviteSelectedCompetitors());
@@ -101,6 +149,7 @@ public class CompetitorPanel extends SimplePanel {
         }
 
         competitorsPanel.add(buttonPanel);
+        mainPanel.add(busyIndicator);
         mainPanel.add(competitorTable);
         
         refreshableCompetitorSelectionModel.addSelectionChangeHandler(new Handler() {
@@ -122,5 +171,12 @@ public class CompetitorPanel extends SimplePanel {
     
     public void refreshCompetitorList() {
         competitorTable.refreshCompetitorList(leaderboardName);
+    }
+
+    @Override
+    public void setBusy(boolean isBusy) {
+        if (busyIndicator.isBusy() != isBusy) {
+            busyIndicator.setBusy(isBusy);
+        }
     }
 }

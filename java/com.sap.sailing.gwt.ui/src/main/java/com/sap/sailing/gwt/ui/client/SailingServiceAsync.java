@@ -27,6 +27,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -41,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrack
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
@@ -462,6 +464,13 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getScoreCorrections(String scoreCorrectionProviderName, String eventName, String boatClassName,
             Date timePointWhenResultPublished, AsyncCallback<RegattaScoreCorrectionDTO> asyncCallback);
+
+    void getCompetitorProviderNames(AsyncCallback<Iterable<String>> callback);
+
+    void getCompetitorProviderDTOByName(String providerName, AsyncCallback<CompetitorProviderDTO> callback);
+
+    void getCompetitorDescriptors(String competitorProviderName, String eventName, String regattaName,
+            AsyncCallback<Iterable<CompetitorDescriptorDTO>> callback);
 
     void getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<WindInfoForRaceDTO> callback);
 

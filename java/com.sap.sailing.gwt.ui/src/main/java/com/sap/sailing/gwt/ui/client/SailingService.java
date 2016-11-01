@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -52,6 +53,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrack
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
+import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
@@ -341,6 +343,13 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             Date timePointWhenResultPublished) throws Exception;
 
     void updateLeaderboardScoreCorrectionsAndMaxPointsReasons(BulkScoreCorrectionDTO updates) throws NoWindException;
+
+    Iterable<String> getCompetitorProviderNames();
+
+    CompetitorProviderDTO getCompetitorProviderDTOByName(String providerName) throws Exception;
+
+    Iterable<CompetitorDescriptorDTO> getCompetitorDescriptors(String competitorProviderName, String eventName,
+            String regattaName) throws Exception;
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
