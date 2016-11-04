@@ -45,6 +45,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -435,6 +436,17 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *         lock.
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
+    
+    /**
+     * Returns competitor's mark passings.
+     * 
+     * @param waitForLatestUpdates
+     *            if any mark passing updates are pending because some calculations are currently going on and updates
+     *            haven't all been processed yet then the call will block until these updates have been processed in
+     *            case this parameter is set to {@code true}. For this the method uses a lock on the
+     *            {@link MarkPassingCalculator }to block the thread until all calculations will be finished.
+     */
+    NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates);
 
     /**
      * This obtains the course's read lock before asking for the read lock for the <code>markPassings</code> structure.

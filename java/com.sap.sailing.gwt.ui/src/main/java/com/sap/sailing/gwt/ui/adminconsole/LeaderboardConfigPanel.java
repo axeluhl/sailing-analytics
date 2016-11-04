@@ -690,6 +690,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             selectedLeaderBoardPanel.setVisible(true);
             selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + selectedLeaderboard.name + "'");
             if (!selectedLeaderboard.type.isMetaLeaderboard()) {
+                trackedRacesListComposite.setRegattaFilterValue(selectedLeaderboard.regattaName);
                 trackedRacesCaptionPanel.setVisible(true);
             }
             addRaceColumnsButton.setVisible(!selectedLeaderboard.type.isRegattaLeaderboard());

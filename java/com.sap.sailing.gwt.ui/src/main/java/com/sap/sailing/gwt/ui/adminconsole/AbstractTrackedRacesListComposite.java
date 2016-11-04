@@ -7,8 +7,14 @@ import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -20,6 +26,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -38,13 +45,14 @@ import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
-import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.gwt.client.panels.CustomizableFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -74,9 +82,11 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     private Button btnRefresh;
 
-    private LabeledAbstractFilterablePanel<RaceDTO> filterablePanelRaces;
+    private CustomizableFilterablePanel<RaceDTO> filterablePanelRaces;
 
     protected TrackedRacesSettings settings;
+
+    private ListBox listBoxRegattas;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -95,6 +105,23 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         this.stringMessages = stringMessages;
     }
 
+    public void setRegattaFilterValue(String regattaName) {
+        for (int i = 0; i < listBoxRegattas.getItemCount(); i++) {
+            if (listBoxRegattas.getValue(i).equals(regattaName)) {
+                listBoxRegattas.setSelectedIndex(i);
+                // Firing change event on combobox to filter
+                DomEvent.fireNativeEvent(Document.get().createChangeEvent(), listBoxRegattas);
+                return;
+            }
+        }
+
+        // Set 'All' option in case there are no tracked race related to regatta
+        if (listBoxRegattas.getItemCount() > 0) {
+            listBoxRegattas.setSelectedIndex(0);
+            DomEvent.fireNativeEvent(Document.get().createChangeEvent(), listBoxRegattas);
+        }
+    }
+    
     protected void createUI() {
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         raceList = new ListDataProvider<>();
@@ -104,11 +131,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         initWidget(panel);
         HorizontalPanel filterPanel = new HorizontalPanel();
         panel.add(filterPanel);
-        Label lblFilterRaces = new Label(stringMessages.filterRacesByName() + ":");
-        lblFilterRaces.setWordWrap(false);
-        filterPanel.setSpacing(5);
-        filterPanel.add(lblFilterRaces);
-        filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
+        
         noTrackedRacesLabel = new Label(stringMessages.noRacesYet());
         noTrackedRacesLabel.setWordWrap(false);
         panel.add(noTrackedRacesLabel);
@@ -116,21 +139,52 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         raceTable = new FlushableCellTable<RaceDTO>(/* pageSize */10000, tableRes);
         raceTable.ensureDebugId("TrackedRacesCellTable");
         
-        filterablePanelRaces = new LabeledAbstractFilterablePanel<RaceDTO>(lblFilterRaces, allRaces, raceTable,
-                raceList) {
+        Label lblFilterRaces = new Label(stringMessages.filterRaces()+":");
+        lblFilterRaces.setWordWrap(false);
+        lblFilterRaces.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        lblFilterRaces.getElement().getStyle().setMarginRight(10, Unit.PX);
+        filterPanel.add(lblFilterRaces);
+        filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
+
+        filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceTable, raceList) {            
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
                 strings.add(t.boatClass);
                 strings.add(t.getRegattaName());
-                strings.add(t.toString());
                 return strings;
             }
         };
+        Label lblFilterByRegatta = new Label(stringMessages.filterByRegatta());
+        lblFilterByRegatta.setWordWrap(false);
+        listBoxRegattas = new ListBox();
+        listBoxRegattas.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                filterablePanelRaces.filter();
+            }
+        });
+        filterablePanelRaces.add(lblFilterByRegatta, listBoxRegattas, new Filter<RaceDTO>() {
+            @Override
+            public boolean matches(RaceDTO t) {
+                return listBoxRegattas.getSelectedIndex() == 0 /* All */ || Util.equalsWithNull(listBoxRegattas.getSelectedValue(), t.getRegattaName());
+            }
+            @Override
+            public String getName() {
+                return "TrackedRacesByRegattaFilter";
+            }
+        });
+
+        Label lblFilterRacesByName = new Label(stringMessages.filterByNameOrBoatClass() + ":");
+        lblFilterRacesByName.setWordWrap(false);
+        filterablePanelRaces.add(lblFilterRacesByName);
+        filterablePanelRaces.addDefaultTextBox();
         filterablePanelRaces.getTextBox().ensureDebugId("TrackedRacesFilterTextBox");
         
         filterPanel.add(filterablePanelRaces);
+        filterPanel.setCellVerticalAlignment(filterablePanelRaces, HasVerticalAlignment.ALIGN_MIDDLE);
+
         final EntityIdentityComparator<RaceDTO> entityIdentityComparator = new EntityIdentityComparator<RaceDTO>() {
             @Override
             public boolean representSameEntity(RaceDTO dto1, RaceDTO dto2) {
@@ -455,6 +509,9 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         refreshableSelectionModel.clear();
     }
 
+    /**
+     * @param regattas
+     */
     @Override
     public void fillRegattas(Iterable<RegattaDTO> regattas) {
         makeControlsReactToFillRegattas(regattas);
@@ -467,15 +524,27 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         }
         List<RaceDTO> newAllRaces = new ArrayList<RaceDTO>();
         List<RegattaDTO> newAllRegattas = new ArrayList<RegattaDTO>();
+        List<String> regattaNames = new ArrayList<>();
         for (RegattaDTO regatta : regattas) {
             newAllRegattas.add(regatta);
             for (RaceDTO race : regatta.races) {
                 if (race != null) {
                     if (raceIsToBeAddedToList(race)) {
+                        //We need only those regatta names which are available 
+                        //at tracking table
+                        if (!regattaNames.contains(regatta.getName())) {
+                            regattaNames.add(regatta.getName());
+                        }
                         newAllRaces.add(race);
                     }
                 }
             }
+        }
+
+        listBoxRegattas.clear();
+        listBoxRegattas.addItem(stringMessages.all(), "");
+        for (String regatta : regattaNames) {
+            listBoxRegattas.addItem(regatta, regatta);
         }
         allRaces = newAllRaces;
         filterablePanelRaces.updateAll(allRaces);

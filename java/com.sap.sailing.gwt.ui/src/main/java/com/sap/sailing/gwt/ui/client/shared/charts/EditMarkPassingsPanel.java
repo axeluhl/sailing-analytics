@@ -192,10 +192,11 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
+                    final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
+                    final Date time = timer.getTime();
                     sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                             leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
-                            leaderboardNameRaceColumnNameAndFleetName.getFleetName(),
-                                    waypointSelectionModel.getSelectedObject().getA(), timer.getTime(), competitor,
+                            leaderboardNameRaceColumnNameAndFleetName.getFleetName(), waypoint, time, competitor,
                                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
@@ -316,11 +317,17 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         clearInfo();
     }
     
+    /**
+     * Overloaded version of refill list which accepts new mark passing created on UI.
+     * Implemented due to TrackedRace inaccessibility at GWT 
+     * 
+     * @param markPassing - pair of waypoint (integer) and datetime of passing
+     */
     private void refillList() {
         clearInfo();
         competitor = competitorSelectionModel.getSelectedCompetitors().iterator().next();
         // Get current mark passings
-        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, new AsyncCallback<Map<Integer, Date>>() {
+        sailingService.getCompetitorMarkPassings(raceIdentifier, competitor, true, new AsyncCallback<Map<Integer, Date>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorTryingToObtainMarkPassing(caught.getMessage()));
