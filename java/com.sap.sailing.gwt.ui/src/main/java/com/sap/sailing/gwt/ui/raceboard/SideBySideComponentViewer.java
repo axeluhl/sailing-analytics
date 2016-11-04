@@ -31,7 +31,7 @@ import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.PersistentSettingsDialog;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -244,7 +244,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     public <SettingsType extends AbstractSettings> void showSettingsDialog(Component<SettingsType> component) {
         if (component.hasSettings()) {
-            new SettingsDialog<SettingsType>(component, stringMessages).show();
+            new PersistentSettingsDialog<SettingsType>(component, stringMessages).show();
         }
     }
 

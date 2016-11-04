@@ -154,7 +154,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
             };
             
             if(raceboardPerspectiveLifecycleWithAllSettings == null) {
-                raceBoardContext.createAsyncCallbackJoiner(raceBoardDataCallback).startSettingsRetrievementAndJoinAsyncCallback();
+                raceBoardContext.createSettingsRetrievementWithAsyncCallbackJoiner(raceBoardDataCallback).startSettingsRetrievementAndJoinAsyncCallback();
             }
             
             sailingService.getRaceboardData(currentLiveRace.getRegattaName(), currentLiveRace.getRaceName(),

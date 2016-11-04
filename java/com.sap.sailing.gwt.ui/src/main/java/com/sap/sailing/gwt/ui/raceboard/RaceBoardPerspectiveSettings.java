@@ -2,7 +2,9 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
@@ -10,14 +12,19 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
  * @author Frank
  *
  */
-public class RaceBoardPerspectiveSettings extends AbstractSettings {
-    private final boolean showLeaderboard;
-    private final boolean showWindChart;
-    private final boolean showCompetitorsChart;
-    private final String activeCompetitorsFilterSetName;
-    private final boolean canReplayDuringLiveRaces;
-    private final Duration initialDurationAfterRaceStartInReplay;
+public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSettings {
     
+    private static final long serialVersionUID = 5471954179434008459L;
+    
+    private transient BooleanSetting showLeaderboard;
+    private transient BooleanSetting showWindChart;
+    private transient BooleanSetting showCompetitorsChart;
+    private transient StringSetting activeCompetitorsFilterSetName;
+    private transient BooleanSetting canReplayDuringLiveRaces;
+    //TODO add DurationSetting
+    private transient Duration initialDurationAfterRaceStartInReplay;
+    
+    //TODO unify the names of url params and default settings names
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
     public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
@@ -34,36 +41,47 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
         /* showWindChart */false, /* showCompetitorsChart */false, 
         /* canReplayDuringLiveRaces */false, /* initialDurationAfterRaceStartInReplay */ null);
     }
+    
+    @Override
+    protected void addChildSettings() {
+        this.showLeaderboard = new BooleanSetting("showLeaderboard", this, true);
+        this.showWindChart = new BooleanSetting("showWindChart", this, false);
+        this.showCompetitorsChart = new BooleanSetting("showCompetitorsChart", this, false);
+        this.activeCompetitorsFilterSetName = new StringSetting("activeCompetitorsFilterSetName", this, null);
+        this.canReplayDuringLiveRaces = new BooleanSetting("canReplayDuringLiveRaces", this, false);
+    }
 
     public RaceBoardPerspectiveSettings(String activeCompetitorsFilterSetName, boolean showLeaderboard,
             boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces,
             Duration initialDurationAfterRaceStartInReplay) {
-        this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
-        this.showLeaderboard = showLeaderboard;
-        this.showWindChart = showWindChart;
-        this.showCompetitorsChart = showCompetitorsChart;
-        this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
+        this.activeCompetitorsFilterSetName.setValue(activeCompetitorsFilterSetName);
+        this.showLeaderboard.setValue(showLeaderboard);
+        this.showWindChart.setValue(showWindChart);
+        this.showCompetitorsChart.setValue(showCompetitorsChart);
+        this.canReplayDuringLiveRaces.setValue(canReplayDuringLiveRaces);
+        
+        //TODO convert to DurationSetting
         this.initialDurationAfterRaceStartInReplay = initialDurationAfterRaceStartInReplay;
     }
 
     public boolean isShowLeaderboard() {
-        return showLeaderboard;
+        return showLeaderboard.getValue();
     }
 
     public boolean isShowWindChart() {
-        return showWindChart;
+        return showWindChart.getValue();
     }
 
     public boolean isShowCompetitorsChart() {
-        return showCompetitorsChart;
+        return showCompetitorsChart.getValue();
     }
 
     public String getActiveCompetitorsFilterSetName() {
-        return activeCompetitorsFilterSetName;
+        return activeCompetitorsFilterSetName.getValue();
     }
 
     public boolean isCanReplayDuringLiveRaces() {
-        return canReplayDuringLiveRaces;
+        return canReplayDuringLiveRaces.getValue();
     }
 
     public static RaceBoardPerspectiveSettings readSettingsFromURL(boolean defaultForViewShowLeaderboard,

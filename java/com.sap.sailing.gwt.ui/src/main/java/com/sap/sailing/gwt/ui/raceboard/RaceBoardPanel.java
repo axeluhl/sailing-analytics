@@ -88,7 +88,7 @@ import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.PersistentSettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractRootPerspectiveComposite;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
@@ -439,7 +439,7 @@ public class RaceBoardPanel extends AbstractRootPerspectiveComposite<RaceBoardPe
         if (component.hasSettings()) {
             settingsMenu.addItem(component.getLocalizedShortName(), new Command() {
                 public void execute() {
-                    new SettingsDialog<SettingsType>(component, stringMessages).show();
+                    new PersistentSettingsDialog<SettingsType>(component, stringMessages).show();
                   }
             });
         }

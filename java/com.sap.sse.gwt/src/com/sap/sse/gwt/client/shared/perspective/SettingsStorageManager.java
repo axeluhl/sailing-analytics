@@ -190,7 +190,7 @@ public class SettingsStorageManager<PS extends Settings> {
             return getSecondCallbackResult();
         }
         public void receiveContextSpecificSettingsJson(String contextSpecificSettingsJson) {
-            receiveContextSpecificSettingsJson(contextSpecificSettingsJson);
+            receiveSecondCallbackResult(contextSpecificSettingsJson);
         }
         public PerspectiveCompositeSettings<PS> getDefaultSettings() {
             return defaultSettings;
@@ -199,6 +199,14 @@ public class SettingsStorageManager<PS extends Settings> {
     
     public Throwable getLastServerError() {
         return lastError;
+    }
+    
+    public String serializeSettings(PerspectiveCompositeSettings<PS> settings) {
+        return jsonSerializer.serializeToString(settings);
+    }
+    
+    public PerspectiveCompositeSettings<PS> deserializeSettings(String serializedToJsonSettings, PerspectiveCompositeSettings<PS> defaultSettings) {
+        return jsonSerializer.deserialize(defaultSettings, serializedToJsonSettings);
     }
 
     //TODO replace mockups with real implementation

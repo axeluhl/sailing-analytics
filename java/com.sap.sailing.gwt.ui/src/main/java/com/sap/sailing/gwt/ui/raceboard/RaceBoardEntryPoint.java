@@ -93,21 +93,12 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             return;
         }
         
-        // read perspective settings parameters from URL
-        final RaceBoardPerspectiveSettings perspectiveSettings = RaceBoardPerspectiveSettings.readSettingsFromURL(
-                /* defaultForViewShowLeaderboard */ true, /* defaultForViewShowWindchart */ false,
-                /* defaultForViewShowCompetitorsChart */ false, /* defaultForViewCompetitorFilter */ null,
-                /* defaultForCanReplayDuringLiveRaces */ false);
-        // Determine if the charts, such as the competitor chart or the wind chart, the edit marks
-        // panels, such as mark passing and mark position editors and manage media buttons should be shown. 
-        // Automatic selection of attached video (if any) also depends on this flag.
-        // The decision is made once during initial page load based on the device type (mobile or not).
         final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
         
         
         final RaceBoardContext context = new RaceBoardContext("RaceBoardEntryPoint", new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE), regattaName, raceName, leaderboardName, leaderboardGroupName, eventId);
         
-        AsyncCallbackWithSettingsRetrievementJoiner<RaceboardDataDTO,RaceBoardPerspectiveSettings> asyncCallbackJoiner = context.createAsyncCallbackJoiner(new AsyncCallback<RaceboardDataDTO>() {
+        AsyncCallbackWithSettingsRetrievementJoiner<RaceboardDataDTO,RaceBoardPerspectiveSettings> asyncCallbackJoiner = context.createSettingsRetrievementWithAsyncCallbackJoiner(new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO raceboardData) {
                 if (!raceboardData.isValidLeaderboard()) {
@@ -131,7 +122,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     createErrorPage("Could not obtain a race with name " + raceName + " for a regatta with name " + regattaName);
                     return;
                 }
-                final RaceBoardPanel raceBoardPanel = createPerspectivePage(context, raceboardData, perspectiveSettings, showChartMarkEditMediaButtonsAndVideo);
+                final RaceBoardPanel raceBoardPanel = createPerspectivePage(context, raceboardData, showChartMarkEditMediaButtonsAndVideo);
                 if (finalMode != null) {
                     finalMode.applyTo(raceBoardPanel);
                 }
@@ -156,7 +147,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         vp.add(new Label(message));
     }
 
-    private RaceBoardPanel createPerspectivePage(RaceBoardContext context, RaceboardDataDTO raceboardData, RaceBoardPerspectiveSettings perspectiveSettings,
+    private RaceBoardPanel createPerspectivePage(RaceBoardContext context, RaceboardDataDTO raceboardData,
             boolean showChartMarkEditMediaButtonsAndVideo) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
@@ -165,9 +156,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
   
-        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> defaultSettings = context.getDefaultSettingsForRootPerspective();
-        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveCompositeSettings =
-                new PerspectiveCompositeSettings<>(perspectiveSettings, defaultSettings.getSettingsPerComponentId());
+        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveCompositeSettings = context.getDefaultSettingsForRootPerspective();
         
         PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(context.getRootPerspectiveLifecycle(),
                 perspectiveCompositeSettings);

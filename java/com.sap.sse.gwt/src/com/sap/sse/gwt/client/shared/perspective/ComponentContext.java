@@ -11,14 +11,12 @@ import com.sap.sse.gwt.client.shared.components.Component;
 public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS extends Settings> {
     
     private final SettingsStorageManager<PS> settingsStorageManager;
-    private final PL rootPerspectiveLifecycle;
+    protected final PL rootPerspectiveLifecycle;
     
     /**
-     * Settings tree with defaults for all components.
+     * Current default settings for the whole settings tree in serialized string.
      */
-    private PerspectiveCompositeSettings<PS> currentDefaultSettings = null;
-    
-    private PerspectiveLifecycleWithAllSettings<PL, PS> rootPerspectiveLifecycleWithCurrentDefaultSettings = null;
+    private String currentDefaultSettings = null;
     
     public ComponentContext(String entryPointId, PL rootPerspectiveLifecycle, String...contextDefinitionParameters) {
         this.rootPerspectiveLifecycle = rootPerspectiveLifecycle;
@@ -39,10 +37,8 @@ public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS e
 
             @Override
             public void onSuccess(PerspectiveCompositeSettings<PS> result) {
-                currentDefaultSettings = result;
-                rootPerspectiveLifecycleWithCurrentDefaultSettings = new PerspectiveLifecycleWithAllSettings<>(rootPerspectiveLifecycle, result);
-                //assure, the defaults are not modified outside of context
-                asyncCallback.onSuccess(rootPerspectiveLifecycle.cloneSettings(result));
+                currentDefaultSettings = settingsStorageManager.serializeSettings(result);
+                asyncCallback.onSuccess(result);
             }
         });
     }
@@ -53,6 +49,9 @@ public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS e
         
         final PerspectiveCompositeSettings<PS> newRootPerspectiveSettings;
         if(parentPerspective == null) {
+            //TODO Some EntryPoints (e.g. LeaderboardEntryPoint) include only a component
+            //as a root GUI node. Thus, there isn't any root perspective in the gui node tree
+            //That's why the code must be adapted to that cases.
             if(component instanceof AbstractRootPerspectiveComposite) {
                 //root perspective is updating its perspective own settings
                 AbstractRootPerspectiveComposite<? extends PerspectiveLifecycle<PS>, PS> rootPerspective = (AbstractRootPerspectiveComposite<? extends PerspectiveLifecycle<PS>, PS>) component;
@@ -72,14 +71,15 @@ public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS e
         return rootPerspectiveLifecycle;
     }
     
-    public PerspectiveLifecycleWithAllSettings<PL, PS> getRootPerspectiveLifecycleWithCurrentDefaultSettings() {
-        return rootPerspectiveLifecycleWithCurrentDefaultSettings;
-    }
-    
     private void storeNewDefaultSettings(PerspectiveCompositeSettings<PS> newRootPerspectiveSettings) {
-        // TODO split settings in global settings and context specific
-        settingsStorageManager.storeGlobalSettings(extractGlobalSettings(newRootPerspectiveSettings));
-        settingsStorageManager.storeContextSpecificSettings(extractContextSpecificSettings(newRootPerspectiveSettings));
+        PerspectiveCompositeSettings<PS> globalSettings = extractGlobalSettings(newRootPerspectiveSettings);
+        if(globalSettings != null) {
+            settingsStorageManager.storeGlobalSettings(globalSettings);
+        }
+        PerspectiveCompositeSettings<PS> contextSpecificSettings = extractContextSpecificSettings(newRootPerspectiveSettings);
+        if(contextSpecificSettings != null) {
+            settingsStorageManager.storeContextSpecificSettings(contextSpecificSettings);
+        }
     }
 
     protected abstract PerspectiveCompositeSettings<PS> extractContextSpecificSettings(PerspectiveCompositeSettings<PS> newRootPerspectiveSettings);
@@ -116,7 +116,10 @@ public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS e
     }
     
     public PerspectiveCompositeSettings<PS> getDefaultSettingsForRootPerspective() {
-        return rootPerspectiveLifecycle.cloneSettings(currentDefaultSettings);
+        if(currentDefaultSettings == null) {
+            throw new IllegalStateException("Settings have not been initialized yet.");
+        }
+        return settingsStorageManager.deserializeSettings(currentDefaultSettings, rootPerspectiveLifecycle.createDefaultSettings());
     }
     
     private static String buildContextDefinitionId(String[] contextDefinitionParameters) {
@@ -131,7 +134,7 @@ public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS e
         return str.toString();
     }
 
-    public<T> AsyncCallbackWithSettingsRetrievementJoiner<T, PS> createAsyncCallbackJoiner(
+    public<T> AsyncCallbackWithSettingsRetrievementJoiner<T, PS> createSettingsRetrievementWithAsyncCallbackJoiner(
             AsyncCallback<T> callbackToWrap) {
         return new AsyncCallbackWithSettingsRetrievementJoiner<>(this, callbackToWrap);
     }
