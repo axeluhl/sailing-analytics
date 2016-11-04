@@ -61,6 +61,19 @@
         <item>UNIFORM</item>
         <item>ZULU</item>
     </string-array>
+    <string name="preference_racing_procedure_swc_classflag_key" translatable="false">swcClassFlag</string>
+    <string name="preference_racing_procedure_swc_hasxray_key" translatable="false">swcIndividualRecall</string>
+    <bool name="preference_racing_procedure_swc_hasxray_default">true</bool>
+    <string name="preference_racing_procedure_swc_resultentryenabled_key" translatable="false">swcResultEntryEnabled</string>
+    <bool name="preference_racing_procedure_swc_resultentryenabled_default">false</bool>
+    <string name="preference_racing_procedure_swc_startmode_flags_key" translatable="false">swcStartmodeFlags</string>
+    <string-array name="preference_racing_procedure_swc_startmode_flags_default">
+        <item>PAPA</item>
+        <item>INDIA</item>
+        <item>BLACK</item>
+        <item>UNIFORM</item>
+        <item>ZULU</item>
+    </string-array>
     <string name="preference_racing_procedure_gatestart_classflag_key" translatable="false">gateStartClassFlag</string>
     <string name="preference_racing_procedure_gatestart_hasxray_key" translatable="false">gateStartIndividualRecall</string>
     <bool name="preference_racing_procedure_gatestart_hasxray_default">false</bool>

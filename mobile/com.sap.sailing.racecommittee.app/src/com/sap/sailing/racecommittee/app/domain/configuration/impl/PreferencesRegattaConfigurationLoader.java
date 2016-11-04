@@ -54,14 +54,14 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         rrs26.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.RRS26));
         rrs26.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.RRS26));
         rrs26.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.RRS26));
-        rrs26.setStartModeFlags(new ArrayList<Flags>(preferences.getRRS26StartmodeFlags()));
+        rrs26.setStartModeFlags(new ArrayList<>(preferences.getRRS26StartmodeFlags()));
         configuration.setRRS26Configuration(rrs26);
 
         SWCConfigurationImpl swcStart = new SWCConfigurationImpl();
         swcStart.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.SWC));
         swcStart.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.SWC));
         swcStart.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.SWC));
-        swcStart.setStartModeFlags(new ArrayList<Flags>(preferences.getSWCStartmodeFlags()));
+        swcStart.setStartModeFlags(new ArrayList<>(preferences.getSWCStartmodeFlags()));
         configuration.setSWCConfiguration(swcStart);
 
         GateStartConfigurationImpl gateStart = new GateStartConfigurationImpl();
@@ -109,14 +109,14 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
             RRS26Configuration config = configuration.getRRS26Configuration();
             storeRacingProcedureConfiguration(RacingProcedureType.RRS26, config);
             if (config.getStartModeFlags() != null) {
-                preferences.setRRS26StartmodeFlags(new HashSet<Flags>(config.getStartModeFlags()));
+                preferences.setRRS26StartmodeFlags(new HashSet<>(config.getStartModeFlags()));
             }
         }
         if (configuration.getSWCConfiguration() != null) {
             SWCConfiguration config = configuration.getSWCConfiguration();
             storeRacingProcedureConfiguration(RacingProcedureType.SWC, config);
             if (config.getStartModeFlags() != null) {
-                preferences.setSWCStartmodeFlags(new HashSet<Flags>(config.getStartModeFlags()));
+                preferences.setSWCStartmodeFlags(new HashSet<>(config.getStartModeFlags()));
             }
         }
 
