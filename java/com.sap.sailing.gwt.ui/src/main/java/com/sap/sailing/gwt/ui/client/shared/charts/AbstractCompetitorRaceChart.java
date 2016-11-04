@@ -384,6 +384,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 if (!chartSeries.contains(competitorDataSeries)) {
                     chart.addSeries(competitorDataSeries);
                     chart.addSeries(markPassingSeries);
+                    //this is to prevent a bug, that will prohibit the initial rendering
+                    chart.setSizeToMatchContainer();
                     
                 }
             }
