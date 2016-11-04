@@ -8,6 +8,7 @@ import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class IncrementalAnyOrderLeastSquaresImplSerializer implements JsonSerializer<IncrementalAnyOrderLeastSquaresImpl> {
 
+    public static final String FIELD_NUMBER_OF_POINTS_ADDED = "numberOfPointsAdded";
     public static final String FIELD_USE_SYMBOLLIC_INVERSION_IF_POSSIBLE = "useSymbollicInversionIfPossible";
     public static final String FIELD_HAS_INTERCEPT = "hasIntercept";
     public static final String FIELD_POLYNOMIAL_ORDER = "polynomialOrder";
@@ -39,6 +40,7 @@ public class IncrementalAnyOrderLeastSquaresImplSerializer implements JsonSerial
         speedRegressionJSON.put(FIELD_POLYNOMIAL_ORDER, object.getPolynomialOrder());
         speedRegressionJSON.put(FIELD_HAS_INTERCEPT, object.isHasIntercept());
         speedRegressionJSON.put(FIELD_USE_SYMBOLLIC_INVERSION_IF_POSSIBLE, object.isUseSymbollicInversionIfPossible());
+        speedRegressionJSON.put(FIELD_NUMBER_OF_POINTS_ADDED, object.getNumberOfAddedPoints());
         
         return speedRegressionJSON;
     }

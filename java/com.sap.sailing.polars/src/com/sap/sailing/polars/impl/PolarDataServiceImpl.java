@@ -393,4 +393,12 @@ public class PolarDataServiceImpl implements PolarDataService,
         return polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().getRegressionsImpl();
     }
 
+    public Map<BoatClass, Long> getFixCointPerBoatClass() {
+        return polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().getFixCountPerBoatClass();
+    }
+
+    public void updateFixCountPerBoatClass(Map<BoatClass, Long> fixCountPerBoatClass) {
+        polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().updateFixCountPerBoatClass(fixCountPerBoatClass);
+    }
+
 }

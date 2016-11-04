@@ -58,7 +58,7 @@ public class BearingClusterGroup extends FixClusterGroup<Bearing> {
         return new ComparatorClusterBoundary<Bearing>(angle, strategy, comparator);
     }
 
-    private static class BearingComparator implements Comparator<Bearing>, Serializable {
+    public static class BearingComparator implements Comparator<Bearing>, Serializable {
 
         private static final long serialVersionUID = 8166601046140275541L;
 

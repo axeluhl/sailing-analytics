@@ -141,4 +141,57 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
         return hullType;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((super.getName() == null) ? 0 : super.getName().hashCode());
+        result = prime * result + (int) (approximateManeuverDurationInMilliseconds
+                ^ (approximateManeuverDurationInMilliseconds >>> 32));
+        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
+        result = prime * result + ((hullBeam == null) ? 0 : hullBeam.hashCode());
+        result = prime * result + ((hullLength == null) ? 0 : hullLength.hashCode());
+        result = prime * result + ((hullType == null) ? 0 : hullType.hashCode());
+        result = prime * result + (typicallyStartsUpwind ? 1231 : 1237);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        BoatClassImpl other = (BoatClassImpl) obj;
+        if (super.getName() == null) {
+            if (other.getName() != null)
+                return false;
+        } else if (!super.getName().equals(other.getName()))
+            return false;
+        if (approximateManeuverDurationInMilliseconds != other.approximateManeuverDurationInMilliseconds)
+            return false;
+        if (displayName == null) {
+            if (other.displayName != null)
+                return false;
+        } else if (!displayName.equals(other.displayName))
+            return false;
+        if (hullBeam == null) {
+            if (other.hullBeam != null)
+                return false;
+        } else if (!hullBeam.equals(other.hullBeam))
+            return false;
+        if (hullLength == null) {
+            if (other.hullLength != null)
+                return false;
+        } else if (!hullLength.equals(other.hullLength))
+            return false;
+        if (hullType != other.hullType)
+            return false;
+        if (typicallyStartsUpwind != other.typicallyStartsUpwind)
+            return false;
+        return true;
+    }
+    
 }

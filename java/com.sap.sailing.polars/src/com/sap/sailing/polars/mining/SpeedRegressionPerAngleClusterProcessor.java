@@ -249,5 +249,16 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     public void updateRegressions(Map<GroupKey, ? extends IncrementalLeastSquares> regressionsToUpdate) {
         regressions.putAll(regressionsToUpdate);
     }
-    
+
+    public Map<BoatClass, Long> getFixCountPerBoatClass() {
+        synchronized (fixCountPerBoatClass) {
+            return Collections.unmodifiableMap(fixCountPerBoatClass);
+        }
+    }
+
+    public void updateFixCountPerBoatClass(Map<BoatClass, Long> fixCountPerBoatClass) {
+        synchronized (this.fixCountPerBoatClass) {
+            this.fixCountPerBoatClass.putAll(fixCountPerBoatClass);
+        }
+    }
 }

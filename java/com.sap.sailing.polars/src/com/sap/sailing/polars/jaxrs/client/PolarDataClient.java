@@ -19,15 +19,27 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 import com.sap.sailing.polars.jaxrs.api.PolarDataResource;
 import com.sap.sailing.polars.jaxrs.deserialization.AngleAndSpeedRegressionDeserializer;
-import com.sap.sailing.polars.jaxrs.deserialization.GroupKeyDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.BoatClassDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.ClusterBoundaryDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.ClusterDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.CompoundGroupKeyDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.DegreeBearingDeserializer;
 import com.sap.sailing.polars.jaxrs.deserialization.IncrementalAnyOrderLeastSquaresImplDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.LegTypeDeserializer;
 import com.sap.sailing.polars.mining.AngleAndSpeedRegression;
+import com.sap.sailing.polars.mining.BearingClusterGroup;
 import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.MapDeserializer;
+import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.GroupKey;
 
 /**
@@ -41,18 +53,22 @@ public class PolarDataClient {
 
     private static final Logger logger = Logger.getLogger(PolarDataClient.class.getName());
 
-    // MOCKING
-    private static final String HOST = "http://127.0.0.1:8888/polars/api/polar_data";
+    private static final String RESOURCE = "polars/api/polar_data";
 
     private final PolarDataServiceImpl polarDataServiceImpl;
+    private final String polarDataSourceURL;
 
     /**
      * Default constructor is missing because we need {@link PolarDataServiceImpl} to reach regressions
      * 
      * @param polarDataServiceImpl
+     *            {@link PolarDataServiceImpl} service to work with
+     * @param polarDataSourceURL
+     *            archive server URL string
      */
-    public PolarDataClient(PolarDataServiceImpl polarDataServiceImpl) {
+    public PolarDataClient(String polarDataSourceURL, PolarDataServiceImpl polarDataServiceImpl) {
         this.polarDataServiceImpl = polarDataServiceImpl;
+        this.polarDataSourceURL = polarDataSourceURL;
     }
 
     /**
@@ -62,33 +78,62 @@ public class PolarDataClient {
      * @throws IOException
      * @throws ParseException
      */
-    public void fetchPolarDataRegressions() throws IOException, ParseException {
+    public void updatePolarDataRegressions() throws IOException, ParseException {
         try {
-            logger.log(Level.INFO, "Loading polar regression data from remote server " + HOST);
+            logger.log(Level.INFO, "Loading polar regression data from remote server " + polarDataSourceURL);
 
             HttpClient client = new SystemDefaultHttpClient();
-            HttpGet getProcessor = new HttpGet(HOST);
+            HttpGet getProcessor = new HttpGet(getAPIString());
             HttpResponse processorResponse = client.execute(getProcessor);
 
             JSONObject jsonObject = getJsonFromResponse(processorResponse);
-            
-            MapDeserializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedDeserializer = 
-                    new MapDeserializer<>(new GroupKeyDeserializer<>(), new IncrementalAnyOrderLeastSquaresImplDeserializer());
-            MapDeserializer<GroupKey, AngleAndSpeedRegression> cubicDeserializer = 
-                    new MapDeserializer<>(new GroupKeyDeserializer<>(), new AngleAndSpeedRegressionDeserializer());
+
+            MapDeserializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedDeserializer = new MapDeserializer<>(
+                    new CompoundGroupKeyDeserializer<BoatClass, Cluster<Bearing>>(PolarDataResource.FIELD_BOAT_CLASS, PolarDataResource.FIELD_CLUSTER, 
+                            new BoatClassDeserializer(), new ClusterDeserializer<Bearing>(new ClusterBoundaryDeserializer<>(new DegreeBearingDeserializer(), new BearingClusterGroup.BearingComparator()))), 
+                    new IncrementalAnyOrderLeastSquaresImplDeserializer());
+            MapDeserializer<GroupKey, AngleAndSpeedRegression> cubicDeserializer = new MapDeserializer<>(
+                    new CompoundGroupKeyDeserializer<LegType, BoatClass>(PolarDataResource.FIELD_LEG_TYPE, PolarDataResource.FIELD_BOAT_CLASS,
+                            new LegTypeDeserializer(), new BoatClassDeserializer()), 
+                    new AngleAndSpeedRegressionDeserializer());
+            MapDeserializer<BoatClass, Long> fixCountPerBoatClassDeserializer = new MapDeserializer<>(new BoatClassDeserializer(), new JsonDeserializer<Long>() {
+                @Override
+                public Long deserialize(JSONObject object) throws JsonDeserializationException {
+                    return (Long) object.get(PolarDataResource.FIELD_LONG);
+                }
+            });
 
             Map<GroupKey, AngleAndSpeedRegression> cubicRegression = cubicDeserializer
                     .deserialize((JSONArray) jsonObject.get(PolarDataResource.FIELD_CUBIC_REGRESSION));
             Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedRegression = speedDeserializer
                     .deserialize((JSONArray) jsonObject.get(PolarDataResource.FIELD_SPEED_REGRESSION));
+            Map<BoatClass, Long> fixCountPerBoatClass = fixCountPerBoatClassDeserializer.deserialize((JSONArray) jsonObject.get(PolarDataResource.FIELD_FIX_COUNT_PER_BOAT_CLASS));
+
+            JSONArray array = (JSONArray) jsonObject.get(PolarDataResource.FIELD_AVAILABLE_BOAT_CLASSES);
+            for (int i = 0; i < array.size(); i++) {
+                JSONObject object = (JSONObject) array.get(i);
+
+                BoatClass boatClass = new BoatClassDeserializer().deserialize(object);
+                polarDataServiceImpl.getAllBoatClassesWithPolarSheetsAvailable().add(boatClass);
+            }
 
             polarDataServiceImpl.updateRegressions(cubicRegression, speedRegression);
+            polarDataServiceImpl.updateFixCountPerBoatClass(fixCountPerBoatClass);
 
-            logger.log(Level.INFO, "Loading polar regression data from remote server " + HOST + " succeeded");
+            logger.log(Level.INFO,
+                    "Loading polar regression data from remote server " + polarDataSourceURL + " succeeded");
         } catch (ClientProtocolException e) {
             // Catching ClientProtocolException to indicate problems with HTTP protocol
-            logger.log(Level.WARNING,
-                    "Failed to load polar regression data from remote server " + HOST + ", " + e.getMessage());
+            logger.log(Level.WARNING, "Failed to load polar regression data from remote server " + polarDataSourceURL
+                    + ", " + e.getMessage());
+        }
+    }
+
+    private String getAPIString() {
+        if (polarDataSourceURL.endsWith("/")) {
+            return polarDataSourceURL + RESOURCE;
+        } else {
+            return polarDataSourceURL + "/" + RESOURCE;
         }
     }
 
@@ -97,7 +142,8 @@ public class PolarDataClient {
         final Header encoding = response.getEntity().getContentEncoding();
         final InputStream content = response.getEntity().getContent();
         final JSONObject json;
-        try (final Reader reader = encoding == null ? new InputStreamReader(content) : new InputStreamReader(content, encoding.getValue())) {
+        try (final Reader reader = encoding == null ? new InputStreamReader(content)
+                : new InputStreamReader(content, encoding.getValue())) {
             json = (JSONObject) jsonParser.parse(reader);
         }
 
