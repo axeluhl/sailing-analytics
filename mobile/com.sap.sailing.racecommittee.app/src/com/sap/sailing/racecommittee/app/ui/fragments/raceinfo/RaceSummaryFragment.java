@@ -26,6 +26,8 @@ public class RaceSummaryFragment extends BaseFragment {
     private TextView mFinishEndTime;
     private TextView mFinishEndDuration;
     private TextView mFinishDuration;
+    private View mRegionProtest;
+    private TextView mProtestTime;
     private View mRegionWind;
     private View mRegionRecall;
 
@@ -48,6 +50,8 @@ public class RaceSummaryFragment extends BaseFragment {
         mFinishEndTime = ViewHelper.get(layout, R.id.race_finish_end_time);
         mFinishEndDuration = ViewHelper.get(layout, R.id.race_finish_end_duration);
         mFinishDuration = ViewHelper.get(layout, R.id.race_finish_duration);
+        mRegionProtest = ViewHelper.get(layout, R.id.region_protest);
+        mProtestTime = ViewHelper.get(layout, R.id.protest_time_end);
         mRegionWind = ViewHelper.get(layout, R.id.region_wind);
         mRegionRecall = ViewHelper.get(layout, R.id.region_individual_recalls);
 
@@ -142,6 +146,17 @@ public class RaceSummaryFragment extends BaseFragment {
         }
         if (mFinishDuration != null) {
             mFinishDuration.setText(TimeUtils.formatTimeAgo(getActivity(), finishedTime.getTimeInMillis() - finishingTime.getTimeInMillis()));
+        }
+
+        if (mRegionProtest != null) {
+            mRegionProtest.setVisibility(View.GONE);
+            if (getRaceState().getProtestTime() != null) {
+                mRegionProtest.setVisibility(View.VISIBLE);
+
+                if (mProtestTime != null) {
+                    mProtestTime.setText(mDateFormat.format(getRaceState().getProtestTime().asDate()));
+                }
+            }
         }
 
         if (mRegionWind != null) {
