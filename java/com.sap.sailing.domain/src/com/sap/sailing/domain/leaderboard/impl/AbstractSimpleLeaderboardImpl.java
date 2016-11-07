@@ -1437,6 +1437,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             } else {
                 entryDTO.timeSinceLastPositionFixInSeconds = null;  
             }
+            final Distance averageRideHeight = trackedRace.getAverageRideHeight(competitor, timePoint);
+            entryDTO.averageRideHeightInMeters = averageRideHeight == null ? null : averageRideHeight.getMeters();
         }
         if (addLegDetails && trackedRace != null) {
             try {
@@ -1721,11 +1723,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             Double speedOverGroundInKnots;
             if (trackedLeg.hasFinishedLeg(timePoint))  {
                 speedOverGroundInKnots = averageSpeedOverGround == null ? null : averageSpeedOverGround.getKnots();
-                result.currentRideHeightInMeters = trackedLeg.getAverageRideHeight(timePoint);
+                final Distance averageRideHeight = trackedLeg.getAverageRideHeight(timePoint);
+                result.currentRideHeightInMeters = averageRideHeight == null ? null : averageRideHeight.getMeters();
             } else {
                 final SpeedWithBearing speedOverGround = trackedLeg.getSpeedOverGround(timePoint);
                 speedOverGroundInKnots = speedOverGround == null ? null : speedOverGround.getKnots();
-                result.currentRideHeightInMeters = trackedLeg.getRideHeight(timePoint);
+                final Distance rideHeight = trackedLeg.getRideHeight(timePoint);
+                result.currentRideHeightInMeters = rideHeight == null ? null : rideHeight.getMeters();
             }
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);

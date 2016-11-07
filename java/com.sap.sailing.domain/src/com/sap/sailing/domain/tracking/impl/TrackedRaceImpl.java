@@ -707,7 +707,21 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
-        return markPassingsForCompetitor.get(competitor);
+        return getMarkPassings(competitor, /* waitForLatestUpdates */ false);
+    }
+    
+    @Override
+    public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates) {
+        if (waitForLatestUpdates && markPassingCalculator != null) {
+            markPassingCalculator.lockForRead();
+        }
+        try {
+            return markPassingsForCompetitor.get(competitor);
+        } finally {
+            if (waitForLatestUpdates && markPassingCalculator != null) {
+                markPassingCalculator.unlockForRead();
+            }
+        }
     }
 
     protected NavigableSet<MarkPassing> getMarkPassingsInOrderAsNavigableSet(Waypoint waypoint) {
@@ -1535,6 +1549,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         Distance result;
         result = crossTrackErrorCache
                 .getAverageSignedCrossTrackError(competitor, from, to, upwindOnly, waitForLatestAnalysis);
+        return result;
+    }
+
+    @Override
+    public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
+        BravoFixTrack<Competitor> track = getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+        final Leg firstLeg;
+        final TrackedLegOfCompetitor firstTrackedLeg;
+        if (track != null && (firstLeg = getRace().getCourse().getFirstLeg()) != null && (firstTrackedLeg = getTrackedLeg(competitor, firstLeg)).hasStartedLeg(timePoint)) {
+            final TrackedLegOfCompetitor lastTrackedLeg = getTrackedLegFinishingAt(getRace().getCourse().getLastWaypoint()).getTrackedLeg(competitor);
+            TimePoint endTimePoint = lastTrackedLeg.hasFinishedLeg(timePoint) ? lastTrackedLeg.getFinishTime() : timePoint;
+            result = track.getAverageRideHeight(firstTrackedLeg.getStartTime(), endTimePoint);
+        } else {
+            result = null;
+        }
         return result;
     }
 
