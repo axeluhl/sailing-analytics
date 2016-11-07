@@ -1138,6 +1138,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
                         courseMarkOverlay.setBuoyZoneRadius(settings.getBuoyZoneRadius());
                         courseMarkOverlay.setSelected(isSelected);
+                        courseMarkOverlay.setCourse(courseDTO);
                         courseMarkOverlay.draw();
                         toRemoveCourseMarks.remove(markDTO.getName());
                     }

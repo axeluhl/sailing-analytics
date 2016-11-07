@@ -13,7 +13,7 @@ public class MarkVectorGraphicsFactory {
             break;
         case STARTBOAT:
         case FINISHBOAT:
-            result = new BoatMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+            result = new BoatMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern, markDTO.getIdAsString());
             break;
         case LANDMARK:
             result = new LandMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);

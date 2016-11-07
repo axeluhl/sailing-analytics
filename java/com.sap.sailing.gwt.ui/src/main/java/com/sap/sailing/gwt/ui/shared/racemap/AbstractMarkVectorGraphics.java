@@ -2,9 +2,11 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 
 import com.google.gwt.canvas.dom.client.CanvasGradient;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 
 /**
  * A class for course mark graphics based on SVG graphics drawn to a HTML5 canvas
@@ -188,4 +190,10 @@ public abstract class AbstractMarkVectorGraphics implements MarkVectorGraphics {
     }
     
     protected abstract void drawMarkBody(Context2d  ctx, boolean isSelected, String color);
+
+    @Override
+    public Bearing getRotationInDegrees(CoursePositionsDTO coursePositionsDTO) {
+        // by default, no rotation for marks
+        return null;
+    }
 }

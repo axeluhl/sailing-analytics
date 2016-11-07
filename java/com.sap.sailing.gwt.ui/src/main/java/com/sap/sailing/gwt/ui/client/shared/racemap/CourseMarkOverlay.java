@@ -1,9 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -15,12 +12,10 @@ import com.google.gwt.maps.client.base.Size;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
-import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphicsFactory;
@@ -35,7 +30,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
      */
     private final MarkDTO mark;
     
-    private final CoursePositionsDTO coursePositionsDTO;
+    private CoursePositionsDTO coursePositionsDTO;
 
     private Position position;
 
@@ -99,7 +94,6 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 Context2d context2d = getCanvas().getContext2d();
                 // draw the course mark
                 markVectorGraphics.drawMarkToCanvas(context2d, isSelected, canvasWidth, canvasHeight, markSizeScaleFactor);
-                setRotation();
                 // draw the buoy zone
                 if (showBuoyZone && isMarkWithBuoyZone(mark) && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                     CssColor grayTransparentColor = CssColor.make("rgba(37,158,255,0.75)");
@@ -119,39 +113,15 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 lastWidth = canvasWidth;
                 lastHeight = canvasHeight;
             }
+            final Bearing rotation = markVectorGraphics.getRotationInDegrees(coursePositionsDTO);
+            if (rotation != null) {
+                setCanvasRotation(rotation.getDegrees());
+            }
             Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(position));
             if (showBuoyZone && isMarkWithBuoyZone(mark) && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                 setCanvasPosition(buoyPositionInPx.getX() - buoyZoneRadiusInPixel, buoyPositionInPx.getY() - buoyZoneRadiusInPixel);
             } else {
                 setCanvasPosition(buoyPositionInPx.getX() - canvasWidth / 2.0, buoyPositionInPx.getY() - canvasHeight / 2.0);
-            }
-        }
-    }
-
-    private void setRotation() {
-        if (mark.type == MarkType.STARTBOAT || mark.type == MarkType.FINISHBOAT) {
-            Bearing lineBearing;
-            List<Position> lineMarkPositions = new ArrayList<Position>();
-            MarkDTO firstMark = null;
-            MarkDTO secondMark = null;
-            for (WaypointDTO currentWaypoint : coursePositionsDTO.course.waypoints) {
-                if (currentWaypoint.passingInstructions == PassingInstruction.Line) {
-                    Iterator<MarkDTO> marks = currentWaypoint.controlPoint.getMarks().iterator();
-                    firstMark = marks.next();
-                    if (marks.hasNext()) {
-                        secondMark = marks.next();
-                        if (mark.getIdAsString().equals(firstMark.getIdAsString())
-                                || mark.getIdAsString().equals(secondMark.getIdAsString())) {
-                            lineMarkPositions.add(firstMark.position);
-                            lineMarkPositions.add(secondMark.position);
-                            break;
-                        }
-                    }
-                }
-            }
-            lineBearing = getLineBearing(lineMarkPositions);
-            if (lineBearing != null) {
-                setCanvasRotation(lineBearing.getDegrees());
             }
         }
     }
@@ -191,18 +161,6 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         return new Util.Pair<Double, Size>(markSizeScaleFactor, Size.newInstance(markHeightInPixel * 2.0, markHeightInPixel * 2.0));
     }
 
-    private Bearing getLineBearing(List<Position> markPositions) {
-        Bearing result = null;
-        if (markPositions.size() > 1) {
-            Position firstPosition = markPositions.get(0);
-            Position secondPosition = markPositions.get(1);
-            if (firstPosition != null) {
-                result = firstPosition.getBearingGreatCircle(secondPosition);
-            }
-        }
-        return result;
-    }
-
     private String getTitle() {
         return mark.getName();
     }
@@ -213,6 +171,10 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
 
     public void setShowBuoyZone(boolean showBuoyZone) {
         this.showBuoyZone = showBuoyZone;
+    }
+    
+    public void setCourse(CoursePositionsDTO coursePositionsDTO) {
+        this.coursePositionsDTO = coursePositionsDTO;
     }
 
     public MarkDTO getMark() {

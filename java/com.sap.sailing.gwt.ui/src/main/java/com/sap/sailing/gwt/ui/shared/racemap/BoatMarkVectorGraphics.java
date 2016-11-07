@@ -1,9 +1,19 @@
 package com.sap.sailing.gwt.ui.shared.racemap;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 
 public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
 
@@ -12,13 +22,15 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
     private final static double BOAT_MARK_SELECTION_SCALE = 3.5;
     private final static double BOAT_MARK_SELECTION_TRANSLATE_X = -10;
     private final static double BOAT_MARK_SELECTION_TRANSLATE_Y = -30;
+    private final String markIdAsString;
 
-    public BoatMarkVectorGraphics(MarkType type, String color, String shape, String pattern) {
+    public BoatMarkVectorGraphics(MarkType type, String color, String shape, String pattern, String markIdAsString) {
         super(type, color, shape, pattern);
         this.anchorPointX = BOAT_MARK_HEIGHT_IN_METERS.getMeters() / 2;
         this.anchorPointY = BOAT_MARK_WIDTH_IN_METERS.getMeters() / 2;
         this.markHeightInMeters = BOAT_MARK_HEIGHT_IN_METERS;
         this.markWidthInMeters = BOAT_MARK_WIDTH_IN_METERS;
+        this.markIdAsString = markIdAsString;
     }
 
     protected void setUpScaleAndTranslateForMarkSelection(Context2d ctx) {
@@ -85,4 +97,40 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
         ctx.fill();
         ctx.beginPath();
     }
+
+    @Override
+    public Bearing getRotationInDegrees(CoursePositionsDTO coursePositionsDTO) {
+        List<Position> lineMarkPositions = new ArrayList<Position>();
+        MarkDTO firstMark = null;
+        MarkDTO secondMark = null;
+        for (WaypointDTO currentWaypoint : coursePositionsDTO.course.waypoints) {
+            if (currentWaypoint.passingInstructions == PassingInstruction.Line) {
+                Iterator<MarkDTO> marks = currentWaypoint.controlPoint.getMarks().iterator();
+                firstMark = marks.next();
+                if (marks.hasNext()) {
+                    secondMark = marks.next();
+                    if (markIdAsString.equals(firstMark.getIdAsString())
+                            || markIdAsString.equals(secondMark.getIdAsString())) {
+                        lineMarkPositions.add(firstMark.position);
+                        lineMarkPositions.add(secondMark.position);
+                        break;
+                    }
+                }
+            }
+        }
+        return getLineBearing(lineMarkPositions);
+    }
+    
+    private Bearing getLineBearing(List<Position> markPositions) {
+        Bearing result = null;
+        if (markPositions.size() > 1) {
+            Position firstPosition = markPositions.get(0);
+            Position secondPosition = markPositions.get(1);
+            if (firstPosition != null) {
+                result = firstPosition.getBearingGreatCircle(secondPosition);
+            }
+        }
+        return result;
+    }
+
 }
