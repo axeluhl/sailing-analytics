@@ -45,10 +45,13 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
+import com.sap.sailing.domain.tracking.impl.NonCachingMarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
@@ -316,8 +319,22 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * If the <code>waypoint</code> only has one {@link #getMarks() mark}, its position at time <code>timePoint</code>
      * is returned. Otherwise, the center of gravity between the mark positions is computed and returned.
      */
-    Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint);
+    default Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
+        return getApproximatePosition(waypoint, timePoint, new NonCachingMarkPositionAtTimePointCache(this, timePoint));
+    }
     
+    /**
+     * Same as {@link #getApproximatePosition(Waypoint, TimePoint)}, but giving the caller the possibility to pass a
+     * cache of mark positions and related information that can help speed up compound operations requiring frequent
+     * access to the same marks in the same race for the same time point.
+     * 
+     * @param markPositionCache
+     *            a cache for this {@link MarkPositionAtTimePointCache#getTrackedRace() race} and the
+     *            {@link MarkPositionAtTimePointCache#getTimePoint() timePoint} passed
+     */
+    Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint,
+            MarkPositionAtTimePointCache markPositionCache);
+
     /**
      * Checks whether the {@link Wind#getTimePoint()} is in range of start and end {@link TimePoint}s plus extra time
      * for wind recording. If, based on a {@link RaceExecutionOrderProvider}, there is no previous race that takes the
@@ -419,6 +436,17 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *         lock.
      */
     NavigableSet<MarkPassing> getMarkPassings(Competitor competitor);
+    
+    /**
+     * Returns competitor's mark passings.
+     * 
+     * @param waitForLatestUpdates
+     *            if any mark passing updates are pending because some calculations are currently going on and updates
+     *            haven't all been processed yet then the call will block until these updates have been processed in
+     *            case this parameter is set to {@code true}. For this the method uses a lock on the
+     *            {@link MarkPassingCalculator }to block the thread until all calculations will be finished.
+     */
+    NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates);
 
     /**
      * This obtains the course's read lock before asking for the read lock for the <code>markPassings</code> structure.
@@ -669,6 +697,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
 
     Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to, boolean upwindOnly,
             boolean waitForLatestAnalysis) throws NoWindException;
+
+    public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint);
 
     WindStore getWindStore();
 
@@ -946,4 +976,5 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * @return all currently attached {@link RaceLog}s or an empty Iterable if there aren't any
      */
     Iterable<RaceLog> getAttachedRaceLogs();
+
 }

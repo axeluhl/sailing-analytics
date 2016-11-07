@@ -28,7 +28,7 @@ public class DropdownItem extends Widget {
         setElement(uiBinder.createAndBindUi(this));
         
         if(active) {
-            getElement().addClassName(local_res.css().dropdownregattas_content_linkactive());
+            getElement().addClassName(local_res.css().dropdown_content_linkactive());
         }
         
         this.link.setHref(link);

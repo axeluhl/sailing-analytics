@@ -127,6 +127,7 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.MarkPositionAtTimePointCache;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -706,7 +707,21 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor) {
-        return markPassingsForCompetitor.get(competitor);
+        return getMarkPassings(competitor, /* waitForLatestUpdates */ false);
+    }
+    
+    @Override
+    public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates) {
+        if (waitForLatestUpdates && markPassingCalculator != null) {
+            markPassingCalculator.lockForRead();
+        }
+        try {
+            return markPassingsForCompetitor.get(competitor);
+        } finally {
+            if (waitForLatestUpdates && markPassingCalculator != null) {
+                markPassingCalculator.unlockForRead();
+            }
+        }
     }
 
     protected NavigableSet<MarkPassing> getMarkPassingsInOrderAsNavigableSet(Waypoint waypoint) {
@@ -1538,6 +1553,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
+    public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
+        final Distance result;
+        BravoFixTrack<Competitor> track = getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+        final Leg firstLeg;
+        final TrackedLegOfCompetitor firstTrackedLeg;
+        if (track != null && (firstLeg = getRace().getCourse().getFirstLeg()) != null && (firstTrackedLeg = getTrackedLeg(competitor, firstLeg)).hasStartedLeg(timePoint)) {
+            final TrackedLegOfCompetitor lastTrackedLeg = getTrackedLegFinishingAt(getRace().getCourse().getLastWaypoint()).getTrackedLeg(competitor);
+            TimePoint endTimePoint = lastTrackedLeg.hasFinishedLeg(timePoint) ? lastTrackedLeg.getFinishTime() : timePoint;
+            result = track.getAverageRideHeight(firstTrackedLeg.getStartTime(), endTimePoint);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Override
     public TrackedLegOfCompetitor getCurrentLeg(Competitor competitor, TimePoint timePoint) {
         // If the mark passing that starts a leg happened exactly at timePoint, the MarkPassingByTimeComparator won't consider
         // them equal because 
@@ -1671,10 +1702,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint) {
+    public Position getApproximatePosition(Waypoint waypoint, TimePoint timePoint, MarkPositionAtTimePointCache markPositionCache) {
+        assert timePoint.equals(markPositionCache.getTimePoint());
+        assert this == markPositionCache.getTrackedRace();
         Position result = null;
         for (Mark mark : waypoint.getMarks()) {
-            Position nextPos = getOrCreateTrack(mark).getEstimatedPosition(timePoint, /* extrapolate */false);
+            Position nextPos = markPositionCache.getEstimatedPosition(mark);
             if (result == null) {
                 result = nextPos;
             } else if (nextPos != null) {
@@ -3893,8 +3926,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
         }
         Duration durationOfAllLegs = Duration.NULL;
+        final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, timepoint);
         for (TrackedLeg leg : trackedLegs.values()) {
-            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint);
+            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint, markPositionCache);
             durationOfAllLegs = durationOfAllLegs.plus(durationOfLeg);
         }
         return durationOfAllLegs;

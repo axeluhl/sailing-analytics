@@ -18,7 +18,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
@@ -30,7 +32,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
-    private static final int MAX_BUOY_ZONE_RADIUS_IN_METERS = 100;
+    private static final Distance MAX_BUOY_ZONE_RADIUS = new MeterDistance(100);
     private static final int MAX_STROKE_WEIGHT = 33;
     //Initializing the lists to prevent a null pointer exception in the first validation call
     private List<Util.Pair<CheckBox, ManeuverType>> checkboxAndManeuverType = new ArrayList<Util.Pair<CheckBox, ManeuverType>>();
@@ -45,7 +47,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showSimulationOverlayCheckbox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
-    private DoubleBox buoyZoneRadiusBox;
+    private DoubleBox buoyZoneRadiusInMetersBox;
     private CheckBox transparentHoverlines;
     private IntegerBox hoverlineStrokeWeight;
     
@@ -197,17 +199,17 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> vce) {
                 boolean newValue = vce.getValue();
-                RaceMapSettingsDialogComponent.this.buoyZoneRadiusBox.setEnabled(newValue);
+                RaceMapSettingsDialogComponent.this.buoyZoneRadiusInMetersBox.setEnabled(newValue);
             }
         });
         Label buoyZoneRadiusLabel = new Label(stringMessages.radiusInMeters() + ":");
         buoyZoneRadiusLabel.getElement().getStyle().setMarginLeft(25, Unit.PX);
         buoyZoneSettingsPanel.add(buoyZoneRadiusLabel);
         buoyZoneSettingsPanel.setCellVerticalAlignment(buoyZoneRadiusLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        buoyZoneRadiusBox = dialog.createDoubleBox(Double.valueOf((int) (initialSettings.getBuoyZoneRadiusInMeters())), 4);
-        buoyZoneRadiusBox.setEnabled(initialSettings.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS));
-        buoyZoneSettingsPanel.add(buoyZoneRadiusBox);
-        buoyZoneSettingsPanel.setCellVerticalAlignment(buoyZoneRadiusBox, HasVerticalAlignment.ALIGN_MIDDLE);
+        buoyZoneRadiusInMetersBox = dialog.createDoubleBox(initialSettings.getBuoyZoneRadius().getMeters(), 4);
+        buoyZoneRadiusInMetersBox.setEnabled(initialSettings.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS));
+        buoyZoneSettingsPanel.add(buoyZoneRadiusInMetersBox);
+        buoyZoneSettingsPanel.setCellVerticalAlignment(buoyZoneRadiusInMetersBox, HasVerticalAlignment.ALIGN_MIDDLE);
         vp.add(buoyZoneSettingsPanel);
 
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.STARTLINE));
@@ -272,14 +274,14 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             tailLengthInMilliseconds = tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l;
         }
         
-        double buoyZoneRadiusInMeters = initialSettings.getBuoyZoneRadiusInMeters();
-        if (helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE) && buoyZoneRadiusBox.getValue() != null) {
-            buoyZoneRadiusInMeters = buoyZoneRadiusBox.getValue();
+        Distance buoyZoneRadius = initialSettings.getBuoyZoneRadius();
+        if (helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE) && buoyZoneRadiusInMetersBox.getValue() != null) {
+            buoyZoneRadius = new MeterDistance(buoyZoneRadiusInMetersBox.getValue());
         }
         
         return new RaceMapSettings(zoomSettings, helpLinesSettings,
                 transparentHoverlines.getValue(), hoverlineStrokeWeight.getValue(), tailLengthInMilliseconds, windUpCheckbox.getValue(),
-                buoyZoneRadiusInMeters, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
+                buoyZoneRadius, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
                 initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue());
     }
@@ -318,7 +320,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS) && valueToValidate.getTailLengthInMilliseconds() <= 0) {
                     errorMessage = stringMessages.tailLengthMustBePositive();
                 } else if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE) 
-                        && (valueToValidate.getBuoyZoneRadiusInMeters() < 0 || valueToValidate.getBuoyZoneRadiusInMeters() > MAX_BUOY_ZONE_RADIUS_IN_METERS)) {
+                        && (valueToValidate.getBuoyZoneRadius().compareTo(Distance.NULL) < 0 || valueToValidate.getBuoyZoneRadius().compareTo(MAX_BUOY_ZONE_RADIUS) > 0)) {
                         errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.buoyZone(), 0, 100);
                 } else if (valueToValidate.getHoverlineStrokeWeight() < 0 || valueToValidate.getHoverlineStrokeWeight() > MAX_STROKE_WEIGHT) {
                     errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.bufferLineStrokeWeight(), 0, MAX_STROKE_WEIGHT);
