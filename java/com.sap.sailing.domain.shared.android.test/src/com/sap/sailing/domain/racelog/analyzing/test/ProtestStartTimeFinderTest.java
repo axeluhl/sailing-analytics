@@ -16,7 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestStartTimeFinder;
 import com.sap.sse.common.TimePoint;
 
-public class ProtestStartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<ProtestStartTimeFinder, TimePoint> {
+public class ProtestStartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<ProtestStartTimeFinder, RaceLogProtestStartTimeEvent> {
 
     @Override
     protected ProtestStartTimeFinder createAnalyzer(RaceLog raceLog) {
@@ -27,7 +27,7 @@ public class ProtestStartTimeFinderTest extends PassAwareRaceLogAnalyzerTest<Pro
     protected TargetPair getTargetEventsAndResultForPassAwareTests(int passId, AbstractLogEventAuthor author) {
         RaceLogProtestStartTimeEvent event = createEvent(RaceLogProtestStartTimeEvent.class, 1, passId, author);
         when(event.getProtestStartTime()).thenReturn(mock(TimePoint.class));
-        return new TargetPair(Arrays.asList(event), event.getProtestStartTime());
+        return new TargetPair(Arrays.asList(event), event);
     }
     
     @Test

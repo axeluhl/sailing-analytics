@@ -36,7 +36,9 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ProtestTimeDialogFragment extends AttachedDialogFragment implements View.OnClickListener {
@@ -273,7 +275,8 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         TimePoint protestTime = TimeUtils.getTime(mTimePicker);
         TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
-            race.getState().setProtestTime(now, protestTime);
+            Duration duration = Duration.ONE_MINUTE.times(90);
+            race.getState().setProtestTime(now, protestTime, duration);
         }
         if (mHome != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {

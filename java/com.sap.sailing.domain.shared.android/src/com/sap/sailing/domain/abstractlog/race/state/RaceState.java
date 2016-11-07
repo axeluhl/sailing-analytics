@@ -142,9 +142,9 @@ public interface RaceState extends ReadonlyRaceState {
     void setFinishedTime(TimePoint now);
 
     /**
-     * Sets the protest (start) time.
+     * Sets the protest (start) time and the duration.
      */
-    void setProtestTime(TimePoint now, TimePoint protestStartTime);
+    void setProtestTime(TimePoint now, TimePoint protestStartTime, Duration protestTimeDuration);
 
     /**
      * Signals the abort of this race.

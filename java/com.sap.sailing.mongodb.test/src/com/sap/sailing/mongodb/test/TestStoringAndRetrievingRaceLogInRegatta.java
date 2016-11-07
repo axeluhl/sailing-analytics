@@ -63,6 +63,7 @@ import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.TripleSerializer;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -97,7 +98,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogProtestStartTimeEvent() {        
-        RaceLogProtestStartTimeEvent expectedEvent = new RaceLogProtestStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now());
+        RaceLogProtestStartTimeEvent expectedEvent = new RaceLogProtestStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now(), Duration.ONE_MINUTE.times(90));
         addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
         RaceLog loadedRaceLog = retrieveRaceLog();
         loadedRaceLog.lockForRead();
@@ -108,6 +109,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
             assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());
             assertEquals(expectedEvent.getId(), actualEvent.getId());
             assertEquals(expectedEvent.getProtestStartTime(), actualEvent.getProtestStartTime());
+            assertEquals(expectedEvent.getProtestDuration(), actualEvent.getProtestDuration());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();

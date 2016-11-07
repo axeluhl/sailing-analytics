@@ -3,19 +3,18 @@ package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
-import com.sap.sse.common.TimePoint;
 
-public class ProtestStartTimeFinder extends RaceLogAnalyzer<TimePoint> {
+public class ProtestStartTimeFinder extends RaceLogAnalyzer<RaceLogProtestStartTimeEvent> {
 
     public ProtestStartTimeFinder(RaceLog raceLog) {
         super(raceLog);
     }
 
     @Override
-    protected TimePoint performAnalysis() {
+    protected RaceLogProtestStartTimeEvent performAnalysis() {
         for (RaceLogEvent event : getPassEventsDescending()) {
             if (event instanceof RaceLogProtestStartTimeEvent) {
-                return ((RaceLogProtestStartTimeEvent) event).getProtestStartTime();
+                return ((RaceLogProtestStartTimeEvent) event);
             }
         }
         return null;

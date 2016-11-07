@@ -169,8 +169,8 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
 
     @Override
-    public void setProtestTime(TimePoint now, TimePoint timePoint) {
-        raceLog.add(new RaceLogProtestStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), timePoint));
+    public void setProtestTime(TimePoint now, TimePoint timePoint, Duration duration) {
+        raceLog.add(new RaceLogProtestStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), timePoint, duration));
     }
 
     @Override

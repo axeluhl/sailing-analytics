@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -12,4 +13,9 @@ public interface RaceLogProtestStartTimeEvent extends RaceLogEvent {
      * Returns the start time of the race's protest time.
      */
     TimePoint getProtestStartTime();
+
+    /**
+     * Returns the protest time duration
+     */
+    Duration getProtestDuration();
 }

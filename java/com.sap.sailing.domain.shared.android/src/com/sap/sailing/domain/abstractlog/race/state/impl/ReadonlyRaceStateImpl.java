@@ -10,6 +10,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
@@ -41,6 +42,7 @@ import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -141,7 +143,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private StartTimeFinderResult cachedStartTimeFinderResult;
     private TimePoint cachedFinishingTime;
     private TimePoint cachedFinishedTime;
-    private TimePoint cachedProtestTime;
+    private RaceLogProtestStartTimeEvent cachedProtest;
     private CompetitorResults cachedPositionedCompetitors;
     private CompetitorResults cachedConfirmedPositionedCompetitors;
     private CourseBase cachedCourseDesign;
@@ -319,7 +321,12 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     @Override
     public TimePoint getProtestTime() {
-        return cachedProtestTime;
+        return cachedProtest.getProtestStartTime();
+    }
+
+    @Override
+    public Duration getProtestDuration() {
+        return cachedProtest.getProtestDuration();
     }
 
     @Override
@@ -459,9 +466,9 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             changedListeners.onFinishedTimeChanged(this);
         }
 
-        TimePoint protestTime = protestTimeAnalyzer.analyze();
-        if (!Util.equalsWithNull(cachedProtestTime, protestTime)) {
-            cachedProtestTime = protestTime;
+        RaceLogProtestStartTimeEvent protest = protestTimeAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedProtest, protest)) {
+            cachedProtest = protest;
             changedListeners.onProtestTimeChanged(this);
         }
 

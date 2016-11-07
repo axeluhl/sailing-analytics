@@ -294,6 +294,19 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return loadTimePoint(object, field.name());
     }
     
+    public static Duration loadDuration(DBObject object, String fieldName) {
+        Duration result = null;
+        Number durationAsNumber = (Number) object.get(fieldName);
+        if (durationAsNumber != null) {
+            result = new MillisecondsDurationImpl(durationAsNumber.longValue());
+        }
+        return result;
+    }
+    
+    public static Duration loadDuration(DBObject object, FieldNames field) {
+        return loadDuration(object, field.name());
+    }
+    
     public static TimeRange loadTimeRange(DBObject object, FieldNames field) {
         DBObject timeRangeObj = (DBObject) object.get(field.name());
         if (timeRangeObj == null) {
@@ -1464,7 +1477,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RaceLogEvent loadRaceLogProtestStartTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors, DBObject dbObject) {
         TimePoint protestStartTime = loadTimePoint(dbObject, FieldNames.RACE_LOG_PROTEST_START_TIME);
-        return new RaceLogProtestStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, protestStartTime);
+        Duration protestDuration = loadDuration(dbObject, FieldNames.RACE_LOG_PROTEST_DURATION);
+        return new RaceLogProtestStartTimeEventImpl(createdAt, logicalTimePoint, author, id, passId, protestStartTime, protestDuration);
     }
 
     private RaceLogEvent loadRaceLogStartProcedureChangedEvent(TimePoint createdAt, AbstractLogEventAuthor author,

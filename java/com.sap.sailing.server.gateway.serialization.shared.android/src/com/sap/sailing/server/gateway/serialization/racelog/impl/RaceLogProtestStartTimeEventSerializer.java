@@ -11,6 +11,7 @@ public class RaceLogProtestStartTimeEventSerializer extends BaseRaceLogEventSeri
     
     public static final String VALUE_CLASS = RaceLogProtestStartTimeEvent.class.getSimpleName();
     public static final String FIELD_PROTEST_START_TIME = "protestStartTime";
+    public static final String FIELD_PROTEST_DURATION = "protestDuration";
 
     public RaceLogProtestStartTimeEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
@@ -26,6 +27,7 @@ public class RaceLogProtestStartTimeEventSerializer extends BaseRaceLogEventSeri
         RaceLogProtestStartTimeEvent event = (RaceLogProtestStartTimeEvent) object;
         JSONObject result = super.serialize(event);
         result.put(FIELD_PROTEST_START_TIME, event.getProtestStartTime().asMillis());
+        result.put(FIELD_PROTEST_DURATION, event.getProtestDuration().asMillis());
         return result;
     }
 

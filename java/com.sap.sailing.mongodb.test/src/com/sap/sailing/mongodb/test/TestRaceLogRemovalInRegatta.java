@@ -51,7 +51,7 @@ public class TestRaceLogRemovalInRegatta extends AbstractTestStoringAndRetrievin
         Fleet blueFleet = qualification.getFleetByName(blueFleetName);
         RaceLog yellowLog = qualification.getRaceColumnByName(raceColumnName).getRaceLog(yellowFleet);
         RaceLog blueLog = qualification.getRaceColumnByName(raceColumnName).getRaceLog(blueFleet);
-        RaceLogProtestStartTimeEvent expectedEventYellow = new RaceLogProtestStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now());
+        RaceLogProtestStartTimeEvent expectedEventYellow = new RaceLogProtestStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now(), null);
         yellowLog.add(expectedEventYellow);
         RaceLogStartTimeEvent expectedEventBlue = new RaceLogStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now());
         blueLog.add(expectedEventBlue);

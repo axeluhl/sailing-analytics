@@ -925,6 +925,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogProtestStartTimeEvent.class.getSimpleName());
         storeTimePoint(event.getProtestStartTime(), result, FieldNames.RACE_LOG_PROTEST_START_TIME);
+        storeDuration(event.getProtestDuration(), result, FieldNames.RACE_LOG_PROTEST_DURATION);
         return result;
     }
 

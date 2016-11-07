@@ -198,7 +198,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testProtestStartTimeSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = new RaceLogProtestStartTimeEventImpl(null, author, 0, null);
+        RaceLogEvent event = new RaceLogProtestStartTimeEventImpl(null, author, 0, null, null);
         serializer.serialize(event);
         verify(protestStartTimeEventSerializer).serialize(event);
     }

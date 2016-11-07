@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -135,6 +136,11 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
      * If there is a protest time set, returns the most recent one. Otherwise <code>null</code>.
      */
     TimePoint getProtestTime();
+
+    /**
+     * If there is a protest time set, returns the most recent duration.
+     */
+    Duration getProtestDuration();
 
     /**
      * If there is a course set, returns the most recent one. Otherwise <code>null</code>.
