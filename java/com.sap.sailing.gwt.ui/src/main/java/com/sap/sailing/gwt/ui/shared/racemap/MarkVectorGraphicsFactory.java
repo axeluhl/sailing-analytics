@@ -8,7 +8,7 @@ public class MarkVectorGraphicsFactory {
         final MarkVectorGraphics result;
         switch (markType) {
         case BUOY:
-            result = new BuoyMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+            result = createBuoyMarkVectorGraphics(markDTO);
             break;
         case STARTBOAT:
         case FINISHBOAT:
@@ -18,8 +18,25 @@ public class MarkVectorGraphicsFactory {
             result = new LandMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
             break;
         default:
-            result = new BuoyMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+            result = createBuoyMarkVectorGraphics(markDTO);
             break;
+        }
+        return result;
+    }
+
+    private MarkVectorGraphics createBuoyMarkVectorGraphics(MarkDTO markDTO) {
+        final MarkVectorGraphics result;
+        if (markDTO.shape != null) {
+            if (Shape.CYLINDER.name().equalsIgnoreCase(markDTO.shape) && markDTO.pattern != null
+                    && Pattern.CHECKERED.name().equalsIgnoreCase(markDTO.pattern)) {
+                result = new FinishFlagMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+            } else if (Shape.CONICAL.name().equalsIgnoreCase(markDTO.shape)) {
+                result = new ConicalBuoyMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+            } else {
+                result = new SimpleBuoyMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+            }
+        } else {
+            result = new SimpleBuoyMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
         }
         return result;
     }

@@ -3,110 +3,14 @@ package com.sap.sailing.gwt.ui.shared.racemap;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.sap.sailing.domain.common.MarkType;
 
-public class BuoyMarkVectorGraphics extends AbstractMarkVectorGraphics implements MarkVectorGraphics {
+public class FinishFlagMarkVectorGraphics extends AbstractMarkVectorGraphics implements MarkVectorGraphics {
 
-    public BuoyMarkVectorGraphics(MarkType type, String color, String shape, String pattern) {
+    public FinishFlagMarkVectorGraphics(MarkType type, String color, String shape, String pattern) {
         super(type, color, shape, pattern);
     }
 
     @Override
     protected void drawMarkBody(Context2d ctx, boolean isSelected, String color) {
-        if (shape != null) {
-            if (Shape.CYLINDER.name().equalsIgnoreCase(shape) && pattern != null
-                    && Pattern.CHECKERED.name().equalsIgnoreCase(pattern)) {
-                drawBuoyWithFinishFlag(ctx, isSelected, color);
-            } else if (Shape.CONICAL.name().equalsIgnoreCase(shape)) {
-                drawConicalBuoy(ctx, isSelected, color);
-            } else {
-                drawSimpleBuoy(ctx, isSelected, color);
-            }
-        } else {
-            drawSimpleBuoy(ctx, isSelected, color);
-        }
-    }
-
-    void drawSimpleBuoy(Context2d ctx, boolean isSelected, String color) {
-        ctx.setStrokeStyle("rgba(0,0,0,0)");
-
-        ctx.save();
-        ctx.setFillStyle(color);
-        ctx.transform(12.5, 0, 0, 12.5, -578, 22.2);
-
-        ctx.beginPath();
-        ctx.arc(49.7, 12.8, 2.66, 0, doublePi, false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle(DEFAULT_MARK_BG_COLOR);
-        ctx.transform(12.5, 0, 0, 12.5, -578, 22.2);
-        ctx.beginPath();
-        ctx.arc(49.7, 11.3, 3.37, 0, doublePi, false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle(color);
-        ctx.transform(12.5, 0, 0, 12.5, -578, 22.2);
-        ctx.beginPath();
-        ctx.arc(49.6, 10.6, 2.66, 0, doublePi, false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle(DEFAULT_MARK_BG_COLOR);
-        ctx.transform(4.98, 0, 0, 10.8, -205, 50.4);
-        ctx.beginPath();
-        ctx.moveTo(50.8, 9.84);
-        ctx.lineTo(48.5, 9.84);
-        ctx.lineTo(48.5, 1.44);
-        ctx.lineTo(50.8, 1.9);
-        ctx.lineTo(50.8, 9.84);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.transform(12.5, 0, 0, 12.5, -570, 22.2);
-        ctx.save();
-        ctx.setFillStyle(color);
-        ctx.beginPath();
-        ctx.moveTo(48.8, 3.82);
-        ctx.lineTo(48.8, -1.32);
-        ctx.lineTo(57, 1.05);
-        ctx.lineTo(48.8, 3.82);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle(DEFAULT_MARK_BG_COLOR);
-        ctx.beginPath();
-        ctx.moveTo(48.5, 4.16);
-        ctx.lineTo(48.5, -1.65);
-        ctx.lineTo(57.8, 1.03);
-        ctx.lineTo(48.5, 4.16);
-        ctx.closePath();
-        ctx.moveTo(49, -0.994);
-        ctx.lineTo(49, 3.47);
-        ctx.lineTo(56.2, 1.07);
-        ctx.lineTo(49, -0.994);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-        ctx.restore();
-    }
-
-    private void drawBuoyWithFinishFlag(Context2d ctx, boolean isSelected, String color) {
         ctx.setStrokeStyle("rgba(0,0,0,0)");
 
         ctx.save();
@@ -271,79 +175,6 @@ public class BuoyMarkVectorGraphics extends AbstractMarkVectorGraphics implement
         ctx.fill();
         ctx.stroke();
         ctx.restore();
-        ctx.restore();
-    }
-
-    private void drawConicalBuoy(Context2d ctx, boolean isSelected, String color) {
-        ctx.setStrokeStyle("rgba(0,0,0,0)");
-
-        ctx.save();
-        ctx.setFillStyle(color);
-        ctx.transform(12.5, 0, 0, 12.5, -578, 22.2);
-        ctx.beginPath();
-        ctx.arc(49.7, 12.8, 2.66, 0, doublePi, false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle(DEFAULT_MARK_BG_COLOR);
-        ctx.transform(12.5, 0, 0, 12.5, -578, 22.2);
-        ctx.beginPath();
-        ctx.arc(49.7, 11.3, 3.37, 0, doublePi, false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle(color);
-        ctx.transform(12.5, 0, 0, 12.5, -578, 22.2);
-        ctx.beginPath();
-        ctx.arc(49.6, 10.6, 2.66, 0, doublePi, false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle(DEFAULT_MARK_BG_COLOR);
-        ctx.beginPath();
-        ctx.moveTo(36.9, 98);
-        ctx.lineTo(47.5, 98);
-        ctx.quadraticCurveTo(47.5, 98, 47.5, 98);
-        ctx.lineTo(47.5, 154.5);
-        ctx.quadraticCurveTo(47.5, 154.5, 47.5, 154.5);
-        ctx.lineTo(36.9, 154.5);
-        ctx.quadraticCurveTo(36.9, 154.5, 36.9, 154.5);
-        ctx.lineTo(36.9, 98);
-        ctx.quadraticCurveTo(36.9, 98, 36.9, 98);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle(DEFAULT_MARK_BG_COLOR);
-        ctx.beginPath();
-        ctx.moveTo(43.6, 0.372);
-        ctx.lineTo(87.3, 102);
-        ctx.lineTo(-0.714, 102);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.save();
-        ctx.setFillStyle(color);
-        ctx.beginPath();
-        ctx.moveTo(43.6, 14.7);
-        ctx.lineTo(78.5, 96.6);
-        ctx.lineTo(8.07, 96.6);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
         ctx.restore();
     }
 }
