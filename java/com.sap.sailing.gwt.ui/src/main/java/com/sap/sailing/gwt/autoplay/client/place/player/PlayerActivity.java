@@ -7,16 +7,16 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderContext;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderComponentContext;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardContext;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardComponentContext;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.IOnDefaultSettingsLoaded;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
@@ -63,12 +63,12 @@ public class PlayerActivity extends AbstractActivity {
                 LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifecycle = new LeaderboardWithHeaderPerspectiveLifecycle(leaderBoardDTO, StringMessages.INSTANCE);
                 RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(leaderBoardDTO, StringMessages.INSTANCE);
          
-                final RaceBoardContext raceBoardContext = new RaceBoardContext("AutoPlay", raceboardPerspectiveLifecycle, null, null, playerPlace.getConfiguration().getLeaderboardName(), null, eventUUID);
-                final LeaderboardWithHeaderContext leaderboardWithHeaderContext = new LeaderboardWithHeaderContext("AutoPlay", leaderboardPerspectiveLifecycle);
+                final RaceBoardComponentContext raceBoardContext = new RaceBoardComponentContext("AutoPlay", raceboardPerspectiveLifecycle, null, null, playerPlace.getConfiguration().getLeaderboardName(), null, eventUUID);
+                final LeaderboardWithHeaderComponentContext leaderboardWithHeaderContext = new LeaderboardWithHeaderComponentContext("AutoPlay", leaderboardPerspectiveLifecycle);
                 
 
                 
-                ComponentContext.initMultipleDefaultSettings(raceBoardContext, leaderboardWithHeaderContext, new IOnDefaultSettingsLoaded() {
+                AbstractComponentContextWithSettingsStorage.initMultipleDefaultSettings(raceBoardContext, leaderboardWithHeaderContext, new IOnDefaultSettingsLoaded() {
                     
                     @Override
                     public void onLoaded() {

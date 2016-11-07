@@ -42,7 +42,7 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
 
     @Override
     public LeaderboardSettings cloneSettings(LeaderboardSettings settings) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return new LeaderboardSettings(settings.getManeuverDetailsToShow(), settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(), settings.getNamesOfRaceColumnsToShow(), settings.getNamesOfRacesToShow(), settings.getNumberOfLastRacesToShow(), settings.isAutoExpandPreSelectedRace(), settings.getDelayBetweenAutoAdvancesInMilliseconds(), settings.getNameOfRaceToSort(), settings.isSortAscending(), settings.isUpdateUponPlayStateChange(), settings.getActiveRaceColumnSelectionStrategy(), settings.isShowAddedScores(), settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), settings.isShowCompetitorSailIdColumn(), settings.isShowCompetitorFullNameColumn());
     }
 
     @Override

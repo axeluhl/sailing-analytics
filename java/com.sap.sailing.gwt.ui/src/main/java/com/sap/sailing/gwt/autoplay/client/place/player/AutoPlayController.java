@@ -10,7 +10,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderContext;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderComponentContext;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspective;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardContext;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardComponentContext;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
@@ -68,10 +68,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     private final PlayerView playerView;
     private final AutoPlayerConfiguration autoPlayerConfiguration;
     
-    private final LeaderboardWithHeaderContext leaderboardWithHeaderContext;
-    private final RaceBoardContext raceBoardContext;
+    private final LeaderboardWithHeaderComponentContext leaderboardWithHeaderContext;
+    private final RaceBoardComponentContext raceBoardContext;
     
-    public AutoPlayController(LeaderboardWithHeaderContext leaderboardWithHeaderContext, RaceBoardContext raceBoardContext, SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+    public AutoPlayController(LeaderboardWithHeaderComponentContext leaderboardWithHeaderContext, RaceBoardComponentContext raceBoardContext, SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, ErrorReporter errorReporter, AutoPlayerConfiguration autoPlayerConfiguration,
             UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails, PlayerView playerView) {
         this.leaderboardWithHeaderContext = leaderboardWithHeaderContext;

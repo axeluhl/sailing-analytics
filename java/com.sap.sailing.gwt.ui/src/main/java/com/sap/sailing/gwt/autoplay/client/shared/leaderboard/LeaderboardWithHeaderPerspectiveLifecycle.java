@@ -6,7 +6,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspectiveSettings> {
     
@@ -15,7 +14,6 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     private final StringMessages stringMessages;
 
     public LeaderboardWithHeaderPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
-        super();
         this.stringMessages = stringMessages;
         this.leaderboardPanelLifecycle = new LeaderboardPanelLifecycle(leaderboard, stringMessages);
         this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " +
@@ -29,12 +27,6 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     @Override
     public LeaderboardWithHeaderPerspectiveSettings createPerspectiveOwnDefaultSettings() {
         return new LeaderboardWithHeaderPerspectiveSettings();
-    }
-
-    @Override
-    public PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> cloneSettings(
-            PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
     }
 
     @Override
@@ -63,6 +55,12 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     @Override
     public String getComponentId() {
         return "LeaderboardWithHeader";
+    }
+
+    @Override
+    public LeaderboardWithHeaderPerspectiveSettings clonePerspectiveOwnSettings(
+            LeaderboardWithHeaderPerspectiveSettings settings) {
+        return new LeaderboardWithHeaderPerspectiveSettings(settings.isLeaderboardAutoZoom(), settings.getLeaderboardZoomFactor());
     }
 
 }

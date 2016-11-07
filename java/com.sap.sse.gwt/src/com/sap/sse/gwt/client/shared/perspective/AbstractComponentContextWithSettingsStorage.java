@@ -8,19 +8,18 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 
-public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS extends Settings> {
+public abstract class AbstractComponentContextWithSettingsStorage<PL extends PerspectiveLifecycle<PS>, PS extends Settings> extends AbstractComponentContext<PL, PS> {
     
     private final SettingsStorageManager<PS> settingsStorageManager;
-    protected final PL rootPerspectiveLifecycle;
     
     /**
-     * Current default settings for the whole settings tree in serialized string.
+     * Current default settings for the whole settings tree.
      */
-    private String currentDefaultSettings = null;
+    private PerspectiveCompositeSettings<PS> currentDefaultSettings = null;
     
-    public ComponentContext(String entryPointId, PL rootPerspectiveLifecycle, String...contextDefinitionParameters) {
-        this.rootPerspectiveLifecycle = rootPerspectiveLifecycle;
-        this.settingsStorageManager = new SettingsStorageManager<>(entryPointId + "+" + rootPerspectiveLifecycle.getComponentId(), buildContextDefinitionId(contextDefinitionParameters));
+    public AbstractComponentContextWithSettingsStorage(PL rootPerspectiveLifecycle, SettingsStorageManager<PS> settingsStorageManager) {
+        super(rootPerspectiveLifecycle);
+        this.settingsStorageManager = settingsStorageManager;
     }
     
     public void initDefaultSettings(final DefaultSettingsLoadedCallback<PS> asyncCallback) {
@@ -37,13 +36,14 @@ public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS e
 
             @Override
             public void onSuccess(PerspectiveCompositeSettings<PS> result) {
-                currentDefaultSettings = settingsStorageManager.serializeSettings(result);
+                currentDefaultSettings = rootPerspectiveLifecycle.cloneSettings(result);
                 asyncCallback.onSuccess(result);
             }
         });
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings) {
         Perspective<? extends Settings> parentPerspective = component.getComponentTreeNodeInfo().getParentPerspective();
         
@@ -64,11 +64,8 @@ public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS e
         } else {
             newRootPerspectiveSettings = (PerspectiveCompositeSettings<PS>) updatePerspectiveLifecycleWithAllSettings(parentPerspective, component, newDefaultSettings);
         }
+        this.currentDefaultSettings = rootPerspectiveLifecycle.cloneSettings(newRootPerspectiveSettings);
         storeNewDefaultSettings(newRootPerspectiveSettings);
-    }
-    
-    public PL getRootPerspectiveLifecycle() {
-        return rootPerspectiveLifecycle;
     }
     
     private void storeNewDefaultSettings(PerspectiveCompositeSettings<PS> newRootPerspectiveSettings) {
@@ -111,35 +108,24 @@ public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS e
         }
     }
     
-    public Throwable getLastServerError() {
-        return settingsStorageManager.getLastServerError();
+    public Throwable getLastError() {
+        return settingsStorageManager.getLastError();
     }
     
+    @Override
     public PerspectiveCompositeSettings<PS> getDefaultSettingsForRootPerspective() {
         if(currentDefaultSettings == null) {
             throw new IllegalStateException("Settings have not been initialized yet.");
         }
-        return settingsStorageManager.deserializeSettings(currentDefaultSettings, rootPerspectiveLifecycle.createDefaultSettings());
+        return rootPerspectiveLifecycle.cloneSettings(currentDefaultSettings);
     }
     
-    private static String buildContextDefinitionId(String[] contextDefinitionParameters) {
-        StringBuilder str = new StringBuilder("<");
-        for(String contextDefinitionParameter : contextDefinitionParameters) {
-            if(contextDefinitionParameter != null) {
-                str.append(contextDefinitionParameter);
-            }
-            str.append(";");
-        }
-        str.append(">");
-        return str.toString();
-    }
-
     public<T> AsyncCallbackWithSettingsRetrievementJoiner<T, PS> createSettingsRetrievementWithAsyncCallbackJoiner(
             AsyncCallback<T> callbackToWrap) {
         return new AsyncCallbackWithSettingsRetrievementJoiner<>(this, callbackToWrap);
     }
     
-    public static<PS1 extends Settings, PS2 extends Settings> void initMultipleDefaultSettings(ComponentContext<?, PS1> context1, ComponentContext<?, PS2> context2, final IOnDefaultSettingsLoaded onDefaultSettingsLoaded) {
+    public static<PS1 extends Settings, PS2 extends Settings> void initMultipleDefaultSettings(AbstractComponentContextWithSettingsStorage<?, PS1> context1, AbstractComponentContextWithSettingsStorage<?, PS2> context2, final IOnDefaultSettingsLoaded onDefaultSettingsLoaded) {
         DoubleSettingsRetrievementJoiner<PS1, PS2> joiner = new DoubleSettingsRetrievementJoiner<PS1, PS2>(context1, context2) {
             @Override
             public void onAllDefaultSettingsLoaded() {
@@ -147,6 +133,11 @@ public abstract class ComponentContext<PL extends PerspectiveLifecycle<PS>, PS e
             }
         };
         joiner.startSettingsRetrievementAndJoinAsyncCallback();
+    }
+    
+    @Override
+    public boolean hasMakeCustomDefaultSettingsSupport() {
+        return true;
     }
     
 }

@@ -17,5 +17,7 @@ public interface PerspectiveLifecycle<PS extends Settings> extends
     
     PS createPerspectiveOwnDefaultSettings();
     
+    PS clonePerspectiveOwnSettings(PS settings);
+    
     SettingsDialogComponent<PS> getPerspectiveOwnSettingsDialogComponent(PS settings);
 }

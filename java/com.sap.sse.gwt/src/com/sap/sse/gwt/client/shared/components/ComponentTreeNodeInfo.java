@@ -1,13 +1,13 @@
 package com.sap.sse.gwt.client.shared.components;
 
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
 
 public class ComponentTreeNodeInfo<SettingsType extends Settings> {
     
     private Perspective<? extends Settings> parentPerspective = null;
-    private ComponentContext<?, ?> componentContext = null;
+    private AbstractComponentContextWithSettingsStorage<?, ?> componentContext = null;
     
     public void setParentPerspective(Perspective<? extends Settings> parentPerspective) {
         this.parentPerspective = parentPerspective;
@@ -17,11 +17,11 @@ public class ComponentTreeNodeInfo<SettingsType extends Settings> {
         return parentPerspective;
     }
     
-    public void setComponentContext(ComponentContext<?, ?> componentContext) {
+    public void setComponentContext(AbstractComponentContextWithSettingsStorage<?, ?> componentContext) {
         this.componentContext = componentContext;
     }
     
-    public ComponentContext<?, ?> getComponentContext() {
+    public AbstractComponentContextWithSettingsStorage<?, ?> getComponentContext() {
         return componentContext;
     }
     

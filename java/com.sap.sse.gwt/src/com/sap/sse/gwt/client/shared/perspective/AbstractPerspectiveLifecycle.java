@@ -37,6 +37,20 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
         return new PerspectiveCompositeSettings<>(perspectiveOwnSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
     }
     
+    @Override
+    public PerspectiveCompositeSettings<PS> cloneSettings(PerspectiveCompositeSettings<PS> settings) {
+        return new PerspectiveCompositeSettings<>(this.clonePerspectiveOwnSettings(settings.getPerspectiveOwnSettings()), getComponentIdsAndClonedSettings(settings).getSettingsPerComponentId());
+    }
+    
+    protected CompositeSettings getComponentIdsAndClonedSettings(PerspectiveCompositeSettings<PS> settings) {
+        Map<String, Settings> componentIdsAndSettings = new HashMap<>();
+        for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
+            componentIdsAndSettings.put(componentLifecycle.getComponentId(), cloneChildComponentSettings(componentLifecycle, settings));
+        }
+        CompositeSettings compositeSettings = new CompositeSettings(componentIdsAndSettings);
+        return compositeSettings;
+    }
+    
     protected CompositeSettings getComponentIdsAndDefaultSettings() {
         Map<String, Settings> componentIdsAndSettings = new HashMap<>();
         for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
@@ -48,6 +62,12 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
 
     public Iterable<ComponentLifecycle<?,?>> getComponentLifecycles() {
         return componentLifecycles;
+    }
+    
+    private static<S extends Settings> S cloneChildComponentSettings(ComponentLifecycle<S, ?> childComponentLifecycle, PerspectiveCompositeSettings<?> settings) {
+        @SuppressWarnings("unchecked")
+        S childSettings = (S) settings.findSettingsByComponentId(childComponentLifecycle.getComponentId());
+        return childComponentLifecycle.cloneSettings(childSettings);
     }
 
 }

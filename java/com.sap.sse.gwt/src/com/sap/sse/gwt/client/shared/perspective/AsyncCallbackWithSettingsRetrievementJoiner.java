@@ -6,9 +6,9 @@ import com.sap.sse.common.settings.Settings;
 public class AsyncCallbackWithSettingsRetrievementJoiner<T, PS extends Settings> extends CallbacksJoinerHelper<T, PerspectiveCompositeSettings<PS>> implements AsyncCallback<T> {
     
     private final AsyncCallback<T> wrappedCallback;
-    private final ComponentContext<?, PS> context;
+    private final AbstractComponentContextWithSettingsStorage<?, PS> context;
     
-    public AsyncCallbackWithSettingsRetrievementJoiner(ComponentContext<?, PS> context, AsyncCallback<T> callbackToWrap) {
+    public AsyncCallbackWithSettingsRetrievementJoiner(AbstractComponentContextWithSettingsStorage<?, PS> context, AsyncCallback<T> callbackToWrap) {
         this.wrappedCallback = callbackToWrap;
         this.context = context;
     }

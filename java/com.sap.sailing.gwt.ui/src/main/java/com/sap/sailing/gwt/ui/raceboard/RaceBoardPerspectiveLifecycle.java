@@ -10,7 +10,6 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveSettings> {
@@ -43,12 +42,6 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         componentLifecycles.add(multiCompetitorRaceChartLifecycle);
         componentLifecycles.add(mediaPlayerLifecycle);
         componentLifecycles.add(raceTimePanelLifecycle);
-    }
-
-    @Override
-    public PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> cloneSettings(
-            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
     }
 
     @Override
@@ -98,5 +91,10 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     @Override
     public String getComponentId() {
         return "RaceBoard";
+    }
+
+    @Override
+    public RaceBoardPerspectiveSettings clonePerspectiveOwnSettings(RaceBoardPerspectiveSettings settings) {
+        return new RaceBoardPerspectiveSettings(settings.getActiveCompetitorsFilterSetName(), settings.isShowLeaderboard(), settings.isShowWindChart(), settings.isShowCompetitorsChart(), settings.isCanReplayDuringLiveRaces(), settings.getInitialDurationAfterRaceStartInReplay());
     }
 }

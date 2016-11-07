@@ -1,13 +1,13 @@
 package com.sap.sailing.gwt.autoplay.client.shared.leaderboard;
 
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.perspective.UserSettingsStorageManager;
 
-public class LeaderboardWithHeaderContext extends ComponentContext<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> {
+public class LeaderboardWithHeaderComponentContext extends AbstractComponentContextWithSettingsStorage<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> {
 
-    public LeaderboardWithHeaderContext(String entryPointId, LeaderboardWithHeaderPerspectiveLifecycle rootPerspectiveLifecycle) {
-        super(entryPointId, rootPerspectiveLifecycle);
-        // TODO Auto-generated constructor stub
+    public LeaderboardWithHeaderComponentContext(String entryPointId, LeaderboardWithHeaderPerspectiveLifecycle rootPerspectiveLifecycle) {
+        super(rootPerspectiveLifecycle, new UserSettingsStorageManager<LeaderboardWithHeaderPerspectiveSettings>(entryPointId));
     }
 
     @Override
