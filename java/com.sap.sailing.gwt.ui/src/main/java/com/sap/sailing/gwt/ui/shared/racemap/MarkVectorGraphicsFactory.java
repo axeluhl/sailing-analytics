@@ -4,7 +4,8 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 
 public class MarkVectorGraphicsFactory {
-    public MarkVectorGraphics getMarkVectorGraphics(MarkType markType, MarkDTO markDTO) {
+    public MarkVectorGraphics getMarkVectorGraphics(MarkDTO markDTO) {
+        final MarkType markType = markDTO.type;
         final MarkVectorGraphics result;
         switch (markType) {
         case BUOY:

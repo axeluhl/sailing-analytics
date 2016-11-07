@@ -67,7 +67,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         this.showBuoyZone = false;
         this.markScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
         this.markVectorGraphicsFactory = new MarkVectorGraphicsFactory();
-        this.markVectorGraphics = markVectorGraphicsFactory.getMarkVectorGraphics(markDTO.type, markDTO);
+        this.markVectorGraphics = markVectorGraphicsFactory.getMarkVectorGraphics(markDTO);
         setCanvasSize(50, 50);
     }
     
