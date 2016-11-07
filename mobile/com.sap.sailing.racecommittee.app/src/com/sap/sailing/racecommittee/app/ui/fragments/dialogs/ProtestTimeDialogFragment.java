@@ -5,23 +5,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.util.SparseBooleanArray;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TimePicker;
-
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ScreenHelper;
@@ -38,8 +21,24 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.util.SparseBooleanArray;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TimePicker;
 
 public class ProtestTimeDialogFragment extends AttachedDialogFragment implements View.OnClickListener {
 
