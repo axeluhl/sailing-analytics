@@ -4,10 +4,9 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.sap.sailing.domain.common.Distance;
 
 public interface MarkVectorGraphics {
+    void drawMarkToCanvas(Context2d ctx, boolean isSelected, double width, double height, double scaleFactor);
 
-	public void drawMarkToCanvas(Context2d ctx, boolean isSelected, double width, double height, double scaleFactor);
+    Distance getMarkHeight();
 
-    public Distance getMarkHeight();
-
-    public Distance getMarkWidth();
+    Distance getMarkWidth();
 }
