@@ -127,34 +127,35 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             }
         }
     }
-    
-	private void setRotation() {
-		if (mark.type == MarkType.STARTBOAT || mark.type == MarkType.FINISHBOAT) {
-			Bearing lineBearing;
-			List<Position> lineMarkPositions = new ArrayList<Position>();
-			MarkDTO firstMark = null;
-			MarkDTO secondMark = null;
-			for (WaypointDTO currentWaypoint : coursePositionsDTO.course.waypoints) {
-				if (currentWaypoint.passingInstructions == PassingInstruction.Line) {
-					Iterator<MarkDTO> marks = currentWaypoint.controlPoint.getMarks().iterator();
-					firstMark = marks.next();
-					if (marks.hasNext()) {
-						secondMark = marks.next();
-						if (mark.getIdAsString().equals(firstMark.getIdAsString())
-								|| mark.getIdAsString().equals(secondMark.getIdAsString())) {
-							lineMarkPositions.add(firstMark.position);
-							lineMarkPositions.add(secondMark.position);
-						}
-					}
-				}
-			}
-			lineBearing = getLineBearing(lineMarkPositions);
-			if (lineBearing != null) {
-				setCanvasRotation(lineBearing.getDegrees());
-			}
-		}
-	}
-    
+
+    private void setRotation() {
+        if (mark.type == MarkType.STARTBOAT || mark.type == MarkType.FINISHBOAT) {
+            Bearing lineBearing;
+            List<Position> lineMarkPositions = new ArrayList<Position>();
+            MarkDTO firstMark = null;
+            MarkDTO secondMark = null;
+            for (WaypointDTO currentWaypoint : coursePositionsDTO.course.waypoints) {
+                if (currentWaypoint.passingInstructions == PassingInstruction.Line) {
+                    Iterator<MarkDTO> marks = currentWaypoint.controlPoint.getMarks().iterator();
+                    firstMark = marks.next();
+                    if (marks.hasNext()) {
+                        secondMark = marks.next();
+                        if (mark.getIdAsString().equals(firstMark.getIdAsString())
+                                || mark.getIdAsString().equals(secondMark.getIdAsString())) {
+                            lineMarkPositions.add(firstMark.position);
+                            lineMarkPositions.add(secondMark.position);
+                            break;
+                        }
+                    }
+                }
+            }
+            lineBearing = getLineBearing(lineMarkPositions);
+            if (lineBearing != null) {
+                setCanvasRotation(lineBearing.getDegrees());
+            }
+        }
+    }
+
     private boolean isMarkWithBuoyZone(MarkDTO mark) {
         return mark.type == null || mark.type == MarkType.BUOY || mark.type == MarkType.STARTBOAT || 
                 mark.type == MarkType.FINISHBOAT || mark.type == MarkType.LANDMARK;
@@ -190,17 +191,17 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         return new Util.Pair<Double, Size>(markSizeScaleFactor, Size.newInstance(markHeightInPixel * 2.0, markHeightInPixel * 2.0));
     }
 
-	private Bearing getLineBearing(List<Position> markPositions) {
-		Bearing result = null;
-		if (markPositions.size() > 1) {
-			Position firstPosition = markPositions.get(0);
-			Position secondPosition = markPositions.get(1);
-			if (firstPosition != null) {
-				result = firstPosition.getBearingGreatCircle(secondPosition);
-			}
-		}
-		return result;
-	}
+    private Bearing getLineBearing(List<Position> markPositions) {
+        Bearing result = null;
+        if (markPositions.size() > 1) {
+            Position firstPosition = markPositions.get(0);
+            Position secondPosition = markPositions.get(1);
+            if (firstPosition != null) {
+                result = firstPosition.getBearingGreatCircle(secondPosition);
+            }
+        }
+        return result;
+    }
 
     private String getTitle() {
         return mark.getName();
