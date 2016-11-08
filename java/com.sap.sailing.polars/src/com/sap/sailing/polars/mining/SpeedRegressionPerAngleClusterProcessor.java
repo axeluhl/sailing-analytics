@@ -235,19 +235,25 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     }
 
     public Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> getRegressionsImpl() {
-        Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> map = new HashMap<>();
-        
-        regressions.keySet().stream().forEach(key -> map.put(key, (IncrementalAnyOrderLeastSquaresImpl) regressions.get(key)));
-        
-        return Collections.unmodifiableMap(map);
+        synchronized (regressions) {
+            Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> map = new HashMap<>();
+            
+            regressions.keySet().stream().forEach(key -> map.put(key, (IncrementalAnyOrderLeastSquaresImpl) regressions.get(key)));
+            
+            return Collections.unmodifiableMap(map);
+        }
     }
 
     public Map<GroupKey, IncrementalLeastSquares> getRegressions() {
-        return Collections.unmodifiableMap(regressions);
+        synchronized (regressions) {
+            return Collections.unmodifiableMap(regressions);
+        }
     }
 
     public void updateRegressions(Map<GroupKey, ? extends IncrementalLeastSquares> regressionsToUpdate) {
-        regressions.putAll(regressionsToUpdate);
+        synchronized (regressions) {
+            regressions.putAll(regressionsToUpdate);
+        }
     }
 
     public Map<BoatClass, Long> getFixCountPerBoatClass() {

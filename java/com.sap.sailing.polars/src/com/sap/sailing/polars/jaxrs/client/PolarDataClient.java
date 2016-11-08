@@ -33,7 +33,7 @@ import com.sap.sailing.polars.jaxrs.deserialization.DegreeBearingDeserializer;
 import com.sap.sailing.polars.jaxrs.deserialization.IncrementalAnyOrderLeastSquaresImplDeserializer;
 import com.sap.sailing.polars.jaxrs.deserialization.LegTypeDeserializer;
 import com.sap.sailing.polars.mining.AngleAndSpeedRegression;
-import com.sap.sailing.polars.mining.BearingClusterGroup;
+import com.sap.sailing.polars.mining.BearingComparator;
 import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -89,19 +89,27 @@ public class PolarDataClient {
             JSONObject jsonObject = getJsonFromResponse(processorResponse);
 
             MapDeserializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedDeserializer = new MapDeserializer<>(
-                    new CompoundGroupKeyDeserializer<BoatClass, Cluster<Bearing>>(PolarDataResource.FIELD_BOAT_CLASS, PolarDataResource.FIELD_CLUSTER, 
-                            new BoatClassDeserializer(), new ClusterDeserializer<Bearing>(new ClusterBoundaryDeserializer<>(new DegreeBearingDeserializer(), new BearingClusterGroup.BearingComparator()))), 
+                    new CompoundGroupKeyDeserializer<BoatClass, Cluster<Bearing>>(
+                            PolarDataResource.FIELD_BOAT_CLASS, 
+                            PolarDataResource.FIELD_CLUSTER, 
+                            new BoatClassDeserializer(), 
+                            new ClusterDeserializer<Bearing>(new ClusterBoundaryDeserializer<>(new DegreeBearingDeserializer(), new BearingComparator()))), 
                     new IncrementalAnyOrderLeastSquaresImplDeserializer());
             MapDeserializer<GroupKey, AngleAndSpeedRegression> cubicDeserializer = new MapDeserializer<>(
-                    new CompoundGroupKeyDeserializer<LegType, BoatClass>(PolarDataResource.FIELD_LEG_TYPE, PolarDataResource.FIELD_BOAT_CLASS,
-                            new LegTypeDeserializer(), new BoatClassDeserializer()), 
+                    new CompoundGroupKeyDeserializer<LegType, BoatClass>(
+                            PolarDataResource.FIELD_LEG_TYPE, 
+                            PolarDataResource.FIELD_BOAT_CLASS,
+                            new LegTypeDeserializer(), 
+                            new BoatClassDeserializer()), 
                     new AngleAndSpeedRegressionDeserializer());
-            MapDeserializer<BoatClass, Long> fixCountPerBoatClassDeserializer = new MapDeserializer<>(new BoatClassDeserializer(), new JsonDeserializer<Long>() {
-                @Override
-                public Long deserialize(JSONObject object) throws JsonDeserializationException {
-                    return (Long) object.get(PolarDataResource.FIELD_LONG);
-                }
-            });
+            MapDeserializer<BoatClass, Long> fixCountPerBoatClassDeserializer = new MapDeserializer<>(
+                    new BoatClassDeserializer(), 
+                    new JsonDeserializer<Long>() {
+                        @Override
+                        public Long deserialize(JSONObject object) throws JsonDeserializationException {
+                            return (Long) object.get(PolarDataResource.FIELD_LONG);
+                        }
+                    });
 
             Map<GroupKey, AngleAndSpeedRegression> cubicRegression = cubicDeserializer
                     .deserialize((JSONArray) jsonObject.get(PolarDataResource.FIELD_CUBIC_REGRESSION));

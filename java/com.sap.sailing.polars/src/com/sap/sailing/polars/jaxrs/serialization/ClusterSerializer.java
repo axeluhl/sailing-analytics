@@ -23,8 +23,9 @@ public class ClusterSerializer<ElementType extends Serializable> implements Json
     public JSONObject serialize(Cluster<ElementType> object) {
         JSONObject clusterJSON = new JSONObject();
 
+        // Check reference type to avoid interface modification
         if (!(object instanceof AbstractCluster)) {
-            throw new IllegalStateException("Unknown Cluster type");
+            throw new IllegalArgumentException("Unknown Cluster type");
         }
 
         JSONArray boundariesJSON = new JSONArray();

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
+import java.util.Objects;
+
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
@@ -143,55 +145,80 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((super.getName() == null) ? 0 : super.getName().hashCode());
-        result = prime * result + (int) (approximateManeuverDurationInMilliseconds
-                ^ (approximateManeuverDurationInMilliseconds >>> 32));
-        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
-        result = prime * result + ((hullBeam == null) ? 0 : hullBeam.hashCode());
-        result = prime * result + ((hullLength == null) ? 0 : hullLength.hashCode());
-        result = prime * result + ((hullType == null) ? 0 : hullType.hashCode());
-        result = prime * result + (typicallyStartsUpwind ? 1231 : 1237);
-        return result;
+        return Objects.hash(getName(), approximateManeuverDurationInMilliseconds, displayName, hullBeam, hullLength,
+                hullType, typicallyStartsUpwind);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(Object object) {
+        if (object == this)
             return true;
-        if (obj == null)
+
+        if (!(object instanceof BoatClassImpl))
             return false;
-        if (getClass() != obj.getClass())
+
+        BoatClassImpl other = (BoatClassImpl) object;
+
+        if (!Objects.equals(this.getName(), other.getName()))
             return false;
-        BoatClassImpl other = (BoatClassImpl) obj;
-        if (super.getName() == null) {
-            if (other.getName() != null)
-                return false;
-        } else if (!super.getName().equals(other.getName()))
+
+        if (!Objects.equals(this.approximateManeuverDurationInMilliseconds,
+                other.approximateManeuverDurationInMilliseconds))
             return false;
-        if (approximateManeuverDurationInMilliseconds != other.approximateManeuverDurationInMilliseconds)
+
+        if (!Objects.equals(this.displayName, other.displayName))
             return false;
-        if (displayName == null) {
-            if (other.displayName != null)
-                return false;
-        } else if (!displayName.equals(other.displayName))
+
+        if (!Objects.equals(this.hullBeam, other.hullBeam))
             return false;
-        if (hullBeam == null) {
-            if (other.hullBeam != null)
-                return false;
-        } else if (!hullBeam.equals(other.hullBeam))
+
+        if (!Objects.equals(this.hullLength, other.hullLength))
             return false;
-        if (hullLength == null) {
-            if (other.hullLength != null)
-                return false;
-        } else if (!hullLength.equals(other.hullLength))
+
+        if (!Objects.equals(this.hullType, other.hullType))
             return false;
-        if (hullType != other.hullType)
+
+        if (!Objects.equals(this.typicallyStartsUpwind, other.typicallyStartsUpwind))
             return false;
-        if (typicallyStartsUpwind != other.typicallyStartsUpwind)
-            return false;
+
         return true;
     }
     
+    public static class InstanceBuilder {
+        private String name;
+        private String displayName;
+        private Distance hullBeam;
+        private Distance hullLength;
+        private BoatHullType hullType;
+        private boolean typicallyStartsUpwind;
+        
+        public InstanceBuilder(String name, boolean typicallyStartsUpwind) {
+            this.name = name;
+            this.typicallyStartsUpwind = typicallyStartsUpwind;
+        }
+
+        public InstanceBuilder setDisplayName(String displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
+        public InstanceBuilder setHullBeam(Distance hullBeam) {
+            this.hullBeam = hullBeam;
+            return this;
+        }
+
+        public InstanceBuilder setHullLength(Distance hullLength) {
+            this.hullLength = hullLength;
+            return this;
+        }
+
+        public InstanceBuilder setHullType(BoatHullType hullType) {
+            this.hullType = hullType;
+            return this;
+        }
+        
+        public BoatClassImpl build() {
+            return new BoatClassImpl(name, typicallyStartsUpwind, displayName, hullLength, hullBeam, hullType);
+        }
+    }
 }

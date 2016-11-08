@@ -23,8 +23,9 @@ public class ClusterBoundarySerializer<ElementType extends Serializable>
     public JSONObject serialize(ClusterBoundary<ElementType> object) {
         JSONObject boundaryJSON = new JSONObject();
 
+        // Check reference type to avoid interface modification
         if (!(object instanceof AbstractClusterBoundary)) {
-            throw new IllegalStateException("Unknown ClusterBoundary type");
+            throw new IllegalArgumentException("Unknown ClusterBoundary type");
         }
 
         AbstractClusterBoundary<ElementType> abstractBoundary = (AbstractClusterBoundary<ElementType>) object;

@@ -223,11 +223,15 @@ public class CubicRegressionPerCourseProcessor implements
     }
 
     public Map<GroupKey, AngleAndSpeedRegression> getRegressions() {
-        return Collections.unmodifiableMap(regressions);
+        synchronized (regressions) {
+            return Collections.unmodifiableMap(regressions);
+        }
     }
     
     public void updateRegressions(Map<GroupKey, AngleAndSpeedRegression> regressionsToUpdate) {
-        regressions.putAll(regressionsToUpdate);
+        synchronized (regressions) {
+            regressions.putAll(regressionsToUpdate);
+        }
     }
     
 }
