@@ -23,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRac
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.swc.SWCRacingProcedure;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartPathFinderFragment;
@@ -134,6 +135,14 @@ public class MorePanelFragment extends BasePanelFragment {
         RacingProcedure procedure = getRaceState().getRacingProcedure();
         if (procedure instanceof RRS26RacingProcedure) {
             RRS26RacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
+            if (mStartMode != null && mStartModeFlag != null) {
+                mStartMode.setVisibility(View.VISIBLE);
+                mStartModeFlag.setImageDrawable(FlagsResources
+                        .getFlagDrawable(getActivity(), typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
+            }
+        }
+        if (procedure instanceof SWCRacingProcedure) {
+            SWCRacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
             if (mStartMode != null && mStartModeFlag != null) {
                 mStartMode.setVisibility(View.VISIBLE);
                 mStartModeFlag.setImageDrawable(FlagsResources
