@@ -1288,7 +1288,14 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         private class RaceDistanceTraveledInMeters implements LegDetailField<Double> {
             @Override
             public Double get(LeaderboardRowDTO row) {
-                return row.getDistanceTraveledInMeters(getRaceColumnName()).getMeters();
+                Distance distanceForRaceColumn = row.getDistanceTraveledInMeters(getRaceColumnName());
+                final Double distance;
+                if(distanceForRaceColumn != null){
+                    distance = distanceForRaceColumn.getMeters();
+                } else {
+                    distance = null;
+                }
+                return distance;
             }
         }
 
