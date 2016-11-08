@@ -1,9 +1,5 @@
 package com.sap.sailing.gwt.home.communication.fakeseries;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -70,20 +66,8 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
                 dto.setLeaderboardId(overallLeaderboardGroup.getOverallLeaderboard().getName());
             }
 
-            List<Event> fakeSeriesEvents = new ArrayList<Event>();
-            for (Event event : ctx.getRacingEventService().getAllEvents()) {
-                for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-                    if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                        fakeSeriesEvents.add(event);
-                    }
-                }
-            }
-            Collections.sort(fakeSeriesEvents, new Comparator<Event>() {
-                public int compare(Event e1, Event e2) {
-                    return e2.getStartDate().compareTo(e1.getStartDate());
-                }
-            });
-            for(Event eventInSeries: fakeSeriesEvents) {
+            for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(overallLeaderboardGroup,
+                    ctx.getRacingEventService())) {
                 EventMetadataDTO eventOfSeries = HomeServiceUtil.convertToMetadataDTO(eventInSeries, ctx.getRacingEventService());
                 dto.addEvent(eventOfSeries);
                 

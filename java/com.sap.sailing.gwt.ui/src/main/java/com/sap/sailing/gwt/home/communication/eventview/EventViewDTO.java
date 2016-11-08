@@ -28,13 +28,6 @@ public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
     private String officialWebsiteURL;
     private String sailorsInfoWebsiteURL;
 
-    public EventViewDTO() {
-    }
-
-    public EventViewDTO(String name) {
-        setDisplayName(name);
-    }
-
     public EventType getType() {
         return type;
     }

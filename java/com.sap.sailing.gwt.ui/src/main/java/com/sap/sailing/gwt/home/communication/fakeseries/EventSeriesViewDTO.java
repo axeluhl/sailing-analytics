@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.communication.fakeseries;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.Result;
 public class EventSeriesViewDTO implements Result, HasLogo {
     private UUID id;
     private String displayName;
-    private ArrayList<EventMetadataDTO> events = new ArrayList<>();
+    private ArrayList<EventMetadataDTO> eventsDescending = new ArrayList<>();
     private ImageDTO logoImage;
     private boolean hasMedia;
     private boolean hasAnalytics;
@@ -36,9 +37,6 @@ public class EventSeriesViewDTO implements Result, HasLogo {
 
     public EventSeriesState state;
 
-    public EventSeriesViewDTO() {
-    }
-    
     public UUID getId() {
         return id;
     }
@@ -55,12 +53,18 @@ public class EventSeriesViewDTO implements Result, HasLogo {
         this.displayName = displayName;
     }
 
-    public List<EventMetadataDTO> getEvents() {
-        return events;
+    public List<EventMetadataDTO> getEventsDescending() {
+        return eventsDescending;
+    }
+    
+    public List<EventMetadataDTO> getEventsAscending() {
+        ArrayList<EventMetadataDTO> eventsAscending = new ArrayList<>(eventsDescending);
+        Collections.reverse(eventsAscending);
+        return eventsAscending;
     }
 
     public void addEvent(EventMetadataDTO event) {
-        this.events.add(event);
+        this.eventsDescending.add(event);
     }
 
     public ImageDTO getLogoImage() {

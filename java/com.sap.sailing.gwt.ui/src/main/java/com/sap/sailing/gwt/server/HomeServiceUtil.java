@@ -4,6 +4,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -550,5 +552,31 @@ public final class HomeServiceUtil {
             }
         }
         return false;
+    }
+    
+    /**
+     * Provides the list of {@link Event}s for a series based on the given overall {@link LeaderboardGroup} in a
+     * descending order sorted by the {@link Event#getStartDate() event's start date}.
+     * 
+     * @param overallLeaderboardGroup the series overall {@link LeaderboardGroup}
+     * @param service {@link RacingEventService}
+     * @return the {@link Event}s for the series in descending od
+     */
+    public static List<Event> getEventsForSeriesInDescendingOrder(LeaderboardGroup overallLeaderboardGroup,
+            RacingEventService service) {
+        List<Event> eventsInSeries = new ArrayList<>();
+        for (Event event : service.getAllEvents()) {
+            for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                if (overallLeaderboardGroup.equals(leaderboardGroup)) {
+                    eventsInSeries.add(event);
+                }
+            }
+        }
+        Collections.sort(eventsInSeries, new Comparator<Event>() {
+            public int compare(Event e1, Event e2) {
+                return e2.getStartDate().compareTo(e1.getStartDate());
+            }
+        });
+        return eventsInSeries;
     }
 }
