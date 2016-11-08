@@ -137,20 +137,16 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     }
 
     protected void showLoading(String message) {
-        if (timer.getPlayMode() != PlayModes.Live) {
-            if (chart.isRendered()) {
-                chart.showLoading(message);
-            } else {
-                add(busyIndicator);
-            }
+        if (chart.isRendered()) {
+            chart.showLoading(message);
+        } else {
+            add(busyIndicator);
         }
         isLoading = true;
     }
 
     protected void hideLoading() {
-        if (timer.getPlayMode() != PlayModes.Live) {
-            chart.hideLoading();
-        }
+        chart.hideLoading();
         isLoading = false;
         remove(busyIndicator);
     }

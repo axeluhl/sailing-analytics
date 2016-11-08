@@ -56,6 +56,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -468,7 +469,10 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 clearChart();
             } else if (needsDataLoading() && from != null && to != null) {
                 setWidget(chart);
-                showLoading("Loading wind data...");
+                // if not playing or empty show loading message
+                if (timer.getPlayState() != PlayStates.Playing || timeOfLatestRequestInMillis == null) {
+                    showLoading("Loading wind data...");
+                }
                 GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
                         from, to, settings.getResolutionInMilliseconds(), null, /* onlyUpToNewestEvent==true because we don't want
                         to overshoot the evidence so far */ true);
