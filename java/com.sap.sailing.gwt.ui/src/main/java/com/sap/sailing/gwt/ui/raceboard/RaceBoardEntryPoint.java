@@ -96,7 +96,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
         
         
-        final RaceBoardComponentContext context = new RaceBoardComponentContext("RaceBoardEntryPoint", new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE), regattaName, raceName, leaderboardName, leaderboardGroupName, eventId);
+        final RaceBoardComponentContext context = new RaceBoardComponentContext(getUserService(), "RaceBoardEntryPoint", new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE), regattaName, raceName, leaderboardName, leaderboardGroupName, eventId);
         
         AsyncCallbackWithSettingsRetrievementJoiner<RaceboardDataDTO,RaceBoardPerspectiveSettings> asyncCallbackJoiner = context.createSettingsRetrievementWithAsyncCallbackJoiner(new AsyncCallback<RaceboardDataDTO>() {
             @Override

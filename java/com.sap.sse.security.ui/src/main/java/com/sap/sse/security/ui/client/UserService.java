@@ -14,7 +14,6 @@ import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.StorageEvent;
 import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -48,8 +47,6 @@ public class UserService {
      */
     private static final String LOCAL_STORAGE_UPDATE_KEY = "current-user-has-changed";
     
-    private final SettingsToJsonSerializerGWT serializer = new SettingsToJsonSerializerGWT();
-
     private final UserManagementServiceAsync userManagementService;
 
     private final Set<UserStatusEventHandler> handlers;
@@ -213,21 +210,16 @@ public class UserService {
 
     /**
      * Loads the {@link #getCurrentUser() current user}'s preference with the given {@link String key} from server.
-     * Because the preference is persisted as JSON on server, the loaded data will be deserialized into the provided
-     * {@link GenericSerializableSettings} instance.
+     * The preferences are passed to the {@link AsyncCallback} as serialized in {@link String}.
      * 
      * @param key
      *            key of the preference to load
-     * @param emptyInstance
-     *            an empty {@link GenericSerializableSettings} instance, where the loaded data is deserialized to
      * @param callback
      *            {@link AsyncCallback} for GWT RPC call
      *            
-     * @see GenericSerializableSettings
-     * @see AbstractGenericSerializableSettings
      */
-    public <T extends GenericSerializableSettings> void getPreference(String key, final T emptyInstance,
-            final AsyncCallback<T> callback) {
+    public void getPreference(String key,
+            final AsyncCallback<String> callback) {
         String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
         getUserManagementService().getPreference(username, key, new AsyncCallback<String>() {
             @Override
@@ -237,28 +229,22 @@ public class UserService {
 
             @Override
             public void onSuccess(String result) {
-                callback.onSuccess(serializer.deserialize(emptyInstance, result));
+                callback.onSuccess(result);
             }
         });
     }
     
     /**
      * Sets the {@link #getCurrentUser() current user}'s preference with the given {@link String key} on server.
-     * Because preferences are persisted as JSON, the provided {@link GenericSerializableSettings} instance
-     * will be serialized before it is sent to the server.
      * 
      * @param key
      *            key of the preference to set
-     * @param instance
-     *            {@link GenericSerializableSettings} instance containing the preference value
-     *            
-     * @see GenericSerializableSettings
-     * @see AbstractGenericSerializableSettings
+     * @param serializedSettings
+     *            Serialized settings as {@link String} containing the preferences
      */
-    public void setPreference(String key, GenericSerializableSettings instance) {
+    public void setPreference(String key, String serializedSettings) {
         String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
-        String json = serializer.serializeToString(instance);
-        getUserManagementService().setPreference(username, key, json, new AsyncCallback<Void>() {
+        getUserManagementService().setPreference(username, key, serializedSettings, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 // TODO What to do in case of failure?

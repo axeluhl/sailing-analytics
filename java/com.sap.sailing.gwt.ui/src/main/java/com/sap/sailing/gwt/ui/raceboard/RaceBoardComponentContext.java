@@ -2,17 +2,18 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.UUID;
 
+import com.sap.sailing.gwt.common.client.UserSettingsStorageManager;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.shared.perspective.UserSettingsStorageManager;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RaceBoardComponentContext
         extends AbstractComponentContextWithSettingsStorage<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> {
 
-    public RaceBoardComponentContext(String entryPointId, RaceBoardPerspectiveLifecycle raceBoardPerspectiveLifecycle,
+    public RaceBoardComponentContext(UserService userService, String entryPointId, RaceBoardPerspectiveLifecycle raceBoardPerspectiveLifecycle,
             String regattaName, String raceName, String leaderboardName, String leaderboardGroupName, UUID eventId) {
-        super(raceBoardPerspectiveLifecycle, new UserSettingsStorageManager<RaceBoardPerspectiveSettings>(entryPointId + "." + raceBoardPerspectiveLifecycle.getComponentId(), regattaName, raceName, leaderboardName, leaderboardGroupName,
+        super(raceBoardPerspectiveLifecycle, new UserSettingsStorageManager<RaceBoardPerspectiveSettings>(userService, entryPointId + "." + raceBoardPerspectiveLifecycle.getComponentId(), regattaName, raceName, leaderboardName, leaderboardGroupName,
                 eventId == null ? null : eventId.toString()));
     }
 
