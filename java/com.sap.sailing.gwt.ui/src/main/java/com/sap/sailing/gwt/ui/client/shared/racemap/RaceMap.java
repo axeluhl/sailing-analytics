@@ -1129,7 +1129,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                     CourseMarkOverlay courseMarkOverlay = courseMarkOverlays.get(markDTO.getName());
                     if (courseMarkOverlay == null) {
-                        courseMarkOverlay = new CourseMarkOverlay(map, RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX, markDTO, coordinateSystem);
+                        courseMarkOverlay = new CourseMarkOverlay(map, RaceMapOverlaysZIndexes.COURSEMARK_ZINDEX, markDTO, coordinateSystem, courseDTO);
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
                         courseMarkOverlay.setBuoyZoneRadius(settings.getBuoyZoneRadius());
                         courseMarkOverlay.setSelected(isSelected);
@@ -1142,6 +1142,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
                         courseMarkOverlay.setBuoyZoneRadius(settings.getBuoyZoneRadius());
                         courseMarkOverlay.setSelected(isSelected);
+                        courseMarkOverlay.setCourse(courseDTO);
                         courseMarkOverlay.draw();
                         toRemoveCourseMarks.remove(markDTO.getName());
                     }
