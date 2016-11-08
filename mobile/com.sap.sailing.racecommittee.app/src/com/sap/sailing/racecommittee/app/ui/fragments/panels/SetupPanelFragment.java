@@ -30,7 +30,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartPathFinderFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFactorFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
@@ -352,7 +352,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                 mButtonProcedure.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonMode != null && !mButtonMode.equals(view)) {
-                resetFragment(mButtonMode.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), LineStartModeFragment.class);
+                resetFragment(mButtonMode.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartModeFragment.class);
                 mButtonMode.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonPathfinder != null && !mButtonPathfinder.equals(view)) {
@@ -474,7 +474,8 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(LineStartModeFragment.newInstance(LineStartModeFragment.START_MODE_PLANNED));
+                    replaceFragment(StartModeFragment
+                        .newInstance(StartModeFragment.START_MODE_PLANNED, getRaceState().getTypedRacingProcedure().getType().toString()));
                     break;
 
                 default:

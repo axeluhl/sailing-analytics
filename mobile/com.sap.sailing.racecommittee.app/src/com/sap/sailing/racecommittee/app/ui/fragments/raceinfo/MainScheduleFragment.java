@@ -22,6 +22,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.swc.SWCRacingProcedure;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -157,12 +158,24 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
             mItems.add(new SelectionItem(getString(R.string.start_procedure), mRacingProcedureType.toString(), null, false, false, runnableProcedure));
             if (RacingProcedureType.RRS26.equals(mRacingProcedureType)) {
                 // LineStart
-                RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+                final RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 Flags flag = procedure.getStartModeFlag();
                 Runnable runnableMode = new Runnable() {
                     @Override
                     public void run() {
-                        openFragment(LineStartModeFragment.newInstance(START_MODE_PRESETUP));
+                        openFragment(StartModeFragment.newInstance(START_MODE_PRESETUP, mRacingProcedureType.toString()));
+                    }
+                };
+                Drawable drawable = FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize);
+                mItems.add(new SelectionItem(getString(R.string.start_mode), flag.name(), drawable, false, false, runnableMode));
+            } else if (RacingProcedureType.SWC.equals(mRacingProcedureType)) {
+                // Sailing World Cup Start
+                final SWCRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+                Flags flag = procedure.getStartModeFlag();
+                Runnable runnableMode = new Runnable() {
+                    @Override
+                    public void run() {
+                        openFragment(StartModeFragment.newInstance(START_MODE_PRESETUP, mRacingProcedureType.toString()));
                     }
                 };
                 Drawable drawable = FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize);
