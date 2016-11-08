@@ -87,14 +87,11 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
                 if (event.isAttached() && leaderboardPanel != null) {
                     // waiting while leaderboard is loaded
                     leaderboardPanel.addLeaderboardUpdateListener(new LeaderboardUpdateListener() {
-                        // We have to remove listener to prevent endless loop of button clicking
-                        // as when leaderboard is live it is updated through some interval
                         @Override
                         public void updatedLeaderboard(LeaderboardDTO leaderboard) {
-                            leaderboardPanel.removeLeaderboardUpdateListener(this);
                             // If race or regatta is live then check button by default
                             if (leaderboard.hasLiveRace(autoRefreshTimer.getLiveTimePointInMillis())) {
-                                handleAutoRefreshClick();
+                                turnOnAutoPlay();
                             }
                         }
 
@@ -162,6 +159,21 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
                     delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
                 }
             }
+        }
+    }
+    
+    /**
+     * This method turns on auto playing mode on leaderboard
+     */
+    private void turnOnAutoPlay() {
+        if (autoRefreshTimer.getPlayState() != PlayStates.Playing) {
+            autoRefreshTimer.setPlayMode(PlayModes.Live);
+        }
+        
+        // Styles applied each time because of tabs switching. In this case play mode stays as Playing but styling is lost
+        autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        if (delegate != null) {
+            delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
         }
     }
     

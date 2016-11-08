@@ -69,7 +69,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
             final LeaderboardSettings leaderboardSettings = EventParamUtils.createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
             final RaceIdentifier preselectedRace = EventParamUtils.getPreselectedRace(Window.Location.getParameterMap());
 
-            final MultiLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(leaderboardSettings,
+            MultiLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(leaderboardSettings,
                     null, // TODO: preselectedLeaderboardName
                     preselectedRace,
                     "leaderboardGroupName",
@@ -84,8 +84,8 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
             if (currentPresenter.getSeriesDTO().getState() != EventSeriesState.RUNNING) {
                 // TODO: this.leaderboard.hideRefresh();
             } else {
-                // Calls auto refresh button click handler on parent leaderboard
-                leaderboard.handleAutoRefreshClick();
+                // Turn on auto refresh button at parent leaderboard
+                leaderboard.turnOnAutoPlay();
             }
             regattaAnalyticsManager.hideCompetitorChart();
             leaderboardPanel.setVisible(true);

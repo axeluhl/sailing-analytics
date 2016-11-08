@@ -109,9 +109,22 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
     }
 
     /**
-     * Refactoring to make leaderboard click handler available from {@link EventSeriesLeaderboardsTabView}
+     * This method turns on auto playing mode on leaderboard
      */
-    public void handleAutoRefreshClick() {
+    public void turnOnAutoPlay() {
+        if (autoRefreshTimer.getPlayState() != PlayStates.Playing) {
+            autoRefreshTimer.setPlayMode(PlayModes.Live);
+        }
+        
+        // Styles applied each time because of tabs switching. In this case play mode stays as Playing but styling is lost
+        autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        if (delegate != null) {
+            delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        }
+    }
+
+    @UiHandler("autoRefreshAnchor")
+    void toogleAutoRefreshClicked(ClickEvent event) {
         if (autoRefreshTimer != null) {
             autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
             autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
@@ -140,11 +153,6 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
                 }
             }
         }
-    }
-
-    @UiHandler("autoRefreshAnchor")
-    void toogleAutoRefreshClicked(ClickEvent event) {
-        handleAutoRefreshClick();
     }
     
     @UiHandler("settingsAnchor")
