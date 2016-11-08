@@ -5,12 +5,16 @@ import java.util.List;
 
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.BooleanSetting;
 
 /**
  * @author Lennart Hensler (D054527)
  */
-public class RaceMapZoomSettings {
+public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
     
+    private static final long serialVersionUID = 7283052942434130497L;
+
     /**
      * The auto-zoom types for a {@link RaceMap}.<br />
      * Each zoom type has a {@link LatLngBoundsCalculator}, which calculates the new bounds for a map.
@@ -30,8 +34,14 @@ public class RaceMapZoomSettings {
         }
     };
 
-    private final List<ZoomTypes> typesToConsiderOnZoom;
-    private final boolean zoomToSelectedCompetitors;
+    private List<ZoomTypes> typesToConsiderOnZoom;
+    private BooleanSetting zoomToSelectedCompetitors;
+    
+    @Override
+    protected void addChildSettings() {
+//        typesToConsiderOnZoom = new EnumListSetting<>("zoomToSelectedCompetitors", this, stringToEnumConverter);
+        zoomToSelectedCompetitors = new BooleanSetting("zoomToSelectedCompetitors", this, false);
+    }
 
     /**
      * Creates default RaceMapZoomSettings with the {@link ZoomTypes} <code>BUOYS</code>.<br />
@@ -41,13 +51,12 @@ public class RaceMapZoomSettings {
         typesToConsiderOnZoom = new ArrayList<>();
         // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
         typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
-        zoomToSelectedCompetitors = false;
     }
     
     public RaceMapZoomSettings(Iterable<ZoomTypes> typesToConsider, boolean zoomToSelected) {
         this.typesToConsiderOnZoom = new ArrayList<>();
         Util.addAll(typesToConsider, this.typesToConsiderOnZoom);
-        this.zoomToSelectedCompetitors = zoomToSelected;
+        this.zoomToSelectedCompetitors.setValue(zoomToSelected);
     }
 
     public LatLngBounds getNewBounds(RaceMap forMap) {
@@ -74,7 +83,7 @@ public class RaceMapZoomSettings {
     }
     
     public boolean isZoomToSelectedCompetitors() {
-        return zoomToSelectedCompetitors;
+        return zoomToSelectedCompetitors.getValue();
     }
 
     public boolean containsZoomType(ZoomTypes zoomType) {
@@ -86,7 +95,7 @@ public class RaceMapZoomSettings {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((typesToConsiderOnZoom == null) ? 0 : typesToConsiderOnZoom.hashCode());
-        result = prime * result + (zoomToSelectedCompetitors ? 1231 : 1237);
+        result = prime * result + (zoomToSelectedCompetitors.getValue() ? 1231 : 1237);
         return result;
     }
 

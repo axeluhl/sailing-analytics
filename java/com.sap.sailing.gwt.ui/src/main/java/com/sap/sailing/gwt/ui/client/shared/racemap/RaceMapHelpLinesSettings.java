@@ -5,9 +5,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 
-public class RaceMapHelpLinesSettings {
+public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSettings {
     
+    private static final long serialVersionUID = -3155593082712145485L;
+
     /**
      * Types of help lines on the map
      */
@@ -16,6 +19,11 @@ public class RaceMapHelpLinesSettings {
     }
     
     private final Set<HelpLineTypes> visibleHelpLines;
+    
+    @Override
+    protected void addChildSettings() {
+        // TODO Auto-generated method stub
+    }
 
     /**
      * Creates new RaceMapHelpLinesSettings with the {@link HelpLineTypes} <code>STARTLINE</code>,

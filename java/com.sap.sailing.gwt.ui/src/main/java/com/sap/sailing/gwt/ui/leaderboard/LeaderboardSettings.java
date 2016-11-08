@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.BooleanSetting;
 
 /**
  * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
@@ -16,7 +17,9 @@ import com.sap.sse.common.settings.AbstractSettings;
  * @author Axel Uhl (d043530)
  *
  */
-public class LeaderboardSettings extends AbstractSettings {
+public class LeaderboardSettings extends AbstractGenericSerializableSettings {
+    private static final long serialVersionUID = 2625004077963291333L;
+    
     public static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
     public static final String PARAM_EMBEDDED = "embedded";
     public static final String PARAM_HIDE_TOOLBAR = "hideToolbar";
@@ -74,9 +77,9 @@ public class LeaderboardSettings extends AbstractSettings {
     private final List<DetailType> legDetailsToShow;
     private final List<DetailType> raceDetailsToShow;
     private final List<DetailType> overallDetailsToShow;
-    private final boolean autoExpandPreSelectedRace;
+    private BooleanSetting autoExpandPreSelectedRace;
     private final Long delayBetweenAutoAdvancesInMilliseconds;
-    private final boolean updateUponPlayStateChange;
+    private BooleanSetting updateUponPlayStateChange;
     
     /**
      * There are two ways to select race columns.
@@ -90,20 +93,30 @@ public class LeaderboardSettings extends AbstractSettings {
      * Otherwise, the leaderboard will be sorted by the race column (ascending if {@link #sortAscending}, descending otherwise.
      */
     private final String nameOfRaceToSort;
-    private final boolean sortAscending;
+    private BooleanSetting sortAscending;
     
     /**
      * Shows scores sum'd up for each race column
      */
-    private final boolean showAddedScores;
+    private BooleanSetting showAddedScores;
     
-    private final boolean showCompetitorSailIdColumn;
-    private final boolean showCompetitorFullNameColumn;
+    private BooleanSetting showCompetitorSailIdColumn;
+    private BooleanSetting showCompetitorFullNameColumn;
     
     /**
      * Show a column with total number of races completed
      */
-    private final boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
+    private BooleanSetting showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
+    
+    @Override
+    protected void addChildSettings() {
+        autoExpandPreSelectedRace = new BooleanSetting("autoExpandPreSelectedRace", this);
+        updateUponPlayStateChange = new BooleanSetting("updateUponPlayStateChange", this, true);
+        sortAscending = new BooleanSetting("sortAscending", this);
+        showAddedScores = new BooleanSetting("showAddedScores", this, false);
+        showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this);
+        showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this);
+    }
     
     /**
      * @param raceColumnsToShow <code>null</code> means don't modify the list of races shown
@@ -125,16 +138,16 @@ public class LeaderboardSettings extends AbstractSettings {
         this.namesOfRaceColumnsToShow = namesOfRaceColumnsToShow;
         this.numberOfLastRacesToShow = numberOfLastRacesToShow;
         this.activeRaceColumnSelectionStrategy = activeRaceColumnSelectionStrategy;
-        this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
+        this.autoExpandPreSelectedRace.setValue(autoExpandPreSelectedRace);
         this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
         this.maneuverDetailsToShow = meneuverDetailsToShow;
         this.nameOfRaceToSort = nameOfRaceToSort;
-        this.sortAscending = sortAscending;
-        this.updateUponPlayStateChange = updateUponPlayStateChange;
-        this.showAddedScores = showAddedScores;
-        this.showCompetitorSailIdColumn = showCompetitorSailIdColumn;
-        this.showCompetitorFullNameColumn = showCompetitorFullNameColumn;
-        this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor = showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
+        this.sortAscending.setValue(sortAscending);
+        this.updateUponPlayStateChange.setValue(updateUponPlayStateChange);
+        this.showAddedScores.setValue(showAddedScores);
+        this.showCompetitorSailIdColumn.setValue(showCompetitorSailIdColumn);
+        this.showCompetitorFullNameColumn.setValue(showCompetitorFullNameColumn);
+        this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(showOverallColumnWithNumberOfRacesCompletedPerCompetitor);
     }
   
     /**
@@ -192,7 +205,7 @@ public class LeaderboardSettings extends AbstractSettings {
     }
 
     public boolean isAutoExpandPreSelectedRace() {
-        return autoExpandPreSelectedRace;
+        return autoExpandPreSelectedRace.getValue();
     }
 
     /**
@@ -208,7 +221,7 @@ public class LeaderboardSettings extends AbstractSettings {
     }
 
     public boolean isSortAscending() {
-        return sortAscending;
+        return sortAscending.getValue();
     }
 
     /**
@@ -216,7 +229,7 @@ public class LeaderboardSettings extends AbstractSettings {
      * the settings won't automatically be replaced / adjusted when the play state changes.
      */
     public boolean isUpdateUponPlayStateChange() {
-        return updateUponPlayStateChange;
+        return updateUponPlayStateChange.getValue();
     }
 
     public RaceColumnSelectionStrategies getActiveRaceColumnSelectionStrategy() {
@@ -224,11 +237,11 @@ public class LeaderboardSettings extends AbstractSettings {
     }
 
     public boolean isShowAddedScores() {
-        return showAddedScores;
+        return showAddedScores.getValue();
     }
     
     public boolean isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor() {
-        return showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
+        return showOverallColumnWithNumberOfRacesCompletedPerCompetitor.getValue();
     }
     
     /**
@@ -317,10 +330,10 @@ public class LeaderboardSettings extends AbstractSettings {
     }
     
     public boolean isShowCompetitorSailIdColumn() {
-        return showCompetitorSailIdColumn;
+        return showCompetitorSailIdColumn.getValue();
     }
     
     public boolean isShowCompetitorFullNameColumn() {
-        return showCompetitorFullNameColumn;
+        return showCompetitorFullNameColumn.getValue();
     }
 }

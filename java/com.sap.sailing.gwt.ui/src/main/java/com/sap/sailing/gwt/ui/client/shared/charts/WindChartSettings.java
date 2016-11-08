@@ -4,9 +4,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.BooleanSetting;
 
-public class WindChartSettings extends AbstractSettings {
+public class WindChartSettings extends AbstractGenericSerializableSettings {
+    private static final long serialVersionUID = -3250243915670349222L;
+
     public static final long DEFAULT_RESOLUTION_IN_MILLISECONDS = 10000;
 
     private final Set<WindSourceType> windDirectionSourcesToDisplay;
@@ -14,17 +17,21 @@ public class WindChartSettings extends AbstractSettings {
     
     private long resolutionInMilliseconds;
 
-    private boolean showWindSpeedSeries;
-    private boolean showWindDirectionsSeries;
+    private BooleanSetting showWindSpeedSeries;
+    private BooleanSetting showWindDirectionsSeries;
+    
+    @Override
+    protected void addChildSettings() {
+        showWindSpeedSeries = new BooleanSetting("showWindSpeedSeries", this, true);
+        showWindDirectionsSeries = new BooleanSetting("showWindDirectionsSeries", this, true);
+    }
 
     /**
      *  The default settings
      */
     public WindChartSettings() {
-        showWindSpeedSeries = true;
         windSpeedSourcesToDisplay = new LinkedHashSet<WindSourceType>();
         windSpeedSourcesToDisplay.add(WindSourceType.COMBINED);
-        showWindDirectionsSeries = true;
         windDirectionSourcesToDisplay = new LinkedHashSet<WindSourceType>();
         windDirectionSourcesToDisplay.add(WindSourceType.COMBINED);
         resolutionInMilliseconds = DEFAULT_RESOLUTION_IN_MILLISECONDS;
@@ -32,9 +39,9 @@ public class WindChartSettings extends AbstractSettings {
     
     public WindChartSettings(boolean showWindSpeedSeries, Set<WindSourceType> windSpeedSourcesToDisplay, 
             boolean showWindDirectionsSeries, Set<WindSourceType> windDirectionSourcesToDisplay, long resolutionInMilliseconds) {
-        this.showWindSpeedSeries = showWindSpeedSeries;
+        this.showWindSpeedSeries.setValue(showWindSpeedSeries);
         this.windSpeedSourcesToDisplay = windSpeedSourcesToDisplay;
-        this.showWindDirectionsSeries = showWindDirectionsSeries;
+        this.showWindDirectionsSeries.setValue(showWindDirectionsSeries);
         this.windDirectionSourcesToDisplay = windDirectionSourcesToDisplay;
         this.resolutionInMilliseconds = resolutionInMilliseconds;
     }
@@ -60,11 +67,11 @@ public class WindChartSettings extends AbstractSettings {
     }
 
     public boolean isShowWindSpeedSeries() {
-        return showWindSpeedSeries;
+        return showWindSpeedSeries.getValue();
     }
 
     public boolean isShowWindDirectionsSeries() {
-        return showWindDirectionsSeries;
+        return showWindDirectionsSeries.getValue();
     }
 
     public void setResolutionInMilliseconds(long resolutionInMilliseconds) {
@@ -72,11 +79,11 @@ public class WindChartSettings extends AbstractSettings {
     }
 
     public void setShowWindSpeedSeries(boolean showWindSpeedSeries) {
-        this.showWindSpeedSeries = showWindSpeedSeries;
+        this.showWindSpeedSeries.setValue(showWindSpeedSeries);
     }
 
     public void setShowWindDirectionsSeries(boolean showWindDirectionsSeries) {
-        this.showWindDirectionsSeries = showWindDirectionsSeries;
+        this.showWindDirectionsSeries.setValue(showWindDirectionsSeries);
     }
 
     public void setWindDirectionSourcesToDisplay(Set<WindSourceType> windDirectionSourcesToDisplay) {

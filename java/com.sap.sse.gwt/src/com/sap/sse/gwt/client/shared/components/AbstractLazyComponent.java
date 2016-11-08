@@ -2,9 +2,9 @@ package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.user.client.ui.LazyPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 
-public abstract class AbstractLazyComponent<SettingsType extends AbstractSettings> extends LazyPanel implements LazyComponent<SettingsType> {
+public abstract class AbstractLazyComponent<SettingsType extends Settings> extends LazyPanel implements LazyComponent<SettingsType> {
 
     private ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = new ComponentTreeNodeInfo<>();
     
