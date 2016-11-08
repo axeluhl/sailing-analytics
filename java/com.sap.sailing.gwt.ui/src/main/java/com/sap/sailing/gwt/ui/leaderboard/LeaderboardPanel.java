@@ -1289,13 +1289,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             @Override
             public Double get(LeaderboardRowDTO row) {
                 Distance distanceForRaceColumn = row.getDistanceTraveledInMeters(getRaceColumnName());
-                final Double distance;
-                if(distanceForRaceColumn != null){
-                    distance = distanceForRaceColumn.getMeters();
-                } else {
-                    distance = null;
-                }
-                return distance;
+                return distanceForRaceColumn == null ? null : distanceForRaceColumn.getMeters();
             }
         }
 
