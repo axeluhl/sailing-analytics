@@ -34,10 +34,11 @@ public class Trigger<T> {
 
     public synchronized T get() {
         if (triggerables != null) {
-            for (final Triggerable triggerable : triggerables) {
+            final List<Triggerable> copy = triggerables;
+            triggerables = null;
+            for (final Triggerable triggerable : copy) {
                 triggerable.run();
             }
-            triggerables = null;
         }
         return t;
     }
