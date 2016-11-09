@@ -31,27 +31,23 @@ public class CompoundGroupKeySerializer<M, S> implements JsonSerializer<GroupKey
         this.subKeySerializer = subKeySerializer;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public JSONObject serialize(GroupKey object) {
-        JSONObject keyJSON = new JSONObject();
-
+        final JSONObject keyJSON = new JSONObject();
         if (object.getKeys() == null || object.getKeys().size() != COMPOUND_KEY_DEPTH) {
             return keyJSON;
         }
-
         for (GroupKey groupKey : object.getKeys()) {
             if (!(groupKey instanceof GenericGroupKey)) {
                 return keyJSON;
             }
         }
-
+        @SuppressWarnings("unchecked")
         GenericGroupKey<M> mainKey = (GenericGroupKey<M>) object.getKeys().get(MAIN_KEY_INDEX);
+        @SuppressWarnings("unchecked")
         GenericGroupKey<S> subKey = (GenericGroupKey<S>) object.getKeys().get(SUB_KEY_INDEX);
-
         keyJSON.put(mainKeyName, mainKeySerializer.serialize(mainKey.getValue()));
         keyJSON.put(subKeyName, subKeySerializer.serialize(subKey.getValue()));
-
         return keyJSON;
     }
 

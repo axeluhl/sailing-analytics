@@ -22,20 +22,16 @@ public class ClusterSerializer<ElementType extends Serializable> implements Json
     @Override
     public JSONObject serialize(Cluster<ElementType> object) {
         JSONObject clusterJSON = new JSONObject();
-
         // Check reference type to avoid interface modification
         if (!(object instanceof AbstractCluster)) {
             throw new IllegalArgumentException("Unknown Cluster type");
         }
-
         JSONArray boundariesJSON = new JSONArray();
         AbstractCluster<ElementType> abstractCluster = (AbstractCluster<ElementType>) object;
         for (ClusterBoundary<ElementType> clusterBoundary : abstractCluster.getClusterBoundaries()) {
             boundariesJSON.add(boundarySerializer.serialize(clusterBoundary));
         }
-
         clusterJSON.put(FIELD_BOUNDARIES, boundariesJSON);
-
         return clusterJSON;
     }
 
