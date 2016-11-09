@@ -4,6 +4,7 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
@@ -39,9 +40,34 @@ public class Activator implements BundleActivator {
         
         String polarDataSourceURL = System.getProperty(POLAR_DATA_SOURCE_URL_PROPERTY_NAME);
         if (polarDataSourceURL != null && !polarDataSourceURL.isEmpty()) {
-            PolarDataClient polarDataClient = new PolarDataClient(polarDataSourceURL, service);
-            polarDataClient.updatePolarDataRegressions();
+            waitForRacingEventServiceToObtainDomainFactory(polarDataSourceURL, service);
         }
+    }
+    
+    /**
+     * Spawns a daemon thread that waits for the domain factory to be registered with the {@link PolarDataService}, then
+     * runs the polar data import from the given URL. The domain factory is required to resolve boat classes during
+     * de-serialization.
+     */
+    private void waitForRacingEventServiceToObtainDomainFactory(final String polarDataSourceURL, final PolarDataServiceImpl polarService) {
+        final Thread t = new Thread(()->{
+                try {
+                    Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // ensure that classpath:... Shiro ini files are resolved properly
+                    logger.info("Waiting for domain factory to be registered with PolarService...");
+                    polarService.runWithDomainFactory(domainFactory -> { 
+                        PolarDataClient polarDataClient = new PolarDataClient(polarDataSourceURL, polarService, domainFactory);
+                        try {
+                            polarDataClient.updatePolarDataRegressions();
+                        } catch (Exception e) {
+                            logger.log(Level.SEVERE, "Exception while trying to import polar data from "+polarDataSourceURL, e);
+                        }
+                        });
+                } catch (InterruptedException e) {
+                    logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
+                }
+            }, "PolarService activator waiting for domain factory to be registered");
+        t.setDaemon(true);
+        t.start();
     }
 
     @Override

@@ -1,6 +1,9 @@
 package com.sap.sailing.polars.jaxrs.deserialization;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 import org.json.simple.JSONObject;
 
@@ -10,27 +13,26 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
-public class CompoundGroupKeyDeserializer<M, S> implements JsonDeserializer<GroupKey> {
+public class CompoundGroupKeyDeserializer implements JsonDeserializer<GroupKey> {
+    private final LinkedHashMap<String, JsonDeserializer<?>> deserializers;
     
-    private final String mainKeyName;
-    private final String subKeyName;
-    
-    private final JsonDeserializer<M> mainKeyDeserializer;
-    private final JsonDeserializer<S> subKeyDeserializer;
-    
-    public CompoundGroupKeyDeserializer(String mainKeyName, String subKeyName, JsonDeserializer<M> mainKeyDeserializer,
-            JsonDeserializer<S> subKeyDeserializer) {
-        this.mainKeyName = mainKeyName;
-        this.subKeyName = subKeyName;
-        this.mainKeyDeserializer = mainKeyDeserializer;
-        this.subKeyDeserializer = subKeyDeserializer;
+    public CompoundGroupKeyDeserializer(LinkedHashMap<String, JsonDeserializer<?>> deserializers) {
+        this.deserializers = deserializers;
     }
 
     @Override
     public GroupKey deserialize(JSONObject object) throws JsonDeserializationException {
-        GenericGroupKey<M> mainKey = new GenericGroupKey<M>(mainKeyDeserializer.deserialize((JSONObject) object.get(mainKeyName)));
-        GenericGroupKey<S> subKey = new GenericGroupKey<S>(subKeyDeserializer.deserialize((JSONObject) object.get(subKeyName)));
-        return new CompoundGroupKey(Arrays.asList(mainKey, subKey));
+        final List<GroupKey> keys = new ArrayList<>();
+        assert object.size() == deserializers.size();
+        for (final Entry<String, JsonDeserializer<?>> keyNameAndDeserializer : deserializers.entrySet()) {
+            Object key = keyNameAndDeserializer.getValue().deserialize((JSONObject) object.get(keyNameAndDeserializer.getKey()));
+            if (key instanceof GroupKey) {
+                keys.add((GroupKey) key);
+            } else {
+                keys.add(new GenericGroupKey<Object>(key));
+            }
+        }
+        return new CompoundGroupKey(keys);
     }
 
 }

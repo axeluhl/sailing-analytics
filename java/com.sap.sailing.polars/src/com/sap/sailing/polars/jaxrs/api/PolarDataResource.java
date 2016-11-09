@@ -1,6 +1,8 @@
 package com.sap.sailing.polars.jaxrs.api;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -12,7 +14,6 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.polars.jaxrs.AbstractPolarResource;
 import com.sap.sailing.polars.jaxrs.serialization.AngleAndSpeedRegressionSerializer;
 import com.sap.sailing.polars.jaxrs.serialization.ClusterBoundarySerializer;
@@ -26,7 +27,6 @@ import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImp
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MapSerializer;
-import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.GroupKey;
 
 @Path("/polar_data")
@@ -46,13 +46,17 @@ public class PolarDataResource extends AbstractPolarResource {
     private final MapSerializer<BoatClass, Long> fixCountPerBoatClassSerialzier;
 
     public PolarDataResource() {
+        final LinkedHashMap<String, JsonSerializer<?>> cubicKeySerializers = new LinkedHashMap<>();
+        cubicKeySerializers.put(FIELD_LEG_TYPE, new LegTypeSerializer());
+        cubicKeySerializers.put(FIELD_BOAT_CLASS, new BoatClassJsonSerializer());
         cubicSerializer = new MapSerializer<>(
-                new CompoundGroupKeySerializer<LegType, BoatClass>(FIELD_LEG_TYPE, FIELD_BOAT_CLASS, 
-                        new LegTypeSerializer(), new BoatClassJsonSerializer()), 
+                new CompoundGroupKeySerializer(cubicKeySerializers),
                 new AngleAndSpeedRegressionSerializer());
+        final LinkedHashMap<String, JsonSerializer<?>> speedKeySerializers = new LinkedHashMap<>();
+        speedKeySerializers.put(FIELD_BOAT_CLASS, new BoatClassJsonSerializer());
+        speedKeySerializers.put(FIELD_CLUSTER, new ClusterSerializer<Bearing>(new ClusterBoundarySerializer<>(new DegreeBearingSerializer())));
         speedSerializer = new MapSerializer<>(
-                new CompoundGroupKeySerializer<BoatClass, Cluster<Bearing>>(FIELD_BOAT_CLASS, FIELD_CLUSTER, 
-                        new BoatClassJsonSerializer(), new ClusterSerializer<Bearing>(new ClusterBoundarySerializer<>(new DegreeBearingSerializer()))),
+                new CompoundGroupKeySerializer(speedKeySerializers),
                 new IncrementalAnyOrderLeastSquaresImplSerializer());
         fixCountPerBoatClassSerialzier = new MapSerializer<>(new BoatClassJsonSerializer(), new JsonSerializer<Long>() {
             @Override

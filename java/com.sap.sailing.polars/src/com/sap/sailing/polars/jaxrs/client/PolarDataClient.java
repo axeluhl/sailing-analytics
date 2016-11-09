@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,8 +21,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 import com.sap.sailing.polars.jaxrs.api.PolarDataResource;
 import com.sap.sailing.polars.jaxrs.deserialization.AngleAndSpeedRegressionDeserializer;
@@ -38,8 +39,8 @@ import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.MapDeserializer;
-import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.GroupKey;
 
 /**
@@ -57,18 +58,19 @@ public class PolarDataClient {
 
     private final PolarDataServiceImpl polarDataServiceImpl;
     private final String polarDataSourceURL;
-
+    private final SharedDomainFactory domainFactory;
+    
     /**
      * Default constructor is missing because we need {@link PolarDataServiceImpl} to reach regressions
-     * 
-     * @param polarDataServiceImpl
-     *            {@link PolarDataServiceImpl} service to work with
      * @param polarDataSourceURL
      *            archive server URL string
+     * @param polarDataServiceImpl
+     *            {@link PolarDataServiceImpl} service to work with
      */
-    public PolarDataClient(String polarDataSourceURL, PolarDataServiceImpl polarDataServiceImpl) {
+    public PolarDataClient(String polarDataSourceURL, PolarDataServiceImpl polarDataServiceImpl, SharedDomainFactory domainFactory) {
         this.polarDataServiceImpl = polarDataServiceImpl;
         this.polarDataSourceURL = polarDataSourceURL;
+        this.domainFactory = domainFactory;
     }
 
     /**
@@ -81,26 +83,22 @@ public class PolarDataClient {
     public void updatePolarDataRegressions() throws IOException, ParseException {
         try {
             logger.log(Level.INFO, "Loading polar regression data from remote server " + polarDataSourceURL);
-
             HttpClient client = new SystemDefaultHttpClient();
             HttpGet getProcessor = new HttpGet(getAPIString());
             HttpResponse processorResponse = client.execute(getProcessor);
-
             JSONObject jsonObject = getJsonFromResponse(processorResponse);
-
+            LinkedHashMap<String, JsonDeserializer<?>> speedDeserializers = new LinkedHashMap<>();
+            final BoatClassJsonDeserializer boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
+            speedDeserializers.put(PolarDataResource.FIELD_BOAT_CLASS, boatClassDeserializer);
+            speedDeserializers.put(PolarDataResource.FIELD_CLUSTER, new ClusterDeserializer<Bearing>(new ClusterBoundaryDeserializer<>(new DegreeBearingDeserializer(), new BearingComparator())));
             MapDeserializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedDeserializer = new MapDeserializer<>(
-                    new CompoundGroupKeyDeserializer<BoatClass, Cluster<Bearing>>(
-                            PolarDataResource.FIELD_BOAT_CLASS, 
-                            PolarDataResource.FIELD_CLUSTER, 
-                            new BoatClassDeserializer(), 
-                            new ClusterDeserializer<Bearing>(new ClusterBoundaryDeserializer<>(new DegreeBearingDeserializer(), new BearingComparator()))), 
+                    new CompoundGroupKeyDeserializer(speedDeserializers), 
                     new IncrementalAnyOrderLeastSquaresImplDeserializer());
+            LinkedHashMap<String, JsonDeserializer<?>> cubicDeserializers = new LinkedHashMap<>();
+            cubicDeserializers.put(PolarDataResource.FIELD_LEG_TYPE, new LegTypeDeserializer());
+            cubicDeserializers.put(PolarDataResource.FIELD_BOAT_CLASS, boatClassDeserializer);
             MapDeserializer<GroupKey, AngleAndSpeedRegression> cubicDeserializer = new MapDeserializer<>(
-                    new CompoundGroupKeyDeserializer<LegType, BoatClass>(
-                            PolarDataResource.FIELD_LEG_TYPE, 
-                            PolarDataResource.FIELD_BOAT_CLASS,
-                            new LegTypeDeserializer(), 
-                            new BoatClassDeserializer()), 
+                    new CompoundGroupKeyDeserializer(cubicDeserializers), 
                     new AngleAndSpeedRegressionDeserializer());
             MapDeserializer<BoatClass, Long> fixCountPerBoatClassDeserializer = new MapDeserializer<>(
                     new BoatClassDeserializer(), 

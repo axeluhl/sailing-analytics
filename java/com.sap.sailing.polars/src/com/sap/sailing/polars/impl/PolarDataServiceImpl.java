@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -363,7 +364,23 @@ public class PolarDataServiceImpl implements PolarDataService,
 
     @Override
     public void registerDomainFactory(DomainFactory domainFactory) {
-        this.domainFactory = domainFactory;
+        synchronized(this) {
+            this.domainFactory = domainFactory;
+            this.notifyAll();
+        }
+    }
+    
+    @Override
+    public void runWithDomainFactory(Consumer<DomainFactory> consumer) throws InterruptedException {
+        DomainFactory myDomainFactory;
+        synchronized(this) {
+            myDomainFactory = domainFactory;
+            while (myDomainFactory == null) {
+                wait();
+                myDomainFactory = domainFactory;
+            }
+        }
+        consumer.accept(myDomainFactory);
     }
 
     @Override

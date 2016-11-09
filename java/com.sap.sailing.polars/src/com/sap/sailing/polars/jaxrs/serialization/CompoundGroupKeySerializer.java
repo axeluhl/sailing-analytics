@@ -1,54 +1,52 @@
 package com.sap.sailing.polars.jaxrs.serialization;
 
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 
-public class CompoundGroupKeySerializer<M, S> implements JsonSerializer<GroupKey> {
+public class CompoundGroupKeySerializer implements JsonSerializer<GroupKey> {
+    private final LinkedHashMap<String, JsonSerializer<?>> subKeySerializers;
 
-    private static final int COMPOUND_KEY_DEPTH = 2;
-    private static final int MAIN_KEY_INDEX = 0;
-    private static final int SUB_KEY_INDEX = 1;
-    
-    private final String mainKeyName;
-    private final String subKeyName;
-
-    private final JsonSerializer<M> mainKeySerializer;
-    private final JsonSerializer<S> subKeySerializer;
-
-    public CompoundGroupKeySerializer(String mainKeyName, String subKeyName, JsonSerializer<M> mainKeySerializer,
-            JsonSerializer<S> subKeySerializer) {
-        assert mainKeyName != null;
-        assert subKeyName != null;
-        assert mainKeySerializer != null;
-        assert subKeySerializer != null;
-
-        this.mainKeyName = mainKeyName;
-        this.subKeyName = subKeyName;
-        this.mainKeySerializer = mainKeySerializer;
-        this.subKeySerializer = subKeySerializer;
+    /**
+     * The order of serializers must match with the order of the sub-keys they are responsible to
+     * de-serialize
+     * 
+     * @param subKeySerializers keys are the key names used as key in the JSON object constructed
+     */
+    public CompoundGroupKeySerializer(LinkedHashMap<String, JsonSerializer<?>> subKeySerializers) {
+        this.subKeySerializers = subKeySerializers;
     }
 
     @Override
     public JSONObject serialize(GroupKey object) {
         final JSONObject keyJSON = new JSONObject();
-        if (object.getKeys() == null || object.getKeys().size() != COMPOUND_KEY_DEPTH) {
+        if (object.getKeys() == null || object.getKeys().size() != subKeySerializers.size()) {
             return keyJSON;
         }
-        for (GroupKey groupKey : object.getKeys()) {
-            if (!(groupKey instanceof GenericGroupKey)) {
-                return keyJSON;
+        final Iterator<? extends GroupKey> keyIter = object.getKeys().iterator();
+        for (final Entry<String, JsonSerializer<?>> keyNameAndSerializer : subKeySerializers.entrySet()) {
+            GroupKey key = keyIter.next();
+            @SuppressWarnings("unchecked")
+            JsonSerializer<Object> groupKeySerializer = (JsonSerializer<Object>) keyNameAndSerializer.getValue();
+            final Object keyObject;
+            if (key instanceof GenericGroupKey<?>) {
+                keyObject = ((GenericGroupKey<?>) key).getValue();
+            } else {
+                keyObject = key;
             }
+            addToJson(keyJSON, keyNameAndSerializer.getKey(), groupKeySerializer, keyObject);
         }
-        @SuppressWarnings("unchecked")
-        GenericGroupKey<M> mainKey = (GenericGroupKey<M>) object.getKeys().get(MAIN_KEY_INDEX);
-        @SuppressWarnings("unchecked")
-        GenericGroupKey<S> subKey = (GenericGroupKey<S>) object.getKeys().get(SUB_KEY_INDEX);
-        keyJSON.put(mainKeyName, mainKeySerializer.serialize(mainKey.getValue()));
-        keyJSON.put(subKeyName, subKeySerializer.serialize(subKey.getValue()));
         return keyJSON;
+    }
+
+    protected <K> void addToJson(final JSONObject keyJSON, final String keyName, final JsonSerializer<K> keySerializer, K key) {
+        keyJSON.put(keyName, keySerializer.serialize(key));
     }
 
 }
