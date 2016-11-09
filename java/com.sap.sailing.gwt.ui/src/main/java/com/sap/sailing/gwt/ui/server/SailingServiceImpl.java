@@ -2941,7 +2941,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
                         .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
-                    result = bravoFixTrack.getRideHeight(timePoint);
+                    final Distance rideHeight = bravoFixTrack.getRideHeight(timePoint);
+                    result = rideHeight == null ? null : rideHeight.getMeters();
                 }
                 break;
             default:
@@ -5804,12 +5805,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO) {
+    public Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO, boolean waitForCalculations) {
         Map<Integer, Date> result = new HashMap<>();
         final TrackedRace trackedRace = getExistingTrackedRace(race);
         if (trackedRace != null) {
             Competitor competitor = getCompetitorByIdAsString(trackedRace.getRace().getCompetitors(), competitorDTO.getIdAsString());
-            Set<MarkPassing> competitorMarkPassings = trackedRace.getMarkPassings(competitor);
+            Set<MarkPassing> competitorMarkPassings;
+            competitorMarkPassings = trackedRace.getMarkPassings(competitor, waitForCalculations);
             Iterable<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints();
             if (competitorMarkPassings != null) {
                 for (MarkPassing markPassing : competitorMarkPassings) {
