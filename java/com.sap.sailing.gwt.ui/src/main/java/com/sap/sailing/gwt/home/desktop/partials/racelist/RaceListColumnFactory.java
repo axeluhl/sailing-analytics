@@ -21,9 +21,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
-import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -78,8 +76,7 @@ public class RaceListColumnFactory {
                 }
             }
         };
-        InvertibleComparator<T> comparator = null;
-        return new SortableRaceListColumn<T, FleetMetadataDTO>("", cell, comparator) {
+        return new SortableRaceListColumn<T, FleetMetadataDTO>("", cell, null) {
             @Override
             public String getColumnStyle() {
                 return CSS.race_fleetcorner();
@@ -213,8 +210,7 @@ public class RaceListColumnFactory {
                 }
             }
         };
-        InvertibleComparator<T> comparator = null;
-        return new SortableRaceListColumn<T, FlagStateDTO>(I18N.flags(), cell, comparator) {
+        return new SortableRaceListColumn<T, FlagStateDTO>(I18N.flags(), cell, null) {
             @Override
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
@@ -482,10 +478,7 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(final EventView.Presenter presenter) {
-        InvertibleComparator<T> comparator = new InvertibleComparatorAdapter<T>() {
-            
-            private DefaultRaceListColumnComparator<T> defaultComparator = new DefaultRaceListColumnComparator<>();
-            
+        DefaultRaceListColumnComparator<T> comparator = new DefaultRaceListColumnComparator<T>() {
             @Override
             public int compare(T o1, T o2) {
                 if (o1.getTrackingState() == TRACKED_VALID_DATA && o2.getTrackingState() == TRACKED_VALID_DATA) {
@@ -498,7 +491,7 @@ public class RaceListColumnFactory {
                 }
                 int compareResult = -o1.getTrackingState().compareTo(o2.getTrackingState());
                 if(compareResult == 0) {
-                    compareResult = defaultComparator.compare(o1, o2);
+                    compareResult = super.compare(o1, o2);
                 }
                 return compareResult;
             }
@@ -522,7 +515,7 @@ public class RaceListColumnFactory {
     }
     
     public static class SortableRaceListStartTimeColumn<T extends RaceMetadataDTO<?>> extends SortableRaceListColumn<T, Date> {
-        protected SortableRaceListStartTimeColumn(InvertibleComparator<T> comparator) {
+        protected SortableRaceListStartTimeColumn(RaceListColumnComparator<T, ?> comparator) {
             super(I18N.start(), new StartTimeCell(), comparator, SortingOrder.DESCENDING);
         }
         
@@ -559,7 +552,7 @@ public class RaceListColumnFactory {
     
     
     private static abstract class WindSpeedOrRangeColumn<T extends RaceMetadataDTO<?>> extends SortableRaceListColumn<T, String> {
-        protected WindSpeedOrRangeColumn(InvertibleComparator<T> comparator) {
+        protected WindSpeedOrRangeColumn(RaceListColumnComparator<T, ?> comparator) {
             super(I18N.wind(), new TextCell(), comparator);
         }
 
@@ -579,7 +572,7 @@ public class RaceListColumnFactory {
         private static final SafeUri ICON_VIDEO = UriUtils.fromTrustedString("images/home/icon-video.png"); 
         private static final SafeUri ICON_AUDIO = UriUtils.fromTrustedString("images/home/icon-audio.png"); 
         
-        private DataCountColumn(final SafeUri imageUri, InvertibleComparator<T> comparator) {
+        private DataCountColumn(final SafeUri imageUri, RaceListColumnComparator<T, ?> comparator) {
             super(new SafeHtmlHeader(TEMPLATE.imageHeader(CSS.raceslist_head_itemflag(), imageUri)), new AbstractCell<Number>() {
                 @Override
                 public void render(Context context, Number value, SafeHtmlBuilder sb) {

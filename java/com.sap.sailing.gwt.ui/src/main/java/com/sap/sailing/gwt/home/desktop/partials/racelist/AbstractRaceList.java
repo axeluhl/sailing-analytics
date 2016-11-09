@@ -57,9 +57,11 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
     protected void setTableData(Collection<T> data) {
         this.ensureInitTableColumns();
         this.columnSet.updateColumnVisibilities();
+        List<T> dataList = new ArrayList<>(data);
         for (int i = 0; i < this.cellTable.getColumnCount(); i++) {
             SortableRaceListColumn<T, ?> column = (SortableRaceListColumn<T, ?>) this.cellTable.getColumn(i);
             column.updateHeaderAndCellStyles();
+            column.setRacesInNaturalOrder(dataList);
         }
         this.cellTable.setPageSize(data.size());
         this.cellTable.setList(data);

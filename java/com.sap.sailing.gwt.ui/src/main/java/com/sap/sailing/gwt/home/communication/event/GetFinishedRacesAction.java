@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.RaceListDataCalculator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
-import com.sap.sse.gwt.dispatch.shared.commands.LinkedSetResult;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
 /**
@@ -24,7 +24,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
  * state} using a duration of <i>5 minutes</i> for currently running events.
  * </p>
  */
-public class GetFinishedRacesAction implements SailingAction<ResultWithTTL<LinkedSetResult<RaceListRaceDTO>>>,
+public class GetFinishedRacesAction implements SailingAction<ResultWithTTL<ListResult<RaceListRaceDTO>>>,
         IsClientCacheable {
     
     private UUID eventId;
@@ -47,12 +47,12 @@ public class GetFinishedRacesAction implements SailingAction<ResultWithTTL<Linke
 
     @Override
     @GwtIncompatible
-    public ResultWithTTL<LinkedSetResult<RaceListRaceDTO>> execute(SailingDispatchContext context) {
+    public ResultWithTTL<ListResult<RaceListRaceDTO>> execute(SailingDispatchContext context) {
         RaceListDataCalculator raceListDataCalculator = new RaceListDataCalculator();
         EventActionUtil.forRacesOfRegatta(context, eventId, regattaId, raceListDataCalculator);
         
         return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId,
-                Duration.ONE_MINUTE.times(5)), new LinkedSetResult<>(raceListDataCalculator.getResult()));
+                Duration.ONE_MINUTE.times(5)), new ListResult<>(raceListDataCalculator.getResult()));
     }
 
     @Override

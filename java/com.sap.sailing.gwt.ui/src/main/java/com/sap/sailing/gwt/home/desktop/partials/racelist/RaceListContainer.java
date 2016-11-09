@@ -59,12 +59,6 @@ public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite i
             noContentPlaceholderUi.getStyle().setDisplay(Display.NONE);
             getElement().getStyle().clearDisplay();
             raceListUi.setVisible(true);
-            if(data != null) {
-                int naturalOrder = 0;
-                for(T dataItem : data) {
-                    dataItem.setNaturalOrder(naturalOrder++);
-                }
-            }
             this.raceListUi.setTableData(data);
         }
     }
