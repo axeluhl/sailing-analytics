@@ -183,42 +183,4 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
 
         return true;
     }
-    
-    public static class InstanceBuilder {
-        private String name;
-        private String displayName;
-        private Distance hullBeam;
-        private Distance hullLength;
-        private BoatHullType hullType;
-        private boolean typicallyStartsUpwind;
-        
-        public InstanceBuilder(String name, boolean typicallyStartsUpwind) {
-            this.name = name;
-            this.typicallyStartsUpwind = typicallyStartsUpwind;
-        }
-
-        public InstanceBuilder setDisplayName(String displayName) {
-            this.displayName = displayName;
-            return this;
-        }
-
-        public InstanceBuilder setHullBeam(Distance hullBeam) {
-            this.hullBeam = hullBeam;
-            return this;
-        }
-
-        public InstanceBuilder setHullLength(Distance hullLength) {
-            this.hullLength = hullLength;
-            return this;
-        }
-
-        public InstanceBuilder setHullType(BoatHullType hullType) {
-            this.hullType = hullType;
-            return this;
-        }
-        
-        public BoatClassImpl build() {
-            return new BoatClassImpl(name, typicallyStartsUpwind, displayName, hullLength, hullBeam, hullType);
-        }
-    }
 }
