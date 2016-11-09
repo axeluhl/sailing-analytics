@@ -528,7 +528,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     PolarSheetsXYDiagramData createXYDiagramForBoatClass(String itemText);
 
-    Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO);
+    /**
+     * @see SailingServiceAsync#getCompetitorMarkPassings(RegattaAndRaceIdentifier, CompetitorDTO, boolean, com.google.gwt.user.client.rpc.AsyncCallback)
+     */
+    Map<Integer, Date> getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
+            boolean waitForCalculations);
 
     /**
      * Obtains fixed mark passings and mark passing suppressions from the race log identified by
