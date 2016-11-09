@@ -101,7 +101,7 @@ public class PolarDataClient {
                     new CompoundGroupKeyDeserializer(cubicDeserializers), 
                     new AngleAndSpeedRegressionDeserializer());
             MapDeserializer<BoatClass, Long> fixCountPerBoatClassDeserializer = new MapDeserializer<>(
-                    new BoatClassDeserializer(), 
+                    boatClassDeserializer, 
                     new JsonDeserializer<Long>() {
                         @Override
                         public Long deserialize(JSONObject object) throws JsonDeserializationException {
