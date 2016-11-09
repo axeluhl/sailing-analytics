@@ -114,13 +114,6 @@ public class PolarDataClient {
                     .deserialize((JSONArray) jsonObject.get(PolarDataResource.FIELD_SPEED_REGRESSION));
             Map<BoatClass, Long> fixCountPerBoatClass = fixCountPerBoatClassDeserializer.deserialize((JSONArray) jsonObject.get(PolarDataResource.FIELD_FIX_COUNT_PER_BOAT_CLASS));
 
-            JSONArray array = (JSONArray) jsonObject.get(PolarDataResource.FIELD_AVAILABLE_BOAT_CLASSES);
-            for (int i = 0; i < array.size(); i++) {
-                JSONObject object = (JSONObject) array.get(i);
-                BoatClass boatClass = boatClassDeserializer.deserialize(object);
-                polarDataServiceImpl.getAllBoatClassesWithPolarSheetsAvailable().add(boatClass);
-            }
-
             polarDataServiceImpl.updateRegressions(cubicRegression, speedRegression);
             polarDataServiceImpl.updateFixCountPerBoatClass(fixCountPerBoatClass);
 

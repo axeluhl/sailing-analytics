@@ -9,7 +9,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -32,7 +31,6 @@ import com.sap.sse.datamining.shared.GroupKey;
 @Path("/polar_data")
 public class PolarDataResource extends AbstractPolarResource {
 
-    public static final String FIELD_AVAILABLE_BOAT_CLASSES = "availableBoatClasses";
     public static final String FIELD_FIX_COUNT_PER_BOAT_CLASS = "fixCountPerBoatClass";
     public static final String FIELD_LONG = "long";
     public static final String FIELD_CLUSTER = "cluster";
@@ -76,17 +74,10 @@ public class PolarDataResource extends AbstractPolarResource {
         Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedRegressions = getPolarDataServiceImpl()
                 .getSpeedRegressionsPerAngle();
         Map<BoatClass, Long> fixCountPerBoatClass = getPolarDataServiceImpl().getFixCointPerBoatClass();
-
         JSONObject regressions = new JSONObject();
         regressions.put(FIELD_CUBIC_REGRESSION, cubicSerializer.serialize(cubicRegressions));
         regressions.put(FIELD_SPEED_REGRESSION, speedSerializer.serialize(speedRegressions));
         regressions.put(FIELD_FIX_COUNT_PER_BOAT_CLASS, fixCountPerBoatClassSerialzier.serialize(fixCountPerBoatClass));
-        JSONArray array = new JSONArray();
-        for (BoatClass boatClass : getPolarDataServiceImpl().getAllBoatClassesWithPolarSheetsAvailable()) {
-            array.add(new BoatClassJsonSerializer().serialize(boatClass));
-        }
-        regressions.put(FIELD_AVAILABLE_BOAT_CLASSES, array);
-
         return Response.ok(regressions.toJSONString())
                 .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
