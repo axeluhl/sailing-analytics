@@ -26,7 +26,6 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 import com.sap.sailing.polars.jaxrs.api.PolarDataResource;
 import com.sap.sailing.polars.jaxrs.deserialization.AngleAndSpeedRegressionDeserializer;
-import com.sap.sailing.polars.jaxrs.deserialization.BoatClassDeserializer;
 import com.sap.sailing.polars.jaxrs.deserialization.ClusterBoundaryDeserializer;
 import com.sap.sailing.polars.jaxrs.deserialization.ClusterDeserializer;
 import com.sap.sailing.polars.jaxrs.deserialization.CompoundGroupKeyDeserializer;
@@ -118,8 +117,7 @@ public class PolarDataClient {
             JSONArray array = (JSONArray) jsonObject.get(PolarDataResource.FIELD_AVAILABLE_BOAT_CLASSES);
             for (int i = 0; i < array.size(); i++) {
                 JSONObject object = (JSONObject) array.get(i);
-
-                BoatClass boatClass = new BoatClassDeserializer().deserialize(object);
+                BoatClass boatClass = boatClassDeserializer.deserialize(object);
                 polarDataServiceImpl.getAllBoatClassesWithPolarSheetsAvailable().add(boatClass);
             }
 
