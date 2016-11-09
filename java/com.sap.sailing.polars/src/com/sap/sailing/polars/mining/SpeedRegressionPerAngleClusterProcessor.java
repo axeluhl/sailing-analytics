@@ -3,7 +3,6 @@ package com.sap.sailing.polars.mining;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -56,8 +55,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
      */
     private transient ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners;
 
-    private final Set<BoatClass> availableBoatClasses = new HashSet<BoatClass>();
-
     public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
     }
@@ -88,7 +85,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         regression.addData(fix.getWind().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
-        availableBoatClasses.add(boatClass);
         Set<PolarsChangedListener> listenersForBoatClass = listeners.get(fix.getBoatClass());
         if (listenersForBoatClass != null) {
             for (PolarsChangedListener listener : listenersForBoatClass) {
@@ -188,7 +184,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     }
 
     Set<BoatClass> getAvailableBoatClasses() {
-        return availableBoatClasses;
+        return Collections.unmodifiableSet(fixCountPerBoatClass.keySet());
     }
 
     @Override
