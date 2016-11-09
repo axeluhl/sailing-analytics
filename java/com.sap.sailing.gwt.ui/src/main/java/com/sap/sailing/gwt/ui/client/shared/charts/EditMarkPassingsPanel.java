@@ -193,25 +193,24 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
-                    if (!isSettingFixedMarkPossible(timer, stringMessages)) {
-                        return;
+                    if (isSettingFixedTimePossible(timer, stringMessages)) {
+                        final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
+                        final Date time = timer.getTime();
+                        sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
+                                leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
+                                leaderboardNameRaceColumnNameAndFleetName.getFleetName(), waypoint, time, competitor,
+                                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorSettingFixedPassing(caught.getMessage()));
+                            }
+        
+                            @Override
+                            public void onSuccess(Void result) {
+                                refillList();
+                            }
+                        });
                     }
-                    final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
-                    final Date time = timer.getTime();
-                    sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
-                            leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
-                            leaderboardNameRaceColumnNameAndFleetName.getFleetName(), waypoint, time, competitor,
-                                    new AsyncCallback<Void>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(stringMessages.errorSettingFixedPassing(caught.getMessage()));
-                        }
-    
-                        @Override
-                        public void onSuccess(Void result) {
-                            refillList();
-                        }
-                    });
                 }
             }
         });
@@ -287,16 +286,19 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     }
     
     /**
-     * If we try to set a time as mark passing of a waypoint then first we should make sure the times of previous mark
-     * is before the time of current setting mark and time of the following mark is after the setting time
+     * Checks the possibility of setting a new fixed time for selected waypoint
+     * 
+     * @return false if new fixed time for waypoint is after the fixed time of any of the following waypoints or before
+     *         any of the previous ones
      */
-    private boolean isSettingFixedMarkPossible(Timer timer, StringMessages stringMessages) {
-        Pair<Integer, Date> selectedWaypoint = waypointSelectionModel.getSelectedObject();
-        for (Pair<Integer, Date> waypoint : waypointList.getList()) {
-            if ((waypoint.getA() < selectedWaypoint.getA() && waypoint.getB().after(timer.getTime()))
-                    || (waypoint.getA() > selectedWaypoint.getA() && waypoint.getB().before(timer.getTime()))) {
+    private boolean isSettingFixedTimePossible(Timer timer, StringMessages stringMessages) {
+        Integer selectedWaypointIndex = waypointSelectionModel.getSelectedObject().getA();
+        for (Integer waypointIndex : currentCompetitorEdits.keySet()) {
+            Date waypointDate = currentCompetitorEdits.get(waypointIndex);
+            if ((waypointIndex < selectedWaypointIndex && waypointDate.after(timer.getTime()))
+                    || (waypointIndex > selectedWaypointIndex && waypointDate.before(timer.getTime()))) {
                 Window.alert(stringMessages
-                        .warningSettingFixedPassing(currentWaypoints.get(selectedWaypoint.getA()).getName()));
+                        .warningSettingFixedPassing(currentWaypoints.get(selectedWaypointIndex).getName()));
                 return false;
             }
         }
