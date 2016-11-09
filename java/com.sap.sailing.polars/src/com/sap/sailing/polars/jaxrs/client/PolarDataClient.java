@@ -1,133 +1,160 @@
 package com.sap.sailing.polars.jaxrs.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
+import com.sap.sailing.polars.jaxrs.api.PolarDataResource;
 import com.sap.sailing.polars.jaxrs.deserialization.AngleAndSpeedRegressionDeserializer;
-import com.sap.sailing.polars.jaxrs.deserialization.GroupKeyDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.BoatClassDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.ClusterBoundaryDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.ClusterDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.CompoundGroupKeyDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.DegreeBearingDeserializer;
 import com.sap.sailing.polars.jaxrs.deserialization.IncrementalAnyOrderLeastSquaresImplDeserializer;
+import com.sap.sailing.polars.jaxrs.deserialization.LegTypeDeserializer;
 import com.sap.sailing.polars.mining.AngleAndSpeedRegression;
-import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
-import com.sap.sailing.polars.mining.SpeedRegressionPerAngleClusterProcessor;
+import com.sap.sailing.polars.mining.BearingComparator;
+import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.MapDeserializer;
+import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.GroupKey;
 
 /**
- * This class is used to replicate polar data regressions calculation from the remote server using Apache {@link HttpClient}
+ * This class is used to replicate polar data regressions calculation from the remote server using Apache
+ * {@link HttpClient}
  * 
  * @author Oleg_Zheleznov
  *
  */
 public class PolarDataClient {
 
-    // MOCKING
-    private static final String HOST = "http://127.0.0.1:8888/polars/api/polar_data/";
+    private static final Logger logger = Logger.getLogger(PolarDataClient.class.getName());
 
-    private static final String CUBIC_REGRESSION = "cubic_regression";
-    private static final String SPEED_REGRESSION = "speed_regression";
+    private static final String RESOURCE = "polars/api/polar_data";
 
-    private PolarDataServiceImpl polarDataServiceImpl;
-
-    private MapDeserializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedDeserializer;
-    private MapDeserializer<GroupKey, AngleAndSpeedRegression> cubicDeserializer;
+    private final PolarDataServiceImpl polarDataServiceImpl;
+    private final String polarDataSourceURL;
 
     /**
-     * Default constructor is missing because we need {@link PolarDataServiceImpl} to reach {@link PolarDataMiner} later
+     * Default constructor is missing because we need {@link PolarDataServiceImpl} to reach regressions
      * 
      * @param polarDataServiceImpl
+     *            {@link PolarDataServiceImpl} service to work with
+     * @param polarDataSourceURL
+     *            archive server URL string
      */
-    public PolarDataClient(PolarDataServiceImpl polarDataServiceImpl) {
+    public PolarDataClient(String polarDataSourceURL, PolarDataServiceImpl polarDataServiceImpl) {
         this.polarDataServiceImpl = polarDataServiceImpl;
-
-        speedDeserializer = new MapDeserializer<>(SPEED_REGRESSION, new GroupKeyDeserializer<>(),
-                new IncrementalAnyOrderLeastSquaresImplDeserializer());
-        cubicDeserializer = new MapDeserializer<>(CUBIC_REGRESSION, new GroupKeyDeserializer<>(),
-                new AngleAndSpeedRegressionDeserializer());
+        this.polarDataSourceURL = polarDataSourceURL;
     }
 
     /**
-     * This method is used to update {@link CubicRegressionPerCourseProcessor} regressions with data received from remote server.
-     * Before the regressions map will be updated it may be cleaned
+     * This method is used to update {@link PolarDataMiner} regressions with data received from remote server. Before
+     * the regression maps will be updated it may be cleaned
      * 
-     * @param clean determines whether regressions map will be cleaned or not
-     * @return Updated {@link CubicRegressionPerCourseProcessor}
-     * @throws IllegalStateException
      * @throws IOException
      * @throws ParseException
      */
-    public CubicRegressionPerCourseProcessor getCubicRegressionProcessor(boolean clean)
-            throws IllegalStateException, IOException, ParseException {
-        CubicRegressionPerCourseProcessor processor = polarDataServiceImpl.getPolarDataMiner()
-                .getCubicRegressionPerCourseProcessor();
-        HttpClient client = new SystemDefaultHttpClient();
-        HttpGet getProcessor = new HttpGet(HOST + CUBIC_REGRESSION);
-        HttpResponse processorResponse = client.execute(getProcessor);
+    public void updatePolarDataRegressions() throws IOException, ParseException {
+        try {
+            logger.log(Level.INFO, "Loading polar regression data from remote server " + polarDataSourceURL);
 
-        Map<GroupKey, AngleAndSpeedRegression> map = cubicDeserializer
-                .deserialize(getJsonFromResponse(processorResponse));
+            HttpClient client = new SystemDefaultHttpClient();
+            HttpGet getProcessor = new HttpGet(getAPIString());
+            HttpResponse processorResponse = client.execute(getProcessor);
 
-        if (clean) {
-            processor.getRegressions().clear();
+            JSONObject jsonObject = getJsonFromResponse(processorResponse);
+
+            MapDeserializer<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedDeserializer = new MapDeserializer<>(
+                    new CompoundGroupKeyDeserializer<BoatClass, Cluster<Bearing>>(
+                            PolarDataResource.FIELD_BOAT_CLASS, 
+                            PolarDataResource.FIELD_CLUSTER, 
+                            new BoatClassDeserializer(), 
+                            new ClusterDeserializer<Bearing>(new ClusterBoundaryDeserializer<>(new DegreeBearingDeserializer(), new BearingComparator()))), 
+                    new IncrementalAnyOrderLeastSquaresImplDeserializer());
+            MapDeserializer<GroupKey, AngleAndSpeedRegression> cubicDeserializer = new MapDeserializer<>(
+                    new CompoundGroupKeyDeserializer<LegType, BoatClass>(
+                            PolarDataResource.FIELD_LEG_TYPE, 
+                            PolarDataResource.FIELD_BOAT_CLASS,
+                            new LegTypeDeserializer(), 
+                            new BoatClassDeserializer()), 
+                    new AngleAndSpeedRegressionDeserializer());
+            MapDeserializer<BoatClass, Long> fixCountPerBoatClassDeserializer = new MapDeserializer<>(
+                    new BoatClassDeserializer(), 
+                    new JsonDeserializer<Long>() {
+                        @Override
+                        public Long deserialize(JSONObject object) throws JsonDeserializationException {
+                            return (Long) object.get(PolarDataResource.FIELD_LONG);
+                        }
+                    });
+
+            Map<GroupKey, AngleAndSpeedRegression> cubicRegression = cubicDeserializer
+                    .deserialize((JSONArray) jsonObject.get(PolarDataResource.FIELD_CUBIC_REGRESSION));
+            Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> speedRegression = speedDeserializer
+                    .deserialize((JSONArray) jsonObject.get(PolarDataResource.FIELD_SPEED_REGRESSION));
+            Map<BoatClass, Long> fixCountPerBoatClass = fixCountPerBoatClassDeserializer.deserialize((JSONArray) jsonObject.get(PolarDataResource.FIELD_FIX_COUNT_PER_BOAT_CLASS));
+
+            JSONArray array = (JSONArray) jsonObject.get(PolarDataResource.FIELD_AVAILABLE_BOAT_CLASSES);
+            for (int i = 0; i < array.size(); i++) {
+                JSONObject object = (JSONObject) array.get(i);
+
+                BoatClass boatClass = new BoatClassDeserializer().deserialize(object);
+                polarDataServiceImpl.getAllBoatClassesWithPolarSheetsAvailable().add(boatClass);
+            }
+
+            polarDataServiceImpl.updateRegressions(cubicRegression, speedRegression);
+            polarDataServiceImpl.updateFixCountPerBoatClass(fixCountPerBoatClass);
+
+            logger.log(Level.INFO,
+                    "Loading polar regression data from remote server " + polarDataSourceURL + " succeeded");
+        } catch (ClientProtocolException e) {
+            // Catching ClientProtocolException to indicate problems with HTTP protocol
+            logger.log(Level.WARNING, "Failed to load polar regression data from remote server " + polarDataSourceURL
+                    + ", " + e.getMessage());
         }
-        processor.getRegressions().putAll(map);
-
-        return processor;
     }
 
-    /**
-     * This method is used to update {@link SpeedRegressionPerAngleClusterProcessor} regressions with data received from remote server.
-     * Before the regressions map will be updated it may be cleaned
-     * 
-     * @param clean determines whether regressions map will be cleaned or not
-     * @return Updated {@link SpeedRegressionPerAngleClusterProcessor}
-     * @throws IllegalStateException
-     * @throws IOException
-     * @throws ParseException
-     */
-    public SpeedRegressionPerAngleClusterProcessor getSpeedRegressionProcessor(boolean clean)
-            throws IllegalStateException, IOException, ParseException {
-        SpeedRegressionPerAngleClusterProcessor processor = polarDataServiceImpl.getPolarDataMiner()
-                .getSpeedRegressionPerAngleClusterProcessor();
-        HttpClient client = new SystemDefaultHttpClient();
-        HttpGet getProcessor = new HttpGet(HOST + SPEED_REGRESSION);
-        HttpResponse processorResponse = client.execute(getProcessor);
-
-        Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> map = speedDeserializer
-                .deserialize(getJsonFromResponse(processorResponse));
-
-        if (clean) {
-            processor.getRegressions().clear();
-        }
-        processor.getRegressions().putAll(map);
-
-        return processor;
-    }
-
-    private JSONObject getJsonFromResponse(HttpResponse response)
-            throws IllegalStateException, IOException, ParseException {
-        JSONParser jsonParser = new JSONParser();
-        final Header contentEncoding = response.getEntity().getContentEncoding();
-        final Reader reader;
-        if (contentEncoding == null) {
-            reader = new InputStreamReader(response.getEntity().getContent());
+    private String getAPIString() {
+        if (polarDataSourceURL.endsWith("/")) {
+            return polarDataSourceURL + RESOURCE;
         } else {
-            reader = new InputStreamReader(response.getEntity().getContent(), contentEncoding.getValue());
+            return polarDataSourceURL + "/" + RESOURCE;
         }
-        JSONObject json = (JSONObject) jsonParser.parse(reader);
-        reader.close();
+    }
+
+    private JSONObject getJsonFromResponse(HttpResponse response) throws IOException, ParseException {
+        JSONParser jsonParser = new JSONParser();
+        final Header encoding = response.getEntity().getContentEncoding();
+        final InputStream content = response.getEntity().getContent();
+        final JSONObject json;
+        try (final Reader reader = encoding == null ? new InputStreamReader(content)
+                : new InputStreamReader(content, encoding.getValue())) {
+            json = (JSONObject) jsonParser.parse(reader);
+        }
+
         return json;
     }
 

@@ -1,6 +1,7 @@
 package com.sap.sailing.polars.mining;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -222,7 +223,15 @@ public class CubicRegressionPerCourseProcessor implements
     }
 
     public Map<GroupKey, AngleAndSpeedRegression> getRegressions() {
-        return regressions;
+        synchronized (regressions) {
+            return Collections.unmodifiableMap(regressions);
+        }
+    }
+    
+    public void updateRegressions(Map<GroupKey, AngleAndSpeedRegression> regressionsToUpdate) {
+        synchronized (regressions) {
+            regressions.putAll(regressionsToUpdate);
+        }
     }
     
 }

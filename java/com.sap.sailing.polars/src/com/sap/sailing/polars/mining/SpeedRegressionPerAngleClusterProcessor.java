@@ -1,6 +1,7 @@
 package com.sap.sailing.polars.mining;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -234,15 +235,36 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     }
 
     public Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> getRegressionsImpl() {
-        Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> map = new HashMap<>();
-        
-        regressions.keySet().stream().forEach(key -> map.put(key, (IncrementalAnyOrderLeastSquaresImpl) regressions.get(key)));
-        
-        return map;
+        synchronized (regressions) {
+            Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> map = new HashMap<>();
+            
+            regressions.keySet().stream().forEach(key -> map.put(key, (IncrementalAnyOrderLeastSquaresImpl) regressions.get(key)));
+            
+            return Collections.unmodifiableMap(map);
+        }
     }
 
     public Map<GroupKey, IncrementalLeastSquares> getRegressions() {
-        return regressions;
+        synchronized (regressions) {
+            return Collections.unmodifiableMap(regressions);
+        }
     }
-    
+
+    public void updateRegressions(Map<GroupKey, ? extends IncrementalLeastSquares> regressionsToUpdate) {
+        synchronized (regressions) {
+            regressions.putAll(regressionsToUpdate);
+        }
+    }
+
+    public Map<BoatClass, Long> getFixCountPerBoatClass() {
+        synchronized (fixCountPerBoatClass) {
+            return Collections.unmodifiableMap(fixCountPerBoatClass);
+        }
+    }
+
+    public void updateFixCountPerBoatClass(Map<BoatClass, Long> fixCountPerBoatClass) {
+        synchronized (this.fixCountPerBoatClass) {
+            this.fixCountPerBoatClass.putAll(fixCountPerBoatClass);
+        }
+    }
 }

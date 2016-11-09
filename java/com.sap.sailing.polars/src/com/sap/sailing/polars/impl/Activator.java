@@ -11,6 +11,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.polars.jaxrs.client.PolarDataClient;
 import com.sap.sse.replication.Replicable;
 
 /**
@@ -20,6 +21,8 @@ import com.sap.sse.replication.Replicable;
  *
  */
 public class Activator implements BundleActivator {
+
+    private static final String POLAR_DATA_SOURCE_URL_PROPERTY_NAME = "polardata.source.url";
 
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
@@ -33,6 +36,12 @@ public class Activator implements BundleActivator {
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, service.getId().toString());
         registrations.add(context.registerService(Replicable.class.getName(), service, replicableServiceProperties));
+        
+        String polarDataSourceURL = System.getProperty(POLAR_DATA_SOURCE_URL_PROPERTY_NAME);
+        if (polarDataSourceURL != null && !polarDataSourceURL.isEmpty()) {
+            PolarDataClient polarDataClient = new PolarDataClient(polarDataSourceURL, service);
+            polarDataClient.updatePolarDataRegressions();
+        }
     }
 
     @Override

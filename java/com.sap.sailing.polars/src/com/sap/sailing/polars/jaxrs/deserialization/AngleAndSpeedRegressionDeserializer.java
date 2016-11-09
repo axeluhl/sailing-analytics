@@ -10,7 +10,11 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 
 public class AngleAndSpeedRegressionDeserializer implements JsonDeserializer<AngleAndSpeedRegression> {
 
-    private IncrementalAnyOrderLeastSquaresImplDeserializer regressionDeserializer = new IncrementalAnyOrderLeastSquaresImplDeserializer();
+    private final IncrementalAnyOrderLeastSquaresImplDeserializer regressionDeserializer;
+    
+    public AngleAndSpeedRegressionDeserializer() {
+        regressionDeserializer = new IncrementalAnyOrderLeastSquaresImplDeserializer();
+    }
 
     @Override
     public AngleAndSpeedRegression deserialize(JSONObject object) throws JsonDeserializationException {

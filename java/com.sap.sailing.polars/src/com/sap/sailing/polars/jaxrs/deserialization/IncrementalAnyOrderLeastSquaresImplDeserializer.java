@@ -32,8 +32,9 @@ public class IncrementalAnyOrderLeastSquaresImplDeserializer implements JsonDese
         int polynomialOrder = Integer.valueOf(object.get(IncrementalAnyOrderLeastSquaresImplSerializer.FIELD_POLYNOMIAL_ORDER).toString());
         boolean hasIntercept = (boolean) object.get(IncrementalAnyOrderLeastSquaresImplSerializer.FIELD_HAS_INTERCEPT);
         boolean useSymbollicInversionIfPossible = (boolean) object.get(IncrementalAnyOrderLeastSquaresImplSerializer.FIELD_USE_SYMBOLLIC_INVERSION_IF_POSSIBLE);
+        long numberOfPointsAdded = (long) object.get(IncrementalAnyOrderLeastSquaresImplSerializer.FIELD_NUMBER_OF_POINTS_ADDED);
         
-        return new IncrementalAnyOrderLeastSquaresImpl(matrixOfXSums, vectorOfXYMultSums, polynomialOrder, hasIntercept, useSymbollicInversionIfPossible);
+        return new IncrementalAnyOrderLeastSquaresImpl(matrixOfXSums, vectorOfXYMultSums, polynomialOrder, hasIntercept, useSymbollicInversionIfPossible, numberOfPointsAdded);
     }
 
 }
