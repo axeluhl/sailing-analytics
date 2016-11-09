@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization;
 import org.json.simple.JSONArray;
 
 /**
- * Interface for serializer collections to Json.
+ * Interface for serializing collections to Json.
  *
  * @param <T> Class to serialize.
  */

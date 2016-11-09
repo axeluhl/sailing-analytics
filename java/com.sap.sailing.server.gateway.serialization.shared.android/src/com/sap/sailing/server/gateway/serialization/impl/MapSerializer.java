@@ -8,10 +8,6 @@ import com.sap.sailing.server.gateway.serialization.JsonArraySerializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class MapSerializer<K, V> implements JsonArraySerializer<Map<K, V>> {
-
-    public static final String FIELD_VALUE = "value";
-    public static final String FIELD_KEY = "key";
-
     private final MapEntrySerializer<K, V> mapEntrySerializer;
 
     /**
@@ -30,7 +26,6 @@ public class MapSerializer<K, V> implements JsonArraySerializer<Map<K, V>> {
         for (Entry<K, V> entry : map.entrySet()) {
             entriesJSON.add(mapEntrySerializer.serialize(entry));
         }
-
         return entriesJSON;
     }
 }
