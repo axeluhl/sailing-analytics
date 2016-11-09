@@ -133,7 +133,23 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
         }, ClickEvent.getType());
     }
     
-    private void handleAutoRefreshClick() {
+    /**
+     * This method turns on auto playing mode on leaderboard
+     */
+    private void turnOnAutoPlay() {
+        if (autoRefreshTimer.getPlayState() != PlayStates.Playing) {
+            autoRefreshTimer.setPlayMode(PlayModes.Live);
+        }
+        
+        // Styles applied each time because of tabs switching. In this case play mode stays as Playing but styling is lost
+        autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        if (delegate != null) {
+            delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        }
+    }
+    
+    @UiHandler("autoRefreshAnchor")
+    void toogleAutoRefreshClicked(ClickEvent event) {
         autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
         autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
         if (delegate != null) {
@@ -160,26 +176,6 @@ public class OldLeaderboard extends Composite implements BusyStateChangeListener
                 }
             }
         }
-    }
-    
-    /**
-     * This method turns on auto playing mode on leaderboard
-     */
-    private void turnOnAutoPlay() {
-        if (autoRefreshTimer.getPlayState() != PlayStates.Playing) {
-            autoRefreshTimer.setPlayMode(PlayModes.Live);
-        }
-        
-        // Styles applied each time because of tabs switching. In this case play mode stays as Playing but styling is lost
-        autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-        if (delegate != null) {
-            delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-        }
-    }
-    
-    @UiHandler("autoRefreshAnchor")
-    void toogleAutoRefreshClicked(ClickEvent event) {
-        handleAutoRefreshClick();
     }
     
     @UiHandler("settingsAnchor")
