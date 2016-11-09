@@ -14,13 +14,11 @@ import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 @GwtIncompatible
 public class RaceListDataCalculator implements RaceCallback {
     private final TreeSet<RaceListRaceDTO> races = new TreeSet<>();
-    private int naturalOrder = 0;
 
     @Override
     public void doForRace(RaceContext context) {
         RaceListRaceDTO finishedRace = context.getFinishedRaceOrNull();
         if (finishedRace != null) {
-            finishedRace.setNaturalOrder(naturalOrder++);
             races.add(finishedRace);
         }
     }

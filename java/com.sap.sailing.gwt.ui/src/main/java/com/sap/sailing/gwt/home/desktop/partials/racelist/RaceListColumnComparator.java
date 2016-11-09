@@ -2,12 +2,9 @@ package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
-import com.sap.sse.common.util.NaturalComparator;
 
 public abstract class RaceListColumnComparator<R extends RaceMetadataDTO<?>, S extends Comparable<S>>
         extends InvertibleComparatorAdapter<R> {
-
-    private static final NaturalComparator raceNameComparator = new NaturalComparator(false);
 
     @Override
     public int compare(R o1, R o2) {
@@ -21,12 +18,9 @@ public abstract class RaceListColumnComparator<R extends RaceMetadataDTO<?>, S e
         } else {
             compareResult = getValue(o1).compareTo(getValue(o2));
         }
-
         if (compareResult == 0) {
-            compareResult = Integer.compare(o1.getNaturalOrder(), o2.getNaturalOrder());
-        }
-        if (compareResult == 0) {
-            compareResult = raceNameComparator.compare(o1.getRaceName(), o2.getRaceName());
+            //RaceListRaceDTO implements Comparable which considers natural order and race names for its comparison
+            compareResult = o1.compareTo(o2);
         }
 
         return compareResult;
