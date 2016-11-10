@@ -24,6 +24,9 @@ import com.sap.sse.common.TimePoint;
  *
  */
 public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike {
+
+    public static final double DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS = 2;
+
     ScoringScheme getScoringScheme();
 
     /**
@@ -156,6 +159,14 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
     RankingMetricConstructor getRankingMetricConstructor();
 
     RegattaAndRaceIdentifier getRaceIdentifier(RaceDefinition race);
+
+    /**
+     * Define the value which would be multipled by hull length from {@link BoatClass}. 
+     * Next the calculated value {@link RegattaUtil} would be used to fill out radius of buoy on race map setting.
+     */
+    public Double getBuoyZoneRadiusInHullLengths();
+
+    public void setBuoyZoneRadiusInHullLengths(Double buoyZoneRadiusInHullLengths);
 
     /**
      * When there is no race committee app in place and no operator is managing the race start times for this regatta,

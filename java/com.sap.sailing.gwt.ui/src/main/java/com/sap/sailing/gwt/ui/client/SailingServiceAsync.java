@@ -441,7 +441,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
-            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, boolean useStartTimeInference,
+            ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType,
             AsyncCallback<RegattaDTO> callback);
 
@@ -528,7 +528,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void storeSwissTimingArchiveConfiguration(String swissTimingUrl, AsyncCallback<Void> asyncCallback);
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
-            RegattaConfigurationDTO regattaConfiguration, boolean useStartTimeInference,
+            RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, AsyncCallback<Void> callback);
 
     /**
@@ -703,9 +703,14 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      *            the URL pointing to a Manage2Sail JSON document that contains the link to the XRR document
      */
     void getRegattas(String manage2SailJsonUrl, AsyncCallback<Iterable<RegattaDTO>> asyncCallback);
-
+    
+    /**
+     * Returns mark passings for the competitor. Using the {@code waitForCalculations} parameter callers can control
+     * whether to obtain a snapshot immediately of wait for pending updates. Waiting may be desirable, e.g., when having
+     * submitted a fixed mark passing into a race log which triggers the re-calculations asynchronously.
+     */
     void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
-            AsyncCallback<Map<Integer, Date>> callback);
+            boolean waitForCalculations, AsyncCallback<Map<Integer, Date>> callback);
 
     void getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName, String fleetName,
             CompetitorDTO competitor, AsyncCallback<Map<Integer, Date>> callback);

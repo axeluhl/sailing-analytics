@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -190,7 +191,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), 0);
+        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), Distance.NULL);
         // Use temporary competitorID as boat Id -> boat will be removed from competitor later on anyway
         BoatDTO boat = new BoatDTO(competitorToEdit.getIdAsString(), name.getText(), boatClass, sailId.getText());
         CompetitorDTO result = new CompetitorDTOImpl(name.getText(), shortName.getText(), color, email.getText(),

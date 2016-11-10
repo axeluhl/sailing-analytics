@@ -208,7 +208,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String mark();
     String otherManeuver();
     String douglasPeuckerPoints();
-    String filterRacesByName();
+    String filterRaces();
+    String filterByNameOrBoatClass();
+    String filterByRegatta();
     String filterMediaByName();
     String actionEdit();
     String actionEditScores();
@@ -1333,6 +1335,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     
     String fixedMarkPassing();
     String suppressedMarkPassing();
+    String warningSettingFixedPassing(String waypoint);
     String windUp();
     String currentFilterSelection();
     String notCapableOfGeneratingACodeForIdentifier();
@@ -1739,4 +1742,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String lastFix();
     String filterDeviceMappings();
     String raceStartAnalysis();
+    String urlForLanguage(String language);
+    String urlForAllLanguages();
+    String externalLinks();
+    String buoyZoneRadiusInHullLengths();
+    String incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
 }
