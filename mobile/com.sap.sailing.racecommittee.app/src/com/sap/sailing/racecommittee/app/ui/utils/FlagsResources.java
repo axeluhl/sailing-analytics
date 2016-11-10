@@ -106,7 +106,7 @@ public class FlagsResources {
             break;
 
         case OSCAR:
-            flag = "flag_papa_" + size + "dp";
+            flag = "flag_oscar_" + size + "dp";
             outline = outline.replace("XX", "01");
             break;
 
