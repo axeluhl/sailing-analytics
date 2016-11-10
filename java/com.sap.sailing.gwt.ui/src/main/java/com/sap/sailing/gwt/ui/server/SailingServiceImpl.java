@@ -1704,7 +1704,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Boat boatOfCompetitor = race.getBoatOfCompetitorById(competitor.getId());
             if (boatOfCompetitor != null) {
                 BoatClassDTO boatClassDTO = new BoatClassDTO(boatOfCompetitor.getBoatClass().getName(), 
-                        boatOfCompetitor.getBoatClass().getDisplayName(), boatOfCompetitor.getBoatClass().getHullLength().getMeters());
+                        boatOfCompetitor.getBoatClass().getDisplayName(), boatOfCompetitor.getBoatClass().getHullLength());
                 BoatDTO boatDTO = new BoatDTO(boatOfCompetitor.getId().toString(), boatOfCompetitor.getName(), boatClassDTO, 
                         boatOfCompetitor.getSailID(), boatOfCompetitor.getColor());
                 competitorBoats.put(competitorDTOsMap.get(competitor.getId().toString()), boatDTO);

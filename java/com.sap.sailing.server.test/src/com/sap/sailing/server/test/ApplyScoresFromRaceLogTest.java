@@ -125,12 +125,12 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         for (int i=0; i<8; i++) {
             final String competitorName = "C"+i;
             competitors.add(service.getBaseDomainFactory().getCompetitorStore().getOrCreateCompetitor(UUID.randomUUID(),
-                    competitorName, /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
+                    competitorName, competitorName, /* displayColor */ Color.RED, /* email */ null, /* flagImageURI */ null,
                     new TeamImpl("STG", Collections.singleton(
                             new PersonImpl(competitorName, new NationalityImpl("GER"),
                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
+                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName+ "Id", competitorName + "'s boat",
                     new BoatClassImpl("505", /* typicallyStartsUpwind */ true), /* sailID */ null),
                     /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         }
