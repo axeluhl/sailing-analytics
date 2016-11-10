@@ -193,8 +193,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 final LeaderboardNameRaceColumnNameAndFleetName leaderboardNameRaceColumnNameAndFleetName =
                         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(raceIdentifier);
                 if (leaderboardNameRaceColumnNameAndFleetName != null) {
+                    final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
                     if (isSettingFixedTimePossible(timer, stringMessages)) {
-                        final Integer waypoint = waypointSelectionModel.getSelectedObject().getA();
                         final Date time = timer.getTime();
                         sailingService.updateFixedMarkPassing(leaderboardNameRaceColumnNameAndFleetName.getLeaderboardName(),
                                 leaderboardNameRaceColumnNameAndFleetName.getRaceColumnName(),
@@ -210,6 +210,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                                 refillList();
                             }
                         });
+                    } else {
+                        Window.alert(stringMessages.warningSettingFixedPassing(currentWaypoints.get(waypoint).getName()));
                     }
                 }
             }
@@ -297,8 +299,6 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
             Date waypointDate = currentCompetitorEdits.get(waypointIndex);
             if ((waypointIndex < selectedWaypointIndex && waypointDate.after(timer.getTime()))
                     || (waypointIndex > selectedWaypointIndex && waypointDate.before(timer.getTime()))) {
-                Window.alert(stringMessages
-                        .warningSettingFixedPassing(currentWaypoints.get(selectedWaypointIndex).getName()));
                 return false;
             }
         }
