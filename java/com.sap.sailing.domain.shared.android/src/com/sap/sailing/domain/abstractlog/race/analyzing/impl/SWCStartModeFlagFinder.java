@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public class SWCStartModeFlagFinder extends RaceLogAnalyzer<Flags> {
 
-    private final static List<Flags> defaultStartModeFlags = Arrays.asList(Flags.PAPA, Flags.BLACK, Flags.UNIFORM);
+    private final static List<Flags> defaultStartModeFlags = Arrays.asList(Flags.BLACK, Flags.UNIFORM);
     
     private final RacingProcedureTypeAnalyzer procedureAnalyzer;
     private final List<Flags> startModeFlags;
