@@ -1,0 +1,1841 @@
+{
+  "cubic_regressions": [
+    {
+      "key": {
+        "legType": {
+          "value": "DOWNWIND"
+        },
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        }
+      },
+      "value": {
+        "maxWindSpeedInKnots": 12.370646835827564,
+        "speedRegression": {
+          "matrixOfXSums": [
+            [
+              1538115.1444206564,
+              1.4876719777013548E7,
+              1.5011352538228098E8
+            ],
+            [
+              1.4876719777013548E7,
+              1.5011352538228098E8,
+              1.5675776508659391E9
+            ],
+            [
+              1.5011352538228098E8,
+              1.5675776508659391E9,
+              1.6802855358002722E10
+            ]
+          ],
+          "vectorOfXYMultSums": [
+            765435.4421979425,
+            7370728.778163926,
+            7.408362388329804E7
+          ],
+          "polynomialOrder": 3,
+          "hasIntercept": false,
+          "useSymbollicInversionIfPossible": true,
+          "numberOfPointsAdded": 19052
+        },
+        "angleRegression": {
+          "matrixOfXSums": [
+            [
+              19052.0,
+              166911.2678749284,
+              1538115.1444206564,
+              1.4876719777013548E7
+            ],
+            [
+              166911.2678749284,
+              1538115.1444206564,
+              1.4876719777013548E7,
+              1.5011352538228098E8
+            ],
+            [
+              1538115.1444206564,
+              1.4876719777013548E7,
+              1.5011352538228098E8,
+              1.5675776508659391E9
+            ],
+            [
+              1.4876719777013548E7,
+              1.5011352538228098E8,
+              1.5675776508659391E9,
+              1.6802855358002722E10
+            ]
+          ],
+          "vectorOfXYMultSums": [
+            3201909.311486866,
+            2.800312059769855E7,
+            2.5759429627038085E8,
+            2.487280088300444E9
+          ],
+          "polynomialOrder": 3,
+          "hasIntercept": true,
+          "useSymbollicInversionIfPossible": true,
+          "numberOfPointsAdded": 19052
+        }
+      }
+    },
+    {
+      "key": {
+        "legType": {
+          "value": "UPWIND"
+        },
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        }
+      },
+      "value": {
+        "maxWindSpeedInKnots": 12.933508257615301,
+        "speedRegression": {
+          "matrixOfXSums": [
+            [
+              3104893.2210855177,
+              3.209292295750583E7,
+              3.4265788208067435E8
+            ],
+            [
+              3.209292295750583E7,
+              3.4265788208067435E8,
+              3.7533405187473555E9
+            ],
+            [
+              3.4265788208067435E8,
+              3.7533405187473555E9,
+              4.1923277554243805E10
+            ]
+          ],
+          "vectorOfXYMultSums": [
+            1375419.0703205406,
+            1.3897719207262984E7,
+            1.45616645675432E8
+          ],
+          "polynomialOrder": 3,
+          "hasIntercept": false,
+          "useSymbollicInversionIfPossible": true,
+          "numberOfPointsAdded": 32879
+        },
+        "angleRegression": {
+          "matrixOfXSums": [
+            [
+              32879.0,
+              312426.9313626956,
+              3104893.2210855177,
+              3.209292295750583E7
+            ],
+            [
+              312426.9313626956,
+              3104893.2210855177,
+              3.209292295750583E7,
+              3.4265788208067435E8
+            ],
+            [
+              3104893.2210855177,
+              3.209292295750583E7,
+              3.4265788208067435E8,
+              3.7533405187473555E9
+            ],
+            [
+              3.209292295750583E7,
+              3.4265788208067435E8,
+              3.7533405187473555E9,
+              4.1923277554243805E10
+            ]
+          ],
+          "vectorOfXYMultSums": [
+            1518187.5732084995,
+            1.4314750398595158E7,
+            1.4136535915351444E8,
+            1.4543277276382754E9
+          ],
+          "polynomialOrder": 3,
+          "hasIntercept": true,
+          "useSymbollicInversionIfPossible": true,
+          "numberOfPointsAdded": 32879
+        }
+      }
+    }
+  ],
+  "speed_regressions": [
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 45.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 50.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            969526.7915778756,
+            1.0071941149599124E7,
+            1.0818008241782826E8
+          ],
+          [
+            1.0071941149599124E7,
+            1.0818008241782826E8,
+            1.1925315121262054E9
+          ],
+          [
+            1.0818008241782826E8,
+            1.1925315121262054E9,
+            1.3405880915540386E10
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          428788.5642333736,
+          4353675.986592137,
+          4.588740875993319E7
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 10210
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 35.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 40.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            400504.16266350995,
+            4254640.309947781,
+            4.611914380387935E7
+          ],
+          [
+            4254640.309947781,
+            4.611914380387935E7,
+            5.082019564380885E8
+          ],
+          [
+            4.611914380387935E7,
+            5.082019564380885E8,
+            5.674449693009415E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          171551.3714376922,
+          1797026.0515406262,
+          1.9246756406658877E7
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 3832
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 55.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 60.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            129262.02997152582,
+            1197274.1664871974,
+            1.1718099070123065E7
+          ],
+          [
+            1197274.1664871974,
+            1.1718099070123065E7,
+            1.2040235395304883E8
+          ],
+          [
+            1.1718099070123065E7,
+            1.2040235395304883E8,
+            1.2872323730960712E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          63278.70205245705,
+          567095.1122304463,
+          5378147.4463128345
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 1783
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 85.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 90.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            70120.65255798039,
+            625906.1183220104,
+            5811194.5343658095
+          ],
+          [
+            625906.1183220104,
+            5811194.5343658095,
+            5.6146791236549914E7
+          ],
+          [
+            5811194.5343658095,
+            5.6146791236549914E7,
+            5.631896223802675E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          47579.54041271782,
+          419286.0646939853,
+          3841753.660748578
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 976
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 25.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 30.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            7133.8525827744825,
+            75572.07156089506,
+            816887.3397611149
+          ],
+          [
+            75572.07156089506,
+            816887.3397611149,
+            8989560.00148151
+          ],
+          [
+            816887.3397611149,
+            8989560.00148151,
+            1.0046961008467597E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          3116.9567102384126,
+          32500.803832238336,
+          346149.92383169365
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 68
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 65.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 70.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            7329.983203049962,
+            67419.93813189669,
+            646478.8695277252
+          ],
+          [
+            67419.93813189669,
+            646478.8695277252,
+            6445628.4525616225
+          ],
+          [
+            646478.8695277252,
+            6445628.4525616225,
+            6.651731194325334E7
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          3786.449276038606,
+          34375.95668358708,
+          325262.2774069563
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 98
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 75.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 80.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            10511.907218798327,
+            81593.63236471513,
+            636006.7056051082
+          ],
+          [
+            81593.63236471513,
+            636006.7056051082,
+            4986281.6415347885
+          ],
+          [
+            636006.7056051082,
+            4986281.6415347885,
+            3.9406846168998025E7
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          7100.704913789477,
+          54977.66100605062,
+          427138.9707496542
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 176
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 95.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 100.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            93333.62121246808,
+            999915.4758490707,
+            1.095706435110089E7
+          ],
+          [
+            999915.4758490707,
+            1.095706435110089E7,
+            1.2206125945752656E8
+          ],
+          [
+            1.095706435110089E7,
+            1.2206125945752656E8,
+            1.3758134295032158E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          63307.21329058633,
+          675841.58271952,
+          7385092.557531925
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 896
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 145.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 150.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            52494.1044585854,
+            538028.446797173,
+            5697782.002297451
+          ],
+          [
+            538028.446797173,
+            5697782.002297451,
+            6.1878294446577206E7
+          ],
+          [
+            5697782.002297451,
+            6.1878294446577206E7,
+            6.846260262297748E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          26588.785418189862,
+          270419.68593981816,
+          2845883.5311750174
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 567
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 125.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 130.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            76482.14689328088,
+            771296.8925672814,
+            7971899.913627422
+          ],
+          [
+            771296.8925672814,
+            7971899.913627422,
+            8.407368999000522E7
+          ],
+          [
+            7971899.913627422,
+            8.407368999000522E7,
+            9.009173842097766E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          45191.37487390627,
+          456416.6897715735,
+          4723285.07655378
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 822
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 115.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 120.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            93564.07863980254,
+            920900.1214343105,
+            9316071.196964867
+          ],
+          [
+            920900.1214343105,
+            9316071.196964867,
+            9.651913361997212E7
+          ],
+          [
+            9316071.196964867,
+            9.651913361997212E7,
+            1.0200676191883137E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          56813.60671193876,
+          560376.9721359367,
+          5679136.520798507
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 1058
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 135.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 140.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            46788.849819985124,
+            454915.76472745574,
+            4563998.703303904
+          ],
+          [
+            454915.76472745574,
+            4563998.703303904,
+            4.705327625277314E7
+          ],
+          [
+            4563998.703303904,
+            4.705327625277314E7,
+            4.961728654417582E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          25722.371377807063,
+          250504.7273053429,
+          2516039.3675353043
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 549
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 105.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 110.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            54344.044164891435,
+            579641.8456964324,
+            6287902.528369789
+          ],
+          [
+            579641.8456964324,
+            6287902.528369789,
+            6.90827641292768E7
+          ],
+          [
+            6287902.528369789,
+            6.90827641292768E7,
+            7.66174536219027E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          35268.48539018447,
+          375848.8686933337,
+          4073938.073324781
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 513
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 165.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 170.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            298297.79126874835,
+            2828658.5725156767,
+            2.804213420982997E7
+          ],
+          [
+            2828658.5725156767,
+            2.804213420982997E7,
+            2.885723713765439E8
+          ],
+          [
+            2.804213420982997E7,
+            2.885723713765439E8,
+            3.0578953288583965E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          147855.24891908822,
+          1395954.9292645338,
+          1.3784154711595874E7
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 3840
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 175.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 180.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            386726.05775473133,
+            3705650.4448967422,
+            3.70649256082739E7
+          ],
+          [
+            3705650.4448967422,
+            3.70649256082739E7,
+            3.839961346266182E8
+          ],
+          [
+            3.70649256082739E7,
+            3.839961346266182E8,
+            4.087198813396205E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          191872.72528010258,
+          1830242.4002778602,
+          1.82327707148228E7
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 4878
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 155.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 160.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            141713.3215138969,
+            1396064.7586969584,
+            1.4314645066984124E7
+          ],
+          [
+            1396064.7586969584,
+            1.4314645066984124E7,
+            1.5149183372122544E8
+          ],
+          [
+            1.4314645066984124E7,
+            1.5149183372122544E8,
+            1.6415854541813862E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          71159.04117742988,
+          695385.0730786487,
+          7081447.896195924
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 1688
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 30.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 35.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            69082.67721927057,
+            736362.2280257243,
+            7990904.321074089
+          ],
+          [
+            736362.2280257243,
+            7990904.321074089,
+            8.804555376884778E7
+          ],
+          [
+            7990904.321074089,
+            8.804555376884778E7,
+            9.826075059049499E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          29871.262260727308,
+          314400.9204075934,
+          3373872.5633205
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 649
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 40.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 45.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            1041560.0986469811,
+            1.105857317085484E7,
+            1.2029056664778014E8
+          ],
+          [
+            1.105857317085484E7,
+            1.2029056664778014E8,
+            1.3335234158071933E9
+          ],
+          [
+            1.2029056664778014E8,
+            1.3335234158071933E9,
+            1.500006663989351E10
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          448088.4055429726,
+          4678085.690188799,
+          5.0188422468799666E7
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 10166
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 50.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 55.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            450352.4147224736,
+            4360515.347818873,
+            4.435459568513676E7
+          ],
+          [
+            4360515.347818873,
+            4.435459568513676E7,
+            4.703120609840081E8
+          ],
+          [
+            4.435459568513676E7,
+            4.703120609840081E8,
+            5.153029348013093E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          211563.36107411332,
+          1984768.6670823067,
+          1.961675193527427E7
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 5647
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 60.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 65.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            27736.333368306576,
+            253160.93906171626,
+            2412965.443530037
+          ],
+          [
+            253160.93906171626,
+            2412965.443530037,
+            2.3937866977049954E7
+          ],
+          [
+            2412965.443530037,
+            2.3937866977049954E7,
+            2.4589724507604748E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          14123.886380961354,
+          126684.06327464599,
+          1186853.602115563
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 379
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 80.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 85.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            34591.19017757398,
+            281122.4489486852,
+            2339429.879220692
+          ],
+          [
+            281122.4489486852,
+            2339429.879220692,
+            2.0046185319105256E7
+          ],
+          [
+            2339429.879220692,
+            2.0046185319105256E7,
+            1.777676588997444E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          23950.1286054783,
+          193086.09870129442,
+          1591173.6445183975
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 551
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 70.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 75.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            2319.16992392556,
+            17990.147485329486,
+            140021.44185966367
+          ],
+          [
+            17990.147485329486,
+            140021.44185966367,
+            1093066.266593289
+          ],
+          [
+            140021.44185966367,
+            1093066.266593289,
+            8555486.620791724
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          1377.5912613816586,
+          10700.379056083713,
+          83361.69190186902
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 39
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 20.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 25.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            81.64271821179612,
+            737.6938851103304,
+            6665.533437010747
+          ],
+          [
+            737.6938851103304,
+            6665.533437010747,
+            60227.333988627805
+          ],
+          [
+            6665.533437010747,
+            60227.333988627805,
+            544192.2681291733
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          40.09625255855915,
+          362.2951437206661,
+          3273.567048987454
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 1
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 150.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 155.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            79061.49851724188,
+            789343.01383747,
+            8180381.754814587
+          ],
+          [
+            789343.01383747,
+            8180381.754814587,
+            8.728979432611892E7
+          ],
+          [
+            8180381.754814587,
+            8.728979432611892E7,
+            9.519265987873307E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          39993.08700611611,
+          396420.77154207724,
+          4083552.934106657
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 911
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 140.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 145.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            43322.287016977665,
+            430143.25507603964,
+            4412127.467536525
+          ],
+          [
+            430143.25507603964,
+            4412127.467536525,
+            4.650402504308257E7
+          ],
+          [
+            4412127.467536525,
+            4.650402504308257E7,
+            5.009206120072541E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          22211.243193472084,
+          219063.3333042291,
+          2233053.846595388
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 492
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 90.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 95.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            89210.69397448945,
+            900448.8816202794,
+            9405952.659874951
+          ],
+          [
+            900448.8816202794,
+            9405952.659874951,
+            1.0101741517252043E8
+          ],
+          [
+            9405952.659874951,
+            1.0101741517252043E8,
+            1.1083094604832582E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          59772.82954842516,
+          597618.6673437103,
+          6193687.798277367
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 990
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 120.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 125.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            98327.13824717893,
+            951316.5860399434,
+            9469474.665570185
+          ],
+          [
+            951316.5860399434,
+            9469474.665570185,
+            9.66542109403653E7
+          ],
+          [
+            9469474.665570185,
+            9.66542109403653E7,
+            1.0076219369563662E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          59644.4820673722,
+          578580.0475725153,
+          5773667.889667335
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 1152
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 100.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 105.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            70387.9841680135,
+            758926.6181239334,
+            8338374.752725496
+          ],
+          [
+            758926.6181239334,
+            8338374.752725496,
+            9.286960621489891E7
+          ],
+          [
+            8338374.752725496,
+            9.286960621489891E7,
+            1.0444018998929454E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          47954.84338873978,
+          515310.5992818445,
+          5647229.073889516
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 658
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 130.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 135.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            67176.13414243938,
+            672222.1949087384,
+            6901219.288516854
+          ],
+          [
+            672222.1949087384,
+            6901219.288516854,
+            7.239723099916653E7
+          ],
+          [
+            6901219.288516854,
+            7.239723099916653E7,
+            7.728984704047335E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          37682.24415281858,
+          377871.3382320838,
+          3885820.1276635467
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 733
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 110.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 115.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            54219.05488090353,
+            559817.1918841656,
+            5910560.711211481
+          ],
+          [
+            559817.1918841656,
+            5910560.711211481,
+            6.3534606333946615E7
+          ],
+          [
+            5910560.711211481,
+            6.3534606333946615E7,
+            6.926171551566622E8
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          33114.52149106004,
+          342439.61132324394,
+          3619870.5722965
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 553
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 170.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 175.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            351985.48947513045,
+            3343093.158510845,
+            3.3196089105017964E7
+          ],
+          [
+            3343093.158510845,
+            3.3196089105017964E7,
+            3.4206720263332826E8
+          ],
+          [
+            3.3196089105017964E7,
+            3.4206720263332826E8,
+            3.6279709641692934E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          173681.2441911219,
+          1645328.401196411,
+          1.6299046697893117E7
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 4525
+      }
+    },
+    {
+      "key": {
+        "boatClass": {
+          "name": "Laser Radial",
+          "typicallyStartsUpwind": true
+        },
+        "cluster": {
+          "boundaries": [
+            {
+              "value": {
+                "degrees": 160.0
+              },
+              "strategy": "GREATER_THAN"
+            },
+            {
+              "value": {
+                "degrees": 165.0
+              },
+              "strategy": "LOWER_EQUALS_THAN"
+            }
+          ]
+        }
+      },
+      "value": {
+        "matrixOfXSums": [
+          [
+            212277.93405201042,
+            2020692.95075029,
+            2.0112690781229258E7
+          ],
+          [
+            2020692.95075029,
+            2.0112690781229258E7,
+            2.0777343520961288E8
+          ],
+          [
+            2.0112690781229258E7,
+            2.0777343520961288E8,
+            2.209472698658786E9
+          ]
+        ],
+        "vectorOfXYMultSums": [
+          106036.7715703459,
+          1004745.4226310572,
+          9958371.096101545
+        ],
+        "polynomialOrder": 3,
+        "hasIntercept": false,
+        "useSymbollicInversionIfPossible": true,
+        "numberOfPointsAdded": 2717
+      }
+    }
+  ],
+  "fixCountPerBoatClass": [
+    {
+      "key": {
+        "name": "Laser Radial",
+        "typicallyStartsUpwind": true
+      },
+      "value": {
+        "long": 62117
+      }
+    }
+  ]
+}

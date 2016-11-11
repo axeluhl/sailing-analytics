@@ -82,10 +82,7 @@ public class PolarDataClient {
     public void updatePolarDataRegressions() throws IOException, ParseException {
         try {
             logger.log(Level.INFO, "Loading polar regression data from remote server " + polarDataSourceURL);
-            HttpClient client = new SystemDefaultHttpClient();
-            HttpGet getProcessor = new HttpGet(getAPIString());
-            HttpResponse processorResponse = client.execute(getProcessor);
-            JSONObject jsonObject = getJsonFromResponse(processorResponse);
+            JSONObject jsonObject = getJsonFromResponse();
             LinkedHashMap<String, JsonDeserializer<?>> speedDeserializers = new LinkedHashMap<>();
             final BoatClassJsonDeserializer boatClassDeserializer = new BoatClassJsonDeserializer(domainFactory);
             speedDeserializers.put(PolarDataResource.FIELD_BOAT_CLASS, boatClassDeserializer);
@@ -134,10 +131,14 @@ public class PolarDataClient {
         }
     }
 
-    private JSONObject getJsonFromResponse(HttpResponse response) throws IOException, ParseException {
+    protected JSONObject getJsonFromResponse() throws IOException, ParseException {
+        HttpClient client = new SystemDefaultHttpClient();
+        HttpGet getProcessor = new HttpGet(getAPIString());
+        HttpResponse processorResponse = client.execute(getProcessor);
+        
         JSONParser jsonParser = new JSONParser();
-        final Header encoding = response.getEntity().getContentEncoding();
-        final InputStream content = response.getEntity().getContent();
+        final Header encoding = processorResponse.getEntity().getContentEncoding();
+        final InputStream content = processorResponse.getEntity().getContent();
         final JSONObject json;
         try (final Reader reader = encoding == null ? new InputStreamReader(content)
                 : new InputStreamReader(content, encoding.getValue())) {
