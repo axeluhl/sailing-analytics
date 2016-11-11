@@ -70,22 +70,17 @@ public class FixOverlay extends CanvasOverlayV3 {
     
     public Util.Pair<Double, Size> getFixScaleAndSize() {
         double minFixHeight = 20;
-        
         // the original fix vector graphics is too small (2.1m x 1.5m) for higher zoom levels
         // therefore we scale the fixes with factor 2 by default
         double buoyScaleFactor = 2.0;
-
         Size fixSizeInPixel = calculateBoundingBox(mapProjection, fix.position,
-                fixVectorGraphics.getFixWidthInMeters() * buoyScaleFactor, fixVectorGraphics.getFixHeightInMeters() * buoyScaleFactor);
-        
+                fixVectorGraphics.getFixWidth().scale(buoyScaleFactor), fixVectorGraphics.getFixHeight().scale(buoyScaleFactor));
         double fixHeightInPixel = fixSizeInPixel.getHeight();
         if(fixHeightInPixel < minFixHeight)
             fixHeightInPixel = minFixHeight;
-
         // The coordinates of the canvas drawing methods are based on the 'centimeter' unit (1px = 1cm).
         // To calculate the display real fix size the scale factor from canvas units to the real   
-        double fixSizeScaleFactor = fixHeightInPixel / (fixVectorGraphics.getFixHeightInMeters() * 100);
-
+        double fixSizeScaleFactor = fixHeightInPixel / (fixVectorGraphics.getFixHeight().scale(100).getMeters());
         return new Util.Pair<Double, Size>(fixSizeScaleFactor, Size.newInstance(fixHeightInPixel * 2.0, fixHeightInPixel * 2.0));
     }
     

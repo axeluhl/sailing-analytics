@@ -172,7 +172,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         filterPanel.setSpacing(5);
         racesPanel.add(filterPanel);
         
-        Label lblFilterEvents = new Label(stringMessages.filterRacesByName()+ ":");
+        Label lblFilterEvents = new Label(stringMessages.filterRaces()+ ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         

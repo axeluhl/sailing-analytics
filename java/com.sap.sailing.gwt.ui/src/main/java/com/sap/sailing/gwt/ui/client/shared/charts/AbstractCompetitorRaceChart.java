@@ -136,6 +136,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
         Chart chart = new Chart().setZoomType(BaseChart.ZoomType.X)
                 .setPersistent(true)
+                .setReflow(false)
                 .setWidth100()
                 .setAlignTicks(true)
                 .setHeight100()
@@ -383,6 +384,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 if (!chartSeries.contains(competitorDataSeries)) {
                     chart.addSeries(competitorDataSeries);
                     chart.addSeries(markPassingSeries);
+                    //this is to prevent a bug, that will prohibit the initial rendering
+                    chart.setSizeToMatchContainer();
                     
                 }
             }

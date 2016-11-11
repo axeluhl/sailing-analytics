@@ -241,7 +241,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         filterPanel.setSpacing(5);
         trackableRacesPanel.add(filterPanel);
 
-        Label lblFilterEvents = new Label(stringConstants.filterRacesByName() + ":");
+        Label lblFilterEvents = new Label(stringConstants.filterRaces() + ":");
         filterPanel.add(lblFilterEvents);
         filterPanel.setCellVerticalAlignment(lblFilterEvents, HasVerticalAlignment.ALIGN_MIDDLE);
         
