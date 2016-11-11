@@ -4,8 +4,11 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.gwt.common.settings.converter.WindSourceTypeStringToEnumConverter;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.EnumLinkedHashSetSetting;
 import com.sap.sse.common.settings.generic.LongSetting;
 
 public class WindChartSettings extends AbstractGenericSerializableSettings {
@@ -13,8 +16,8 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
 
     public static final long DEFAULT_RESOLUTION_IN_MILLISECONDS = 10000;
 
-    private Set<WindSourceType> windDirectionSourcesToDisplay;
-    private Set<WindSourceType> windSpeedSourcesToDisplay;
+    private EnumLinkedHashSetSetting<WindSourceType> windDirectionSourcesToDisplay;
+    private EnumLinkedHashSetSetting<WindSourceType> windSpeedSourcesToDisplay;
     
     private LongSetting resolutionInMilliseconds;
 
@@ -23,6 +26,14 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
     
     @Override
     protected void addChildSettings() {
+        Set<WindSourceType> defaultWindDirectionSourcesToDisplay = new LinkedHashSet<WindSourceType>();
+        defaultWindDirectionSourcesToDisplay.add(WindSourceType.COMBINED);
+        windDirectionSourcesToDisplay = new EnumLinkedHashSetSetting<>("windDirectionSourcesToDisplay", this, defaultWindDirectionSourcesToDisplay, new WindSourceTypeStringToEnumConverter());
+        
+        Set<WindSourceType> defaultWindSpeedSourcesToDisplay = new LinkedHashSet<>();
+        defaultWindSpeedSourcesToDisplay.add(WindSourceType.COMBINED);
+        windSpeedSourcesToDisplay = new EnumLinkedHashSetSetting<>("windSpeedSourcesToDisplay", this, defaultWindSpeedSourcesToDisplay, new WindSourceTypeStringToEnumConverter());
+        
         resolutionInMilliseconds = new LongSetting("resolutionInMilliseconds", this, DEFAULT_RESOLUTION_IN_MILLISECONDS);
         showWindSpeedSeries = new BooleanSetting("showWindSpeedSeries", this, true);
         showWindDirectionsSeries = new BooleanSetting("showWindDirectionsSeries", this, true);
@@ -32,18 +43,14 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
      *  The default settings
      */
     public WindChartSettings() {
-        windSpeedSourcesToDisplay = new LinkedHashSet<WindSourceType>();
-        windSpeedSourcesToDisplay.add(WindSourceType.COMBINED);
-        windDirectionSourcesToDisplay = new LinkedHashSet<WindSourceType>();
-        windDirectionSourcesToDisplay.add(WindSourceType.COMBINED);
     }
     
     public WindChartSettings(boolean showWindSpeedSeries, Set<WindSourceType> windSpeedSourcesToDisplay, 
             boolean showWindDirectionsSeries, Set<WindSourceType> windDirectionSourcesToDisplay, long resolutionInMilliseconds) {
         this.showWindSpeedSeries.setValue(showWindSpeedSeries);
-        this.windSpeedSourcesToDisplay = windSpeedSourcesToDisplay;
+        this.windSpeedSourcesToDisplay.setValues(windSpeedSourcesToDisplay);
         this.showWindDirectionsSeries.setValue(showWindDirectionsSeries);
-        this.windDirectionSourcesToDisplay = windDirectionSourcesToDisplay;
+        this.windDirectionSourcesToDisplay.setValues(windDirectionSourcesToDisplay);
         this.resolutionInMilliseconds.setValue(resolutionInMilliseconds);
     }
     
@@ -56,11 +63,11 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
     }
 
     public Set<WindSourceType> getWindDirectionSourcesToDisplay() {
-        return windDirectionSourcesToDisplay;
+        return Util.createSet(windDirectionSourcesToDisplay.getValues());
     }
 
     public Set<WindSourceType> getWindSpeedSourcesToDisplay() {
-        return windSpeedSourcesToDisplay;
+        return Util.createSet(windSpeedSourcesToDisplay.getValues());
     }
 
     public long getResolutionInMilliseconds() {
@@ -89,15 +96,13 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
 
     public void setWindDirectionSourcesToDisplay(Set<WindSourceType> windDirectionSourcesToDisplay) {
         if(windDirectionSourcesToDisplay != null) {
-            this.windDirectionSourcesToDisplay.clear();
-            this.windDirectionSourcesToDisplay.addAll(windDirectionSourcesToDisplay);
+            this.windDirectionSourcesToDisplay.setValues(windDirectionSourcesToDisplay);
         }
     }
 
     public void setWindSpeedSourcesToDisplay(Set<WindSourceType> windSpeedSourcesToDisplay) {
         if(windSpeedSourcesToDisplay != null) {
-            this.windSpeedSourcesToDisplay.clear();
-            this.windSpeedSourcesToDisplay.addAll(windSpeedSourcesToDisplay);
+            this.windSpeedSourcesToDisplay.setValues(windSpeedSourcesToDisplay);
         }
     }
 }
