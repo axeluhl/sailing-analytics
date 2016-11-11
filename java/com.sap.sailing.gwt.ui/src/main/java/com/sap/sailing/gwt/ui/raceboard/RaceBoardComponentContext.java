@@ -2,11 +2,11 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.UUID;
 
-import com.sap.sailing.gwt.common.client.UserSettingsStorageManager;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class RaceBoardComponentContext
         extends AbstractComponentContextWithSettingsStorage<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> {

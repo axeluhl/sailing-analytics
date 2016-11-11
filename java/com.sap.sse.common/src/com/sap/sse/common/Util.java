@@ -297,6 +297,15 @@ public class Util {
         }
         return list;
     }
+    
+    public static <T> Set<T> createSet(Iterable<T> iterable) {
+        Set<T> set = new HashSet<>();
+        Iterator<T> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            set.add(iterator.next());
+        }
+        return set;
+    }
 
     /**
      * A null-safe check whether <code>t</code> is contained in <code>ts</code>. For <code>ts==null</code> the method

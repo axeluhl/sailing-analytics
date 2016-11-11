@@ -1,10 +1,21 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.common.settings.converter.DetailTypeStringToEnumConverter;
+import com.sap.sse.common.settings.generic.EnumSetting;
 
 public class MultiCompetitorRaceChartSettings extends ChartSettings {
-    private final DetailType firstDetailType;
-    private final DetailType secondDetailType;
+    private static final long serialVersionUID = 2885108745814848018L;
+    
+    private EnumSetting<DetailType> firstDetailType;
+    private EnumSetting<DetailType> secondDetailType;
+    
+    @Override
+    protected void addChildSettings() {
+        super.addChildSettings();
+        firstDetailType = new EnumSetting<>("firstDetailType", this, DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, new DetailTypeStringToEnumConverter());
+        secondDetailType = new EnumSetting<>("secondDetailType", this, null, new DetailTypeStringToEnumConverter());
+    }
 
     /**
      * @param firstDetailType must not be {@code null}
@@ -13,15 +24,15 @@ public class MultiCompetitorRaceChartSettings extends ChartSettings {
     public MultiCompetitorRaceChartSettings(ChartSettings settings, DetailType firstDetailType,
             DetailType secondDetailType) {
         super(settings);
-        this.firstDetailType = firstDetailType;
-        this.secondDetailType = secondDetailType;
+        this.firstDetailType.setValue(firstDetailType);
+        this.secondDetailType.setValue(secondDetailType);
     }
 
     public DetailType getFirstDetailType() {
-        return firstDetailType;
+        return firstDetailType.getValue();
     }
 
     public DetailType getSecondDetailType() {
-        return secondDetailType;
+        return secondDetailType.getValue();
     }
 }

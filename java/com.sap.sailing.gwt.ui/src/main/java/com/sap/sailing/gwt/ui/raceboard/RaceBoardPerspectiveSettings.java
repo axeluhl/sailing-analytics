@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import com.sap.sailing.gwt.common.settings.DurationSetting;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
@@ -21,8 +22,7 @@ public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSet
     private transient BooleanSetting showCompetitorsChart;
     private transient StringSetting activeCompetitorsFilterSetName;
     private transient BooleanSetting canReplayDuringLiveRaces;
-    //TODO add DurationSetting
-    private transient Duration initialDurationAfterRaceStartInReplay;
+    private transient DurationSetting initialDurationAfterRaceStartInReplay;
     
     //TODO unify the names of url params and default settings names
     public static final String PARAM_VIEW_MODE = "viewMode";
@@ -49,6 +49,7 @@ public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSet
         this.showCompetitorsChart = new BooleanSetting("showCompetitorsChart", this, false);
         this.activeCompetitorsFilterSetName = new StringSetting("activeCompetitorsFilterSetName", this, null);
         this.canReplayDuringLiveRaces = new BooleanSetting("canReplayDuringLiveRaces", this, false);
+        this.initialDurationAfterRaceStartInReplay = new DurationSetting("initialDurationAfterRaceStartInReplay", this, null);
     }
 
     public RaceBoardPerspectiveSettings(String activeCompetitorsFilterSetName, boolean showLeaderboard,
@@ -59,9 +60,7 @@ public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSet
         this.showWindChart.setValue(showWindChart);
         this.showCompetitorsChart.setValue(showCompetitorsChart);
         this.canReplayDuringLiveRaces.setValue(canReplayDuringLiveRaces);
-        
-        //TODO convert to DurationSetting
-        this.initialDurationAfterRaceStartInReplay = initialDurationAfterRaceStartInReplay;
+        this.initialDurationAfterRaceStartInReplay.setValue(initialDurationAfterRaceStartInReplay);
     }
 
     public boolean isShowLeaderboard() {
@@ -99,7 +98,7 @@ public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSet
     }
 
     public Duration getInitialDurationAfterRaceStartInReplay() {
-        return initialDurationAfterRaceStartInReplay;
+        return initialDurationAfterRaceStartInReplay.getValue();
     }
 
     /**

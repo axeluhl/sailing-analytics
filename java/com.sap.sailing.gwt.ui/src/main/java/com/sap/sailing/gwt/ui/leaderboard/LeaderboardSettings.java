@@ -6,8 +6,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.common.settings.converter.DetailTypeStringToEnumConverter;
+import com.sap.sailing.gwt.common.settings.converter.RaceColumnSelectionStrategiesStringToEnumConverter;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.EnumListSetting;
+import com.sap.sse.common.settings.generic.EnumSetting;
+import com.sap.sse.common.settings.generic.IntegerSetting;
+import com.sap.sse.common.settings.generic.LongSetting;
+import com.sap.sse.common.settings.generic.StringListSetting;
+import com.sap.sse.common.settings.generic.StringSetting;
 
 /**
  * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
@@ -60,25 +69,25 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
      * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to EXPLIZIT
      */
-    private final List<String> namesOfRaceColumnsToShow;
+    private StringListSetting namesOfRaceColumnsToShow;
 
     /**
      * Only one of {@link #namesOfRaceColumnsToShow} and {@link #namesOfRacesToShow} must be non-<code>null</code>.
      * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to EXPLIZIT
      */
-    private final List<String> namesOfRacesToShow;
+    private StringListSetting namesOfRacesToShow;
 
     /**
      * Only valid when the {@link #activeRaceColumnSelectionStrategy} is set to LAST_N
      */
-    private final Integer numberOfLastRacesToShow;
+    private IntegerSetting numberOfLastRacesToShow;
 
-    private final List<DetailType> maneuverDetailsToShow;
-    private final List<DetailType> legDetailsToShow;
-    private final List<DetailType> raceDetailsToShow;
-    private final List<DetailType> overallDetailsToShow;
+    private EnumListSetting<DetailType> maneuverDetailsToShow;
+    private EnumListSetting<DetailType> legDetailsToShow;
+    private EnumListSetting<DetailType> raceDetailsToShow;
+    private EnumListSetting<DetailType> overallDetailsToShow;
     private BooleanSetting autoExpandPreSelectedRace;
-    private final Long delayBetweenAutoAdvancesInMilliseconds;
+    private LongSetting delayBetweenAutoAdvancesInMilliseconds;
     private BooleanSetting updateUponPlayStateChange;
     
     /**
@@ -86,13 +95,14 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      * Either you select races from the list of all races or you select the last N races.
      */
     public static enum RaceColumnSelectionStrategies { EXPLICIT, LAST_N; }
-    private final RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy;
+    
+    private EnumSetting<RaceColumnSelectionStrategies> activeRaceColumnSelectionStrategy;
     
     /**
      * An optional sort column; if <code>null</code>, the leaderboard sorting won't be touched when updating the settings.
      * Otherwise, the leaderboard will be sorted by the race column (ascending if {@link #sortAscending}, descending otherwise.
      */
-    private final String nameOfRaceToSort;
+    private StringSetting nameOfRaceToSort;
     private BooleanSetting sortAscending;
     
     /**
@@ -110,12 +120,24 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     
     @Override
     protected void addChildSettings() {
-        autoExpandPreSelectedRace = new BooleanSetting("autoExpandPreSelectedRace", this);
+        //TODO find more default values
+        namesOfRaceColumnsToShow = new StringListSetting("namesOfRaceColumnsToShow", this);
+        namesOfRacesToShow = new StringListSetting("namesOfRacesToShow", this);
+        numberOfLastRacesToShow = new IntegerSetting("numberOfLastRacesToShow", this, null);
+        maneuverDetailsToShow = new EnumListSetting<>("maneuverDetailsToShow", this, new DetailTypeStringToEnumConverter());
+        legDetailsToShow = new EnumListSetting<>("legDetailsToShow", this, new DetailTypeStringToEnumConverter());
+        raceDetailsToShow = new EnumListSetting<>("raceDetailsToShow", this, new DetailTypeStringToEnumConverter());
+        overallDetailsToShow = new EnumListSetting<>("overallDetailsToShow", this, new DetailTypeStringToEnumConverter());
+        delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, 1000L);
+        activeRaceColumnSelectionStrategy = new EnumSetting<>("activeRaceColumnSelectionStrategy", this, RaceColumnSelectionStrategies.EXPLICIT, new RaceColumnSelectionStrategiesStringToEnumConverter());
+        nameOfRaceToSort = new StringSetting("nameOfRaceToSort", this, null);
+        
+        autoExpandPreSelectedRace = new BooleanSetting("autoExpandPreSelectedRace", this, false);
         updateUponPlayStateChange = new BooleanSetting("updateUponPlayStateChange", this, true);
         sortAscending = new BooleanSetting("sortAscending", this);
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
-        showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this);
-        showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this);
+        showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this, true);
+        showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this, true);
     }
     
     /**
@@ -131,17 +153,17 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
-        this.legDetailsToShow = legDetailsToShow;
-        this.raceDetailsToShow = raceDetailsToShow;
-        this.overallDetailsToShow = overallDetailsToShow;
-        this.namesOfRacesToShow = namesOfRacesToShow;
-        this.namesOfRaceColumnsToShow = namesOfRaceColumnsToShow;
-        this.numberOfLastRacesToShow = numberOfLastRacesToShow;
-        this.activeRaceColumnSelectionStrategy = activeRaceColumnSelectionStrategy;
+        this.legDetailsToShow.setValues(legDetailsToShow);
+        this.raceDetailsToShow.setValues(raceDetailsToShow);
+        this.overallDetailsToShow.setValues(overallDetailsToShow);
+        this.namesOfRacesToShow.setValues(namesOfRacesToShow);
+        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
+        this.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
+        this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
         this.autoExpandPreSelectedRace.setValue(autoExpandPreSelectedRace);
-        this.delayBetweenAutoAdvancesInMilliseconds = delayBetweenAutoAdvancesInMilliseconds;
-        this.maneuverDetailsToShow = meneuverDetailsToShow;
-        this.nameOfRaceToSort = nameOfRaceToSort;
+        this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
+        this.maneuverDetailsToShow.setValues(meneuverDetailsToShow);
+        this.nameOfRaceToSort.setValue(nameOfRaceToSort);
         this.sortAscending.setValue(sortAscending);
         this.updateUponPlayStateChange.setValue(updateUponPlayStateChange);
         this.showAddedScores.setValue(showAddedScores);
@@ -154,28 +176,28 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getManeuverDetailsToShow() {
-        return maneuverDetailsToShow;
+        return Util.createList(maneuverDetailsToShow.getValues());
     }
 
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getLegDetailsToShow() {
-        return legDetailsToShow;
+        return Util.createList(legDetailsToShow.getValues());
     }
 
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getRaceDetailsToShow() {
-        return raceDetailsToShow;
+        return Util.createList(raceDetailsToShow.getValues());
     }
     
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getOverallDetailsToShow() {
-        return overallDetailsToShow;
+        return Util.createList(overallDetailsToShow.getValues());
     }
     
     /**
@@ -184,7 +206,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      * live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<String> getNamesOfRaceColumnsToShow() {
-        return activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT ? namesOfRaceColumnsToShow : null;
+        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? Util.createList(namesOfRaceColumnsToShow.getValues()) : null;
     }
 
     /**
@@ -193,7 +215,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      * a live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<String> getNamesOfRacesToShow() {
-        return activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT ? namesOfRacesToShow : null;
+        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? Util.createList(namesOfRacesToShow.getValues()) : null;
     }
     
     /**
@@ -201,7 +223,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      * {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}.
      */
     public Integer getNumberOfLastRacesToShow() {
-        return activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N ? numberOfLastRacesToShow : null;
+        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.LAST_N ? numberOfLastRacesToShow.getValue() : null;
     }
 
     public boolean isAutoExpandPreSelectedRace() {
@@ -213,11 +235,11 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      *         {@link LeaderboardPanel#updateSettings(LeaderboardSettings)}
      */
     public Long getDelayBetweenAutoAdvancesInMilliseconds() {
-        return delayBetweenAutoAdvancesInMilliseconds;
+        return delayBetweenAutoAdvancesInMilliseconds.getValue();
     }
 
     public String getNameOfRaceToSort() {
-        return nameOfRaceToSort;
+        return nameOfRaceToSort.getValue();
     }
 
     public boolean isSortAscending() {
@@ -233,7 +255,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     }
 
     public RaceColumnSelectionStrategies getActiveRaceColumnSelectionStrategy() {
-        return activeRaceColumnSelectionStrategy;
+        return activeRaceColumnSelectionStrategy.getValue();
     }
 
     public boolean isShowAddedScores() {

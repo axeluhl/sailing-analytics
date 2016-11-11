@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,10 +9,14 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.common.settings.DistanceSetting;
+import com.sap.sailing.gwt.common.settings.converter.ManeuverTypeStringToEnumConverter;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.EnumSetSetting;
+import com.sap.sse.common.settings.generic.IntegerSetting;
+import com.sap.sse.common.settings.generic.LongSetting;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class RaceMapSettings extends AbstractGenericSerializableSettings {
@@ -29,7 +34,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
 
     private BooleanSetting showDouglasPeuckerPoints;
 
-    private final Set<ManeuverType> maneuverTypesToShow;
+    private EnumSetSetting<ManeuverType> maneuverTypesToShow;
 
     private BooleanSetting showOnlySelectedCompetitors;
 
@@ -39,9 +44,9 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     
     private BooleanSetting transparentHoverlines;
     
-    private final int hoverlineStrokeWeight;
+    private IntegerSetting hoverlineStrokeWeight;
 
-    private final long tailLengthInMilliseconds;
+    private LongSetting tailLengthInMilliseconds;
 
     private DistanceSetting buoyZoneRadius;
 
@@ -76,11 +81,11 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         showSimulationOverlay = new BooleanSetting("showSimulationOverlay", this, false);
         zoomSettings = new RaceMapZoomSettings();
         transparentHoverlines = new BooleanSetting("transparentHoverlines", this, false);
-//        hoverlineStrokeWeight = 15;
-//        tailLengthInMilliseconds = 100000l;
+        hoverlineStrokeWeight = new IntegerSetting("hoverlineStrokeWeight", this, 15);
+        tailLengthInMilliseconds = new LongSetting("tailLengthInMilliseconds", this, 100000l);
         showOnlySelectedCompetitors = new BooleanSetting("showOnlySelectedCompetitors", this, false);
         showSelectedCompetitorsInfo = new BooleanSetting("showSelectedCompetitorsInfo", this, true);
-//        maneuverTypesToShow = getDefaultManeuvers();
+        maneuverTypesToShow = new EnumSetSetting<>("maneuverTypesToShow", this, getDefaultManeuvers(), new ManeuverTypeStringToEnumConverter());
         showDouglasPeuckerPoints = new BooleanSetting("showDouglasPeuckerPoints", this, false);
     }
 
@@ -99,12 +104,12 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             boolean transparentHoverlines, int hoverlineStrokeWeight, long tailLengthInMilliseconds, boolean windUp,
             Distance buoyZoneRadius, boolean showOnlySelectedCompetitors, boolean showSelectedCompetitorsInfo,
             boolean showWindStreamletColors, boolean showWindStreamletOverlay, boolean showSimulationOverlay,
-            boolean showMapControls, Set<ManeuverType> maneuverTypesToShow, boolean showDouglasPeuckerPoints) {
+            boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, boolean showDouglasPeuckerPoints) {
         this.zoomSettings = zoomSettings;
         this.helpLinesSettings = helpLinesSettings;
         this.transparentHoverlines.setValue(transparentHoverlines);
-        this.hoverlineStrokeWeight = hoverlineStrokeWeight;
-        this.tailLengthInMilliseconds = tailLengthInMilliseconds;
+        this.hoverlineStrokeWeight.setValue(hoverlineStrokeWeight);
+        this.tailLengthInMilliseconds.setValue(tailLengthInMilliseconds);
         this.windUp.setValue(windUp);
         this.buoyZoneRadius.setValue(buoyZoneRadius);
         this.showOnlySelectedCompetitors.setValue(showOnlySelectedCompetitors);
@@ -113,7 +118,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         this.showWindStreamletOverlay.setValue(showWindStreamletOverlay);
         this.showSimulationOverlay.setValue(showSimulationOverlay);
         this.showMapControls.setValue(showMapControls);
-        this.maneuverTypesToShow = maneuverTypesToShow;
+        this.maneuverTypesToShow.setValues(maneuverTypesToShow);
         this.showDouglasPeuckerPoints.setValue(showDouglasPeuckerPoints);
     }
 
@@ -191,7 +196,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      * {@link #isShowTails()} is <code>true</code>.
      */
     public long getTailLengthInMilliseconds() {
-        return tailLengthInMilliseconds;
+        return tailLengthInMilliseconds.getValue();
     }
 
     public boolean isShowDouglasPeuckerPoints() {
@@ -211,7 +216,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     public boolean isShowManeuverType(ManeuverType maneuverType) {
-        return maneuverTypesToShow.contains(maneuverType);
+        return Util.contains(maneuverTypesToShow.getValues(), maneuverType);
     }
 
     public boolean isShowOnlySelectedCompetitors() {
@@ -231,7 +236,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
     
     public int getHoverlineStrokeWeight() {
-        return this.hoverlineStrokeWeight;
+        return this.hoverlineStrokeWeight.getValue();
     }
     
     public boolean isShowSelectedCompetitorsInfo() {
@@ -273,6 +278,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     public Set<ManeuverType> getManeuverTypesToShow() {
-        return maneuverTypesToShow;
+        return Util.createSet(maneuverTypesToShow.getValues());
     }
 }

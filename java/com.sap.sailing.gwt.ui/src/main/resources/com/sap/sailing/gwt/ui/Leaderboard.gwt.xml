@@ -38,4 +38,5 @@
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
 	<inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
+	<inherits name='com.sap.sse.security.ui.Settings'/>
 </module>

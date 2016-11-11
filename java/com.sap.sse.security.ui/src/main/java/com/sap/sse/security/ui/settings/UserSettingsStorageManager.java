@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client;
+package com.sap.sse.security.ui.settings;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;

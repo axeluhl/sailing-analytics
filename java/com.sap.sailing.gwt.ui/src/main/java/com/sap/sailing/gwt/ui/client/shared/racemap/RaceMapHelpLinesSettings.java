@@ -1,11 +1,12 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sailing.gwt.common.settings.converter.HelpLineTypesStringToEnumConverter;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.EnumSetSetting;
 
 public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSettings {
     
@@ -18,11 +19,17 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
         STARTLINE, FINISHLINE, ADVANTAGELINE, COURSEMIDDLELINE, BUOYZONE, BOATTAILS, STARTLINETOFIRSTMARKTRIANGLE, COURSEGEOMETRY
     }
     
-    private final Set<HelpLineTypes> visibleHelpLines;
+    private EnumSetSetting<HelpLineTypes> visibleHelpLines;
     
     @Override
     protected void addChildSettings() {
-        // TODO Auto-generated method stub
+        Set<HelpLineTypes> defaultVisibleHelpLines = new HashSet<HelpLineTypes>();
+        defaultVisibleHelpLines.add(HelpLineTypes.STARTLINE);
+        defaultVisibleHelpLines.add(HelpLineTypes.FINISHLINE);
+        defaultVisibleHelpLines.add(HelpLineTypes.ADVANTAGELINE);
+        defaultVisibleHelpLines.add(HelpLineTypes.BOATTAILS);
+        
+        visibleHelpLines = new EnumSetSetting<>("visibleHelpLines", this, defaultVisibleHelpLines, new HelpLineTypesStringToEnumConverter());
     }
 
     /**
@@ -30,24 +37,18 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
      * <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
      */
     public RaceMapHelpLinesSettings() {
-        visibleHelpLines = new HashSet<HelpLineTypes>();
-        visibleHelpLines.add(HelpLineTypes.STARTLINE);
-        visibleHelpLines.add(HelpLineTypes.FINISHLINE);
-        visibleHelpLines.add(HelpLineTypes.ADVANTAGELINE);
-        visibleHelpLines.add(HelpLineTypes.BOATTAILS);
     }
     
     public RaceMapHelpLinesSettings(Iterable<HelpLineTypes> visibleHelpLines) {
-        this.visibleHelpLines = new HashSet<>();
-        Util.addAll(visibleHelpLines, this.visibleHelpLines);
+        this.visibleHelpLines.setValues(visibleHelpLines);
     }
 
     public boolean isVisible(HelpLineTypes helpLineType) {
-        return visibleHelpLines.contains(helpLineType);
+        return Util.contains(visibleHelpLines.getValues(), helpLineType);
     }
 
     public Iterable<HelpLineTypes> getVisibleHelpLineTypes() {
-        return Collections.unmodifiableCollection(visibleHelpLines);
+        return visibleHelpLines.getValues();
     }
     
     @Override
@@ -76,6 +77,6 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
     }
 
     public boolean isShowAnyHelperLines() {
-        return !visibleHelpLines.isEmpty();
+        return !Util.isEmpty(visibleHelpLines.getValues());
     }
 }
