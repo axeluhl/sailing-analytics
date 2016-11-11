@@ -3,16 +3,21 @@ package com.sap.sse.common.settings.generic.base;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.ValueCollectionSetting;
 import com.sap.sse.common.settings.generic.ValueConverter;
 import com.sap.sse.common.settings.value.Value;
 import com.sap.sse.common.settings.value.ValueCollectionValue;
 
-public abstract class AbstractValueCollectionSetting<T, C extends Collection<Value>> extends AbstractHasValueSetting<T> implements ValueCollectionSetting<T> {
+public abstract class AbstractValueCollectionSetting<T, C extends Collection<Value>, D extends Collection<T>> extends AbstractHasValueSetting<T> implements ValueCollectionSetting<T> {
+
+    private final D defaultValues = createDefaultValuesCollection();
+    private final boolean emptyIsDefault;
     
-    public AbstractValueCollectionSetting(String name, AbstractGenericSerializableSettings settings, ValueConverter<T> valueConverter) {
+    public AbstractValueCollectionSetting(String name, AbstractGenericSerializableSettings settings, ValueConverter<T> valueConverter, boolean emptyIsDefault) {
         super(name, settings, valueConverter);
+        this.emptyIsDefault = emptyIsDefault;
     }
     
     @SuppressWarnings("unchecked")
@@ -31,9 +36,14 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
         return result;
     }
     
+    protected abstract D createDefaultValuesCollection();
+    
     @Override
     public Iterable<T> getValues() {
         ValueCollectionValue<C> value = getValue();
+        if(emptyIsDefault && (value == null || value.isEmpty())) {
+            return Collections.unmodifiableCollection(defaultValues);
+        }
         if(value == null) {
             return Collections.emptyList();
         }
@@ -51,6 +61,29 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
 
     public void clear() {
         ensureValue().clear();
+    }
+    @Override
+    public void resetToDefault() {
+        setValues(defaultValues);
+    }
+    
+    @Override
+    public boolean isDefaultValue() {
+        ValueCollectionValue<C> value = getValue();
+        return (emptyIsDefault && (value == null || value.isEmpty()))
+                || (value.size() == defaultValues.size() && defaultValues.containsAll(value.getValues(getValueConverter())));
+    }
+    
+    @Override
+    public final void setDefaultValues(Iterable<T> defaultValues) {
+        boolean wasDefault = isDefaultValue();
+        this.defaultValues.clear();
+        if(defaultValues != null) {
+            Util.addAll(defaultValues, this.defaultValues);
+        }
+        if(wasDefault) {
+            resetToDefault();
+        }
     }
 
     @Override
