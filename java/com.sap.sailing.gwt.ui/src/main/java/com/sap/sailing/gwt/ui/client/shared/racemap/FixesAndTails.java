@@ -21,6 +21,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.util.Trigger;
 import com.sap.sse.common.util.Triggerable;
 import com.sap.sse.gwt.client.TriggerableTimer;
@@ -290,13 +292,14 @@ public class FixesAndTails {
         int indexOfLastShownFix = lastShownFix.get(competitorDTO).get() == null ? -1 : lastShownFix.get(competitorDTO).get();
         final Polyline tail = getTail(competitorDTO);
         int intoThisIndex = 0;
+        final Comparator<GPSFixDTOWithSpeedWindTackAndLegType> fixByTimePointComparator = new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
+            @Override
+            public int compare(GPSFixDTOWithSpeedWindTackAndLegType o1, GPSFixDTOWithSpeedWindTackAndLegType o2) {
+                return o1.timepoint.compareTo(o2.timepoint);
+            }
+        };
         for (GPSFixDTOWithSpeedWindTackAndLegType mergeThisFix : mergeThis) {
-            intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
-                @Override
-                public int compare(GPSFixDTOWithSpeedWindTackAndLegType o1, GPSFixDTOWithSpeedWindTackAndLegType o2) {
-                    return o1.timepoint.compareTo(o2.timepoint);
-                }
-            });
+            intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, fixByTimePointComparator);
             if (intoThisIndex < 0) {
                 intoThisIndex = -intoThisIndex-1;
             }
@@ -519,13 +522,14 @@ public class FixesAndTails {
             Date toDate;
             Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
             Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
-            boolean overlap = false;
+            boolean overlap = timepointOfFirstKnownFix != null && timepointOfLastKnownFix != null &&
+                    new TimeRangeImpl(new MillisecondsTimePoint(tailstart), new MillisecondsTimePoint(upTo)).intersects(
+                            new TimeRangeImpl(new MillisecondsTimePoint(timepointOfFirstKnownFix), new MillisecondsTimePoint(timepointOfLastKnownFix)));
             if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
                     && !tailstart.after(timepointOfLastKnownFix)) {
                 // the beginning of what we need is contained in the interval we already have; skip what we already have
                 fromDate = new Date(timepointOfLastKnownFix.getTime()+1l); // "from" is "inclusive", so add 1ms to also skip the last fix we have
-                overlap = true;
             } else {
                 fromDate = tailstart;
             }
@@ -534,7 +538,6 @@ public class FixesAndTails {
                     && !upTo.after(timepointOfLastKnownFix)) {
                 // the end of what we need is contained in the interval we already have; skip what we already have
                 toDate = timepointOfFirstKnownFix;
-                overlap = true;
             } else {
                 toDate = upTo;
             }
