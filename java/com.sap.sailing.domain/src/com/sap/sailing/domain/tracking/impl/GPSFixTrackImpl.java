@@ -414,13 +414,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
         final Position result;
         // TODO bug #346: compute a confidence value for the position returned based on time difference between fix(es) and timePoint; consider using Taylor approximation of more fixes around timePoint to predict and weigh position
         if (lastFixAtOrBefore == null) {
-            if (firstFixAtOrAfter == null) {
-                // no fix at all; cannot determine a position
-                result = null;
-            } else {
-                // only one fix valid; extrapolate or use unchanged
-                result = getEstimatedPosition(timePoint, firstFixAtOrAfter, extrapolate);
-            }
+            result = null;
         } else {
             if (firstFixAtOrAfter == null) {
                 // only one fix valid; extrapolate or use unchanged
