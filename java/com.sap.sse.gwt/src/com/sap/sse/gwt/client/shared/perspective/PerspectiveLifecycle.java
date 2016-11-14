@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
+import java.util.Map;
+
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -20,4 +22,8 @@ public interface PerspectiveLifecycle<PS extends Settings> extends
     PS clonePerspectiveOwnSettings(PS settings);
     
     SettingsDialogComponent<PS> getPerspectiveOwnSettingsDialogComponent(PS settings);
+
+    Map<String, Settings> cloneComponentIdsAndSettings(PerspectiveCompositeSettings<PS> settings);
+
+    Map<String, Settings> createDefaultComponentIdsAndSettings();
 }

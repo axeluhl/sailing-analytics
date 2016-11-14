@@ -48,7 +48,7 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
     }
 
     public Iterable<HelpLineTypes> getVisibleHelpLineTypes() {
-        return visibleHelpLines.isValuesEmpty() ? null : visibleHelpLines.getValues();
+        return visibleHelpLines.getValues();
     }
     
     @Override

@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.ui.client.UserService;
@@ -41,37 +43,38 @@ public class RaceBoardComponentContext
                 defaultLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 defaultLeaderboardSettings.isShowCompetitorSailIdColumn(),
                 defaultLeaderboardSettings.isShowCompetitorFullNameColumn());
-        defaultSettings.getSettingsPerComponentId().put(leaderboardComponentId, contextSpecificLeaderboardSettings);
-        return defaultSettings;
+        
+        Map<String, Settings> clonedComponentIdsAndSettings = rootPerspectiveLifecycle.cloneComponentIdsAndSettings(defaultSettings);
+        clonedComponentIdsAndSettings.put(leaderboardComponentId, contextSpecificLeaderboardSettings);
+        return new PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>(defaultSettings.getPerspectiveOwnSettings(), clonedComponentIdsAndSettings);
     }
 
     @Override
     protected PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> extractGlobalSettings(
             PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> newRootPerspectiveSettings) {
         String leaderboardComponentId = rootPerspectiveLifecycle.getLeaderboardPanelLifecycle().getComponentId();
-        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> clonedSettings = rootPerspectiveLifecycle
-                .cloneSettings(newRootPerspectiveSettings);
-        LeaderboardSettings clonedLeaderboardSettings = (LeaderboardSettings) clonedSettings.getSettingsPerComponentId()
+        LeaderboardSettings currentLeaderboardSettings = (LeaderboardSettings) newRootPerspectiveSettings.getSettingsPerComponentId()
                 .get(leaderboardComponentId);
         LeaderboardSettings defaultLeaderboardSettings = rootPerspectiveLifecycle.getLeaderboardPanelLifecycle()
                 .createDefaultSettings();
         LeaderboardSettings globalLeaderboardSettings = new LeaderboardSettings(
-                clonedLeaderboardSettings.getManeuverDetailsToShow(), clonedLeaderboardSettings.getLegDetailsToShow(),
-                clonedLeaderboardSettings.getRaceDetailsToShow(), clonedLeaderboardSettings.getOverallDetailsToShow(),
+                currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
+                currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
                 defaultLeaderboardSettings.getNamesOfRaceColumnsToShow(),
                 defaultLeaderboardSettings.getNamesOfRacesToShow(),
-                clonedLeaderboardSettings.getNumberOfLastRacesToShow(),
-                clonedLeaderboardSettings.isAutoExpandPreSelectedRace(),
-                clonedLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
+                currentLeaderboardSettings.getNumberOfLastRacesToShow(),
+                currentLeaderboardSettings.isAutoExpandPreSelectedRace(),
+                currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 defaultLeaderboardSettings.getNameOfRaceToSort(), defaultLeaderboardSettings.isSortAscending(),
-                clonedLeaderboardSettings.isUpdateUponPlayStateChange(),
-                clonedLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
-                clonedLeaderboardSettings.isShowAddedScores(),
-                clonedLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                clonedLeaderboardSettings.isShowCompetitorSailIdColumn(),
-                clonedLeaderboardSettings.isShowCompetitorFullNameColumn());
-        clonedSettings.getSettingsPerComponentId().put(leaderboardComponentId, globalLeaderboardSettings);
-        return clonedSettings;
+                currentLeaderboardSettings.isUpdateUponPlayStateChange(),
+                currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
+                currentLeaderboardSettings.isShowAddedScores(),
+                currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
+                currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
+                currentLeaderboardSettings.isShowCompetitorFullNameColumn());
+        Map<String, Settings> clonedComponentIdsAndSettings = rootPerspectiveLifecycle.cloneComponentIdsAndSettings(newRootPerspectiveSettings);
+        clonedComponentIdsAndSettings.put(leaderboardComponentId, globalLeaderboardSettings);
+        return new PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>(newRootPerspectiveSettings.getPerspectiveOwnSettings(), clonedComponentIdsAndSettings);
     }
 
 }

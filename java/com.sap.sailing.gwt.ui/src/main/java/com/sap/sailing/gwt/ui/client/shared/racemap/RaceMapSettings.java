@@ -278,6 +278,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     public Set<ManeuverType> getManeuverTypesToShow() {
-        return maneuverTypesToShow.isValuesEmpty() ? null : Util.createSet(maneuverTypesToShow.getValues());
+        return Util.createSet(maneuverTypesToShow.getValues());
     }
 }

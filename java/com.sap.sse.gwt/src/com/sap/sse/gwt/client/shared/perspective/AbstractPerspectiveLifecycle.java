@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
 /**
  * An abstract base class for perspective lifecycle's. Subclasses need to add the {@link ComponentLifecycle} instances
@@ -34,30 +33,28 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
     @Override
     public PerspectiveCompositeSettings<PS> createDefaultSettings() {
         PS perspectiveOwnSettings = createPerspectiveOwnDefaultSettings();
-        return new PerspectiveCompositeSettings<>(perspectiveOwnSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
+        return new PerspectiveCompositeSettings<>(perspectiveOwnSettings, createDefaultComponentIdsAndSettings());
     }
     
     @Override
     public PerspectiveCompositeSettings<PS> cloneSettings(PerspectiveCompositeSettings<PS> settings) {
-        return new PerspectiveCompositeSettings<>(this.clonePerspectiveOwnSettings(settings.getPerspectiveOwnSettings()), getComponentIdsAndClonedSettings(settings).getSettingsPerComponentId());
+        return new PerspectiveCompositeSettings<>(this.clonePerspectiveOwnSettings(settings.getPerspectiveOwnSettings()), cloneComponentIdsAndSettings(settings));
     }
     
-    protected CompositeSettings getComponentIdsAndClonedSettings(PerspectiveCompositeSettings<PS> settings) {
+    public Map<String, Settings> cloneComponentIdsAndSettings(PerspectiveCompositeSettings<PS> settings) {
         Map<String, Settings> componentIdsAndSettings = new HashMap<>();
         for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
             componentIdsAndSettings.put(componentLifecycle.getComponentId(), cloneChildComponentSettings(componentLifecycle, settings));
         }
-        CompositeSettings compositeSettings = new CompositeSettings(componentIdsAndSettings);
-        return compositeSettings;
+        return componentIdsAndSettings;
     }
     
-    protected CompositeSettings getComponentIdsAndDefaultSettings() {
+    public Map<String, Settings> createDefaultComponentIdsAndSettings() {
         Map<String, Settings> componentIdsAndSettings = new HashMap<>();
         for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
             componentIdsAndSettings.put(componentLifecycle.getComponentId(), componentLifecycle.createDefaultSettings());
         }
-        CompositeSettings compositeSettings = new CompositeSettings(componentIdsAndSettings);
-        return compositeSettings;
+        return componentIdsAndSettings;
     }
 
     public Iterable<ComponentLifecycle<?,?>> getComponentLifecycles() {

@@ -177,28 +177,28 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getManeuverDetailsToShow() {
-        return maneuverDetailsToShow.isValuesEmpty() ? null : Util.createList(maneuverDetailsToShow.getValues());
+        return Util.createList(maneuverDetailsToShow.getValues());
     }
 
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getLegDetailsToShow() {
-        return legDetailsToShow.isValuesEmpty() ? null : Util.createList(legDetailsToShow.getValues());
+        return Util.createList(legDetailsToShow.getValues());
     }
 
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getRaceDetailsToShow() {
-        return raceDetailsToShow.isValuesEmpty() ? null : Util.createList(raceDetailsToShow.getValues());
+        return Util.createList(raceDetailsToShow.getValues());
     }
     
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getOverallDetailsToShow() {
-        return overallDetailsToShow.isValuesEmpty() ? null : Util.createList(overallDetailsToShow.getValues());
+        return Util.createList(overallDetailsToShow.getValues());
     }
     
     /**
