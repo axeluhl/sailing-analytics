@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.swc.impl;
+package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,21 +14,17 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite.FulfillmentFunction;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.NoMorePrerequisite;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureChangedListeners;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.swc.SWCChangedListener;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.swc.SWCRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.SWCRacingProcedure;
 import com.sap.sailing.domain.base.configuration.procedures.SWCConfiguration;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 
-public class SWCRacingProcedureImpl extends BaseRacingProcedure implements SWCRacingProcedure {
+public class SWCRacingProcedureImpl extends LineStartRacingProcedureImpl implements SWCRacingProcedure {
 
     private final static long CLASS_OVER_OSCAR_AND_STARTMODE_UP_INTERVAL = 6 * 60 * 1000; // 6 minutes before start
     private final static long CLASS_OVER_OSCAR_AND_STARTMODE_DOWN_INTERVAL = 1 * 60 * 1000; // 1 minute after start
@@ -161,21 +157,6 @@ public class SWCRacingProcedureImpl extends BaseRacingProcedure implements SWCRa
     }
     
     @Override
-    protected RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> createChangedListenerContainer() {
-        return new SWCChangedListeners();
-    }
-    
-    @Override
-    protected SWCChangedListeners getChangedListeners() {
-        return (SWCChangedListeners) super.getChangedListeners();
-    }
-
-    @Override
-    public void addChangedListener(SWCChangedListener listener) {
-        getChangedListeners().add(listener);
-    }
-
-    @Override
     public void setStartModeFlag(TimePoint timePoint, Flags startMode) {
         raceLog.add(new RaceLogFlagEventImpl(timePoint, author, raceLog.getCurrentPassId(), startMode, Flags.NONE, true));
     }
@@ -184,7 +165,12 @@ public class SWCRacingProcedureImpl extends BaseRacingProcedure implements SWCRa
     public Flags getStartModeFlag() {
         return cachedStartmodeFlag;
     }
-    
+
+    @Override
+    public Flags getDefaultStartMode() {
+        return SWCRacingProcedure.DefaultStartMode;
+    }
+
     public boolean startmodeFlagHasBeenSet() {
         return startmodeFlagHasBeenSet;
     }
@@ -195,7 +181,7 @@ public class SWCRacingProcedureImpl extends BaseRacingProcedure implements SWCRa
         if (startmodeFlag != null && (!startmodeFlag.equals(cachedStartmodeFlag) || !startmodeFlagHasBeenSet)) {
             cachedStartmodeFlag = startmodeFlag;
             startmodeFlagHasBeenSet = true;
-            getChangedListeners().onStartmodeChanged(this);
+            getChangedListeners().onStartModeChanged(this);
         }
         super.update();
     }

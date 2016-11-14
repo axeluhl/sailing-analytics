@@ -12,8 +12,8 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.basic.impl.
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.impl.ESSRacingProcedureImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl.GateStartRacingProcedureImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.league.impl.LeagueRacingProcedureImpl;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl.RRS26RacingProcedureImpl;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.swc.impl.SWCRacingProcedureImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl.RRS26RacingProcedureImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl.SWCRacingProcedureImpl;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;

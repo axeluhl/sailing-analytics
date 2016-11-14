@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.LineStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 
 public class RaceDetailPanel extends SimplePanel {
@@ -209,7 +209,8 @@ public class RaceDetailPanel extends SimplePanel {
             if (data.raceInfo.startProcedureDTO != null) {
                 switch (data.raceInfo.startProcedure) {
                 case RRS26:
-                    RRS26InfoDTO rrsInfo = (RRS26InfoDTO) data.raceInfo.startProcedureDTO;
+                case SWC:    
+                    LineStartInfoDTO rrsInfo = (LineStartInfoDTO) data.raceInfo.startProcedureDTO;
                     if (rrsInfo != null) {
                         if (rrsInfo.startModeFlag != null) {
                             showProcedureInfo("Start mode", rrsInfo.startModeFlag.toString());

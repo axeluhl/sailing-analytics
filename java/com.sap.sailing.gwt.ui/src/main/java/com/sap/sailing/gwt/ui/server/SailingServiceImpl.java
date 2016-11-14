@@ -77,7 +77,7 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.ReadonlyRRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.LineStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
@@ -332,7 +332,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.GateStartInfoDTO;
-import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RRS26InfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.LineStartInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO.RaceInfoExtensionDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogEventDTO;
@@ -978,8 +978,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             info = new GateStartInfoDTO(gateStart.getPathfinder(), gateStart.getGateLaunchStopTime());
             break;
         case RRS26:
-            ReadonlyRRS26RacingProcedure rrs26 = state.getTypedReadonlyRacingProcedure();
-            info = new RRS26InfoDTO(rrs26.getStartModeFlag());
+        case SWC:
+            LineStartRacingProcedure linestart = state.getTypedReadonlyRacingProcedure();
+            info = new LineStartInfoDTO(linestart.getStartModeFlag());
         case UNKNOWN:
         default:
             break;
