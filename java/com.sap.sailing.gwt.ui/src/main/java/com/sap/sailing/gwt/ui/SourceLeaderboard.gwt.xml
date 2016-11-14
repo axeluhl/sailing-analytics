@@ -3,6 +3,7 @@
 <module>
 	<inherits name='com.google.gwt.user.User'/>
 	<inherits name='com.sap.sse.security.ui.Settings'/>
+	<inherits name='com.sap.sailing.gwt.common.SailingSettings'/>
 
 	<source path="leaderboard"/> 
 

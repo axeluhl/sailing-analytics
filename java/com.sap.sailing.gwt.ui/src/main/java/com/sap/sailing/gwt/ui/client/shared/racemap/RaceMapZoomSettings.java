@@ -40,7 +40,7 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
     
     @Override
     protected void addChildSettings() {
-        typesToConsiderOnZoom = new EnumListSetting<>("zoomToSelectedCompetitors", this, Collections.singleton(ZoomTypes.BUOYS), new ZoomTypesStringToEnumConverter());
+        typesToConsiderOnZoom = new EnumListSetting<>("typesToConsiderOnZoom", this, Collections.singleton(ZoomTypes.BUOYS), new ZoomTypesStringToEnumConverter());
         zoomToSelectedCompetitors = new BooleanSetting("zoomToSelectedCompetitors", this, false);
     }
 
@@ -76,7 +76,7 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
     }
     
     public Iterable<ZoomTypes> getTypesToConsiderOnZoom() {
-        return typesToConsiderOnZoom.getValues();
+        return typesToConsiderOnZoom.isValuesEmpty() ? null : typesToConsiderOnZoom.getValues();
     }
     
     public boolean isZoomToSelectedCompetitors() {

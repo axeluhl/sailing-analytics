@@ -138,6 +138,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
         showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this, true);
         showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this, true);
+        showOverallColumnWithNumberOfRacesCompletedPerCompetitor = new BooleanSetting("showOverallColumnWithNumberOfRacesCompletedPerCompetitor", this, false);
     }
     
     /**
@@ -176,28 +177,28 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getManeuverDetailsToShow() {
-        return Util.createList(maneuverDetailsToShow.getValues());
+        return maneuverDetailsToShow.isValuesEmpty() ? null : Util.createList(maneuverDetailsToShow.getValues());
     }
 
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getLegDetailsToShow() {
-        return Util.createList(legDetailsToShow.getValues());
+        return legDetailsToShow.isValuesEmpty() ? null : Util.createList(legDetailsToShow.getValues());
     }
 
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getRaceDetailsToShow() {
-        return Util.createList(raceDetailsToShow.getValues());
+        return raceDetailsToShow.isValuesEmpty() ? null : Util.createList(raceDetailsToShow.getValues());
     }
     
     /**
      * A live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<DetailType> getOverallDetailsToShow() {
-        return Util.createList(overallDetailsToShow.getValues());
+        return overallDetailsToShow.isValuesEmpty() ? null : Util.createList(overallDetailsToShow.getValues());
     }
     
     /**
@@ -206,7 +207,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      * live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<String> getNamesOfRaceColumnsToShow() {
-        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? Util.createList(namesOfRaceColumnsToShow.getValues()) : null;
+        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? (namesOfRaceColumnsToShow.isValuesEmpty() ? null : Util.createList(namesOfRaceColumnsToShow.getValues())) : null;
     }
 
     /**
@@ -215,7 +216,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
      * a live collection that reflects the current state of the settings of a leaderboard panel
      */
     public List<String> getNamesOfRacesToShow() {
-        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? Util.createList(namesOfRacesToShow.getValues()) : null;
+        return activeRaceColumnSelectionStrategy.getValue() == RaceColumnSelectionStrategies.EXPLICIT ? (namesOfRacesToShow.isValuesEmpty() ? null : Util.createList(namesOfRacesToShow.getValues())) : null;
     }
     
     /**

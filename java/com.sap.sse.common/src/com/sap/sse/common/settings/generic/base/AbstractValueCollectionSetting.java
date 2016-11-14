@@ -49,6 +49,12 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
         }
         return value.getValues(getValueConverter());
     }
+    
+    @Override
+    public boolean isValuesEmpty() {
+        ValueCollectionValue<C> value = getValue();
+        return value == null || value.isEmpty();
+    }
 
     @Override
     public final void setValues(Iterable<T> values) {
@@ -70,8 +76,8 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     @Override
     public boolean isDefaultValue() {
         ValueCollectionValue<C> value = getValue();
-        return (emptyIsDefault && (value == null || value.isEmpty()))
-                || (value.size() == defaultValues.size() && defaultValues.containsAll(value.getValues(getValueConverter())));
+        return ((emptyIsDefault || (defaultValues == null || defaultValues.isEmpty())) && (value == null || value.isEmpty()))
+                || (value != null && value.size() == defaultValues.size() && defaultValues.containsAll(value.getValues(getValueConverter())));
     }
     
     @Override

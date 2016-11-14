@@ -5,6 +5,7 @@
     <inherits name="com.sap.sse.security.ui.Authentication" />
     <inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
     <inherits name='com.sap.sse.security.ui.Settings' />
+    <inherits name='com.sap.sailing.gwt.common.SailingSettings'/>
     
 	<source path="raceboard"/> 
 

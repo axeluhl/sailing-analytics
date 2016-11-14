@@ -35,11 +35,12 @@ public class DistanceConverter implements ValueConverter<Distance> {
 
     @Override
     public Distance fromValue(Value value) {
-        return new MeterDistance(((DoubleValue) value).getValue());
+        DoubleValue doubleValue = (DoubleValue) value;
+        return doubleValue.getValue() == null ? null : new MeterDistance(doubleValue.getValue());
     }
 
     @Override
     public Value toValue(Distance value) {
-        return new DoubleValue(value.getMeters());
+        return value == null ? null : new DoubleValue(value.getMeters());
     }
 }

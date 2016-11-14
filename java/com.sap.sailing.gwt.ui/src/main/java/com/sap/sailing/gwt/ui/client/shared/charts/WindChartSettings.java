@@ -63,11 +63,11 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
     }
 
     public Set<WindSourceType> getWindDirectionSourcesToDisplay() {
-        return Util.createSet(windDirectionSourcesToDisplay.getValues());
+        return windDirectionSourcesToDisplay.isValuesEmpty() ? null : Util.createSet(windDirectionSourcesToDisplay.getValues());
     }
 
     public Set<WindSourceType> getWindSpeedSourcesToDisplay() {
-        return Util.createSet(windSpeedSourcesToDisplay.getValues());
+        return windSpeedSourcesToDisplay.isValuesEmpty() ? null : Util.createSet(windSpeedSourcesToDisplay.getValues());
     }
 
     public long getResolutionInMilliseconds() {

@@ -35,11 +35,12 @@ public class DurationConverter implements ValueConverter<Duration> {
 
     @Override
     public Duration fromValue(Value value) {
-        return new MillisecondsDurationImpl(((LongValue) value).getValue());
+        LongValue longValue = (LongValue) value;
+        return longValue.getValue() == null ? null : new MillisecondsDurationImpl(longValue.getValue());
     }
 
     @Override
     public Value toValue(Duration value) {
-        return new LongValue(value.asMillis());
+        return value == null ? null : new LongValue(value.asMillis());
     }
 }
