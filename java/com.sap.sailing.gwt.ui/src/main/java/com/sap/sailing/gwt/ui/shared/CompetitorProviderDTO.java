@@ -33,12 +33,15 @@ public class CompetitorProviderDTO extends NamedDTO {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (!super.equals(obj)) {
             return false;
+        }
         CompetitorProviderDTO other = (CompetitorProviderDTO) obj;
         return Objects.equals(hasCompetitorsForRegattasInEvent, other.hasCompetitorsForRegattasInEvent);
     }

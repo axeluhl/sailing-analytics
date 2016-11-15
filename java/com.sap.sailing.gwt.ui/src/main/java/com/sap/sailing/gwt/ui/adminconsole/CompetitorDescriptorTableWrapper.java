@@ -141,9 +141,11 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
         ListHandler<CompetitorDescriptorDTO> competitorColumnListHandler = getColumnSortHandler();
 
         competitorColumnListHandler.setComparator(competitorNameColumn, new Comparator<CompetitorDescriptorDTO>() {
+            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
+
             @Override
             public int compare(CompetitorDescriptorDTO cd1, CompetitorDescriptorDTO cd2) {
-                return cd1.getName().compareTo(cd2.getName());
+                return comparator.compare(cd1.getName(), cd2.getName());
             }
         });
 

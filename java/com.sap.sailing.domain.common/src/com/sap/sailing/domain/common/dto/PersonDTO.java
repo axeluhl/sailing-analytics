@@ -53,13 +53,15 @@ public class PersonDTO extends NamedDTO {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (!super.equals(obj)) {
             return false;
-
+        }
         PersonDTO other = (PersonDTO) obj;
         return Objects.equals(dateOfBirth, other.dateOfBirth) && Objects.equals(description, other.description)
                 && Objects.equals(nationalityThreeLetterIOCAcronym, other.nationalityThreeLetterIOCAcronym);

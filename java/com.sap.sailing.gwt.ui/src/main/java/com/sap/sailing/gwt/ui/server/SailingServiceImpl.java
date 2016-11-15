@@ -692,7 +692,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Iterable<String> getCompetitorProviderNames() {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (CompetitorProvider competitorProvider : getAllCompetotorProviders()) {
             result.add(competitorProvider.getName());
         }
@@ -701,7 +701,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private Iterable<CompetitorProvider> getAllCompetotorProviders() {
         final Object[] services = competitorProviderServiceTracker.getServices();
-        List<CompetitorProvider> result = new ArrayList<CompetitorProvider>();
+        List<CompetitorProvider> result = new ArrayList<>();
         if (services != null) {
             for (Object service : services) {
                 result.add((CompetitorProvider) service);
@@ -712,25 +712,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public CompetitorProviderDTO getCompetitorProviderDTOByName(String providerName) throws Exception {
-        CompetitorProviderDTO result = null;
         for (CompetitorProvider competitorProvider : getAllCompetotorProviders()) {
             if (competitorProvider.getName().equals(providerName)) {
-                result = convertToCompetitorProviderDTO(competitorProvider);
-                break;
+                return new CompetitorProviderDTO(competitorProvider.getName(),
+                        new HashMap<>(competitorProvider.getHasCompetitorsForRegattasInEvent()));
             }
         }
-        return result;
-    }
-
-    private CompetitorProviderDTO convertToCompetitorProviderDTO(CompetitorProvider competitorProvider)
-            throws Exception {
-        Map<String, Set<String>> hasResultsForRegattaByEventName = new HashMap<String, Set<String>>();
-        for (Map.Entry<String, Set<String>> entry : competitorProvider
-                .getHasCompetitorsForRegattasInEvent().entrySet()) {
-            Set<String> regattas = new HashSet<>(entry.getValue());
-            hasResultsForRegattaByEventName.put(entry.getKey(), regattas);
-        }
-        return new CompetitorProviderDTO(competitorProvider.getName(), hasResultsForRegattaByEventName);
+        return null;
     }
 
     @Override
@@ -1573,7 +1561,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 polarDiagram = new PolarDiagramGPS(boatClass, polarData);
             } catch (SparseSimulationDataException e) {
                 polarDiagram = null;
-                // TODO: raise a UI message, to inform user about missing polar data resulting in unability to simulate
             }
             result = polarDiagram != null;
         }

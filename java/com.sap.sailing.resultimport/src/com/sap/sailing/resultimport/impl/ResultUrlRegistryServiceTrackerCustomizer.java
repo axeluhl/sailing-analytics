@@ -39,6 +39,8 @@ public abstract class ResultUrlRegistryServiceTrackerCustomizer implements
 
     protected abstract ScoreCorrectionProvider configureScoreCorrectionProvider(ResultUrlRegistry resultUrlRegistry);
 
+    // return null by default to not to create create dependency on competitor import in freg and yachtscoring since we haven't
+    // had implementation for importing competitors for this bundles yet
     protected  CompetitorProvider configureCompetitorProvider(ResultUrlRegistry resultUrlRegistry) {
         return null;
     }

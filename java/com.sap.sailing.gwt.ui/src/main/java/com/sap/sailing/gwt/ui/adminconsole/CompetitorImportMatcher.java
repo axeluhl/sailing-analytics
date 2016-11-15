@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
  *
  */
 public class CompetitorImportMatcher {
-
+    //FIXME: Not sure about the amount of data. May be need to implement some cache for that.
     private final Iterable<CompetitorDTO> existingCompetitorDTOs;
 
     public CompetitorImportMatcher(Iterable<CompetitorDTO> existingCompetitors) {

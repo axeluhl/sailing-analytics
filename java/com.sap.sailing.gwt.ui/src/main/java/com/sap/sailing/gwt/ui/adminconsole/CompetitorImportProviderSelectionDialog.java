@@ -25,13 +25,16 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+
 /**
- * Define the dialog for displaying competitor providers names and list box of pair "event, regatta" names where we have competitors are available for importing.
- * Also defines  which dialog would be created for matching and applying result of import using the factory {@link ApplyImportedCompetitorsDialogFactory}
+ * Defines the dialog for displaying competitor provider names and list box of pair "event, regatta" names where we have
+ * competitors are available for importing. Also defines which dialog would be created for matching and applying result
+ * of import using the factory {@link ApplyImportedCompetitorsDialogFactory}
+ * 
  * @author Alexander_Tatarinovich
  *
  */
-public abstract class CompetitorImportProviderSelectionDialog extends DataEntryDialog<CompetitorImportDialogResult> {
+public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<CompetitorImportSelectionDialogResult> {
 
     private final ListBox competitorListBox;
     private final ListBox competitorProviderListBox;
@@ -46,11 +49,12 @@ public abstract class CompetitorImportProviderSelectionDialog extends DataEntryD
      */
     private final LinkedHashMap<String, Pair<String, String>> eventRagateNamesByCompetitorListItem;
 
-    public CompetitorImportProviderSelectionDialog(BusynessPanel busynessPanel,
-            Iterable<String> competitorProviderNames, SailingServiceAsync sailingService, StringMessages stringMessages,
-            ErrorReporter errorReporter) {
+    public CompetitorImportProviderSelectionDialog(ApplyImportedCompetitorsDialogFactory applyCompetitorsDialogFactory,
+            Busyness busynessPanel, Iterable<String> competitorProviderNames, SailingServiceAsync sailingService,
+            StringMessages stringMessages, ErrorReporter errorReporter) {
         super(stringMessages.importCompetitors(), null, stringMessages.ok(), stringMessages.cancel(), null,
-                new Callback(sailingService, busynessPanel, errorReporter, stringMessages));
+                new Callback(applyCompetitorsDialogFactory, sailingService, busynessPanel, errorReporter,
+                        stringMessages));
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -153,18 +157,21 @@ public abstract class CompetitorImportProviderSelectionDialog extends DataEntryD
         return eventAndRegattaNames;
     }
 
-    private static class Callback implements DialogCallback<CompetitorImportDialogResult> {
-        private final BusynessPanel busynessPanel;
+    private static class Callback implements DialogCallback<CompetitorImportSelectionDialogResult> {
+        private final Busyness busynessPanel;
         private final SailingServiceAsync sailingService;
         private final ErrorReporter errorReporter;
         private final StringMessages stringMessages;
+        private final ApplyImportedCompetitorsDialogFactory applyCompetitorsDialogFactory;
 
-        public Callback(SailingServiceAsync sailingService, BusynessPanel busynessPanel, ErrorReporter errorReporter,
+        public Callback(ApplyImportedCompetitorsDialogFactory applyCompetitorsDialogFactory,
+                SailingServiceAsync sailingService, Busyness busynessPanel, ErrorReporter errorReporter,
                 StringMessages stringMessages) {
             this.sailingService = sailingService;
             this.busynessPanel = busynessPanel;
             this.errorReporter = errorReporter;
             this.stringMessages = stringMessages;
+            this.applyCompetitorsDialogFactory = applyCompetitorsDialogFactory;
         }
 
         @Override
@@ -173,7 +180,7 @@ public abstract class CompetitorImportProviderSelectionDialog extends DataEntryD
         }
 
         @Override
-        public void ok(final CompetitorImportDialogResult competitorImportDialogResult) {
+        public void ok(final CompetitorImportSelectionDialogResult competitorImportDialogResult) {
             if (competitorImportDialogResult == null) {
                 return;
             }
@@ -203,9 +210,8 @@ public abstract class CompetitorImportProviderSelectionDialog extends DataEntryD
                                 @Override
                                 public void onSuccess(Iterable<CompetitorDTO> competitors) {
                                     busynessPanel.setBusy(false);
-                                    final ApplyImportedCompetitorsDialogFactory applyCompetitorDialogFactory = competitorImportDialogResult
-                                            .getApplyImportedCompetitorsDialogFactory();
-                                    applyCompetitorDialogFactory
+
+                                    applyCompetitorsDialogFactory
                                             .createApplyImportedCompetitorsDialog(competitorDescriptors, competitors)
                                             .show();
                                 }
@@ -216,22 +222,20 @@ public abstract class CompetitorImportProviderSelectionDialog extends DataEntryD
     }
 
     /**
-     * Factory for creating specific dialog {@link ApplyImportedCompetitorsDialog} where we will be match and apply imported competitors.
-     * @param competitorDescriptors imported competitor descriptors {@link CompetitorDescriptorDTO}
-     * @param competitors existing competitors from {@link CompetitorStore}
+     * Factory for creating specific dialog {@link ApplyImportedCompetitorsDialog} where we will be match and apply
+     * imported competitors.
+     * 
+     * @param competitorDescriptors
+     *            imported competitor descriptors {@link CompetitorDescriptorDTO}
+     * @param competitors
+     *            existing competitors from {@link CompetitorStore}
      * @author Alexander_Tatarinovich
      *
      */
-    protected interface ApplyImportedCompetitorsDialogFactory {
+    public interface ApplyImportedCompetitorsDialogFactory {
         ApplyImportedCompetitorsDialog createApplyImportedCompetitorsDialog(
                 Iterable<CompetitorDescriptorDTO> competitorDescriptors, Iterable<CompetitorDTO> competitors);
     }
-
-    /**
-     * Get factory {@link ApplyImportedCompetitorsDialogFactory} for creating specific dialog {@link ApplyImportedCompetitorsDialog}.
-     * @return
-     */
-    protected abstract ApplyImportedCompetitorsDialogFactory getApplyImportedCompetitorsDialogFactory();
 
     @Override
     protected Widget getAdditionalWidget() {
@@ -248,8 +252,8 @@ public abstract class CompetitorImportProviderSelectionDialog extends DataEntryD
     }
 
     @Override
-    protected CompetitorImportDialogResult getResult() {
-        CompetitorImportDialogResult competitorImportDialogResult = null;
+    protected CompetitorImportSelectionDialogResult getResult() {
+        CompetitorImportSelectionDialogResult competitorImportDialogResult = null;
         int selectedProviderIndex = competitorProviderListBox.getSelectedIndex();
         if (selectedProviderIndex > 0) {
             String selectedProviderName = competitorProviderListBox.getItemText(selectedProviderIndex);
@@ -259,12 +263,10 @@ public abstract class CompetitorImportProviderSelectionDialog extends DataEntryD
                         .get(competitorListBox.getValue(selectedScoreCorrectionIndex));
                 String eventName = pair.getA();
                 String regattaName = pair.getB();
-                competitorImportDialogResult = new CompetitorImportDialogResult(selectedProviderName, eventName,
-                        regattaName, getApplyImportedCompetitorsDialogFactory());
+                competitorImportDialogResult = new CompetitorImportSelectionDialogResult(selectedProviderName,
+                        eventName, regattaName);
             }
         }
-
         return competitorImportDialogResult;
     }
-
 }

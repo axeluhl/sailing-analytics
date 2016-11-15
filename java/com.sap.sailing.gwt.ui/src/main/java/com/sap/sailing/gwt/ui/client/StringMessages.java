@@ -1742,10 +1742,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String buoyZoneRadiusInHullLengths();
     String incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
     String importCompetitors();
-    String choseWhichCompetitorsShouldBeImported();
+    String chooseWhichCompetitorsShouldBeImported();
     String existingCompetitors();
     String importedCompetitors();
-    String cannotChoseMoreThenOne();
     String hasMatches();
     String filterImportedCompetitorsByNameSailRaceFleet();
     String errorLoadingCompetitorImportProviders(String message);

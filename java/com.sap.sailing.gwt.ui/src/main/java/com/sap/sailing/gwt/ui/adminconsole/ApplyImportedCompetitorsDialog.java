@@ -46,7 +46,7 @@ public class ApplyImportedCompetitorsDialog extends DataEntryDialog<Set<Competit
     public ApplyImportedCompetitorsDialog(final Iterable<CompetitorDescriptorDTO> competitorDescriptorDTOs,
             final Iterable<CompetitorDTO> existingCompetitor, StringMessages stringMessages,
             SailingServiceAsync sailingService, ErrorReporter errorReporter) {
-        super(stringMessages.importCompetitors(), stringMessages.choseWhichCompetitorsShouldBeImported(),
+        super(stringMessages.importCompetitors(), stringMessages.chooseWhichCompetitorsShouldBeImported(),
                 stringMessages.ok(), stringMessages.cancel(), null, /* TODO: implement calback */null);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;

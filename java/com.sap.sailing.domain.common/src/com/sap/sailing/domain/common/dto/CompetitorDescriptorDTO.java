@@ -118,12 +118,15 @@ public class CompetitorDescriptorDTO extends NamedDTO {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (!super.equals(obj))
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (!super.equals(obj)) {
             return false;
+        }
         CompetitorDescriptorDTO other = (CompetitorDescriptorDTO) obj;
         return Objects.equals(countryName, other.countryName) && Objects.equals(eventName, other.eventName)
                 && Objects.equals(fleetName, other.fleetName) && Objects.deepEquals(persons, other.persons)
