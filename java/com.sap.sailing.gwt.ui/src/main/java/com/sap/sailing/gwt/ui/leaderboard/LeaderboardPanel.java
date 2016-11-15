@@ -3374,4 +3374,9 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         }
     }
 
+    @Override
+    public String getId() {
+        return "LeaderboardPanel";
+    }
+
 }

@@ -216,4 +216,9 @@ public class LeaderboardWithHeaderPerspective extends AbstractRootPerspectiveCom
         return true;
     }
 
+    @Override
+    public String getId() {
+        return "LeaderboardWithHeaderPerspective";
+    }
+
 }

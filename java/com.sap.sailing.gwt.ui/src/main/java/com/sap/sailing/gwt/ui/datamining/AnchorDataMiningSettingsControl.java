@@ -129,4 +129,9 @@ public class AnchorDataMiningSettingsControl extends AbstractComponent<Composite
         return "AnchorDataMiningSettingsControl";
     }
 
+    @Override
+    public String getId() {
+        return "AnchorDataMiningSettingsControl";
+    }
+
 }

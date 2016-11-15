@@ -137,4 +137,9 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
         return "simpleQueryRunner";
     }
 
+    @Override
+    public String getId() {
+        return "SimpleQueryRunner";
+    }
+
 }

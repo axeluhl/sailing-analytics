@@ -2915,4 +2915,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         raceCompetitorSet.removeCompetitorsForRaceDefinedListener(listener);
     }
 
+    @Override
+    public String getId() {
+        return "RaceMap";
+    }
+
 }

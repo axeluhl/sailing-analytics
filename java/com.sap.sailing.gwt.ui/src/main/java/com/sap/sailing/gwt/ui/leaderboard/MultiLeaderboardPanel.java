@@ -285,4 +285,9 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     public void removeLeaderboardUpdateListener(LeaderboardUpdateListener leaderboardUpdateListener) {
         leaderboardUpdateListeners.remove(leaderboardUpdateListener);
     }
+
+    @Override
+    public String getId() {
+        return "MultiLeaderboardPanel";
+    }
 }

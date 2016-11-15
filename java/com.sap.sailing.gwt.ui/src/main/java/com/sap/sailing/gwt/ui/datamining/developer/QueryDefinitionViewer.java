@@ -149,4 +149,9 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     public String getDependentCssClassName() {
         return "queryDefinitionViewer";
     }
+
+    @Override
+    public String getId() {
+        return "QueryDefinitionViewer";
+    }
 }

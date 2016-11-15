@@ -202,4 +202,9 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
         }
         
     }
+
+    @Override
+    public String getId() {
+        return "TabbedResultsPresenter";
+    }
 }

@@ -83,6 +83,11 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         public LeaderboardUrlSettings getSettings() {
             return settings;
         }
+
+        @Override
+        public String getId() {
+            return "ProxyLeaderboardUrlComponent";
+        }
     }
     
     private static class LeaderboardUrlConfigurationDialogComponent implements SettingsDialogComponent<LeaderboardUrlSettings> {

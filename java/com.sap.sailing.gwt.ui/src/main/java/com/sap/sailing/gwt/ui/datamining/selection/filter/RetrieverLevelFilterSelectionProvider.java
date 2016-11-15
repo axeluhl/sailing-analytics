@@ -245,4 +245,9 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
     public AbstractSettings getSettings() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return "RetrieverLevelFilterSelectionProvider";
+    }
 }

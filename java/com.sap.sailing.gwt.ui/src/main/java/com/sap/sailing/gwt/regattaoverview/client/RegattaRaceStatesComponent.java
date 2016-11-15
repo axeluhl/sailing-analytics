@@ -945,4 +945,9 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
         this.repeatedInfoLabel = repeatedInfoLabel;
     }
 
+    @Override
+    public String getId() {
+        return "RegattaRaceStatesComponent";
+    }
+
 }

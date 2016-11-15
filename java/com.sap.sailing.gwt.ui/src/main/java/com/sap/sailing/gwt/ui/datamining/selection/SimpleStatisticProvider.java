@@ -288,4 +288,9 @@ public class SimpleStatisticProvider extends AbstractComponent<SerializableSetti
     public SerializableSettings getSettings() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return "SimpleStatisticProvider";
+    }
 }

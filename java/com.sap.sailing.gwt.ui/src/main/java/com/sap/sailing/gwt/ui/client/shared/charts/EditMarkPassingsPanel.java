@@ -491,4 +491,9 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
         return null;
     }
 
+    @Override
+    public String getId() {
+        return "EditMarkPassingsPanel";
+    }
+
 }

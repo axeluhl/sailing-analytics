@@ -247,4 +247,10 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
     public Settings getSettings() {
         return null;
     }
+
+
+    @Override
+    public String getId() {
+        return "PolarBackendResultsPresenter";
+    }
 }

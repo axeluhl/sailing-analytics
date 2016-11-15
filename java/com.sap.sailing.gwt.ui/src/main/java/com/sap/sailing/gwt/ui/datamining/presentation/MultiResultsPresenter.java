@@ -202,4 +202,9 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
         
     }
 
+    @Override
+    public String getId() {
+        return "MultiResultsPresenter";
+    }
+
 }

@@ -310,4 +310,9 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     public Settings getSettings() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return "PolarResultsPresenter";
+    }
 }

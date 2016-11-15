@@ -184,4 +184,9 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
     public AbstractSettings getSettings() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return "PlainFilterSelectionPresenter";
+    }
 }

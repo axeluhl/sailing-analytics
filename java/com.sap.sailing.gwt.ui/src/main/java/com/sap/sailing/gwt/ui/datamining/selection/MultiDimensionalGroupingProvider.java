@@ -267,4 +267,9 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
         return null;
     }
 
+    @Override
+    public String getId() {
+        return "MultiDimensionalGroupingProvider";
+    }
+
 }

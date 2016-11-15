@@ -640,4 +640,9 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
         return backToLivePlayButton;
     }
 
+    @Override
+    public String getId() {
+        return "TimePanel";
+    }
+
 }

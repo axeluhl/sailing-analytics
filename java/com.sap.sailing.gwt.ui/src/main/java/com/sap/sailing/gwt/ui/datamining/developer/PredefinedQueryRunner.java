@@ -174,4 +174,9 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
     public String getDependentCssClassName() {
         return "predefinedQueryRunner";
     }
+
+    @Override
+    public String getId() {
+        return "PredefinedQueryRunner";
+    }
 }

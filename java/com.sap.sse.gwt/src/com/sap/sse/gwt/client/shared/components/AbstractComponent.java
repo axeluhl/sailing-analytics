@@ -7,11 +7,6 @@ public abstract class AbstractComponent<SettingsType extends Settings> implement
     private ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = new ComponentTreeNodeInfo<>();
     
     @Override
-    public String getId() {
-        return getLocalizedShortName();
-    }
-    
-    @Override
     public ComponentTreeNodeInfo<SettingsType> getComponentTreeNodeInfo() {
         return componentTreeNodeInfo;
     }

@@ -696,5 +696,10 @@ public class RaceBoardPanel extends AbstractRootPerspectiveComposite<RaceBoardPe
     public void onResize() {
         dockPanel.onResize();        
     }
+
+    @Override
+    public String getId() {
+        return "RaceBoardPanel";
+    }
 }
 

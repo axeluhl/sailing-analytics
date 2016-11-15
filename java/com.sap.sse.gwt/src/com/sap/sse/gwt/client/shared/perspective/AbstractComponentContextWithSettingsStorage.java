@@ -88,9 +88,10 @@ public abstract class AbstractComponentContextWithSettingsStorage<PL extends Per
         PerspectiveLifecycleWithAllSettings<?,T> perspectiveLifecycleWithAllSettings = perspective.getPerspectiveLifecycleWithAllSettings();
         Map<String, Settings> originalSettingsPerComponent = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsPerComponentId();
         Map<String, Settings> newSettingsPerComponent = new HashMap<>();
+        String replaceComponentId = replaceComponent.getId();
         for (Entry<String, Settings> entry : originalSettingsPerComponent.entrySet()) {
             String componentId = entry.getKey();
-            if(replaceComponent.getId().equals(componentId)) {
+            if(replaceComponentId.equals(componentId)) {
                 newSettingsPerComponent.put(replaceComponent.getId(), replaceComponentNewDefaultSettings);
             } else {
                 newSettingsPerComponent.put(componentId, entry.getValue());

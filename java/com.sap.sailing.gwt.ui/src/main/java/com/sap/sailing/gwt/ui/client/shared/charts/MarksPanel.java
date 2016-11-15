@@ -168,4 +168,9 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
         return null;
     }
 
+    @Override
+    public String getId() {
+        return "MarksPanel";
+    }
+
 }

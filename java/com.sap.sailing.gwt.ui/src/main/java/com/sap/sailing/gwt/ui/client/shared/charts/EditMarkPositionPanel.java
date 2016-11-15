@@ -1005,4 +1005,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     public AbstractSettings getSettings() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return "EditMarkPositionPanel";
+    }
 }

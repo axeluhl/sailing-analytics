@@ -70,4 +70,9 @@ public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComp
     public String getDependentCssClassName() {
         return "";
     }
+
+    @Override
+    public String getId() {
+        return "SAPHeaderComponent";
+    }
 }

@@ -9,10 +9,12 @@ public abstract class RetrieverLevelSettingsComponent extends AbstractComponent<
 
     private final DataRetrieverLevelDTO retrieverLevel;
     private final String localizedName;
+    private final String componentId;
 
-    public RetrieverLevelSettingsComponent(DataRetrieverLevelDTO retrieverLevel, String localizedName) {
+    public RetrieverLevelSettingsComponent(DataRetrieverLevelDTO retrieverLevel, String componentId, String localizedName) {
         this.retrieverLevel = retrieverLevel;
         this.localizedName = localizedName;
+        this.componentId = componentId;
     }
     
     public DataRetrieverLevelDTO getRetrieverLevel() {
@@ -52,6 +54,11 @@ public abstract class RetrieverLevelSettingsComponent extends AbstractComponent<
     @Override
     public SerializableSettings getSettings() {
         return retrieverLevel.getDefaultSettings();
+    }
+    
+    @Override
+    public String getId() {
+        return componentId;
     }
 
 }

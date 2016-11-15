@@ -78,4 +78,9 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
     public String getDependentCssClassName() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return "PerspectiveCompositeLifecycleTabbedSettingsComponentFor" + perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getComponentId();
+    }
 }

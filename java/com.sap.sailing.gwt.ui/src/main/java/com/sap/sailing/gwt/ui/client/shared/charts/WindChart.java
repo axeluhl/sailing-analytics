@@ -627,4 +627,9 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
     public WindChartSettings getSettings() {
         return settings;
     }
+
+    @Override
+    public String getId() {
+        return "WindChart";
+    }
 }

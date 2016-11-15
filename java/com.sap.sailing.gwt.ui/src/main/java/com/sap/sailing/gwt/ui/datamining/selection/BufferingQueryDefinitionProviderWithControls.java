@@ -342,4 +342,9 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         
     }
 
+    @Override
+    public String getId() {
+        return "BufferingQueryDefinitionProviderWithControls";
+    }
+
 }

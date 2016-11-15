@@ -67,4 +67,9 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
         chart.setSize(chart.getOffsetWidth(), Window.getClientHeight());
         chart.redraw();
     }
+
+    @Override
+    public String getId() {
+        return "MultiCompetitorLeaderboardChart";
+    }
 }

@@ -805,4 +805,9 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public ErrorReporter getErrorReporter() {
         return errorReporter;
     }
+
+    @Override
+    public String getId() {
+        return "MediaPlayerManagerComponent";
+    }
 }

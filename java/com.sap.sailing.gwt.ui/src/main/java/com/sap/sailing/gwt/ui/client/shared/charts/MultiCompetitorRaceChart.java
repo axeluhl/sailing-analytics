@@ -105,4 +105,9 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
         return "multiCompetitorRaceChart";
     }
 
+    @Override
+    public String getId() {
+        return "MultiCompetitorRaceChart";
+    }
+
 }

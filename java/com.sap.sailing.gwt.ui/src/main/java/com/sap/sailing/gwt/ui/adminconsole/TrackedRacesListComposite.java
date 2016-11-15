@@ -197,5 +197,10 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         return null;
     }
 
+    @Override
+    public String getId() {
+        return "TrackedRacesListComposite";
+    }
+
     
 }

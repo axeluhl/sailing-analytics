@@ -336,4 +336,9 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     public SerializableSettings getSettings() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return "ListRetrieverChainFilterSelectionProvider";
+    }
 }
