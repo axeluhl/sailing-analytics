@@ -24,7 +24,7 @@ public class PolarDataResourceTest {
     private static final double[] ANGLE_FUNCTION_COEFFS_DOWNWIND = 
             new double[]{ 172.54379549250007, -3.369846070650965, 0.6635660994215868, -0.03653517733437184 };
     private static final String BOAT_CLASS = "Laser Radial";
-    
+
     private PolarDataServiceImpl polarDataService;
     private SharedDomainFactory sharedDomainFactory;
 
@@ -36,9 +36,11 @@ public class PolarDataResourceTest {
         PolarDataClientMock client = new PolarDataClientMock(new File("resources/polar_data.json"), polarDataService, sharedDomainFactory);
         client.updatePolarDataRegressions();
     }
-    
+
     /**
-     * Test to check if client importing data correctly. Using {@link PolarDataClientMock} which use {@link File} polar_data.json as source
+     * Test to check if client importing data correctly. Using {@link PolarDataClientMock} which use {@link File}
+     * polar_data.json as source
+     * 
      * @throws NotEnoughDataHasBeenAddedException
      */
     @Test
@@ -46,11 +48,12 @@ public class PolarDataResourceTest {
         BoatClass boatClass = sharedDomainFactory.getOrCreateBoatClass(BOAT_CLASS);
         PolynomialFunction angleDownwindFunction = new PolynomialFunction(ANGLE_FUNCTION_COEFFS_DOWNWIND);
         PolynomialFunction speedDownwindFunction = new PolynomialFunction(SPEED_FUNCTIONS_COEFFS_DOWNWIND);
-        
+
         assertThat(polarDataService.getSpeedRegressionsPerAngle().size(), is(32));
         assertThat(polarDataService.getCubicRegressionsPerCourse().size(), is(2));
         assertThat(polarDataService.getFixCointPerBoatClass().get(boatClass), is(62117L));
-        //presuming that if downwind functions & regression collections' size are correct then any other thing is imported correctly 
+        // presuming that if downwind functions & regression collections' size are correct then any other thing is
+        // imported correctly
         assertThat(polarDataService.getAngleRegressionFunction(boatClass, LegType.DOWNWIND), is(angleDownwindFunction));
         assertThat(polarDataService.getSpeedRegressionFunction(boatClass, LegType.DOWNWIND), is(speedDownwindFunction));
     }

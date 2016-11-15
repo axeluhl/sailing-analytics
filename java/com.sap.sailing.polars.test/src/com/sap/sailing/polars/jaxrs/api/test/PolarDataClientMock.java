@@ -13,7 +13,7 @@ import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 import com.sap.sailing.polars.jaxrs.client.PolarDataClient;
 
 public class PolarDataClientMock extends PolarDataClient {
-    
+
     private final File file;
 
     public PolarDataClientMock(File file, PolarDataServiceImpl polarDataServiceImpl,
@@ -26,5 +26,5 @@ public class PolarDataClientMock extends PolarDataClient {
     protected JSONObject getJsonFromResponse() throws IOException, ParseException {
         return (JSONObject) new JSONParser().parse(new FileReader(file));
     }
-    
+
 }
