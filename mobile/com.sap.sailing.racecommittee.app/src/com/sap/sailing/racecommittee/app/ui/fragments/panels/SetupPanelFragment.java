@@ -21,8 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRac
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.RRS26RacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.SWCRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.LineStartRacingProcedure;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -177,16 +176,9 @@ public class SetupPanelFragment extends BasePanelFragment {
                 mButtonRaceGroup.setVisibility(View.GONE);
             }
 
-            if (getRaceState().getRacingProcedure() instanceof RRS26RacingProcedure) {
+            if (getRaceState().getRacingProcedure() instanceof LineStartRacingProcedure) {
                 if (mButtonMode != null) {
-                    RRS26RacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
-                    mButtonMode.setPanelImage(FlagsResources.getFlagDrawable(getActivity(), typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
-                    mButtonMode.setVisibility(View.VISIBLE);
-                }
-            }
-            if (getRaceState().getRacingProcedure() instanceof SWCRacingProcedure) {
-                if (mButtonMode != null) {
-                    SWCRacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
+                    LineStartRacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
                     mButtonMode.setPanelImage(FlagsResources.getFlagDrawable(getActivity(), typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
                     mButtonMode.setVisibility(View.VISIBLE);
                 }
