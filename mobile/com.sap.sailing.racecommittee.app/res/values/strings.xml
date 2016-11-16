@@ -81,6 +81,9 @@
     <string name="protest_dialog_title">Protest start time</string>
     <string name="finished_dialog_title">Set the time when the race finished</string>
     <string name="protest_start_time">Protest start time: %s</string>
+    <string name="protest_duration">Protest duration: %d min</string>
+    <string name="protest_end_time">Protest end time: %s</string>
+    <string name="protest_duration_dialog_title">Duration in Minutes</string>
     <string name="no_pathfinder_selected">No Pathfinder selected</string>
     <string name="set_line_opening_time">Gate Launch</string>
     <string name="no_line_opening_time_selected">No time selected</string>
@@ -462,8 +465,9 @@
     <string name="data_reload_message">Data has to be reloaded. Possible data loss is possible.</string>
     <string name="preference_allow_dependent_races_header">Relative Start Time (Minutes)</string>
     <string name="preference_allow_dependent_races_description">Enable Relative Start Time between Races</string>
-    <string name="preference_dependent_races_offset_header">Default Relative Start Time Offset</string>
+    <string name="preference_dependent_races_offset_header">Default Relative Start Time Offset (Minutes)</string>
     <string name="preference_allow_edit_race_factor_header">Race factor change</string>
+    <string name="preference_protest_time_header">Protest Time Duration (Minutes)</string>
     <string name="preference_allow_edit_race_factor_description">Race managers can change the race factor per race</string>
     <string name="error_finished_time">The given finish time is earlier than the first finisher time. Please recheck the time.</string>
     <string name="error_finishing_time">The selected time is before the race start.</string>

@@ -66,6 +66,9 @@
     <string name="protest_dialog_title">Beginn der Protestzeit</string>
     <string name="finished_dialog_title">Rennende setzen</string>
     <string name="protest_start_time">Protestzeit beginnt: %s</string>
+    <string name="protest_duration">Protestdauer: %d Min</string>
+    <string name="protest_end_time">Protestzeit endet: %s</string>
+    <string name="protest_duration_dialog_title">Dauer in Minuten</string>
     <string name="no_pathfinder_selected">Kein Pathfinder gesetzt</string>
     <string name="set_line_opening_time">Gate Launch</string>
     <string name="no_line_opening_time_selected">Keine Zeit gesetzt</string>
@@ -440,6 +443,7 @@
     <string name="preference_allow_dependent_races_description">Aktiviert relative Startzeiten zwischen Rennen</string>
     <string name="preference_dependent_races_offset_header">Standard Offset der relativen Startzeit (Minuten)</string>
     <string name="preference_allow_edit_race_factor_header">Rennfaktor ändern</string>
+    <string name="preference_protest_time_header">Protestzeit Dauer (Minuten)</string>
     <string name="preference_allow_edit_race_factor_description">Rennleiter können den Rennfaktor je Rennen ändern</string>
     <string name="error_finished_time">Die ausgewählte Zielzeit liegt vor der Zeit, der ersten Schiffeinfahrt. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_finishing_time">Die ausgewählte Zeit is vor dem Rennstart. Bitte überprüfe die Uhrzeit.</string>

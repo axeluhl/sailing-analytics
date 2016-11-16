@@ -13,7 +13,9 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogProtestStartTimeEventSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class RaceLogProtestStartTimeEventDeserializer extends BaseRaceLogEventDeserializer {
 
@@ -24,9 +26,10 @@ public class RaceLogProtestStartTimeEventDeserializer extends BaseRaceLogEventDe
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
-        Long protestStartTime = (Long) object.get(RaceLogProtestStartTimeEventSerializer.FIELD_PROTEST_START_TIME);
-        return new RaceLogProtestStartTimeEventImpl(createdAt, timePoint, author, id,
-                passId, new MillisecondsTimePoint(protestStartTime));
+        Long protestStart = (Long) object.get(RaceLogProtestStartTimeEventSerializer.FIELD_PROTEST_START_TIME);
+        Long protestEnd = (Long) object.get(RaceLogProtestStartTimeEventSerializer.FIELD_PROTEST_END_TIME);
+        TimeRange protestTime = new TimeRangeImpl(new MillisecondsTimePoint(protestStart), new MillisecondsTimePoint(protestEnd));
+        return new RaceLogProtestStartTimeEventImpl(createdAt, timePoint, author, id, passId, protestTime);
     }
 
 }
