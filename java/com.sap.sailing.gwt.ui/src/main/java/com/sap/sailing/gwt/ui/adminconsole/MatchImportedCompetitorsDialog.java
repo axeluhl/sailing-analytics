@@ -24,12 +24,12 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
- * Define dialog where we can match and apply imported competitors.
+ * Defines dialog where we can match and choose imported competitors.
  * 
  * @author Alexander_Tatarinovich
  *
  */
-public class ApplyImportedCompetitorsDialog extends DataEntryDialog<Set<CompetitorDTO>> {
+public class MatchImportedCompetitorsDialog extends DataEntryDialog<Set<CompetitorDTO>> {
 
     private CompetitorDescriptorTableWrapper<RefreshableMultiSelectionModel<CompetitorDescriptorDTO>> importedCompetitorsTable;
     private CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> existingCompetitorsTable;
@@ -43,11 +43,12 @@ public class ApplyImportedCompetitorsDialog extends DataEntryDialog<Set<Competit
 
     private final Map<CompetitorDescriptorDTO, CompetitorDTO> existingCompetitorsByImported = new HashMap<>();
 
-    public ApplyImportedCompetitorsDialog(final Iterable<CompetitorDescriptorDTO> competitorDescriptorDTOs,
+    public MatchImportedCompetitorsDialog(final Iterable<CompetitorDescriptorDTO> competitorDescriptorDTOs,
             final Iterable<CompetitorDTO> existingCompetitor, StringMessages stringMessages,
-            SailingServiceAsync sailingService, ErrorReporter errorReporter) {
+            SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            DialogCallback<Set<CompetitorDTO>> callback) {
         super(stringMessages.importCompetitors(), stringMessages.chooseWhichCompetitorsShouldBeImported(),
-                stringMessages.ok(), stringMessages.cancel(), null, /* TODO: implement calback */null);
+                stringMessages.ok(), stringMessages.cancel(), null, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -136,16 +137,6 @@ public class ApplyImportedCompetitorsDialog extends DataEntryDialog<Set<Competit
                 }
             }
         };
-    }
-
-    private void saveCompetitors(Set<CompetitorDTO> competitors) {
-        // TODO: implement logic for saving competitors
-
-        registerCompetitors(competitors);
-    }
-
-    protected void registerCompetitors(Set<CompetitorDTO> competitors) {
-        // Do nothing by default. Can be overridden in child classes for registration competitor in race or regatta
     }
 
     @Override

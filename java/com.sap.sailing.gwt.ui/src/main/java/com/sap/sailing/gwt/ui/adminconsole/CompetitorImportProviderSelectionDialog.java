@@ -28,8 +28,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
  * Defines the dialog for displaying competitor provider names and list box of pair "event, regatta" names where we have
- * competitors are available for importing. Also defines which dialog would be created for matching and applying result
- * of import using the factory {@link ApplyImportedCompetitorsDialogFactory}
+ * competitors are available for importing. Also defines which dialog would be created for matching imported competitors
+ * using the factory {@link MatchImportedCompetitorsDialogFactory}
  * 
  * @author Alexander_Tatarinovich
  *
@@ -49,11 +49,11 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
      */
     private final LinkedHashMap<String, Pair<String, String>> eventRagateNamesByCompetitorListItem;
 
-    public CompetitorImportProviderSelectionDialog(ApplyImportedCompetitorsDialogFactory applyCompetitorsDialogFactory,
+    public CompetitorImportProviderSelectionDialog(MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory,
             Busyness busynessPanel, Iterable<String> competitorProviderNames, SailingServiceAsync sailingService,
             StringMessages stringMessages, ErrorReporter errorReporter) {
         super(stringMessages.importCompetitors(), null, stringMessages.ok(), stringMessages.cancel(), null,
-                new Callback(applyCompetitorsDialogFactory, sailingService, busynessPanel, errorReporter,
+                new Callback(matchCompetitorsDialogFactory, sailingService, busynessPanel, errorReporter,
                         stringMessages));
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -162,16 +162,16 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
         private final SailingServiceAsync sailingService;
         private final ErrorReporter errorReporter;
         private final StringMessages stringMessages;
-        private final ApplyImportedCompetitorsDialogFactory applyCompetitorsDialogFactory;
+        private final MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory;
 
-        public Callback(ApplyImportedCompetitorsDialogFactory applyCompetitorsDialogFactory,
+        public Callback(MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory,
                 SailingServiceAsync sailingService, Busyness busynessPanel, ErrorReporter errorReporter,
                 StringMessages stringMessages) {
             this.sailingService = sailingService;
             this.busynessPanel = busynessPanel;
             this.errorReporter = errorReporter;
             this.stringMessages = stringMessages;
-            this.applyCompetitorsDialogFactory = applyCompetitorsDialogFactory;
+            this.matchCompetitorsDialogFactory = matchCompetitorsDialogFactory;
         }
 
         @Override
@@ -211,8 +211,8 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                                 public void onSuccess(Iterable<CompetitorDTO> competitors) {
                                     busynessPanel.setBusy(false);
 
-                                    applyCompetitorsDialogFactory
-                                            .createApplyImportedCompetitorsDialog(competitorDescriptors, competitors)
+                                    matchCompetitorsDialogFactory
+                                            .createMatchImportedCompetitorsDialog(competitorDescriptors, competitors)
                                             .show();
                                 }
                             });
@@ -222,8 +222,8 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
     }
 
     /**
-     * Factory for creating specific dialog {@link ApplyImportedCompetitorsDialog} where we will be match and apply
-     * imported competitors.
+     * Factory for creating specific dialog {@link MatchImportedCompetitorsDialog} where we will be match imported
+     * competitors.
      * 
      * @param competitorDescriptors
      *            imported competitor descriptors {@link CompetitorDescriptorDTO}
@@ -232,8 +232,8 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
      * @author Alexander_Tatarinovich
      *
      */
-    public interface ApplyImportedCompetitorsDialogFactory {
-        ApplyImportedCompetitorsDialog createApplyImportedCompetitorsDialog(
+    public interface MatchImportedCompetitorsDialogFactory {
+        MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
                 Iterable<CompetitorDescriptorDTO> competitorDescriptors, Iterable<CompetitorDTO> competitors);
     }
 

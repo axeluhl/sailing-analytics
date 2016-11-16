@@ -14,7 +14,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
-import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.ApplyImportedCompetitorsDialogFactory;
+import com.sap.sailing.gwt.ui.adminconsole.CompetitorImportProviderSelectionDialog.MatchImportedCompetitorsDialogFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -102,11 +102,11 @@ public class CompetitorPanel extends SimplePanel implements Busyness{
                 sailingService.getCompetitorProviderNames(new AsyncCallback<Iterable<String>>() {
                     @Override
                     public void onSuccess(Iterable<String> providerNames) {
-                        ApplyImportedCompetitorsDialogFactory applyCompetitorsDialogFactory = getApplyCompetitorsDialogFactory(
+                        MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
                                 sailingService, stringMessages, errorReporter);
 
                         CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
-                                applyCompetitorsDialogFactory, CompetitorPanel.this, providerNames, sailingService,
+                                matchCompetitorsDialogFactory, CompetitorPanel.this, providerNames, sailingService,
                                 stringMessages, errorReporter);
                         dialog.show();
                     }
@@ -153,16 +153,18 @@ public class CompetitorPanel extends SimplePanel implements Busyness{
         }
     }
 
-    private ApplyImportedCompetitorsDialogFactory getApplyCompetitorsDialogFactory(
+    private MatchImportedCompetitorsDialogFactory getMatchCompetitorsDialogFactory(
             final SailingServiceAsync sailingService, final StringMessages stringMessages,
             final ErrorReporter errorReporter) {
-        return new ApplyImportedCompetitorsDialogFactory() {
+        return new MatchImportedCompetitorsDialogFactory() {
             @Override
-            public ApplyImportedCompetitorsDialog createApplyImportedCompetitorsDialog(
+            public MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
                     final Iterable<CompetitorDescriptorDTO> competitorDescriptors,
                     final Iterable<CompetitorDTO> competitors) {
-                return new ApplyImportedCompetitorsDialog(competitorDescriptors, competitors, stringMessages,
-                        sailingService, errorReporter);
+                ImportCompetitorCallback importCompetitorCallback = new ImportCompetitorCallback(sailingService,
+                        errorReporter, stringMessages);
+                return new MatchImportedCompetitorsDialog(competitorDescriptors, competitors, stringMessages,
+                        sailingService, errorReporter, importCompetitorCallback);
             }
         };
     }
