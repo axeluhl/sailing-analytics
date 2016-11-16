@@ -479,6 +479,10 @@ public class AppPreferences {
             .getInteger(R.integer.preference_protest_time_duration_default));
     }
 
+    public void setProtestTimeDuration(int value) {
+        helper.getEditor().putInt(context.getString(R.string.preference_protest_time_duration_key), value).commit();
+    }
+
     public String getTheme() {
         return helper.getString(context.getString(R.string.preference_theme_key), context.getResources().getString(R.string.preference_theme_default));
     }
