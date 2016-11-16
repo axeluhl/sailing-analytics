@@ -381,6 +381,7 @@
     <string name="finished_text_01">Bitte evaluieren und übermitteln Sie die Zusammenfassung des Rennens.</string>
     <string name="finished_text_02">Ihre Zusammenfassung wurde veröffentlicht. Änderungen müssen erneut gesendet werden.</string>
     <string name="protest_time">Protestzeit</string>
+    <string name="protest_time_start">Start der Protestzeit</string>
     <string name="protest_time_end">Ende der Protestzeit</string>
     <string name="finished_duration">#TIME# min</string>
     <string name="no_camera">Keine Kamera-App gefunden</string>

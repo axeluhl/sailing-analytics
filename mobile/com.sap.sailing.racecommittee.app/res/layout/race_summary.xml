@@ -219,6 +219,46 @@
                     android:background="?attr/black" />
 
                 <LinearLayout
+                    android:id="@+id/protest_start"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="@dimen/finished_line_padding_half"
+                    android:paddingTop="@dimen/finished_line_padding_half">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="15"
+                        android:text="@string/protest_time_start"
+                        android:textColor="?attr/white"
+                        android:textSize="@dimen/finished_default_text_size" />
+
+                    <Space
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginLeft="@dimen/default_margin_half"
+                        android:layout_gravity="center_vertical" />
+
+                    <TextView
+                        android:id="@+id/protest_time_start"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="8"
+                        android:gravity="center_horizontal"
+                        android:textColor="?attr/white"
+                        android:textSize="@dimen/finished_default_text_size"
+                        tools:text="12:12:23" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="10" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/protest_end"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -229,21 +269,38 @@
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="3"
+                        android:layout_weight="15"
                         android:text="@string/protest_time_end"
                         android:textColor="?attr/white"
                         android:textSize="@dimen/finished_default_text_size" />
+
+                    <Space
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginLeft="@dimen/default_margin_half"
+                        android:layout_gravity="center_vertical" />
 
                     <TextView
                         android:id="@+id/protest_time_end"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:gravity="right"
+                        android:layout_weight="8"
+                        android:gravity="center_horizontal"
                         android:textColor="?attr/white"
                         android:textSize="@dimen/finished_default_text_size"
                         tools:text="12:12:23" />
+
+                    <TextView
+                        android:id="@+id/protest_time_duration"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="10"
+                        android:gravity="right"
+                        android:textColor="?attr/white"
+                        android:textSize="@dimen/finished_default_text_size"
+                        tools:text="12' 12" />
                 </LinearLayout>
             </LinearLayout>
 
