@@ -14,10 +14,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.RRS26RacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.SWCRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.LineStartRacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
-import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
@@ -28,18 +26,14 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartModeFragment extends BaseFragment {
 
-    private static final String PROCEDURE = "procedure";
-
     private ListView mListView;
-    private RRS26RacingProcedure mRRS26Procedure = null;
-    private SWCRacingProcedure mSWCProcedure = null;
+    private LineStartRacingProcedure mLineStartProcedure;
     private int mFlagSize;
 
-    public static StartModeFragment newInstance(@START_MODE_VALUES int startMode, String procedure) {
+    public static StartModeFragment newInstance(@START_MODE_VALUES int startMode) {
         StartModeFragment fragment = new StartModeFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
-        args.putString(PROCEDURE, procedure);
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,12 +58,7 @@ public class StartModeFragment extends BaseFragment {
             }
         }
 
-        String procedure = getArguments().getString(PROCEDURE, "");
-        if (procedure.equals(RacingProcedureType.RRS26.toString())) {
-            mRRS26Procedure = getRaceState().getTypedRacingProcedure();
-        } else if (procedure.equals(RacingProcedureType.SWC.toString())) {
-            mSWCProcedure = getRaceState().getTypedRacingProcedure();
-        }
+        mLineStartProcedure = getRaceState().getTypedRacingProcedure();
     }
 
     @Override
@@ -98,12 +87,7 @@ public class StartModeFragment extends BaseFragment {
         super.onResume();
 
         ArrayList<StartModeItem> startModes = new ArrayList<>();
-        List<Flags> flags = null;
-        if (mRRS26Procedure != null) {
-            flags = mRRS26Procedure.getConfiguration().getStartModeFlags();
-        } else if (mSWCProcedure != null) {
-            flags = mSWCProcedure.getConfiguration().getStartModeFlags();
-        }
+        List<Flags> flags = mLineStartProcedure.getConfiguration().getStartModeFlags();
         if (flags != null) {
             int position = 0;
             int selected = -1;
@@ -114,12 +98,7 @@ public class StartModeFragment extends BaseFragment {
             }
             Collections.sort(startModes, new StartModeComparator());
             for (StartModeItem startModeItem : startModes) {
-                Flags flag = null;
-                if (mRRS26Procedure != null) {
-                    flag = mRRS26Procedure.getStartModeFlag();
-                } else if (mSWCProcedure != null) {
-                    flag = mSWCProcedure.getStartModeFlag();
-                }
+                Flags flag = mLineStartProcedure.getStartModeFlag();
                 if (startModeItem.getFlag().equals(flag)) {
                     selected = position;
                 }
@@ -152,14 +131,8 @@ public class StartModeFragment extends BaseFragment {
 
     public void onClick(StartModeItem startMode) {
         boolean sameFlag = false;
-        Flags flag = null;
-        if (mRRS26Procedure != null) {
-            flag = mRRS26Procedure.getStartModeFlag();
-            mRRS26Procedure.setStartModeFlag(MillisecondsTimePoint.now(), startMode.getFlag());
-        } else if (mSWCProcedure != null) {
-            flag = mSWCProcedure.getStartModeFlag();
-            mSWCProcedure.setStartModeFlag(MillisecondsTimePoint.now(), startMode.getFlag());
-        }
+        Flags flag = mLineStartProcedure.getStartModeFlag();
+        mLineStartProcedure.setStartModeFlag(MillisecondsTimePoint.now(), startMode.getFlag());
         if (startMode.getFlag().equals(flag)) {
             sameFlag = true;
         }

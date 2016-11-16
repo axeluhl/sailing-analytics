@@ -30,8 +30,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartPathFinderFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFactorFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
@@ -474,8 +474,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(StartModeFragment
-                        .newInstance(StartModeFragment.START_MODE_PLANNED, getRaceState().getTypedRacingProcedure().getType().toString()));
+                    replaceFragment(StartModeFragment.newInstance(StartModeFragment.START_MODE_PLANNED));
                     break;
 
                 default:
