@@ -21,7 +21,9 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -271,11 +273,12 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
     private void setAndAnnounceProtestTime() {
         List<ManagedRace> selectedRaces = getSelectedRaces();
-        TimePoint protestTime = TimeUtils.getTime(mTimePicker);
+        TimePoint startTime = TimeUtils.getTime(mTimePicker);
         TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
             Duration duration = Duration.ONE_MINUTE.times(90);
-            race.getState().setProtestTime(now, protestTime, duration);
+            TimeRange protestTime = new TimeRangeImpl(startTime, startTime.plus(duration));
+            race.getState().setProtestTime(now, protestTime);
         }
         if (mHome != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {

@@ -64,8 +64,11 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.TripleSerializer;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStoringAndRetrievingRaceLogInRegatta {
     public TestStoringAndRetrievingRaceLogInRegatta() throws UnknownHostException, MongoException {
@@ -97,8 +100,10 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     }
     
     @Test
-    public void testStoreAndRetrieveRegattaWithRaceLogProtestStartTimeEvent() {        
-        RaceLogProtestStartTimeEvent expectedEvent = new RaceLogProtestStartTimeEventImpl(now, author, 0, MillisecondsTimePoint.now(), Duration.ONE_MINUTE.times(90));
+    public void testStoreAndRetrieveRegattaWithRaceLogProtestStartTimeEvent() {
+        TimePoint now = MillisecondsTimePoint.now();
+        TimeRange protestTime = new TimeRangeImpl(now, now.plus(Duration.ONE_MINUTE.times(90)));
+        RaceLogProtestStartTimeEvent expectedEvent = new RaceLogProtestStartTimeEventImpl(now, author, 0, protestTime);
         addAndStoreRaceLogEvent(regatta, raceColumnName, expectedEvent);
         RaceLog loadedRaceLog = retrieveRaceLog();
         loadedRaceLog.lockForRead();
@@ -108,8 +113,8 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
             assertEquals(expectedEvent.getLogicalTimePoint(), actualEvent.getLogicalTimePoint());
             assertEquals(expectedEvent.getPassId(), actualEvent.getPassId());
             assertEquals(expectedEvent.getId(), actualEvent.getId());
-            assertEquals(expectedEvent.getProtestStartTime(), actualEvent.getProtestStartTime());
-            assertEquals(expectedEvent.getProtestDuration(), actualEvent.getProtestDuration());
+            assertEquals(expectedEvent.getProtestTime().from(), actualEvent.getProtestTime().from());
+            assertEquals(expectedEvent.getProtestTime().to(), actualEvent.getProtestTime().to());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();

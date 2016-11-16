@@ -10,7 +10,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogChangedListener;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
@@ -19,7 +18,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastWindFixFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestStartTimeFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ProtestTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
@@ -42,8 +41,8 @@ import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 
 /**
@@ -118,7 +117,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private final StartTimeFinder startTimeAnalyzer;
     private final FinishingTimeFinder finishingTimeAnalyzer;
     private final FinishedTimeFinder finishedTimeAnalyzer;
-    private final ProtestStartTimeFinder protestTimeAnalyzer;
+    private final ProtestTimeFinder protestTimeAnalyzer;
 
     private final FinishPositioningListFinder finishPositioningListAnalyzer;
     private final ConfirmedFinishPositioningListFinder confirmedFinishPositioningListAnalyzer;
@@ -143,7 +142,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private StartTimeFinderResult cachedStartTimeFinderResult;
     private TimePoint cachedFinishingTime;
     private TimePoint cachedFinishedTime;
-    private RaceLogProtestStartTimeEvent cachedProtest;
+    private TimeRange cachedProtest;
     private CompetitorResults cachedPositionedCompetitors;
     private CompetitorResults cachedConfirmedPositionedCompetitors;
     private CourseBase cachedCourseDesign;
@@ -186,7 +185,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.startTimeAnalyzer = new StartTimeFinder(raceLogResolver, raceLog);
         this.finishingTimeAnalyzer = new FinishingTimeFinder(raceLog);
         this.finishedTimeAnalyzer = new FinishedTimeFinder(raceLog);
-        this.protestTimeAnalyzer = new ProtestStartTimeFinder(raceLog);
+        this.protestTimeAnalyzer = new ProtestTimeFinder(raceLog);
         this.finishPositioningListAnalyzer = new FinishPositioningListFinder(raceLog);
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
         this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ false);
@@ -320,13 +319,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
 
     @Override
-    public TimePoint getProtestTime() {
-        return cachedProtest.getProtestStartTime();
-    }
-
-    @Override
-    public Duration getProtestDuration() {
-        return cachedProtest.getProtestDuration();
+    public TimeRange getProtestTime() {
+        return cachedProtest;
     }
 
     @Override
@@ -466,7 +460,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             changedListeners.onFinishedTimeChanged(this);
         }
 
-        RaceLogProtestStartTimeEvent protest = protestTimeAnalyzer.analyze();
+        TimeRange protest = protestTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedProtest, protest)) {
             cachedProtest = protest;
             changedListeners.onProtestTimeChanged(this);

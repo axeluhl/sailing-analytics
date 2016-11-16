@@ -5,25 +5,23 @@ import java.io.Serializable;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 
 public class RaceLogProtestStartTimeEventImpl extends RaceLogEventImpl implements RaceLogProtestStartTimeEvent {
     private static final long serialVersionUID = -1800827552916395996L;
 
-    private final TimePoint protestStartTime;
-    private final Duration protestDuration;
-
+    private final TimeRange protestTime;
+    
     public RaceLogProtestStartTimeEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
-            Serializable pId, int pPassId, TimePoint protestStartTime, Duration protestDuration) {
+            Serializable pId, int pPassId, TimeRange protestTime) {
         super(createdAt, pTimePoint, author, pId, pPassId);
-        this.protestStartTime = protestStartTime;
-        this.protestDuration = protestDuration;
+        this.protestTime = protestTime;
     }
 
     public RaceLogProtestStartTimeEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId,
-            TimePoint protestStartTime, Duration protestDuration) {
-        this(now(), logicalTimePoint, author, randId(), pPassId, protestStartTime, protestDuration);
+            TimeRange protestTime) {
+        this(now(), logicalTimePoint, author, randId(), pPassId, protestTime);
     }
 
     @Override
@@ -32,18 +30,13 @@ public class RaceLogProtestStartTimeEventImpl extends RaceLogEventImpl implement
     }
 
     @Override
-    public TimePoint getProtestStartTime() {
-        return protestStartTime;
-    }
-
-    @Override
-    public Duration getProtestDuration() {
-        return protestDuration;
+    public TimeRange getProtestTime() {
+        return protestTime;
     }
 
     @Override
     public String getShortInfo() {
-        return "protestStartTime=" + protestStartTime + ", protestDuration=" + protestDuration;
+        return "protestStartTime=" + protestTime.from() + ", protestEndTime=" + protestTime.to();
     }
 
 }

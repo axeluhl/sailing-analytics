@@ -943,14 +943,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             
             if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
-                final TimePoint protestStartTime = state.getProtestTime();
-                final Duration protestDuration = state.getProtestDuration();
-                if (protestStartTime != null && protestDuration != null) {
-                    raceInfoDTO.protestFinishTime = protestStartTime.plus(protestDuration).asDate();
-                    raceInfoDTO.lastUpperFlag = Flags.BRAVO;
-                    raceInfoDTO.lastLowerFlag = Flags.NONE;
-                    raceInfoDTO.lastFlagsAreDisplayed = true;
-                    raceInfoDTO.lastFlagsDisplayedStateChanged = true;
+                if (state.getProtestTime() != null) {
+                    final TimePoint protestEndTime = state.getProtestTime().to();
+                    if (protestEndTime != null) {
+                        raceInfoDTO.protestFinishTime = protestEndTime.asDate();
+                        raceInfoDTO.lastUpperFlag = Flags.BRAVO;
+                        raceInfoDTO.lastLowerFlag = Flags.NONE;
+                        raceInfoDTO.lastFlagsAreDisplayed = true;
+                        raceInfoDTO.lastFlagsDisplayedStateChanged = true;
+                    }
                 }
             }
             
