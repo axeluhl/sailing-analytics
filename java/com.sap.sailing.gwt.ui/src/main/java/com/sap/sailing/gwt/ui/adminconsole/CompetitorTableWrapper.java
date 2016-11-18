@@ -383,7 +383,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
     }
 
     /**
-     * Use this method if you want to make some rows grayed out with a tool tip
+     * This method makes rows grayed out with a tool tip
      */
     public void grayOutCompetitors(final List<CompetitorWithToolTipDTO> competitors) {
         table.addCellPreviewHandler(new CellPreviewEvent.Handler<CompetitorDTO>() {

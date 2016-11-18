@@ -20,7 +20,6 @@ import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -89,72 +88,68 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
 
     public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
-            String raceColumnName, String fleetName,
+            String raceColumnName, String fleetName, List<FleetDTO> fleets,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
         this(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass,
-                raceColumnName, fleetName, new Validator(stringMessages));
+                raceColumnName, fleetName, fleets, new Validator(stringMessages));
     }
     
     public RaceLogCompetitorRegistrationDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean editable,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
-            String leaderboardName, String boatClass, String raceColumnName, String fleetName, Validator validator) {
+            String leaderboardName, String boatClass, String raceColumnName, String fleetName, List<FleetDTO> fleets, Validator validator) {
         super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass, validator);
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
         fleetNameWithCompetitors = new HashMap<>();
-        findCompetitorsFromTheSameRaceColumn();
+        findCompetitorsFromTheSameRaceColumn(fleets);
         competitorRegistrationInRaceLogCheckBox = new CheckBox(stringMessages.registerCompetitorsOnRace());
         validator.setCompetitorRegistrationInRaceLogCheckBox(competitorRegistrationInRaceLogCheckBox);
         validator.setFleetWithCompetitors(fleetNameWithCompetitors);
         setupCompetitorRegistationsOnRaceCheckbox();
     }
 
-    private void findCompetitorsFromTheSameRaceColumn() {
+    /**
+     * Finds the competitors from the fleets of the same race column and puts them to the map
+     */
+    private void findCompetitorsFromTheSameRaceColumn(final List<FleetDTO> fleets) {
         fleetNameWithCompetitors.clear();
-        sailingService.getLeaderboard(leaderboardName, new AsyncCallback<StrippedLeaderboardDTO>() {
-            @Override
-            public void onSuccess(StrippedLeaderboardDTO result) {
-                final List<FleetDTO> fleets = result.getRaceColumnByName(raceColumnName).getFleets();
-                for (FleetDTO fleetDTO : fleets) {
-                    final String curFleetName = fleetDTO.getName();
-                    if (!curFleetName.equals(fleetName)) {
-                        sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName,
-                                curFleetName, new AsyncCallback<Collection<CompetitorDTO>>() {
-        
-                                    @Override
-                                    public void onSuccess(Collection<CompetitorDTO> result) {
-                                        fleetNameWithCompetitors.put(curFleetName, new HashSet<>(result));
-                                        //if the data was gained completely then gray out specific rows
-                                        if (fleetNameWithCompetitors.size() == fleets.size() - 1) {
-                                            grayOutRows();
-                                        }
-                                    }
-                                    
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        errorReporter.reportError("Could not load already registered competitors: "
-                                                + caught.getMessage());
-                                    }
-                                });
-                    }
-                }
-            }
+        for (FleetDTO fleetDTO : fleets) {
+            final String curFleetName = fleetDTO.getName();
+            if (!curFleetName.equals(fleetName)) {
+                sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, curFleetName,
+                        new AsyncCallback<Collection<CompetitorDTO>>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Could not load leaderboard: " + caught.getMessage());
+                            @Override
+                            public void onSuccess(Collection<CompetitorDTO> result) {
+                                fleetNameWithCompetitors.put(curFleetName, new HashSet<>(result));
+                                // if the data was gained completely then gray out specific rows
+                                // TODO : maybe, there is a way to make it better
+                                if (fleetNameWithCompetitors.size() == fleets.size() - 1) {
+                                    grayOutRows();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(
+                                        "Could not load already registered competitors: " + caught.getMessage());
+                            }
+                        });
             }
-        });
+        }
     }
 
+    /**
+     * Grays out rows with competitors from the same race column
+     */
     private void grayOutRows() {
         List<CompetitorWithToolTipDTO> competitors = new ArrayList<>();
         for (Map.Entry<String, Set<CompetitorDTO>> entry : fleetNameWithCompetitors.entrySet()) {
             if (!entry.getKey().equals(fleetName)) {
                 for (CompetitorDTO competitor : entry.getValue()) {
-                    competitors.add(new CompetitorWithToolTipDTO(competitor,
-                            stringMessages.toolTipMessage(competitor.getName(), fleetName, entry.getKey(), raceColumnName)));
+                    competitors.add(new CompetitorWithToolTipDTO(competitor, stringMessages
+                            .toolTipMessage(competitor.getName(), fleetName, entry.getKey(), raceColumnName)));
                 }
             }
         }
