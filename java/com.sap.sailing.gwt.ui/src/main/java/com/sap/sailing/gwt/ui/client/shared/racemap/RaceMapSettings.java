@@ -167,20 +167,20 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      * copy constructor that produces a new settings object that equals the one passed as argument but takes the zoom settings from the second parameter
      */
     public RaceMapSettings(RaceMapSettings settings, RaceMapZoomSettings zoomSettings) {
-        this.buoyZoneRadius = settings.buoyZoneRadius;
+        this.buoyZoneRadius.setValue(settings.buoyZoneRadius.getValue());
         this.helpLinesSettings = new RaceMapHelpLinesSettings(settings.getHelpLinesSettings().getVisibleHelpLineTypes());
-        this.transparentHoverlines = settings.transparentHoverlines;
-        this.hoverlineStrokeWeight = settings.hoverlineStrokeWeight;
-        this.maneuverTypesToShow = settings.maneuverTypesToShow;
-        this.showDouglasPeuckerPoints = settings.showDouglasPeuckerPoints;
-        this.showOnlySelectedCompetitors = settings.showOnlySelectedCompetitors;
-        this.showSelectedCompetitorsInfo = settings.showSelectedCompetitorsInfo;
-        this.showSimulationOverlay = settings.showSimulationOverlay;
-        this.showWindStreamletOverlay = settings.showWindStreamletOverlay;
-        this.showWindStreamletColors = settings.showWindStreamletColors;
-        this.showMapControls = settings.showMapControls;
-        this.tailLengthInMilliseconds = settings.tailLengthInMilliseconds;
-        this.windUp = settings.windUp;
+        this.transparentHoverlines.setValue(settings.transparentHoverlines.getValue());
+        this.hoverlineStrokeWeight.setValue(settings.hoverlineStrokeWeight.getValue());
+        this.maneuverTypesToShow.setValues(settings.maneuverTypesToShow.getValues());
+        this.showDouglasPeuckerPoints.setValue(settings.showDouglasPeuckerPoints.getValue());
+        this.showOnlySelectedCompetitors.setValue(settings.showOnlySelectedCompetitors.getValue());
+        this.showSelectedCompetitorsInfo.setValue(settings.showSelectedCompetitorsInfo.getValue());
+        this.showSimulationOverlay.setValue(settings.showSimulationOverlay.getValue());
+        this.showWindStreamletOverlay.setValue(settings.showWindStreamletOverlay.getValue());
+        this.showWindStreamletColors.setValue(settings.showWindStreamletColors.getValue());
+        this.showMapControls.setValue(settings.showMapControls.getValue());
+        this.tailLengthInMilliseconds.setValue(settings.tailLengthInMilliseconds.getValue());
+        this.windUp.setValue(settings.windUp.getValue());
         this.zoomSettings = zoomSettings;
     }
     

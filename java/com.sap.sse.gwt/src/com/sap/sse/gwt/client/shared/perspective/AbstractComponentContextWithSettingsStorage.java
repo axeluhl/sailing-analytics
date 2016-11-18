@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
+import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.components.Component;
 
 public abstract class AbstractComponentContextWithSettingsStorage<PL extends PerspectiveLifecycle<PS>, PS extends Settings> extends AbstractComponentContext<PL, PS> {
@@ -137,8 +139,15 @@ public abstract class AbstractComponentContextWithSettingsStorage<PL extends Per
     }
     
     @Override
-    public boolean hasMakeCustomDefaultSettingsSupport() {
-        return true;
+    public boolean hasMakeCustomDefaultSettingsSupport(Component<?> component) {
+        if(!component.hasSettings()) {
+            return false;
+        }
+        Settings settings = component.getSettings();
+        if(settings instanceof SettingsMap || settings instanceof GenericSerializableSettings) {
+            return true;
+        }
+        return false;
     }
     
 }

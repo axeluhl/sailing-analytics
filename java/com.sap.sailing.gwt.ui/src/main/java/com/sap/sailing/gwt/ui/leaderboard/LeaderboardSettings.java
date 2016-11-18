@@ -134,7 +134,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         
         autoExpandPreSelectedRace = new BooleanSetting("autoExpandPreSelectedRace", this, false);
         updateUponPlayStateChange = new BooleanSetting("updateUponPlayStateChange", this, true);
-        sortAscending = new BooleanSetting("sortAscending", this);
+        sortAscending = new BooleanSetting("sortAscending", this, true);
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
         showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this, true);
         showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this, true);

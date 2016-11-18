@@ -143,7 +143,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.PersistentSettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
@@ -727,7 +727,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         settingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new PersistentSettingsDialog<RaceMapSettings>(component, stringMessages).show();
+                new SettingsDialog<RaceMapSettings>(component, stringMessages).show();
             }
         });
         map.setControls(ControlPosition.RIGHT_TOP, settingsButton);

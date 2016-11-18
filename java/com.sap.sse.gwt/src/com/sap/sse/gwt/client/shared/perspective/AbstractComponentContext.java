@@ -23,7 +23,7 @@ public abstract class AbstractComponentContext<PL extends PerspectiveLifecycle<P
         return rootPerspectiveLifecycle.createDefaultSettings();
     }
     
-    public boolean hasMakeCustomDefaultSettingsSupport() {
+    public boolean hasMakeCustomDefaultSettingsSupport(Component<?> component) {
         return false;
     }
 }

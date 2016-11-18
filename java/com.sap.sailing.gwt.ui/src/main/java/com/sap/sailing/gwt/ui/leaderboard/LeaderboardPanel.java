@@ -120,7 +120,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
-import com.sap.sse.gwt.client.shared.components.PersistentSettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
@@ -1883,7 +1883,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
             competitorSearchTextBox.getSettingsButton().addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    new PersistentSettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
+                    new SettingsDialog<LeaderboardSettings>(LeaderboardPanel.this, stringMessages).show();
                 }
             });
             this.competitorFilterPanel = competitorSearchTextBox;
