@@ -90,14 +90,6 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     public RaceMapSettings() {
-        this(
-                /* showMapControls */ true,
-                new RaceMapHelpLinesSettings(),
-                /* windUp */ false,
-                /* buoyZoneRadius */ DEFAULT_BUOY_ZONE_RADIUS,
-                /* showWindStreamletOverlay */ false,
-                /* showWindStreamletColors */ false,
-                /* showSimulationOverlay */ false);
     }
 
     public RaceMapSettings(RaceMapZoomSettings zoomSettings, RaceMapHelpLinesSettings helpLinesSettings,
@@ -168,7 +160,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
      */
     public RaceMapSettings(RaceMapSettings settings, RaceMapZoomSettings zoomSettings) {
         this.buoyZoneRadius.setValue(settings.buoyZoneRadius.getValue());
-        this.helpLinesSettings = new RaceMapHelpLinesSettings(settings.getHelpLinesSettings().getVisibleHelpLineTypes());
+        this.helpLinesSettings.init(settings.getHelpLinesSettings());
         this.transparentHoverlines.setValue(settings.transparentHoverlines.getValue());
         this.hoverlineStrokeWeight.setValue(settings.hoverlineStrokeWeight.getValue());
         this.maneuverTypesToShow.setValues(settings.maneuverTypesToShow.getValues());
@@ -181,7 +173,7 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         this.showMapControls.setValue(settings.showMapControls.getValue());
         this.tailLengthInMilliseconds.setValue(settings.tailLengthInMilliseconds.getValue());
         this.windUp.setValue(settings.windUp.getValue());
-        this.zoomSettings = zoomSettings;
+        this.zoomSettings.init(zoomSettings);
     }
     
     /**

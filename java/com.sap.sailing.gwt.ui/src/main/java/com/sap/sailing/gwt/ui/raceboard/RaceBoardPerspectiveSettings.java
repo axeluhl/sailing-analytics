@@ -24,7 +24,6 @@ public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSet
     private transient BooleanSetting canReplayDuringLiveRaces;
     private transient DurationSetting initialDurationAfterRaceStartInReplay;
     
-    //TODO unify the names of url params and default settings names
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
     public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
@@ -37,9 +36,6 @@ public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSet
     public static final String PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS = "t";
     
     public RaceBoardPerspectiveSettings() {
-        this(/* activeCompetitorsFilterSetName */null, /* showLeaderboard */true,
-        /* showWindChart */false, /* showCompetitorsChart */false, 
-        /* canReplayDuringLiveRaces */false, /* initialDurationAfterRaceStartInReplay */ null);
     }
     
     @Override

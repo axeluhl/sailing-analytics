@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
@@ -20,9 +19,7 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
 
     @Override
     public MultiCompetitorRaceChartSettings createDefaultSettings() {
-        ChartSettings chartSettings = new ChartSettings(AbstractCompetitorRaceChart.DEFAULT_STEPSIZE);
-        DetailType defaultDetailType = DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
-        return new MultiCompetitorRaceChartSettings(chartSettings, defaultDetailType, null);
+        return new MultiCompetitorRaceChartSettings();
     }
 
     @Override

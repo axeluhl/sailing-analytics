@@ -14,15 +14,11 @@ public class ChartSettings extends AbstractGenericSerializableSettings {
         stepSizeInMillis = new LongSetting("stepSizeInMillis", this, AbstractCompetitorRaceChart.DEFAULT_STEPSIZE);
     }
     
+    public ChartSettings() {
+    }
+    
     public ChartSettings(long stepSizeInMillis) {
         this.stepSizeInMillis.setValue(stepSizeInMillis);
-    }
-
-    /**
-     * Copy-constructor
-     */
-    public ChartSettings(ChartSettings superResult) {
-        this(superResult.getStepSizeInMillis());
     }
 
     public long getStepSizeInMillis() {

@@ -16,6 +16,9 @@ public class MultiCompetitorRaceChartSettings extends ChartSettings {
         firstDetailType = new EnumSetting<>("firstDetailType", this, DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, new DetailTypeStringToEnumConverter());
         secondDetailType = new EnumSetting<>("secondDetailType", this, null, new DetailTypeStringToEnumConverter());
     }
+    
+    public MultiCompetitorRaceChartSettings() {
+    }
 
     /**
      * @param firstDetailType must not be {@code null}
@@ -23,7 +26,7 @@ public class MultiCompetitorRaceChartSettings extends ChartSettings {
      */
     public MultiCompetitorRaceChartSettings(ChartSettings settings, DetailType firstDetailType,
             DetailType secondDetailType) {
-        super(settings);
+        super(settings.getStepSizeInMillis());
         this.firstDetailType.setValue(firstDetailType);
         this.secondDetailType.setValue(secondDetailType);
     }

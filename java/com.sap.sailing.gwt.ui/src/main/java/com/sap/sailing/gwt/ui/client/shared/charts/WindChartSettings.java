@@ -54,14 +54,6 @@ public class WindChartSettings extends AbstractGenericSerializableSettings {
         this.resolutionInMilliseconds.setValue(resolutionInMilliseconds);
     }
     
-    /**
-     * Uses {@link WindChart#DEFAULT_RESOLUTION_IN_MILLISECONDS} as resolution
-     */
-    public WindChartSettings(boolean showWindSpeedSeries, Set<WindSourceType> windSpeedSourcesToDisplay, 
-            boolean showWindDirectionsSeries, Set<WindSourceType> windDirectionSourcesToDisplay) {
-        this(showWindSpeedSeries, windSpeedSourcesToDisplay, showWindDirectionsSeries, windDirectionSourcesToDisplay, DEFAULT_RESOLUTION_IN_MILLISECONDS);
-    }
-
     public Set<WindSourceType> getWindDirectionSourcesToDisplay() {
         return Util.createSet(windDirectionSourcesToDisplay.getValues());
     }
