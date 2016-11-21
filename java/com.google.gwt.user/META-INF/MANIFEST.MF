@@ -186,4 +186,5 @@ Export-Package: com.google.gwt.activity.shared,
  javaemul.internal,
  javaemul.internal.annotations,
  jsinterop.annotations
-Require-Bundle: javax.servlet;bundle-version="3.1.0"
+Require-Bundle: javax.servlet;bundle-version="3.1.0",
+ org.junit4;bundle-version="4.8.2";resolution:=optional
