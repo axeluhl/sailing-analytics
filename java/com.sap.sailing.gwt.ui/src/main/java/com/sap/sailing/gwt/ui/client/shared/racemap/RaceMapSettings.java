@@ -73,13 +73,13 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     @Override
     protected void addChildSettings() {
         showMapControls = new BooleanSetting("showMapControls", this, true);
-        helpLinesSettings = new RaceMapHelpLinesSettings();
+        helpLinesSettings = new RaceMapHelpLinesSettings("helpLinesSettings", this);
         windUp = new BooleanSetting("windUp", this, false);
         buoyZoneRadius = new DistanceSetting("buoyZoneRadius", this, DEFAULT_BUOY_ZONE_RADIUS);
         showWindStreamletOverlay = new BooleanSetting("showWindStreamletOverlay", this, false);
         showWindStreamletColors = new BooleanSetting("showWindStreamletColors", this, false);
         showSimulationOverlay = new BooleanSetting("showSimulationOverlay", this, false);
-        zoomSettings = new RaceMapZoomSettings();
+        zoomSettings = new RaceMapZoomSettings("zoomSettings", this);
         transparentHoverlines = new BooleanSetting("transparentHoverlines", this, false);
         hoverlineStrokeWeight = new IntegerSetting("hoverlineStrokeWeight", this, 15);
         tailLengthInMilliseconds = new LongSetting("tailLengthInMilliseconds", this, 100000l);
@@ -105,8 +105,8 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
             Distance buoyZoneRadius, boolean showOnlySelectedCompetitors, boolean showSelectedCompetitorsInfo,
             boolean showWindStreamletColors, boolean showWindStreamletOverlay, boolean showSimulationOverlay,
             boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, boolean showDouglasPeuckerPoints) {
-        this.zoomSettings = zoomSettings;
-        this.helpLinesSettings = helpLinesSettings;
+        this.zoomSettings.init(zoomSettings);
+        this.helpLinesSettings.init(helpLinesSettings);
         this.transparentHoverlines.setValue(transparentHoverlines);
         this.hoverlineStrokeWeight.setValue(hoverlineStrokeWeight);
         this.tailLengthInMilliseconds.setValue(tailLengthInMilliseconds);

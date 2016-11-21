@@ -39,6 +39,22 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
     public RaceMapHelpLinesSettings() {
     }
     
+    /**
+     * Creates new RaceMapHelpLinesSettings with the {@link HelpLineTypes} <code>STARTLINE</code>,
+     * <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
+     */
+    public RaceMapHelpLinesSettings(String propertyName, AbstractGenericSerializableSettings parentSettings) {
+        super(propertyName, parentSettings);
+    }
+    
+    /**
+     * Creates new RaceMapHelpLinesSettings with the {@link HelpLineTypes} <code>STARTLINE</code>,
+     * <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
+     */
+     protected void init(RaceMapHelpLinesSettings settings) {
+         this.visibleHelpLines.setValues(settings.getVisibleHelpLineTypes());
+     }
+    
     public RaceMapHelpLinesSettings(Iterable<HelpLineTypes> visibleHelpLines) {
         this.visibleHelpLines.setValues(visibleHelpLines);
     }

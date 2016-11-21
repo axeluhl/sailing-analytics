@@ -43,19 +43,33 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
         typesToConsiderOnZoom = new EnumListSetting<>("typesToConsiderOnZoom", this, Collections.singleton(ZoomTypes.BUOYS), new ZoomTypesStringToEnumConverter());
         zoomToSelectedCompetitors = new BooleanSetting("zoomToSelectedCompetitors", this, false);
     }
-
+    
     /**
      * Creates default RaceMapZoomSettings with the {@link ZoomTypes} <code>BUOYS</code>.<br />
      * The attribute <code>zoomToSelectedCompetitors</code> will be <code>false</code>.
      */
     public RaceMapZoomSettings() {
+        super();
+    }
+
+    /**
+     * Creates default RaceMapZoomSettings with the {@link ZoomTypes} <code>BUOYS</code>.<br />
+     * The attribute <code>zoomToSelectedCompetitors</code> will be <code>false</code>.
+     */
+    public RaceMapZoomSettings(String propertyName, AbstractGenericSerializableSettings parentSettings) {
+        super(propertyName, parentSettings);
     }
     
     public RaceMapZoomSettings(Iterable<ZoomTypes> typesToConsider, boolean zoomToSelected) {
         this.typesToConsiderOnZoom.setValues(typesToConsider);
         this.zoomToSelectedCompetitors.setValue(zoomToSelected);
     }
-
+    
+    protected void init(RaceMapZoomSettings settings) {
+        this.typesToConsiderOnZoom.setValues(settings.getTypesToConsiderOnZoom());
+        this.zoomToSelectedCompetitors.setValue(settings.isZoomToSelectedCompetitors());
+    }
+    
     public LatLngBounds getNewBounds(RaceMap forMap) {
         LatLngBounds newBounds = null;
         if (typesToConsiderOnZoom != null) {
