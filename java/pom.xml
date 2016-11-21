@@ -116,6 +116,8 @@
         <module>com.sap.sailing.server.gateway.serialization</module>
         <module>com.sap.sailing.www</module>
         <module>com.sap.sailing.xmlexport</module>
+        <module>com.google.gwt.user</module>
+        <module>com.google.gwt.sev</module>
         <module>com.google.gwt.servlet</module>
         <module>com.tractrac.clientmodule</module>
         <module>com.googlecode.java-diff-utils</module>
