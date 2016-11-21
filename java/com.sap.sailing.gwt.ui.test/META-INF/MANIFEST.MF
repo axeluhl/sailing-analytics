@@ -18,8 +18,8 @@ Require-Bundle: com.sap.sailing.server,
  com.google.gwt.user;bundle-version="2.8.0";resolution:=optional
 Bundle-ClassPath: .
 Import-Package: com.sap.sailing.domain.racelogtracking.impl,
- javax.servlet;version="2.6.0",
- javax.servlet.http;version="2.6.0",
+ javax.servlet;version="3.1.0",
+ javax.servlet.http;version="3.1.0",
  junit.framework;version="4.8.1",
  org.json.simple,
  org.json.simple.parser,
