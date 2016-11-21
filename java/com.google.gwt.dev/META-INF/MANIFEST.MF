@@ -10,4 +10,5 @@ Bundle-ClassPath: lib/gwt-dev.jar,
 Require-Bundle: javax.servlet;bundle-version="3.1.0"
 Export-Package: com.google.gwt.core.ext,
  com.google.gwt.core.ext.linker,
- com.google.gwt.core.ext.linker.impl
+ com.google.gwt.core.ext.linker.impl,
+ com.google.gwt.dev.cfg
