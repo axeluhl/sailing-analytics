@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
@@ -381,20 +382,6 @@ public class TrackingService extends Service implements  android.location.Locati
     public class TrackingBinder extends Binder {
         public TrackingService getService() {
             return TrackingService.this;
-        }
-    }
-
-    public enum GPSQuality {
-        noSignal(0), poor(2), good(3), great(4);
-
-        private final int gpsQuality;
-
-        GPSQuality(int quality) {
-            this.gpsQuality = quality;
-        }
-
-        public int toInt() {
-            return this.gpsQuality;
         }
     }
 

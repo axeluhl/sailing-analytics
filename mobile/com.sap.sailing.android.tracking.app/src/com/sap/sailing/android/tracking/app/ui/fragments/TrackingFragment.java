@@ -18,12 +18,12 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
-import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
@@ -91,7 +91,7 @@ public class TrackingFragment extends BaseFragment {
 
             modeText.setText(savedInstanceState.getString(SIS_MODE));
             statusText.setText(savedInstanceState.getString(SIS_STATUS));
-            qualityIndicator.setSignalQuality(savedInstanceState.getInt(SIS_GPS_QUALITY));
+            qualityIndicator.setSignalQuality(GPSQuality.getValue(savedInstanceState.getInt(SIS_GPS_QUALITY)));
             accuracyText.setText(savedInstanceState.getString(SIS_GPS_ACCURACY));
             unsentFixesText.setText(savedInstanceState.getString(SIS_GPS_UNSENT_FIXES));
         } else {
@@ -235,7 +235,7 @@ public class TrackingFragment extends BaseFragment {
         if (isAdded()) {
             Activity activity = getActivity();
             SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) activity.findViewById(R.id.gps_quality_indicator);
-            indicatorView.setSignalQuality(quality.toInt());
+            indicatorView.setSignalQuality(quality);
             TextView accuracyTextView = (TextView) getActivity().findViewById(R.id.gps_accuracy_label);
             accuracyTextView.setText("~ " + String.valueOf(Math.round(gpsAccurracy)) + " m");
             updateTrackingStatus(quality);

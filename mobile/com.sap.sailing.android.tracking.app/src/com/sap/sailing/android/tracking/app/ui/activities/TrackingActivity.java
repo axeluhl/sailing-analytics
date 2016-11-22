@@ -25,10 +25,10 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivityListener;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
-import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityListener;
 import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingBinder;
 import com.sap.sailing.android.tracking.app.ui.fragments.CompassFragment;
@@ -242,9 +242,9 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     @Override
-    public void gpsQualityAndAccuracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing bearing, Speed speed) {
+    public void gpsQualityAndAccuracyUpdated(GPSQuality quality, float accuracy, Bearing bearing, Speed speed) {
         if (trackingFragment.isAdded()) {
-            trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
+            trackingFragment.setGPSQualityAndAcurracy(quality, accuracy);
         }
 
         ScreenSlidePagerAdapter viewPagerAdapter = getViewPagerAdapter();
