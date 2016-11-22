@@ -35,6 +35,7 @@ public class RegattaHeaderBody extends UIObject {
         setElement(uiBinder.createAndBindUi(this));
         ImageResource logo = BoatClassImageResolver.getBoatClassIconResource(regattaMetadata.getBoatClass());
         logoUi.getStyle().setBackgroundImage("url('" + logo.getSafeUri().asString() + "')");
+        logoUi.setTitle(regattaMetadata.getBoatClass());
         nameUi.setInnerText(regattaMetadata.getDisplayName());
         RegattaState state = regattaMetadata.getState();
         LabelTypeUtil.renderLabelTypeOrHide(labelUi, showStateMarker ? state.getStateMarker() : LabelType.NONE);
