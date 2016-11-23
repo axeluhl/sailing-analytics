@@ -62,7 +62,6 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.Component;
 
 /**
@@ -224,8 +223,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         if (isVisible()) {
             // if no data is loaded yet, or if it is not playing and not live (append loading every second) show loading
             // indicator
-            if (primary.timeOfLatestRequestInMillis == null
-                    || (timer.getPlayState() != PlayStates.Playing && timer.getPlayMode() != PlayModes.Live)) {
+            if (shouldShowLoading(primary.timeOfLatestRequestInMillis)) {
                 showLoading(stringMessages.loadingCompetitorData());
             }
             ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();

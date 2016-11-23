@@ -35,6 +35,7 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
@@ -256,5 +257,13 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     @Override
     public String getId() {
         return getLocalizedShortName();
+    }
+
+    /**
+     * Returns true if a normal loading message is allowed to appear over the
+     */
+    public boolean shouldShowLoading(Long timestamp) {
+        return timestamp == null
+                || (timer.getPlayState() != PlayStates.Playing && timer.getPlayMode() != PlayModes.Live);
     }
 }
