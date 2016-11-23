@@ -471,7 +471,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 setWidget(chart);
                 // if not playing or empty show loading message
                 if (timer.getPlayState() != PlayStates.Playing || timeOfLatestRequestInMillis == null) {
-                    showLoading("Loading wind data...");
+                    showLoading(stringMessages.windChartLoading());
                 }
                 GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
                         from, to, settings.getResolutionInMilliseconds(), null, /* onlyUpToNewestEvent==true because we don't want
