@@ -370,27 +370,13 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         TextView hoursTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_hours_label);
         TextView minutesTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_minutes_label);
 
+        daysTextViewLabel.setText(getResources().getQuantityText(R.plurals.day, days));
+        hoursTextViewLabel.setText(getResources().getQuantityText(R.plurals.hour, hours));
+        minutesTextViewLabel.setText(getResources().getQuantityText(R.plurals.minute, minutes));
+
         daysTextView.setText(String.format("%02d", days));
         hoursTextView.setText(String.format("%02d", hours));
         minutesTextView.setText(String.format("%02d", minutes));
-
-        if (days == 1) {
-            daysTextViewLabel.setText(R.string.day);
-        } else {
-            daysTextViewLabel.setText(R.string.days);
-        }
-
-        if (hours == 1) {
-            hoursTextViewLabel.setText(R.string.hour);
-        } else {
-            hoursTextViewLabel.setText(R.string.hours);
-        }
-
-        if (minutes == 1) {
-            minutesTextViewLabel.setText(R.string.minute);
-        } else {
-            minutesTextViewLabel.setText(R.string.minutes);
-        }
     }
 
     public void setFragmentWatcher(FragmentWatcher fWatcher) {
