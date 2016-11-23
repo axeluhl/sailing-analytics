@@ -57,4 +57,7 @@
     <string name="footer_text">Mehr Informationen auf</string>
     <string name="footer_text_link">https://www.sapsailing.com</string>
 
+    <string name="yesterday">Gestern</string>
+    <string name="today">Heute</string>
+    <string name="tomorrow">Morgen</string>
 </resources>
