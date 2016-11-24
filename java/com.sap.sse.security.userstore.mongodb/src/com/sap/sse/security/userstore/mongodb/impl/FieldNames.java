@@ -2,6 +2,12 @@ package com.sap.sse.security.userstore.mongodb.impl;
 
 public class FieldNames {
     
+    public static enum Tenant {
+        NAME,
+        OWNER,
+        USERS
+    }
+    
     public static enum User {
         NAME,
         FULLNAME,

@@ -10,6 +10,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.sap.sse.security.Social;
+import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
@@ -28,6 +29,26 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public DB getDatabase() {
         return db;
+    }
+    
+    @Override
+    public void storeTenant(Tenant tenant) {
+        DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
+        tenantCollection.createIndex(new BasicDBObject(FieldNames.Tenant.NAME.name(), null));
+        DBObject dbTenant = new BasicDBObject();
+        DBObject query = new BasicDBObject(FieldNames.Tenant.NAME.name(), tenant.getName());
+        dbTenant.put(FieldNames.Tenant.NAME.name(), tenant.getName());
+        dbTenant.put(FieldNames.Tenant.OWNER.name(), tenant.getOwner());
+        dbTenant.put(FieldNames.Tenant.USERS.name(), tenant.getUsernames());
+        tenantCollection.update(query, dbTenant, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void deleteTenant(Tenant tenant) {
+        DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
+        DBObject dbTenant = new BasicDBObject();
+        dbTenant.put(FieldNames.Tenant.NAME.name(), tenant.getName());
+        tenantCollection.remove(dbTenant);
     }
 
     @Override

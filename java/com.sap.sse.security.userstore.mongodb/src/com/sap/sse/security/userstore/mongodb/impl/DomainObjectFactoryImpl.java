@@ -16,6 +16,7 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sap.sse.security.Social;
+import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
@@ -30,6 +31,38 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
     public DomainObjectFactoryImpl(DB db) {
         this.db = db;
+    }
+    
+    @Override
+    public Iterable<Tenant> loadAllTenants() {
+        ArrayList<Tenant> result = new ArrayList<>();
+        DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
+        try {
+            for (DBObject o : tenantCollection.find()) {
+                result.add(loadTenant(o));
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load tenants.");
+            logger.log(Level.SEVERE, "loadAllTenants", e);
+        }
+        return result;
+    }
+    
+    private Tenant loadTenant(DBObject tenantDBObject) {
+        final String name = (String) tenantDBObject.get(FieldNames.Tenant.NAME.name());
+        final String owner = (String) tenantDBObject.get(FieldNames.Tenant.OWNER.name());
+        Set<String> users = new HashSet<String>();
+        BasicDBList usersO = (BasicDBList) tenantDBObject.get(FieldNames.Tenant.USERS.name());
+        if (usersO != null) {
+            for (Object o : usersO) {
+                users.add((String) o);
+            }
+        }
+        Tenant result = new Tenant(name, owner);
+        for (String user : users) {
+            result.addUser(user);
+        }
+        return result;
     }
 
     @Override

@@ -22,10 +22,12 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.security.PreferenceObjectListener;
 import com.sap.sse.security.SocialSettingsKeys;
+import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 
 /**
@@ -45,7 +47,9 @@ public class UserStoreImpl implements UserStore {
     private static final String ACCESS_TOKEN_KEY = "___access_token___";
 
     private String name = "MongoDB user store";
-
+    
+    private final ConcurrentHashMap<String, Tenant> tenants;
+    
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Set<User>> usersByEmail;
     private final ConcurrentHashMap<String, User> usersByAccessToken;
@@ -91,6 +95,7 @@ public class UserStoreImpl implements UserStore {
     }
     
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
+        tenants = new ConcurrentHashMap<>();
         users = new ConcurrentHashMap<>();
         usersByEmail = new ConcurrentHashMap<>();
         emailForUsername = new ConcurrentHashMap<>();
@@ -119,6 +124,9 @@ public class UserStoreImpl implements UserStore {
             if (changed) {
                 mongoObjectFactory.storeSettingTypes(settingTypes);
                 mongoObjectFactory.storeSettings(settings);
+            }
+            for (Tenant t : domainObjectFactory.loadAllTenants()) {
+                tenants.put(t.getName(), t);
             }
             for (User u : domainObjectFactory.loadAllUsers()) {
                 users.put(u.getName(), u);
@@ -286,6 +294,53 @@ public class UserStoreImpl implements UserStore {
     @Override
     public String getName() {
         return name;
+    }
+    
+    @Override
+    public Iterable<Tenant> getTenants() {
+        return new ArrayList<>(tenants.values());
+    }
+
+    @Override
+    public Tenant getTenantByName(String name) {
+        if (name == null)
+            return null;
+        return tenants.get(name);
+    }
+
+    @Override
+    public Tenant createTenant(String name, String owner) throws TenantManagementException {
+        if (getTenantByName(name) != null) {
+            throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
+        }
+        Tenant tenant = new Tenant(name, owner);
+        logger.info("Creating tenant: " + tenant + " with owner " + owner);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeTenant(tenant);
+        }
+        tenants.put(name, tenant);
+        return tenant;
+    }
+
+    @Override
+    public void updateTenant(Tenant tenant) {
+        logger.info("Updating tenant " + tenant + " in DB");
+        tenants.put(tenant.getName(), tenant);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeTenant(tenant);
+        }
+    }
+
+    @Override
+    public void deleteTenant(String name) throws TenantManagementException {
+        Tenant tenant = tenants.get(name);
+        if (tenant == null) {
+            throw new TenantManagementException(TenantManagementException.TENANT_DOES_NOT_EXIST);
+        }
+        logger.info("Deleting tenant: " + tenant);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.deleteTenant(tenant);
+        }
     }
 
     @Override

@@ -6,9 +6,23 @@ import java.util.UUID;
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 
 public interface UserStore extends Named {
+    Iterable<Tenant> getTenants();
+    
+    /**
+     * The tenant with that {@link User#getName() name} or {@code null} if no such tenant exists
+     */
+    Tenant getTenantByName(String name);
+    
+    Tenant createTenant(String name, String owner) throws TenantManagementException;
+    
+    void updateTenant(Tenant tenant);
+    
+    void deleteTenant(String name) throws TenantManagementException;
+    
     Iterable<User> getUsers();
 
     /**

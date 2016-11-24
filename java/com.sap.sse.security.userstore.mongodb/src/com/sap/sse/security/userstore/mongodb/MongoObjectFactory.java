@@ -3,9 +3,14 @@ package com.sap.sse.security.userstore.mongodb;
 import java.util.Map;
 
 import com.mongodb.DB;
+import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 
 public interface MongoObjectFactory {
+    
+    public void storeTenant(Tenant tenant);
+    
+    public void deleteTenant(Tenant tenant);
 
     public void storeUser(User user);
     
