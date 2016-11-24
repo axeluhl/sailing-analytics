@@ -1744,4 +1744,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String externalLinks();
     String buoyZoneRadiusInHullLengths();
     String incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
+    String eventRegattaRacesLegendGps();
+    String eventRegattaRacesLegendWind();
+    String eventRegattaRacesLegendVideo();
+    String eventRegattaRacesLegendAudio();
 }
