@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.utils;
+package com.sap.sailing.android.shared.util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.android.shared.R;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

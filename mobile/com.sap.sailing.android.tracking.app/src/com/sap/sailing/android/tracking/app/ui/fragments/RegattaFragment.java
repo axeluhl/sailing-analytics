@@ -37,6 +37,7 @@ import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -56,6 +57,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_regatta, container, false);
 
         Button startTrackingButton = (Button) view.findViewById(R.id.start_tracking);
@@ -333,6 +335,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     }
 
     private void startTrackingActivity() {
+        prefs.setTrackingTimerStarted(MillisecondsTimePoint.now().asMillis());
         RegattaActivity regattaActivity = (RegattaActivity) getActivity();
         Intent intent = new Intent(getActivity(), TrackingActivity.class);
         String checkinDigest = regattaActivity.event.checkinDigest;

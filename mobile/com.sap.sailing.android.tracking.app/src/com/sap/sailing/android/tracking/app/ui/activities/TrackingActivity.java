@@ -17,7 +17,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -45,18 +44,17 @@ import com.viewpagerindicator.CirclePageIndicator;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
 
-    TrackingService trackingService;
+    private TrackingService trackingService;
     private boolean trackingServiceBound;
-    private boolean gpsReceived;
 
-    MessageSendingService messageSendingService;
+    private MessageSendingService messageSendingService;
     boolean messageSendingServiceBound;
 
     private final static String TAG = TrackingActivity.class.getName();
-    private final static String SIS_TRACKING_FRAGMENT = "savedInstanceTrackingFragment";
-    private final static String SIS_LAST_VIEWPAGER_ITEM = "instanceStateLastViewPagerItem";
-    private final static String SIS_LAST_SPEED_TEXT = "instanceStateLastSpeedText";
-    private final static String SIS_LAST_COMPASS_TEXT = "instanceStateLastCompassText";
+    private final static String SIS_TRACKING_FRAGMENT = "trackingFragment";
+    private final static String SIS_LAST_VIEWPAGER_ITEM = "lastViewPagerItem";
+    private final static String SIS_LAST_SPEED_TEXT = "lastSpeedText";
+    private final static String SIS_LAST_COMPASS_TEXT = "lastCompassText";
 
     private ViewPager mPager;
     private ScreenSlidePagerAdapter mPagerAdapter;
@@ -65,7 +63,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     private String checkinDigest;
 
     private TrackingFragment trackingFragment;
-    private TimerRunnable timer;
 
     private int lastViewPagerItem;
 
@@ -217,7 +214,6 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     @Override
     protected void onPause() {
         super.onPause();
-        timer.stop();
 
         mPager = (ViewPager) findViewById(R.id.pager);
         mPager.setAdapter(null);
@@ -227,39 +223,38 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     protected void onResume() {
         super.onResume();
 
-        timer = new TimerRunnable();
-        Thread thread = new Thread(timer);
-        thread.start();
-
         if (mPagerAdapter == null) {
             mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
         }
 
         mPager.setAdapter(mPagerAdapter);
         mPager.setCurrentItem(lastViewPagerItem);
-
-        
     }
 
     @Override
-    public void gpsQualityAndAccuracyUpdated(GPSQuality quality, float accuracy, Bearing bearing, Speed speed) {
-        if (trackingFragment.isAdded()) {
-            trackingFragment.setGPSQualityAndAcurracy(quality, accuracy);
-        }
+    public void gpsQualityAndAccuracyUpdated(final GPSQuality quality, final float accuracy, final Bearing bearing, final Speed speed) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (trackingFragment.isAdded()) {
+                    trackingFragment.setGPSQualityAndAccuracy(quality, accuracy);
+                }
 
-        ScreenSlidePagerAdapter viewPagerAdapter = getViewPagerAdapter();
+                ScreenSlidePagerAdapter viewPagerAdapter = getViewPagerAdapter();
 
-        if (viewPagerAdapter != null) {
-            SpeedFragment speedFragment = viewPagerAdapter.getSpeedFragment();
-            if (speedFragment != null && speedFragment.isAdded()) {
-                speedFragment.setSpeed(speed);
+                if (viewPagerAdapter != null) {
+                    SpeedFragment speedFragment = viewPagerAdapter.getSpeedFragment();
+                    if (speedFragment != null && speedFragment.isAdded()) {
+                        speedFragment.setSpeed(speed);
+                    }
+
+                    CompassFragment compassFragment = viewPagerAdapter.getCompassFragment();
+                    if (compassFragment != null && compassFragment.isAdded()) {
+                        compassFragment.setBearing(bearing);
+                    }
+                }
             }
-
-            CompassFragment compassFragment = viewPagerAdapter.getCompassFragment();
-            if (compassFragment != null && compassFragment.isAdded()) {
-                compassFragment.setBearing(bearing);
-            }
-        }
+        });
     }
 
     @Override
@@ -400,69 +395,5 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         prefs.setTrackingTimerStarted(0);
         ServiceHelper.getInstance().stopTrackingService(this);
         finish();
-    }
-
-    /**
-     * Update UI with a string containing the time since tracking started, e.g. 01:22:45
-     */
-    public void updateTimer() {
-        long trackingTimerStarted = prefs.getTrackingTimerStarted();
-        if (trackingTimerStarted > 0) {
-            hideWaitForGPSText();
-            long diff = System.currentTimeMillis() - trackingTimerStarted;
-            TextView textView = (TextView) findViewById(R.id.tracking_time_label);
-            if (textView != null) {
-                textView.setText(getTimeFormatString(diff));
-            }
-        }
-    }
-
-    private void hideWaitForGPSText() {
-        if (!gpsReceived) {
-            View waitForGPSLabel = findViewById(R.id.wait_for_gps);
-            if (waitForGPSLabel != null) {
-                waitForGPSLabel.setVisibility(View.GONE);
-                gpsReceived = true;
-            }
-        }
-    }
-
-    private String getTimeFormatString(long milliseconds) {
-        int seconds = (int) (milliseconds / 1000) % 60;
-        int minutes = (int) ((milliseconds / (1000 * 60)) % 60);
-        int hours = (int) ((milliseconds / (1000 * 60 * 60)) % 24);
-
-        return String.format(getResources().getConfiguration().locale, "%02d:%02d:%02d", hours, minutes, seconds);
-    }
-
-    private class TimerRunnable implements Runnable {
-
-        private boolean running;
-
-        TimerRunnable() {
-            running = true;
-        }
-
-        @Override
-        public void run() {
-            while (running) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        trackingFragment.checkLastGPSReceived();
-                        updateTimer();
-                    }
-                });
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    ExLog.e(TrackingActivity.this, TAG, "Interrupted sleep");
-                }
-            }
-        }
-
-        public void stop() {
-            running = false;
-        }
     }
 }
