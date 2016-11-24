@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="102">
+<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="103">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
@@ -39,6 +39,17 @@
 <unit id="org.apache.commons.beanutils" version="1.8.0.v201205091237"/>
 <unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
 <repository location="http://download.eclipse.org/releases/luna"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.junit" version="4.8.2.v4_8_2_v20130308-0413"/>
+<unit id="org.junit.source" version="4.8.2.v4_8_2_v20130308-0413"/>
+<unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.core" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.generator" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.integration" version="1.1.0.v201303031500"/>
+<unit id="org.hamcrest.library" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20140114142710/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="javax.ws.rs" version="1.1.1.v20130318-1750"/>
@@ -235,7 +246,8 @@
 <plugin id="org.hyperic.sigar"/>
 <plugin id="org.jdom"/>
 <plugin id="org.jdom.source"/>
-<plugin id="org.junit4"/>
+<plugin id="org.junit" version="4.8.2.v4_8_2_v20130308-0413"/>
+<plugin id="org.junit.source" version="4.8.2.v4_8_2_v20130308-0413"/>
 <plugin id="org.jvnet.mimepull"/>
 <plugin id="org.mockito.mockito-core"/>
 <plugin id="org.mongodb.mongo-java-driver"/>

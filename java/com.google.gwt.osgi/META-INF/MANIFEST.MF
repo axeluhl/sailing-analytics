@@ -173,7 +173,7 @@ Export-Package: com.google.gwt.activity.shared,
  org.hibernate.validator,
  org.hibernate.validator.engine
 Require-Bundle: javax.validation;bundle-version="1.0.0";resolution:=optional,
- org.junit4;bundle-version="4.8.2";resolution:=optional
+ org.junit;bundle-version="4.8.2";resolution:=optional
 Import-Package: com.gargoylesoftware.htmlunit;resolution:=optional,
  com.google.gwt.core.ext;resolution:=optional,
  com.google.gwt.core.ext.typeinfo;resolution:=optional,
