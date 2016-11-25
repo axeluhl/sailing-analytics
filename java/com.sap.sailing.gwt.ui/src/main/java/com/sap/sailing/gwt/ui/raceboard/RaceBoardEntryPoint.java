@@ -61,14 +61,17 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         raceName = Window.Location.getParameter(PARAM_RACE_NAME);
         final String modeName = Window.Location.getParameter(PARAM_MODE);
         RaceBoardMode mode;
+        RaceBoardModes modeType = null;
         if (modeName == null) {
             mode = null;
         } else {
             try {
-                mode = RaceBoardModes.valueOf(modeName).getMode();
+                modeType = RaceBoardModes.valueOf(modeName);
+                mode = modeType.getMode();
             } catch (IllegalArgumentException e) {
                 GWT.log("Couldn't resolve RaceBoard mode " + modeName);
                 mode = null;
+                modeType = null;
             }
         }
         final RaceBoardMode finalMode = mode;
@@ -95,8 +98,11 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         
         final boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
         
-        
-        final RaceBoardComponentContext context = new RaceBoardComponentContext(getUserService(), "RaceBoardEntryPoint", new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE), regattaName, raceName, leaderboardName, leaderboardGroupName, eventId);
+        String componentContextGlobalDefinition = "RaceBoardEntryPoint";
+        if(modeType != null) {
+            componentContextGlobalDefinition += "." + modeType.toString();
+        }
+        final RaceBoardComponentContext context = new RaceBoardComponentContext(getUserService(), componentContextGlobalDefinition, new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE), regattaName, raceName, leaderboardName, leaderboardGroupName, eventId);
         
         AsyncCallbackWithSettingsRetrievementJoiner<RaceboardDataDTO,RaceBoardPerspectiveSettings> asyncCallbackJoiner = context.createSettingsRetrievementWithAsyncCallbackJoiner(new AsyncCallback<RaceboardDataDTO>() {
             @Override

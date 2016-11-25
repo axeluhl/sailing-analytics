@@ -164,6 +164,9 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
      * {@link SailingServiceAsync#getLeaderboardByName(String, java.util.Date, String[], boolean, String, com.google.gwt.user.client.rpc.AsyncCallback)
      * obtain the leaderboard contents} from the server. It may change in case the leaderboard is renamed.
      */
+    
+    private LeaderboardSettings currentSettings;
+    
     private String leaderboardName;
 
     private final ErrorReporter errorReporter;
@@ -410,6 +413,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
     }
 
     public void updateSettings(final LeaderboardSettings newSettings) {
+        this.currentSettings = newSettings;
         boolean oldShallAddOverallDetails = shallAddOverallDetails();
         if (newSettings.getOverallDetailsToShow() != null) {
             selectedOverallDetailColumns.clear();
@@ -1762,6 +1766,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
             final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus) {
+        this.currentSettings = settings;
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
@@ -3106,14 +3111,16 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         if (!settingsUpdatedExplicitly && playMode != oldPlayMode) {
             // if settings weren't explicitly modified, auto-switch to live mode settings and sort for
             // any pre-selected race; we need to copy the previously selected race columns to the new RaceColumnSelection
-            updateSettings(LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(
+            LeaderboardSettings defaultLeaderboardSettingsForPlayMode = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(
                     playMode,
                     /* don't touch columnToSort if no race was pre-selected */ preSelectedRace == null ? null
                             : preSelectedRace.getRaceName(),
                     /* don't change nameOfRaceColumnToShow */null,
                     /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null : preSelectedRace
                             .getRaceName(), getRaceColumnSelection(), /* leave showRegattaRank and overall details unchanged */ null,
-                            /* take into account state of competitor columns*/isShowCompetitorSailId(), isShowCompetitorFullName()));
+                            /* take into account state of competitor columns*/isShowCompetitorSailId(), isShowCompetitorFullName());
+            this.currentSettings.setDefaultValues(defaultLeaderboardSettingsForPlayMode);
+            updateSettings(currentSettings);
         }
         currentlyHandlingPlayStateChange = false;
         oldPlayMode = playMode;

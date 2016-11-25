@@ -63,7 +63,7 @@ public class RaceBoardComponentContext
                 defaultLeaderboardSettings.getNamesOfRaceColumnsToShow(),
                 defaultLeaderboardSettings.getNamesOfRacesToShow(),
                 currentLeaderboardSettings.getNumberOfLastRacesToShow(),
-                currentLeaderboardSettings.isAutoExpandPreSelectedRace(),
+                defaultLeaderboardSettings.isAutoExpandPreSelectedRace(),
                 currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
                 defaultLeaderboardSettings.getNameOfRaceToSort(), defaultLeaderboardSettings.isSortAscending(),
                 currentLeaderboardSettings.isUpdateUponPlayStateChange(),

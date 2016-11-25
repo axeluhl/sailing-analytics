@@ -63,8 +63,8 @@ public class PlayerActivity extends AbstractActivity {
                 LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifecycle = new LeaderboardWithHeaderPerspectiveLifecycle(leaderBoardDTO, StringMessages.INSTANCE);
                 RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(leaderBoardDTO, StringMessages.INSTANCE);
          
-                final RaceBoardComponentContext raceBoardContext = new RaceBoardComponentContext(clientFactory.getUserService(), "AutoPlay", raceboardPerspectiveLifecycle, null, null, playerPlace.getConfiguration().getLeaderboardName(), null, eventUUID);
-                final LeaderboardWithHeaderComponentContext leaderboardWithHeaderContext = new LeaderboardWithHeaderComponentContext(clientFactory.getUserService(), "AutoPlay", leaderboardPerspectiveLifecycle);
+                final RaceBoardComponentContext raceBoardContext = new RaceBoardComponentContext(clientFactory.getUserService(), "AutoPlay.RaceBoard", raceboardPerspectiveLifecycle, null, null, playerPlace.getConfiguration().getLeaderboardName(), null, eventUUID);
+                final LeaderboardWithHeaderComponentContext leaderboardWithHeaderContext = new LeaderboardWithHeaderComponentContext(clientFactory.getUserService(), "AutoPlay.Leaderboard", leaderboardPerspectiveLifecycle);
                 
 
                 

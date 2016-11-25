@@ -240,11 +240,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                     showCompetitorSailIdColumn, showCompetitorFullNameColumn);
 
         } else {
-            final List<DetailType> overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
-            result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
-                    /* overallDetails */ overallDetails, null,
-                    /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
-                    raceColumnSelectionStrategy, /* showCompetitorSailIdColumns */ true, /*showCompetitorFullNameColumn*/ true);
+            return new LeaderboardSettings(refreshIntervalMillis, numberOfLastRacesToShow, raceColumnSelectionStrategy);
         }
         return result;
     }

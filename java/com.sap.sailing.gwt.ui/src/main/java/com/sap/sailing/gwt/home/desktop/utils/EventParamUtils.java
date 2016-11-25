@@ -11,7 +11,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 
 public class EventParamUtils {
@@ -103,12 +102,7 @@ public class EventParamUtils {
                     showCompetitorFullNameColumn);
     
         } else {
-            final List<DetailType> overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
-            result = LeaderboardSettingsFactory.getInstance()
-                    .createNewDefaultSettings(null, null,
-                    /* overallDetails */overallDetails, null,
-                    /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
-                            raceColumnSelectionStrategy, /* showCompetitorSailIdColumns */ true, /*showCompetitorFullNameColumn*/ true);
+            return new LeaderboardSettings(refreshIntervalMillis, numberOfLastRacesToShow, raceColumnSelectionStrategy);
         }
         return result;
     }

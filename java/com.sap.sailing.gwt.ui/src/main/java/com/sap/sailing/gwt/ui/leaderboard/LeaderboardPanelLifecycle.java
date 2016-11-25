@@ -3,11 +3,9 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class LeaderboardPanelLifecycle implements ComponentLifecycle<LeaderboardSettings, LeaderboardSettingsDialogComponent> {
@@ -30,14 +28,7 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
         for (RaceColumnDTO raceColumn : raceList) {
             namesOfRaceColumnsToShow.add(raceColumn.getName());
         }
-        List<DetailType> overallDetails = new ArrayList<>();
-        overallDetails.add(DetailType.REGATTA_RANK);
-
-        return LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(namesOfRaceColumnsToShow, /* namesOfRacesToShow */
-                null, overallDetails, /* nameOfRaceToSort */null,
-                /* autoExpandPreSelectedRace */false, 1000L, /* numberOfLastRacesToShow */null,
-                /* raceColumnSelectionStrategy */RaceColumnSelectionStrategies.EXPLICIT,
-                /* showCompetitorSailIdColumns */true, /* showCompetitorFullNameColumn */true);
+        return new LeaderboardSettings(namesOfRaceColumnsToShow, 1000L).asDefault();
     }
 
     @Override

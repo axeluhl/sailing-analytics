@@ -74,6 +74,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
@@ -447,7 +448,9 @@ public class RaceBoardPanel extends AbstractRootPerspectiveComposite<RaceBoardPe
     
     private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName,
             CompetitorFilterPanel competitorSearchTextBox, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard) {
-        LeaderboardSettings leaderBoardSettings = LeaderboardSettingsFactory.getInstance()
+        LeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
+        LeaderboardSettings leaderboardSettings = findComponentSettingsByLifecycle(leaderboardPanelLifecycle);
+        LeaderboardSettings defaultLeaderboardSettingsForCurrentPlayMode = LeaderboardSettingsFactory.getInstance()
                 .createNewSettingsForPlayMode(timer.getPlayMode(),
                         /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),
                         /* nameOfRaceColumnToShow */ null, /* nameOfRaceToShow */ selectedRaceIdentifier.getRaceName(),
@@ -455,7 +458,8 @@ public class RaceBoardPanel extends AbstractRootPerspectiveComposite<RaceBoardPe
                         /*showCompetitorSailIdColumn*/true,
                         /* don't showCompetitorFullNameColumn in case screen is so small that we don't
                          * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard);
-        return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderBoardSettings, selectedRaceIdentifier != null, selectedRaceIdentifier,
+        leaderboardSettings.setDefaultValues(defaultLeaderboardSettingsForCurrentPlayMode);
+        return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, selectedRaceIdentifier != null, selectedRaceIdentifier,
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 userAgent, /* showRaceDetails */ true, competitorSearchTextBox,
                 /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,

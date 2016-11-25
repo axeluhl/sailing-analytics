@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -86,7 +85,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     private EnumListSetting<DetailType> legDetailsToShow;
     private EnumListSetting<DetailType> raceDetailsToShow;
     private EnumListSetting<DetailType> overallDetailsToShow;
-    private BooleanSetting autoExpandPreSelectedRace;
+    private boolean autoExpandPreSelectedRace = false;
     private LongSetting delayBetweenAutoAdvancesInMilliseconds;
     private BooleanSetting updateUponPlayStateChange;
     
@@ -120,25 +119,65 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     
     @Override
     protected void addChildSettings() {
-        //TODO find more default values
         namesOfRaceColumnsToShow = new StringListSetting("namesOfRaceColumnsToShow", this);
-        namesOfRacesToShow = new StringListSetting("namesOfRacesToShow", this);
+        namesOfRacesToShow = new StringListSetting("namesOfRacesToShow", this, null);
         numberOfLastRacesToShow = new IntegerSetting("numberOfLastRacesToShow", this, null);
-        maneuverDetailsToShow = new EnumListSetting<>("maneuverDetailsToShow", this, new DetailTypeStringToEnumConverter());
-        legDetailsToShow = new EnumListSetting<>("legDetailsToShow", this, new DetailTypeStringToEnumConverter());
-        raceDetailsToShow = new EnumListSetting<>("raceDetailsToShow", this, new DetailTypeStringToEnumConverter());
-        overallDetailsToShow = new EnumListSetting<>("overallDetailsToShow", this, new DetailTypeStringToEnumConverter());
-        delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, 1000L);
+        List<DetailType> maneuverDetails = new ArrayList<DetailType>();
+        maneuverDetails.add(DetailType.TACK);
+        maneuverDetails.add(DetailType.JIBE);
+        maneuverDetails.add(DetailType.PENALTY_CIRCLE);
+        maneuverDetailsToShow = new EnumListSetting<>("maneuverDetailsToShow", this, maneuverDetails, new DetailTypeStringToEnumConverter());
+        List<DetailType> legDetails = new ArrayList<DetailType>();
+        legDetails.add(DetailType.DISTANCE_TRAVELED);
+        legDetails.add(DetailType.AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
+        legDetails.add(DetailType.RANK_GAIN);
+        legDetailsToShow = new EnumListSetting<>("legDetailsToShow", this, legDetails, new DetailTypeStringToEnumConverter());
+        List<DetailType> raceDetails = new ArrayList<DetailType>();
+        raceDetails.add(DetailType.DISPLAY_LEGS);
+        raceDetailsToShow = new EnumListSetting<>("raceDetailsToShow", this, raceDetails, new DetailTypeStringToEnumConverter());
+        List<DetailType> overallDetails = new ArrayList<>();
+        overallDetails.add(DetailType.REGATTA_RANK);
+        overallDetailsToShow = new EnumListSetting<>("overallDetailsToShow", this, overallDetails, new DetailTypeStringToEnumConverter());
+        delayBetweenAutoAdvancesInMilliseconds = new LongSetting("delayBetweenAutoAdvancesInMilliseconds", this, null);
         activeRaceColumnSelectionStrategy = new EnumSetting<>("activeRaceColumnSelectionStrategy", this, RaceColumnSelectionStrategies.EXPLICIT, new RaceColumnSelectionStrategiesStringToEnumConverter());
         nameOfRaceToSort = new StringSetting("nameOfRaceToSort", this, null);
-        
-        autoExpandPreSelectedRace = new BooleanSetting("autoExpandPreSelectedRace", this, false);
         updateUponPlayStateChange = new BooleanSetting("updateUponPlayStateChange", this, true);
         sortAscending = new BooleanSetting("sortAscending", this, true);
         showAddedScores = new BooleanSetting("showAddedScores", this, false);
         showCompetitorSailIdColumn = new BooleanSetting("showCompetitorSailIdColumn", this, true);
         showCompetitorFullNameColumn = new BooleanSetting("showCompetitorFullNameColumn", this, true);
         showOverallColumnWithNumberOfRacesCompletedPerCompetitor = new BooleanSetting("showOverallColumnWithNumberOfRacesCompletedPerCompetitor", this, false);
+    }
+    
+    public LeaderboardSettings() {
+    }
+    
+    public LeaderboardSettings(List<String> namesOfRaceColumnsToShow) {
+        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
+    }
+    
+    public LeaderboardSettings(List<String> namesOfRaceColumnsToShow, Long delayBetweenAutoAdvancesInMilliseconds) {
+        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
+        this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
+    }
+    
+    public LeaderboardSettings(Long delayBetweenAutoAdvancesInMilliseconds, Integer numberOfLastRacesToShow,
+            RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy) {
+        this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
+        this.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
+        this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
+    }
+    
+    public LeaderboardSettings(List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow,
+            String nameOfRaceToSort, boolean autoExpandPreSelectedRace,
+            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn) {
+        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
+        this.namesOfRacesToShow.setValues(namesOfRacesToShow);
+        this.overallDetailsToShow.setValues(overallDetailsToShow);
+        this.nameOfRaceToSort.setValue(nameOfRaceToSort);
+        this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
+        this.showCompetitorSailIdColumn.setValue(showCompetitorSailIdColumn);
+        this.showCompetitorFullNameColumn.setValue(showCompetitorFullNameColumn);
     }
     
     /**
@@ -161,7 +200,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
         this.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
         this.activeRaceColumnSelectionStrategy.setValue(activeRaceColumnSelectionStrategy);
-        this.autoExpandPreSelectedRace.setValue(autoExpandPreSelectedRace);
+        this.autoExpandPreSelectedRace = autoExpandPreSelectedRace;
         this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
         this.maneuverDetailsToShow.setValues(meneuverDetailsToShow);
         this.nameOfRaceToSort.setValue(nameOfRaceToSort);
@@ -228,7 +267,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     }
 
     public boolean isAutoExpandPreSelectedRace() {
-        return autoExpandPreSelectedRace.getValue();
+        return autoExpandPreSelectedRace;
     }
 
     /**
@@ -321,12 +360,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
                                      raceColumnSelectionStrategy, showAddedScores, showOverallColumnWithNumberOfRacesSailedPerCompetitor,
                                      showCompetitorSailIdColumn, showCompetitorFullNameColumn);
         } else {
-            final List<DetailType> overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
-            result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
-                    /* overallDetails */ overallDetails, null,
-                    /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
-                    raceColumnSelectionStrategy, /*showCompetitorSailIdColumns*/ true,
-                    /*showCompetitorFullNameColumn*/ true);
+            return new LeaderboardSettings(refreshIntervalMillis, numberOfLastRacesToShow, raceColumnSelectionStrategy);
         }
         return result;
     }
@@ -359,4 +393,30 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     public boolean isShowCompetitorFullNameColumn() {
         return showCompetitorFullNameColumn.getValue();
     }
+    
+    public void setDefaultValues(LeaderboardSettings newDefaults) {
+        autoExpandPreSelectedRace = newDefaults.autoExpandPreSelectedRace;
+        namesOfRaceColumnsToShow.setDefaultValues(newDefaults.namesOfRaceColumnsToShow.getValues());
+        namesOfRacesToShow.setDefaultValues(newDefaults.namesOfRacesToShow.getValues());
+        numberOfLastRacesToShow.setDefaultValue(newDefaults.numberOfLastRacesToShow.getValue());
+        maneuverDetailsToShow.setDefaultValues(newDefaults.maneuverDetailsToShow.getValues());
+        legDetailsToShow.setDefaultValues(newDefaults.legDetailsToShow.getValues());
+        raceDetailsToShow.setDefaultValues(newDefaults.raceDetailsToShow.getValues());
+        overallDetailsToShow.setDefaultValues(newDefaults.overallDetailsToShow.getValues());
+        delayBetweenAutoAdvancesInMilliseconds.setDefaultValue(newDefaults.delayBetweenAutoAdvancesInMilliseconds.getValue());
+        activeRaceColumnSelectionStrategy.setDefaultValue(newDefaults.activeRaceColumnSelectionStrategy.getValue());
+        nameOfRaceToSort.setDefaultValue(newDefaults.nameOfRaceToSort.getValue());
+        updateUponPlayStateChange.setDefaultValue(newDefaults.updateUponPlayStateChange.getValue());
+        sortAscending.setDefaultValue(newDefaults.sortAscending.getValue());
+        showAddedScores.setDefaultValue(newDefaults.showAddedScores.getValue());
+        showCompetitorSailIdColumn.setDefaultValue(newDefaults.showCompetitorSailIdColumn.getValue());
+        showCompetitorFullNameColumn.setDefaultValue(newDefaults.showCompetitorFullNameColumn.getValue());
+        showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setDefaultValue(newDefaults.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.getValue());
+    }
+
+    public LeaderboardSettings asDefault() {
+        setDefaultValues(this);
+        return this;
+    }
+    
 }

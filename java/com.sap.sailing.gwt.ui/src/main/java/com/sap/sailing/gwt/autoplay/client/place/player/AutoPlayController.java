@@ -101,6 +101,11 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     
     private void showLeaderboard() {
         if (activeTvView != AutoPlayModes.Leaderboard) {
+            
+            if(leaderboardPerspectiveLifecycleWithAllSettings == null) {
+                leaderboardPerspectiveLifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(leaderboardWithHeaderContext.getRootPerspectiveLifecycle(), leaderboardWithHeaderContext.getDefaultSettingsForRootPerspective());
+            }
+            
             playerView.clearContent();
             boolean withFullscreenButton = autoPlayerConfiguration.isFullscreenMode() && isInitialScreen;
             LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(leaderboardWithHeaderContext, leaderboardPerspectiveLifecycleWithAllSettings, 

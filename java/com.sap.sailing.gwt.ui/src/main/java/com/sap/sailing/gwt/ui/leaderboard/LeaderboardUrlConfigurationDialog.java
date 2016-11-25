@@ -118,9 +118,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             for (RaceColumnDTO raceColumn : raceList) {
                 namesOfRaceColumnsToShow.add(raceColumn.getName());
             }
-            LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                    namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
-                    false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true);
+            LeaderboardSettings settings = new LeaderboardSettings(namesOfRaceColumnsToShow);
             leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings, raceList, stringMessages);
         }
 
