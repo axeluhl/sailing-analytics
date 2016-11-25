@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -11,6 +12,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.shared.EventHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.client.Window;
@@ -32,6 +35,7 @@ import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserManagementPanel extends DockPanel {
@@ -39,6 +43,9 @@ public class UserManagementPanel extends DockPanel {
     private List<UserCreatedEventHandler> userCreatedHandlers = new ArrayList<>();
     
     private List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
+    
+    private SingleSelectionModel<TenantDTO> tenantSingleSelectionModel;
+    private TenantListDataProvider tenantListDataProvider;
     
     private SingleSelectionModel<UserDTO> singleSelectionModel;
 
@@ -93,6 +100,92 @@ public class UserManagementPanel extends DockPanel {
         });
         buttonPanel.add(deleteButton);
         deleteButton.setEnabled(singleSelectionModel.getSelectedObject() != null);
+        
+        // TODO: find the right place for the tenant controls
+        Button createTenantButton = new Button("Create tenant", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new CreateTenantDialog(stringMessages, userManagementService, tenantListDataProvider).show();
+            }
+        });
+        buttonPanel.add(createTenantButton);
+        Button addUserToTenantButton = new Button("Add user to tenant", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                TenantDTO tenant = tenantSingleSelectionModel.getSelectedObject();
+                UserDTO user = singleSelectionModel.getSelectedObject();
+                if (tenant != null && user != null) {
+                    userManagementService.addUserToTenant(user.getName(), tenant.getName(), new AsyncCallback<TenantDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert("Error adding user to tenant.");
+                        }
+                        @Override
+                        public void onSuccess(TenantDTO result) {
+                            tenantListDataProvider.updateDisplays();
+                        }
+                    });
+                }
+            }
+        });
+        buttonPanel.add(addUserToTenantButton);
+        Button removeUserFromTenantButton = new Button("Remove user from tenant", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                TenantDTO tenant = tenantSingleSelectionModel.getSelectedObject();
+                UserDTO user = singleSelectionModel.getSelectedObject();
+                if (tenant != null && user != null) {
+                    userManagementService.removeUserFromTenant(user.getName(), tenant.getName(), new AsyncCallback<TenantDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Window.alert("Error removing user from tenant.");
+                        }
+                        @Override
+                        public void onSuccess(TenantDTO result) {
+                            tenantListDataProvider.updateDisplays();
+                        }
+                    });
+                }
+            }
+        });
+        buttonPanel.add(removeUserFromTenantButton);
+        tenantSingleSelectionModel = new SingleSelectionModel<>();
+        final CellList<TenantDTO> tenantList = new CellList<TenantDTO>(new AbstractCell<TenantDTO>() {
+            @Override
+            public void render(Context context, TenantDTO value, SafeHtmlBuilder sb) {
+                if (value == null) {
+                    return;
+                }
+                sb.appendHtmlConstant("<table>");
+                sb.appendHtmlConstant("<tr>");
+                sb.appendHtmlConstant("<td>");
+                sb.appendEscaped(value.getName());
+                sb.appendHtmlConstant("</td>");
+                sb.appendHtmlConstant("<td>");
+                sb.appendEscaped(value.getOwner() == null? "" : value.getOwner());
+                sb.appendHtmlConstant("</td>");
+                sb.appendHtmlConstant("<td>");
+                String concated = "";
+                for (String username : value.getUsernames()) {
+                    concated += username + ", ";
+                }
+                sb.appendEscaped(concated);
+                sb.appendHtmlConstant("</td>");
+                sb.appendHtmlConstant("</tr>");
+                sb.appendHtmlConstant("</table>");
+            }
+            
+        });
+        tenantList.setSelectionModel(tenantSingleSelectionModel);
+        tenantListDataProvider = new TenantListDataProvider(userManagementService);
+        tenantList.setPageSize(20);
+        tenantListDataProvider.addDataDisplay(tenantList);
+        SimplePager tenantPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
+        tenantPager.setDisplay(tenantList);
+        ScrollPanel tenantPanel = new ScrollPanel(tenantList);
+        west.add(tenantPager);
+        west.add(tenantPanel);
+        
         final UserList userList = new UserList();
         userList.setSelectionModel(singleSelectionModel);
         TextBox filterBox = new TextBox();

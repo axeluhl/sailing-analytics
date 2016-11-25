@@ -1,6 +1,7 @@
 package com.sap.sse.security;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.common.NamedWithID;
@@ -20,6 +21,7 @@ public class Tenant implements OwnedBy, NamedWithID {
     public Tenant(String name, String owner) {
         this.name = name;
         this.owner = owner;
+        this.userNames = new HashSet<>();
     }
     
     @Override
@@ -41,8 +43,13 @@ public class Tenant implements OwnedBy, NamedWithID {
         userNames.add(name);
         return this;
     }
+    
+    public Tenant removeUser(String user) {
+        userNames.remove(user);
+        return this;
+    }
 
     public Iterable<String> getUsernames() {
         return userNames;
-    }
+    }    
 }

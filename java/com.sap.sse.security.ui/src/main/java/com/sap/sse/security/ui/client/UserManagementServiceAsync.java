@@ -7,9 +7,18 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementServiceAsync {
+    void getTenantList(AsyncCallback<Collection<TenantDTO>> callback);
+    
+    void createTenant(String name, String owner, AsyncCallback<TenantDTO> callback);
+    
+    void addUserToTenant(String user, String tenant, AsyncCallback<TenantDTO> asyncCallback);
+    
+    void removeUserFromTenant(String user, String tenant, AsyncCallback<TenantDTO> asyncCallback);
+    
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
 
     void getCurrentUser(AsyncCallback<UserDTO> callback);
@@ -70,5 +79,4 @@ public interface UserManagementServiceAsync {
     void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);
 
     void verifySocialUser(CredentialDTO credential, AsyncCallback<UserDTO> callback);
-
 }

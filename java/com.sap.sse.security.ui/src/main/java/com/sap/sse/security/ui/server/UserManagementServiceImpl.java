@@ -33,12 +33,14 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
+import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.ui.client.UserManagementService;
@@ -47,6 +49,7 @@ import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
@@ -84,6 +87,40 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 SecurityUtils.setSecurityManager(getSecurityService().getSecurityManager());
             }
         }.start();
+    }
+    
+    private TenantDTO createTenantDTOFromTenant(Tenant tenant) {
+        return new TenantDTO(tenant.getName(), tenant.getOwner(), tenant.getUsernames());
+    }
+    
+    @Override
+    public Collection<TenantDTO> getTenantList() {
+        List<TenantDTO> tenants = new ArrayList<>();
+        for (Tenant t : getSecurityService().getTenantList()) {
+            TenantDTO tenantDTO = createTenantDTOFromTenant(t);
+            tenants.add(tenantDTO);
+        }
+        return tenants;
+    }
+    
+    @Override
+    public TenantDTO createTenant(String name, String owner) {
+        // TODO: create TenantManagementException_CustomSeri.....?
+        try {
+            return createTenantDTOFromTenant(getSecurityService().createTenant(name, owner));
+        } catch (TenantManagementException e) {
+            return null;
+        }
+    }
+    
+    @Override
+    public TenantDTO addUserToTenant(String user, String tenant) {
+        return createTenantDTOFromTenant(getSecurityService().addUserToTenant(user, tenant));
+    }
+    
+    @Override
+    public TenantDTO removeUserFromTenant(String user, String tenant) {
+        return createTenantDTOFromTenant(getSecurityService().removeUserFromTenant(user, tenant));
     }
 
     @Override

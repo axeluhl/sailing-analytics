@@ -10,9 +10,18 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementService extends RemoteService {
+    Collection<TenantDTO> getTenantList();
+    
+    TenantDTO createTenant(String name, String owner);
+    
+    TenantDTO addUserToTenant(String user, String tenant);
+    
+    TenantDTO removeUserFromTenant(String user, String tenant);
+    
     Collection<UserDTO> getUserList();
 
     Collection<UserDTO> getFilteredSortedUserList(String filter);

@@ -82,11 +82,13 @@ import com.sap.sse.security.SessionCacheManager;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
+import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -262,6 +264,30 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public CachingSecurityManager getSecurityManager() {
         return this.securityManager;
+    }
+    
+    @Override
+    public Iterable<Tenant> getTenantList() {
+        return store.getTenants();
+    }
+    
+    @Override
+    public Tenant createTenant(String name, String owner) throws TenantManagementException {
+        return store.createTenant(name, owner);
+    }
+    
+    @Override
+    public Tenant addUserToTenant(String user, String tenant) {
+        Tenant updatedTenant = store.getTenantByName(tenant).addUser(user);
+        store.updateTenant(updatedTenant);
+        return updatedTenant;
+    }
+
+    @Override
+    public Tenant removeUserFromTenant(String user, String tenant) {
+        Tenant updatedTenant = store.getTenantByName(tenant).removeUser(user);
+        store.updateTenant(updatedTenant);
+        return updatedTenant;
     }
 
     @Override

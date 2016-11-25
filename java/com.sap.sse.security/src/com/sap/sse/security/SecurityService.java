@@ -16,6 +16,7 @@ import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 
 /**
@@ -29,6 +30,14 @@ import com.sap.sse.security.shared.UserManagementException;
 public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
 
     SecurityManager getSecurityManager();
+    
+    Iterable<Tenant> getTenantList();
+    
+    Tenant createTenant(String name, String owner) throws TenantManagementException;
+    
+    Tenant addUserToTenant(String user, String tenant);
+
+    Tenant removeUserFromTenant(String user, String tenant);
 
     Iterable<User> getUserList();
 
@@ -185,5 +194,4 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void removeAccessToken(String username);
 
     User loginByAccessToken(String accessToken);
-
 }
