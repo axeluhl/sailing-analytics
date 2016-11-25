@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.common.security;
 
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.AbstractRole;
 
-public enum Roles implements Role {
+public enum AbstractRoles implements AbstractRole {
     spectator("spectator"),
     moderator("moderator"),
     sailor("sailor"),
@@ -10,13 +10,13 @@ public enum Roles implements Role {
     eventmanager("eventmanager"),
     mediaeditor("mediaeditor");
     
-    private Roles(String rolename) {
+    private final String rolename;
+    
+    private AbstractRoles(String rolename) {
         this.rolename = rolename;
     }
     
     public String getRolename() {
         return rolename;
     }
-
-    private final String rolename;
 }

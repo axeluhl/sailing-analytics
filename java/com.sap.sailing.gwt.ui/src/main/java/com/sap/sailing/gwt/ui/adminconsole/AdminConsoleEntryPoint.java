@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Roles;
+import com.sap.sailing.domain.common.security.AbstractRoles;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
@@ -41,7 +41,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.resources.Highcharts;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
@@ -272,7 +272,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 getStringMessages().localServer(), Permission.MANAGE_LOCAL_SERVER_INSTANCE);
 
         final UserManagementPanel userManagementPanel = new UserManagementPanel(getUserService(), StringMessages.INSTANCE,
-                SailingPermissionsForRoleProvider.INSTANCE, Arrays.<Role>asList(Roles.values()), Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()));
+                SailingPermissionsForRoleProvider.INSTANCE, Arrays.<AbstractRole>asList(AbstractRoles.values()), Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()));
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<UserManagementPanel>(userManagementPanel),
                 getStringMessages().userManagement(), Permission.MANAGE_USERS);
         

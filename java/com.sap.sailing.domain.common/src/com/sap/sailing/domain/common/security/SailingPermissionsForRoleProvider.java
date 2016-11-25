@@ -14,7 +14,7 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
         final Iterable<String> result;
         if (DefaultRoles.ADMIN.getRolename().equals(role)) {
             result = Collections.<String>singletonList("*");
-        } else if (Roles.eventmanager.getRolename().equals(role)) {
+        } else if (AbstractRoles.eventmanager.getRolename().equals(role)) {
             result = asList(
                     // RaceBoard:
                     Permission.MANAGE_MEDIA,
@@ -44,9 +44,9 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
                     Permission.LEADERBOARD,
                     Permission.LEADERBOARD_GROUP
                     );
-        } else if (Roles.mediaeditor.getRolename().equals(role)) {
+        } else if (AbstractRoles.mediaeditor.getRolename().equals(role)) {
             result = asList(Permission.MANAGE_MEDIA);
-        } else if (Roles.moderator.getRolename().equals(role)) {
+        } else if (AbstractRoles.moderator.getRolename().equals(role)) {
             result = asList(Permission.CAN_REPLAY_DURING_LIVE_RACES);
         } else {
             result = Collections.emptyList();

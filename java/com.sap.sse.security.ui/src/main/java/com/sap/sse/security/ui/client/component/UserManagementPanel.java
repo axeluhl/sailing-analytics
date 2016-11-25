@@ -29,7 +29,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -52,11 +52,11 @@ public class UserManagementPanel extends DockPanel {
     private UserListDataProvider userListDataProvider;
     
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages, PermissionsForRoleProvider permissionsForRoleProvider) {
-        this(userService, stringMessages, permissionsForRoleProvider, Collections.<Role>emptySet(), Collections.<Permission>emptySet());
+        this(userService, stringMessages, permissionsForRoleProvider, Collections.<AbstractRole>emptySet(), Collections.<Permission>emptySet());
     }
     
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages, PermissionsForRoleProvider permissionsForRoleProvider,
-            Iterable<Role> additionalRoles, Iterable<Permission> additionalPermissions) {
+            Iterable<AbstractRole> additionalRoles, Iterable<Permission> additionalPermissions) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         VerticalPanel west = new VerticalPanel();
         HorizontalPanel buttonPanel = new HorizontalPanel();

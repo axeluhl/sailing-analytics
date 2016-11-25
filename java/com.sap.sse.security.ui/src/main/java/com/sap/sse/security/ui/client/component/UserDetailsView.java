@@ -31,7 +31,7 @@ import com.sap.sse.security.shared.DefaultPermissions;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
@@ -62,7 +62,7 @@ public class UserDetailsView extends FlowPanel {
 
     public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages,
             final UserListDataProvider userListDataProvider, PermissionsForRoleProvider permissionsForRoleProvider,
-            Iterable<Role> additionalRoles, Iterable<Permission> additionalPermissions) {
+            Iterable<AbstractRole> additionalRoles, Iterable<Permission> additionalPermissions) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         this.stringMessages = stringMessages;
         this.permissionForRoleProvider = permissionsForRoleProvider;
@@ -72,7 +72,7 @@ public class UserDetailsView extends FlowPanel {
         for (DefaultRoles defaultRole : DefaultRoles.values()) {
             defaultRoleNames.add(defaultRole.getRolename());
         }
-        for (Role role : additionalRoles) {
+        for (AbstractRole role : additionalRoles) {
             defaultRoleNames.add(role.getRolename());
         }
         List<String> defaultPermissionNames = new ArrayList<>();

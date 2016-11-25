@@ -1,6 +1,6 @@
 package com.sap.sse.security.shared;
 
-public enum DefaultRoles implements Role {
+public enum DefaultRoles implements AbstractRole {
     ADMIN("admin");
     
     private DefaultRoles(String rolename) {
