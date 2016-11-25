@@ -115,7 +115,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     @Override
     public TenantDTO addUserToTenant(String user, String tenant) {
-        if (SecurityUtils.getSubject().isPermitted("Tenant:addUser:" + tenant)) {
+        if (SecurityUtils.getSubject().isPermitted("tenant:add_user:" + tenant + ":" + user)) {
             return createTenantDTOFromTenant(getSecurityService().addUserToTenant(user, tenant));
         } else {
             return null; // TODO: implement this with exception
@@ -124,7 +124,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     @Override
     public TenantDTO removeUserFromTenant(String user, String tenant) {
-        if (SecurityUtils.getSubject().isPermitted("Tenant:removeUser:" + tenant)) {
+        if (SecurityUtils.getSubject().isPermitted("tenant:remove_user:" + tenant + ":" + user)) {
             return createTenantDTOFromTenant(getSecurityService().removeUserFromTenant(user, tenant));
         } else {
             return null; // TODO: implement this with exception
