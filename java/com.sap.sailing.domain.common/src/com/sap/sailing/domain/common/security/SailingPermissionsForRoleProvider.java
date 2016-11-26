@@ -3,6 +3,7 @@ package com.sap.sailing.domain.common.security;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.sap.sse.security.shared.AbstractRoles;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 
@@ -13,7 +14,7 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
     public Iterable<String> getPermissions(String role) {
         final Iterable<String> result;
         if (DefaultRoles.ADMIN.getRolename().equals(role)) {
-            result = Collections.<String>singletonList("*");
+            result = DefaultRoles.ADMIN.getPermissions();
         } else if (AbstractRoles.eventmanager.getRolename().equals(role)) {
             result = asList(
                     // RaceBoard:
