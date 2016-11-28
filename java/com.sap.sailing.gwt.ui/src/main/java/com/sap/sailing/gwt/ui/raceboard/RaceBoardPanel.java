@@ -458,7 +458,7 @@ public class RaceBoardPanel extends AbstractRootPerspectiveComposite<RaceBoardPe
                         /*showCompetitorSailIdColumn*/true,
                         /* don't showCompetitorFullNameColumn in case screen is so small that we don't
                          * even display the leaderboard initially */ isScreenLargeEnoughToInitiallyDisplayLeaderboard);
-        leaderboardSettings.setDefaultValues(defaultLeaderboardSettingsForCurrentPlayMode);
+        leaderboardSettings = LeaderboardSettingsFactory.getInstance().overrideDefaultValuesWithNewDefaults(leaderboardSettings, defaultLeaderboardSettingsForCurrentPlayMode);
         return new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, selectedRaceIdentifier != null, selectedRaceIdentifier,
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
                 userAgent, /* showRaceDetails */ true, competitorSearchTextBox,

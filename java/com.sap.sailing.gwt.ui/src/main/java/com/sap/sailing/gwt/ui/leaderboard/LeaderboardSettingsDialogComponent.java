@@ -377,7 +377,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         Long delayBetweenAutoAdvancesValue = refreshIntervalInSecondsBox.getValue();
         Integer lastNRacesToShowValue = activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.LAST_N ?
                 numberOfLastRacesToShowBox.getValue() : null;
-        return new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow,
+        LeaderboardSettings newSettings = new LeaderboardSettings(maneuverDetailsToShow, legDetailsToShow, raceDetailsToShow,
                 overallDetailsToShow, namesOfRaceColumnsToShow, /* nameOfRacesToShow */null,
                 lastNRacesToShowValue,
                 initialSettings.isAutoExpandPreSelectedRace(), 1000l * (delayBetweenAutoAdvancesValue == null ? 0l : delayBetweenAutoAdvancesValue.longValue()),
@@ -386,6 +386,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
                 /*showAddedScores*/ showAddedScoresCheckBox.getValue().booleanValue(),
                 /*showOverallColumnWithNumberOfRacesSailedPerCompetitor*/ showOverallColumnWithNumberOfRacesSailedPerCompetitorCheckBox.getValue().booleanValue(),
                 showCompetitorSailIdColumnheckBox.getValue(), showCompetitorFullNameColumnCheckBox.getValue());
+        return LeaderboardSettingsFactory.getInstance().keepDefaults(initialSettings, newSettings);
     }
 
     @Override

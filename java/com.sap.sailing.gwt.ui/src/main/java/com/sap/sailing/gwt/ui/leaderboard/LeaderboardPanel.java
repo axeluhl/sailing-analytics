@@ -3119,7 +3119,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                     /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null : preSelectedRace
                             .getRaceName(), getRaceColumnSelection(), /* leave showRegattaRank and overall details unchanged */ null,
                             /* take into account state of competitor columns*/isShowCompetitorSailId(), isShowCompetitorFullName());
-            this.currentSettings.setDefaultValues(defaultLeaderboardSettingsForPlayMode);
+            currentSettings = LeaderboardSettingsFactory.getInstance().overrideDefaultValuesWithNewDefaults(currentSettings, defaultLeaderboardSettingsForPlayMode);
             updateSettings(currentSettings);
         }
         currentlyHandlingPlayStateChange = false;
@@ -3165,7 +3165,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         for (RaceColumnDTO raceColumn : selectedRaceColumns) {
             namesOfRaceColumnsToShow.add(raceColumn.getName());
         }
-        return new LeaderboardSettings(Collections.unmodifiableList(selectedManeuverDetails),
+        LeaderboardSettings leaderboardSettings = new LeaderboardSettings(Collections.unmodifiableList(selectedManeuverDetails),
                 Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
                 Collections.unmodifiableList(selectedOverallDetailColumns), namesOfRaceColumnsToShow, /*namesOfRacesToShow*/ null,
                 raceColumnSelection.getNumberOfLastRaceColumnsToShow(), 
@@ -3173,6 +3173,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                 /*sortAscending*/ true, /*updateUponPlayStateChange*/ true, raceColumnSelection.getType(),
                 isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
                 isShowCompetitorSailId(), isShowCompetitorFullName());
+        return LeaderboardSettingsFactory.getInstance().keepDefaults(currentSettings, leaderboardSettings);
     }
     
     @Override

@@ -28,12 +28,13 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
         for (RaceColumnDTO raceColumn : raceList) {
             namesOfRaceColumnsToShow.add(raceColumn.getName());
         }
-        return new LeaderboardSettings(namesOfRaceColumnsToShow, 1000L).asDefault();
+        return LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomDefaults(new LeaderboardSettings(namesOfRaceColumnsToShow, 1000L));
     }
 
     @Override
     public LeaderboardSettings cloneSettings(LeaderboardSettings settings) {
-        return new LeaderboardSettings(settings.getManeuverDetailsToShow(), settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(), settings.getNamesOfRaceColumnsToShow(), settings.getNamesOfRacesToShow(), settings.getNumberOfLastRacesToShow(), settings.isAutoExpandPreSelectedRace(), settings.getDelayBetweenAutoAdvancesInMilliseconds(), settings.getNameOfRaceToSort(), settings.isSortAscending(), settings.isUpdateUponPlayStateChange(), settings.getActiveRaceColumnSelectionStrategy(), settings.isShowAddedScores(), settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), settings.isShowCompetitorSailIdColumn(), settings.isShowCompetitorFullNameColumn());
+        LeaderboardSettings clonedSettings = new LeaderboardSettings(settings.getManeuverDetailsToShow(), settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(), settings.getNamesOfRaceColumnsToShow(), settings.getNamesOfRacesToShow(), settings.getNumberOfLastRacesToShow(), settings.isAutoExpandPreSelectedRace(), settings.getDelayBetweenAutoAdvancesInMilliseconds(), settings.getNameOfRaceToSort(), settings.isSortAscending(), settings.isUpdateUponPlayStateChange(), settings.getActiveRaceColumnSelectionStrategy(), settings.isShowAddedScores(), settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), settings.isShowCompetitorSailIdColumn(), settings.isShowCompetitorFullNameColumn());
+        return LeaderboardSettingsFactory.getInstance().keepDefaults(settings, clonedSettings);
     }
 
     @Override

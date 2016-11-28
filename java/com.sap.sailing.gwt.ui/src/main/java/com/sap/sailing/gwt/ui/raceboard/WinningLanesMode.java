@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
@@ -38,28 +39,13 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
 
     private void adjustLeaderboardSettings() {
         final LeaderboardSettings existingSettings = getLeaderboardPanel().getSettings();
-        final List<DetailType> raceDetailsToShow = new ArrayList<>(existingSettings.getRaceDetailsToShow());
+        final List<DetailType> raceDetailsToShow = new ArrayList<>();
         raceDetailsToShow.add(DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS);
         raceDetailsToShow.add(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_TIME_TRAVELED);
         raceDetailsToShow.remove(DetailType.DISPLAY_LEGS);
-        final LeaderboardSettings newSettings = new LeaderboardSettings(
-                Util.cloneListOrNull(existingSettings.getManeuverDetailsToShow()),
-                Util.cloneListOrNull(existingSettings.getLegDetailsToShow()),
-                raceDetailsToShow,
-                Util.cloneListOrNull(existingSettings.getOverallDetailsToShow()),
-                Util.cloneListOrNull(existingSettings.getNamesOfRaceColumnsToShow()),
-                Util.cloneListOrNull(existingSettings.getNamesOfRacesToShow()),
-                existingSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,
-                existingSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                existingSettings.getNameOfRaceToSort(), existingSettings.isSortAscending(),
-                existingSettings.isUpdateUponPlayStateChange(),
-                existingSettings.getActiveRaceColumnSelectionStrategy(),
-                existingSettings.isShowAddedScores(),
-                existingSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                existingSettings.isShowCompetitorSailIdColumn(),
-                existingSettings.isShowCompetitorFullNameColumn());
+        final LeaderboardSettings newSettings = LeaderboardSettingsFactory.getInstance().overrideDefaultValuesForRaceDetails(existingSettings, raceDetailsToShow);
         getLeaderboardPanel().updateSettings(newSettings);
     }
 

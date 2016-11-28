@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
@@ -43,6 +44,7 @@ public class RaceBoardComponentContext
                 defaultLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 defaultLeaderboardSettings.isShowCompetitorSailIdColumn(),
                 defaultLeaderboardSettings.isShowCompetitorFullNameColumn());
+        contextSpecificLeaderboardSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(leaderboardSettings, contextSpecificLeaderboardSettings);
         
         Map<String, Settings> clonedComponentIdsAndSettings = rootPerspectiveLifecycle.cloneComponentIdsAndSettings(defaultSettings);
         clonedComponentIdsAndSettings.put(leaderboardComponentId, contextSpecificLeaderboardSettings);
@@ -72,6 +74,7 @@ public class RaceBoardComponentContext
                 currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
                 currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn());
+        globalLeaderboardSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(currentLeaderboardSettings, globalLeaderboardSettings);
         Map<String, Settings> clonedComponentIdsAndSettings = rootPerspectiveLifecycle.cloneComponentIdsAndSettings(newRootPerspectiveSettings);
         clonedComponentIdsAndSettings.put(leaderboardComponentId, globalLeaderboardSettings);
         return new PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>(newRootPerspectiveSettings.getPerspectiveOwnSettings(), clonedComponentIdsAndSettings);
