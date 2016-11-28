@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.spectator;
 
+import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
@@ -8,9 +9,9 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
-import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
-import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
@@ -64,18 +65,6 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
-        if (!embedded) {
-            String title = groupName != null ? groupName : getStringMessages().overview();
-            LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(title, getStringMessages(), this, getUserService());
-            logoAndTitlePanel.addStyleName("LogoAndTitlePanel");
-            FlowPanel globalNavigationPanel = new GlobalNavigationPanel(getStringMessages(), true, null, null, /* event */ null, null);
-            logoAndTitlePanel.add(globalNavigationPanel);
-
-            rootPanel.add(logoAndTitlePanel);
-        } else {
-            RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
-            RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
-        }
         if (groupName == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
@@ -105,7 +94,24 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
             }
             rootPanel.add(groupAndFeedbackPanel);
         }
+        if (!embedded) {
+            String title = groupName != null ? groupName : getStringMessages().overview();
+            SAPSailingHeaderWithAuthentication header  = getHeader(title);
+            rootPanel.add(header);
+        } else {
+            RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
+            RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
+        }
         fillRegattas();
+    }
+
+    private SAPSailingHeaderWithAuthentication getHeader(String title){
+    	SAPSailingHeaderWithAuthentication header  = new SAPSailingHeaderWithAuthentication(title);         
+        new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        header.getElement().getStyle().setPosition(Position.FIXED);
+        header.getElement().getStyle().setTop(0, Unit.PX);
+        header.getElement().getStyle().setWidth(100, Unit.PCT);
+        return header;
     }
 
     @Override
