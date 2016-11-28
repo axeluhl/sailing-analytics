@@ -10,6 +10,7 @@ public abstract class UrlData {
     public String checkinURLStr;
     public String eventId;
     public String leaderboardName;
+    public String leaderboardDisplayName;
     public DeviceIdentifier deviceUuid;
     public String eventUrl;
     public String leaderboardUrl;

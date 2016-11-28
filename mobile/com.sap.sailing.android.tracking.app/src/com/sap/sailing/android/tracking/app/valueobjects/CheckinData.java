@@ -12,6 +12,7 @@ import android.net.Uri;
 
 public abstract class CheckinData extends BaseCheckinData {
     private String leaderboardName;
+    private String leaderboardDisplayName;
     private String eventId;
     private String eventName;
     private String eventStartDateStr;
@@ -26,6 +27,7 @@ public abstract class CheckinData extends BaseCheckinData {
 
     public CheckinData(UrlData data) {
         leaderboardName = Uri.decode(data.leaderboardName);
+        leaderboardDisplayName = data.leaderboardDisplayName;
         deviceUid = data.deviceUuid.getStringRepresentation();
         eventId = data.eventId;
         eventName = data.eventName;
@@ -64,6 +66,7 @@ public abstract class CheckinData extends BaseCheckinData {
     public LeaderboardInfo getLeaderboard() {
         LeaderboardInfo leaderboard = new LeaderboardInfo();
         leaderboard.name = leaderboardName;
+        leaderboard.displayName = leaderboardDisplayName;
         leaderboard.checkinDigest = checkinDigest;
         return leaderboard;
     }

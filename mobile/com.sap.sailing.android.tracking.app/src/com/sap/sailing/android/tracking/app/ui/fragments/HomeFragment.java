@@ -44,6 +44,7 @@ import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.adapter.RegattaAdapter;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase;
 import com.sap.sailing.android.tracking.app.ui.activities.BuoyActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.StartActivity;
@@ -268,14 +269,14 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         switch (loaderId) {
             case REGATTA_LOADER:
-                String[] projection = new String[] { AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event.EVENT_CHECKIN_DIGEST,
-                    AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event._ID,
-                    AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event.EVENT_NAME,
-                    AnalyticsContract.PATH_EVENT + "." + AnalyticsContract.Event.EVENT_SERVER,
-                    AnalyticsContract.PATH_LEADERBOARD + "." + AnalyticsContract.Leaderboard.LEADERBOARD_NAME,
-                    AnalyticsContract.PATH_COMPETITOR + "." + AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME,
-                    AnalyticsContract.PATH_MARK + "." + AnalyticsContract.Mark.MARK_NAME,
-                    AnalyticsContract.PATH_CHECKIN + "." + AnalyticsContract.Checkin.CHECKIN_TYPE};
+                String[] projection = new String[] { AnalyticsDatabase.Tables.EVENTS + "." + AnalyticsContract.Event.EVENT_CHECKIN_DIGEST,
+                    AnalyticsDatabase.Tables.EVENTS + "." + AnalyticsContract.Event._ID,
+                    AnalyticsDatabase.Tables.EVENTS + "." + AnalyticsContract.Event.EVENT_NAME,
+                    AnalyticsDatabase.Tables.EVENTS + "." + AnalyticsContract.Event.EVENT_SERVER,
+                    AnalyticsDatabase.Tables.LEADERBOARDS + "." + AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME,
+                    AnalyticsDatabase.Tables.COMPETITORS + "." + AnalyticsContract.Competitor.COMPETITOR_DISPLAY_NAME,
+                    AnalyticsDatabase.Tables.MARKS + "." + AnalyticsContract.Mark.MARK_NAME,
+                    AnalyticsDatabase.Tables.CHECKIN_URIS + "." + AnalyticsContract.Checkin.CHECKIN_TYPE};
                 return new CursorLoader(getActivity(), AnalyticsContract.LeaderboardsEventsCompetitorsMarksJoined.CONTENT_URI, projection, null, null, null);
 
             default:
