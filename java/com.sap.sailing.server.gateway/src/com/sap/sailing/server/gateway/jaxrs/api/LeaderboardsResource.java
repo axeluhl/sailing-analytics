@@ -263,7 +263,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, LeaderboardDTO leaderboard,
             ResultStates resultState, TimePoint resultTimePoint, Integer maxCompetitorsCount) {
         jsonLeaderboard.put("name", leaderboard.name);
-
+        final String displayName = leaderboard.getDisplayName();
+        jsonLeaderboard.put("displayName", displayName == null ? leaderboard.name : displayName);
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
@@ -282,7 +283,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     private void writeCommonLeaderboardData(JSONObject jsonLeaderboard, Leaderboard leaderboard,
             ResultStates resultState, TimePoint resultTimePoint, Integer maxCompetitorsCount) {
         jsonLeaderboard.put("name", leaderboard.getName());
-
+        final String displayName = leaderboard.getDisplayName();
+        jsonLeaderboard.put("displayName", displayName == null ? leaderboard.getName() : displayName);
         jsonLeaderboard.put("resultTimepoint", resultTimePoint != null ? resultTimePoint.asMillis() : null);
         jsonLeaderboard.put("resultState", resultState.name());
         jsonLeaderboard.put("maxCompetitorsCount", maxCompetitorsCount);
