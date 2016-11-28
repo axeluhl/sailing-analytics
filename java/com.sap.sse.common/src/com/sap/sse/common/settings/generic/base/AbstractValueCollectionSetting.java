@@ -91,6 +91,11 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
             resetToDefault();
         }
     }
+    
+    @Override
+    public Iterable<T> getDefaultValues() {
+        return Collections.unmodifiableCollection(this.defaultValues);
+    }
 
     @Override
     public String toString() {

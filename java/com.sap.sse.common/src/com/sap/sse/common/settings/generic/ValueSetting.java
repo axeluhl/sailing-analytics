@@ -6,4 +6,6 @@ public interface ValueSetting<T> extends HasValueSetting<T> {
     void setValue(T value);
     
     void setDefaultValue(T defaultValue);
+    
+    T getDefaultValue();
 }

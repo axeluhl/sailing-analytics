@@ -59,6 +59,11 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     }
     
     @Override
+    public T getDefaultValue() {
+        return defaultValue;
+    }
+    
+    @Override
     public String toString() {
         return "" +  getValue();
     }
