@@ -81,7 +81,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.MeterDistance;
@@ -153,7 +152,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
-    
+    public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
     
     private MapWidget map;
     
@@ -2810,7 +2809,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           // To play with the styles, check out http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html.
           // To convert an RGB color into the strange hue/saturation/lightness model used by the Google Map use
           // http://software.stadtwerk.org/google_maps_colorizr/#water/all/123456/.
-          Triple<RGBColor, Integer, Integer> hslColor = convertFromColorToHSL(ColorMapImpl.WATER_COLOR);
+          Triple<RGBColor, Integer, Integer> hslColor = convertFromColorToHSL(WATER_COLOR);
           mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, hslColor.getA(), hslColor.getB(), hslColor.getC());
           
           MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();

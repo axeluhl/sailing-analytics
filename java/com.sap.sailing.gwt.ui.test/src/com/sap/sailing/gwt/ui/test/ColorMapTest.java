@@ -8,12 +8,19 @@ import java.util.List;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
+import com.sap.sse.common.Color;
+import com.sap.sse.common.impl.RGBColor;
 
 public class ColorMapTest {
+    // this is a duplicate variable to RaceMap.WATER_COLOR, as the RaceMap class cannot be loaded without a GWT context,
+    // due to the GWT.create(), this would fail the junit test
+    public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
 
     @Test
     public void testHundredDistinctColors() {
-        ColorMapImpl<Integer> colorMap = new ColorMapImpl<Integer>();
+        ArrayList<Color> blockedColors = new ArrayList<>();
+        blockedColors.add(WATER_COLOR);
+        ColorMapImpl<Integer> colorMap = new ColorMapImpl<Integer>(blockedColors);
         List<String> existingColors = new ArrayList<String>();
         int amountOfDistinctColorsToCreate = 100;
         for (int i = 1; i <= amountOfDistinctColorsToCreate; i++) {
@@ -26,20 +33,27 @@ public class ColorMapTest {
     }
 
     /**
-     * A function only useful for visual tests.
-     * It creates an HTML file (as string) with 100 distinct colors on top of the water color of the google map.
+     * A function only useful for visual tests. It creates an HTML file (as string) with 100 distinct colors on top of
+     * the water color of the google map.
      */
     public void createColorMapAsHtml() {
-        ColorMapImpl<Integer> colorMap = new ColorMapImpl<Integer>();
+        ArrayList<Color> blockedWater = new ArrayList<Color>();
+        blockedWater.add(WATER_COLOR);
+        ColorMapImpl<Integer> colorMap = new ColorMapImpl<Integer>(blockedWater);
         int amountOfDistinctColorsToCreate = 100;
 
-        String colorMapAsHtml = "<html><head></head><body style='background-color: #A5BFDD'>";       
+        String colorMapAsHtml = "<html><head></head><body style='background-color: " + WATER_COLOR.getAsHtml() + "'>";
 
-        for(int i = 1; i <= amountOfDistinctColorsToCreate; i++) {
-            colorMapAsHtml += "<div style='height:3px; background-color:" + colorMap.getColorByID(i) + "'></div><br/>";
+        for (int i = 1; i <= amountOfDistinctColorsToCreate; i++) {
+            colorMapAsHtml += "<div style='height:3px; background-color:" + colorMap.getColorByID(i).getAsHtml()
+                    + "'></div><br/>";
         }
 
         colorMapAsHtml += "</body></html>";
         System.out.println(colorMapAsHtml);
+    }
+
+    public static void main(String[] args) {
+        new ColorMapTest().createColorMapAsHtml();
     }
 }

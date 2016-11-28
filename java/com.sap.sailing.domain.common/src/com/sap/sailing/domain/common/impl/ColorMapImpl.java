@@ -8,7 +8,6 @@ import com.sap.sailing.domain.common.ColorMap;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.HSVColor;
-import com.sap.sse.common.impl.RGBColor;
 
 
 /**
@@ -31,8 +30,6 @@ public class ColorMapImpl<T> implements ColorMap<T> {
      */
     private static final double MIN_COLOR_DISTANCE = 0.2;
     
-    public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
-
     private static final float STEP = 0.1f;
     /*
      * Number of steps were made
@@ -58,12 +55,18 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     /** a list of already used colors which should be excluded from the automatic color assignment */
     private List<HSVColor> blockedColors;
 
-    public ColorMapImpl() {
+    // public ColorMapImpl() {
+    // this(new ArrayList<Color>());
+    // }
+
+    public ColorMapImpl(List<Color> initialBlockedColors) {
         baseColors = new HSVColor[11];
         idColor = new HashMap<>();
         blockedColors = new ArrayList<>();
+        for (Color initialBlockedColor : initialBlockedColors) {
+            blockedColors.add(convertFromColorToHSV(initialBlockedColor));
+        }
         insertBaseColors();
-        blockedColors.add(convertFromColorToHSV(WATER_COLOR));
     }
 
     private void insertBaseColors() {
@@ -138,7 +141,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
         blockedColors.clear();
     }
     
-    private HSVColor convertFromColorToHSV(Color color) {
+    private static HSVColor convertFromColorToHSV(Color color) {
         Triple<Float, Float, Float> hsvColor = color.getAsHSV();
         return new HSVColor(hsvColor.getA(), hsvColor.getB(), hsvColor.getC());
     }
