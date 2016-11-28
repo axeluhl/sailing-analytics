@@ -1144,11 +1144,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
                 }
             }
+            final Double buoyZoneRadiusInHullLengths = (Double) dbRegatta.get(FieldNames.REGATTA_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS.name()); 
             final Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
             final Boolean controlTrackingFromStartAndFinishTimes = (Boolean) dbRegatta.get(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name());
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
             result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass, startDate, endDate, series, /* persistent */true,
-                    loadScoringScheme(dbRegatta), id, courseArea, useStartTimeInference == null ? true
+                    loadScoringScheme(dbRegatta), id, courseArea, buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS : buoyZoneRadiusInHullLengths, useStartTimeInference == null ? true
                             : useStartTimeInference, controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
                                     rankingMetricConstructor);
             result.setRegattaConfiguration(configuration);

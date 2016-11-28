@@ -55,7 +55,7 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
         
         if(currentPresenter.getEventDTO().getType() == EventType.SERIES_EVENT) {
             final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
-            Anchor seriesAnchor = new Anchor(currentPresenter.getEventDTO().getSeriesName());
+            Anchor seriesAnchor = new Anchor(i18n.overallLeaderboardSelection());
             seriesAnchor.setHref(currentEventSeriesNavigation.getTargetUrl());
             seriesAnchor.addClickHandler(new ClickHandler() {
                 @Override
