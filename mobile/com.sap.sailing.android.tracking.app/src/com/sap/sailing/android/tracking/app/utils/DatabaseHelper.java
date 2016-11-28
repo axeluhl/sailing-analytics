@@ -20,7 +20,6 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Checkin;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
-import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventLeaderboardCompetitorJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
