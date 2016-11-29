@@ -946,6 +946,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (state.getProtestTime() != null) {
                     final TimePoint protestEndTime = state.getProtestTime().to();
                     if (protestEndTime != null) {
+                        final TimePoint protestStartTime = state.getProtestTime().from();
+                        raceInfoDTO.protestStartTime = protestStartTime == null ? null : protestStartTime.asDate();
                         raceInfoDTO.protestFinishTime = protestEndTime.asDate();
                         raceInfoDTO.lastUpperFlag = Flags.BRAVO;
                         raceInfoDTO.lastLowerFlag = Flags.NONE;

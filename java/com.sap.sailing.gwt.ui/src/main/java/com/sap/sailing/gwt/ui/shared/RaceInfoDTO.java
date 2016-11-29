@@ -45,6 +45,7 @@ public class RaceInfoDTO implements IsSerializable {
     public RaceLogRaceStatus lastStatus;
     public Date startTime;
     public Date finishedTime;
+    public Date protestStartTime;
     public Date protestFinishTime;
     public Date lastUpdateTime;
     public Flags lastUpperFlag;
