@@ -204,6 +204,7 @@ public class AnalyticsProvider extends ContentProvider {
         }
 
         long id = db.insertOrThrow(table, null, values);
+        notifyChange(AnalyticsContract.LeaderboardsEventsCompetitorsMarksJoined.CONTENT_URI);
         notifyChange(uri);
         return uri.buildUpon().appendPath(String.valueOf(id)).build();
     }
@@ -244,6 +245,7 @@ public class AnalyticsProvider extends ContentProvider {
         }
 
         int rowsDeleted = db.delete(table, selection, selectionArgs);
+        notifyChange(AnalyticsContract.LeaderboardsEventsCompetitorsMarksJoined.CONTENT_URI);
         notifyChange(uri);
         return rowsDeleted;
     }
