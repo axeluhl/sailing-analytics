@@ -276,7 +276,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         Set<ItemT> itemsToProcess = new HashSet<ItemT>(previousMappings.keySet());
         itemsToProcess.addAll(newMappings.keySet());
         int numberOfItemsToProcess = itemsToProcess.size();
-        double progressPerItem = numberOfItemsToProcess < 1 ? 1 : 1 / numberOfItemsToProcess;
+        double progressPerItem = numberOfItemsToProcess <= 1 ? 1 : 1.0 / numberOfItemsToProcess;
         int itemIndex = 0;
         for (ItemT item : itemsToProcess) {
             double baseProgress = itemIndex * progressPerItem;
