@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +48,6 @@ import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -102,9 +101,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         windSourceDirectionPoints = new HashMap<WindSource, Point[]>();
         windSourceSpeedPoints = new HashMap<WindSource, Point[]>();
         firstPointOfFirstSeries = null;
-        ArrayList<com.sap.sse.common.Color> blockedColors = new ArrayList<>();
-        blockedColors.add(RaceMap.WATER_COLOR);
-        colorMap = new ColorMapImpl<WindSource>(blockedColors);
+        colorMap = new ColorMapImpl<WindSource>(Collections.<com.sap.sse.common.Color>emptyList());
         chart = new Chart()
                 .setPersistent(true)
                 .setReflow(false)
