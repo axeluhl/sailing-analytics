@@ -56,27 +56,28 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     private List<HSVColor> blockedColors;
 
     public ColorMapImpl(Color... initialBlockedColors) {
-        baseColors = new HSVColor[11];
+        baseColors = insertBaseColors();
         idColor = new HashMap<>();
         blockedColors = new ArrayList<>();
         for (Color initialBlockedColor : initialBlockedColors) {
             blockedColors.add(convertFromColorToHSV(initialBlockedColor));
         }
-        insertBaseColors();
     }
 
-    private void insertBaseColors() {
-        baseColors[0]  = new HSVColor(0,   1, 1); // Red
-        baseColors[1]  = new HSVColor(30,  1, 1); // Orange
-        baseColors[2]  = new HSVColor(45,  1, 1);
-        baseColors[3]  = new HSVColor(120, 1, 1); // Green
-        baseColors[4]  = new HSVColor(160, 1, 1);
-        baseColors[5]  = new HSVColor(190, 1, 1);
-        baseColors[6]  = new HSVColor(240, 1, 1); // Blue
-        baseColors[7]  = new HSVColor(270, 1, 1); // Pink
-        baseColors[8]  = new HSVColor(285, 1, 1);
-        baseColors[9]  = new HSVColor(300, 1, 1); // Magenta
-        baseColors[10] = new HSVColor(330, 1, 1);
+    private HSVColor[] insertBaseColors() {
+        final HSVColor[] result = new HSVColor[] {
+            new HSVColor(0,   1, 1), // Red
+            new HSVColor(30,  1, 1), // Orange
+            new HSVColor(45,  1, 1),
+            new HSVColor(120, 1, 1), // Green
+            new HSVColor(160, 1, 1),
+            new HSVColor(190, 1, 1),
+            new HSVColor(240, 1, 1), // Blue
+            new HSVColor(270, 1, 1), // Pink
+            new HSVColor(285, 1, 1),
+            new HSVColor(300, 1, 1), // Magenta
+            new HSVColor(330, 1, 1) };
+        return result;
     }
 
     /**
