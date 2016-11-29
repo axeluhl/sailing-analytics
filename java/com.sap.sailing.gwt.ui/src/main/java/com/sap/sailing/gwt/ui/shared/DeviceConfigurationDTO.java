@@ -13,7 +13,11 @@ public class DeviceConfigurationDTO implements IsSerializable {
         public static class RRS26ConfigurationDTO extends RacingProcedureConfigurationDTO {
             public List<Flags> startModeFlags;
         }
-        
+
+        public static class SWCStartConfigurationDTO extends RacingProcedureConfigurationDTO {
+            public List<Flags> startModeFlags;
+        }
+
         public static class GateStartConfigurationDTO extends RacingProcedureConfigurationDTO {
             public Boolean hasPathfinder;
             public Boolean hasAdditionalGolfDownTime;
@@ -36,6 +40,7 @@ public class DeviceConfigurationDTO implements IsSerializable {
         public CourseDesignerMode defaultCourseDesignerMode;
         
         public RRS26ConfigurationDTO rrs26Configuration;
+        public SWCStartConfigurationDTO swcStartConfiguration;
         public GateStartConfigurationDTO gateStartConfiguration;
         public ESSConfigurationDTO essConfiguration;
         public RacingProcedureConfigurationDTO basicConfiguration;

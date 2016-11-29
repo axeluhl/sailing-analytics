@@ -987,6 +987,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String activateIndividualRecall();
     String activateResultEntry();
     String rrs26Start();
+    String sailingWorldCupStart();
     String setConfiguration();
     String classFlag();
     String classFlagHelpText(String procedure);
