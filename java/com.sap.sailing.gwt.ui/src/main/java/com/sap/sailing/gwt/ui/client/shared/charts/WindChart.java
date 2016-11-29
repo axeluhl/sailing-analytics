@@ -103,6 +103,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         colorMap = new ColorMapImpl<WindSource>();
         chart = new Chart()
                 .setPersistent(true)
+                .setReflow(false)
                 .setZoomType(BaseChart.ZoomType.X)
                 .setMarginLeft(65)
                 .setMarginRight(65)
@@ -115,7 +116,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 .setPlotBackgroundColor("#f8f8f8")
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(stringMessages.wind()))
+                .setChartTitle(new ChartTitle().setText(stringMessages.wind()).setOption("floating",true))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setLinePlotOptions(new LinePlotOptions().setLineWidth(LINE_WIDTH).setMarker(
                         new Marker().setEnabled(false).setHoverState(
@@ -182,7 +183,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         chart.getYAxis(1).setOpposite(true).setAxisTitleText(stringMessages.speed()+" ("+stringMessages.knotsUnit()+")").setMin(0)
             .setMaxPadding(0.05).setStartOnTick(false).setGridLineWidth(0).setMinorGridLineWidth(0);
         if (compactChart) {
-            chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
+            chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(20)
                  .setOption("legend/margin", 2)
                  .setOption("title/margin", 5)
                  .setChartSubtitle(null)
