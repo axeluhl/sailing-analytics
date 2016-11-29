@@ -55,10 +55,6 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     /** a list of already used colors which should be excluded from the automatic color assignment */
     private List<HSVColor> blockedColors;
 
-    // public ColorMapImpl() {
-    // this(new ArrayList<Color>());
-    // }
-
     public ColorMapImpl(List<Color> initialBlockedColors) {
         baseColors = new HSVColor[11];
         idColor = new HashMap<>();
@@ -122,9 +118,11 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     }
 
     public boolean addBlockedColor(Color color) {
-        boolean result = false;
-        if(color != null && !blockedColors.contains(color)) {
+        final boolean result;
+        if (color != null && !blockedColors.contains(color)) {
             result = blockedColors.add(convertFromColorToHSV(color));
+        } else {
+            result = false;
         }
         return result;
     }

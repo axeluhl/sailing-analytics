@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.test;
+package com.sap.sailing.domain.common.test;
 
 import static org.junit.Assert.assertEquals;
 
