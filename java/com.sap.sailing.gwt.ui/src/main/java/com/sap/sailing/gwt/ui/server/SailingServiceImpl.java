@@ -127,6 +127,7 @@ import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl
 import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.RacingProcedureWithConfigurableStartModeFlagConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.SWCConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.LineStartConfiguration;
@@ -4913,13 +4914,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (dto.rrs26Configuration != null) {
             RRS26ConfigurationImpl config = new RRS26ConfigurationImpl();
             applyGeneralRacingProcedureConfigProperties(dto.rrs26Configuration, config);
-            config.setStartModeFlags(dto.rrs26Configuration.startModeFlags);
+            applyRacingProcedureWithConfigurableStartModeFlagConfigProperties(dto.rrs26Configuration, config);
             configuration.setRRS26Configuration(config);
         }
         if (dto.swcStartConfiguration != null) {
             SWCConfigurationImpl config = new SWCConfigurationImpl();
             applyGeneralRacingProcedureConfigProperties(dto.swcStartConfiguration, config);
-            config.setStartModeFlags(dto.swcStartConfiguration.startModeFlags);
+            applyRacingProcedureWithConfigurableStartModeFlagConfigProperties(dto.swcStartConfiguration, config);
             configuration.setSWCConfiguration(config);
         }
         if (dto.gateStartConfiguration != null) {
@@ -4954,6 +4955,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         config.setResultEntryEnabled(racingProcedureConfigurationDTO.isResultEntryEnabled);
     }
 
+    private void applyRacingProcedureWithConfigurableStartModeFlagConfigProperties(
+            RacingProcedureWithConfigurableStartModeFlagConfigurationDTO racingProcedureConfigurationDTO,
+            RacingProcedureWithConfigurableStartModeFlagConfigurationImpl config) {
+        config.setStartModeFlags(racingProcedureConfigurationDTO.startModeFlags);
+    }
+    
     @Override
     public boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto) {
         TimePoint newStartTime = getService().setStartTimeAndProcedure(dto.leaderboardName, dto.raceColumnName, 
