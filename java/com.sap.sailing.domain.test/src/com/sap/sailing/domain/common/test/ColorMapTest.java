@@ -18,9 +18,7 @@ public class ColorMapTest {
 
     @Test
     public void testHundredDistinctColors() {
-        ArrayList<Color> blockedColors = new ArrayList<>();
-        blockedColors.add(WATER_COLOR);
-        ColorMapImpl<Integer> colorMap = new ColorMapImpl<Integer>(blockedColors);
+        ColorMapImpl<Integer> colorMap = new ColorMapImpl<Integer>(WATER_COLOR);
         List<String> existingColors = new ArrayList<String>();
         int amountOfDistinctColorsToCreate = 100;
         for (int i = 1; i <= amountOfDistinctColorsToCreate; i++) {
@@ -37,9 +35,7 @@ public class ColorMapTest {
      * the water color of the google map.
      */
     public void createColorMapAsHtml() {
-        ArrayList<Color> blockedWater = new ArrayList<Color>();
-        blockedWater.add(WATER_COLOR);
-        ColorMapImpl<Integer> colorMap = new ColorMapImpl<Integer>(blockedWater);
+        ColorMapImpl<Integer> colorMap = new ColorMapImpl<Integer>(WATER_COLOR);
         int amountOfDistinctColorsToCreate = 100;
 
         String colorMapAsHtml = "<html><head></head><body style='background-color: " + WATER_COLOR.getAsHtml() + "'>";

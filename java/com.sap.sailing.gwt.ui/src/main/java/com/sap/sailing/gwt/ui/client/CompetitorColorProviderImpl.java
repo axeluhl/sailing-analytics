@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,9 +26,7 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
 
     public CompetitorColorProviderImpl(RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
-        ArrayList<Color> blockedColors = new ArrayList<>();
-        blockedColors.add(RaceMap.WATER_COLOR);
-        this.competitorsColorMap = new ColorMapImpl<>(blockedColors);
+        this.competitorsColorMap = new ColorMapImpl<>(RaceMap.WATER_COLOR);
         this.competitorsBoatColorsPerRace = new HashMap<RegattaAndRaceIdentifier, Map<CompetitorDTO, Color>>();
         if (raceIdentifier != null) {
             for (Entry<CompetitorDTO, BoatDTO> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {

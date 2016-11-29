@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -101,7 +100,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
         windSourceDirectionPoints = new HashMap<WindSource, Point[]>();
         windSourceSpeedPoints = new HashMap<WindSource, Point[]>();
         firstPointOfFirstSeries = null;
-        colorMap = new ColorMapImpl<WindSource>(Collections.<com.sap.sse.common.Color>emptyList());
+        colorMap = new ColorMapImpl<WindSource>();
         chart = new Chart()
                 .setPersistent(true)
                 .setReflow(false)

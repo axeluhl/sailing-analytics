@@ -55,7 +55,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     /** a list of already used colors which should be excluded from the automatic color assignment */
     private List<HSVColor> blockedColors;
 
-    public ColorMapImpl(List<Color> initialBlockedColors) {
+    public ColorMapImpl(Color... initialBlockedColors) {
         baseColors = new HSVColor[11];
         idColor = new HashMap<>();
         blockedColors = new ArrayList<>();
