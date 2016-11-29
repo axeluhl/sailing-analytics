@@ -89,14 +89,19 @@ public class ColorMapImpl<T> implements ColorMap<T> {
      * @return A color in hex/html-format (e.g. #ff0000)
      */
     public Color getColorByID(T object) {
+        final Color result;
         Color color = idColor.get(object);
         if (color == null) {
+            HSVColor newColor;
             do {
-                color = generateColor(colorCounter++);
-            } while (isContainColor(blockedColors, convertFromColorToHSV(color)));
-            idColor.put(object, color);
+                newColor = generateColor(colorCounter++);
+            } while (isContainColor(blockedColors, newColor));
+            idColor.put(object, newColor);
+            result = newColor;
+        } else {
+            result = color;
         }
-        return color;
+        return result;
     }
     
     private boolean isColorsClose(HSVColor blockedColor, HSVColor newColor) {
@@ -130,7 +135,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     
     public boolean removeBlockedColor(Color color) {
         boolean result = false;
-        if(color != null) {
+        if (color != null) {
             result = blockedColors.remove(convertFromColorToHSV(color));
         }
         return result;
@@ -157,7 +162,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
      * @return A color computed using the {@code index}.
      * @author Stsiapan_Tsybulski
      */
-    private Color generateColor(int index) {
+    private HSVColor generateColor(int index) {
         int baseColorsCount = baseColors.length;
         int currentColorIndex = index % baseColorsCount;
         float saturationDecrease = STEP;
