@@ -118,6 +118,7 @@ import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
@@ -127,6 +128,8 @@ import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.SWCConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.procedures.LineStartConfiguration;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -309,6 +312,7 @@ import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureWithConfigurableStartModeFlagConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -4852,38 +4856,43 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         if (configuration.getRRS26Configuration() != null) {
             dto.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
-            dto.rrs26Configuration.classFlag = configuration.getRRS26Configuration().getClassFlag();
-            dto.rrs26Configuration.hasIndividualRecall = configuration.getRRS26Configuration().hasIndividualRecall();
-            dto.rrs26Configuration.isResultEntryEnabled = configuration.getRRS26Configuration().isResultEntryEnabled();
-            dto.rrs26Configuration.startModeFlags = configuration.getRRS26Configuration().getStartModeFlags();
+            copyBasicRacingProcedureProperties(configuration.getRRS26Configuration(), dto.rrs26Configuration);
+            copyRacingProcedureWithConfigurableStartModeFlagProperties(configuration.getRRS26Configuration(), dto.rrs26Configuration);
+        }
+        if (configuration.getSWCConfiguration() != null) {
+            dto.swcStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.SWCStartConfigurationDTO();
+            copyBasicRacingProcedureProperties(configuration.getSWCConfiguration(), dto.swcStartConfiguration);
+            copyRacingProcedureWithConfigurableStartModeFlagProperties(configuration.getSWCConfiguration(), dto.swcStartConfiguration);
         }
         if (configuration.getGateStartConfiguration() != null) {
             dto.gateStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.GateStartConfigurationDTO();
-            dto.gateStartConfiguration.classFlag = configuration.getGateStartConfiguration().getClassFlag();
-            dto.gateStartConfiguration.hasIndividualRecall = configuration.getGateStartConfiguration().hasIndividualRecall();
-            dto.gateStartConfiguration.isResultEntryEnabled = configuration.getGateStartConfiguration().isResultEntryEnabled();
+            copyBasicRacingProcedureProperties(configuration.getGateStartConfiguration(), dto.gateStartConfiguration);
             dto.gateStartConfiguration.hasPathfinder = configuration.getGateStartConfiguration().hasPathfinder();
             dto.gateStartConfiguration.hasAdditionalGolfDownTime = configuration.getGateStartConfiguration().hasAdditionalGolfDownTime();
         }
         if (configuration.getESSConfiguration() != null) {
             dto.essConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.ESSConfigurationDTO();
-            dto.essConfiguration.classFlag = configuration.getESSConfiguration().getClassFlag();
-            dto.essConfiguration.hasIndividualRecall = configuration.getESSConfiguration().hasIndividualRecall();
-            dto.essConfiguration.isResultEntryEnabled = configuration.getESSConfiguration().isResultEntryEnabled();
+            copyBasicRacingProcedureProperties(configuration.getESSConfiguration(), dto.essConfiguration);
         }
         if (configuration.getBasicConfiguration() != null) {
             dto.basicConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO();
-            dto.basicConfiguration.classFlag = configuration.getBasicConfiguration().getClassFlag();
-            dto.basicConfiguration.hasIndividualRecall = configuration.getBasicConfiguration().hasIndividualRecall();
-            dto.basicConfiguration.isResultEntryEnabled = configuration.getBasicConfiguration().isResultEntryEnabled();
+            copyBasicRacingProcedureProperties(configuration.getBasicConfiguration(), dto.basicConfiguration);
         }
         if (configuration.getLeagueConfiguration() != null) {
             dto.leagueConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.LeagueConfigurationDTO();
-            dto.leagueConfiguration.classFlag = configuration.getLeagueConfiguration().getClassFlag();
-            dto.leagueConfiguration.hasIndividualRecall = configuration.getLeagueConfiguration().hasIndividualRecall();
-            dto.leagueConfiguration.isResultEntryEnabled = configuration.getLeagueConfiguration().isResultEntryEnabled();
+            copyBasicRacingProcedureProperties(configuration.getLeagueConfiguration(), dto.leagueConfiguration);
         }
         return dto;
+    }
+    
+    private void copyBasicRacingProcedureProperties(RacingProcedureConfiguration configuration, final RacingProcedureConfigurationDTO racingProcedureConfigurationDTO) {
+        racingProcedureConfigurationDTO.classFlag = configuration.getClassFlag();
+        racingProcedureConfigurationDTO.hasIndividualRecall = configuration.hasIndividualRecall();
+        racingProcedureConfigurationDTO.isResultEntryEnabled = configuration.isResultEntryEnabled();
+    }
+
+    private void copyRacingProcedureWithConfigurableStartModeFlagProperties(LineStartConfiguration configuration, final RacingProcedureWithConfigurableStartModeFlagConfigurationDTO racingProcedureConfigurationDTO) {
+        racingProcedureConfigurationDTO.startModeFlags = configuration.getStartModeFlags();
     }
 
     private DeviceConfigurationImpl convertToDeviceConfiguration(DeviceConfigurationDTO dto) {
@@ -4906,6 +4915,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             applyGeneralRacingProcedureConfigProperties(dto.rrs26Configuration, config);
             config.setStartModeFlags(dto.rrs26Configuration.startModeFlags);
             configuration.setRRS26Configuration(config);
+        }
+        if (dto.swcStartConfiguration != null) {
+            SWCConfigurationImpl config = new SWCConfigurationImpl();
+            applyGeneralRacingProcedureConfigProperties(dto.swcStartConfiguration, config);
+            config.setStartModeFlags(dto.swcStartConfiguration.startModeFlags);
+            configuration.setSWCConfiguration(config);
         }
         if (dto.gateStartConfiguration != null) {
             GateStartConfigurationImpl config = new GateStartConfigurationImpl();
