@@ -16,6 +16,7 @@ public class RaceLogProtestStartTimeEventImpl extends RaceLogEventImpl implement
     public RaceLogProtestStartTimeEventImpl(TimePoint createdAt, TimePoint pTimePoint, AbstractLogEventAuthor author,
             Serializable pId, int pPassId, TimeRange protestTime) {
         super(createdAt, pTimePoint, author, pId, pPassId);
+        assert protestTime != null && protestTime.from() != null && protestTime.to() != null;
         this.protestTime = protestTime;
     }
 
