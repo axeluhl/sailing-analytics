@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
-import com.sap.sailing.domain.base.configuration.procedures.SWCConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
 
 public abstract class RacingProcedureWithConfigurableStartModeFlagConfigurationImpl extends RacingProcedureConfigurationImpl implements ConfigurableStartModeFlagRacingProcedureConfiguration {
@@ -24,7 +23,7 @@ public abstract class RacingProcedureWithConfigurableStartModeFlagConfigurationI
     
     @Override
     public RacingProcedureConfiguration merge(RacingProcedureConfiguration value) {
-        SWCConfiguration update = (SWCConfiguration) value;
+        ConfigurableStartModeFlagRacingProcedureConfiguration update = (ConfigurableStartModeFlagRacingProcedureConfiguration) value;
         RacingProcedureWithConfigurableStartModeFlagConfigurationImpl target = (RacingProcedureWithConfigurableStartModeFlagConfigurationImpl) super.merge(update);
         if (update.getStartModeFlags() != null) {
             target.setStartModeFlags(update.getStartModeFlags());
