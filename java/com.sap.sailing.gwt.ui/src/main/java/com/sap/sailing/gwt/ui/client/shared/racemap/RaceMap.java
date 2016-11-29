@@ -2806,11 +2806,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           // simplify road display
           mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
           // set water color
-          // To play with the styles, check out http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html.
-          // To convert an RGB color into the strange hue/saturation/lightness model used by the Google Map use
-          // http://software.stadtwerk.org/google_maps_colorizr/#water/all/123456/.
-          Triple<RGBColor, Integer, Integer> hslColor = convertFromColorToHSL(WATER_COLOR);
-          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, hslColor.getA(), hslColor.getB(), hslColor.getC());
+          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
           
           MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
           mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);
@@ -2828,54 +2824,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               mapOptions.setPanControlOptions(panControlOptions);
           }
         return mapOptions;
-    }
-
-    private Triple<RGBColor, Integer, Integer> convertFromColorToHSL(Color color) {
-        Triple<Integer, Integer, Integer> asRgb = color.getAsRGB();
-        int red = asRgb.getA();
-        int green = asRgb.getB();
-        int blue = asRgb.getC();
-        int minRGB = Math.min(Math.min(red, green), blue);
-        int maxRGB = Math.max(Math.max(red, green), blue);
-
-        double min = minRGB / 255.0;
-        double max = maxRGB / 255.0;
-        double L = ((max + min) / 2) * 100;
-        double S;
-        if (minRGB == maxRGB) {
-            S = 0;
-        } else {
-            if (L < 50) {
-                S = ((max - min) / (max + min)) * 100;
-            } else {
-                S = ((max - min) / (2 - max - min)) * 100;
-            }
-        }
-
-        // google maps's water color values
-        int Lbase = 76;
-        int Sbase = 45;
-
-        // merge HSL and base values
-        double googleL;
-        double googleS;
-        if (L < Lbase) {
-            googleL = L * 100 / Lbase - 100;
-        } else if (L > Lbase) {
-            googleL = (L - Lbase) * 100 / (100 - Lbase);
-        } else {
-            googleL = Lbase;
-        }
-
-        if (S < Sbase) {
-            googleS = S * 100 / Sbase - 100;
-        } else if (S > Sbase) {
-            googleS = (S - Sbase) * 100 / (100 - Sbase);
-        } else {
-            googleS = Sbase;
-        }
-        return new Triple<RGBColor, Integer, Integer>(new RGBColor(asRgb.getA(), asRgb.getB(), asRgb.getC()),
-                (int) Math.round(googleS), (int) Math.round(googleL));
     }
 
     /**
