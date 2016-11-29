@@ -83,7 +83,8 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
             if (currentPresenter.getSeriesDTO().getState() != EventSeriesState.RUNNING) {
                 // TODO: this.leaderboard.hideRefresh();
             } else {
-                // TODO: start autorefresh?
+                // Turn on auto refresh button at parent leaderboard
+                leaderboard.turnOnAutoPlay();
             }
             regattaAnalyticsManager.hideCompetitorChart();
             leaderboardPanel.setVisible(true);

@@ -294,19 +294,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return loadTimePoint(object, field.name());
     }
     
-    public static Duration loadDuration(DBObject object, String fieldName) {
-        Duration result = null;
-        Number durationAsNumber = (Number) object.get(fieldName);
-        if (durationAsNumber != null) {
-            result = new MillisecondsDurationImpl(durationAsNumber.longValue());
-        }
-        return result;
-    }
-    
-    public static Duration loadDuration(DBObject object, FieldNames field) {
-        return loadDuration(object, field.name());
-    }
-    
     public static TimeRange loadTimeRange(DBObject object, FieldNames field) {
         DBObject timeRangeObj = (DBObject) object.get(field.name());
         if (timeRangeObj == null) {
