@@ -2,13 +2,13 @@ package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedurePrerequisite;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.LineStartRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sse.common.TimePoint;
 
 public class StartModePrerequisite extends BaseRacingProcedurePrerequisite implements RacingProcedurePrerequisite {
 
-    public StartModePrerequisite(FulfillmentFunction function, LineStartRacingProcedure procedure,
+    public StartModePrerequisite(FulfillmentFunction function, ConfigurableStartModeFlagRacingProcedure procedure,
             TimePoint originalNow, TimePoint originalStartTime) {
         super(function, procedure, originalNow, originalStartTime);
     }
@@ -28,7 +28,7 @@ public class StartModePrerequisite extends BaseRacingProcedurePrerequisite imple
         fulfill(getProcedure().getDefaultStartMode());
     }
     
-    protected LineStartRacingProcedure getProcedure() {
-        return (LineStartRacingProcedure) procedure;
+    protected ConfigurableStartModeFlagRacingProcedure getProcedure() {
+        return (ConfigurableStartModeFlagRacingProcedure) procedure;
     }
 }

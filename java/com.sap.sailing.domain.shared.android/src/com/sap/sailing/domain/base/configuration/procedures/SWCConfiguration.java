@@ -6,5 +6,5 @@ package com.sap.sailing.domain.base.configuration.procedures;
  * @author Frank
  *
  */
-public interface SWCConfiguration extends LineStartConfiguration {
+public interface SWCConfiguration extends ConfigurableStartModeFlagRacingProcedureConfiguration {
 }

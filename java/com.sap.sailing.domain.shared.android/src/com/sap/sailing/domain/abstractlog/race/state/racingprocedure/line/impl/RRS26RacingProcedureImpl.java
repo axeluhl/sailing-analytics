@@ -24,7 +24,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 
-public class RRS26RacingProcedureImpl extends LineStartRacingProcedureImpl implements RRS26RacingProcedure {
+public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingProcedureImpl implements RRS26RacingProcedure {
 
     private final static long startPhaseClassUpInterval = 5 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseStartModeUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds

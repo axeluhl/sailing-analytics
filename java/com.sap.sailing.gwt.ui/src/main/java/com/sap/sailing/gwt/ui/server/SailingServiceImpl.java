@@ -77,7 +77,7 @@ import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.ReadonlyGateStartRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.LineStartRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
@@ -130,7 +130,7 @@ import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurati
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureWithConfigurableStartModeFlagConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.SWCConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.procedures.LineStartConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
@@ -984,7 +984,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             break;
         case RRS26:
         case SWC:
-            LineStartRacingProcedure linestart = state.getTypedReadonlyRacingProcedure();
+            ConfigurableStartModeFlagRacingProcedure linestart = state.getTypedReadonlyRacingProcedure();
             info = new LineStartInfoDTO(linestart.getStartModeFlag());
         case UNKNOWN:
         default:
@@ -4892,7 +4892,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         racingProcedureConfigurationDTO.isResultEntryEnabled = configuration.isResultEntryEnabled();
     }
 
-    private void copyRacingProcedureWithConfigurableStartModeFlagProperties(LineStartConfiguration configuration, final RacingProcedureWithConfigurableStartModeFlagConfigurationDTO racingProcedureConfigurationDTO) {
+    private void copyRacingProcedureWithConfigurableStartModeFlagProperties(ConfigurableStartModeFlagRacingProcedureConfiguration configuration, final RacingProcedureWithConfigurableStartModeFlagConfigurationDTO racingProcedureConfigurationDTO) {
         racingProcedureConfigurationDTO.startModeFlags = configuration.getStartModeFlags();
     }
 

@@ -24,7 +24,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 
-public class SWCRacingProcedureImpl extends LineStartRacingProcedureImpl implements SWCRacingProcedure {
+public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProcedureImpl implements SWCRacingProcedure {
 
     private final static long CLASS_OVER_OSCAR_AND_STARTMODE_UP_INTERVAL = 6 * 60 * 1000; // 6 minutes before start
     private final static long CLASS_OVER_OSCAR_AND_STARTMODE_DOWN_INTERVAL = 1 * 60 * 1000; // 1 minute after start

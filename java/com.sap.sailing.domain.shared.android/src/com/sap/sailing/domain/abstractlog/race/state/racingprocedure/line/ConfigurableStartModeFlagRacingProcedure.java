@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
-import com.sap.sailing.domain.base.configuration.procedures.LineStartConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sse.common.TimePoint;
 
@@ -11,11 +11,11 @@ import com.sap.sse.common.TimePoint;
  * @author Frank
  *
  */
-public interface LineStartRacingProcedure extends RacingProcedure  {
+public interface ConfigurableStartModeFlagRacingProcedure extends RacingProcedure  {
 
     void addChangedListener(LineStartChangedListener listener);
     
-    LineStartConfiguration getConfiguration();
+    ConfigurableStartModeFlagRacingProcedureConfiguration getConfiguration();
     
     Flags getStartModeFlag();
     

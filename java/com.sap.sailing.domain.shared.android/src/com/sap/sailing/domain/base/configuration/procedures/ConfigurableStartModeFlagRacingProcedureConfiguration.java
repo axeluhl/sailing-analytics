@@ -5,7 +5,7 @@ import java.util.List;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
 
-public interface LineStartConfiguration extends RacingProcedureConfiguration {
+public interface ConfigurableStartModeFlagRacingProcedureConfiguration extends RacingProcedureConfiguration {
     
     List<Flags> getStartModeFlags();
 

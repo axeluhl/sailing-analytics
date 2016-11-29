@@ -4,6 +4,6 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 
 public interface LineStartChangedListener extends RacingProcedureChangedListener {
     
-    void onStartModeChanged(LineStartRacingProcedure racingProcedure);
+    void onStartModeChanged(ConfigurableStartModeFlagRacingProcedure racingProcedure);
 
 }

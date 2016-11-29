@@ -3,11 +3,11 @@ package com.sap.sailing.domain.base.configuration.impl;
 import java.util.List;
 
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
-import com.sap.sailing.domain.base.configuration.procedures.LineStartConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.SWCConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
 
-public abstract class RacingProcedureWithConfigurableStartModeFlagConfigurationImpl extends RacingProcedureConfigurationImpl implements LineStartConfiguration {
+public abstract class RacingProcedureWithConfigurableStartModeFlagConfigurationImpl extends RacingProcedureConfigurationImpl implements ConfigurableStartModeFlagRacingProcedureConfiguration {
 
     private static final long serialVersionUID = 5141617199229598965L;
 
@@ -32,7 +32,7 @@ public abstract class RacingProcedureWithConfigurableStartModeFlagConfigurationI
         return target;
     }
 
-    protected LineStartConfiguration copy() {
+    protected ConfigurableStartModeFlagRacingProcedureConfiguration copy() {
         RacingProcedureWithConfigurableStartModeFlagConfigurationImpl copy = (RacingProcedureWithConfigurableStartModeFlagConfigurationImpl) super.copy();
         copy.setStartModeFlags(startModeFlags);
         return copy;

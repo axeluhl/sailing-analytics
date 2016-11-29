@@ -14,7 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.LineStartRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -27,7 +27,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class StartModeFragment extends BaseFragment {
 
     private ListView mListView;
-    private LineStartRacingProcedure mLineStartProcedure;
+    private ConfigurableStartModeFlagRacingProcedure mLineStartProcedure;
     private int mFlagSize;
 
     public static StartModeFragment newInstance(@START_MODE_VALUES int startMode) {

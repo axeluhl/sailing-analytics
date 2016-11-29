@@ -7,13 +7,13 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureChangedListeners;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.LineStartChangedListener;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.LineStartRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
-import com.sap.sailing.domain.base.configuration.procedures.LineStartConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
 
-public abstract class LineStartRacingProcedureImpl extends BaseRacingProcedure implements LineStartRacingProcedure {
+public abstract class ConfigurableStartModeFlagRacingProcedureImpl extends BaseRacingProcedure implements ConfigurableStartModeFlagRacingProcedure {
     
-    public LineStartRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
+    public ConfigurableStartModeFlagRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
             RacingProcedureConfiguration configuration, RaceLogResolver raceLogResolver) {
         super(raceLog, author, configuration, raceLogResolver);
     }
@@ -34,7 +34,7 @@ public abstract class LineStartRacingProcedureImpl extends BaseRacingProcedure i
     }
     
     @Override
-    public LineStartConfiguration getConfiguration() {
-        return (LineStartConfiguration) super.getConfiguration();
+    public ConfigurableStartModeFlagRacingProcedureConfiguration getConfiguration() {
+        return (ConfigurableStartModeFlagRacingProcedureConfiguration) super.getConfiguration();
     }
 }

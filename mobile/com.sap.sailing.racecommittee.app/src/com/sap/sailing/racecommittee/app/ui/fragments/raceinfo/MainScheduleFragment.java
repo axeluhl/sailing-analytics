@@ -22,7 +22,7 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedLi
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.LineStartRacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
@@ -155,8 +155,8 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 }
             };
             mItems.add(new SelectionItem(getString(R.string.start_procedure), mRacingProcedure.getType().toString(), null, false, false, runnableProcedure));
-            if (mRacingProcedure instanceof LineStartRacingProcedure) {
-                final LineStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+            if (mRacingProcedure instanceof ConfigurableStartModeFlagRacingProcedure) {
+                final ConfigurableStartModeFlagRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
                 Flags flag = procedure.getStartModeFlag();
                 Runnable runnableMode = new Runnable() {
                     @Override
@@ -250,10 +250,10 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     }
 
     private void startRace() {
-        LineStartRacingProcedure lineStartRacingProcedure = null;
+        ConfigurableStartModeFlagRacingProcedure lineStartRacingProcedure = null;
 
         Flags flag = null;
-        if (getRaceState().getRacingProcedure() instanceof LineStartRacingProcedure) {
+        if (getRaceState().getRacingProcedure() instanceof ConfigurableStartModeFlagRacingProcedure) {
             lineStartRacingProcedure = getRaceState().getTypedRacingProcedure();
             flag = lineStartRacingProcedure.getStartModeFlag();
         }
