@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
 import com.sap.sailing.android.shared.ui.customviews.GPSQuality;

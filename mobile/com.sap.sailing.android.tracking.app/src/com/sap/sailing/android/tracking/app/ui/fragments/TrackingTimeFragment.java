@@ -2,7 +2,6 @@ package com.sap.sailing.android.tracking.app.ui.fragments;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
