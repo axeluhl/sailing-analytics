@@ -10,12 +10,17 @@ import java.util.List;
 public enum BravoSensorDataMetadata {
     INSTANCE;
 
-    private final String RIDE_HEIGHT = "RideHeight";
+    public final String RIDE_HEIGHT = "RideHeight";
+    public final String RIDE_HEIGHT_PORT_HULL = "RideHeightPortHull";
+    public final String RIDE_HEIGHT_STARBOARD_HULL = "RideHeightStbdHull";
+    public final String HEEL = "Heel";
+    public final String PITCH = "ImuSensor_Pitch";
+    
     private final int HEADER_COLUMN_OFFSET = 3;
 
-    private final List<String> columns = Collections.unmodifiableList(Arrays.asList(RIDE_HEIGHT, "RideHeightPortHull",
-            "RideHeightStbdHull", "Heel", "Trim", "ImuSensor_GyroX", "ImuSensor_GyroY", "ImuSensor_GyroZ",
-            "ImuSensor_Pitch", "ImuSensor_Roll", "ImuSensor_Yaw", "ImuSensor_LinearAccX", "ImuSensor_LinearAccY",
+    private final List<String> columns = Collections.unmodifiableList(Arrays.asList(RIDE_HEIGHT, RIDE_HEIGHT_PORT_HULL,
+            RIDE_HEIGHT_STARBOARD_HULL, HEEL, "Trim", "ImuSensor_GyroX", "ImuSensor_GyroY", "ImuSensor_GyroZ",
+            PITCH, "ImuSensor_Roll", "ImuSensor_Yaw", "ImuSensor_LinearAccX", "ImuSensor_LinearAccY",
             "ImuSensor_LinearAccZ", "Hb_Z", "Dn_Z", "Db_Z", "LKF_ride_hgh", "LKF_ride_hgh_Position",
             "LKF_ride_hgh_Velocity", "LKF_ride_hgh_Acceleration", "LKF_ride_hgh_PositionError",
             "LKF_ride_hgh_VelocityError", "LKF_ride_hgh_AccelerationError", "Gps_Gga_PosFixTime", "Gps_Gga_Lat",
@@ -24,6 +29,8 @@ public enum BravoSensorDataMetadata {
             "BravoNet_Node0x0A0_Voltage", "BravoNet_Node0x0A0_Temperature", "BravoNet_Node0x0A0_Current"));
     
     public final int rideHeightColumn = getColumnIndex(RIDE_HEIGHT);
+    public final int rideHeightPortColumn = getColumnIndex(RIDE_HEIGHT_PORT_HULL);
+    public final int rideHeightStarboardColumn = getColumnIndex(RIDE_HEIGHT_STARBOARD_HULL);
     public final int columnCount = columns.size();
 
     public List<String> getColumns() {
