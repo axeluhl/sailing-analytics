@@ -1,9 +1,11 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -63,7 +65,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     private final SensorFixStore sensorFixStore;
     private final GPSFixStore gpsFixStore;
     private RegattaLogDeviceMappings<WithID> deviceMappings;
-    private final AtomicInteger activeLoaders = new AtomicInteger();
+    private final Map<Object, Double> activeLoaders = new ConcurrentHashMap<>();
     private final SensorFixMapperFactory sensorFixMapperFactory;
     private AtomicBoolean preemptiveStopRequested = new AtomicBoolean(false);
     private AtomicBoolean stopRequested = new AtomicBoolean(false);
@@ -245,7 +247,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         trackedRace.removeListener(raceChangeListener);
         deviceMappings.stop();
         synchronized (this) {
-            if (activeLoaders.get() == 0) {
+            if (activeLoaders.size() == 0) {
                 setStatusAndProgress(TrackedRaceStatusEnum.FINISHED, 1.0);
             }
         }
@@ -263,7 +265,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
     private synchronized void waitForLoadingToFinishRunning() {
         try {
-            while (activeLoaders.get() > 0) {
+            while (activeLoaders.size() > 0) {
                 wait();
             }
         } catch (InterruptedException e) {
@@ -294,39 +296,49 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * @param updateCallback
      *            the {@link Runnable} callback used to run the update
      */
-    private void updateAsyncInternal(final Runnable updateCallback) {
-        synchronized (FixLoaderAndTracker.this) {
-            activeLoaders.incrementAndGet();
-            setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
-        }
+    private void updateAsyncInternal(final RunnableWithProgress updateCallback) {
+        final Object loaderKey = new Object();
+        updateLoaderStatus(loaderKey, 0.0);
         ThreadPoolUtil.INSTANCE.getDefaultForegroundTaskThreadPoolExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 trackedRace.lockForSerializationRead();
                 try {
                     if (!preemptiveStopRequested.get()) {
-                        setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
-                        synchronized (FixLoaderAndTracker.this) {
-                            FixLoaderAndTracker.this.notifyAll();
-                        }
-                        updateCallback.run();
+                        updateCallback.run((progress) -> updateLoaderStatus(loaderKey, progress));
                     }
                 } finally {
                     try {
-                        synchronized (FixLoaderAndTracker.this) {
-                            int currentActiveLoaders = activeLoaders.decrementAndGet();
-                            FixLoaderAndTracker.this.notifyAll();
-                            if (currentActiveLoaders == 0) {
-                                setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
-                                        : TrackedRaceStatusEnum.TRACKING, 1.0);
-                            }
-                        }
+                        loaderFinished(loaderKey);
                     } finally {
                         trackedRace.unlockAfterSerializationRead();
                     }
                 }
             }
         });
+    }
+    
+    private synchronized void updateLoaderStatus(Object loader, double progress) {
+        activeLoaders.put(loader, progress);
+        updateOverallLoaderStatus();
+    }
+    
+    private synchronized void loaderFinished(Object loader) {
+        activeLoaders.remove(loader);
+        updateOverallLoaderStatus();
+        FixLoaderAndTracker.this.notifyAll();
+    }
+    
+    private void updateOverallLoaderStatus() {
+        int loaderCount = activeLoaders.size();
+        if (loaderCount == 0) {
+            setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
+                    : TrackedRaceStatusEnum.TRACKING, 1.0);
+        } else {
+            double sum = activeLoaders.values().stream().collect(Collectors.summingDouble(Double::doubleValue));
+            double progress = sum / loaderCount;
+            setStatusAndProgress(TrackedRaceStatusEnum.LOADING, progress);
+        }
     }
 
     private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
@@ -379,5 +391,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 loadFixes(rangeToLoad, newMapping);
             }
         }
+    }
+    
+    private interface RunnableWithProgress {
+        void run(ProgressCallback progressCallback);
     }
 }
