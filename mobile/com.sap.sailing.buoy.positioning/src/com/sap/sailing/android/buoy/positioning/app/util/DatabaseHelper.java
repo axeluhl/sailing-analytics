@@ -4,6 +4,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.content.OperationApplicationException;
+import android.database.Cursor;
+import android.os.RemoteException;
+import android.provider.BaseColumns;
+import android.support.v4.content.LocalBroadcastManager;
+
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
@@ -18,17 +29,6 @@ import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-
-import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.content.OperationApplicationException;
-import android.database.Cursor;
-import android.os.RemoteException;
-import android.provider.BaseColumns;
-import android.support.v4.content.LocalBroadcastManager;
 
 public class DatabaseHelper {
 
@@ -172,11 +172,12 @@ public class DatabaseHelper {
 
         ContentResolver cr = context.getContentResolver();
 
-        ContentValues clv = new ContentValues();
-        clv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
-        clv.put(Leaderboard.LEADERBOARD_SERVER_URL, leaderboard.serverUrl);
-        clv.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
-        cr.insert(Leaderboard.CONTENT_URI, clv);
+        ContentValues cv = new ContentValues();
+        cv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
+        cv.put(Leaderboard.LEADERBOARD_DISPLAY_NAME, leaderboard.displayName);
+        cv.put(Leaderboard.LEADERBOARD_SERVER_URL, leaderboard.serverUrl);
+        cv.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
+        cr.insert(Leaderboard.CONTENT_URI, cv);
 
         // now insert marks
 
@@ -184,14 +185,14 @@ public class DatabaseHelper {
 
         // marks
         for (MarkInfo mark : markList) {
-            ContentValues cmv = new ContentValues();
-            cmv.put(Mark.MARK_CHECKIN_DIGEST, mark.getCheckinDigest());
-            cmv.put(Mark.MARK_ID, mark.getId().toString());
-            cmv.put(Mark.MARK_NAME, mark.getName());
-            cmv.put(Mark.MARK_TYPE, mark.getType().toString());
-            cmv.put(Mark.MARK_CLASS_NAME, mark.getClassName());
+            cv.clear();
+            cv.put(Mark.MARK_CHECKIN_DIGEST, mark.getCheckinDigest());
+            cv.put(Mark.MARK_ID, mark.getId().toString());
+            cv.put(Mark.MARK_NAME, mark.getName());
+            cv.put(Mark.MARK_TYPE, mark.getType().toString());
+            cv.put(Mark.MARK_CLASS_NAME, mark.getClassName());
 
-            opList.add(ContentProviderOperation.newInsert(Mark.CONTENT_URI).withValues(cmv).build());
+            opList.add(ContentProviderOperation.newInsert(Mark.CONTENT_URI).withValues(cv).build());
         }
 
         for (MarkPingInfo ping : pings) {
@@ -200,13 +201,11 @@ public class DatabaseHelper {
 
         // checkin url
 
-        ContentValues ccuv = new ContentValues();
+        cv.put(CheckinUri.CHECKIN_URI_VALUE, checkinURL.urlString);
+        cv.put(CheckinUri.CHECKIN_URI_CHECKIN_DIGEST, checkinURL.checkinDigest);
+        cr.insert(CheckinUri.CONTENT_URI, cv);
 
-        ccuv.put(CheckinUri.CHECKIN_URI_VALUE, checkinURL.urlString);
-        ccuv.put(CheckinUri.CHECKIN_URI_CHECKIN_DIGEST, checkinURL.checkinDigest);
-        cr.insert(CheckinUri.CONTENT_URI, ccuv);
-
-        opList.add(ContentProviderOperation.newInsert(CheckinUri.CONTENT_URI).withValues(ccuv).build());
+        opList.add(ContentProviderOperation.newInsert(CheckinUri.CONTENT_URI).withValues(cv).build());
 
         try {
             cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
@@ -232,11 +231,12 @@ public class DatabaseHelper {
         ContentResolver cr = context.getContentResolver();
 
         // Update Leaderboard
-        ContentValues leaderboardValues = new ContentValues();
-        leaderboardValues.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
-        leaderboardValues.put(Leaderboard.LEADERBOARD_SERVER_URL, leaderboard.serverUrl);
-        leaderboardValues.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
-        cr.update(Leaderboard.CONTENT_URI, leaderboardValues, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] {leaderboard.checkinDigest});
+        ContentValues cv = new ContentValues();
+        cv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
+        cv.put(Leaderboard.LEADERBOARD_DISPLAY_NAME, leaderboard.displayName);
+        cv.put(Leaderboard.LEADERBOARD_SERVER_URL, leaderboard.serverUrl);
+        cv.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
+        cr.update(Leaderboard.CONTENT_URI, cv, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] {leaderboard.checkinDigest});
         List<MarkInfo> currentMarks = getMarks(context, leaderboard.checkinDigest);
         // Delete marks which where deleted on the server
         for (MarkInfo currentMark : currentMarks){
@@ -246,16 +246,16 @@ public class DatabaseHelper {
         }
         // Update marks
         for (MarkInfo mark : markList) {
-            ContentValues cmv = new ContentValues();
-            cmv.put(Mark.MARK_CHECKIN_DIGEST, mark.getCheckinDigest());
-            cmv.put(Mark.MARK_ID, mark.getId().toString());
-            cmv.put(Mark.MARK_NAME, mark.getName());
-            cmv.put(Mark.MARK_TYPE, mark.getType().toString());
-            cmv.put(Mark.MARK_CLASS_NAME, mark.getClassName());
+            cv.clear();
+            cv.put(Mark.MARK_CHECKIN_DIGEST, mark.getCheckinDigest());
+            cv.put(Mark.MARK_ID, mark.getId().toString());
+            cv.put(Mark.MARK_NAME, mark.getName());
+            cv.put(Mark.MARK_TYPE, mark.getType().toString());
+            cv.put(Mark.MARK_CLASS_NAME, mark.getClassName());
             if (!dataBaseContainsMark(context, mark)) {
-                cr.insert(Mark.CONTENT_URI, cmv);
+                cr.insert(Mark.CONTENT_URI, cv);
             } else {
-                cr.update(Mark.CONTENT_URI, cmv, Mark.MARK_ID + " = ?", new String[] { mark.getId().toString() });
+                cr.update(Mark.CONTENT_URI, cv, Mark.MARK_ID + " = ?", new String[] { mark.getId().toString() });
             }
         }
         LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(context.getString(R.string.database_changed)));
@@ -277,13 +277,13 @@ public class DatabaseHelper {
         ContentResolver cr = context.getContentResolver();
         deletePingsFromDataBase(context, markPing.getMarkId().toString());
         ArrayList<ContentProviderOperation> opList = new ArrayList<>();
-        ContentValues mpcv = new ContentValues();
-        mpcv.put(MarkPing.MARK_ID, markPing.getMarkId().toString());
-        mpcv.put(MarkPing.MARK_PING_LATITUDE, markPing.getLatitude());
-        mpcv.put(MarkPing.MARK_PING_LONGITUDE, markPing.getLongitude());
-        mpcv.put(MarkPing.MARK_PING_ACCURACY, markPing.getAccuracy());
-        mpcv.put(MarkPing.MARK_PING_TIMESTAMP, markPing.getTimestamp());
-        opList.add(ContentProviderOperation.newInsert(MarkPing.CONTENT_URI).withValues(mpcv).build());
+        ContentValues cv = new ContentValues();
+        cv.put(MarkPing.MARK_ID, markPing.getMarkId().toString());
+        cv.put(MarkPing.MARK_PING_LATITUDE, markPing.getLatitude());
+        cv.put(MarkPing.MARK_PING_LONGITUDE, markPing.getLongitude());
+        cv.put(MarkPing.MARK_PING_ACCURACY, markPing.getAccuracy());
+        cv.put(MarkPing.MARK_PING_TIMESTAMP, markPing.getTimestamp());
+        opList.add(ContentProviderOperation.newInsert(MarkPing.CONTENT_URI).withValues(cv).build());
 
         try {
             cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);

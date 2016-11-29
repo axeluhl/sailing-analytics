@@ -145,6 +145,12 @@ public class CheckinManager {
                             return;
                         }
 
+                        try {
+                            urlData.leaderboardDisplayName = response.getString("displayName");
+                        } catch (JSONException e) {
+                            urlData.leaderboardDisplayName = leaderboardName;
+                        }
+
                         HttpGetRequest getMarksRequest;
                         try {
                             getMarksRequest = new HttpGetRequest(new URL(urlData.getMarkUrl), mContext);
@@ -236,6 +242,7 @@ public class CheckinManager {
         CheckinData data = new CheckinData();
         data.serverWithPort = urlData.hostWithPort;
         data.leaderboardName = leaderboardName;
+        data.leaderboardDisplayName = urlData.leaderboardDisplayName;
         data.marks = urlData.marks;
         data.pings = urlData.pings;
         data.deviceUid = urlData.deviceUuid.getStringRepresentation();
@@ -330,6 +337,7 @@ public class CheckinManager {
         public List<MarkInfo> marks;
         public List<MarkPingInfo> pings;
         public String leaderboardName;
+        public String leaderboardDisplayName;
         public DeviceIdentifier deviceUuid;
         public String getMarkUrl;
         public String getLeaderboardUrl;

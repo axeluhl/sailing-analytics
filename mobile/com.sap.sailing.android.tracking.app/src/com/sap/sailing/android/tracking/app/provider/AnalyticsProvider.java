@@ -278,36 +278,31 @@ public class AnalyticsProvider extends ContentProvider {
                 return builder.table(Tables.COMPETITORS);
 
             case COMPETITOR_ID:
-                final String competitor_id = uri.getLastPathSegment();
-                return builder.table(Tables.COMPETITORS).where(Competitor.COMPETITOR_ID + " = ?", competitor_id);
+                return builder.table(Tables.COMPETITORS).where(Competitor.COMPETITOR_ID + " = ?", uri.getLastPathSegment());
 
             case LEADERBOARD:
                 return builder.table(Tables.LEADERBOARDS);
 
             case LEADERBOARD_ID:
-                final String leaderboard_id = uri.getLastPathSegment();
-                return builder.table(Tables.LEADERBOARDS).where(BaseColumns._ID + " = ?", leaderboard_id);
+                return builder.table(Tables.LEADERBOARDS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
 
             case EVENT:
                 return builder.table(Tables.EVENTS);
 
             case EVENT_ID:
-                final String event_id = uri.getLastPathSegment();
-                return builder.table(Tables.EVENTS).where(Event.EVENT_ID + " = ?", event_id);
+                return builder.table(Tables.EVENTS).where(Event.EVENT_ID + " = ?", uri.getLastPathSegment());
 
             case CHECKIN_URI:
                 return builder.table(Tables.CHECKIN_URIS);
 
             case CHECKIN_URI_ID:
-                final String checkinUriId = uri.getLastPathSegment();
-                return builder.table(Tables.CHECKIN_URIS).where(BaseColumns._ID + " = ?", checkinUriId);
+                return builder.table(Tables.CHECKIN_URIS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
 
             case MARK:
                 return builder.table(Tables.MARKS);
 
             case MARK_ID:
-                final String mark_id = uri.getLastPathSegment();
-                return builder.table(Tables.MARKS).where(BaseColumns._ID + " = ?", mark_id);
+                return builder.table(Tables.MARKS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
 
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

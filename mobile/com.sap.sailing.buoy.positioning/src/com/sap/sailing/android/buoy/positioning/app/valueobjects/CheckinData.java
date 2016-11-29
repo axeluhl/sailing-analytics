@@ -1,16 +1,17 @@
 package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
-import com.sap.sailing.android.shared.data.BaseCheckinData;
-import com.sap.sailing.android.shared.data.CheckinUrlInfo;
-import com.sap.sailing.android.shared.data.LeaderboardInfo;
-
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+import com.sap.sailing.android.shared.data.BaseCheckinData;
+import com.sap.sailing.android.shared.data.CheckinUrlInfo;
+import com.sap.sailing.android.shared.data.LeaderboardInfo;
+
 public class CheckinData extends BaseCheckinData {
     public String leaderboardName;
+    public String leaderboardDisplayName;
     public String deviceUid;
     public String uriString;
     public String checkinDigest;
@@ -33,6 +34,7 @@ public class CheckinData extends BaseCheckinData {
     public LeaderboardInfo getLeaderboard() {
         LeaderboardInfo leaderboard = new LeaderboardInfo();
         leaderboard.name = leaderboardName;
+        leaderboard.displayName = leaderboardDisplayName;
         leaderboard.checkinDigest = checkinDigest;
         leaderboard.serverUrl = serverWithPort;
         return leaderboard;
