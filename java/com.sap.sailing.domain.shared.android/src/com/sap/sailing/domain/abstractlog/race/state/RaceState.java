@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 
 /**
  * Extension to the {@link ReadonlyRaceState} allowing write-access to the state of a race.
@@ -142,9 +143,9 @@ public interface RaceState extends ReadonlyRaceState {
     void setFinishedTime(TimePoint now);
 
     /**
-     * Sets the protest (start) time.
+     * Sets the protest time.
      */
-    void setProtestTime(TimePoint now, TimePoint protestStartTime);
+    void setProtestTime(TimePoint now, TimeRange protestTime);
 
     /**
      * Signals the abort of this race.

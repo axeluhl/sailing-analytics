@@ -86,6 +86,7 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         setupRacingProcedureTypePreference();
         setupCourseDesignerTypePreference();
         setupDependentRacesPreference();
+        setupProtestTimePreference();
     }
 
     private void setupRacingProcedureTypePreference() {
@@ -124,6 +125,10 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
 
     private void setupDependentRacesPreference() {
         bindPreferenceSummaryToInteger(findPreference(R.string.preference_dependent_races_offset_key));
+    }
+
+    private void setupProtestTimePreference() {
+        bindPreferenceSummaryToInteger(findPreference(R.string.preference_protest_time_duration_key));
     }
 
     private void setupStartmodeFlagsList(@StringRes int prefId) {

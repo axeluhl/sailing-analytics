@@ -948,14 +948,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             
             if (raceInfoDTO.lastStatus.equals(RaceLogRaceStatus.FINISHED)) {
-                TimePoint protestStartTime = state.getProtestTime();
-                if (protestStartTime != null) {
-                    final Duration protestDuration = Duration.ONE_MINUTE.times(90); // 90 min protest duration; see bug 3089 (make protest time variable)
-                    raceInfoDTO.protestFinishTime = protestStartTime.plus(protestDuration).asDate();
-                    raceInfoDTO.lastUpperFlag = Flags.BRAVO;
-                    raceInfoDTO.lastLowerFlag = Flags.NONE;
-                    raceInfoDTO.lastFlagsAreDisplayed = true;
-                    raceInfoDTO.lastFlagsDisplayedStateChanged = true;
+                if (state.getProtestTime() != null) {
+                    final TimePoint protestEndTime = state.getProtestTime().to();
+                    if (protestEndTime != null) {
+                        final TimePoint protestStartTime = state.getProtestTime().from();
+                        raceInfoDTO.protestStartTime = protestStartTime == null ? null : protestStartTime.asDate();
+                        raceInfoDTO.protestFinishTime = protestEndTime.asDate();
+                        raceInfoDTO.lastUpperFlag = Flags.BRAVO;
+                        raceInfoDTO.lastLowerFlag = Flags.NONE;
+                        raceInfoDTO.lastFlagsAreDisplayed = true;
+                        raceInfoDTO.lastFlagsDisplayedStateChanged = true;
+                    }
                 }
             }
             
