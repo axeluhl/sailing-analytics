@@ -70,11 +70,12 @@ public class FoilingData {
         return leaderboard;
     }
     
-    public String perform() throws Exception {
+    public void perform() throws Exception {
     	StringBuffer result = new StringBuffer();
     	result.append("TimePoint").append(";");
     	result.append("RegattaName").append(";");
-    	result.append("CourseIndex").append(";");
+    	result.append("RaceName").append(";");
+    	result.append("CourseIndexStartingAtZero").append(";");
     	result.append("CompetitorName").append(";");
     	result.append("SpeedOverGroundInKnots").append(";");
     	result.append("RideHeight").append(";");
@@ -84,7 +85,8 @@ public class FoilingData {
     	result.append("Pitch").append(";");
     	result.append("AveragedWindSpeed").append(";");
     	result.append("WindBearingInDegrees").append("\n");
-    	for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
+    	Leaderboard leaderboard = getLeaderboard();
+    	for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
 				final List<Competitor> allCompetitors = trackedRace.getCompetitorsFromBestToWorst(/*timePoint*/trackedRace.getEndOfRace());
@@ -116,6 +118,7 @@ public class FoilingData {
 
                 				result.append(timePointToConsider.asDate().toString()).append(";");
                 				result.append(trackedRace.getRaceIdentifier().getRegattaName()).append(";");
+                				result.append(trackedRace.getRaceIdentifier().getRaceName()).append(";");
                 				result.append(trackedRace.getRace().getCourse().getLegs().indexOf(leg.getLeg())).append(";");
                 				result.append(competitor.getName()).append(";");
                 				result.append(speedOfCompetitor.getKnots()).append(";");
@@ -134,6 +137,9 @@ public class FoilingData {
                 }
             }
     	}
-    	return result.toString();
+		res.setContentType("text/csv");
+		res.addHeader("Content-Disposition", "attachment; filename=" + leaderboard.getName() + ".csv");
+		res.getOutputStream().write(result.toString().getBytes());
+		res.getOutputStream().flush();
     }
 }
