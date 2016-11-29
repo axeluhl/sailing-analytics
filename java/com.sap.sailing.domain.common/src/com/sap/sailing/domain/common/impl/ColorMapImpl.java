@@ -28,7 +28,7 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     /**
      * Used for blocking a range of colors around each color in {@link ColorMapImpl#blockedColors}
      */
-    private static final double MIN_COLOR_DISTANCE = 0.2;
+    private static final double MIN_COLOR_DISTANCE = 0.5;
     
     private static final float STEP = 0.1f;
     /*
