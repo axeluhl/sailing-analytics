@@ -28,8 +28,7 @@ public class RaceBoardComponentContext
                 .getSettingsPerComponentId().get(leaderboardComponentId);
         PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> defaultSettings = rootPerspectiveLifecycle
                 .createDefaultSettings();
-        LeaderboardSettings defaultLeaderboardSettings = (LeaderboardSettings) defaultSettings
-                .getSettingsPerComponentId().get(leaderboardComponentId);
+        LeaderboardSettings defaultLeaderboardSettings = leaderboardSettings.getDefaultSettings();
         LeaderboardSettings contextSpecificLeaderboardSettings = new LeaderboardSettings(
                 defaultLeaderboardSettings.getManeuverDetailsToShow(), defaultLeaderboardSettings.getLegDetailsToShow(),
                 defaultLeaderboardSettings.getRaceDetailsToShow(), defaultLeaderboardSettings.getOverallDetailsToShow(),
@@ -57,8 +56,7 @@ public class RaceBoardComponentContext
         String leaderboardComponentId = rootPerspectiveLifecycle.getLeaderboardPanelLifecycle().getComponentId();
         LeaderboardSettings currentLeaderboardSettings = (LeaderboardSettings) newRootPerspectiveSettings.getSettingsPerComponentId()
                 .get(leaderboardComponentId);
-        LeaderboardSettings defaultLeaderboardSettings = rootPerspectiveLifecycle.getLeaderboardPanelLifecycle()
-                .createDefaultSettings();
+        LeaderboardSettings defaultLeaderboardSettings = currentLeaderboardSettings.getDefaultSettings();
         LeaderboardSettings globalLeaderboardSettings = new LeaderboardSettings(
                 currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
                 currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),

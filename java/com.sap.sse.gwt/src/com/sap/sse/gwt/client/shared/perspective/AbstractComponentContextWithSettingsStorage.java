@@ -51,9 +51,6 @@ public abstract class AbstractComponentContextWithSettingsStorage<PL extends Per
         
         final PerspectiveCompositeSettings<PS> newRootPerspectiveSettings;
         if(parentPerspective == null) {
-            //TODO Some EntryPoints (e.g. LeaderboardEntryPoint) include only a component
-            //as a root GUI node. Thus, there isn't any root perspective in the gui node tree
-            //That's why the code must be adapted to that cases.
             if(component instanceof AbstractRootPerspectiveComposite) {
                 //root perspective is updating its perspective own settings
                 AbstractRootPerspectiveComposite<? extends PerspectiveLifecycle<PS>, PS> rootPerspective = (AbstractRootPerspectiveComposite<? extends PerspectiveLifecycle<PS>, PS>) component;

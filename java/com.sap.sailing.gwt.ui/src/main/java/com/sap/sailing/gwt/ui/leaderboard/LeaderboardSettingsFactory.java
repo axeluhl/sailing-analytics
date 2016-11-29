@@ -46,7 +46,7 @@ public class LeaderboardSettingsFactory {
      *            overall details if and only if this parameter is <code>true</code>
      */
     public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort, String nameOfRaceColumnToShow,
-            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection, Boolean showRegattaRank, boolean showCompetitorSailIdColumn,
+            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection, boolean showRegattaRank, boolean showCompetitorSailIdColumn,
             boolean showCompetitorNameColumn) {
         if (nameOfRaceColumnToShow != null && nameOfRaceToShow != null) {
             throw new IllegalArgumentException("Can identify only one race to show, either by race name or by its column name, but not both");
@@ -91,20 +91,14 @@ public class LeaderboardSettingsFactory {
     
     /**
      * @param showRegattaRank
-     *            if <code>null</code>, the overall detail settings that are responsible for deciding whether or not to
-     *            show the regatta rank are left unchanged; otherwise, a non-<code>null</code> overall details
-     *            collection will be put to the settings and the {@link DetailType#REGATTA_RANK} will be added to the
+     *            Puts overall details
+     *            collection to the settings and adds {@link DetailType#REGATTA_RANK} to the
      *            overall details if and only if this parameter is <code>true</code>
      */
-    private List<DetailType> createOverallDetailsForShowRegattaRank(Boolean showRegattaRank) {
-        final List<DetailType> overallDetails;
-        if (showRegattaRank != null) {
-            overallDetails = new ArrayList<>();
-            if (showRegattaRank) {
-                overallDetails.add(DetailType.REGATTA_RANK);
-            }
-        } else {
-            overallDetails = null; // leave overall details unchanged
+    private List<DetailType> createOverallDetailsForShowRegattaRank(boolean showRegattaRank) {
+        final List<DetailType> overallDetails = new ArrayList<>();
+        if (showRegattaRank) {
+            overallDetails.add(DetailType.REGATTA_RANK);
         }
         return overallDetails;
     }

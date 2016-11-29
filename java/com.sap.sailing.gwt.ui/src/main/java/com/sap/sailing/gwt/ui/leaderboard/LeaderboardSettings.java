@@ -396,8 +396,16 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     
     void overrideDefaultValues(LeaderboardSettings newDefaults) {
         autoExpandPreSelectedRace = newDefaults.autoExpandPreSelectedRace;
+        boolean namesOfRaceColumnsToShowWasDefault = Util.equals(namesOfRaceColumnsToShow.getValues(), namesOfRaceColumnsToShow.getDefaultValues());
         namesOfRaceColumnsToShow.setDefaultValues(newDefaults.namesOfRaceColumnsToShow.getValues());
         namesOfRacesToShow.setDefaultValues(newDefaults.namesOfRacesToShow.getValues());
+        if(getNamesOfRaceColumnsToShow() != null && getNamesOfRacesToShow() != null) {
+            if(namesOfRaceColumnsToShowWasDefault) {
+                namesOfRaceColumnsToShow.setValues(null);
+            } else {
+                namesOfRacesToShow.setValues(null);
+            }
+        }
         numberOfLastRacesToShow.setDefaultValue(newDefaults.numberOfLastRacesToShow.getValue());
         maneuverDetailsToShow.setDefaultValues(newDefaults.maneuverDetailsToShow.getValues());
         legDetailsToShow.setDefaultValues(newDefaults.legDetailsToShow.getValues());
@@ -415,9 +423,6 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     }
     
     void setValues(LeaderboardSettings settingsWithCustomValues) {
-        if (settingsWithCustomValues.getNamesOfRacesToShow() != null && settingsWithCustomValues.getNamesOfRaceColumnsToShow() != null) {
-            throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
-        }
         this.legDetailsToShow.setValues(settingsWithCustomValues.getLegDetailsToShow());
         this.raceDetailsToShow.setValues(settingsWithCustomValues.getRaceDetailsToShow());
         this.overallDetailsToShow.setValues(settingsWithCustomValues.getOverallDetailsToShow());
@@ -437,7 +442,7 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor.setValue(settingsWithCustomValues.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
     }
     
-    LeaderboardSettings getDefaultSettings() {
+    public LeaderboardSettings getDefaultSettings() {
         LeaderboardSettings leaderboardSettings = new LeaderboardSettings();
         leaderboardSettings.legDetailsToShow.setDefaultValues(legDetailsToShow.getDefaultValues());
         leaderboardSettings.raceDetailsToShow.setDefaultValues(raceDetailsToShow.getDefaultValues());

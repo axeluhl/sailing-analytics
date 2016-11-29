@@ -3117,7 +3117,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                             : preSelectedRace.getRaceName(),
                     /* don't change nameOfRaceColumnToShow */null,
                     /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null : preSelectedRace
-                            .getRaceName(), getRaceColumnSelection(), /* leave showRegattaRank and overall details unchanged */ null,
+                            .getRaceName(), getRaceColumnSelection(), true,
                             /* take into account state of competitor columns*/isShowCompetitorSailId(), isShowCompetitorFullName());
             currentSettings = LeaderboardSettingsFactory.getInstance().overrideDefaultValuesWithNewDefaults(currentSettings, defaultLeaderboardSettingsForPlayMode);
             updateSettings(currentSettings);
