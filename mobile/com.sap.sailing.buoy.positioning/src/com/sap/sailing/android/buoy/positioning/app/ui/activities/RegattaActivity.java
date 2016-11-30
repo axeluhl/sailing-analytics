@@ -45,7 +45,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
         prefs.setLastScannedQRCode(null);
         Intent intent = getIntent();
 
-
         checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
         leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
 
@@ -68,8 +67,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             getSupportActionBar().setTitle(leaderboardName);
         }
-        RegattaFragment regattaFragment = new RegattaFragment();
-        replaceFragment(R.id.content_frame, regattaFragment);
+        replaceFragment(R.id.content_frame, RegattaFragment.newInstance());
 
         MarkerUtils.withContext(this).startMarkerService(checkinUrl);
     }
@@ -147,11 +145,10 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     @Override
     public void onCheckinDataAvailable(BaseCheckinData checkinData) {
-        if (checkinData != null) {
+        if (checkinData != null && checkinData instanceof CheckinData) {
             CheckinData data = (CheckinData) checkinData;
             try {
                 DatabaseHelper.getInstance().updateMarks(this, data.marks, data.getLeaderboard());
-                getRegattaFragment().getAdapter().notifyDataSetChanged();
             } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                 ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                 displayDatabaseError();
@@ -187,10 +184,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     public String getCheckinDigest() {
         return checkinDigest;
-    }
-
-    public RegattaFragment getRegattaFragment() {
-        return (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
     }
 
     /**

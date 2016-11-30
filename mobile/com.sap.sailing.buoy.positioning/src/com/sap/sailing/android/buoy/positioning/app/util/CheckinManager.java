@@ -26,7 +26,6 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
-import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
@@ -49,7 +48,6 @@ import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithP
 
 public class CheckinManager {
     private final static String TAG = CheckinManager.class.getName();
-    private BaseCheckinData checkinData;
     private final CheckinDataActivity activity;
     private final Context mContext;
     private final AppPreferences prefs;
@@ -263,25 +261,20 @@ public class CheckinManager {
         }
     }
 
-    public void setCheckinData(BaseCheckinData data) {
-        checkinData = data;
+    private void setCheckinData(CheckinData data) {
         if (activity != null) {
-            activity.onCheckinDataAvailable(getCheckinData());
+            activity.onCheckinDataAvailable(data);
         } else if (dataChangedListner != null){
             dataChangedListner.handleData(data);
         }
     }
 
     public interface DataChangedListner{
-        void handleData(BaseCheckinData data);
+        void handleData(CheckinData data);
     }
 
-    public void setDataChangedListner(DataChangedListner listner){
-        dataChangedListner = listner;
-    }
-
-    public BaseCheckinData getCheckinData() {
-        return checkinData;
+    public void setDataChangedListner(DataChangedListner listener){
+        dataChangedListner = listener;
     }
 
     /**

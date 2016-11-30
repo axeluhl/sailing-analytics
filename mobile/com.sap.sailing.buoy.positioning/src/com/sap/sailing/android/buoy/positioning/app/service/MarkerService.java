@@ -8,7 +8,6 @@ import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.shared.data.BaseCheckinData;
 
 public class MarkerService extends IntentService implements  CheckinManager.DataChangedListner{
     private static String TAG = MarkerService.class.getName();
@@ -26,7 +25,7 @@ public class MarkerService extends IntentService implements  CheckinManager.Data
     }
 
     @Override
-    public void handleData(BaseCheckinData data) {
+    public void handleData(CheckinData data) {
         if (data != null) {
             try {
                 CheckinData checkinData = (CheckinData) data;
