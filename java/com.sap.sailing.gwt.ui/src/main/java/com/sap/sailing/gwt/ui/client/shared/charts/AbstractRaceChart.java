@@ -260,9 +260,11 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     }
 
     /**
-     * Returns true if a normal loading message is allowed to appear over the
+     * Determines if a standard loading message is allowed to appear over the chart or not.
+     * 
+     * @return <code>true</code> if the message is allowed, <code>false</code> otherwise.
      */
-    public boolean shouldShowLoading(Long timestamp) {
+    protected boolean shouldShowLoading(Long timestamp) {
         return timestamp == null
                 || (timer.getPlayState() != PlayStates.Playing && timer.getPlayMode() != PlayModes.Live);
     }
