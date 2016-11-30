@@ -14,6 +14,7 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 
 /**
  * This interface gives you reading access to the state of a race. You can query various properties of the race
@@ -134,7 +135,7 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
     /**
      * If there is a protest time set, returns the most recent one. Otherwise <code>null</code>.
      */
-    TimePoint getProtestTime();
+    TimeRange getProtestTime();
 
     /**
      * If there is a course set, returns the most recent one. Otherwise <code>null</code>.

@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.common.Color;
 
 public class CompetitorColorProviderImpl implements CompetitorColorProvider {
@@ -25,7 +26,7 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
 
     public CompetitorColorProviderImpl(RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
-        this.competitorsColorMap = new ColorMapImpl<>();
+        this.competitorsColorMap = new ColorMapImpl<>(RaceMap.WATER_COLOR);
         this.competitorsBoatColorsPerRace = new HashMap<RegattaAndRaceIdentifier, Map<CompetitorDTO, Color>>();
         if (raceIdentifier != null) {
             for (Entry<CompetitorDTO, BoatDTO> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {

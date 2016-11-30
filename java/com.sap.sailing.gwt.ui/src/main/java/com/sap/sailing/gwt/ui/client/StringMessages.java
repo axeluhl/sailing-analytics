@@ -811,6 +811,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showingDetailsOfRace(String raceName);
     String startAt();
     String finishAt();
+    String protestStartsAt();
     String protestEndsAt();
     String unknown();
     String raceLog();
@@ -987,6 +988,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String activateIndividualRecall();
     String activateResultEntry();
     String rrs26Start();
+    String sailingWorldCupStart();
     String setConfiguration();
     String classFlag();
     String classFlagHelpText(String procedure);
@@ -1183,6 +1185,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
+    String windChartLoading();
     String mediaNoVideosCaption();
     String mediaShowVideoCaption();
     String mediaShowVideoTooltip(String title);
