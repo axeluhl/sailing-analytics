@@ -6,6 +6,7 @@ import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
+import com.sap.sailing.domain.base.configuration.procedures.SWCConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
@@ -17,6 +18,7 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
     private CourseDesignerMode defaultCourseDesignerMode;
     
     private RRS26Configuration rrs26Configuration;
+    private SWCConfiguration swcConfiguration;
     private GateStartConfiguration gateStartConfiguration;
     private ESSConfiguration essConfiguration;
     private LeagueConfiguration leagueConfiguration;
@@ -47,6 +49,15 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
 
     public void setRRS26Configuration(RRS26Configuration rrs26Configuration) {
         this.rrs26Configuration = rrs26Configuration;
+    }
+
+    @Override
+    public SWCConfiguration getSWCConfiguration() {
+        return swcConfiguration;
+    }
+
+    public void setSWCConfiguration(SWCConfiguration swcConfiguration) {
+        this.swcConfiguration = swcConfiguration;
     }
 
     @Override
@@ -91,6 +102,7 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         copy.setDefaultRacingProcedureType(defaultRacingProcedureType);
         copy.setDefaultCourseDesignerMode(defaultCourseDesignerMode);
         copy.setRRS26Configuration(rrs26Configuration);
+        copy.setSWCConfiguration(swcConfiguration);
         copy.setGateStartConfiguration(gateStartConfiguration);
         copy.setESSConfiguration(essConfiguration);
         copy.setBasicConfiguration(basicConfiguration);
@@ -111,6 +123,10 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         if (update.getRRS26Configuration() != null) {
             target.setRRS26Configuration(
                     (RRS26Configuration) target.getRRS26Configuration().merge(update.getRRS26Configuration()));
+        }
+        if (update.getSWCConfiguration() != null) {
+            target.setSWCConfiguration(
+                    (SWCConfiguration) target.getSWCConfiguration().merge(update.getSWCConfiguration()));
         }
         if (update.getGateStartConfiguration() != null) {
             target.setGateStartConfiguration(

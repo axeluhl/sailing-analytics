@@ -13,11 +13,12 @@ import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.SWCConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
-import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.base.configuration.procedures.SWCConfiguration;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 
@@ -52,8 +53,15 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
         rrs26.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.RRS26));
         rrs26.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.RRS26));
         rrs26.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.RRS26));
-        rrs26.setStartModeFlags(new ArrayList<Flags>(preferences.getRRS26StartmodeFlags()));
+        rrs26.setStartModeFlags(new ArrayList<>(preferences.getRRS26StartmodeFlags()));
         configuration.setRRS26Configuration(rrs26);
+
+        SWCConfigurationImpl swcStart = new SWCConfigurationImpl();
+        swcStart.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.SWC));
+        swcStart.setHasIndividualRecall(preferences.getRacingProcedureHasIndividualRecall(RacingProcedureType.SWC));
+        swcStart.setResultEntryEnabled(preferences.getRacingProcedureIsResultEntryEnabled(RacingProcedureType.SWC));
+        swcStart.setStartModeFlags(new ArrayList<>(preferences.getSWCStartmodeFlags()));
+        configuration.setSWCConfiguration(swcStart);
 
         GateStartConfigurationImpl gateStart = new GateStartConfigurationImpl();
         gateStart.setClassFlag(preferences.getRacingProcedureClassFlag(RacingProcedureType.GateStart));
@@ -100,9 +108,17 @@ public class PreferencesRegattaConfigurationLoader implements ConfigurationLoade
             RRS26Configuration config = configuration.getRRS26Configuration();
             storeRacingProcedureConfiguration(RacingProcedureType.RRS26, config);
             if (config.getStartModeFlags() != null) {
-                preferences.setRRS26StartmodeFlags(new HashSet<Flags>(config.getStartModeFlags()));
+                preferences.setRRS26StartmodeFlags(new HashSet<>(config.getStartModeFlags()));
             }
         }
+        if (configuration.getSWCConfiguration() != null) {
+            SWCConfiguration config = configuration.getSWCConfiguration();
+            storeRacingProcedureConfiguration(RacingProcedureType.SWC, config);
+            if (config.getStartModeFlags() != null) {
+                preferences.setSWCStartmodeFlags(new HashSet<>(config.getStartModeFlags()));
+            }
+        }
+
         if (configuration.getGateStartConfiguration() != null) {
             GateStartConfiguration config = configuration.getGateStartConfiguration();
             storeRacingProcedureConfiguration(RacingProcedureType.GateStart, config);

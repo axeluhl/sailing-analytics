@@ -207,7 +207,7 @@
     <string name="settings_category_course_designer">Course Designer Configuration</string>
     <string name="override_default_course_designer_type_select_header">Course Designer Type</string>
     <string name="settings_course_designer_by_name_course_names_header">Course Names</string>
-    <string name="preference_racing_procedure_rrs26_startmode_flags_header">Startmode Flags</string>
+    <string name="preference_racing_procedure_startmode_flags_header">Startmode Flags</string>
     <string name="preference_racing_procedure_classflag_header">Class Flag</string>
     <string name="preference_racing_procedure_hasxray_header">Individual Recall</string>
     <string name="preference_racing_procedure_hasxray_description">Activate this option to enable individual recall</string>
@@ -406,6 +406,8 @@
     <string name="finished_text_02">Your evaluation has been published. Changes need to be resubmitted in orde to take effect.</string>
 
     <string name="protest_time">Protest Time</string>
+    <string name="protest_time_start">Start Protest Time</string>
+    <string name="protest_time_end">End Protest Time</string>
     <string name="degrees">Degrees</string>
 
     <string name="no_camera">No Camera App found</string>
