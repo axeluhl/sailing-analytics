@@ -107,6 +107,21 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
         }, ClickEvent.getType());
     }
 
+    /**
+     * This method turns on auto playing mode on leaderboard
+     */
+    public void turnOnAutoPlay() {
+        if (autoRefreshTimer.getPlayState() != PlayStates.Playing) {
+            autoRefreshTimer.setPlayMode(PlayModes.Live);
+        }
+        
+        // Styles applied each time because of tabs switching. In this case play mode stays as Playing but styling is lost
+        autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        if (delegate != null) {
+            delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+        }
+    }
+
     @UiHandler("autoRefreshAnchor")
     void toogleAutoRefreshClicked(ClickEvent event) {
         if (autoRefreshTimer != null) {
@@ -114,7 +129,8 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
             autoRefreshAnchor.removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
             if (delegate != null) {
                 delegate.getAutoRefreshControl().removeStyleName(local_res.css().regattaleaderboard_meta_reload_live());
-                delegate.getAutoRefreshControl().removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
+                delegate.getAutoRefreshControl()
+                        .removeStyleName(local_res.css().regattaleaderboard_meta_reload_playing());
             }
             if (autoRefreshTimer.getPlayState() == PlayStates.Playing) {
                 autoRefreshTimer.pause();
@@ -131,7 +147,8 @@ public class OldMultiLeaderboard extends Composite implements SelectedLeaderboar
                 autoRefreshAnchor.addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
                 if (delegate != null) {
                     // delegate.getAutoRefreshControl().getElement().getStyle().setBackgroundColor("red");
-                    delegate.getAutoRefreshControl().addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
+                    delegate.getAutoRefreshControl()
+                            .addStyleName(local_res.css().regattaleaderboard_meta_reload_live());
                 }
             }
         }
