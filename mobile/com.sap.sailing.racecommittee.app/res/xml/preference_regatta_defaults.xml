@@ -40,6 +40,12 @@
             android:key="@string/preference_allow_edit_race_factor_key"
             android:summary="@string/preference_allow_edit_race_factor_description"
             android:title="@string/preference_allow_edit_race_factor_header" />
+
+        <com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
+            android:defaultValue="@integer/preference_protest_time_duration_default"
+            android:key="@string/preference_protest_time_duration_key"
+            android:numeric="integer"
+            android:title="@string/preference_protest_time_header"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="RRS26">
