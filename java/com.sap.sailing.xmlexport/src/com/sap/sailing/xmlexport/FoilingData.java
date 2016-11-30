@@ -25,6 +25,8 @@ import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
+import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -75,7 +77,7 @@ public class FoilingData {
     	result.append("TimePoint").append(";");
     	result.append("RegattaName").append(";");
     	result.append("RaceName").append(";");
-    	result.append("CourseIndexStartingAtZero").append(";");
+    	result.append("LegIndexStartingAtZero").append(";");
     	result.append("CompetitorName").append(";");
     	result.append("SpeedOverGroundInKnots").append(";");
     	result.append("RideHeight").append(";");
@@ -83,18 +85,19 @@ public class FoilingData {
     	result.append("RideHeightStarboard").append(";");
     	result.append("Heel").append(";");
     	result.append("Pitch").append(";");
-    	result.append("AveragedWindSpeed").append(";");
+    	result.append("AveragedWindSpeedInKnots").append(";");
     	result.append("WindBearingInDegrees").append("\n");
     	Leaderboard leaderboard = getLeaderboard();
     	for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                if (trackedRace != null) {
 				final List<Competitor> allCompetitors = trackedRace.getCompetitorsFromBestToWorst(/*timePoint*/trackedRace.getEndOfRace());
                 for (Competitor competitor : allCompetitors) {
                 	DynamicSensorFixTrack<Competitor, BravoFix> sensorTrack = trackedRace.getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 	final Duration samplingInterval = Duration.ONE_SECOND;
                 	final TimePoint fromTimePoint = trackedRace.getStartOfRace();
-                	if (fromTimePoint != null) {
+                	if (sensorTrack != null && fromTimePoint != null) {
 						final List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
 						final WindSource windSource = new WindSourceImpl(WindSourceType.COMBINED);
 						windSourcesToDeliver.add(windSource);
@@ -114,12 +117,16 @@ public class FoilingData {
                 				WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> windFix = windTrack.getAveragedWindWithConfidence(null, timePointToConsider);
                 				SpeedWithConfidence<TimePoint> windFixSpeed = new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(windFix.getObject().getKnots()), windFix.getConfidence(), timePointToConsider);
                 				Bearing windFixBearing = windFix.getObject().getBearing();
-                				TrackedLegOfCompetitor leg = trackedRace.getCurrentLeg(competitor, timePointToConsider);
-
+                				TrackedLegOfCompetitor leg = trackedRace.getTrackedLeg(competitor, timePointToConsider);
+                				
                 				result.append(timePointToConsider.asDate().toString()).append(";");
                 				result.append(trackedRace.getRaceIdentifier().getRegattaName()).append(";");
                 				result.append(trackedRace.getRaceIdentifier().getRaceName()).append(";");
-                				result.append(trackedRace.getRace().getCourse().getLegs().indexOf(leg.getLeg())).append(";");
+                				if (leg != null) {
+                					result.append(trackedRace.getRace().getCourse().getLegs().indexOf(leg.getLeg())).append(";");
+                				} else {
+                					result.append("-1").append(";");
+                				}
                 				result.append(competitor.getName()).append(";");
                 				result.append(speedOfCompetitor.getKnots()).append(";");
                 				result.append(rideHeight).append(";");
@@ -135,11 +142,12 @@ public class FoilingData {
                 		}
                 	}
                 }
+                }
             }
     	}
 		res.setContentType("text/csv");
 		res.addHeader("Content-Disposition", "attachment; filename=" + leaderboard.getName() + ".csv");
-		res.getOutputStream().write(result.toString().getBytes());
+		res.getOutputStream().write(result.toString().getBytes("UTF-8"));
 		res.getOutputStream().flush();
     }
 }
