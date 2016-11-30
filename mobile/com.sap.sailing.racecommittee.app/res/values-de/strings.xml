@@ -199,7 +199,7 @@
     <string name="gate_launch_stops_after">Gate Launch stoppt nach %dmin</string>
     <string name="override_default_course_designer_type_select_header">Kursdesigner</string>
     <string name="settings_course_designer_by_name_course_names_header">Kursnamen</string>
-    <string name="preference_racing_procedure_rrs26_startmode_flags_header">Startmodus Flaggen</string>
+    <string name="preference_racing_procedure_startmode_flags_header">Startmodus Flaggen</string>
     <string name="preference_racing_procedure_classflag_header">Klassenflagge</string>
     <string name="preference_racing_procedure_hasxray_header">Einzelrückruf</string>
     <string name="preference_racing_procedure_hasxray_description">Diese Option aktiviert den Einzelrückruf</string>

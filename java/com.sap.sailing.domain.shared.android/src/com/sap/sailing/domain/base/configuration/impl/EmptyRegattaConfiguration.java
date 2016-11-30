@@ -18,6 +18,7 @@ public class EmptyRegattaConfiguration extends RegattaConfigurationImpl implemen
         setDefaultRacingProcedureType(RacingProcedureType.UNKNOWN);
         setDefaultCourseDesignerMode(CourseDesignerMode.UNKNOWN);
         setRRS26Configuration(new RRS26ConfigurationImpl());
+        setSWCConfiguration(new SWCConfigurationImpl());
         setGateStartConfiguration(new GateStartConfigurationImpl());
         setESSConfiguration(new ESSConfigurationImpl());
         setBasicConfiguration(new RacingProcedureConfigurationImpl());
