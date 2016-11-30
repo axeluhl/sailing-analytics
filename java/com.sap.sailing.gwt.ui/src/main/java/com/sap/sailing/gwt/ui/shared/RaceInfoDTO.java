@@ -26,13 +26,13 @@ public class RaceInfoDTO implements IsSerializable {
         }
     }
     
-    public static class RRS26InfoDTO implements RaceInfoExtensionDTO {
+    public static class LineStartInfoDTO implements RaceInfoExtensionDTO {
         public Flags startModeFlag;
         
         // for GWT serialization
-        public RRS26InfoDTO() { }
+        public LineStartInfoDTO() { }
         
-        public RRS26InfoDTO(Flags startMode) {
+        public LineStartInfoDTO(Flags startMode) {
             this.startModeFlag = startMode;
         }
     }
