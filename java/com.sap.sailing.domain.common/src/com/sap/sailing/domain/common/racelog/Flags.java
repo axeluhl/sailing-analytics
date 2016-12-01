@@ -14,6 +14,7 @@ public enum Flags {
     INDIA,
     INDIA_ZULU, // the flag combination of I+Z flown at the same time
     NOVEMBER,
+    OSCAR,
     PAPA,
     UNIFORM,
     XRAY,

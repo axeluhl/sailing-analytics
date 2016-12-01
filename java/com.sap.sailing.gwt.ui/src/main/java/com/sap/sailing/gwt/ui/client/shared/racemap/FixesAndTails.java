@@ -21,6 +21,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.util.Trigger;
 import com.sap.sse.common.util.Triggerable;
 import com.sap.sse.gwt.client.TriggerableTimer;
@@ -225,30 +227,43 @@ public class FixesAndTails {
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
         for (final Map.Entry<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
-                List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.get(e.getKey());
+                final CompetitorDTO competitor = e.getKey();
+                List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.get(competitor);
                 if (fixesForCompetitor == null) {
                     fixesForCompetitor = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
-                    fixes.put(e.getKey(), fixesForCompetitor);
+                    fixes.put(competitor, fixesForCompetitor);
                 }
-                if (!overlapsWithKnownFixes.get(e.getKey())) {
+                if (!overlapsWithKnownFixes.get(competitor)) {
                     // clearing and then re-populating establishes the invariant that an extrapolated fix must be the last
                     fixesForCompetitor.clear();
                     // to re-establish the invariants for tails, firstShownFix and lastShownFix, we now need to remove
                     // all points from the competitor's polyline and clear the entries in firstShownFix and lastShownFix
-                    final Triggerable triggerable = new Triggerable(new Runnable() { @Override public void run() { clearTail(e.getKey()); } });
-                    final Trigger<Polyline> tailTrigger = tails.get(e.getKey());
-                    if (tailTrigger != null) {
-                        tailTrigger.register(triggerable);
-                    }
-                    registerIndexTrigger(triggerable, firstShownFix, e.getKey());
-                    registerIndexTrigger(triggerable, lastShownFix, e.getKey());
+                    final Triggerable triggerable = new Triggerable(new Runnable() { @Override public void run() { clearTail(competitor); } });
+                    registerTriggerable(competitor, triggerable);
                     fixesForCompetitor.addAll(e.getValue());
-                    overlapsWithKnownFixes.put(e.getKey(), true); // In case this was only one part of a split request, the next request *does* have an overlap
+                    overlapsWithKnownFixes.put(competitor, true); // In case this was only one part of a split request, the next request *does* have an overlap
                 } else {
-                    mergeFixes(e.getKey(), e.getValue(), timeForPositionTransitionMillis);
+                    mergeFixes(competitor, e.getValue(), timeForPositionTransitionMillis);
                 }
             }
         }
+    }
+
+    /**
+     * A {@link Triggerable} that is usually a {@link TriggerableTimer} and is or will be scheduled for delayed execution
+     * will be registered with the {@link #tails}, {@link #firstShownFix} and {@link #lastShownFix} structures such that
+     * when any of them is accessed for the {@code competitor} passed as parameter then the {@code triggerable} will be
+     * triggered to ensure consistency and establish all invariants. This way, invariants may temporarily be left unmet
+     * which gives the UI a better chance of delaying particularly the tail updates. However, in case of read access the
+     * invariants all must be established, hence the trigger pattern.
+     */
+    private void registerTriggerable(final CompetitorDTO competitor, final Triggerable triggerable) {
+        final Trigger<Polyline> tailTrigger = tails.get(competitor);
+        if (tailTrigger != null) {
+            tailTrigger.register(triggerable);
+        }
+        registerIndexTrigger(triggerable, firstShownFix, competitor);
+        registerIndexTrigger(triggerable, lastShownFix, competitor);
     }
     
     private void registerIndexTrigger(Triggerable triggerable, Map<CompetitorDTO, Trigger<Integer>> indexMap, CompetitorDTO competitor) {
@@ -290,13 +305,14 @@ public class FixesAndTails {
         int indexOfLastShownFix = lastShownFix.get(competitorDTO).get() == null ? -1 : lastShownFix.get(competitorDTO).get();
         final Polyline tail = getTail(competitorDTO);
         int intoThisIndex = 0;
+        final Comparator<GPSFixDTOWithSpeedWindTackAndLegType> fixByTimePointComparator = new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
+            @Override
+            public int compare(GPSFixDTOWithSpeedWindTackAndLegType o1, GPSFixDTOWithSpeedWindTackAndLegType o2) {
+                return o1.timepoint.compareTo(o2.timepoint);
+            }
+        };
         for (GPSFixDTOWithSpeedWindTackAndLegType mergeThisFix : mergeThis) {
-            intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
-                @Override
-                public int compare(GPSFixDTOWithSpeedWindTackAndLegType o1, GPSFixDTOWithSpeedWindTackAndLegType o2) {
-                    return o1.timepoint.compareTo(o2.timepoint);
-                }
-            });
+            intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, fixByTimePointComparator);
             if (intoThisIndex < 0) {
                 intoThisIndex = -intoThisIndex-1;
             }
@@ -322,6 +338,7 @@ public class FixesAndTails {
                                 tail.getPath().removeAt(finalIntoThisIndex - finalIndexOfFirstShownFix);
                             }
                         });
+                        registerTriggerable(competitorDTO, triggerable);
                         Timer timer = new TriggerableTimer(triggerable);
                         runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
                     }
@@ -334,40 +351,47 @@ public class FixesAndTails {
                     intoThisIndex--;
                 }
             } else {
-                intoThis.add(intoThisIndex, mergeThisFix);
-                if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
-                    // fix inserted at a position currently visualized by tail
-                    tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
-                }
-                if (intoThisIndex < indexOfFirstShownFix) {
-                    indexOfFirstShownFix++;
-                }
-                if (intoThisIndex <= indexOfLastShownFix) {
-                    indexOfLastShownFix++;
-                }
-                // If there is a fix prior to the one added and that prior fix was obtained by extrapolation, remove it now because
-                // extrapolated fixes can only be the last in the list
-                if (intoThisIndex > 0 && intoThis.get(intoThisIndex-1).extrapolated) {
-                    intoThis.remove(intoThisIndex-1);
-                    if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
-                        final int finalIntoThisIndex = intoThisIndex;
-                        final int finalIndexOfFirstShownFix = indexOfFirstShownFix;
-                        Triggerable triggerable = new Triggerable(new Runnable() {
-                            @Override
-                            public void run() {
-                                tail.getPath().removeAt(finalIntoThisIndex-1 - finalIndexOfFirstShownFix);
-                            }
-                        });
-                        Timer timer = new TriggerableTimer(triggerable);
-                        runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
+                // insert the fix only if it is not extrapolated or if the extrapolated fix is to be appended to the end (including
+                // being the only fix)
+                if (!mergeThisFix.extrapolated || intoThisIndex == intoThis.size()) {
+                    intoThis.add(intoThisIndex, mergeThisFix);
+                    if (tail != null && intoThisIndex >= indexOfFirstShownFix && intoThisIndex <= indexOfLastShownFix) {
+                        // fix inserted at a position currently visualized by tail
+                        tail.getPath().insertAt(intoThisIndex - indexOfFirstShownFix, coordinateSystem.toLatLng(mergeThisFix.position));
                     }
-                    if (intoThisIndex-1 < indexOfFirstShownFix) {
-                        indexOfFirstShownFix--;
+                    if (intoThisIndex < indexOfFirstShownFix) {
+                        indexOfFirstShownFix++;
                     }
-                    if (intoThisIndex-1 <= indexOfLastShownFix) {
-                        indexOfLastShownFix--;
+                    if (intoThisIndex <= indexOfLastShownFix) {
+                        indexOfLastShownFix++;
                     }
-                    intoThisIndex--;
+                    // If there is a fix prior to the one added and that prior fix was obtained by extrapolation, remove it now because
+                    // extrapolated fixes can only be the last in the list
+                    if (intoThisIndex > 0 && intoThis.get(intoThisIndex-1).extrapolated) {
+                        intoThis.remove(intoThisIndex-1);
+                        if (tail != null && intoThisIndex-1 >= indexOfFirstShownFix && intoThisIndex-1 <= indexOfLastShownFix) {
+                            final int finalIntoThisIndex = intoThisIndex;
+                            final int finalIndexOfFirstShownFix = indexOfFirstShownFix;
+                            Triggerable triggerable = new Triggerable(new Runnable() {
+                                @Override
+                                public void run() {
+                                    tail.getPath().removeAt(finalIntoThisIndex-1 - finalIndexOfFirstShownFix);
+                                }
+                            });
+                            registerTriggerable(competitorDTO, triggerable);
+                            Timer timer = new TriggerableTimer(triggerable);
+                            runDelayedOrImmediately(timer, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
+                        }
+                        if (intoThisIndex-1 < indexOfFirstShownFix) {
+                            indexOfFirstShownFix--;
+                        }
+                        if (intoThisIndex-1 <= indexOfLastShownFix) {
+                            indexOfLastShownFix--;
+                        }
+                        intoThisIndex--;
+                    }
+                } else {
+                    intoThisIndex--; // to compensate for the following ++
                 }
             }
             intoThisIndex++;
@@ -519,13 +543,14 @@ public class FixesAndTails {
             Date toDate;
             Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
             Date timepointOfFirstKnownFix = fixesForCompetitor == null ? null : getTimepointOfFirstNonExtrapolated(fixesForCompetitor);
-            boolean overlap = false;
+            boolean overlap = timepointOfFirstKnownFix != null && timepointOfLastKnownFix != null &&
+                    new TimeRangeImpl(new MillisecondsTimePoint(tailstart), new MillisecondsTimePoint(upTo)).intersects(
+                            new TimeRangeImpl(new MillisecondsTimePoint(timepointOfFirstKnownFix), new MillisecondsTimePoint(timepointOfLastKnownFix)));
             if (fixesForCompetitor != null && timepointOfFirstKnownFix != null
                     && !tailstart.before(timepointOfFirstKnownFix) && timepointOfLastKnownFix != null
                     && !tailstart.after(timepointOfLastKnownFix)) {
                 // the beginning of what we need is contained in the interval we already have; skip what we already have
                 fromDate = new Date(timepointOfLastKnownFix.getTime()+1l); // "from" is "inclusive", so add 1ms to also skip the last fix we have
-                overlap = true;
             } else {
                 fromDate = tailstart;
             }
@@ -534,7 +559,6 @@ public class FixesAndTails {
                     && !upTo.after(timepointOfLastKnownFix)) {
                 // the end of what we need is contained in the interval we already have; skip what we already have
                 toDate = timepointOfFirstKnownFix;
-                overlap = true;
             } else {
                 toDate = upTo;
             }

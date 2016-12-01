@@ -38,6 +38,7 @@ public class FlagImageResolver {
         flagImageMap.put(Flags.UNIFORM, resources.flagUniform());
         flagImageMap.put(Flags.XRAY, resources.flagXray());
         flagImageMap.put(Flags.ZULU, resources.flagZulu());
+        flagImageMap.put(Flags.OSCAR, resources.flagOscar());
     }
     
     public ImageResource resolveFlagToImage(Flags flag, boolean isDisplayed, boolean displayStateChanged) {
