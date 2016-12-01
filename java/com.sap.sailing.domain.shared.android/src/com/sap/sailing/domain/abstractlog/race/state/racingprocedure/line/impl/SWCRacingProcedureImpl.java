@@ -18,7 +18,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite.FulfillmentFunction;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.NoMorePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.SWCRacingProcedure;
-import com.sap.sailing.domain.base.configuration.procedures.SWCConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -35,7 +35,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
     private boolean startmodeFlagHasBeenSet;
 
     public SWCRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
-             SWCConfiguration configuration, RaceLogResolver raceLogResolver) {
+             SWCStartConfiguration configuration, RaceLogResolver raceLogResolver) {
         super(raceLog, author, configuration, raceLogResolver);
         
         RacingProcedureTypeAnalyzer procedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
@@ -187,8 +187,8 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
     }
     
     @Override
-    public SWCConfiguration getConfiguration() {
-        return (SWCConfiguration) super.getConfiguration();
+    public SWCStartConfiguration getConfiguration() {
+        return (SWCStartConfiguration) super.getConfiguration();
     }
 
 }

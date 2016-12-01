@@ -6,7 +6,7 @@ import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
-import com.sap.sailing.domain.base.configuration.procedures.SWCConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
@@ -18,7 +18,7 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
     private CourseDesignerMode defaultCourseDesignerMode;
     
     private RRS26Configuration rrs26Configuration;
-    private SWCConfiguration swcConfiguration;
+    private SWCStartConfiguration swcStartConfiguration;
     private GateStartConfiguration gateStartConfiguration;
     private ESSConfiguration essConfiguration;
     private LeagueConfiguration leagueConfiguration;
@@ -52,12 +52,12 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
     }
 
     @Override
-    public SWCConfiguration getSWCConfiguration() {
-        return swcConfiguration;
+    public SWCStartConfiguration getSWCStartConfiguration() {
+        return swcStartConfiguration;
     }
 
-    public void setSWCConfiguration(SWCConfiguration swcConfiguration) {
-        this.swcConfiguration = swcConfiguration;
+    public void setSWCStartConfiguration(SWCStartConfiguration swcStartConfiguration) {
+        this.swcStartConfiguration = swcStartConfiguration;
     }
 
     @Override
@@ -102,7 +102,7 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         copy.setDefaultRacingProcedureType(defaultRacingProcedureType);
         copy.setDefaultCourseDesignerMode(defaultCourseDesignerMode);
         copy.setRRS26Configuration(rrs26Configuration);
-        copy.setSWCConfiguration(swcConfiguration);
+        copy.setSWCStartConfiguration(swcStartConfiguration);
         copy.setGateStartConfiguration(gateStartConfiguration);
         copy.setESSConfiguration(essConfiguration);
         copy.setBasicConfiguration(basicConfiguration);
@@ -124,9 +124,9 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
             target.setRRS26Configuration(
                     (RRS26Configuration) target.getRRS26Configuration().merge(update.getRRS26Configuration()));
         }
-        if (update.getSWCConfiguration() != null) {
-            target.setSWCConfiguration(
-                    (SWCConfiguration) target.getSWCConfiguration().merge(update.getSWCConfiguration()));
+        if (update.getSWCStartConfiguration() != null) {
+            target.setSWCStartConfiguration(
+                    (SWCStartConfiguration) target.getSWCStartConfiguration().merge(update.getSWCStartConfiguration()));
         }
         if (update.getGateStartConfiguration() != null) {
             target.setGateStartConfiguration(

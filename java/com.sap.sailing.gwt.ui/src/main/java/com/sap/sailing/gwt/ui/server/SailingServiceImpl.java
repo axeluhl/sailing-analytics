@@ -129,7 +129,7 @@ import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureWithConfigurableStartModeFlagConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.SWCConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.SWCStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
@@ -1726,12 +1726,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            date provided as value
      * @param to
      *            for the list of competitors provided as keys (expected to be equal to the set of competitors used as
-     *            keys in the <code>from</code> parameter, requests the GPS fixes up to but excluding the date provided
-     *            as value
+     *            keys in the <code>from</code> parameter, requests the GPS fixes up to but excluding (except
+     *            {@code extrapolate} is {@code true}) the date provided as value
      * @param extrapolate
-     *            if <code>true</code> and no (exact or interpolated) position is known for <code>date</code>, the last
+     *            if <code>true</code> and no (exact or interpolated) position is known for <code>to</code>, the last
      *            entry returned in the list of GPS fixes will be obtained by extrapolating from the competitors last
-     *            known position before <code>date</code> and the estimated speed.
+     *            known position at <code>to</code> and the estimated speed. With this, the {@code to} time point is no
+     *            longer exclusive.
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
@@ -1759,7 +1760,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         Iterator<GPSFixMoving> fixIter = track.getFixesIterator(fromTimePoint, /* inclusive */true);
                         while (fixIter.hasNext()) {
                             GPSFixMoving fix = fixIter.next();
-                            if (fix.getTimePoint().before(toTimePointExcluding)) {
+                            if (fix.getTimePoint().before(toTimePointExcluding) ||
+                                    (extrapolate && fix.getTimePoint().equals(toTimePointExcluding))) {
                                 if (logger.isLoggable(Level.FINEST)) {
                                     logger.finest(""+competitor.getName()+": " + fix);
                                 }
@@ -1823,7 +1825,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             if (fixIter.hasNext()) {
                                 fix = fixIter.next();
                             } else {
-                                // check if fix was at date and if extrapolation is requested
+                                // check if fix was at date and if extrapolation is requested; 
                                 if (!fix.getTimePoint().equals(toTimePointExcluding) && extrapolate) {
                                     Position position = track.getEstimatedPosition(toTimePointExcluding, extrapolate);
                                     Wind wind2 = trackedRace.getWind(position, toTimePointExcluding);
@@ -4863,10 +4865,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             copyBasicRacingProcedureProperties(configuration.getRRS26Configuration(), dto.rrs26Configuration);
             copyRacingProcedureWithConfigurableStartModeFlagProperties(configuration.getRRS26Configuration(), dto.rrs26Configuration);
         }
-        if (configuration.getSWCConfiguration() != null) {
+        if (configuration.getSWCStartConfiguration() != null) {
             dto.swcStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.SWCStartConfigurationDTO();
-            copyBasicRacingProcedureProperties(configuration.getSWCConfiguration(), dto.swcStartConfiguration);
-            copyRacingProcedureWithConfigurableStartModeFlagProperties(configuration.getSWCConfiguration(), dto.swcStartConfiguration);
+            copyBasicRacingProcedureProperties(configuration.getSWCStartConfiguration(), dto.swcStartConfiguration);
+            copyRacingProcedureWithConfigurableStartModeFlagProperties(configuration.getSWCStartConfiguration(), dto.swcStartConfiguration);
         }
         if (configuration.getGateStartConfiguration() != null) {
             dto.gateStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.GateStartConfigurationDTO();
@@ -4921,10 +4923,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             configuration.setRRS26Configuration(config);
         }
         if (dto.swcStartConfiguration != null) {
-            SWCConfigurationImpl config = new SWCConfigurationImpl();
+            SWCStartConfigurationImpl config = new SWCStartConfigurationImpl();
             applyGeneralRacingProcedureConfigProperties(dto.swcStartConfiguration, config);
             applyRacingProcedureWithConfigurableStartModeFlagConfigProperties(dto.swcStartConfiguration, config);
-            configuration.setSWCConfiguration(config);
+            configuration.setSWCStartConfiguration(config);
         }
         if (dto.gateStartConfiguration != null) {
             GateStartConfigurationImpl config = new GateStartConfigurationImpl();
