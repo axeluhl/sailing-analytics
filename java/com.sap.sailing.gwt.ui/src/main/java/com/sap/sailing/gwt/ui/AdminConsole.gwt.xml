@@ -66,7 +66,6 @@
     <inherits name='com.sap.sailing.gwt.settings.Settings'/>
     
     <set-configuration-property name="CssResource.enableGss" value="true" />
-    <set-configuration-property name="CssResource.legacy" value="true" />
     <set-configuration-property name="CssResource.conversionMode" value="strict" />
 	
 	<source path='masterdataimport'/>

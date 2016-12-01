@@ -21,7 +21,6 @@
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 	
 	<set-configuration-property name="CssResource.enableGss" value="true" />
-	<set-configuration-property name="CssResource.legacy" value="true" />
 	<set-configuration-property name="CssResource.conversionMode" value="strict" />
 
 	<add-linker name="xsiframe" />

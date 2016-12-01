@@ -54,7 +54,6 @@
 
 	<set-configuration-property name="mgwt.css" value="pretty" />
 	<set-configuration-property name="CssResource.enableGss" value="true" />
-	<set-configuration-property name="CssResource.legacy" value="true" />
 	<set-configuration-property name="CssResource.conversionMode" value="strict" />
 
 	<extend-property name="locale" values="de" />
