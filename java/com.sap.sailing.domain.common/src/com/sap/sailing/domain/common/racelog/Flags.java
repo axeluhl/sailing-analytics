@@ -26,7 +26,13 @@ public enum Flags {
     AP,
     ESSONE,
     ESSTWO,
-    ESSTHREE;
+    ESSTHREE,
+    SWC_ZERO,
+    SWC_ONE,
+    SWC_TWO,
+    SWC_THREE,
+    SWC_FOUR,
+    SWC_FIVE;
     
     public static Flags[] validValues() {
         List<Flags> validValues = new ArrayList<Flags>();
