@@ -15,26 +15,32 @@
             background-position: left;
             background-repeat: no-repeat;
         }
-        .iconGPS{
+        .iconGPS {
             background-image:url('images/home/raw_gps_fixes.png');
         }
-        .iconWind{
+        .iconWind {
             background-image:url('images/home/icon-wind.png');
             border-left: 1px solid #ccc;
         }
-        .iconVideo{
+        .iconVideo {
             background-image:url('images/home/icon-video.png');
             border-left: 1px solid #ccc;
         }
-        .iconAudio{
+        .iconAudio {
             background-image:url('images/home/icon-audio.png');
             border-left: 1px solid #ccc;
         }
+        .legend {
+            text-align: right;
+            vertical-align: baseline;
+            line-height: 1.333em;
+            margin: 0 0 .5em;
+        }
     </ui:style>
     <g:HTMLPanel addStyleNames="{local_res.css.raceslistlive}">
-        <div ui:field="legend">
-            <h3 ui:field="titleUi"/>
-            <div class="{style.iconGPS}"><ui:text from='{i18n.eventRegattaRacesLegendGps}'/></div>
+        <h3 ui:field="titleUi" class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium5}"/>
+        <div ui:field="legend" class="{style.legend} {res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium7}">
+<!--             <div class="{style.iconGPS}"><ui:text from='{i18n.eventRegattaRacesLegendGps}'/></div> -->
             <div class="{style.iconWind}"><ui:text from='{i18n.eventRegattaRacesLegendWind}'/></div>
             <div class="{style.iconVideo}"><ui:text from='{i18n.eventRegattaRacesLegendVideo}'/></div>
             <div class="{style.iconAudio}"><ui:text from='{i18n.eventRegattaRacesLegendAudio}'/></div>
