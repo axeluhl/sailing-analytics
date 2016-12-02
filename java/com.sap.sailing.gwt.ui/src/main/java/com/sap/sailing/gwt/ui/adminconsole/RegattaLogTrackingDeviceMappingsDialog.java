@@ -41,7 +41,7 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
-import com.sap.sse.common.filter.AbstractListFilter;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -179,30 +179,19 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 string.add(t.deviceIdentifier.deviceId);
                 return string;
             }
+        };
+        filterField.addFilter(new Filter<DeviceMappingDTO>() {
+            @Override
+            public boolean matches(DeviceMappingDTO dm) {
+                return showPingMappingsCb.getValue() || !"PING".equals(dm.deviceIdentifier.deviceType);
+            }
             
             @Override
-            protected AbstractListFilter<DeviceMappingDTO> getFilterer() {
-                final AbstractListFilter<DeviceMappingDTO> baseFilterer = super.getFilterer();
-                return new AbstractListFilter<DeviceMappingDTO>() {
-                    @Override
-                    public Iterable<String> getStrings(DeviceMappingDTO t) {
-                        return baseFilterer.getStrings(t);
-                    }
-
-                    @Override
-                    public Iterable<DeviceMappingDTO> applyFilter(Iterable<String> keywords,
-                            Iterable<DeviceMappingDTO> all) {
-                        final List<DeviceMappingDTO> result = new ArrayList<>();
-                        for (final DeviceMappingDTO dm : super.applyFilter(keywords, all)) {
-                            if (showPingMappingsCb.getValue() || !"PING".equals(dm.deviceIdentifier.deviceType)) {
-                                result.add(dm);
-                            }
-                        }
-                        return result;
-                    }
-                };
+            public String getName() {
+                return "ShowPingMappingsFilter";
             }
-        };
+        });
+        
         deviceMappingTable.registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         final VerticalPanel vp = new VerticalPanel();
         deviceMappingPanel.add(vp);

@@ -105,6 +105,11 @@ public class FlagsResources {
             outline = outline.replace("XX", "01");
             break;
 
+        case OSCAR:
+            flag = "flag_oscar_" + size + "dp";
+            outline = outline.replace("XX", "01");
+            break;
+
         case PAPA:
             flag = "flag_papa_" + size + "dp";
             outline = outline.replace("XX", "01");

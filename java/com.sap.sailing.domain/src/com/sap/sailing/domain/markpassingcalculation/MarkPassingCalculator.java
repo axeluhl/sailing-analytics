@@ -26,6 +26,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.util.IntHolder;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.ThreadPoolUtil;
 
 /**
@@ -60,14 +62,16 @@ public class MarkPassingCalculator {
      * started and then terminated again.
      */
     private final Thread listenerThread;
+
+    private final Listen listen;
     
     /**
      * Synchronized using the {@link #listenerThread} as monitor object.
      */
     private boolean listenerThreadStarted;
 
-    public MarkPassingCalculator(DynamicTrackedRace race, boolean listen, boolean waitForInitialMarkPassingCalculation) {
-        if (listen) {
+    public MarkPassingCalculator(DynamicTrackedRace race, boolean doListen, boolean waitForInitialMarkPassingCalculation) {
+        if (doListen) {
             listener = new MarkPassingUpdateListener(race);
         } else {
             listener = null;
@@ -75,10 +79,12 @@ public class MarkPassingCalculator {
         this.race = race;
         finder = new CandidateFinderImpl(race, executor);
         chooser = new CandidateChooserImpl(race);
-        if (listen) {
-            listenerThread = new Thread(new Listen(race.getRace().getName()), "MarkPassingCalculator for race " + race.getRace().getName());
+        if (doListen) {
+            listen = new Listen(race.getRace().getName());
+            listenerThread = new Thread(listen, "MarkPassingCalculator for race " + race.getRace().getName());
         } else {
             listenerThread = null;
+            listen = null;
         }
         Thread t = new Thread(() -> {
             final Set<Callable<Void>> tasks = new HashSet<>();
@@ -94,7 +100,7 @@ public class MarkPassingCalculator {
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to compute initial set of mark passings for race "+race.getRace().getName(), e);
             }
-            if (listen) {
+            if (doListen) {
                 listenerThread.setDaemon(true);
                 listenerThread.start();
                 synchronized (listenerThread) {
@@ -132,6 +138,28 @@ public class MarkPassingCalculator {
     }
 
     /**
+     * It's used for locking the calculation thread for read. You will be blocked if the calculation is in progress.
+     * Make sure that you unlock the thread with the method {@link MarkPassingCalculator#unlockForRead()} once you don't
+     * need it any more, using a {@code finally} clause to ensure unlocking even with abnormal termination.
+     */
+    public void lockForRead() {
+        if (listen != null) {
+            listen.lockForRead();
+        }
+    }
+    
+    /**
+     * Unlocks the calculation thread for read.
+     * 
+     * @see #lockForRead
+     */
+    public void unlockForRead() {
+        if (listen != null) {
+            listen.unlockAfterRead();
+        }
+    }
+
+    /**
      * Waits until an object is in the queue, then drains it entirely. After that the information is sorted depending on
      * whether it is a fix, an updated waypoint or an updated fixed markpassing. Finally, if <code>suspended</code> is
      * false, new passing are computed. First new wayponts are evaluated, than new fixed markpassings. Than the
@@ -143,8 +171,25 @@ public class MarkPassingCalculator {
     private class Listen implements Runnable {
         private final String raceName;
         
+        /**
+         * The write lock is being held by the thread running this {@link Runnable} after successfully having
+         * waited for the next update to be pushed to the {@link MarkPassingUpdateListener#getQueue() queue},
+         * before draining the queue starts and until the processing of all events from the queue has completed.
+         * This way, trying to obtain the read lock will block until all pending updates have been processed.
+         */
+        private final NamedReentrantReadWriteLock lock;
+        
         public Listen(String raceName) {
             this.raceName = raceName;
+            lock = new NamedReentrantReadWriteLock("lock for calculation thread (" + Listen.class.getSimpleName() + ")", /* fair */ false);
+        }
+        
+        public void lockForRead() {
+            LockUtil.lockForRead(lock);
+        }
+        
+        public void unlockAfterRead() {
+            LockUtil.unlockAfterRead(lock);
         }
 
         @Override
@@ -171,6 +216,7 @@ public class MarkPassingCalculator {
                             logger.log(Level.SEVERE, "MarkPassingCalculator for "+raceName+" threw exception " + e.getMessage()
                                     + " while waiting for new GPSFixes");
                         }
+                        LockUtil.lockForWrite(lock);
                         listener.getQueue().drainTo(allNewFixInsertions);
                         logger.fine("MPC for "+raceName+" received "+ allNewFixInsertions.size()+" new updates.");
                         for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
@@ -225,6 +271,8 @@ public class MarkPassingCalculator {
                         }
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+": " + e.getMessage(), e);
+                    } finally {
+                        LockUtil.unlockAfterWrite(lock);
                     }
                 }
             } finally {

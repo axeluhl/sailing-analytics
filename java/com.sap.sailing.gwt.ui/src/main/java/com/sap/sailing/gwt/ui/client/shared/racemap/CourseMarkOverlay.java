@@ -9,13 +9,16 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphics;
+import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphicsFactory;
 import com.sap.sse.common.Util;
 
 /**
@@ -26,6 +29,8 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
      * The course mark to draw
      */
     private final MarkDTO mark;
+    
+    private CoursePositionsDTO coursePositionsDTO;
 
     private Position position;
 
@@ -45,18 +50,22 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     private Boolean lastShowBuoyZone;
     private Boolean lastIsSelected;
     private Distance lastBuoyZoneRadius;
+    
+    private MarkVectorGraphicsFactory markVectorGraphicsFactory;
 
-    public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO, CoordinateSystem coordinateSystem) {
+    public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO, CoordinateSystem coordinateSystem, CoursePositionsDTO coursePositionsDTO) {
         super(map, zIndex, coordinateSystem);
         this.mark = markDTO;
+        this.coursePositionsDTO = coursePositionsDTO;
         this.position = markDTO.position;
         this.buoyZoneRadius = new MeterDistance(0.0);
         this.showBuoyZone = false;
-        markVectorGraphics = new MarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
-        markScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
+        this.markScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
+        this.markVectorGraphicsFactory = new MarkVectorGraphicsFactory();
+        this.markVectorGraphics = markVectorGraphicsFactory.getMarkVectorGraphics(markDTO);
         setCanvasSize(50, 50);
     }
-
+    
     @Override
     protected void draw() {
         if (mapProjection != null && mark != null && position != null) {
@@ -104,6 +113,10 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                 lastWidth = canvasWidth;
                 lastHeight = canvasHeight;
             }
+            final Bearing rotation = markVectorGraphics.getRotationInDegrees(coursePositionsDTO);
+            if (rotation != null) {
+                setCanvasRotation(rotation.getDegrees());
+            }
             Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(position));
             if (showBuoyZone && isMarkWithBuoyZone(mark) && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                 setCanvasPosition(buoyPositionInPx.getX() - buoyZoneRadiusInPixel, buoyPositionInPx.getY() - buoyZoneRadiusInPixel);
@@ -112,7 +125,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             }
         }
     }
-    
+
     private boolean isMarkWithBuoyZone(MarkDTO mark) {
         return mark.type == null || mark.type == MarkType.BUOY || mark.type == MarkType.STARTBOAT || 
                 mark.type == MarkType.FINISHBOAT || mark.type == MarkType.LANDMARK;
@@ -158,6 +171,10 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
 
     public void setShowBuoyZone(boolean showBuoyZone) {
         this.showBuoyZone = showBuoyZone;
+    }
+    
+    public void setCourse(CoursePositionsDTO coursePositionsDTO) {
+        this.coursePositionsDTO = coursePositionsDTO;
     }
 
     public MarkDTO getMark() {

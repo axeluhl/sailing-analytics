@@ -61,7 +61,4 @@ public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
         }
         return false;
     }
-    
-    
-
 }
