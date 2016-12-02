@@ -69,11 +69,12 @@ public final class ListBoxUtils {
     }
 
     public static void setupRRS26StartmodeFlagsListBox(ListBox box, List<Flags> selectedFlags) {
-        setupFlagsListBox(box, selectedFlags, Flags.PAPA, Flags.BLACK, Flags.INDIA, Flags.INDIA_ZULU, Flags.UNIFORM);            
+        setupFlagsListBox(box, selectedFlags, Flags.getStartModeFlags());            
     }
     
     public static void setupSWCStartmodeFlagsListBox(ListBox box, List<Flags> selectedFlags) {
-        setupFlagsListBox(box, selectedFlags, Flags.BLACK, Flags.UNIFORM);            
+        // the SWC racing procedure restricts the possible start modes to BLACK and UNIFORM, eliminating INDIA / ZULU combinations as well as PAPA
+        setupFlagsListBox(box, selectedFlags, Flags.BLACK, Flags.UNIFORM);
     }
 
 }
