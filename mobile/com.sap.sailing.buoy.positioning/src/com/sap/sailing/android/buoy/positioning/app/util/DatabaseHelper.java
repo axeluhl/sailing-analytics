@@ -164,15 +164,11 @@ public class DatabaseHelper {
      */
     public void storeCheckinRow(Context context, List<MarkInfo> markList, LeaderboardInfo leaderboard,
             CheckinUrlInfo checkinURL, List<MarkPingInfo> pings) throws GeneralDatabaseHelperException {
-
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "New data stored");
         }
         // inserting leaderboard first
-
-
         ContentResolver cr = context.getContentResolver();
-
         ContentValues clv = new ContentValues();
         clv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
         clv.put(Leaderboard.LEADERBOARD_SERVER_URL, leaderboard.serverUrl);
