@@ -10,6 +10,8 @@ import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * 
@@ -29,6 +31,12 @@ public class UserSettingsStorageManager<PS extends Settings> implements Settings
     private final SettingsToJsonSerializerGWT jsonSerializer = new SettingsToJsonSerializerGWT();
     private final SettingsToUrlSerializer urlSerializer = new SettingsToUrlSerializer();
     
+    /**
+     * This is used, to ensure that only once the data is loaded remote, if a user logs in later, he must refresh, to
+     * avoid "complicated problems"
+     */
+    private boolean initialUserSetting = false;
+
     public UserSettingsStorageManager(UserService userService, String globalDefinitionId, String... contextDefinitionParameters) {
         this.userService = userService;
         this.storageGlobalKey = globalDefinitionId;
@@ -81,47 +89,57 @@ public class UserSettingsStorageManager<PS extends Settings> implements Settings
         
         defaultSettings = retrieveDefaultSettingsFromUrl(defaultSettings);
         final SettingsJsonRetrievement settingsJsonRetrievement = new SettingsJsonRetrievement(defaultSettings);
-        if(userService.getCurrentUser() != null) {
-            AsyncCallback<String> globalSettingsAsyncCallback = new AsyncCallback<String>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    lastError = caught;
-                    settingsJsonRetrievement.receiveError(caught);
-                    onSuccess(null);
-                }
-                
-                @Override
-                public void onSuccess(String globalSettingsJson) {
-                    settingsJsonRetrievement.receiveGlobalSettingsJson(globalSettingsJson);
-                    if(settingsJsonRetrievement.hasAllCallbacksReceived()) {
-                        continueRetrieveDefaultSettings(settingsJsonRetrievement, asyncCallback);
-                    }
-                }
-            };
-            retrieveGlobalSettingsJsonFromServer(globalSettingsAsyncCallback);
+        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             
-            AsyncCallback<String> contextSpecificSettingsAsyncCallback = new AsyncCallback<String>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    lastError = caught;
-                    settingsJsonRetrievement.receiveError(caught);
-                    onSuccess(null);
-                }
-                
-                @Override
-                public void onSuccess(String contextSpecificSettingsJson) {
-                    settingsJsonRetrievement.receiveContextSpecificSettingsJson(contextSpecificSettingsJson);
-                    if(settingsJsonRetrievement.hasAllCallbacksReceived()) {
+            @Override
+            public void onUserStatusChange(UserDTO user) {
+                if (!initialUserSetting) {
+                    initialUserSetting = true;
+                    if (user != null) {
+                        AsyncCallback<String> globalSettingsAsyncCallback = new AsyncCallback<String>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                lastError = caught;
+                                settingsJsonRetrievement.receiveError(caught);
+                                onSuccess(null);
+                            }
+
+                            @Override
+                            public void onSuccess(String globalSettingsJson) {
+                                settingsJsonRetrievement.receiveGlobalSettingsJson(globalSettingsJson);
+                                if (settingsJsonRetrievement.hasAllCallbacksReceived()) {
+                                    continueRetrieveDefaultSettings(settingsJsonRetrievement, asyncCallback);
+                                }
+                            }
+                        };
+                        retrieveGlobalSettingsJsonFromServer(globalSettingsAsyncCallback);
+
+                        AsyncCallback<String> contextSpecificSettingsAsyncCallback = new AsyncCallback<String>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                lastError = caught;
+                                settingsJsonRetrievement.receiveError(caught);
+                                onSuccess(null);
+                            }
+
+                            @Override
+                            public void onSuccess(String contextSpecificSettingsJson) {
+                                settingsJsonRetrievement
+                                        .receiveContextSpecificSettingsJson(contextSpecificSettingsJson);
+                                if (settingsJsonRetrievement.hasAllCallbacksReceived()) {
+                                    continueRetrieveDefaultSettings(settingsJsonRetrievement, asyncCallback);
+                                }
+                            }
+                        };
+                        retrieveContextSpecificSettingsJsonFromServer(contextSpecificSettingsAsyncCallback);
+                    } else {
+                        settingsJsonRetrievement.receiveContextSpecificSettingsJson(null);
+                        settingsJsonRetrievement.receiveGlobalSettingsJson(null);
                         continueRetrieveDefaultSettings(settingsJsonRetrievement, asyncCallback);
                     }
                 }
-            };
-            retrieveContextSpecificSettingsJsonFromServer(contextSpecificSettingsAsyncCallback);
-        } else {
-            settingsJsonRetrievement.receiveContextSpecificSettingsJson(null);
-            settingsJsonRetrievement.receiveGlobalSettingsJson(null);
-            continueRetrieveDefaultSettings(settingsJsonRetrievement, asyncCallback);
-        }
+            }
+        });
     }
     
     private void continueRetrieveDefaultSettings(
