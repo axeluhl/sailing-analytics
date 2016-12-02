@@ -49,7 +49,7 @@ public class ReadonlyRacingProcedureFactory implements RacingProcedureFactory {
         case RRS26:
             return new RRS26RacingProcedureImpl(raceLog, author, loadedConfiguration.getRRS26Configuration(), raceLogResolver);
         case SWC:
-            return new SWCRacingProcedureImpl(raceLog, author, loadedConfiguration.getSWCConfiguration(), raceLogResolver);
+            return new SWCRacingProcedureImpl(raceLog, author, loadedConfiguration.getSWCStartConfiguration(), raceLogResolver);
         case BASIC:
             return new BasicRacingProcedureImpl(raceLog, author, loadedConfiguration.getBasicConfiguration(), raceLogResolver);
         case LEAGUE:

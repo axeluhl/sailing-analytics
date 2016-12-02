@@ -129,7 +129,7 @@ import com.sap.sailing.domain.base.configuration.impl.RRS26ConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RacingProcedureWithConfigurableStartModeFlagConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.SWCConfigurationImpl;
+import com.sap.sailing.domain.base.configuration.impl.SWCStartConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
@@ -4865,10 +4865,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             copyBasicRacingProcedureProperties(configuration.getRRS26Configuration(), dto.rrs26Configuration);
             copyRacingProcedureWithConfigurableStartModeFlagProperties(configuration.getRRS26Configuration(), dto.rrs26Configuration);
         }
-        if (configuration.getSWCConfiguration() != null) {
+        if (configuration.getSWCStartConfiguration() != null) {
             dto.swcStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.SWCStartConfigurationDTO();
-            copyBasicRacingProcedureProperties(configuration.getSWCConfiguration(), dto.swcStartConfiguration);
-            copyRacingProcedureWithConfigurableStartModeFlagProperties(configuration.getSWCConfiguration(), dto.swcStartConfiguration);
+            copyBasicRacingProcedureProperties(configuration.getSWCStartConfiguration(), dto.swcStartConfiguration);
+            copyRacingProcedureWithConfigurableStartModeFlagProperties(configuration.getSWCStartConfiguration(), dto.swcStartConfiguration);
         }
         if (configuration.getGateStartConfiguration() != null) {
             dto.gateStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.GateStartConfigurationDTO();
@@ -4923,10 +4923,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             configuration.setRRS26Configuration(config);
         }
         if (dto.swcStartConfiguration != null) {
-            SWCConfigurationImpl config = new SWCConfigurationImpl();
+            SWCStartConfigurationImpl config = new SWCStartConfigurationImpl();
             applyGeneralRacingProcedureConfigProperties(dto.swcStartConfiguration, config);
             applyRacingProcedureWithConfigurableStartModeFlagConfigProperties(dto.swcStartConfiguration, config);
-            configuration.setSWCConfiguration(config);
+            configuration.setSWCStartConfiguration(config);
         }
         if (dto.gateStartConfiguration != null) {
             GateStartConfigurationImpl config = new GateStartConfigurationImpl();
