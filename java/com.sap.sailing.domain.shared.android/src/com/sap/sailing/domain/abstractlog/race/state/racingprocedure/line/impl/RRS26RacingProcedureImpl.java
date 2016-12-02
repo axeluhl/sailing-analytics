@@ -17,13 +17,14 @@ import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingProcedureImpl implements RRS26RacingProcedure {
 
-    private final static long startPhaseClassUpInterval = 5 * 60 * 1000; // minutes * seconds * milliseconds
-    private final static long startPhaseStartModeUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
-    private final static long startPhaseStartModeDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static Duration startPhaseClassUpInterval = Duration.ONE_MINUTE.times(5);
+    private final static Duration startPhaseStartModeUpInterval = Duration.ONE_MINUTE.times(4);
+    private final static Duration startPhaseStartModeDownInterval = Duration.ONE_MINUTE;
 
     public RRS26RacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
              RRS26Configuration configuration, RaceLogResolver raceLogResolver) {
@@ -31,7 +32,7 @@ public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingPro
     }
 
     @Override
-    protected long getStartPhaseStartModeUpInterval() {
+    protected Duration getStartPhaseStartModeUpInterval() {
         return startPhaseStartModeUpInterval;
     }
 
@@ -59,15 +60,6 @@ public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingPro
     
     @Override
     protected Boolean isResultEntryEnabledByDefault() {
-        return false;
-    }
-
-    @Override
-    public boolean isStartphaseActive(TimePoint startTime, TimePoint now) {
-        if (now.before(startTime)) {
-            long timeTillStart = startTime.minus(now.asMillis()).asMillis();
-            return timeTillStart < startPhaseClassUpInterval;
-        }
         return false;
     }
 

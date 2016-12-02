@@ -16,6 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.Config
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.LineStartChangedListener;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 public abstract class ConfigurableStartModeFlagRacingProcedureImpl extends BaseRacingProcedure implements ConfigurableStartModeFlagRacingProcedure {
@@ -41,7 +42,12 @@ public abstract class ConfigurableStartModeFlagRacingProcedureImpl extends BaseR
         update();
     }
 
-    abstract protected long getStartPhaseStartModeUpInterval();
+    abstract protected Duration getStartPhaseStartModeUpInterval();
+
+    @Override
+    public boolean isStartphaseActive(TimePoint startTime, TimePoint now) {
+        return now.before(startTime) && !now.before(startTime.minus(getStartPhaseStartModeUpInterval()));
+    }
 
     @Override
     public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,

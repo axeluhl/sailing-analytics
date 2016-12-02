@@ -17,12 +17,13 @@ import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguratio
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProcedureImpl implements SWCRacingProcedure {
 
-    private final static long CLASS_AND_STARTMODE_UP_INTERVAL = 6 * 60 * 1000; // 6 minutes before start
-    private final static long CLASS_AND_STARTMODE_DOWN_INTERVAL = 1 * 60 * 1000; // 1 minute after start
+    private final static Duration CLASS_AND_STARTMODE_UP_INTERVAL = Duration.ONE_MINUTE.times(6); // 6 minutes before start
+    private final static Duration CLASS_AND_STARTMODE_DOWN_INTERVAL = Duration.ONE_MINUTE; // 1 minute after start
 
     public SWCRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
              SWCStartConfiguration configuration, RaceLogResolver raceLogResolver) {
@@ -30,7 +31,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
     }
 
     @Override
-    protected long getStartPhaseStartModeUpInterval() {
+    protected Duration getStartPhaseStartModeUpInterval() {
         return CLASS_AND_STARTMODE_UP_INTERVAL;
     }
 
@@ -59,11 +60,6 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
     @Override
     protected Boolean isResultEntryEnabledByDefault() {
         return false;
-    }
-
-    @Override
-    public boolean isStartphaseActive(TimePoint startTime, TimePoint now) {
-        return now.before(startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL));
     }
 
     @Override
