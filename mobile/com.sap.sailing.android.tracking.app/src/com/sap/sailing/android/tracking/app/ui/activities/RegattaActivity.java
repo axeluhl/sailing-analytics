@@ -420,10 +420,9 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
     @Override
     public void onCheckinDataAvailable(CheckinData checkinData) {
         if (checkinData != null) {
-            CheckinData data = (CheckinData) checkinData;
             try {
-                if (data instanceof CompetitorCheckinData) {
-                    CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) data;
+                if (checkinData instanceof CompetitorCheckinData) {
+                    CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) checkinData;
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
                     DatabaseHelper.getInstance().storeCompetitorCheckinRow(this, competitorCheckinData.getEvent(), competitorCheckinData.getCompetitor(),
                         competitorCheckinData.getLeaderboard(), competitorCheckinData.getCheckinUrl());

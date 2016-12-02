@@ -143,9 +143,8 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData> {
     }
 
     @Override
-    public void onCheckinDataAvailable(CheckinData checkinData) {
-        if (checkinData != null && checkinData instanceof CheckinData) {
-            CheckinData data = (CheckinData) checkinData;
+    public void onCheckinDataAvailable(CheckinData data) {
+        if (data != null) {
             try {
                 DatabaseHelper.getInstance().updateMarks(this, data);
             } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
