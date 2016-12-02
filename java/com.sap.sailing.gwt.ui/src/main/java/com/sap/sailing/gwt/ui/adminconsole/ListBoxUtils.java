@@ -68,7 +68,12 @@ public final class ListBoxUtils {
         setupFlagsListBox(box, selectedFlags, Flags.validValues());
     }
 
-    public static void setupStartmodeFlagsListBox(ListBox box, List<Flags> selectedFlags) {
+    public static void setupRRS26StartmodeFlagsListBox(ListBox box, List<Flags> selectedFlags) {
         setupFlagsListBox(box, selectedFlags, Flags.PAPA, Flags.BLACK, Flags.INDIA, Flags.INDIA_ZULU, Flags.UNIFORM);            
     }
+    
+    public static void setupSWCStartmodeFlagsListBox(ListBox box, List<Flags> selectedFlags) {
+        setupFlagsListBox(box, selectedFlags, Flags.BLACK, Flags.UNIFORM);            
+    }
+
 }
