@@ -170,7 +170,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
                         null);
             } else {
                 TimePoint recallRemoved = getIndividualRecallRemovalTime();
-                return new FlagPoleState(Collections.<FlagPole>emptyList(), recallRemoved == null ? startTime : recallRemoved);
+                return new FlagPoleState(Collections.<FlagPole>emptyList(), recallRemoved == null ? startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL) : recallRemoved);
             }
         }
     }
