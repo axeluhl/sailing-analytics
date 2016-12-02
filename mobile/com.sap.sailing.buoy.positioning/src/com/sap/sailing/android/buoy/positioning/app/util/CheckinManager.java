@@ -15,13 +15,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.net.Uri;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.widget.Toast;
-
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
@@ -46,9 +39,16 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSeri
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
+import android.widget.Toast;
+
 public class CheckinManager {
     private final static String TAG = CheckinManager.class.getName();
-    private final CheckinDataActivity activity;
+    private final CheckinDataActivity<CheckinData> activity;
     private final Context mContext;
     private final AppPreferences prefs;
     private String url;
@@ -59,7 +59,7 @@ public class CheckinManager {
         this(url, context, /* context is not necessarily a CheckinDataActivity */ null);
     }
 
-    private CheckinManager(String url, Context context, CheckinDataActivity activity) {
+    private CheckinManager(String url, Context context, CheckinDataActivity<CheckinData> activity) {
         sharedDomainFactory = new SharedDomainFactoryImpl(/* race log resolver not needed in this app */ null);
         this.url = url;
         mContext = context;
@@ -67,7 +67,7 @@ public class CheckinManager {
         this.activity = activity;
     }
 
-    public CheckinManager(String url, CheckinDataActivity activity) {
+    public CheckinManager(String url, CheckinDataActivity<CheckinData> activity) {
         this(url, activity, activity);
     }
     
