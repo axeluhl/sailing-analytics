@@ -21,8 +21,8 @@ import com.sap.sse.common.TimePoint;
 
 public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProcedureImpl implements SWCRacingProcedure {
 
-    private final static long CLASS_AND_OSCAR_AND_STARTMODE_UP_INTERVAL = 6 * 60 * 1000; // 6 minutes before start
-    private final static long CLASS_AND_OSCAR_AND_STARTMODE_DOWN_INTERVAL = 1 * 60 * 1000; // 1 minute after start
+    private final static long CLASS_AND_STARTMODE_UP_INTERVAL = 6 * 60 * 1000; // 6 minutes before start
+    private final static long CLASS_AND_STARTMODE_DOWN_INTERVAL = 1 * 60 * 1000; // 1 minute after start
 
     public SWCRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
              SWCStartConfiguration configuration, RaceLogResolver raceLogResolver) {
@@ -31,7 +31,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
 
     @Override
     protected long getStartPhaseStartModeUpInterval() {
-        return CLASS_AND_OSCAR_AND_STARTMODE_UP_INTERVAL;
+        return CLASS_AND_STARTMODE_UP_INTERVAL;
     }
 
     @Override
@@ -63,17 +63,17 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
 
     @Override
     public boolean isStartphaseActive(TimePoint startTime, TimePoint now) {
-        return now.before(startTime.minus(CLASS_AND_OSCAR_AND_STARTMODE_UP_INTERVAL));
+        return now.before(startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL));
     }
 
     @Override
     protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent> asList(
-                new RaceStateEventImpl(startTime.minus(CLASS_AND_OSCAR_AND_STARTMODE_UP_INTERVAL), RaceStateEvents.SWC_CLASS_OVER_OSCAR_UP),
-                new RaceStateEventImpl(startTime.minus(CLASS_AND_OSCAR_AND_STARTMODE_UP_INTERVAL), RaceStateEvents.SWC_STARTMODE_UP),
+                new RaceStateEventImpl(startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL), RaceStateEvents.SWC_CLASS_UP),
+                new RaceStateEventImpl(startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL), RaceStateEvents.SWC_STARTMODE_UP),
                 new RaceStateEventImpl(startTime, RaceStateEvents.START),
-                new RaceStateEventImpl(startTime.plus(CLASS_AND_OSCAR_AND_STARTMODE_DOWN_INTERVAL), RaceStateEvents.SWC_STARTMODE_DOWN), 
-                new RaceStateEventImpl(startTime.plus(CLASS_AND_OSCAR_AND_STARTMODE_DOWN_INTERVAL), RaceStateEvents.SWC_CLASS_OVER_OSCAR_DOWN));
+                new RaceStateEventImpl(startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL), RaceStateEvents.SWC_STARTMODE_DOWN), 
+                new RaceStateEventImpl(startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL), RaceStateEvents.SWC_CLASS_DOWN));
     }
 
     @Override
@@ -83,9 +83,9 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
             if (!startmodeFlagHasBeenSet()) {
                 setStartModeFlag(event.getTimePoint(), cachedStartmodeFlag);
             }
-        case SWC_CLASS_OVER_OSCAR_UP:
+        case SWC_CLASS_UP:
         case SWC_STARTMODE_DOWN:
-        case SWC_CLASS_OVER_OSCAR_DOWN:
+        case SWC_CLASS_DOWN:
             getChangedListeners().onActiveFlagsChanged(this);
             return true;
         default:
@@ -98,18 +98,18 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
         Flags classFlag = getConfiguration().getClassFlag() != null ?
             getConfiguration().getClassFlag() : Flags.CLASS;
             
-        if (now.before(startTime.minus(CLASS_AND_OSCAR_AND_STARTMODE_UP_INTERVAL))) {
+        if (now.before(startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(classFlag, Flags.OSCAR, false), new FlagPole(cachedStartmodeFlag, false)),
+                    Arrays.asList(new FlagPole(classFlag, false), new FlagPole(cachedStartmodeFlag, false)),
                     null,
-                    Arrays.asList(new FlagPole(classFlag, Flags.OSCAR, true), new FlagPole(cachedStartmodeFlag, true)), 
-                    startTime.minus(CLASS_AND_OSCAR_AND_STARTMODE_UP_INTERVAL));
-        } else if (now.before(startTime.plus(CLASS_AND_OSCAR_AND_STARTMODE_DOWN_INTERVAL))) {
+                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, true)), 
+                    startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL));
+        } else if (now.before(startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(classFlag,  Flags.OSCAR, true), new FlagPole(cachedStartmodeFlag, true)),
-                    startTime.minus(CLASS_AND_OSCAR_AND_STARTMODE_UP_INTERVAL),
-                    Arrays.asList(new FlagPole(classFlag,  Flags.OSCAR, false), new FlagPole(cachedStartmodeFlag, false)), 
-                    startTime.plus(CLASS_AND_OSCAR_AND_STARTMODE_DOWN_INTERVAL));
+                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, true)),
+                    startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL),
+                    Arrays.asList(new FlagPole(classFlag, false), new FlagPole(cachedStartmodeFlag, false)), 
+                    startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL));
         } else {
             if (isIndividualRecallDisplayed(now)) {
                 return new FlagPoleState(
