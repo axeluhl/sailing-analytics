@@ -468,7 +468,10 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
                 clearChart();
             } else if (needsDataLoading() && from != null && to != null) {
                 setWidget(chart);
-                showLoading("Loading wind data...");
+                // if not playing or empty show loading message
+                if (shouldShowLoading(timeOfLatestRequestInMillis)) {
+                    showLoading(stringMessages.windChartLoading());
+                }
                 GetWindInfoAction getWindInfoAction = new GetWindInfoAction(sailingService, selectedRaceIdentifier,
                         from, to, settings.getResolutionInMilliseconds(), null, /* onlyUpToNewestEvent==true because we don't want
                         to overshoot the evidence so far */ true);

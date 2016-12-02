@@ -2,7 +2,7 @@ package com.sap.sailing.domain.abstractlog.race.state.racingprocedure;
 
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl.GateLaunchTimePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl.PathfinderPrerequisite;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl.StartmodePrerequisite;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl.StartModePrerequisite;
 
 /**
  * Something that has to be fulfilled before the race can start (e.g. decide which start mode flag is shown).
@@ -24,7 +24,7 @@ public interface RacingProcedurePrerequisite {
 
         void fulfill(GateLaunchTimePrerequisite prerequisite);
 
-        void fulfill(StartmodePrerequisite prerequisite);
+        void fulfill(StartModePrerequisite prerequisite);
     }
 
     /**

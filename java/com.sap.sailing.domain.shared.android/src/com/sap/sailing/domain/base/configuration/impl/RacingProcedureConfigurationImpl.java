@@ -49,8 +49,12 @@ public class RacingProcedureConfigurationImpl implements RacingProcedureConfigur
         this.isResultEntryEnabled = isResultEntryEnabled;
     }
 
+    protected RacingProcedureConfigurationImpl newInstance() {
+        return new RacingProcedureConfigurationImpl();
+    }
+    
     protected RacingProcedureConfiguration copy() {
-        return copy(new RacingProcedureConfigurationImpl());
+        return copy(newInstance());
     }
     
     protected RacingProcedureConfiguration copy(RacingProcedureConfigurationImpl target) {

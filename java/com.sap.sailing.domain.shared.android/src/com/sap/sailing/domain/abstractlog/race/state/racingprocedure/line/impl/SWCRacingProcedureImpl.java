@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.impl;
+package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -6,51 +6,46 @@ import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RRS26StartModeFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.SWCStartModeFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite.FulfillmentFunction;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.NoMorePrerequisite;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureChangedListeners;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26ChangedListener;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
-import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.SWCRacingProcedure;
+import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 
-public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS26RacingProcedure {
+public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProcedureImpl implements SWCRacingProcedure {
 
-    private final static long startPhaseClassUpInterval = 5 * 60 * 1000; // minutes * seconds * milliseconds
-    private final static long startPhaseStartModeUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
-    private final static long startPhaseStartModeDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
+    private final static long CLASS_OVER_OSCAR_AND_STARTMODE_UP_INTERVAL = 6 * 60 * 1000; // 6 minutes before start
+    private final static long CLASS_OVER_OSCAR_AND_STARTMODE_DOWN_INTERVAL = 1 * 60 * 1000; // 1 minute after start
 
-    private final RRS26StartModeFlagFinder startModeFlagAnalyzer;
+    private final SWCStartModeFlagFinder startModeFlagAnalyzer;
     
     private Flags cachedStartmodeFlag;
     private boolean startmodeFlagHasBeenSet;
 
-    public RRS26RacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
-             RRS26Configuration configuration, RaceLogResolver raceLogResolver) {
+    public SWCRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
+             SWCStartConfiguration configuration, RaceLogResolver raceLogResolver) {
         super(raceLog, author, configuration, raceLogResolver);
         
         RacingProcedureTypeAnalyzer procedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
         if (configuration.getStartModeFlags() != null) {
-            this.startModeFlagAnalyzer = new RRS26StartModeFlagFinder(procedureAnalyzer, raceLog, configuration.getStartModeFlags());
+            this.startModeFlagAnalyzer = new SWCStartModeFlagFinder(procedureAnalyzer, raceLog, configuration.getStartModeFlags());
         } else {
-            this.startModeFlagAnalyzer = new RRS26StartModeFlagFinder(procedureAnalyzer, raceLog);
+            this.startModeFlagAnalyzer = new SWCStartModeFlagFinder(procedureAnalyzer, raceLog);
         }
         
-        this.cachedStartmodeFlag = RRS26RacingProcedure.DefaultStartMode;
+        this.cachedStartmodeFlag = SWCRacingProcedure.DefaultStartMode;
         this.startmodeFlagHasBeenSet = false;
         
         update();
@@ -58,7 +53,7 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
 
     @Override
     public RacingProcedureType getType() {
-        return RacingProcedureType.RRS26;
+        return RacingProcedureType.SWC;
     }
     
     @Override
@@ -86,39 +81,34 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     @Override
     public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             FulfillmentFunction function) {
-        if (startTime.minus(startPhaseStartModeUpInterval).before(now) && !startmodeFlagHasBeenSet) {
-            return new StartmodePrerequisite(function, this, now, startTime);
-        }
         return new NoMorePrerequisite(function);
     }
 
     @Override
     public boolean isStartphaseActive(TimePoint startTime, TimePoint now) {
-        if (now.before(startTime)) {
-            long timeTillStart = startTime.minus(now.asMillis()).asMillis();
-            return timeTillStart < startPhaseClassUpInterval;
-        }
-        return false;
+        return now.before(startTime.minus(CLASS_OVER_OSCAR_AND_STARTMODE_UP_INTERVAL));
     }
 
     @Override
     protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent> asList(
-                new RaceStateEventImpl(startTime.minus(startPhaseClassUpInterval), RaceStateEvents.RRS26_CLASS_UP),
-                new RaceStateEventImpl(startTime.minus(startPhaseStartModeUpInterval), RaceStateEvents.RRS26_STARTMODE_UP),
-                new RaceStateEventImpl(startTime.minus(startPhaseStartModeDownInterval), RaceStateEvents.RRS26_STARTMODE_DOWN), 
-                new RaceStateEventImpl(startTime, RaceStateEvents.START));
+                new RaceStateEventImpl(startTime.minus(CLASS_OVER_OSCAR_AND_STARTMODE_UP_INTERVAL), RaceStateEvents.SWC_CLASS_OVER_OSCAR_UP),
+                new RaceStateEventImpl(startTime.minus(CLASS_OVER_OSCAR_AND_STARTMODE_UP_INTERVAL), RaceStateEvents.SWC_STARTMODE_UP),
+                new RaceStateEventImpl(startTime, RaceStateEvents.START),
+                new RaceStateEventImpl(startTime.plus(CLASS_OVER_OSCAR_AND_STARTMODE_DOWN_INTERVAL), RaceStateEvents.SWC_STARTMODE_DOWN), 
+                new RaceStateEventImpl(startTime.plus(CLASS_OVER_OSCAR_AND_STARTMODE_DOWN_INTERVAL), RaceStateEvents.SWC_CLASS_OVER_OSCAR_DOWN));
     }
 
     @Override
     public boolean processStateEvent(RaceStateEvent event) {
         switch (event.getEventName()) {
-        case RRS26_STARTMODE_UP:
+        case SWC_STARTMODE_UP:
             if (!startmodeFlagHasBeenSet) {
                 setStartModeFlag(event.getTimePoint(), cachedStartmodeFlag);
             }
-        case RRS26_CLASS_UP:
-        case RRS26_STARTMODE_DOWN:
+        case SWC_CLASS_OVER_OSCAR_UP:
+        case SWC_STARTMODE_DOWN:
+        case SWC_CLASS_OVER_OSCAR_DOWN:
             getChangedListeners().onActiveFlagsChanged(this);
             return true;
         default:
@@ -130,30 +120,19 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     public FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now) {
         Flags classFlag = getConfiguration().getClassFlag() != null ?
             getConfiguration().getClassFlag() : Flags.CLASS;
-        if (now.before(startTime.minus(startPhaseClassUpInterval))) {
+            
+        if (now.before(startTime.minus(CLASS_OVER_OSCAR_AND_STARTMODE_UP_INTERVAL))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(classFlag, false), new FlagPole(cachedStartmodeFlag, false)),
+                    Arrays.asList(new FlagPole(classFlag, Flags.OSCAR, false), new FlagPole(cachedStartmodeFlag, false)),
                     null,
-                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, false)), 
-                    startTime.minus(startPhaseClassUpInterval));
-        } else if (now.before(startTime.minus(startPhaseStartModeUpInterval))) {
+                    Arrays.asList(new FlagPole(classFlag, Flags.OSCAR, true), new FlagPole(cachedStartmodeFlag, true)), 
+                    startTime.minus(CLASS_OVER_OSCAR_AND_STARTMODE_UP_INTERVAL));
+        } else if (now.before(startTime.plus(CLASS_OVER_OSCAR_AND_STARTMODE_DOWN_INTERVAL))) {
             return new FlagPoleState(
-                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, false)),
-                    startTime.minus(startPhaseClassUpInterval),
-                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, true)), 
-                    startTime.minus(startPhaseStartModeUpInterval));
-        } else if (now.before(startTime.minus(startPhaseStartModeDownInterval))) {
-            return new FlagPoleState(
-                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, true)),
-                    startTime.minus(startPhaseStartModeUpInterval),
-                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, false)), 
-                    startTime.minus(startPhaseStartModeDownInterval));
-        } else if (now.before(startTime)) {
-            return new FlagPoleState(
-                    Arrays.asList(new FlagPole(classFlag, true), new FlagPole(cachedStartmodeFlag, false)),
-                    startTime.minus(startPhaseStartModeDownInterval),
-                    Arrays.asList(new FlagPole(classFlag, false), new FlagPole(cachedStartmodeFlag, false)), 
-                    startTime);
+                    Arrays.asList(new FlagPole(classFlag,  Flags.OSCAR, true), new FlagPole(cachedStartmodeFlag, true)),
+                    startTime.minus(CLASS_OVER_OSCAR_AND_STARTMODE_UP_INTERVAL),
+                    Arrays.asList(new FlagPole(classFlag,  Flags.OSCAR, false), new FlagPole(cachedStartmodeFlag, false)), 
+                    startTime.plus(CLASS_OVER_OSCAR_AND_STARTMODE_DOWN_INTERVAL));
         } else {
             if (isIndividualRecallDisplayed(now)) {
                 return new FlagPoleState(
@@ -178,21 +157,6 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     }
     
     @Override
-    protected RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> createChangedListenerContainer() {
-        return new RRS26ChangedListeners();
-    }
-    
-    @Override
-    protected RRS26ChangedListeners getChangedListeners() {
-        return (RRS26ChangedListeners) super.getChangedListeners();
-    }
-
-    @Override
-    public void addChangedListener(RRS26ChangedListener listener) {
-        getChangedListeners().add(listener);
-    }
-
-    @Override
     public void setStartModeFlag(TimePoint timePoint, Flags startMode) {
         raceLog.add(new RaceLogFlagEventImpl(timePoint, author, raceLog.getCurrentPassId(), startMode, Flags.NONE, true));
     }
@@ -201,7 +165,12 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
     public Flags getStartModeFlag() {
         return cachedStartmodeFlag;
     }
-    
+
+    @Override
+    public Flags getDefaultStartMode() {
+        return SWCRacingProcedure.DefaultStartMode;
+    }
+
     public boolean startmodeFlagHasBeenSet() {
         return startmodeFlagHasBeenSet;
     }
@@ -212,14 +181,14 @@ public class RRS26RacingProcedureImpl extends BaseRacingProcedure implements RRS
         if (startmodeFlag != null && (!startmodeFlag.equals(cachedStartmodeFlag) || !startmodeFlagHasBeenSet)) {
             cachedStartmodeFlag = startmodeFlag;
             startmodeFlagHasBeenSet = true;
-            getChangedListeners().onStartmodeChanged(this);
+            getChangedListeners().onStartModeChanged(this);
         }
         super.update();
     }
     
     @Override
-    public RRS26Configuration getConfiguration() {
-        return (RRS26Configuration) super.getConfiguration();
+    public SWCStartConfiguration getConfiguration() {
+        return (SWCStartConfiguration) super.getConfiguration();
     }
 
 }

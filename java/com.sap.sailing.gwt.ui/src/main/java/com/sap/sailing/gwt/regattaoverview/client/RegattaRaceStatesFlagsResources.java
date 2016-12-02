@@ -54,7 +54,10 @@ interface RegattaRaceStatesFlagsResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/flags/flags_racecommittee/uniform.png")
     ImageResource flagUniform();
-    
+
+    @Source("com/sap/sailing/gwt/ui/client/images/flags/flags_racecommittee/oscar.png")
+    ImageResource flagOscar();
+
     @Source("com/sap/sailing/gwt/ui/client/images/flags/flags_racecommittee/whiskey.png")
     ImageResource flagWhiskey();
     

@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
+import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -18,21 +19,23 @@ import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJso
 public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<RegattaConfiguration> {
     
     public static RegattaConfigurationJsonDeserializer create() {
-        return new RegattaConfigurationJsonDeserializer(RRS26ConfigurationJsonDeserializer.create(),
+        return new RegattaConfigurationJsonDeserializer(RRS26ConfigurationJsonDeserializer.create(), SWCStartConfigurationJsonDeserializer.create(),
                 GateStartConfigurationJsonDeserializer.create(), ESSConfigurationJsonDeserializer.create(),
                 RacingProcedureConfigurationJsonDeserializer.create(), LeagueConfigurationJsonDeserializer.create());
     }
 
     private final RRS26ConfigurationJsonDeserializer rrs26Deserializer;
+    private final SWCStartConfigurationJsonDeserializer swcStartDeserializer;
     private final GateStartConfigurationJsonDeserializer gateStartDeserializer;
     private final ESSConfigurationJsonDeserializer essDeserializer;
     private final RacingProcedureConfigurationJsonDeserializer basicDeserializer;
     private final LeagueConfigurationJsonDeserializer leagueDeserializer;
     
-    public RegattaConfigurationJsonDeserializer(RRS26ConfigurationJsonDeserializer rrs26, 
+    public RegattaConfigurationJsonDeserializer(RRS26ConfigurationJsonDeserializer rrs26, SWCStartConfigurationJsonDeserializer swcStart, 
             GateStartConfigurationJsonDeserializer gateStart, ESSConfigurationJsonDeserializer ess,
             RacingProcedureConfigurationJsonDeserializer basicDeserializer, LeagueConfigurationJsonDeserializer leagueDeserializer) {
         this.rrs26Deserializer = rrs26;
+        this.swcStartDeserializer = swcStart;
         this.gateStartDeserializer = gateStart;
         this.essDeserializer = ess;
         this.basicDeserializer = basicDeserializer;
@@ -60,7 +63,13 @@ public class RegattaConfigurationJsonDeserializer implements JsonDeserializer<Re
                     Helpers.getNestedObjectSafe(object, RegattaConfigurationJsonSerializer.FIELD_RRS26));
             configuration.setRRS26Configuration(rrs26Configuration);
         }
-        
+
+        if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_SWC_START)) {
+            SWCStartConfiguration swcStartConfiguration = swcStartDeserializer.deserialize(
+                    Helpers.getNestedObjectSafe(object, RegattaConfigurationJsonSerializer.FIELD_SWC_START));
+            configuration.setSWCStartConfiguration(swcStartConfiguration);
+        }
+
         if (object.containsKey(RegattaConfigurationJsonSerializer.FIELD_GATE_START)) {
             GateStartConfiguration gateStartConfiguration = 
                     gateStartDeserializer.deserialize(
