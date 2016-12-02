@@ -30,7 +30,7 @@ import com.sap.sse.common.TimePoint;
  * 
  */
 public class NOAAImporter {
-    private static final String QUERY_URL = "http://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination";
+    private static final String QUERY_URL = "https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination";
     private static final String REGEXP_DECLINATION = "<p class=\"indent\"><b>Declination</b> = ([0-9]*)&deg; ([0-9]*)' *([EW])";
     private static final String REGEXP_ANNUAL_CHANGE = "changing by *([0-9]*)&deg; *([0-9]*)' ([EW])/year *</p>";
     
