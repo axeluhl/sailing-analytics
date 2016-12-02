@@ -149,7 +149,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
         } else if (now.before(startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL))) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(cachedStartmodeFlag, true), new FlagPole(Flags.SWC_ZERO, true)),
-                    startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL),
+                    startTime,
                     Arrays.asList(new FlagPole(cachedStartmodeFlag, false), new FlagPole(Flags.SWC_ZERO, false)), 
                     startTime.plus(CLASS_AND_STARTMODE_DOWN_INTERVAL));
         } else {
