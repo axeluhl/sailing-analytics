@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -9,25 +8,19 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
-public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
+public class StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
 
-    private final static List<Flags> defaultStartModeFlags = Arrays.asList(Flags.PAPA, Flags.ZULU, Flags.BLACK, Flags.INDIA, Flags.UNIFORM, Flags.INDIA_ZULU);
-    
     private final RacingProcedureTypeAnalyzer procedureAnalyzer;
     private final List<Flags> startModeFlags;
 
     /**
-     * Searches for the start mode flag of a RRS26 race.
+     * Searches for the start mode flags.
      * 
      * @param procedureAnalyzer
-     *            to be used to ensure a RRS26 race. Must operate on the same race log. Otherwise a
+     *            to be used to ensure a racing procedure with start mode flags. Must operate on the same race log. Otherwise a
      *            {@link IllegalArgumentException} is thrown.
      */
-    public RRS26StartModeFlagFinder(RacingProcedureTypeAnalyzer procedureAnalyzer, RaceLog raceLog) {
-        this(procedureAnalyzer, raceLog, defaultStartModeFlags);
-    }
-    
-    public RRS26StartModeFlagFinder(RacingProcedureTypeAnalyzer procedureAnalyzer, RaceLog raceLog, List<Flags> startModeFlags) {
+    public StartModeFlagFinder(RacingProcedureTypeAnalyzer procedureAnalyzer, RaceLog raceLog, List<Flags> startModeFlags) {
         super(raceLog);
         if (raceLog != procedureAnalyzer.getLog()) {
             throw new IllegalArgumentException("Both analyzers must operate on the same race log.");
@@ -39,7 +32,7 @@ public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
     @Override
     protected Flags performAnalysis() {
         RacingProcedureType type = procedureAnalyzer.analyze();
-        if (!RacingProcedureType.RRS26.equals(type)) {
+        if (!(RacingProcedureType.RRS26.equals(type) || RacingProcedureType.SWC.equals(type))) {
             return null;
         }
         
@@ -61,7 +54,4 @@ public class RRS26StartModeFlagFinder extends RaceLogAnalyzer<Flags> {
         }
         return false;
     }
-    
-    
-
 }
