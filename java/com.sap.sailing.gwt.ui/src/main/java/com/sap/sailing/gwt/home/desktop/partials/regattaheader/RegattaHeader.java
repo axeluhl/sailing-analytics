@@ -5,6 +5,10 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.EventListener;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -18,34 +22,58 @@ public class RegattaHeader extends Composite {
 
     interface RegattaHeaderUiBinder extends UiBinder<Widget, RegattaHeader> {
     }
-    
-    @UiField RegattaHeaderResources local_res;
-    
-    @UiField AnchorElement headerBodyUi;
-    @UiField AnchorElement headerArrowUi;
-    @UiField AnchorElement dataIndicatorsUi;
-    @UiField DivElement gpsDataIndicatorUi;
-    @UiField DivElement windDataIndicatorUi;
-    @UiField DivElement videoDataIndicatorUi;
-    @UiField DivElement audioDataIndicatorUi;
+
+    @UiField
+    RegattaHeaderResources local_res;
+
+    @UiField
+    AnchorElement headerBodyUi;
+    @UiField
+    AnchorElement headerArrowUi;
+    @UiField
+    AnchorElement dataIndicatorsUi;
+    @UiField
+    DivElement gpsDataIndicatorUi;
+    @UiField
+    DivElement windDataIndicatorUi;
+    @UiField
+    DivElement videoDataIndicatorUi;
+    @UiField
+    DivElement audioDataIndicatorUi;
 
     public RegattaHeader(RegattaMetadataDTO regattaMetadata, boolean showStateMarker) {
         initWidget(uiBinder.createAndBindUi(this));
         headerBodyUi.appendChild(new RegattaHeaderBody(regattaMetadata, showStateMarker).getElement());
         this.initDataIndicators(regattaMetadata.getRaceDataInfo());
+
+        // setup click listener for icon legend bubble here, it may be replaced by setRegattaNavigation later on
+        addLegendBubble();
     }
-    
+
+    private void addLegendBubble() {
+        DOM.sinkEvents(dataIndicatorsUi, Event.ONCLICK);
+        Event.setEventListener(dataIndicatorsUi, new EventListener() {
+            @Override
+            public void onBrowserEvent(Event event) {
+                Window.alert("legend bubble required");
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+
+    }
+
     public void setRegattaNavigation(PlaceNavigation<?> placeNavigation) {
         headerArrowUi.getStyle().clearDisplay();
         dataIndicatorsUi.addClassName(local_res.css().regattaheader_indicators_next_to_arrow());
         placeNavigation.configureAnchorElement(headerBodyUi);
         placeNavigation.configureAnchorElement(headerArrowUi);
     }
-    
+
     public void setRegattaRacesNavigation(PlaceNavigation<?> placeNavigation) {
         placeNavigation.configureAnchorElement(dataIndicatorsUi);
     }
-    
+
     private void initDataIndicators(RaceDataInfo raceDataInfo) {
         String disabledStyle = local_res.css().regattaheader_indicator_disabled();
         UIObject.setStyleName(gpsDataIndicatorUi, disabledStyle, !raceDataInfo.hasGPSData());
@@ -54,5 +82,4 @@ public class RegattaHeader extends Composite {
         UIObject.setStyleName(audioDataIndicatorUi, disabledStyle, !raceDataInfo.hasAudioData());
     }
 
-    
 }
