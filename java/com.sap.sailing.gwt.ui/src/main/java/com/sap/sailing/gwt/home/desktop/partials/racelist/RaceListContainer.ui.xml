@@ -20,7 +20,6 @@
         }
         .iconWind {
             background-image:url('images/home/icon-wind.png');
-            border-left: 1px solid #ccc;
         }
         .iconVideo {
             background-image:url('images/home/icon-video.png');
@@ -34,12 +33,13 @@
             text-align: right;
             vertical-align: baseline;
             line-height: 1.333em;
+            padding-right:0px;
             margin: 0 0 .5em;
         }
     </ui:style>
     <g:HTMLPanel addStyleNames="{local_res.css.raceslistlive}">
         <h3 ui:field="titleUi" class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium5}"/>
-        <div ui:field="legend" class="{style.legend} {res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium7}">
+        <div ui:field="legend" class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium7} {style.legend}">
 <!--             <div class="{style.iconGPS}"><ui:text from='{i18n.eventRegattaRacesLegendGps}'/></div> -->
             <div class="{style.iconWind}"><ui:text from='{i18n.eventRegattaRacesLegendWind}'/></div>
             <div class="{style.iconVideo}"><ui:text from='{i18n.eventRegattaRacesLegendVideo}'/></div>
