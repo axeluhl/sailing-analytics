@@ -23,10 +23,4 @@ public interface StringMessages extends Messages {
     String settings();
     String settingsForComponent(String localizedShortName);
     String pleaseSelect();
-    //TODO add to properties files
-    @DefaultMessage("Make default")
-    String makeDefault();
-  //TODO add to properties files
-    @DefaultMessage("Restore default")
-    String restoreDefault();
 }

@@ -95,15 +95,15 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
     }
     
     private void initMakeDefaultButtons(final Component<SettingsType> component, StringMessages stringMessages) {
-        Button makeDefaultButton = new Button(stringMessages.makeDefault());
+        Button makeDefaultButton = new Button(stringMessages.save());
         makeDefaultButton.getElement().getStyle().setMargin(3, Unit.PX);
-        makeDefaultButton.ensureDebugId("MakeDefaultButton");
+        makeDefaultButton.ensureDebugId("SaveButton");
         getLeftButtonPannel().add(makeDefaultButton);
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 component.getComponentTreeNodeInfo().getComponentContext().makeSettingsDefault(component, getResult());
                 //TODO i18n + use nice styled dialog
-                Window.alert("Current settings have been set to default");
+                Window.alert("Settings have been successfully saved");
             }
         });
     }
