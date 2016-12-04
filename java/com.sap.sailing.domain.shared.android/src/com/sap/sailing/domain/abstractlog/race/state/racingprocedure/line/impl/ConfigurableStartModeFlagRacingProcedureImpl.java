@@ -80,6 +80,7 @@ public abstract class ConfigurableStartModeFlagRacingProcedureImpl extends BaseR
             startmodeFlagHasBeenSet = true;
             getChangedListeners().onStartModeChanged(this);
         }
+        super.update();
     }
 
     @Override
