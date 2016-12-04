@@ -3,53 +3,37 @@ package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RRS26StartModeFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RacingProcedureTypeAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite.FulfillmentFunction;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.NoMorePrerequisite;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.RRS26RacingProcedure;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 
 public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingProcedureImpl implements RRS26RacingProcedure {
 
-    private final static long startPhaseClassUpInterval = 5 * 60 * 1000; // minutes * seconds * milliseconds
-    private final static long startPhaseStartModeUpInterval = 4 * 60 * 1000; // minutes * seconds * milliseconds
-    private final static long startPhaseStartModeDownInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
-
-    private final RRS26StartModeFlagFinder startModeFlagAnalyzer;
-    
-    private Flags cachedStartmodeFlag;
-    private boolean startmodeFlagHasBeenSet;
+    private final static Duration startPhaseClassUpInterval = Duration.ONE_MINUTE.times(5);
+    private final static Duration startPhaseStartModeUpInterval = Duration.ONE_MINUTE.times(4);
+    private final static Duration startPhaseStartModeDownInterval = Duration.ONE_MINUTE;
 
     public RRS26RacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
              RRS26Configuration configuration, RaceLogResolver raceLogResolver) {
         super(raceLog, author, configuration, raceLogResolver);
-        
-        RacingProcedureTypeAnalyzer procedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
-        if (configuration.getStartModeFlags() != null) {
-            this.startModeFlagAnalyzer = new RRS26StartModeFlagFinder(procedureAnalyzer, raceLog, configuration.getStartModeFlags());
-        } else {
-            this.startModeFlagAnalyzer = new RRS26StartModeFlagFinder(procedureAnalyzer, raceLog);
-        }
-        
-        this.cachedStartmodeFlag = RRS26RacingProcedure.DefaultStartMode;
-        this.startmodeFlagHasBeenSet = false;
-        
-        update();
+    }
+
+    @Override
+    protected Duration getStartPhaseStartModeUpInterval() {
+        return startPhaseStartModeUpInterval;
     }
 
     @Override
@@ -62,7 +46,7 @@ public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingPro
         boolean hasRecall = super.hasIndividualRecall();
         if (!hasRecall) {
             return false;
-        } else if (startmodeFlagHasBeenSet) {
+        } else if (startmodeFlagHasBeenSet()) {
             return cachedStartmodeFlag != Flags.BLACK;
         } else {
             return hasRecall;
@@ -80,24 +64,6 @@ public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingPro
     }
 
     @Override
-    public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
-            FulfillmentFunction function) {
-        if (startTime.minus(startPhaseStartModeUpInterval).before(now) && !startmodeFlagHasBeenSet) {
-            return new StartModePrerequisite(function, this, now, startTime);
-        }
-        return new NoMorePrerequisite(function);
-    }
-
-    @Override
-    public boolean isStartphaseActive(TimePoint startTime, TimePoint now) {
-        if (now.before(startTime)) {
-            long timeTillStart = startTime.minus(now.asMillis()).asMillis();
-            return timeTillStart < startPhaseClassUpInterval;
-        }
-        return false;
-    }
-
-    @Override
     protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent> asList(
                 new RaceStateEventImpl(startTime.minus(startPhaseClassUpInterval), RaceStateEvents.RRS26_CLASS_UP),
@@ -110,7 +76,7 @@ public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingPro
     public boolean processStateEvent(RaceStateEvent event) {
         switch (event.getEventName()) {
         case RRS26_STARTMODE_UP:
-            if (!startmodeFlagHasBeenSet) {
+            if (!startmodeFlagHasBeenSet()) {
                 setStartModeFlag(event.getTimePoint(), cachedStartmodeFlag);
             }
         case RRS26_CLASS_UP:
@@ -174,38 +140,17 @@ public class RRS26RacingProcedureImpl extends ConfigurableStartModeFlagRacingPro
     }
     
     @Override
-    public void setStartModeFlag(TimePoint timePoint, Flags startMode) {
-        raceLog.add(new RaceLogFlagEventImpl(timePoint, author, raceLog.getCurrentPassId(), startMode, Flags.NONE, true));
-    }
-
-    @Override
-    public Flags getStartModeFlag() {
-        return cachedStartmodeFlag;
-    }
-
-    @Override
     public Flags getDefaultStartMode() {
-        return RRS26RacingProcedure.DefaultStartMode;
+        return RRS26RacingProcedure.DEFAULT_START_MODE;
     }
 
-    public boolean startmodeFlagHasBeenSet() {
-        return startmodeFlagHasBeenSet;
-    }
-    
     @Override
-    protected void update() {
-        Flags startmodeFlag = startModeFlagAnalyzer.analyze();
-        if (startmodeFlag != null && (!startmodeFlag.equals(cachedStartmodeFlag) || !startmodeFlagHasBeenSet)) {
-            cachedStartmodeFlag = startmodeFlag;
-            startmodeFlagHasBeenSet = true;
-            getChangedListeners().onStartModeChanged(this);
-        }
-        super.update();
+    public List<Flags> getDefaultStartModeFlags() {
+        return RRS26RacingProcedure.DEFAULT_START_MODE_FLAGS;
     }
-    
+
     @Override
     public RRS26Configuration getConfiguration() {
         return (RRS26Configuration) super.getConfiguration();
     }
-
 }
