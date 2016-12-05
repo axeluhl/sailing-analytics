@@ -53,7 +53,7 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     }
 
     private void showNoQRCodeMessage() {
-        ((AbstractStartActivity) getActivity()).showErrorPopup(R.string.no_qr_code_popup_title,
+        ((AbstractStartActivity<?>) getActivity()).showErrorPopup(R.string.no_qr_code_popup_title,
                 R.string.no_qr_code_popup_message);
     }
 
