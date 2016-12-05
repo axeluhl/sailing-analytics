@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
+import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
@@ -31,7 +32,13 @@ public interface RegattaConfiguration extends Serializable, Cloneable {
      * @return <code>null</code> if there is no configuration.
      */
     RRS26Configuration getRRS26Configuration();
-    
+
+    /**
+     * Gets the configuration for SWC races.
+     * @return <code>null</code> if there is no configuration.
+     */
+    SWCStartConfiguration getSWCStartConfiguration();
+
     /**
      * Gets the configuration for Gate Start races.
      * @return <code>null</code> if there is no configuration.

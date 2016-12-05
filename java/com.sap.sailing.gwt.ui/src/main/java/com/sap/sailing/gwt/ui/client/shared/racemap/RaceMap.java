@@ -152,6 +152,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
+    public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
     
     private MapWidget map;
     
@@ -1041,11 +1042,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private void updateBoatPositions(final Date newTime, final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData, boolean updateTailsOnly) {
-        final Map<CompetitorDTO, Runnable> tailPreparersPerCompetitor =
-                fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
+        fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
         showBoatsOnMap(newTime, transitionTimeInMillis,
                 /* re-calculate; it could have changed since the asynchronous request was made: */ getCompetitorsToShow(),
-                updateTailsOnly, tailPreparersPerCompetitor);
+                updateTailsOnly);
         if (!updateTailsOnly) {
             showCompetitorInfoOnMap(newTime, transitionTimeInMillis, competitorSelection.getSelectedFilteredCompetitors());
             // even though the wind data is retrieved by a separate call, re-draw the advantage line because it needs to
@@ -1263,12 +1263,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * @param updateTailsOnly
      *            if <code>false</code>, tails of competitors not in <code>competitorsToShow</code> are removed from the
      *            map
-     * @param tailPreparersPerCompetitor
-     *            executed before creating or updating the respective competitor's tail
      */
     private void showBoatsOnMap(final Date newTime, final long timeForPositionTransitionMillis,
-            final Iterable<CompetitorDTO> competitorsToShow, boolean updateTailsOnly,
-            Map<CompetitorDTO, Runnable> tailPreparersPerCompetitor) {
+            final Iterable<CompetitorDTO> competitorsToShow, boolean updateTailsOnly) {
         if (map != null) {
             Date tailsFromTime = new Date(newTime.getTime() - settings.getEffectiveTailLengthInMilliseconds());
             Date tailsToTime = newTime;
@@ -1279,22 +1276,16 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 competitorDTOsOfUnusedBoatCanvases.addAll(boatOverlays.keySet());
             }
             for (CompetitorDTO competitorDTO : competitorsToShow) {
-                Runnable tailPreparer = tailPreparersPerCompetitor.get(competitorDTO);
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
-                    Polyline tail = fixesAndTails.getTail(competitorDTO);
-                    if (tail == null) {
-                        if (tailPreparer != null) { // could be we didn't receive boat position data for this competitor; then no tailPreparer will have been created
-                            tailPreparer.run(); // presumably a no-op, but you never know...
-                        }
-                        tail = fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
+                    if (!fixesAndTails.hasTail(competitorDTO)) {
+                        fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
                     } else {
-                        fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime,
-                                (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2), tailPreparer);
+                        fixesAndTails.updateTail(competitorDTO, tailsFromTime, tailsToTime, (int) (timeForPositionTransitionMillis==-1?-1:timeForPositionTransitionMillis/2));
                         if (!updateTailsOnly) {
                             competitorDTOsOfUnusedTails.remove(competitorDTO);
                         }
                         PolylineOptions newOptions = createTailStyle(competitorDTO, displayHighlighted(competitorDTO));
-                        tail.setOptions(newOptions);
+                        fixesAndTails.getTail(competitorDTO).setOptions(newOptions);
                     }
                     boolean usedExistingBoatCanvas = updateBoatCanvasForCompetitor(competitorDTO, newTime, timeForPositionTransitionMillis);
                     if (usedExistingBoatCanvas && !updateTailsOnly) {
@@ -2815,10 +2806,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           // simplify road display
           mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
           // set water color
-          // To play with the styles, check out http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html.
-          // To convert an RGB color into the strange hue/saturation/lightness model used by the Google Map use
-          // http://software.stadtwerk.org/google_maps_colorizr/#water/all/123456/.
-          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), 0, -70);
+          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
           
           MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
           mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);

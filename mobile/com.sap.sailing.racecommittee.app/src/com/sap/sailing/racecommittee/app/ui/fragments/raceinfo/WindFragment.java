@@ -351,7 +351,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     private void setupLayouts(boolean showMap) {
         if (mHeaderLayout != null) {
             if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PLANNED) {
-                if (AppUtils.with(getActivity()).isLand()) {
+                if (AppUtils.with(getActivity()).isLandscape()) {
                     mHeaderLayout.setVisibility(View.GONE);
                 }
             } else {
