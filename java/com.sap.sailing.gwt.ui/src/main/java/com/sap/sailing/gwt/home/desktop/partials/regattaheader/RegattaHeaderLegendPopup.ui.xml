@@ -6,41 +6,74 @@
     
     <ui:style>
         .iconGPS, .iconWind, .iconVideo, .iconAudio{
+            line-height: 1.5em;
             position: relative;
             display: inline-block;
-            margin-left: 0.666666666666667em;
             padding-left: 2.333333333333333em;
             background-size: 1.666666666666667rem 1.666666666666667rem;
-            background-position: left;
+            background-position: left bottom;
             background-repeat: no-repeat;
         }
        .iconGPS {
             background-image:url('images/home/raw_gps_fixes.png');
         }
         .iconWind {
+            margin-left: 0.666666666666667em;
             background-image:url('images/home/icon-wind.png');
             border-left: 1px solid #ccc;
         }
         .iconVideo {
             background-image:url('images/home/icon-video.png');
-            border-left: 1px solid #ccc;
+            padding-top: 0.277777777777778em;
         }
         .iconAudio {
+            margin-left: 0.666666666666667em;
             background-image:url('images/home/icon-audio.png');
             border-left: 1px solid #ccc;
+            padding-top: 0.277777777777778em;
         }
         .legend{
+            padding: 0.5em;
+            border-radius: .277777777777778em;
             width:100%;
-            height:2.375em;
             background-color:white;
+            border: 2px solid #ccc;
         }
-    
+        .legend:after, .legend:before {
+            left: 100%;
+            top: 50%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .legend:after {
+            border-color: rgba(255, 255, 255, 0);
+            border-left-color: #ffffff;
+            border-width: 0.5em;
+            margin-top: -0.5em;
+            margin-left: -2px;
+        }
+        .legend:before {
+            border-color: rgba(204, 204, 204, 0);
+            border-left-color: #ccc;
+            border-width: 0.55em;
+            margin-top: -0.55em;
+        }
     </ui:style>
     <g:HTMLPanel styleName="{style.legend}">
-            <div class="{style.iconGPS}"><ui:text from='{i18n.eventRegattaRacesLegendGps}'/></div>
-            <div class="{style.iconWind}"><ui:text from='{i18n.eventRegattaRacesLegendWind}'/></div>
-            <div></div>
-            <div class="{style.iconVideo}"><ui:text from='{i18n.eventRegattaRacesLegendVideo}'/></div>
-            <div class="{style.iconAudio}"><ui:text from='{i18n.eventRegattaRacesLegendAudio}'/></div>                
+            <table>
+                <tr>
+                    <td><div class="{style.iconGPS}"><ui:text from='{i18n.eventRegattaHeaderLegendGps}'/></div></td>
+                    <td><div class="{style.iconWind}"><ui:text from='{i18n.eventRegattaHeaderLegendWind}'/></div></td>
+                </tr>
+                <tr>
+                    <td><div class="{style.iconVideo}"><ui:text from='{i18n.eventRegattaHeaderLegendVideo}'/></div></td>
+                    <td><div class="{style.iconAudio}"><ui:text from='{i18n.eventRegattaHeaderLegendAudio}'/></div></td>
+               </tr>
+            </table>
     </g:HTMLPanel>
 </ui:UiBinder> 

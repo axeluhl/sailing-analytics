@@ -38,9 +38,8 @@
         }
     </ui:style>
     <g:HTMLPanel addStyleNames="{local_res.css.raceslistlive}">
-        <h3 ui:field="titleUi" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mediaCss.large5}"/>
-        <div ui:field="legend" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mediaCss.large7} {style.legend}">
-            <div class="{style.iconGPS}"><ui:text from='{i18n.eventRegattaRacesLegendGps}'/></div>
+        <h3 ui:field="titleUi" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mediaCss.large4}"/>
+        <div ui:field="legend" class="{res.mediaCss.column} {res.mediaCss.medium12} {res.mediaCss.large8} {style.legend}">
             <div class="{style.iconWind}"><ui:text from='{i18n.eventRegattaRacesLegendWind}'/></div>
             <div class="{style.iconVideo}"><ui:text from='{i18n.eventRegattaRacesLegendVideo}'/></div>
             <div class="{style.iconAudio}"><ui:text from='{i18n.eventRegattaRacesLegendAudio}'/></div>

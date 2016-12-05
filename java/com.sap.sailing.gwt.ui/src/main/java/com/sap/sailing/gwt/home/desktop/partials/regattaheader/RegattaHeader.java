@@ -1,16 +1,16 @@
 package com.sap.sailing.gwt.home.desktop.partials.regattaheader;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
@@ -56,16 +56,21 @@ public class RegattaHeader extends Composite {
         Event.setEventListener(dataIndicatorsUi, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                final RegattaHeaderLegendPopup pop = new RegattaHeaderLegendPopup(dataIndicatorsUi);
-                // place it right aligned in the header next to it, setPostion is left based so it cannot be used
-                // instead
-                pop.setPopupPositionAndShow(new PositionCallback() {
-
+                final RegattaHeaderLegendPopup pop = new RegattaHeaderLegendPopup();
+                pop.setVisible(false);
+                pop.show();
+                // Pausing until the event loop is clear appears to give the browser
+                // sufficient time to apply CSS styling. We use the popup's offset
+                // width and height to calculate the display position, but those
+                // dimensions are not accurate until styling has been applied.
+                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                     @Override
-                    public void setPosition(int offsetWidth, int offsetHeight) {
-                        pop.getElement().getStyle().setTop(dataIndicatorsUi.getAbsoluteTop(), Unit.PX);
-                        pop.getElement().getStyle().setRight(
-                                dataIndicatorsUi.getAbsoluteLeft(), Unit.PX);
+                    public void execute() {
+                        // the arrow is ~16 pixels long
+                        pop.setPopupPosition(dataIndicatorsUi.getAbsoluteLeft() - pop.getOffsetWidth() - 16,
+                                RegattaHeader.this.getAbsoluteTop() + RegattaHeader.this.getOffsetHeight() / 2
+                                        - pop.getOffsetHeight() / 2);
+                        pop.setVisible(true);
                     }
                 });
                 event.preventDefault();
