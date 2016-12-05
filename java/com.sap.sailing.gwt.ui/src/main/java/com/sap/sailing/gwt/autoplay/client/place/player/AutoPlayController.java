@@ -32,7 +32,6 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContextInitialisationUtils;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
@@ -158,10 +157,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                     errorReporter.reportError("Error while loading data for raceboard: " + caught.getMessage());
                 }
             };
-            
-            if(raceboardPerspectiveLifecycleWithAllSettings == null) {
-                ComponentContextInitialisationUtils.createSettingsRetrievementWithAsyncCallbackJoiner(raceBoardContext, raceBoardDataCallback).startSettingsRetrievementAndJoinAsyncCallback();
-            }
             
             sailingService.getRaceboardData(currentLiveRace.getRegattaName(), currentLiveRace.getRaceName(),
                     autoPlayerConfiguration.getLeaderboardName(), null, null, raceBoardDataCallback);
