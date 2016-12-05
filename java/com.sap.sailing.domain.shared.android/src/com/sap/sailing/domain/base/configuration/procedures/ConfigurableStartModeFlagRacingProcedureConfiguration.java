@@ -8,5 +8,4 @@ import com.sap.sailing.domain.common.racelog.Flags;
 public interface ConfigurableStartModeFlagRacingProcedureConfiguration extends RacingProcedureConfiguration {
     
     List<Flags> getStartModeFlags();
-
 }
