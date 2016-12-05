@@ -72,4 +72,22 @@ interface RegattaRaceStatesFlagsResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/flags/flags_racecommittee/down.png")
     ImageResource arrowDown();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/flags/flags_racecommittee/swc_zero.png")
+    ImageResource flagSWCZero();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/flags/flags_racecommittee/swc_one.png")
+    ImageResource flagSWCOne();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/flags/flags_racecommittee/swc_two.png")
+    ImageResource flagSWCTwo();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/flags/flags_racecommittee/swc_three.png")
+    ImageResource flagSWCThree();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/flags/flags_racecommittee/swc_four.png")
+    ImageResource flagSWCFour();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/flags/flags_racecommittee/swc_five.png")
+    ImageResource flagSWCFive();
 }

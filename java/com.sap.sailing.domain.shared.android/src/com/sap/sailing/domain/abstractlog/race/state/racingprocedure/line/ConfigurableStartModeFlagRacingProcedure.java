@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line;
 
+import java.util.List;
+
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.base.configuration.procedures.ConfigurableStartModeFlagRacingProcedureConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -20,6 +22,8 @@ public interface ConfigurableStartModeFlagRacingProcedure extends RacingProcedur
     Flags getStartModeFlag();
     
     Flags getDefaultStartMode();
+    
+    List<Flags> getDefaultStartModeFlags();
     
     void setStartModeFlag(TimePoint timePoint, Flags startMode);
 }
