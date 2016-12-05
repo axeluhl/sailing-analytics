@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
@@ -60,7 +61,7 @@ public class Swarm implements TimeListener {
     private Date timePoint;
     private double cosineOfAverageLatitude;
 
-    private boolean mapLoaded = false;
+    private HandlerRegistration handlerRegistration;
 
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer,
             VectorField vectorField, StreamletParameters streamletPars) {
@@ -81,19 +82,17 @@ public class Swarm implements TimeListener {
         if (map.getBounds() != null) {
             startWithMap(animationIntervalMillis);
         } else {
-            map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
+            handlerRegistration = map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
                 @Override
                 public void onEvent(BoundsChangeMapEvent event) {
-                    if (!mapLoaded) {
-                        startWithMap(animationIntervalMillis);
-                    }
+                    Swarm.this.handlerRegistration.removeHandler();
+                    startWithMap(animationIntervalMillis);
                 }
             });
         }
     }
 
     private void startWithMap(int animationIntervalMillis) {
-        mapLoaded = true;
         projection = new Mercator(fullcanvas, map);
         projection.calibrate();
         updateBounds();
