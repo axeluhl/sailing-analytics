@@ -27,6 +27,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.perspective.AsyncCallbackWithSettingsRetrievementJoiner;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContextInitialisationUtils;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 
@@ -104,7 +105,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         }
         final RaceBoardComponentContext context = new RaceBoardComponentContext(getUserService(), componentContextGlobalDefinition, new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE), regattaName, raceName, leaderboardName, leaderboardGroupName, eventId);
         
-        AsyncCallbackWithSettingsRetrievementJoiner<RaceboardDataDTO,RaceBoardPerspectiveSettings> asyncCallbackJoiner = context.createSettingsRetrievementWithAsyncCallbackJoiner(new AsyncCallback<RaceboardDataDTO>() {
+        AsyncCallbackWithSettingsRetrievementJoiner<RaceboardDataDTO,RaceBoardPerspectiveSettings> asyncCallbackJoiner = ComponentContextInitialisationUtils.createSettingsRetrievementWithAsyncCallbackJoiner(context, new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO raceboardData) {
                 if (!raceboardData.isValidLeaderboard()) {

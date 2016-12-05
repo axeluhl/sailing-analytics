@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
-import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContextInitialisationUtils;
 import com.sap.sse.gwt.client.shared.perspective.IOnDefaultSettingsLoaded;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
@@ -68,7 +68,7 @@ public class PlayerActivity extends AbstractActivity {
                 
 
                 
-                AbstractComponentContextWithSettingsStorage.initMultipleDefaultSettings(raceBoardContext, leaderboardWithHeaderContext, new IOnDefaultSettingsLoaded() {
+                ComponentContextInitialisationUtils.initTwoComponentContexts(raceBoardContext, leaderboardWithHeaderContext, new IOnDefaultSettingsLoaded() {
                     
                     @Override
                     public void onLoaded() {

@@ -2,12 +2,12 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.Settings;
 
-public abstract class DoubleSettingsRetrievementJoiner<PS1 extends Settings, PS2 extends Settings> extends CallbacksJoinerHelper<PerspectiveCompositeSettings<PS1>, PerspectiveCompositeSettings<PS2>> {
+public abstract class TwoParallelSettingsRetrievementJoiner<PS1 extends Settings, PS2 extends Settings> extends CallbacksJoinerHelper<PerspectiveCompositeSettings<PS1>, PerspectiveCompositeSettings<PS2>> {
     
     private final AbstractComponentContextWithSettingsStorage<?, PS1> context1;
     private final AbstractComponentContextWithSettingsStorage<?, PS2> context2;
     
-    public DoubleSettingsRetrievementJoiner(AbstractComponentContextWithSettingsStorage<?, PS1> context1, AbstractComponentContextWithSettingsStorage<?, PS2> context2) {
+    public TwoParallelSettingsRetrievementJoiner(AbstractComponentContextWithSettingsStorage<?, PS1> context1, AbstractComponentContextWithSettingsStorage<?, PS2> context2) {
         this.context1 = context1;
         this.context2 = context2;
     }

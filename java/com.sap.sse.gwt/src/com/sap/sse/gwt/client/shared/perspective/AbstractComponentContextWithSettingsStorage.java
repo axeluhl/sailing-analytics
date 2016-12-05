@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
@@ -113,21 +112,6 @@ public abstract class AbstractComponentContextWithSettingsStorage<PL extends Per
             throw new IllegalStateException("Settings have not been initialized yet.");
         }
         return rootPerspectiveLifecycle.cloneSettings(currentDefaultSettings);
-    }
-    
-    public<T> AsyncCallbackWithSettingsRetrievementJoiner<T, PS> createSettingsRetrievementWithAsyncCallbackJoiner(
-            AsyncCallback<T> callbackToWrap) {
-        return new AsyncCallbackWithSettingsRetrievementJoiner<>(this, callbackToWrap);
-    }
-    
-    public static<PS1 extends Settings, PS2 extends Settings> void initMultipleDefaultSettings(AbstractComponentContextWithSettingsStorage<?, PS1> context1, AbstractComponentContextWithSettingsStorage<?, PS2> context2, final IOnDefaultSettingsLoaded onDefaultSettingsLoaded) {
-        DoubleSettingsRetrievementJoiner<PS1, PS2> joiner = new DoubleSettingsRetrievementJoiner<PS1, PS2>(context1, context2) {
-            @Override
-            public void onAllDefaultSettingsLoaded() {
-                onDefaultSettingsLoaded.onLoaded();
-            }
-        };
-        joiner.startSettingsRetrievementAndJoinAsyncCallback();
     }
     
     @Override
