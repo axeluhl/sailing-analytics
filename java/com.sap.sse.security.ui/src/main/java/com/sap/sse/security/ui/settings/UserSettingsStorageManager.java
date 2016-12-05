@@ -45,21 +45,17 @@ public class UserSettingsStorageManager<PS extends Settings> implements Settings
     
     public void storeGlobalSettings(PerspectiveCompositeSettings<PS> globalSettings) {
         String serializedSettings = jsonSerializer.serializeToString(globalSettings);
-        if(userService.getCurrentUser() != null) {
-            storeGlobalSettingsOnServer(serializedSettings);
-        }
-        storeGlobalSettingsOnLocalStorage(serializedSettings);
+        storeGlobalSettingsJsonOnServer(serializedSettings);
+        storeGlobalSettingsJsonOnLocalStorage(serializedSettings);
     }
     
     public void storeContextSpecificSettings(PerspectiveCompositeSettings<PS> contextSpecificSettings) {
         String serializedSettings = jsonSerializer.serializeToString(contextSpecificSettings);
-        if(userService.getCurrentUser() != null) {
-            storeContextSpecificSettingsOnServer(serializedSettings);
-        }
-        storeContextSpecificSettingsOnLocalStorage(serializedSettings);
+        storeContextSpecificSettingsJsonOnServer(serializedSettings);
+        storeContextSpecificSettingsJsonOnLocalStorage(serializedSettings);
     }
     
-    private void storeContextSpecificSettingsOnLocalStorage(String serializedContextSpecificSettings) {
+    private void storeContextSpecificSettingsJsonOnLocalStorage(String serializedContextSpecificSettings) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
             localStorage.removeItem(storageContextSpecificKey);
@@ -67,11 +63,13 @@ public class UserSettingsStorageManager<PS extends Settings> implements Settings
         }
     }
 
-    private void storeContextSpecificSettingsOnServer(String serializedContextSpecificSettings) {
-        userService.setPreference(storageContextSpecificKey, serializedContextSpecificSettings);
+    private void storeContextSpecificSettingsJsonOnServer(String serializedContextSpecificSettings) {
+        if(userService.getCurrentUser() != null) {
+            userService.setPreference(storageContextSpecificKey, serializedContextSpecificSettings);
+        }
     }
 
-    private void storeGlobalSettingsOnLocalStorage(String serializedGlobalSettings) {
+    private void storeGlobalSettingsJsonOnLocalStorage(String serializedGlobalSettings) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
             localStorage.removeItem(storageGlobalKey);
@@ -79,15 +77,13 @@ public class UserSettingsStorageManager<PS extends Settings> implements Settings
         }
     }
 
-    private void storeGlobalSettingsOnServer(String serializedGlobalSettings) {
-        userService.setPreference(storageGlobalKey, serializedGlobalSettings);
+    private void storeGlobalSettingsJsonOnServer(String serializedGlobalSettings) {
+        if(userService.getCurrentUser() != null) {
+            userService.setPreference(storageGlobalKey, serializedGlobalSettings);
+        }
     }
 
     public void retrieveDefaultSettings(PerspectiveCompositeSettings<PS> defaultSettings, final DefaultSettingsLoadedCallback<PS> asyncCallback) {
-        defaultSettings = retrieveGlobalSettingsFromLocalStorage(defaultSettings);
-        defaultSettings = retrieveContextSpecificSettingsFromLocalStorage(defaultSettings);
-        
-        defaultSettings = retrieveDefaultSettingsFromUrl(defaultSettings);
         final SettingsJsonRetrievement settingsJsonRetrievement = new SettingsJsonRetrievement(defaultSettings);
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             
@@ -145,13 +141,35 @@ public class UserSettingsStorageManager<PS extends Settings> implements Settings
     private void continueRetrieveDefaultSettings(
             UserSettingsStorageManager<PS>.SettingsJsonRetrievement settingsJsonRetrievement, DefaultSettingsLoadedCallback<PS> callback) {
         PerspectiveCompositeSettings<PS> defaultSettings = settingsJsonRetrievement.getDefaultSettings();
+        
+        // has been any global settings from server retrieved? yes => apply as default and override LocalStorage
         if(settingsJsonRetrievement.getGlobalSettingsJson() != null) {
             defaultSettings = jsonSerializer.deserialize(defaultSettings, settingsJsonRetrievement.getGlobalSettingsJson());
+            storeGlobalSettingsJsonOnLocalStorage(settingsJsonRetrievement.getGlobalSettingsJson());
+        } else {
+            String localStorageGlobalSettingsJson = retrieveGlobalSettingsJsonFromLocalStorage();
+            if(localStorageGlobalSettingsJson != null) {
+                //server has no global settings, local storage has => apply local storage settings and store them on server
+                defaultSettings = jsonSerializer.deserialize(defaultSettings, localStorageGlobalSettingsJson);
+                storeGlobalSettingsJsonOnServer(localStorageGlobalSettingsJson);
+            }
         }
+        
+        // has been any context specific settings from server retrieved? yes => apply as default and override LocalStorage
         if(settingsJsonRetrievement.getContextSpecificSettingsJson() != null) {
             defaultSettings = jsonSerializer.deserialize(defaultSettings, settingsJsonRetrievement.getContextSpecificSettingsJson());
+            storeContextSpecificSettingsJsonOnLocalStorage(settingsJsonRetrievement.getContextSpecificSettingsJson());
+        } else {
+            String localStorageContextSpecificSettingsJson = retrieveContextSpecificSettingsJsonFromLocalStorage();
+            if(localStorageContextSpecificSettingsJson != null) {
+                //server has no context specific settings, local storage has => apply local storage settings and store them on server
+                defaultSettings = jsonSerializer.deserialize(defaultSettings, localStorageContextSpecificSettingsJson);
+                storeContextSpecificSettingsJsonOnServer(localStorageContextSpecificSettingsJson);
+            }
         }
-        defaultSettings = urlSerializer.deserializeFromCurrentLocation(defaultSettings);
+        
+        //URL settings have highest precedence
+        defaultSettings = retrieveDefaultSettingsFromUrl(defaultSettings);
         
         if(settingsJsonRetrievement.isErrorOccurred()) {
             callback.onError(settingsJsonRetrievement.getCaught(), defaultSettings);
@@ -160,22 +178,20 @@ public class UserSettingsStorageManager<PS extends Settings> implements Settings
         }
     }
 
-    private PerspectiveCompositeSettings<PS> retrieveGlobalSettingsFromLocalStorage(PerspectiveCompositeSettings<PS> defaultSettings) {
+    private String retrieveGlobalSettingsJsonFromLocalStorage() {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
-            String serializedSettings = localStorage.getItem(storageGlobalKey);
-            defaultSettings = jsonSerializer.deserialize(defaultSettings, serializedSettings);
+            return localStorage.getItem(storageGlobalKey);
         }
-        return defaultSettings;
+        return null;
     }
     
-    private PerspectiveCompositeSettings<PS> retrieveContextSpecificSettingsFromLocalStorage(PerspectiveCompositeSettings<PS> defaultSettings) {
+    private String retrieveContextSpecificSettingsJsonFromLocalStorage() {
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
-            String serializedSettings = localStorage.getItem(storageContextSpecificKey);
-            defaultSettings = jsonSerializer.deserialize(defaultSettings, serializedSettings);
+            return localStorage.getItem(storageContextSpecificKey);
         }
-        return defaultSettings;
+        return null;
     }
 
     private void retrieveGlobalSettingsJsonFromServer(AsyncCallback<String> asyncCallback) {
