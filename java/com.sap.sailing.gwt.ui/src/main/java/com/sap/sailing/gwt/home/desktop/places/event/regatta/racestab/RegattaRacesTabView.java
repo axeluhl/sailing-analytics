@@ -198,7 +198,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
 
         public RaceListFinishedRaces(EventView.Presenter presenter) {
-            super(presenter, new RaceListColumnSet(1, 1));
+            super(presenter, new RaceListColumnSet(1, 1), true);
         }
         
         @Override
