@@ -97,7 +97,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * <code>timePoint</code>. If the competitor already completed the leg at <code>timePoint</code> and the respective
      * mark passing event was already received, the average ride height for the entire leg (and no further) is computed.
      */
-    Double getAverageRideHeight(TimePoint timePoint);
+    Distance getAverageRideHeight(TimePoint timePoint);
 
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet, otherwise the fix where the maximum speed was
@@ -237,7 +237,7 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * <code>timePoint</code>, returns the current ride height for this time point. If the competitor has already
      * finished the leg, the ride height at the time the competitor finished the leg is returned.
      */
-    Double getRideHeight(TimePoint at);
+    Distance getRideHeight(TimePoint at);
 
     /**
      * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader

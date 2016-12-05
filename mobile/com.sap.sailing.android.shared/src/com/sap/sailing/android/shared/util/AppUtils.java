@@ -150,7 +150,7 @@ public class AppUtils {
      *
      * @return true, if portrait mode
      */
-    public boolean isPort() {
+    public boolean isPortrait() {
         return mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
@@ -159,7 +159,7 @@ public class AppUtils {
      *
      * @return true, if landscape mode
      */
-    public boolean isLand() {
+    public boolean isLandscape() {
         return mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
