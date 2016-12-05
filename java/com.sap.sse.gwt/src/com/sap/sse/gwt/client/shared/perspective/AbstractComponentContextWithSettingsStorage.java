@@ -51,15 +51,10 @@ public abstract class AbstractComponentContextWithSettingsStorage<PL extends Per
         
         final PerspectiveCompositeSettings<PS> newRootPerspectiveSettings;
         if(parentPerspective == null) {
-            if(component instanceof AbstractRootPerspectiveComposite) {
-                //root perspective is updating its perspective own settings
-                AbstractRootPerspectiveComposite<? extends PerspectiveLifecycle<PS>, PS> rootPerspective = (AbstractRootPerspectiveComposite<? extends PerspectiveLifecycle<PS>, PS>) component;
-                newRootPerspectiveSettings = (PerspectiveCompositeSettings<PS>)newDefaultSettings;
-                rootPerspective.getPerspectiveLifecycleWithAllSettings().setAllSettings(newRootPerspectiveSettings);
-            } else {
-                throw new IllegalStateException("Component must belong to a perspective when updating default settings");
-            }
-            
+            //root perspective is updating its perspective own settings
+            Perspective<PS> rootPerspective = (Perspective<PS>) component;
+            newRootPerspectiveSettings = (PerspectiveCompositeSettings<PS>)newDefaultSettings;
+            rootPerspective.getPerspectiveLifecycleWithAllSettings().setAllSettings(newRootPerspectiveSettings);
         } else {
             newRootPerspectiveSettings = (PerspectiveCompositeSettings<PS>) updatePerspectiveLifecycleWithAllSettings(parentPerspective, component, newDefaultSettings);
         }
