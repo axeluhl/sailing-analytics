@@ -11,7 +11,7 @@ public interface RacingProcedurePrerequisite {
 
     /**
      * In charge of fulfilling all {@link RacingProcedurePrerequisite}. Implementations must call the
-     * {@link RacingProcedurePrerequisite} "fulfill" (or {@link RacingProcedurePrerequisite#fulfillWithDefault()}
+     * {@link RacingProcedurePrerequisite#resolve(Resolver)} or {@link RacingProcedurePrerequisite#fulfillWithDefault()}
      * methods to let the framework decide whether there are more prerequisites or the race can start.
      */
     public interface Resolver {

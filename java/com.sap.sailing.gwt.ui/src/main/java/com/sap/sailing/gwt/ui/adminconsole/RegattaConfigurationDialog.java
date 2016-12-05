@@ -248,7 +248,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
                 && originalConfiguration.rrs26Configuration.startModeFlags != null) {
             selectedFlags = originalConfiguration.rrs26Configuration.startModeFlags;
         }
-        ListBoxUtils.setupStartmodeFlagsListBox(rrs26StartModeFlagsBox, selectedFlags);
+        ListBoxUtils.setupRRS26StartmodeFlagsListBox(rrs26StartModeFlagsBox, selectedFlags);
         rrs26StartModeFlagsBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -308,7 +308,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
                 && originalConfiguration.swcStartConfiguration.startModeFlags != null) {
             selectedFlags = originalConfiguration.swcStartConfiguration.startModeFlags;
         }
-        ListBoxUtils.setupStartmodeFlagsListBox(swcStartModeFlagsBox, selectedFlags);
+        ListBoxUtils.setupSWCStartmodeFlagsListBox(swcStartModeFlagsBox, selectedFlags);
         swcStartModeFlagsBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
