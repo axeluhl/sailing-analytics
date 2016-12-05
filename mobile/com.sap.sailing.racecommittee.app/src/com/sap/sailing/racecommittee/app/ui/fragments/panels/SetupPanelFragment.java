@@ -21,7 +21,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRac
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.BaseRacingProcedureChangedListener;
-import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.ConfigurableStartModeFlagRacingProcedure;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -29,8 +29,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartPathFinderFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFactorFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
@@ -176,9 +176,9 @@ public class SetupPanelFragment extends BasePanelFragment {
                 mButtonRaceGroup.setVisibility(View.GONE);
             }
 
-            if (getRaceState().getRacingProcedure() instanceof RRS26RacingProcedure) {
+            if (getRaceState().getRacingProcedure() instanceof ConfigurableStartModeFlagRacingProcedure) {
                 if (mButtonMode != null) {
-                    RRS26RacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
+                    ConfigurableStartModeFlagRacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
                     mButtonMode.setPanelImage(FlagsResources.getFlagDrawable(getActivity(), typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
                     mButtonMode.setVisibility(View.VISIBLE);
                 }
@@ -344,7 +344,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                 mButtonProcedure.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonMode != null && !mButtonMode.equals(view)) {
-                resetFragment(mButtonMode.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), LineStartModeFragment.class);
+                resetFragment(mButtonMode.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartModeFragment.class);
                 mButtonMode.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
             if (mButtonPathfinder != null && !mButtonPathfinder.equals(view)) {
@@ -466,7 +466,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case PanelButton.LEVEL_TOGGLED:
-                    replaceFragment(LineStartModeFragment.newInstance(LineStartModeFragment.START_MODE_PLANNED));
+                    replaceFragment(StartModeFragment.newInstance(StartModeFragment.START_MODE_PLANNED));
                     break;
 
                 default:
