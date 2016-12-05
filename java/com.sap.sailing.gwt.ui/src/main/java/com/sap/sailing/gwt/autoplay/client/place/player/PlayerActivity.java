@@ -82,7 +82,7 @@ public class PlayerActivity extends AbstractActivity {
                         autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
                     }
                 });
-                
+                clientFactory.getUserService().updateUser(true);
             }
 
             @Override
