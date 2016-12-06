@@ -1,11 +1,15 @@
 package com.sap.sse.common.impl.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
 import com.sap.sse.common.impl.AbstractColor;
+import com.sap.sse.common.impl.HSVColor;
+import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Util.Triple;
 
 import junit.framework.Assert;
 
@@ -70,6 +74,22 @@ public class AbstractColorTest {
     @Test
     public void testRgbWithoutParentheses() {
         assertNull(AbstractColor.getCssColor("rgb"));
+    }
+    
+    @Test
+    public void testHSVConversion() {
+        Color color = new RGBColor(5, 6, 7);
+        Triple<Float, Float, Float> hsvValues = color.getAsHSV();
+        HSVColor hsv = new HSVColor(hsvValues.getA(), hsvValues.getB(), hsvValues.getC());
+        Triple<Integer, Integer, Integer> rgbValues = hsv.getAsRGB();
+        assertEquals(5, (int) rgbValues.getA());
+        assertEquals(6, (int) rgbValues.getB());
+        assertEquals(7, (int) rgbValues.getC());
+        // according to http://www.rapidtables.com/convert/color/rgb-to-hsv.htm rgb(5, 6, 7) equals
+        // hsv(210, 0.286, 0.027)
+        assertEquals(210.0, hsvValues.getA(), 0.01);
+        assertEquals(0.286, hsvValues.getB(), 0.01);
+        assertEquals(0.027, hsvValues.getC(), 0.01);
     }
 
 }

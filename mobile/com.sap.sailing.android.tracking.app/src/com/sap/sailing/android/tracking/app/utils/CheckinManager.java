@@ -13,12 +13,6 @@ import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import android.content.DialogInterface;
-import android.net.Uri;
-import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
-
-import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
@@ -50,16 +44,21 @@ import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer
 import com.sap.sse.common.Util;
 import com.sap.sse.shared.media.ImageDescriptor;
 
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.support.v7.app.AlertDialog;
+import android.widget.Toast;
+
 public class CheckinManager {
 
     private final static String TAG = CheckinManager.class.getName();
-    private BaseCheckinData checkinData;
-    private CheckinDataActivity activity;
+    private CheckinData checkinData;
+    private CheckinDataActivity<CheckinData> activity;
     private AppPreferences prefs;
     private String url;
     private boolean update;
 
-    public CheckinManager(String url, CheckinDataActivity activity, boolean update) {
+    public CheckinManager(String url, CheckinDataActivity<CheckinData> activity, boolean update) {
         this.activity = activity;
         this.url = url;
         prefs = new AppPreferences(activity);
@@ -317,7 +316,7 @@ public class CheckinManager {
         activity.onCheckinDataAvailable(getCheckinData());
     }
 
-    public BaseCheckinData getCheckinData() {
+    public CheckinData getCheckinData() {
         return checkinData;
     }
 
