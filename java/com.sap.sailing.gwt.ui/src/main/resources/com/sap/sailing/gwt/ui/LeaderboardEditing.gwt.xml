@@ -46,7 +46,7 @@
 	<source path='simulator'/>
 	
 	<set-configuration-property name="CssResource.enableGss" value="true" />
-	<set-configuration-property name="CssResource.legacy" value="true" />
+	<set-configuration-property name="CssResource.conversionMode" value="strict" />
 	
 	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
     <inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
