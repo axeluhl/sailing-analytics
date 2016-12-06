@@ -48,15 +48,15 @@ public class RegattaHeader extends Composite {
         this.initDataIndicators(regattaMetadata.getRaceDataInfo());
 
         // setup click listener for icon legend bubble here, it may be replaced by setRegattaNavigation later on
-        addLegendBubble();
+        addLegendBubble(regattaMetadata.getRaceDataInfo());
     }
 
-    private void addLegendBubble() {
+    private void addLegendBubble(final RaceDataInfo raceDataInfo) {
         DOM.sinkEvents(dataIndicatorsUi, Event.ONCLICK);
         Event.setEventListener(dataIndicatorsUi, new EventListener() {
             @Override
             public void onBrowserEvent(Event event) {
-                final RegattaHeaderLegendPopup pop = new RegattaHeaderLegendPopup();
+                final RegattaHeaderLegendPopup pop = new RegattaHeaderLegendPopup(raceDataInfo);
                 pop.setVisible(false);
                 pop.show();
                 // Pausing until the event loop is clear appears to give the browser

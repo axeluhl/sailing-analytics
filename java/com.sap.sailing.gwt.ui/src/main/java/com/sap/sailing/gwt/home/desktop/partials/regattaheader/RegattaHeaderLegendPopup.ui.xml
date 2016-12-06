@@ -1,7 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     
     <ui:style>
@@ -67,12 +66,12 @@
     <g:HTMLPanel styleName="{style.legend}">
             <table>
                 <tr>
-                    <td><div class="{style.iconGPS}"><ui:text from='{i18n.eventRegattaHeaderLegendGps}'/></div></td>
-                    <td><div class="{style.iconWind}"><ui:text from='{i18n.eventRegattaHeaderLegendWind}'/></div></td>
+                    <td><div ui:field="iconGPS" class="{style.iconGPS}"/></td>
+                    <td><div ui:field="iconWind" class="{style.iconWind}"/></td>
                 </tr>
                 <tr>
-                    <td><div class="{style.iconVideo}"><ui:text from='{i18n.eventRegattaHeaderLegendVideo}'/></div></td>
-                    <td><div class="{style.iconAudio}"><ui:text from='{i18n.eventRegattaHeaderLegendAudio}'/></div></td>
+                    <td><div ui:field="iconVideo" class="{style.iconVideo}"/></td>
+                    <td><div ui:field="iconAudio" class="{style.iconAudio}"/></td>
                </tr>
             </table>
     </g:HTMLPanel>
