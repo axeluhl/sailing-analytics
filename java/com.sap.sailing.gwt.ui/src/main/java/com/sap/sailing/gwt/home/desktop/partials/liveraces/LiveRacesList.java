@@ -86,5 +86,20 @@ public class LiveRacesList extends Composite {
             columnSet.addColumn(courseColumn);
             columnSet.addColumn(fleetNameColumn);
         }
+
+        @Override
+        public boolean hasWind() {
+            return false;
+        }
+
+        @Override
+        public boolean hasVideos() {
+            return false;
+        }
+
+        @Override
+        public boolean hasAudios() {
+            return false;
+        }
     }
 }
