@@ -1,6 +1,7 @@
 package com.sap.sailing.xmlexport;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +16,7 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -25,8 +26,6 @@ import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
-import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -78,15 +77,20 @@ public class FoilingData {
     	result.append("RegattaName").append(";");
     	result.append("RaceName").append(";");
     	result.append("LegIndexStartingAtZero").append(";");
+    	result.append("LegType").append(";");
     	result.append("CompetitorName").append(";");
+    	result.append("CompetitorSailId").append(";");
+    	result.append("CompetitorUUID").append(";");
     	result.append("SpeedOverGroundInKnots").append(";");
-    	result.append("RideHeight").append(";");
-    	result.append("RideHeightPort").append(";");
-    	result.append("RideHeightStarboard").append(";");
+    	result.append("RideHeightInMeter").append(";");
+    	result.append("RideHeightPortInMeter").append(";");
+    	result.append("RideHeightStarboardInMeter").append(";");
     	result.append("Heel").append(";");
     	result.append("Pitch").append(";");
     	result.append("AveragedWindSpeedInKnots").append(";");
-    	result.append("WindBearingInDegrees").append("\n");
+    	result.append("WindDirectionInDegrees").append(";");
+    	result.append("CompetitorBearingInDegrees").append(";");
+    	result.append("BearingDifferenceBetweenCompetitorAndWindInDegrees").append("\n");
     	Leaderboard leaderboard = getLeaderboard();
     	for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
@@ -108,7 +112,7 @@ public class FoilingData {
                 		while (toTimePoint == null ? (attemptedNumberOfFixes<5) : (timePointToConsider.compareTo(toTimePoint) < 0)) {
                 			BravoFix bravoFixAtTimepoint = sensorTrack.getFirstFixAtOrAfter(timePointToConsider);
                 			if (bravoFixAtTimepoint != null) {
-                				Speed speedOfCompetitor = trackedRace.getTrack(competitor).getEstimatedSpeed(timePointToConsider);
+                				SpeedWithBearing speedOfCompetitor = trackedRace.getTrack(competitor).getEstimatedSpeed(timePointToConsider);
                 				double rideHeight = bravoFixAtTimepoint.get(BravoSensorDataMetadata.INSTANCE.RIDE_HEIGHT);
                 				double rideHeightPort = bravoFixAtTimepoint.get(BravoSensorDataMetadata.INSTANCE.RIDE_HEIGHT_PORT_HULL);
                 				double rideHeightStarboard = bravoFixAtTimepoint.get(BravoSensorDataMetadata.INSTANCE.RIDE_HEIGHT_STARBOARD_HULL);
@@ -119,15 +123,20 @@ public class FoilingData {
                 				Bearing windFixBearing = windFix.getObject().getBearing();
                 				TrackedLegOfCompetitor leg = trackedRace.getTrackedLeg(competitor, timePointToConsider);
                 				
-                				result.append(timePointToConsider.asDate().toString()).append(";");
+                				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-dd HH:mm:ss");
+                				result.append(simpleDateFormat.format(timePointToConsider.asDate())).append(";");
                 				result.append(trackedRace.getRaceIdentifier().getRegattaName()).append(";");
                 				result.append(trackedRace.getRaceIdentifier().getRaceName()).append(";");
                 				if (leg != null) {
                 					result.append(trackedRace.getRace().getCourse().getLegs().indexOf(leg.getLeg())).append(";");
+                					result.append(leg.getTrackedLeg().getLegType(timePointToConsider).name()).append(";");
                 				} else {
                 					result.append("-1").append(";");
+                					result.append("UNKNOWN").append(";");
                 				}
                 				result.append(competitor.getName()).append(";");
+                				result.append(competitor.getBoat().getSailID()).append(";");
+                				result.append(competitor.getId()).append(";");
                 				result.append(speedOfCompetitor.getKnots()).append(";");
                 				result.append(rideHeight).append(";");
                 				result.append(rideHeightPort).append(";");
@@ -135,7 +144,9 @@ public class FoilingData {
                 				result.append(heel).append(";");
                 				result.append(pitch).append(";");
                 				result.append(windFixSpeed.getObject().getKnots()).append(";");
-                				result.append(windFixBearing.getDegrees()).append("\n");
+                				result.append(windFixBearing.reverse().getDegrees()).append(";");
+                				result.append(speedOfCompetitor.getBearing().getDegrees()).append(";");
+                				result.append(speedOfCompetitor.getBearing().getDifferenceTo(windFixBearing.reverse()).getDegrees()).append("\n");
                 			}
 							timePointToConsider = timePointToConsider.plus(samplingInterval);
 							attemptedNumberOfFixes++;
