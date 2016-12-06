@@ -48,7 +48,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
                 sailingService, asyncActionsExecutor, leaderboardSettings, preselectedRace != null, preselectedRace,
                 competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* adjustTimerDelay */
-                /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, true, /*autoApplyTopNFilter*/ false, false));
+                /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, true, /* autoApplyTopNFilter */ false, false,
+                false));
         final FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);
         multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, leaderboardName, chartDetailType,
@@ -79,7 +80,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer {
                                         leaderboardSettings, preselectedRace != null, preselectedRace, competitorSelectionProvider, timer,
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
                                         false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
-                                        false, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false);
+                                        false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, false,
+                                        false);
                                 mainPanel.add(overallLeaderboardPanel);
                                 addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
                                         /* hasSettingsWhenComponentIsInvisible*/ true);

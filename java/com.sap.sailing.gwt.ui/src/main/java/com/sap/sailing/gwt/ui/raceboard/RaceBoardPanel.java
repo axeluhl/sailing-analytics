@@ -459,7 +459,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
                 userAgent, /* showRaceDetails */ true, competitorSearchTextBox,
                 /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
                 /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false,
-                /*autoApplyTopNFilter*/ false, /*showCompetitorFilterStatus*/ false);
+                /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, false);
     }
 
     private void setComponentVisible(SideBySideComponentViewer componentViewer, Component<?> component, boolean visible) {
