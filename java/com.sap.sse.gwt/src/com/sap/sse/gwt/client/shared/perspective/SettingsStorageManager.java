@@ -2,14 +2,14 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.Settings;
 
-public interface SettingsStorageManager<PS extends Settings> {
+public interface SettingsStorageManager<S extends Settings> {
 
-    void retrieveDefaultSettings(PerspectiveCompositeSettings<PS> defaultSettings,
-            DefaultSettingsLoadedCallback<PS> asyncCallback);
+    void retrieveDefaultSettings(S defaultSettings,
+            DefaultSettingsLoadedCallback<S> asyncCallback);
 
-    void storeGlobalSettings(PerspectiveCompositeSettings<PS> globalSettings);
+    void storeGlobalSettings(S globalSettings);
 
-    void storeContextSpecificSettings(PerspectiveCompositeSettings<PS> contextSpecificSettings);
+    void storeContextSpecificSettings(S contextSpecificSettings);
 
     Throwable getLastError();
     

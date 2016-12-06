@@ -316,22 +316,6 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
     private final BusyIndicator busyIndicator;
     private final Set<BusyStateChangeListener> busyStateChangeListeners;
 
-    /**
-     * Tells whether the leaderboard settings were explicitly changed by an external call to
-     * {@link #updateSettings(LeaderboardSettings)}. If so, a {@link #playStateChanged(PlayStates, PlayModes) play state
-     * change} will not automatically lead to a settings change.
-     */
-    private boolean settingsUpdatedExplicitly = false;
-
-    /**
-     * Tells if the leaderboard is currently handling a {@link #playStateChanged(PlayStates, PlayModes) play state
-     * change}. If this is the case, a call to {@link #updateSettings(LeaderboardSettings)} won't set the
-     * {@link #settingsUpdatedExplicitly} flag.
-     */
-    private boolean currentlyHandlingPlayStateChange;
-
-    private PlayModes oldPlayMode;
-
     private final AsyncActionsExecutor asyncActionsExecutor;
 
     /**
@@ -418,9 +402,6 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         if (newSettings.getOverallDetailsToShow() != null) {
             selectedOverallDetailColumns.clear();
             selectedOverallDetailColumns.addAll(newSettings.getOverallDetailsToShow());
-        }
-        if (!newSettings.isUpdateUponPlayStateChange() || !currentlyHandlingPlayStateChange) {
-            settingsUpdatedExplicitly = true;
         }
         setShowAddedScores(newSettings.isShowAddedScores());
         setShowCompetitorSailId(newSettings.isShowCompetitorSailIdColumn());
@@ -1787,7 +1768,6 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         this.initialCompetitorFilterHasBeenApplied = !autoApplyTopNFilter;
         this.showCompetitorFilterStatus = showCompetitorFilterStatus;
         overallDetailColumnMap = createOverallDetailColumnMap();
-        settingsUpdatedExplicitly = !settings.isUpdateUponPlayStateChange();
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
         this.leaderboardUpdateListener = new ArrayList<LeaderboardUpdateListener>();
         if (settings.getLegDetailsToShow() != null) {
@@ -3102,28 +3082,10 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
 
     @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
-        currentlyHandlingPlayStateChange = true;
-        
         if(!isEmbedded) {
             playPause.setHTML(getPlayPauseImgHtml(playState));
             playPause.setTitle(playState == PlayStates.Playing ? stringMessages.pauseAutomaticRefresh() : stringMessages.autoRefresh());
         }
-        if (!settingsUpdatedExplicitly && playMode != oldPlayMode) {
-            // if settings weren't explicitly modified, auto-switch to live mode settings and sort for
-            // any pre-selected race; we need to copy the previously selected race columns to the new RaceColumnSelection
-            LeaderboardSettings defaultLeaderboardSettingsForPlayMode = LeaderboardSettingsFactory.getInstance().createNewSettingsForPlayMode(
-                    playMode,
-                    /* don't touch columnToSort if no race was pre-selected */ preSelectedRace == null ? null
-                            : preSelectedRace.getRaceName(),
-                    /* don't change nameOfRaceColumnToShow */null,
-                    /* set nameOfRaceToShow if race was pre-selected */preSelectedRace == null ? null : preSelectedRace
-                            .getRaceName(), getRaceColumnSelection(), true,
-                            /* take into account state of competitor columns*/isShowCompetitorSailId(), isShowCompetitorFullName());
-            currentSettings = LeaderboardSettingsFactory.getInstance().overrideDefaultValuesWithNewDefaults(currentSettings, defaultLeaderboardSettingsForPlayMode);
-            updateSettings(currentSettings);
-        }
-        currentlyHandlingPlayStateChange = false;
-        oldPlayMode = playMode;
     }
 
     @Override

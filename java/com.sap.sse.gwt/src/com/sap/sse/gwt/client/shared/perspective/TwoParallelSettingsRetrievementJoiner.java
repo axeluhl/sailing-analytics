@@ -2,12 +2,12 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.Settings;
 
-public abstract class TwoParallelSettingsRetrievementJoiner<PS1 extends Settings, PS2 extends Settings> extends CallbacksJoinerHelper<PerspectiveCompositeSettings<PS1>, PerspectiveCompositeSettings<PS2>> {
+public abstract class TwoParallelSettingsRetrievementJoiner<S1 extends Settings, S2 extends Settings> extends CallbacksJoinerHelper<S1, S2> {
     
-    private final AbstractComponentContextWithSettingsStorage<?, PS1> context1;
-    private final AbstractComponentContextWithSettingsStorage<?, PS2> context2;
+    private final AbstractComponentContextWithSettingsStorage<?, S1> context1;
+    private final AbstractComponentContextWithSettingsStorage<?, S2> context2;
     
-    public TwoParallelSettingsRetrievementJoiner(AbstractComponentContextWithSettingsStorage<?, PS1> context1, AbstractComponentContextWithSettingsStorage<?, PS2> context2) {
+    public TwoParallelSettingsRetrievementJoiner(AbstractComponentContextWithSettingsStorage<?, S1> context1, AbstractComponentContextWithSettingsStorage<?, S2> context2) {
         this.context1 = context1;
         this.context2 = context2;
     }
@@ -20,31 +20,31 @@ public abstract class TwoParallelSettingsRetrievementJoiner<PS1 extends Settings
 
     public void startSettingsRetrievementAndJoinAsyncCallback() {
         
-        context1.initDefaultSettings(new DefaultSettingsLoadedCallback<PS1>() {
+        context1.initDefaultSettings(new DefaultSettingsLoadedCallback<S1>() {
 
             @Override
-            public void onError(Throwable caught, PerspectiveCompositeSettings<PS1> fallbackDefaultSettings) {
+            public void onError(Throwable caught, S1 fallbackDefaultSettings) {
                 receiveFirstCallbackResult(fallbackDefaultSettings);
                 processIfFinished();
             }
 
             @Override
-            public void onSuccess(PerspectiveCompositeSettings<PS1> defaultSettings) {
+            public void onSuccess(S1 defaultSettings) {
                 receiveFirstCallbackResult(defaultSettings);
                 processIfFinished();
             }
         });
         
-        context2.initDefaultSettings(new DefaultSettingsLoadedCallback<PS2>() {
+        context2.initDefaultSettings(new DefaultSettingsLoadedCallback<S2>() {
 
             @Override
-            public void onError(Throwable caught, PerspectiveCompositeSettings<PS2> fallbackDefaultSettings) {
+            public void onError(Throwable caught, S2 fallbackDefaultSettings) {
                 receiveSecondCallbackResult(fallbackDefaultSettings);
                 processIfFinished();
             }
 
             @Override
-            public void onSuccess(PerspectiveCompositeSettings<PS2> defaultSettings) {
+            public void onSuccess(S2 defaultSettings) {
                 receiveSecondCallbackResult(defaultSettings);
                 processIfFinished();
             }

@@ -8,36 +8,37 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public abstract class AbstractComponentContextWithSettingsStorage<PL extends PerspectiveLifecycle<PS>, PS extends Settings> extends AbstractComponentContext<PL, PS> {
+public abstract class AbstractComponentContextWithSettingsStorage<L extends ComponentLifecycle<S, ?>, S extends Settings> extends AbstractComponentContext<L, S> {
     
-    private final SettingsStorageManager<PS> settingsStorageManager;
+    private final SettingsStorageManager<S> settingsStorageManager;
     
     /**
      * Current default settings for the whole settings tree.
      */
-    private PerspectiveCompositeSettings<PS> currentDefaultSettings = null;
+    private S currentDefaultSettings = null;
     
-    public AbstractComponentContextWithSettingsStorage(PL rootPerspectiveLifecycle, SettingsStorageManager<PS> settingsStorageManager) {
-        super(rootPerspectiveLifecycle);
+    public AbstractComponentContextWithSettingsStorage(L rootLifecycle, SettingsStorageManager<S> settingsStorageManager) {
+        super(rootLifecycle);
         this.settingsStorageManager = settingsStorageManager;
     }
     
-    public void initDefaultSettings(final DefaultSettingsLoadedCallback<PS> asyncCallback) {
+    public void initDefaultSettings(final DefaultSettingsLoadedCallback<S> asyncCallback) {
         if(currentDefaultSettings != null) {
             throw new IllegalStateException("Settings have been already initialized. You may only call this method once.");
         }
-        PerspectiveCompositeSettings<PS> systemDefaultSettings = rootPerspectiveLifecycle.createDefaultSettings();
-        settingsStorageManager.retrieveDefaultSettings(systemDefaultSettings, new DefaultSettingsLoadedCallback<PS>() {
+        S systemDefaultSettings = rootLifecycle.createDefaultSettings();
+        settingsStorageManager.retrieveDefaultSettings(systemDefaultSettings, new DefaultSettingsLoadedCallback<S>() {
 
             @Override
-            public void onError(Throwable caught, PerspectiveCompositeSettings<PS> fallbackDefaultSettings) {
+            public void onError(Throwable caught, S fallbackDefaultSettings) {
                 asyncCallback.onError(caught, fallbackDefaultSettings);
             }
 
             @Override
-            public void onSuccess(PerspectiveCompositeSettings<PS> result) {
-                currentDefaultSettings = rootPerspectiveLifecycle.cloneSettings(result);
+            public void onSuccess(S result) {
+                currentDefaultSettings = rootLifecycle.cloneSettings(result);
                 asyncCallback.onSuccess(result);
             }
         });
@@ -48,36 +49,48 @@ public abstract class AbstractComponentContextWithSettingsStorage<PL extends Per
     public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings) {
         Perspective<? extends Settings> parentPerspective = component.getComponentTreeNodeInfo().getParentPerspective();
         
-        final PerspectiveCompositeSettings<PS> newRootPerspectiveSettings;
+        final S newRootSettings;
         if(parentPerspective == null) {
-            //root perspective is updating its perspective own settings
-            Perspective<PS> rootPerspective = (Perspective<PS>) component;
-            newRootPerspectiveSettings = (PerspectiveCompositeSettings<PS>)newDefaultSettings;
-            rootPerspective.getPerspectiveLifecycleWithAllSettings().setAllSettings(newRootPerspectiveSettings);
+            if(component instanceof Perspective) {
+                //root perspective is updating its perspective own settings
+                Perspective<? extends Settings> rootPerspective = (Perspective<? extends Settings>) component;
+                setPerspectiveSettingsHelper(rootPerspective, newDefaultSettings);
+                newRootSettings = (S) newDefaultSettings;
+            } else {
+                //root is a single component
+                newRootSettings = (S) newDefaultSettings;
+            }
         } else {
-            newRootPerspectiveSettings = (PerspectiveCompositeSettings<PS>) updatePerspectiveLifecycleWithAllSettings(parentPerspective, component, newDefaultSettings);
+            // propagate updated settings to parent and get root settings
+            newRootSettings = (S) propagateSettingsToRootPerspective(parentPerspective, component, newDefaultSettings);
         }
-        this.currentDefaultSettings = rootPerspectiveLifecycle.cloneSettings(newRootPerspectiveSettings);
-        storeNewDefaultSettings(newRootPerspectiveSettings);
+        this.currentDefaultSettings = rootLifecycle.cloneSettings(newRootSettings);
+        storeNewDefaultSettings(newRootSettings);
     }
     
-    private void storeNewDefaultSettings(PerspectiveCompositeSettings<PS> newRootPerspectiveSettings) {
-        PerspectiveCompositeSettings<PS> globalSettings = extractGlobalSettings(newRootPerspectiveSettings);
+    private static<PS extends Settings> void setPerspectiveSettingsHelper(Perspective<PS> perspective, Settings newPerspectiveSettings) {
+        @SuppressWarnings("unchecked")
+        PerspectiveCompositeSettings<PS> newRootSettings = (PerspectiveCompositeSettings<PS>)newPerspectiveSettings;
+        perspective.getPerspectiveLifecycleWithAllSettings().setAllSettings(newRootSettings);
+    }
+    
+    private void storeNewDefaultSettings(S newRootSettings) {
+        S globalSettings = extractGlobalSettings(newRootSettings);
         if(globalSettings != null) {
             settingsStorageManager.storeGlobalSettings(globalSettings);
         }
-        PerspectiveCompositeSettings<PS> contextSpecificSettings = extractContextSpecificSettings(newRootPerspectiveSettings);
+        S contextSpecificSettings = extractContextSpecificSettings(newRootSettings);
         if(contextSpecificSettings != null) {
             settingsStorageManager.storeContextSpecificSettings(contextSpecificSettings);
         }
     }
 
-    protected abstract PerspectiveCompositeSettings<PS> extractContextSpecificSettings(PerspectiveCompositeSettings<PS> newRootPerspectiveSettings);
+    protected abstract S extractContextSpecificSettings(S newRootSettings);
 
-    protected abstract PerspectiveCompositeSettings<PS> extractGlobalSettings(
-            PerspectiveCompositeSettings<PS> newRootPerspectiveSettings);
+    protected abstract S extractGlobalSettings(
+            S newRootSettings);
 
-    private<T extends Settings> PerspectiveCompositeSettings<?> updatePerspectiveLifecycleWithAllSettings(Perspective<T> perspective, Component<? extends Settings> replaceComponent, Settings replaceComponentNewDefaultSettings) {
+    private<T extends Settings> PerspectiveCompositeSettings<?> propagateSettingsToRootPerspective(Perspective<T> perspective, Component<? extends Settings> replaceComponent, Settings replaceComponentNewDefaultSettings) {
         PerspectiveLifecycleWithAllSettings<?,T> perspectiveLifecycleWithAllSettings = perspective.getPerspectiveLifecycleWithAllSettings();
         Map<String, Settings> originalSettingsPerComponent = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsPerComponentId();
         Map<String, Settings> newSettingsPerComponent = new HashMap<>();
@@ -96,7 +109,7 @@ public abstract class AbstractComponentContextWithSettingsStorage<PL extends Per
         
         Perspective<? extends Settings> parentPerspective = perspective.getComponentTreeNodeInfo().getParentPerspective();
         if(parentPerspective != null) {
-            return updatePerspectiveLifecycleWithAllSettings(parentPerspective, perspective, allSettings);
+            return propagateSettingsToRootPerspective(parentPerspective, perspective, allSettings);
         } else {
             return allSettings;
         }
@@ -107,11 +120,11 @@ public abstract class AbstractComponentContextWithSettingsStorage<PL extends Per
     }
     
     @Override
-    public PerspectiveCompositeSettings<PS> getDefaultSettingsForRootPerspective() {
+    public S getDefaultSettings() {
         if(currentDefaultSettings == null) {
             throw new IllegalStateException("Settings have not been initialized yet.");
         }
-        return rootPerspectiveLifecycle.cloneSettings(currentDefaultSettings);
+        return rootLifecycle.cloneSettings(currentDefaultSettings);
     }
     
     @Override

@@ -3,12 +3,12 @@ package com.sap.sse.gwt.client.shared.perspective;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 
-public class AsyncCallbackWithSettingsRetrievementJoiner<T, PS extends Settings> extends CallbacksJoinerHelper<T, PerspectiveCompositeSettings<PS>> implements AsyncCallback<T> {
+public class AsyncCallbackWithSettingsRetrievementJoiner<T, S extends Settings> extends CallbacksJoinerHelper<T, S> implements AsyncCallback<T> {
     
     private final AsyncCallback<T> wrappedCallback;
-    private final AbstractComponentContextWithSettingsStorage<?, PS> context;
+    private final AbstractComponentContextWithSettingsStorage<?, S> context;
     
-    public AsyncCallbackWithSettingsRetrievementJoiner(AbstractComponentContextWithSettingsStorage<?, PS> context, AsyncCallback<T> callbackToWrap) {
+    public AsyncCallbackWithSettingsRetrievementJoiner(AbstractComponentContextWithSettingsStorage<?, S> context, AsyncCallback<T> callbackToWrap) {
         this.wrappedCallback = callbackToWrap;
         this.context = context;
     }
@@ -37,16 +37,16 @@ public class AsyncCallbackWithSettingsRetrievementJoiner<T, PS extends Settings>
 
     public void startSettingsRetrievementAndJoinAsyncCallback() {
         
-        context.initDefaultSettings(new DefaultSettingsLoadedCallback<PS>() {
+        context.initDefaultSettings(new DefaultSettingsLoadedCallback<S>() {
 
             @Override
-            public void onError(Throwable caught, PerspectiveCompositeSettings<PS> fallbackDefaultSettings) {
+            public void onError(Throwable caught, S fallbackDefaultSettings) {
                 receiveSecondCallbackResult(fallbackDefaultSettings);
                 processIfFinished();
             }
 
             @Override
-            public void onSuccess(PerspectiveCompositeSettings<PS> defaultSettings) {
+            public void onSuccess(S defaultSettings) {
                 receiveSecondCallbackResult(defaultSettings);
                 processIfFinished();
             }

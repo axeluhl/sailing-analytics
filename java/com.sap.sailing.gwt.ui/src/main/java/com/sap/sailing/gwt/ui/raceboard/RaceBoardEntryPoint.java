@@ -105,7 +105,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         }
         final RaceBoardComponentContext context = new RaceBoardComponentContext(getUserService(), componentContextGlobalDefinition, new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE), regattaName, raceName, leaderboardName, leaderboardGroupName, eventId);
         
-        AsyncCallbackWithSettingsRetrievementJoiner<RaceboardDataDTO,RaceBoardPerspectiveSettings> asyncCallbackJoiner = ComponentContextInitialisationUtils.createSettingsRetrievementWithAsyncCallbackJoiner(context, new AsyncCallback<RaceboardDataDTO>() {
+        AsyncCallbackWithSettingsRetrievementJoiner<RaceboardDataDTO, PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> asyncCallbackJoiner = ComponentContextInitialisationUtils.wrapAsyncCallbak(context, new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO raceboardData) {
                 if (!raceboardData.isValidLeaderboard()) {
@@ -163,9 +163,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
   
-        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveCompositeSettings = context.getDefaultSettingsForRootPerspective();
+        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveCompositeSettings = context.getDefaultSettings();
         
-        PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(context.getRootPerspectiveLifecycle(),
+        PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(context.getRootLifecycle(),
                 perspectiveCompositeSettings);
 
         RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(context, raceboardPerspectiveLifecyclesAndSettings,

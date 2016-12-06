@@ -12,21 +12,21 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class RaceBoardComponentContext
-        extends AbstractComponentContextWithSettingsStorage<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> {
+        extends AbstractComponentContextWithSettingsStorage<RaceBoardPerspectiveLifecycle, PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> {
 
     public RaceBoardComponentContext(UserService userService, String entryPointId, RaceBoardPerspectiveLifecycle raceBoardPerspectiveLifecycle,
             String regattaName, String raceName, String leaderboardName, String leaderboardGroupName, UUID eventId) {
-        super(raceBoardPerspectiveLifecycle, new UserSettingsStorageManager<RaceBoardPerspectiveSettings>(userService, entryPointId + "." + raceBoardPerspectiveLifecycle.getComponentId(), regattaName, raceName, leaderboardName, leaderboardGroupName,
+        super(raceBoardPerspectiveLifecycle, new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>(userService, entryPointId + "." + raceBoardPerspectiveLifecycle.getComponentId(), regattaName, raceName, leaderboardName, leaderboardGroupName,
                 eventId == null ? null : eventId.toString()));
     }
 
     @Override
     protected PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> extractContextSpecificSettings(
             PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> newRootPerspectiveSettings) {
-        String leaderboardComponentId = rootPerspectiveLifecycle.getLeaderboardPanelLifecycle().getComponentId();
+        String leaderboardComponentId = rootLifecycle.getLeaderboardPanelLifecycle().getComponentId();
         LeaderboardSettings leaderboardSettings = (LeaderboardSettings) newRootPerspectiveSettings
                 .getSettingsPerComponentId().get(leaderboardComponentId);
-        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> defaultSettings = rootPerspectiveLifecycle
+        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> defaultSettings = rootLifecycle
                 .createDefaultSettings();
         LeaderboardSettings defaultLeaderboardSettings = leaderboardSettings.getDefaultSettings();
         LeaderboardSettings contextSpecificLeaderboardSettings = new LeaderboardSettings(
@@ -45,7 +45,7 @@ public class RaceBoardComponentContext
                 defaultLeaderboardSettings.isShowCompetitorFullNameColumn());
         contextSpecificLeaderboardSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(leaderboardSettings, contextSpecificLeaderboardSettings);
         
-        Map<String, Settings> clonedComponentIdsAndSettings = rootPerspectiveLifecycle.cloneComponentIdsAndSettings(defaultSettings);
+        Map<String, Settings> clonedComponentIdsAndSettings = rootLifecycle.cloneComponentIdsAndSettings(defaultSettings);
         clonedComponentIdsAndSettings.put(leaderboardComponentId, contextSpecificLeaderboardSettings);
         return new PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>(defaultSettings.getPerspectiveOwnSettings(), clonedComponentIdsAndSettings);
     }
@@ -53,7 +53,7 @@ public class RaceBoardComponentContext
     @Override
     protected PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> extractGlobalSettings(
             PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> newRootPerspectiveSettings) {
-        String leaderboardComponentId = rootPerspectiveLifecycle.getLeaderboardPanelLifecycle().getComponentId();
+        String leaderboardComponentId = rootLifecycle.getLeaderboardPanelLifecycle().getComponentId();
         LeaderboardSettings currentLeaderboardSettings = (LeaderboardSettings) newRootPerspectiveSettings.getSettingsPerComponentId()
                 .get(leaderboardComponentId);
         LeaderboardSettings defaultLeaderboardSettings = currentLeaderboardSettings.getDefaultSettings();
@@ -73,7 +73,7 @@ public class RaceBoardComponentContext
                 currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
                 currentLeaderboardSettings.isShowCompetitorFullNameColumn());
         globalLeaderboardSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(currentLeaderboardSettings, globalLeaderboardSettings);
-        Map<String, Settings> clonedComponentIdsAndSettings = rootPerspectiveLifecycle.cloneComponentIdsAndSettings(newRootPerspectiveSettings);
+        Map<String, Settings> clonedComponentIdsAndSettings = rootLifecycle.cloneComponentIdsAndSettings(newRootPerspectiveSettings);
         clonedComponentIdsAndSettings.put(leaderboardComponentId, globalLeaderboardSettings);
         return new PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>(newRootPerspectiveSettings.getPerspectiveOwnSettings(), clonedComponentIdsAndSettings);
     }

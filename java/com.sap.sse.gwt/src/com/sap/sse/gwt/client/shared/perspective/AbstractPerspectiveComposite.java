@@ -42,7 +42,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
         return perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(perspectiveSettings);
     }
 
-    public AbstractPerspectiveComposite(AbstractComponentContext<PL, PS> componentContext, PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings) {
+    public AbstractPerspectiveComposite(AbstractComponentContext<PL, PerspectiveCompositeSettings<PS>> componentContext, PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings) {
         this.perspectiveLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle();
         this.perspectiveOwnSettings = perspectiveLifecycleWithAllSettings.getPerspectiveSettings();
         this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;

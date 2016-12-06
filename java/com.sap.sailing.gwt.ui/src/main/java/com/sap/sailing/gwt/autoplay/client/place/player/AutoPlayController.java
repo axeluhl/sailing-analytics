@@ -103,7 +103,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
         if (activeTvView != AutoPlayModes.Leaderboard) {
             
             if(leaderboardPerspectiveLifecycleWithAllSettings == null) {
-                leaderboardPerspectiveLifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(leaderboardWithHeaderContext.getRootPerspectiveLifecycle(), leaderboardWithHeaderContext.getDefaultSettingsForRootPerspective());
+                leaderboardPerspectiveLifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(leaderboardWithHeaderContext.getRootLifecycle(), leaderboardWithHeaderContext.getDefaultSettings());
             }
             
             playerView.clearContent();
@@ -132,7 +132,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                 public void onSuccess(RaceboardDataDTO result) {
                     
                     if(raceboardPerspectiveLifecycleWithAllSettings == null) {
-                        raceboardPerspectiveLifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(raceBoardContext.getRootPerspectiveLifecycle(), raceBoardContext.getDefaultSettingsForRootPerspective());
+                        raceboardPerspectiveLifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(raceBoardContext.getRootLifecycle(), raceBoardContext.getDefaultSettings());
                     }
                     
                     playerView.clearContent();
