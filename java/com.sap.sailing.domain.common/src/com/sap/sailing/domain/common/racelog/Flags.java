@@ -52,6 +52,17 @@ public enum Flags {
         return validValues.toArray(new Flags[validValues.size()]);
     }
     
+    private static Set<Flags> startModeFlags;
+    
+    static {
+        startModeFlags = new HashSet<>();
+        for (final Flags flag : Flags.values()) {
+            if (flag.isStartModeFlag()) {
+                startModeFlags.add(flag);
+            }
+        }
+    }
+    
     private Flags(boolean isStartModeFlag) {
         this.isStartModeFlag = isStartModeFlag;
     }
@@ -65,6 +76,4 @@ public enum Flags {
     }
     
     private final boolean isStartModeFlag;
-    
-    private static Set<Flags> startModeFlags = new HashSet<>();
 }
