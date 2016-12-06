@@ -7,6 +7,7 @@
         .iconGPS, .iconWind, .iconVideo, .iconAudio{
             line-height: 1.5em;
             position: relative;
+            height:1.666666666666667rem;
             display: inline-block;
             padding-left: 2.333333333333333em;
             background-size: 1.666666666666667rem 1.666666666666667rem;
@@ -32,7 +33,7 @@
             padding-top: 0.277777777777778em;
         }
         .legend{
-            padding: 0.5em;
+            padding: .2em;
             border-radius: .277777777777778em;
             width:100%;
             background-color:white;
@@ -67,11 +68,15 @@
             <table>
                 <tr>
                     <td><div ui:field="iconGPS" class="{style.iconGPS}"/></td>
+                    <td><div ui:field="txtGPS"/></td>
                     <td><div ui:field="iconWind" class="{style.iconWind}"/></td>
+                    <td><div ui:field="txtWind"/></td>
                 </tr>
                 <tr>
                     <td><div ui:field="iconVideo" class="{style.iconVideo}"/></td>
+                    <td><div ui:field="txtVideo"/></td>
                     <td><div ui:field="iconAudio" class="{style.iconAudio}"/></td>
+                    <td><div ui:field="txtAudio"/></td>
                </tr>
             </table>
     </g:HTMLPanel>

@@ -16,6 +16,15 @@ public class RegattaHeaderLegendPopup extends PopupPanel {
     }
 
     @UiField
+    DivElement txtGPS;
+    @UiField
+    DivElement txtWind;
+    @UiField
+    DivElement txtVideo;
+    @UiField
+    DivElement txtAudio;
+
+    @UiField
     DivElement iconGPS;
     @UiField
     DivElement iconWind;
@@ -28,14 +37,19 @@ public class RegattaHeaderLegendPopup extends PopupPanel {
         super(true);
         setWidget(uiBinder.createAndBindUi(this));
 
-        iconGPS.setInnerText(
+        txtGPS.setInnerText(
                 raceDataInfo.hasGPSData() ? StringMessages.INSTANCE.eventRegattaHeaderLegendGps()
                         : StringMessages.INSTANCE.eventRegattaHeaderLegendGpsNo());
-        iconWind.setInnerText(raceDataInfo.hasWindData() ? StringMessages.INSTANCE.eventRegattaHeaderLegendWind()
+        txtWind.setInnerText(raceDataInfo.hasWindData() ? StringMessages.INSTANCE.eventRegattaHeaderLegendWind()
                 : StringMessages.INSTANCE.eventRegattaHeaderLegendWindNo());
-        iconVideo.setInnerText(raceDataInfo.hasVideoData() ? StringMessages.INSTANCE.eventRegattaHeaderLegendVideo()
+        txtVideo.setInnerText(raceDataInfo.hasVideoData() ? StringMessages.INSTANCE.eventRegattaHeaderLegendVideo()
                 : StringMessages.INSTANCE.eventRegattaHeaderLegendVideoNo());
-        iconAudio.setInnerText(raceDataInfo.hasAudioData() ? StringMessages.INSTANCE.eventRegattaHeaderLegendAudio()
+        txtAudio.setInnerText(raceDataInfo.hasAudioData() ? StringMessages.INSTANCE.eventRegattaHeaderLegendAudio()
                 : StringMessages.INSTANCE.eventRegattaHeaderLegendAudioNo());
+
+        iconGPS.getStyle().setOpacity(raceDataInfo.hasGPSData() ? 1.0 : 0.15);
+        iconWind.getStyle().setOpacity(raceDataInfo.hasWindData() ? 1.0 : 0.15);
+        iconVideo.getStyle().setOpacity(raceDataInfo.hasVideoData() ? 1.0 : 0.15);
+        iconAudio.getStyle().setOpacity(raceDataInfo.hasAudioData() ? 1.0 : 0.15);
     }
 }
