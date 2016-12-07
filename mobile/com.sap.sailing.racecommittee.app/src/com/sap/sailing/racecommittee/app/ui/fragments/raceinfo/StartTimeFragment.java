@@ -515,6 +515,7 @@ public class StartTimeFragment extends BaseFragment
                 minutes = (int) (Math.ceil((minutes / 5.0)) * 5.0);
                 if (minutes >= 60) {
                     hours++;
+                    minutes = 0;
                 }
             }
             mTimePicker.setCurrentHour(hours);
