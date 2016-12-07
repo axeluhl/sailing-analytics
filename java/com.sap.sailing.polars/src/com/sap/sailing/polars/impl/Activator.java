@@ -38,7 +38,7 @@ public class Activator implements BundleActivator {
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, service.getId().toString());
         registrations.add(context.registerService(Replicable.class.getName(), service, replicableServiceProperties));
         
-        String polarDataSourceURL = System.getProperty(POLAR_DATA_SOURCE_URL_PROPERTY_NAME);
+        final String polarDataSourceURL = System.getProperty(POLAR_DATA_SOURCE_URL_PROPERTY_NAME);
         if (polarDataSourceURL != null && !polarDataSourceURL.isEmpty()) {
             waitForRacingEventServiceToObtainDomainFactory(polarDataSourceURL, service);
         }

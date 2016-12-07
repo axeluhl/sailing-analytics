@@ -20,20 +20,19 @@ import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 public class PolarDataResourceTest {
 
     private static final double[] SPEED_FUNCTIONS_COEFFS_DOWNWIND = 
-            new double[]{ 0, 0.1740513714125882, 0.07943929197949728, -0.00455702903757782 };
+            new double[]{ 0, 2.2378615205516326, -0.0801870828343283, 9.81959605693472E-4 };
     private static final double[] ANGLE_FUNCTION_COEFFS_DOWNWIND = 
-            new double[]{ 172.54379549250007, -3.369846070650965, 0.6635660994215868, -0.03653517733437184 };
-    private static final String BOAT_CLASS = "Laser Radial";
+            new double[]{ 138.3296034098894, -5.908558698662091, 1.1870404653964215, -0.056603488833331994 };
+    private static final String BOAT_CLASS = "GC32";
 
     private PolarDataServiceImpl polarDataService;
     private SharedDomainFactory sharedDomainFactory;
 
     @Before
-    public void setUp() throws IOException, ParseException {
+    public void setUp() throws IOException, ParseException, ClassNotFoundException, InterruptedException {
         polarDataService = new PolarDataServiceImpl();
         sharedDomainFactory = new SharedDomainFactoryImpl(/* raceLogResolver */ null);
-        
-        PolarDataClientMock client = new PolarDataClientMock(new File("resources/polar_data.json"), polarDataService, sharedDomainFactory);
+        PolarDataClientMock client = new PolarDataClientMock(new File("resources/polar_data"), polarDataService, sharedDomainFactory);
         client.updatePolarDataRegressions();
     }
 
@@ -49,9 +48,9 @@ public class PolarDataResourceTest {
         PolynomialFunction angleDownwindFunction = new PolynomialFunction(ANGLE_FUNCTION_COEFFS_DOWNWIND);
         PolynomialFunction speedDownwindFunction = new PolynomialFunction(SPEED_FUNCTIONS_COEFFS_DOWNWIND);
 
-        assertThat(polarDataService.getSpeedRegressionsPerAngle().size(), is(32));
-        assertThat(polarDataService.getCubicRegressionsPerCourse().size(), is(2));
-        assertThat(polarDataService.getFixCointPerBoatClass().get(boatClass), is(62117L));
+        assertThat(polarDataService.getSpeedRegressionsPerAngle().size(), is(68));
+        assertThat(polarDataService.getCubicRegressionsPerCourse().size(), is(4));
+        assertThat(polarDataService.getFixCointPerBoatClass().get(boatClass), is(9330L));
         // presuming that if downwind functions & regression collections' size are correct then any other thing is
         // imported correctly
         assertThat(polarDataService.getAngleRegressionFunction(boatClass, LegType.DOWNWIND), is(angleDownwindFunction));

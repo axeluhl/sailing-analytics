@@ -1,11 +1,10 @@
 package com.sap.sailing.polars.jaxrs.api.test;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.SharedDomainFactory;
@@ -23,8 +22,8 @@ public class PolarDataClientMock extends PolarDataClient {
     }
 
     @Override
-    protected JSONObject getJsonFromResponse() throws IOException, ParseException {
-        return (JSONObject) new JSONParser().parse(new FileReader(file));
+    protected InputStream getContentFromResponse() throws IOException, ParseException {
+        return new FileInputStream(file);
     }
 
 }
