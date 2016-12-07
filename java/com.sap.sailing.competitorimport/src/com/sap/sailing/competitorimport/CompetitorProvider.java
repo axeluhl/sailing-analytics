@@ -24,7 +24,7 @@ import com.sap.sse.common.Named;
  * @author Axel Uhl (d043530)
  *
  */
-public interface CompetitorProvider extends Named{
+public interface CompetitorProvider extends Named {
     /**
      * @return keys are event names, values are the names of the regatta in the event for which the connector has
      *         competitor names. Should the value for a key be <code>null</code>, competitors for the event may still

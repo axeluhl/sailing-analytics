@@ -57,6 +57,8 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
         when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test.json.txt")));
         final CompetitorProvider competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry) {
+            private static final long serialVersionUID = 6450491595924905L;
+
             @Override
             protected CompetitorDocumentProvider getDocumentProvider() {
                 return new CompetitorDocumentProvider(this) {
@@ -79,6 +81,8 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
         ResultUrlRegistry resultUrlRegistry = mock(ResultUrlRegistry.class);
         when(resultUrlRegistry.getResultUrls(AbstractManage2SailProvider.NAME)).thenReturn(Arrays.asList(getClass().getClassLoader().getResource("VSaW_420_Test_EmptyDivision.json.txt")));
         final CompetitorProvider competitorImporter = new CompetitorImporter(ParserFactory.INSTANCE, resultUrlRegistry) {
+            private static final long serialVersionUID = -7647297718831584969L;
+
             @Override
             protected CompetitorDocumentProvider getDocumentProvider() {
                 return new CompetitorDocumentProvider(this) {

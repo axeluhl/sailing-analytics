@@ -31,6 +31,7 @@ import com.sap.sailing.xrr.schema.SeriesResult;
 import com.sap.sailing.xrr.schema.Team;
 
 public class CompetitorImporter extends AbstractManage2SailProvider implements CompetitorProvider {
+    private static final long serialVersionUID = 7389956404604333931L;
     private final CompetitorDocumentProvider documentProvider;
 
     public CompetitorImporter(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
