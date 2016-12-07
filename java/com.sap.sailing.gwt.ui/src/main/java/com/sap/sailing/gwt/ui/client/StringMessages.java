@@ -205,7 +205,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String mark();
     String otherManeuver();
     String douglasPeuckerPoints();
-    String filterRacesByName();
+    String filterRaces();
+    String filterByNameOrBoatClass();
+    String filterByRegatta();
     String filterMediaByName();
     String actionEdit();
     String actionEditScores();
@@ -809,6 +811,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showingDetailsOfRace(String raceName);
     String startAt();
     String finishAt();
+    String protestStartsAt();
     String protestEndsAt();
     String unknown();
     String raceLog();
@@ -985,6 +988,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String activateIndividualRecall();
     String activateResultEntry();
     String rrs26Start();
+    String sailingWorldCupStart();
     String setConfiguration();
     String classFlag();
     String classFlagHelpText(String procedure);
@@ -1181,6 +1185,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
+    String windChartLoading();
     String mediaNoVideosCaption();
     String mediaShowVideoCaption();
     String mediaShowVideoTooltip(String title);
@@ -1330,6 +1335,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     
     String fixedMarkPassing();
     String suppressedMarkPassing();
+    String warningSettingFixedPassing(String waypoint);
     String windUp();
     String currentFilterSelection();
     String notCapableOfGeneratingACodeForIdentifier();

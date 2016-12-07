@@ -49,9 +49,11 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -95,9 +97,9 @@ public class SensorFixStoreAndLoadTest {
     private static final long FIX_TIMESTAMP2 = 120;
     private static final long FIX_TIMESTAMP3 = 210;
     private static final long AFTER_LAST_FIX = FIX_TIMESTAMP3 + 1;
-    private static final double FIX_RIDE_HEIGHT = 1337.0;
-    private static final double FIX_RIDE_HEIGHT2 = 1338.0;
-    private static final double FIX_RIDE_HEIGHT3 = 1336.0;
+    private static final Distance FIX_RIDE_HEIGHT = new MeterDistance(1337.0);
+    private static final Distance FIX_RIDE_HEIGHT2 = new MeterDistance(1338.0);
+    private static final Distance FIX_RIDE_HEIGHT3 = new MeterDistance(1336.0);
     private static final double FIX_TEST_VALUE = 12.0;
     protected final MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
@@ -384,20 +386,14 @@ public class SensorFixStoreAndLoadTest {
     public void testBravoFixIsCorrectlyWrapped() throws InterruptedException {
         regattaLog.add(new RegattaLogDeviceCompetitorBravoMappingEventImpl(new MillisecondsTimePoint(3), author, comp,
                 device, new MillisecondsTimePoint(START_OF_TRACKING), new MillisecondsTimePoint(MID_OF_TRACKING)));
-
         addBravoFixes();
-
         FixLoaderAndTracker fixLoaderAndTracker = createFixLoaderAndTracker();
-
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         trackedRace.waitForLoadingToFinish();
-
         BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(comp, BravoFixTrack.TRACK_NAME);
         assertEquals(FIX_RIDE_HEIGHT,
                 bravoFixTrack.getFirstFixAtOrAfter(new MillisecondsTimePoint(FIX_TIMESTAMP)).getRideHeight());
-
         fixLoaderAndTracker.stop(true);
     }
     
@@ -482,9 +478,9 @@ public class SensorFixStoreAndLoadTest {
     }
 
     private void addBravoFixes() {
-        store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP, FIX_RIDE_HEIGHT));
-        store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2));
-        store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP3, FIX_RIDE_HEIGHT3));
+        store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP, FIX_RIDE_HEIGHT.getMeters()));
+        store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2.getMeters()));
+        store.storeFix(device, createBravoDoubleVectorFixWithRideHeight(FIX_TIMESTAMP3, FIX_RIDE_HEIGHT3.getMeters()));
     }
 
     private FixLoaderAndTracker createFixLoaderAndTracker() {
