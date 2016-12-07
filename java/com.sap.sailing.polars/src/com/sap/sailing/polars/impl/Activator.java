@@ -12,6 +12,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.polars.ReplicablePolarService;
 import com.sap.sailing.polars.jaxrs.client.PolarDataClient;
 import com.sap.sse.replication.Replicable;
 
@@ -49,13 +50,14 @@ public class Activator implements BundleActivator {
      * runs the polar data import from the given URL. The domain factory is required to resolve boat classes during
      * de-serialization.
      */
-    private void waitForRacingEventServiceToObtainDomainFactory(final String polarDataSourceURL, final PolarDataServiceImpl polarService) {
+    private void waitForRacingEventServiceToObtainDomainFactory(final String polarDataSourceURL, final ReplicablePolarService polarService) {
         final Thread t = new Thread(()->{
                 try {
                     Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // ensure that classpath:... Shiro ini files are resolved properly
                     logger.info("Waiting for domain factory to be registered with PolarService...");
+                    // Note: although the domainFactory parameter isn't used, using runWithDomainFactory ensures that the domain factory is there
                     polarService.runWithDomainFactory(domainFactory -> { 
-                        PolarDataClient polarDataClient = new PolarDataClient(polarDataSourceURL, polarService, domainFactory);
+                        PolarDataClient polarDataClient = new PolarDataClient(polarDataSourceURL, polarService);
                         try {
                             polarDataClient.updatePolarDataRegressions();
                         } catch (Exception e) {

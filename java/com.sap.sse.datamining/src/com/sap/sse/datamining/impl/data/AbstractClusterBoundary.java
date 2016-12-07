@@ -22,7 +22,7 @@ public abstract class AbstractClusterBoundary<ElementType extends Serializable> 
 
     protected abstract int compare(ElementType value);
     
-    public ElementType getBoundaryValue() {
+    protected ElementType getBoundaryValue() {
         return boundaryValue;
     }
 

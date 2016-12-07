@@ -12,9 +12,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
 import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.polars.PolarDataOperation;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 import com.sap.sailing.polars.mining.PolarDataMiner;
+import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
 /**
  * This class is used to replicate polar data regressions calculation from the remote server using Apache
@@ -30,18 +32,18 @@ public class PolarDataClient {
 
     private static final String RESOURCE = "polars/api/polar_data";
 
-    private final PolarDataServiceImpl polarDataServiceImpl;
+    private final ReplicableWithObjectInputStream<? extends PolarDataService, PolarDataOperation<?>> polarDataServiceImpl;
     private final String polarDataSourceURL;
     
     /**
      * Default constructor is missing because we need {@link PolarDataServiceImpl} to reach regressions
      * @param polarDataSourceURL
      *            archive server URL string
-     * @param polarDataServiceImpl
+     * @param polarDataService
      *            {@link PolarDataServiceImpl} service to work with
      */
-    public PolarDataClient(String polarDataSourceURL, PolarDataServiceImpl polarDataServiceImpl, SharedDomainFactory domainFactory) {
-        this.polarDataServiceImpl = polarDataServiceImpl;
+    public PolarDataClient(String polarDataSourceURL, ReplicableWithObjectInputStream<? extends PolarDataService, PolarDataOperation<?>> polarDataService) {
+        this.polarDataServiceImpl = polarDataService;
         this.polarDataSourceURL = polarDataSourceURL;
     }
 

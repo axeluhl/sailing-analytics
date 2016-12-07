@@ -45,7 +45,7 @@ public abstract class AbstractCluster<ElementType extends Serializable> implemen
         return getBoundariesAsString();
     }
 
-    public Collection<ClusterBoundary<ElementType>> getClusterBoundaries() {
+    protected Collection<ClusterBoundary<ElementType>> getClusterBoundaries() {
         return boundaries;
     }
 

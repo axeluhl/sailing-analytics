@@ -17,7 +17,7 @@ public class PolarDataClientMock extends PolarDataClient {
 
     public PolarDataClientMock(File file, PolarDataServiceImpl polarDataServiceImpl,
             SharedDomainFactory domainFactory) {
-        super(null, polarDataServiceImpl, domainFactory);
+        super(null, polarDataServiceImpl);
         this.file = file;
     }
 

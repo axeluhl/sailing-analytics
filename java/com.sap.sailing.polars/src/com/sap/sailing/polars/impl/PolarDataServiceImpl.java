@@ -39,7 +39,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.polars.PolarDataOperation;
+import com.sap.sailing.polars.ReplicablePolarService;
 import com.sap.sailing.polars.mining.AngleAndSpeedRegression;
 import com.sap.sailing.polars.mining.BearingClusterGroup;
 import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
@@ -54,7 +54,6 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
-import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
 /**
  * Uses a custom datamining pipeline to aggregate incoming fixes in two regression based polar containers.
@@ -65,14 +64,13 @@ import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
  * @author Axel Uhl
  * 
  */
-public class PolarDataServiceImpl implements PolarDataService,
-        ReplicableWithObjectInputStream<PolarDataServiceImpl, PolarDataOperation<?>> {
+public class PolarDataServiceImpl implements ReplicablePolarService {
 
     private static final Logger logger = Logger.getLogger(PolarDataServiceImpl.class.getSimpleName());
 
     private PolarDataMiner polarDataMiner;
 
-    private final ConcurrentMap<OperationExecutionListener<PolarDataServiceImpl>, OperationExecutionListener<PolarDataServiceImpl>> operationExecutionListeners;
+    private final ConcurrentMap<OperationExecutionListener<PolarDataService>, OperationExecutionListener<PolarDataService>> operationExecutionListeners;
 
     /**
      * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not
@@ -80,7 +78,7 @@ public class PolarDataServiceImpl implements PolarDataService,
      */
     private ReplicationMasterDescriptor replicatingFromMaster;
 
-    private final Set<OperationWithResult<PolarDataServiceImpl, ?>> operationsSentToMasterForReplication;
+    private final Set<OperationWithResult<PolarDataService, ?>> operationsSentToMasterForReplication;
 
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal
             .withInitial(() -> false);
@@ -266,12 +264,12 @@ public class PolarDataServiceImpl implements PolarDataService,
     }
 
     @Override
-    public void addOperationExecutionListener(OperationExecutionListener<PolarDataServiceImpl> listener) {
+    public void addOperationExecutionListener(OperationExecutionListener<PolarDataService> listener) {
         operationExecutionListeners.put(listener, listener);
     }
 
     @Override
-    public void removeOperationExecutionListener(OperationExecutionListener<PolarDataServiceImpl> listener) {
+    public void removeOperationExecutionListener(OperationExecutionListener<PolarDataService> listener) {
         operationExecutionListeners.remove(listener);
     }
 
@@ -332,7 +330,7 @@ public class PolarDataServiceImpl implements PolarDataService,
     }
 
     @Override
-    public Iterable<OperationExecutionListener<PolarDataServiceImpl>> getOperationExecutionListeners() {
+    public Iterable<OperationExecutionListener<PolarDataService>> getOperationExecutionListeners() {
         return operationExecutionListeners.keySet();
     }
 
@@ -352,13 +350,13 @@ public class PolarDataServiceImpl implements PolarDataService,
     }
 
     @Override
-    public boolean hasSentOperationToMaster(OperationWithResult<PolarDataServiceImpl, ?> operation) {
+    public boolean hasSentOperationToMaster(OperationWithResult<PolarDataService, ?> operation) {
         return this.operationsSentToMasterForReplication.contains(operation);
     }
 
     @Override
     public void addOperationSentToMasterForReplication(
-            OperationWithResultWithIdWrapper<PolarDataServiceImpl, ?> operation) {
+            OperationWithResultWithIdWrapper<PolarDataService, ?> operation) {
         this.operationsSentToMasterForReplication.add(operation);
     }
 
