@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/header"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/selector_header_height"
+    android:background="?attr/sap_gray"
+    android:clickable="true">
+
+    <TextView
+        android:id="@+id/header_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="@dimen/side_padding"
+        android:drawableLeft="?attr/chevron_left_24dp"
+        android:gravity="center"
+        android:textAppearance="?attr/textHeader"
+        tools:text="Header Text" />
+
+    <View
+        android:id="@+id/line_top"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/header_line"
+        android:layout_gravity="bottom"
+        android:background="?attr/black" />
+</FrameLayout>

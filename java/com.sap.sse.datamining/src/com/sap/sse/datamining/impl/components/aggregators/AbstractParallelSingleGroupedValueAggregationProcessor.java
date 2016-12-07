@@ -33,11 +33,11 @@ public abstract class AbstractParallelSingleGroupedValueAggregationProcessor<Val
         if (!valueMap.containsKey(key)) {
             valueMap.put(key, value);
         } else {
-            valueMap.put(key, compareValuesAndReturnNewValue(valueMap.get(key), value));
+            valueMap.put(key, compareValuesAndReturnNewResult(valueMap.get(key), value));
         }
     }
 
-    protected abstract ValueType compareValuesAndReturnNewValue(ValueType previousValue, ValueType newValue);
+    protected abstract ValueType compareValuesAndReturnNewResult(ValueType currentResult, ValueType newValue);
 
     @Override
     protected Map<GroupKey, ValueType> getResult() {

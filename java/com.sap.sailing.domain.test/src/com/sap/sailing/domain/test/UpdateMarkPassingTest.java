@@ -22,7 +22,6 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
@@ -46,7 +45,8 @@ public class UpdateMarkPassingTest {
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(
         /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null,
-                "test", null, OneDesignRankingMetric::new)), race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE,
+                                "test", null, OneDesignRankingMetric::new)),
+                race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 
         /* delayToLiveInMillis */1000, /* millisecondsOverWhichToAverageWind */30000,
         /* millisecondsOverWhichToAverageSpeed */30000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         TimePoint now = MillisecondsTimePoint.now();

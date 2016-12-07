@@ -1,14 +1,15 @@
 package com.sap.sailing.gwt.home.shared.app;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
-import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sse.gwt.client.LinkUtil;
+import com.sap.sse.gwt.settings.UrlBuilderUtil;
 
 public class PlaceNavigation<T extends Place> {
     private final PlaceNavigator placeNavigator;
@@ -53,26 +54,25 @@ public class PlaceNavigation<T extends Place> {
     }
 
     private String buildPlaceUrl() {
-        String url = "";
         if (isRemotePlace()) {
-            url = baseUrl + "/gwt/Home.html";
-            if (!GWT.isProdMode()) {
-                url += "?gwt.codesvr=127.0.0.1:9997";
-            }
-            url += getPlaceToken();
-        } else {
-            url = getPlaceToken();
+            final UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromBaseURLAndPathWithCleanParameters(baseUrl,
+                    "/gwt/Home.html");
+            urlBuilder.setHash(getPlaceToken());
+            return urlBuilder.buildString();
         }
-        return url;
+        return getPlaceTokenWithHash();
     }
 
     public boolean isRemotePlace() {
         return isDestinationOnRemoteServer;
     }
+    
+    private String getPlaceTokenWithHash() {
+        return "#" + getPlaceToken();
+    }
 
     private String getPlaceToken() {
-        return "#" + mapper.getToken(destinationPlace);
-
+        return mapper.getToken(destinationPlace);
     }
 
     private boolean isLocationOnDefaultSapSailingServer(String urlToCheck) {
@@ -99,10 +99,15 @@ public class PlaceNavigation<T extends Place> {
             public void onBrowserEvent(Event event) {
                 if (LinkUtil.handleLinkClick(event)) {
                     event.preventDefault();
+                    event.stopPropagation();
                     goToPlace();
                 }
             }
         });
+    }
+    
+    public String getFullQualifiedUrl() {
+        return Window.Location.createUrlBuilder().setHash(getTargetUrl()).buildString();
     }
     
 }

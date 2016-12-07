@@ -55,6 +55,11 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
     }
 
     @Override
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
     public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException, IOException {
         final List<CompetitorDescriptor> result = new ArrayList<>();
         final Map<String, CompetitorDescriptor> resultsByTeamID = new HashMap<>();

@@ -39,10 +39,10 @@
      <system-property>
         <name>webdriver.firefox.bin</name>
         <!-- Default binary location on Windows: -->
-        <value>c:/Program Files (x86)/Mozilla Firefox/firefox.exe</value>
+        <value>c:\Program Files (x86)\Mozilla Firefox 24\firefox.exe</value>
         <!--  -->
         <!-- Default binary location on Linux: -->
-        <!-- <value>/usr/bin/firefox</value> -->
+        <!-- <value>/usr/bin/firefox</value> --> 
      </system-property>
   </system-properties>
   

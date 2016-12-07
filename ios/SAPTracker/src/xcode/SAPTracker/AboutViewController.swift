@@ -2,37 +2,62 @@
 //  AboutViewController.swift
 //  SAPTracker
 //
-//  Created by computing on 11/11/14.
-//  Copyright (c) 2014 com.sap.sailing. All rights reserved.
+//  Created by Raimund Wege on 04.07.16.
+//  Copyright © 2016 com.sap.sailing. All rights reserved.
 //
 
 import Foundation
 
-class AboutViewController: UIViewController, UIWebViewDelegate, UIAlertViewDelegate {
+class AboutViewController: UIViewController {
     
-    @IBOutlet weak var webView: UIWebView!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var partnershipTextView: UITextView!
+    @IBOutlet weak var licenseInformationButton: UIButton!
+    @IBOutlet weak var termsButton: UIButton!
+    @IBOutlet weak var versionTitleLabel: UILabel!
+    @IBOutlet weak var versionLabel: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        webView!.loadRequest(NSURLRequest(URL: NSURL(string: "http://sapsailing.com")!))
+        setup()
     }
     
-    @IBAction func done(sender: AnyObject) {
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        partnershipTextView.scrollRectToVisible(CGRect(x: 0, y: 0, width: 1, height: 1), animated: false)
+    }
+    
+    // MARK: - Setup
+    
+    private func setup() {
+        setupLocalization()
+        setupNavigationBar()
+        setupVersion()
+    }
+    
+    private func setupLocalization() {
+        navigationItem.title = Translation.AboutView.Title.String
+        partnershipTextView.text = Translation.AboutView.PartnershipTextView.Text.String
+        licenseInformationButton.setTitle(Translation.LicenseView.Title.String, forState: .Normal)
+        termsButton.setTitle(Translation.AboutView.TermsButton.Title.String, forState: .Normal)
+        versionTitleLabel.text = Translation.AboutView.VersionTitleLabel.Text.String
+    }
+    
+    private func setupNavigationBar() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+    }
+    
+    private func setupVersion() {
+        versionLabel.text = NSBundle.mainBundle().infoDictionary?["CFBundleVersion"] as? String ?? "-"
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func doneButtonTapped(sender: AnyObject) {
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    func webViewDidFinishLoad(webView: UIWebView) {
-        activityIndicator.stopAnimating()
+    @IBAction func termsButtonTapped(sender: AnyObject) {
+        UIApplication.sharedApplication().openURL(URLs.Terms)
     }
     
-    func wwebView(webView: UIWebView, didFailLoadWithError error: NSError) {
-        activityIndicator.hidden = true
-        let alertView = UIAlertView(title: NSLocalizedString("Couldn't load about view", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
-        alertView.show()
-    }
-    
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
-    }
 }

@@ -153,7 +153,6 @@ public class FlorianopolisMarkPassingTest extends AbstractMarkPassingTest {
      * 
      * @Test public void testRace26() throws IOException, InterruptedException, URISyntaxException { testRace(26); }
      */
-
     @Override
     protected String getExpectedEventName() {
         return "ESS Florianopolis 2013";

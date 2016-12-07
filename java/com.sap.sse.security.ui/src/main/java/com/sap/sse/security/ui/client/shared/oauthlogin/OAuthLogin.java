@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.client.shared.oauthlogin;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -62,7 +63,7 @@ public class OAuthLogin extends Composite {
 
             @Override
             public void onSuccess(String result) {
-                String authorizationUrl = result;
+                String authorizationUrl = UriUtils.fromString(result).asString();
                 GWT.log("Authorization url: " + authorizationUrl);
 
                 // clear all cookies first

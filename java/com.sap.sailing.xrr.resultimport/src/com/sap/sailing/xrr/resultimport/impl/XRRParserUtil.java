@@ -3,6 +3,7 @@ package com.sap.sailing.xrr.resultimport.impl;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import com.sap.sailing.xrr.schema.Division;
 import com.sap.sailing.xrr.schema.RegattaResults;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -32,4 +33,11 @@ public class XRRParserUtil {
         return timePoint;
     }
 
+    public static String getBoatClassName(Division division) {
+        String result = division.getIFClassID();
+        if (result == null || result.isEmpty()) {
+            result = division.getTitle();
+        }
+        return result;
+    }
 }

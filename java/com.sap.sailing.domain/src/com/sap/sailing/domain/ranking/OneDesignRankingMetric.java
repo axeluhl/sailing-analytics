@@ -88,12 +88,16 @@ public class OneDesignRankingMetric extends AbstractRankingMetric {
                             } else {
                                 // after passing the next mark, who still needs to travel about the same time that to
                                 // traveled after passing the next mark until finishing the race
-                                timeToTookToFinishRaceStartingAtNextMark =
-                                        getTrackedRace().getMarkPassing(to, whosNextMark).getTimePoint().
-                                            until(tosLegFinishingTime);
+                                final MarkPassing tosMarkPassingForWhosNextMark = getTrackedRace().getMarkPassing(to, whosNextMark);
+                                timeToTookToFinishRaceStartingAtNextMark = tosMarkPassingForWhosNextMark == null ? null :
+                                    tosMarkPassingForWhosNextMark.getTimePoint().until(tosLegFinishingTime);
                             }
-                            final TimePoint etaAtFinish = rankingInfo.getTimePoint().plus(etaNextMark.plus(timeToTookToFinishRaceStartingAtNextMark));
-                            result = tosLegFinishingTime.until(etaAtFinish);
+                            if (timeToTookToFinishRaceStartingAtNextMark == null) {
+                                result = null;
+                            } else {
+                                final TimePoint etaAtFinish = rankingInfo.getTimePoint().plus(etaNextMark.plus(timeToTookToFinishRaceStartingAtNextMark));
+                                result = tosLegFinishingTime.until(etaAtFinish);
+                            }
                         }
                     }
                 }

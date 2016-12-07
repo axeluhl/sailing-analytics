@@ -16,7 +16,7 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.domain.common,
  com.sap.sse,
  com.sap.sse.common,
- com.sap.sse.replication
-Bundle-ClassPath: lib/jdom.jar,
- .
+ com.sap.sse.replication,
+ org.jdom;bundle-version="1.1.1"
+Bundle-ClassPath: .
 Web-ContextPath: /export

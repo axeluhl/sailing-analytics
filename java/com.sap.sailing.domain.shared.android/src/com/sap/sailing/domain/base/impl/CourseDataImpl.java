@@ -17,7 +17,6 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
 
     public CourseDataImpl(String name) {
         super(name);
-        
         this.waypoints = new ArrayList<Waypoint>();
     }
 

@@ -15,7 +15,7 @@ import org.openqa.selenium.interactions.Keyboard;
 import org.openqa.selenium.interactions.Mouse;
 
 import com.sap.sailing.selenium.core.FindBy;
-import com.sap.sailing.selenium.pages.common.CSSHelper;
+import com.sap.sailing.selenium.pages.common.AttributeHelper;
 
 public class DataEntryPO extends CellTableRowPO {
     protected static final String CELL_TAG_NAME = "td"; //$NON-NLS-1$
@@ -58,7 +58,7 @@ public class DataEntryPO extends CellTableRowPO {
     }
     
     public boolean isSelected() {
-        return CSSHelper.hasCSSClass((WebElement) this.context, CellTablePO.SELECTED_ROW_CSS_CLASS);
+        return AttributeHelper.isEnabled((WebElement) this.context, CellTablePO.ARIA_ROLE_SELECTED);
     }
     
     public void select() {

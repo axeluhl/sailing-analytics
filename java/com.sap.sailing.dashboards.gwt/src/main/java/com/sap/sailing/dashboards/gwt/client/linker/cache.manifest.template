@@ -1,0 +1,14 @@
+CACHE MANIFEST
+# Unique id #$UNIQUEID$
+# Build version $BUILDVERSION$
+# Change this every time for cache to invalidate.
+# Do not delete the sections, as safari requires this file structure!!!
+
+NETWORK:
+*
+
+CACHE:
+$STATICAPPFILES$
+$GENAPPFILES$
+
+FALLBACK:

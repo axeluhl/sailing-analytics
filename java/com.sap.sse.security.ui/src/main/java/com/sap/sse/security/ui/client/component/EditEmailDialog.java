@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.client.component;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -25,8 +26,7 @@ public class EditEmailDialog extends AbstractUserDialog {
     }
 
     @Override
-    public void show() {
-        super.show();
-        getEmailBox().setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return getEmailBox();
     }
 }

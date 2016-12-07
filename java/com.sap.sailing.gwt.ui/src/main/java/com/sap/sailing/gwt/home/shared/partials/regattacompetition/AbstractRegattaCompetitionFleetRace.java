@@ -1,0 +1,122 @@
+package com.sap.sailing.gwt.home.shared.partials.regattacompetition;
+
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.shortTimeFormatter;
+import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.weekdayMonthAbbrDayDateFormatter;
+import static com.sap.sse.common.impl.MillisecondsTimePoint.now;
+
+import java.util.Date;
+
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.DateUtil;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
+import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPad;
+import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
+
+public abstract class AbstractRegattaCompetitionFleetRace extends Widget implements RegattaCompetitionRaceView {
+    
+    private static final StringMessages I18N = StringMessages.INSTANCE;
+    protected final Element mainElement;
+    private final SimpleRaceMetadataDTO race;
+    private final RegattaCompetitionPresenter presenter;
+    private final PopupPanel panel = new PopupPanel(true, false);
+
+    protected AbstractRegattaCompetitionFleetRace(final SimpleRaceMetadataDTO race,
+            RegattaCompetitionPresenter presenter) {
+        this.race = race;
+        this.presenter = presenter;
+        this.mainElement = getMainUiElement();
+        setupRaceState(race.getTrackingState(), race.getViewState());
+        getRaceNameUiElement().setInnerText(race.getRaceName());
+        setupRaceStart(race.getStart());
+        setElement(mainElement);
+        if (race.hasValidTrackingData()) {
+            sinkEvents(Event.ONCLICK);
+        }
+    }
+    
+    @Override
+    public void onBrowserEvent(Event event) {
+        // Only handle click events if valid tracking data is available
+        if (!race.hasValidTrackingData() || event.getTypeInt() != Event.ONCLICK) {
+            return; 
+        }
+
+        // If rendered as direct link button, open link in new tab directly instead of showing the menu popup
+        if (!race.isFinished() && !race.isRunning()) {
+            Window.open(presenter.getRaceViewerURL(race, RaceBoardModes.PLAYER.name()), "_blank", "");
+            return;
+        }
+        
+        // Show menu popup relative to button by ensuring it stays with the viewport
+        this.getElement().scrollIntoView();
+        panel.setWidget(new RaceviewerLaunchPad(race, panel) {
+            @Override
+            protected String getRaceViewerURL(SimpleRaceMetadataDTO data, String mode) {
+                return presenter.getRaceViewerURL(data, mode);
+            }
+        });
+        panel.setVisible(false);
+        panel.show();
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                Widget button = AbstractRegattaCompetitionFleetRace.this, panelContent = panel.getWidget();
+                int alignRight = button.getAbsoluteLeft() + button.getOffsetWidth() - panelContent.getOffsetWidth();
+                int left = (alignRight - Window.getScrollLeft() < 0 ? button.getAbsoluteLeft() - 1 : alignRight + 1);
+                int alignBottom = button.getAbsoluteTop() + button.getOffsetHeight() - panelContent.getOffsetHeight();
+                int top = (alignBottom - Window.getScrollTop() < 0 ? button.getAbsoluteTop() - 1 : alignBottom + 1);
+                panel.setPopupPosition(left, top);
+                panel.setVisible(true);
+            }
+        });
+    }
+    
+    private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {
+        boolean isUntrackedRace = trackingState != RaceTrackingState.TRACKED_VALID_DATA;
+        if (viewState == RaceViewState.RUNNING) {
+            mainElement.addClassName(getRaceLiveStyleName());
+            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.live() : I18N.actionWatch());
+        } else if (viewState == RaceViewState.FINISHED) {
+            getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.raceIsFinished() : I18N.actionAnalyze());
+        } else {
+            mainElement.addClassName(getRacePlannedStyleName());
+            if (viewState == RaceViewState.SCHEDULED) getRaceStateUiElement().setInnerText(I18N.raceIsPlanned());
+            else getRaceStateUiElement().setInnerText(viewState.getLabel());
+        }
+        setStyleName(mainElement, getRaceUntrackedStyleName(), isUntrackedRace);
+    }
+    
+    private void setupRaceStart(Date startDate) {
+        if (startDate != null) {
+            boolean showTime = DateUtil.isSameDayOfMonth(now().asDate(), startDate);
+            DateTimeFormatRenderer renderer = showTime ? shortTimeFormatter : weekdayMonthAbbrDayDateFormatter;
+            getRaceDateUiElement().setInnerText(renderer.render(startDate));
+        }
+    }
+
+    protected abstract Element getMainUiElement();
+    
+    protected abstract Element getRaceNameUiElement();
+    
+    protected abstract Element getRaceStateUiElement();
+    
+    protected abstract Element getRaceDateUiElement();
+    
+    protected abstract String getRaceLiveStyleName();
+    
+    protected abstract String getRacePlannedStyleName();
+    
+    protected abstract String getRaceUntrackedStyleName();
+    
+}

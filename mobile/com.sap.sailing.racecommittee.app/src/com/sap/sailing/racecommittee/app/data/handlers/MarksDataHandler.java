@@ -22,7 +22,7 @@ public class MarksDataHandler extends DataHandler<Collection<Mark>> {
     }
 
     @Override
-    public void onResult(Collection<Mark> data) {
+    public void onResult(Collection<Mark> data, boolean isCached) {
         manager.addMarks(data);
     }
 

@@ -7,6 +7,9 @@ import com.google.gwt.text.client.IntegerParser;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.ui.ValueBox;
 
+/**
+ * Renders integers in their box without any separators, non-localized, plain. 
+ */
 public class IntegerBox extends ValueBox<Integer> {
     private static final Renderer<Integer> RENDERER = new Renderer<Integer>() {
         public String render(Integer object) {

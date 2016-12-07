@@ -1,0 +1,129 @@
+.suggestions, .suggestionsMobile {
+  width: 100%;
+  font-size: 1rem;
+  overflow: hidden;
+}
+.suggestions {
+  border: 1px solid #dedede;
+  border-radius: 0.333333333333333em;
+}
+
+.suggestionsMobile {
+  border-top: 1px solid #dedede;
+  border-bottom: 1px solid #dedede;
+}
+
+.suggestionsHeader {
+  display: block;
+  background-color: #f2f2f2;
+  color: #333;
+  border-bottom: 1px solid #dedede;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.suggestionsHeaderTitle {
+  padding: 1.111111111111111em;
+  padding-right: 0.25em;
+  font-size: 1.2em;
+  font-weight: 700;
+  line-height: 1.333;
+  display: inline-block;
+}
+
+.suggestionsContent {
+  font-size: inherit;
+  overflow: hidden;
+}
+
+.suggestionsSettingsMenuItem, .suggestionsContentToolbar, .suggestionsSelectedItem {
+  padding: 0.333333333333333em;
+  position: relative;
+  text-align: right;
+}
+
+.suggestionsAddFilter, .suggestionsItemDescription {
+  position: absolute !important;
+  left: 0.333333333333333em;
+  right: 8.666666666666667em; 
+}
+
+.suggestionsRemoveButton {
+  padding: 0.433333333333333em 1em;
+}
+
+.suggestionsToggleButton {
+  position: absolute;
+  right: 0.333333333333333em;
+  top: 0.333333333333333em;
+  width: 2em;
+  height: 2em;
+}
+
+.suggestionsToggleButton input {
+  width: 1.333333333333333em;
+  height: 2em;
+}
+
+.suggestionsAddFilter {
+  right: 9.666666666666667em; 
+}
+
+.suggestionsRemoveButton {
+  position: relative; 
+}
+
+.suggestionsContentTable {
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: separate;
+}
+
+.suggestionsSettingsMenuItem {
+  border-bottom: 1px solid #ddd;
+} 
+
+.suggestionsSelectedItem {
+  border-top: 1px solid #ddd;
+}
+
+.suggestionsSettingsMenuItemLabel {
+  font-weight: 600;
+  padding-right: 2.666666666666667em
+}
+
+.suggestionsSettingsMenuItemLabel, .suggestionsItemDescription {
+  text-align: left;
+  line-height: 2em;
+}
+
+.suggestionsItemDescription > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestionsItemDescriptionImage, .suggestionsItemDescriptionId {
+  margin: 0 0.25em;
+}
+
+.suggestionsItemDescriptionImage {
+  background-repeat: no-repeat;
+  background-size: contain; 
+  background-position: center;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.suggestionsItemDescriptionId {
+  font-weight: 600;
+  display: inline-block;
+  min-width: 5.5em;
+}
+
+.suggestionsContentSeparator {
+  border-bottom: 1px solid #dedede;
+  background-color: #f2f2f2;
+  height: 1.333333333333333em;
+}

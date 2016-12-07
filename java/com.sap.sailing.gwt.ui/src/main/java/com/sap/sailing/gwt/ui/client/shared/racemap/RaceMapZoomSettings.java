@@ -30,23 +30,23 @@ public class RaceMapZoomSettings {
         }
     };
 
-    private Iterable<ZoomTypes> typesToConsiderOnZoom;
-    private boolean zoomToSelectedCompetitors;
+    private final List<ZoomTypes> typesToConsiderOnZoom;
+    private final boolean zoomToSelectedCompetitors;
 
     /**
-     * Creates new RaceMapZoomSettings with the {@link ZoomTypes} <code>BOATS</code> and <code>TAILS</code>.<br />
+     * Creates default RaceMapZoomSettings with the {@link ZoomTypes} <code>BUOYS</code>.<br />
      * The attribute <code>zoomToSelectedCompetitors</code> will be <code>false</code>.
      */
     public RaceMapZoomSettings() {
-        final List<ZoomTypes> myTypesToConsiderOnZoom = new ArrayList<>();
-        typesToConsiderOnZoom = myTypesToConsiderOnZoom;
+        typesToConsiderOnZoom = new ArrayList<>();
         // Other zoom types such as BOATS, TAILS or WINDSENSORS are not currently used as default zoom types.
-        myTypesToConsiderOnZoom.add(ZoomTypes.BUOYS);
+        typesToConsiderOnZoom.add(ZoomTypes.BUOYS);
         zoomToSelectedCompetitors = false;
     }
     
-    public RaceMapZoomSettings(Iterable<ZoomTypes> typesToConsiderOnZoom, boolean zoomToSelected) {
-        this.typesToConsiderOnZoom = typesToConsiderOnZoom;
+    public RaceMapZoomSettings(Iterable<ZoomTypes> typesToConsider, boolean zoomToSelected) {
+        this.typesToConsiderOnZoom = new ArrayList<>();
+        Util.addAll(typesToConsider, this.typesToConsiderOnZoom);
         this.zoomToSelectedCompetitors = zoomToSelected;
     }
 
@@ -71,16 +71,6 @@ public class RaceMapZoomSettings {
     
     public Iterable<ZoomTypes> getTypesToConsiderOnZoom() {
         return typesToConsiderOnZoom;
-    }
-    
-    public void setTypesToConsiderOnZoom(Iterable<ZoomTypes> typesToConsiderOnZoom) {
-        List<ZoomTypes> newTypesToConsiderOnZoom = new ArrayList<>();
-        Util.addAll(typesToConsiderOnZoom, newTypesToConsiderOnZoom);
-        this.typesToConsiderOnZoom = newTypesToConsiderOnZoom;
-    }
-    
-    public void setZoomToSelectedCompetitors(boolean zoomToSelectedCompetitors) {
-        this.zoomToSelectedCompetitors = zoomToSelectedCompetitors;
     }
     
     public boolean isZoomToSelectedCompetitors() {

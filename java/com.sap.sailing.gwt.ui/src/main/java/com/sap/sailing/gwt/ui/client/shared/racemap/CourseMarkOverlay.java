@@ -9,8 +9,10 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphics;
@@ -20,15 +22,14 @@ import com.sap.sse.common.Util;
  * A google map overlay based on a HTML5 canvas for drawing course marks (canvases) and the buoy zone if the mark is a buoy.
  */
 public class CourseMarkOverlay extends CanvasOverlayV3 {
-
     /**
      * The course mark to draw
      */
-    private MarkDTO mark;
+    private final MarkDTO mark;
 
     private Position position;
 
-    private double buoyZoneRadiusInMeter;
+    private Distance buoyZoneRadius;
     
     private boolean showBuoyZone;
 
@@ -43,13 +44,13 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     private Double lastScaleFactor;
     private Boolean lastShowBuoyZone;
     private Boolean lastIsSelected;
-    private Double lastBuoyZoneRadiusInMeter;
+    private Distance lastBuoyZoneRadius;
 
     public CourseMarkOverlay(MapWidget map, int zIndex, MarkDTO markDTO, CoordinateSystem coordinateSystem) {
         super(map, zIndex, coordinateSystem);
         this.mark = markDTO;
         this.position = markDTO.position;
-        this.buoyZoneRadiusInMeter = 0.0;
+        this.buoyZoneRadius = new MeterDistance(0.0);
         this.showBuoyZone = false;
         markVectorGraphics = new MarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
         markScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
@@ -73,13 +74,13 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             double buoyZoneRadiusInPixel = -1;
             if (showBuoyZone && isMarkWithBuoyZone(mark)) {
                 buoyZoneRadiusInPixel = calculateRadiusOfBoundingBoxInPixels(mapProjection, position,
-                        buoyZoneRadiusInMeter);
+                        buoyZoneRadius);
                 if (buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {
                     canvasWidth = (buoyZoneRadiusInPixel + 1) * 2;
                     canvasHeight = (buoyZoneRadiusInPixel + 1) * 2;
                 }
             }
-            if (needToDraw(showBuoyZone, isSelected, buoyZoneRadiusInMeter, canvasWidth, canvasHeight, markSizeScaleFactor)) {
+            if (needToDraw(showBuoyZone, isSelected, buoyZoneRadius, canvasWidth, canvasHeight, markSizeScaleFactor)) {
                 setCanvasSize((int) canvasWidth, (int) canvasHeight);
                 Context2d context2d = getCanvas().getContext2d();
                 // draw the course mark
@@ -96,7 +97,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
                     context2d.closePath();
                     context2d.stroke();
                 }
-                lastBuoyZoneRadiusInMeter = buoyZoneRadiusInMeter;
+                lastBuoyZoneRadius = buoyZoneRadius;
                 lastScaleFactor = markSizeScaleFactor;
                 lastShowBuoyZone = showBuoyZone;
                 lastIsSelected = isSelected;
@@ -121,10 +122,10 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
      * Compares the drawing parameters to {@link #lastLegType} and the other <code>last...</code>. If anything has
      * changed, the result is <code>true</code>.
      */
-    private boolean needToDraw(boolean showBuoyZone, boolean isSelected, double buoyZoneRadiusInMeters, double width, double height, double scaleFactor) {
+    private boolean needToDraw(boolean showBuoyZone, boolean isSelected, Distance buoyZoneRadius, double width, double height, double scaleFactor) {
         return lastShowBuoyZone == null || lastShowBuoyZone != showBuoyZone ||
                lastIsSelected == null || lastIsSelected != isSelected ||
-               lastBuoyZoneRadiusInMeter == null || lastBuoyZoneRadiusInMeter != buoyZoneRadiusInMeters ||
+               lastBuoyZoneRadius == null || !lastBuoyZoneRadius.equals(buoyZoneRadius) ||
                lastScaleFactor == null || lastScaleFactor != scaleFactor ||
                lastWidth == null || lastWidth != width ||
                lastHeight == null || lastHeight != height;
@@ -132,22 +133,18 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
 
     public Util.Pair<Double, Size> getMarkScaleAndSize(Position markPosition) {
         double minMarkHeight = 20;
-        
         // the original buoy vector graphics is too small (2.1m x 1.5m) for higher zoom levels
         // therefore we scale the buoys with factor 2 by default
         double buoyScaleFactor = 2.0;
-
         Size markSizeInPixel = calculateBoundingBox(mapProjection, markPosition,
-                markVectorGraphics.getMarkWidthInMeters() * buoyScaleFactor, markVectorGraphics.getMarkHeightInMeters() * buoyScaleFactor);
-        
+                markVectorGraphics.getMarkWidth().scale(buoyScaleFactor), markVectorGraphics.getMarkHeight().scale(buoyScaleFactor));
         double markHeightInPixel = markSizeInPixel.getHeight();
-        if(markHeightInPixel < minMarkHeight)
+        if (markHeightInPixel < minMarkHeight) {
             markHeightInPixel = minMarkHeight;
-
+        }
         // The coordinates of the canvas drawing methods are based on the 'centimeter' unit (1px = 1cm).
         // To calculate the display real mark size the scale factor from canvas units to the real   
-        double markSizeScaleFactor = markHeightInPixel / (markVectorGraphics.getMarkHeightInMeters() * 100);
-
+        double markSizeScaleFactor = markHeightInPixel / markVectorGraphics.getMarkHeight().scale(100).getMeters();
         return new Util.Pair<Double, Size>(markSizeScaleFactor, Size.newInstance(markHeightInPixel * 2.0, markHeightInPixel * 2.0));
     }
 
@@ -167,8 +164,14 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         return mark;
     }
 
-    public void setMarkPosition(Position position) {
+    public void setMarkPosition(Position position, long transitionTimeInMillis) {
+        updateTransition(transitionTimeInMillis);
         this.position = position;
+    }
+    
+    public void setMarkPosition(LatLng positionLatLng) {
+        position = coordinateSystem.getPosition(positionLatLng);
+        draw();
     }
     
     /**
@@ -186,11 +189,11 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         return coordinateSystem.toLatLng(position);
     }
 
-    public double getBuoyZoneRadiusInMeter() {
-        return buoyZoneRadiusInMeter;
+    public Distance getBuoyZoneRadius() {
+        return buoyZoneRadius;
     }
 
-    public void setBuoyZoneRadiusInMeter(double buoyZoneRadiusInMeter) {
-        this.buoyZoneRadiusInMeter = buoyZoneRadiusInMeter;
+    public void setBuoyZoneRadius(Distance buoyZoneRadius) {
+        this.buoyZoneRadius = buoyZoneRadius;
     }
 }

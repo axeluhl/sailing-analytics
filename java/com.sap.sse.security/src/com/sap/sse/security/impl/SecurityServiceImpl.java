@@ -11,11 +11,13 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,7 +64,6 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
@@ -90,10 +91,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.util.ClearStateTestSupport;
 
-public class SecurityServiceImpl extends RemoteServiceServlet implements ReplicableSecurityService, ClearStateTestSupport {
-
-    private static final long serialVersionUID = -3490163216601311858L;
-
+public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
     private CachingSecurityManager securityManager;
@@ -107,7 +105,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     
     private UserStore store;
     private final ServiceTracker<MailService, MailService> mailServiceTracker;
-    private final ConcurrentHashMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
+    private final ConcurrentMap<OperationExecutionListener<ReplicableSecurityService>, OperationExecutionListener<ReplicableSecurityService>> operationExecutionListeners;
 
     /**
      * The master from which this replicable is currently replicating, or <code>null</code> if this replicable is not currently
@@ -195,7 +193,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         if (Util.isEmpty(store.getUsers())) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
-                createSimpleUser("admin", "nobody@sapsailing.com", "admin", /* validationBaseURL */ null);
+                createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
+                        /* fullName */ null, /* company */ null, /* validationBaseURL */ null);
                 addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
             } catch (UserManagementException | MailException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
@@ -326,8 +325,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public User createSimpleUser(final String username, final String email, String password,
-            final String validationBaseURL) throws UserManagementException, MailException {
+    public User createSimpleUser(final String username, final String email, String password, String fullName,
+            String company, final String validationBaseURL) throws UserManagementException, MailException {
         if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -341,6 +340,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = store.createUser(username, email, upa);
+        result.setFullName(fullName);
+        result.setCompany(company);
         final String emailValidationSecret = result.startEmailValidation();
         // don't replicate exception handling; replicate only the effect on the user store
         apply(s->s.internalStoreUser(result));
@@ -387,6 +388,22 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
         user.passwordWasReset();
+        apply(s->s.internalStoreUser(user));
+    }
+
+    @Override
+    public void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException {
+        final User user = store.getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        updateUserProperties(user, fullName, company, locale);
+    }
+
+    private void updateUserProperties(User user, String fullName, String company, Locale locale) {
+        user.setFullName(fullName);
+        user.setCompany(company);
+        user.setLocale(locale);
         apply(s->s.internalStoreUser(user));
     }
 
@@ -471,7 +488,8 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
 
     public StringBuilder buildURL(String baseURL, Map<String, String> urlParameters) {
         StringBuilder url = new StringBuilder(baseURL);
-        boolean first = !baseURL.contains("?");
+        // Potentially contained hash is checked to support place-based mail verification
+        boolean first = !baseURL.contains("?") || baseURL.contains("#");
         for (Map.Entry<String, String> e : urlParameters.entrySet()) {
             if (first) {
                 url.append('?');
@@ -869,7 +887,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
-    public void setPreference(final String username, final String key, final String value) {
+    public Void setPreference(final String username, final String key, final String value) {
         final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             apply(s->s.internalSetPreference(username, key, value));
@@ -877,12 +895,30 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
             throw new SecurityException("User " + subject.getPrincipal().toString()
                     + " does not have permission to set preference for user " + username);
         }
+        return null;
+    }
+
+    @Override
+    public void setPreferenceObject(final String username, final String key, final Object value) {
+        final Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
+            final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
+            apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
+        } else {
+            throw new SecurityException("User " + subject.getPrincipal().toString()
+                    + " does not have permission to set preference object for user " + username);
+        }
     }
 
     @Override
     public Void internalSetPreference(final String username, final String key, final String value) {
         store.setPreference(username, key, value);
         return null;
+    }
+    
+    @Override
+    public String internalSetPreferenceObject(final String username, final String key, final Object value) {
+        return store.setPreferenceObject(username, key, value);
     }
     
     @Override
@@ -907,10 +943,24 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         store.setAccessToken(username, accessToken);
         return null;
     }
+    
+    @Override
+    public String getAccessToken(String username) {
+        return store.getAccessToken(username);
+    }
 
     @Override
-    public Void internalRemoveAccessToken(String username, String accessToken) {
-        store.removeAccessToken(username, accessToken);
+    public String getOrCreateAccessToken(String username) {
+        String result = store.getAccessToken(username);
+        if (result == null) {
+            result = createAccessToken(username);
+        }
+        return result;
+    }
+
+    @Override
+    public Void internalRemoveAccessToken(String username) {
+        store.removeAccessToken(username);
         return null;
     }
 
@@ -920,7 +970,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             return store.getPreference(username, key);
         } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
+            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
                     + " does not have permission to read preferences of user " + username);
         }
     }
@@ -941,8 +991,14 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
     
     @Override
-    public void removeAccessToken(String username, String accessToken) {
-        apply(s -> s.internalRemoveAccessToken(username, accessToken));
+    public void removeAccessToken(String username) {
+        Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
+            apply(s -> s.internalRemoveAccessToken(username));
+        } else {
+            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
+                    + " does not have permission to remove access token of user " + username);
+        }
     }
 
     // ----------------- Replication -------------

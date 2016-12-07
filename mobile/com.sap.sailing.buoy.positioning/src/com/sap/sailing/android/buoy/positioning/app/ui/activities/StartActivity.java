@@ -1,6 +1,7 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -8,8 +9,10 @@ import android.view.MenuItem;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.HomeFragment;
+import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
+import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
-import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
+import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
 public class StartActivity extends AbstractStartActivity {
@@ -20,8 +23,16 @@ public class StartActivity extends AbstractStartActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.title_activity_start));
             getSupportActionBar().setHomeButtonEnabled(false);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
         }
         replaceFragment(R.id.content_frame, new HomeFragment());
+
+        if (!EulaHelper.with(this).isEulaAccepted()) {
+            EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
+        }
     }
 
     @Override
@@ -35,15 +46,14 @@ public class StartActivity extends AbstractStartActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.about:
-            AboutDialog aboutDialog = new AboutDialog(this);
-            aboutDialog.show();
-            return true;
-        case R.id.settings:
-            startActivity(new Intent(this, SettingActivity.class));
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.about:
+                AboutHelper.showInfoActivity(this);
+                return true;
+            case R.id.settings:
+                startActivity(new Intent(this, SettingActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -57,9 +67,11 @@ public class StartActivity extends AbstractStartActivity {
         return homeFragment;
     }
 
-    public void startRegatta(String leaderboardName) {
-        Intent intent = new Intent(this, RegattaActivity.class);
-        intent.putExtra(getString(R.string.leaderboard_name), leaderboardName);
-        startActivity(intent);
+    @Override
+    public void onCheckinDataAvailable(BaseCheckinData data) {
+        if (data != null) {
+            getHomeFragment().displayUserConfirmationScreen(data);
+        }
     }
+
 }

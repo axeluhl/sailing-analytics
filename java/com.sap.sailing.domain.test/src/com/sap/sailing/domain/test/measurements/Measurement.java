@@ -1,5 +1,13 @@
 package com.sap.sailing.domain.test.measurements;
 
+/**
+ * Create an instance of this class and {@link MeasurementCase#addMeasurement(Measurement) add it} to a
+ * measurement case. The final reporting is then done by invoking {@link MeasurementXMLFile#write()} on
+ * the measurement file created before.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class Measurement {
     private final String name;
     private final double value;
@@ -10,11 +18,11 @@ public class Measurement {
         this.value = value;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public double getValue() {
+    double getValue() {
         return value;
     }
 

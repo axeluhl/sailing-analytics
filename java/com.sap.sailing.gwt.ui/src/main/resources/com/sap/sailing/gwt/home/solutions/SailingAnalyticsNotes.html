@@ -2,8 +2,192 @@
 <html>
 <body>
 <div id="mainContent">
-	<h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
-	<div class="innerContent">
+    <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
+    <div class="innerContent">
+        <h5 class="articleSubheadline">October 2016</h5>
+        <ul class="bulletList">
+           <li>An issue with live re-calculation of the maximum speed over ground (SOG) values has been fixed.
+               In some circumstances it was possible that new live data did not properly update the MaxSOG figures.
+               Since this depended on the timing of read and write access it could have led to different values
+               for different server instances, giving confusing results. The fix provided now ensures that
+               the MaxSOG values are properly evaluated when new data has arrived.  
+           </li>
+           <li>The buoy zone radius is now determined by a configurable regatta property. By default, it is
+               set to two hull lengths, and a regatta administrator may choose to change it to any other factor
+               such as 3 or 2.5. This determines the default used in the race viewer (RaceBoard.html). Users can
+               still change the radius in the map settings to any arbitrary number, deviating from what has
+               "officially" been set for the regatta.
+           </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">August 2016</h5>
+        <ul class="bulletList">
+           <li>In order to prepare user-specific configuration support in additional parts of the application,
+               various modules now require a user account to be accessed. Please sign up and log in to use their
+               full functionality as usual. The following modules are affected:
+               <ul>
+                    <li><tt>/gwt/Simulator.html</tt></li>
+                    <li><tt>/gwt/DataMining.html</tt></li>
+               </ul>  
+           </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">July 2016</h5>
+        <ul class="bulletList">
+           <li>The Wind arrow in the top left corner of the race map / player now serves as a toggle button
+               for the wind streamlet overlay which can still also be reached through the map settings.
+           </li>
+           <li>If you want to analyze a race, the navigation slightly changed. The button, which is shown for tracked
+               races won't lead you to the race board directly, but provides a small menu. There you can choose from
+               several pre-defined analysis, which will launch the race board with respective configurations:
+               <ul>
+               <li>Replay/Watch live: Launches race board in play mode starting at race start, if race is already
+                   finished (Replay) or at the actual time, if the race is currently live (Watch live)
+               </li>
+               <li>Race analysis: Shows the race results by setting the timer to the end of the race.
+                   <i>This option is only available, if the race is already finished.</i>
+               </li>
+               <li>Start analysis: Shows the race start 10 sec after start and shows the speed over ground (SOG) of
+                   the best starters within the competitor chart (zoomed to start).
+                   <i>This option is only available, if the race is already started.</i>
+               </li>
+               <li>Winning lanes: Shows the full lanes of the best competitor, if race is already finished or the of
+                   leading competitors if the race is currently live.
+               </li>
+               </ul>
+           </li>
+           <li>On the user profile page you now can maintain a list of you favorite boat classes and competitors.
+               You can also opt in for notification mails about your favorites to stay informed.
+               A requirement for notification mails to work for you is that you entered a valid mail address
+               to your user profile and verified the address by clicking the link that has been sent via email.
+           </li>
+           <li>Users now may choose their preferred language on the user profile page.
+               Currently only the mail notification mechanism will accept this setting to send mails in the preferred
+               language. This also prepares additional language sensitive feature, e.g. automatically switching the
+               website to your preferred language when logged in.
+           </li>
+           <li>The leaderboard now has a new measure value called "Ride height", which shows the ride height on
+               foils of a competitor, if respective data is available (currently ESS only). This information can
+               also be shown in the competitor chart on the RaceBaord page.
+           </li>
+           <li>To visualize multiple information at once, the competitor chart on the RaceBaord page can now be
+               configured to show two Y-axes. 
+           </li>
+        </ul>
+
+        <h5 class="articleSubheadline">May 2016</h5>
+        <ul class="bulletList">
+           <li>It is now possible to follow races on the RaceBoard, even if there's no wind data available.</li>
+        </ul>
+
+        <h5 class="articleSubheadline">April 2016</h5>
+        <ul class="bulletList">
+            <li>The <tt>/gwt/RaceBoard.html</tt> entry point now accepts an optional parameter "t" in the form
+                <tt>[[hh:]mm:]ss</tt>, for example <tt>t=12:34</tt> to place the timer so much after the race start
+                if the viewer comes up in Replay mode. You may also use just seconds, as in <tt>t=1234</tt> which
+                makes specifying a time <em>before</em> the start somewhat easier (<tt>t=-123</tt> instead of
+                <tt>t=-02:-03</tt>).
+            </li>
+        </ul>
+
+        <h5 class="articleSubheadline">February 2016</h5>
+        <ul class="bulletList">
+            <li>The website now features a user registration and authentication interface.
+                User accounts are currently used to grant special permissions to administrators and moderators.
+                New user specific features (e.g. preferences) will be available in the next couple of months.
+            </li>
+            <li>The RaceBoard URL Parameter "canReplayDuringLiveRaces" has been removed.
+                This parameter was used to allow users to trigger autoplay for live races on non-live points in time.
+                The permission "CAN_REPLAY_DURING_LIVE_RACES" and role "moderator" now grant this functionality to users.
+            </li>
+            <li>Mark positions are no longer interpolated between fixes. Instead, when a mark's track is asked for the
+                mark's position, the last known position at or before the time point requested will be used. The
+                "jumping" of marks in the UI that may otherwise be caused by this is ameliorated by introducing
+                the same CSS animation for the marks that is already used for the boats.
+            </li>
+        </ul>
+
+        <h5 class="articleSubheadline">January 2016</h5>
+        <ul class="bulletList">
+            <li>Show maneuver markers on the race board by default
+                (tacks, jibes and penalty circles) with a smaller icon, which
+                shows an info bubble when the marker is clicked. 
+                The icon turns green if the direction change is to starboard
+                and red if to port.
+            </li>
+        </ul>
+        
+        <h5 class="articleSubheadline">December 2015</h5>
+        <ul class="bulletList">
+	        <li>The advantage line is now animated and moves smoothly with the boats.
+                </li>
+		    <li>New line hover behavior in race map. When the mouse is moved onto a line, for example the start line, a transparent,
+	            wider line is activated behind it that acts as a buffer for the thin line, where the text displayed by the hover is still shown.
+	            This makes it easier to hover over the lines. These wider lines can be made semi transparent instead of transparent 
+	            by unticking the corresponding checkbox in the settings of the race map. Furthermore the stroke weight of the wider lines can be
+	            configured in the same settings dialog.
+            </li>
+		    <li>The race viewer (RaceBoard.html) now intelligently chooses a layout that suits the screen size.
+		        When only little horizontal space is available, only the sail number and nationality but not the
+		        competitor's long name is displayed by default. When vertical space is scarce, competitor and wind
+		        charts are disabled and more horizontal space can be given to the time slider at the bottom. The
+		        leaderboard section can then be scaled to smaller widths and will reduce the column widths better
+		        than in the past.
+		    </li>
+		    <li>With the changes described above, the RaceBoard is now also accessible from the races page on mobile devices.
+		    </li>
+		    <li>For overall / series leaderboards such as a national sailing league or the Extreme Sailing Series, the
+		        live status of the overall leaderboard is now indicated. As long as a live race is ongoing, the respective
+		        column in the overall leaderboard is highlighted, and a comment is displayed that indicates which regatta
+		        is currently still live.
+		    </li>
+		</ul>
+		
+		<h5 class="articleSubheadline">November 2015</h5>
+
+		<ul class="bulletList">
+		    <li>The smartphone page provides some structural navigation items for several pages in the upper right burger menu.
+		        You will see links to e.g. events, regattas and series when navigating on event and series pages.
+		    </li>
+		    <li>It is now possible to filter for competitors in the race list of events/regattas.
+		        If competitor information is available, there is a filter box in the upper right corner of the races page.
+		        The filter is searching for competitors by sail ID as well as the competitor's name.
+		    </li>
+		    <li>Regattas can now be filtered by boat category in the smartphone page.
+		        The filter will be shown for events with multiple regattas if there is more than on boat category associated with the event.
+		    </li>
+		</ul>
+		
+		<h5 class="articleSubheadline">October 2015</h5>
+
+		<ul class="bulletList">
+		    <li>A variety of tablets will now show the desktop page by default.
+		        The mobile version of the website is primarily designed to be used on smartphones,
+		        but you can manually switch back to the mobile version by clicking the corresponding link in the page footer.
+		    </li>
+		    <li>There is some amount of caching on the web page to reduce the consumed traffic for mobile users.
+		        Contents aren't loaded again on each page switch. This improves the traffic consumption and loading speed on fast page switches.
+		    </li>
+		    <li>The fullscreen image viewer (start page and event media page) can automatically slide through the images.
+		        This can be turned on by clicking the corresponding icon in the upper right corner of the fullscreen viewer.
+		    </li>
+		    <li>There is an optimized search and results page for mobile devices now.
+		    </li>
+		</ul>
+		
+		<h5 class="articleSubheadline">September 2015</h5>
+
+		<ul class="bulletList">
+		    <li>Races in the event/regatta race list can now be shown in 'competition format'.
+		        In this format the races and flights are shown in a structural view.
+		        In contrast to the default list view there is no grouping by live and finished states and all
+		        (including upcoming) races/flights are shown in one structural view.
+		    </li>
+		    <li>The mobile page now provides regatta overview pages for events having multiple regattas.
+		        This page shows live races, an excerpt of the current results as well as statistics for the regatta.
+		    </li>
+		</ul>
+		
 		<h5 class="articleSubheadline">August 2015</h5>
 
 		<ul class="bulletList">
@@ -18,6 +202,10 @@
 		        Log entries added after import on the importing server were not written to the
 		        database and therefore were lost upon server restart.
 		    </li>
+		    <li>There is a smartphone-optimized version of the "solutions" page known from the desktop.
+		    </li>
+		    <li>The smartphone event history now has a slider that allows swiping through the events of a year.
+		    </li>
 		</ul>
 
 		<h5 class="articleSubheadline">July 2015</h5>
@@ -27,7 +215,7 @@
 		        users. Race lists are now sortable by various criteria by clicking on the column
 		        headers. A new fancy progress indicator now also provides visual feedback for
 		        multi-fleet regattas. A news ticker box has been implemented, and the event
-		        overview page can hold a video player on its stage. The even media gallery section
+		        overview page can hold a video player on its stage. The event media gallery section
 		        has been greatly improved.
 		    </li>
 		    <li>Fixed a bug in the wind streamlet visualization. Now the wind streamlets
@@ -38,6 +226,11 @@
 		        for one of start/finish line if they are identical), telling the length of the leg
 		        or line, respectively, and its angle to the wind. For the start and finish line
 		        the advantage of the favored side is shown in meters.
+		    </li>
+		    <li>The SAP Sailing Analytics start page is now available in the smartphone version.
+		        This page features some events that are currently interesting as well as showing a
+		        quickfinder for a variety of recent and upcoming events.
+		        Previously, the start page redirected to the event history.
 		    </li>
 		</ul>
 

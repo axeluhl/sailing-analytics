@@ -1,5 +1,10 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -7,17 +12,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.v7.app.AlertDialog;
+
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class AutoUpdater {
 
@@ -34,12 +36,14 @@ public class AutoUpdater {
     }
 
     public void checkForUpdate(boolean forceUpdate) {
-        String serverUrl = preferences.getServerBaseURL();
-        try {
-            new AutoUpdaterChecker(context, this, forceUpdate).check(new URL(serverUrl));
-        } catch (MalformedURLException e) {
-            // ServerBaseURL in preferences is defect? App will crash...
-            ExLog.ex(context, TAG, e);
+        if (AppUtils.with(context).isSideLoaded()) {
+            String serverUrl = preferences.getServerBaseURL();
+            try {
+                new AutoUpdaterChecker(context, this, forceUpdate).check(new URL(serverUrl));
+            } catch (MalformedURLException e) {
+                // ServerBaseURL in preferences is defect? App will crash...
+                ExLog.ex(context, TAG, e);
+            }
         }
     }
 

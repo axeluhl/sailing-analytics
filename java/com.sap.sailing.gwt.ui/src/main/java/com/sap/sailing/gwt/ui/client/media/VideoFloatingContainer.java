@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client.media;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -59,11 +61,19 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
     @Override
     void show() {
         dialogBox.show();
+        dialogBox.setVisible(false);
+        
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                int absoluteTop = popupPositionProvider.getYPositionUiObject().getAbsoluteTop();
+                int posY = absoluteTop - dialogBox.getOffsetHeight() - 40;
+                dialogBox.setPopupPosition(5, posY);
+                dialogBox.setPixelSize(videoPlayer.getDefaultWidth(), videoPlayer.getDefaultHeight());
+                dialogBox.setVisible(true);
+            }
+        });
 
-        int absoluteTop = popupPositionProvider.getYPositionUiObject().getAbsoluteTop();
-        int posY = absoluteTop - 300;
-        dialogBox.setPopupPosition(5, posY);
-        dialogBox.setPixelSize(videoPlayer.getDefaultWidth(), videoPlayer.getDefaultHeight());
     }
 
     @Override

@@ -127,7 +127,7 @@ public class LeaderboardConfigurationPanelPO extends PageArea {
         return new LeaderboardDetailsPanelPO(this.driver, this.leaderboardDetailsPanel);
     }
     
-    private CellTablePO<LeaderboardEntryPO> getLeaderboardTable() {
+    public CellTablePO<LeaderboardEntryPO> getLeaderboardTable() {
         return new GenericCellTablePO<>(this.driver, this.leaderboardsCellTable, LeaderboardEntryPO.class);
     }
     

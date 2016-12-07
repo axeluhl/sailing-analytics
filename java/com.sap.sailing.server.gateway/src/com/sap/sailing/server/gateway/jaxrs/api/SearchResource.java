@@ -43,6 +43,6 @@ public class SearchResource extends AbstractSailingServerResource {
         for (LeaderboardSearchResult searchResult : searchResults) {
             jsonSearchResults.add(serializer.serialize(searchResult));
         }
-        return Response.ok(jsonSearchResults.toJSONString(), MediaType.APPLICATION_JSON).build();
+        return Response.ok(jsonSearchResults.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 }

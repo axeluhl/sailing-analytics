@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.mobile.partials.recents;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 
 public interface EventsOverviewRecentResources extends ClientBundle {
     public static final EventsOverviewRecentResources INSTANCE = GWT.create(EventsOverviewRecentResources.class);
@@ -46,8 +45,7 @@ public interface EventsOverviewRecentResources extends ClientBundle {
         String eventsoverviewrecent_event_arrow();
         String eventsoverviewrecent_event_arrow_image();
         String togglecontainerhidden();
+        String seriesInfo();
     }
 
-    @Source("com/sap/sailing/gwt/home/images/default_event_photo.jpg")
-    ImageResource defaultEventPhotoImage();
 }

@@ -12,6 +12,7 @@ import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONObject;
 
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
+import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/restsecurity")
 public class SecurityResource extends AbstractSecurityResource {
@@ -62,15 +63,55 @@ public class SecurityResource extends AbstractSecurityResource {
         return respondWithAccessTokenForAuthenticatedSubject();
     }
 
+    @GET
+    @Path("/remove_access_token")
+    @Produces("application/json;charset=UTF-8")
+    public Response removeAccessToken() {
+        return removeAccessTokenPost();
+    }
+
+    @POST
+    @Path("/remove_access_token")
+    @Produces("application/json;charset=UTF-8")
+    public Response removeAccessTokenPost() {
+        final Response result;
+        final Object principal = SecurityUtils.getSubject().getPrincipal();
+        if (principal != null) {
+            final String username = principal.toString();
+            result = respondToRemoveAccessTokenForUser(username);
+        } else {
+            result = Response.status(Status.UNAUTHORIZED).build();
+        }
+        return result;
+    }
+
+    Response respondToRemoveAccessTokenForUser(final String username) {
+        final Response result;
+        getService().removeAccessToken(username);
+        result = Response.ok().build();
+        return result;
+    }
+
     private Response respondWithAccessTokenForAuthenticatedSubject() {
-        final String username = SecurityUtils.getSubject().getPrincipal().toString();
-        return respondWithAccessTokenForUser(username);
+        final Response result;
+        final Object principal = SecurityUtils.getSubject().getPrincipal();
+        if (principal != null) {
+            final String username = principal.toString();
+            result = respondWithAccessTokenForUser(username);
+        } else {
+            result = Response.status(Status.UNAUTHORIZED).build();
+        }
+        return result;
     }
 
     Response respondWithAccessTokenForUser(final String username) {
         JSONObject response = new JSONObject();
         response.put("username", username);
-        response.put("access_token", getService().createAccessToken(username));
+        String accessToken = getService().getOrCreateAccessToken(username);
+        if (accessToken == null) {
+            accessToken = getService().createAccessToken(username);
+        }
+        response.put("access_token", accessToken);
         return Response.ok(response.toJSONString(), MediaType.APPLICATION_JSON_TYPE).build();
     }
 }

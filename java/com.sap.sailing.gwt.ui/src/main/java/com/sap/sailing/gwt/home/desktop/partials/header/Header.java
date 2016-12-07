@@ -20,18 +20,20 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.HyperlinkImpl;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.client.place.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.EventPlace;
 import com.sap.sailing.gwt.home.client.place.event.legacy.RegattaPlace;
-import com.sap.sailing.gwt.home.client.place.events.EventsPlace;
-import com.sap.sailing.gwt.home.client.place.searchresult.SearchResultPlace;
-import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace;
-import com.sap.sailing.gwt.home.client.place.solutions.SolutionsPlace.SolutionsNavigationTabs;
-import com.sap.sailing.gwt.home.client.place.start.StartPlace;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
+import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
+import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
+import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
+import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
+import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
 public class Header extends Composite {
     @UiField Anchor startPageLink;
@@ -41,6 +43,8 @@ public class Header extends Composite {
     
     @UiField TextBox searchText;
     @UiField Button searchButton;
+    
+    @UiField Anchor usermenu;
 
     private static final HyperlinkImpl HYPERLINK_IMPL = GWT.create(HyperlinkImpl.class);
     
@@ -51,40 +55,30 @@ public class Header extends Composite {
     private final PlaceNavigation<EventsPlace> eventsNavigation;
     private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
     
+    private final AuthenticationMenuView authenticationMenuView;
+    
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
     
     private static HeaderUiBinder uiBinder = GWT.create(HeaderUiBinder.class);
 
     public Header(final DesktopPlacesNavigator navigator, EventBus eventBus) {
-        this(navigator);
-        
-        eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
-
-            @Override
-            public void onPlaceChanged(PlaceChangedEvent event) {
-                updateActiveLink(event.getNewPlace());
-            }
-        });
-    }
-    
-    public Header(final DesktopPlacesNavigator navigator) {
         this.navigator = navigator;
 
         HeaderResources.INSTANCE.css().ensureInjected();
-
+        
         initWidget(uiBinder.createAndBindUi(this));
         links = Arrays.asList(new Anchor[] { startPageLink, eventsPageLink, solutionsPageLink });
-
+        
         homeNavigation = navigator.getHomeNavigation();
         eventsNavigation = navigator.getEventsNavigation();
-        solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
-
+        solutionsNavigation = navigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
+        
         startPageLink.setHref(homeNavigation.getTargetUrl());
         eventsPageLink.setHref(eventsNavigation.getTargetUrl());
         solutionsPageLink.setHref(solutionsNavigation.getTargetUrl());
         
-        searchText.getElement().setAttribute("placeholder", TextMessages.INSTANCE.headerSearchPlaceholder());
+        searchText.getElement().setAttribute("placeholder", StringMessages.INSTANCE.headerSearchPlaceholder());
         searchText.addKeyPressHandler(new KeyPressHandler() {
             @Override
             public void onKeyPress(KeyPressEvent event) {
@@ -93,6 +87,15 @@ public class Header extends Composite {
                 }
             }
         });
+        
+        eventBus.addHandler(PlaceChangedEvent.TYPE, new PlaceChangedEvent.Handler() {
+            @Override
+            public void onPlaceChanged(PlaceChangedEvent event) {
+                updateActiveLink(event.getNewPlace());
+            }
+        });
+        
+        authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(), HeaderResources.INSTANCE.css().open());
     }
 
     @UiHandler("startPageLink")
@@ -132,6 +135,8 @@ public class Header extends Composite {
             setActiveLink(startPageLink);
         } else if(place instanceof SolutionsPlace) {
             setActiveLink(solutionsPageLink);
+        } else {
+            setActiveLink(null);
         }
         // TODO add more rules
     }
@@ -153,5 +158,9 @@ public class Header extends Composite {
             e.preventDefault();
             setActiveLink(activeLink);
          }
+    }
+
+    public AuthenticationMenuView getAuthenticationMenuView() {
+        return authenticationMenuView;
     }
 }

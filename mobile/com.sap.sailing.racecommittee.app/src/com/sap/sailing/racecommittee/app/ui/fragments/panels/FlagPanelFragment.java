@@ -10,6 +10,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -22,6 +23,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.AbortFlagsFragmen
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.EmptyFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.MoreFlagsFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RecallFlagsFragment;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 
 public class FlagPanelFragment extends BasePanelFragment {
@@ -32,22 +34,30 @@ public class FlagPanelFragment extends BasePanelFragment {
     // Abandon Toggle
     private View mAbandonFlags;
     private View mAbandonLock;
+    private View mAbandonLayer;
 
     // Recall Toggle
     private View mRecallFlags;
     private View mRecallLock;
+    private View mRecallLayer;
 
     // Postpone Toggle
     private View mPostponeFlags;
     private View mPostponeLock;
+    private View mPostponeLayer;
 
     // Course Toggle
     private View mCourseFlags;
     private View mCourseLock;
 
-    // More Toggle (Finish)
-    private View mMoreFlags;
-    private View mMoreLock;
+    // Blue First
+    private View mBlueFirstFlag;
+    private View mBlueFirstLock;
+
+    // Blue Last
+    private View mBlueLastFlag;
+    private View mBlueLastLock;
+    private TextView mBlueLastText;
 
     public FlagPanelFragment() {
         mReceiver = new IntentReceiver();
@@ -68,18 +78,21 @@ public class FlagPanelFragment extends BasePanelFragment {
             mAbandonFlags.setOnClickListener(new AbandonFlagsClick());
         }
         mAbandonLock = ViewHelper.get(layout, R.id.abandon_flags_lock);
+        mAbandonLayer = ViewHelper.get(layout, R.id.abandon_flags_layer);
 
         mRecallFlags = ViewHelper.get(layout, R.id.recall_flags);
         if (mRecallFlags != null) {
             mRecallFlags.setOnClickListener(new RecallFlagsClick());
         }
         mRecallLock = ViewHelper.get(layout, R.id.recall_flags_lock);
+        mRecallLayer = ViewHelper.get(layout, R.id.recall_flags_layer);
 
         mPostponeFlags = ViewHelper.get(layout, R.id.postpone_flags);
         if (mPostponeFlags != null) {
             mPostponeFlags.setOnClickListener(new PostponeFlagsClick());
         }
         mPostponeLock = ViewHelper.get(layout, R.id.postpone_flags_lock);
+        mPostponeLayer = ViewHelper.get(layout, R.id.postpone_flags_layer);
 
         mCourseFlags = ViewHelper.get(layout, R.id.course_flags);
         if (mCourseFlags != null) {
@@ -87,11 +100,18 @@ public class FlagPanelFragment extends BasePanelFragment {
         }
         mCourseLock = ViewHelper.get(layout, R.id.course_flags_lock);
 
-        mMoreFlags = ViewHelper.get(layout, R.id.more_flags);
-        if (mMoreFlags != null) {
-            mMoreFlags.setOnClickListener(new MoreFlagsClick());
+        mBlueFirstFlag = ViewHelper.get(layout, R.id.blue_first_flags);
+        if (mBlueFirstFlag != null) {
+            mBlueFirstFlag.setOnClickListener(new BlueFirstFlagClick());
         }
-        mMoreLock = ViewHelper.get(layout, R.id.more_flags_lock);
+        mBlueFirstLock = ViewHelper.get(layout, R.id.blue_first_flags_lock);
+
+        mBlueLastFlag = ViewHelper.get(layout, R.id.blue_last_flags);
+        if (mBlueLastFlag != null) {
+            mBlueLastFlag.setOnClickListener(new BlueLastFlagClick());
+        }
+        mBlueLastLock = ViewHelper.get(layout, R.id.blue_last_flags_lock);
+        mBlueLastText = ViewHelper.get(layout, R.id.blue_last_flags_text);
 
         return layout;
     }
@@ -123,122 +143,140 @@ public class FlagPanelFragment extends BasePanelFragment {
     }
 
     private void checkStatus() {
-        changeVisibility(mPostponeLock, View.GONE);
-        changeVisibility(mAbandonLock, View.GONE);
-        changeVisibility(mRecallLock, View.GONE);
-        changeVisibility(mCourseLock, View.GONE);
-        changeVisibility(mMoreLock, View.GONE);
+        changeVisibility(mPostponeLock, mPostponeLayer, View.GONE);
+        changeVisibility(mAbandonLock, mAbandonLayer, View.GONE);
+        changeVisibility(mRecallLock, null, View.GONE);
+        changeVisibility(mCourseLock, null, View.GONE);
+        changeVisibility(mBlueFirstLock, null, View.GONE);
+        changeVisibility(mBlueLastLock, null, View.GONE);
 
         switch (getRace().getStatus()) {
-        case UNSCHEDULED:
-            changeVisibility(mPostponeFlags, View.VISIBLE);
-            changeVisibility(mAbandonFlags, View.VISIBLE);
-            changeVisibility(mRecallFlags, View.VISIBLE);
-            changeVisibility(mCourseFlags, View.GONE);
-            changeVisibility(mMoreFlags, View.VISIBLE);
+            case UNSCHEDULED:
+                changeVisibility(mPostponeFlags, null, View.VISIBLE);
+                changeVisibility(mAbandonFlags, null, View.VISIBLE);
+                changeVisibility(mRecallFlags, null, View.VISIBLE);
+                changeVisibility(mCourseFlags, null, View.GONE);
+                changeVisibility(mBlueFirstFlag, null, View.VISIBLE);
+                changeVisibility(mBlueLastFlag, null, View.GONE);
 
-            uncheckMarker(mCourseFlags);
-            break;
+                uncheckMarker(mCourseFlags);
+                break;
 
-        case PRESCHEDULED:
-            changeVisibility(mPostponeFlags, View.VISIBLE);
-            changeVisibility(mAbandonFlags, View.GONE);
-            changeVisibility(mRecallFlags, View.GONE);
-            changeVisibility(mCourseFlags, View.GONE);
-            changeVisibility(mMoreFlags, View.GONE);
+            case PRESCHEDULED:
+                changeVisibility(mPostponeFlags, null, View.VISIBLE);
+                changeVisibility(mAbandonFlags, null, View.GONE);
+                changeVisibility(mRecallFlags, null, View.GONE);
+                changeVisibility(mCourseFlags, null, View.GONE);
+                changeVisibility(mBlueFirstFlag, null, View.GONE);
+                changeVisibility(mBlueLastFlag, null, View.GONE);
 
-            uncheckMarker(mAbandonFlags);
-            uncheckMarker(mCourseFlags);
-            uncheckMarker(mMoreFlags);
-            break;
+                uncheckMarker(mAbandonFlags);
+                uncheckMarker(mCourseFlags);
+                uncheckMarker(mBlueFirstFlag);
+                uncheckMarker(mBlueLastFlag);
+                break;
 
-        case SCHEDULED:
-        case STARTPHASE:
-            changeVisibility(mPostponeFlags, View.VISIBLE);
-            changeVisibility(mAbandonFlags, View.GONE);
-            changeVisibility(mRecallFlags, View.GONE);
-            changeVisibility(mCourseFlags, View.GONE);
-            changeVisibility(mMoreFlags, View.GONE);
+            case SCHEDULED:
+            case STARTPHASE:
+                changeVisibility(mPostponeFlags, null, View.VISIBLE);
+                changeVisibility(mAbandonFlags, null, View.GONE);
+                changeVisibility(mRecallFlags, null, View.GONE);
+                changeVisibility(mCourseFlags, null, View.GONE);
+                changeVisibility(mBlueFirstFlag, null, View.GONE);
+                changeVisibility(mBlueLastFlag, null, View.GONE);
 
-            uncheckMarker(mAbandonFlags);
-            uncheckMarker(mRecallFlags);
-            uncheckMarker(mMoreFlags);
-            break;
+                uncheckMarker(mAbandonFlags);
+                uncheckMarker(mRecallFlags);
+                uncheckMarker(mBlueFirstFlag);
+                uncheckMarker(mBlueLastFlag);
+                break;
 
-        case RUNNING:
-            changeVisibility(mPostponeLock, View.VISIBLE);
+            case RUNNING:
+                changeVisibility(mPostponeLock, mPostponeLayer, View.VISIBLE);
 
-            changeVisibility(mPostponeFlags, View.VISIBLE);
-            changeVisibility(mAbandonFlags, View.VISIBLE);
-            changeVisibility(mRecallFlags, View.VISIBLE);
-            changeVisibility(mCourseFlags, View.GONE);
-            changeVisibility(mMoreFlags, View.VISIBLE);
+                changeVisibility(mPostponeFlags, null, View.VISIBLE);
+                changeVisibility(mAbandonFlags, null, View.VISIBLE);
+                changeVisibility(mRecallFlags, null, View.VISIBLE);
+                changeVisibility(mCourseFlags, null, View.GONE);
+                changeVisibility(mBlueFirstFlag, null, View.VISIBLE);
+                changeVisibility(mBlueLastFlag, null, View.GONE);
 
-            uncheckMarker(mCourseFlags);
-            break;
+                uncheckMarker(mCourseFlags);
+                break;
 
-        case FINISHING:
-            changeVisibility(mPostponeLock, View.VISIBLE);
+            case FINISHING:
+                changeVisibility(mPostponeLock, mPostponeLayer, View.VISIBLE);
 
-            changeVisibility(mPostponeFlags, View.VISIBLE);
-            changeVisibility(mAbandonFlags, View.VISIBLE);
-            changeVisibility(mRecallFlags, View.GONE);
-            changeVisibility(mCourseFlags, View.GONE);
-            changeVisibility(mMoreFlags, View.GONE);
+                changeVisibility(mPostponeFlags, null, View.VISIBLE);
+                changeVisibility(mAbandonFlags, null, View.VISIBLE);
+                changeVisibility(mRecallFlags, null, View.GONE);
+                changeVisibility(mCourseFlags, null, View.GONE);
+                changeVisibility(mBlueFirstFlag, null, View.GONE);
+                changeVisibility(mBlueLastFlag, null,
+                        preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())
+                                ? View.VISIBLE : View.GONE);
 
-            uncheckMarker(mRecallFlags);
-            uncheckMarker(mCourseFlags);
-            uncheckMarker(mMoreFlags);
-            break;
+                uncheckMarker(mRecallFlags);
+                uncheckMarker(mCourseFlags);
+                uncheckMarker(mBlueFirstFlag);
+                uncheckMarker(mBlueLastFlag);
+                break;
 
-        case FINISHED:
-            changeVisibility(mPostponeLock, View.VISIBLE);
+            case FINISHED:
+                changeVisibility(mPostponeLock, mPostponeLayer, View.VISIBLE);
 
-            changeVisibility(mPostponeFlags, View.VISIBLE);
-            changeVisibility(mAbandonFlags, View.VISIBLE);
-            changeVisibility(mRecallFlags, View.VISIBLE);
-            changeVisibility(mCourseFlags, View.GONE);
-            changeVisibility(mMoreFlags, View.VISIBLE);
+                changeVisibility(mPostponeFlags, null, View.GONE);
+                changeVisibility(mAbandonFlags, null, View.GONE);
+                changeVisibility(mRecallFlags, null, View.GONE);
+                changeVisibility(mCourseFlags, null, View.GONE);
+                changeVisibility(mBlueFirstFlag, null, View.GONE);
+                changeVisibility(mBlueLastFlag, null, View.GONE);
 
-            uncheckMarker(mCourseFlags);
-            break;
+                uncheckMarker(mCourseFlags);
+                break;
 
-        default:
-            changeVisibility(mPostponeFlags, View.GONE);
-            changeVisibility(mAbandonFlags, View.GONE);
-            changeVisibility(mRecallFlags, View.GONE);
-            changeVisibility(mCourseFlags, View.GONE);
-            changeVisibility(mMoreFlags, View.GONE);
+            default:
+                changeVisibility(mPostponeFlags, mPostponeLayer, View.GONE);
+                changeVisibility(mAbandonFlags, null, View.GONE);
+                changeVisibility(mRecallFlags, null, View.GONE);
+                changeVisibility(mCourseFlags, null, View.GONE);
+                changeVisibility(mBlueFirstFlag, null, View.GONE);
+                changeVisibility(mBlueLastFlag, null, View.GONE);
 
-            uncheckMarker(mPostponeFlags);
-            uncheckMarker(mAbandonFlags);
-            uncheckMarker(mRecallFlags);
-            uncheckMarker(mCourseFlags);
-            uncheckMarker(mMoreFlags);
-            break;
+                uncheckMarker(mPostponeFlags);
+                uncheckMarker(mAbandonFlags);
+                uncheckMarker(mRecallFlags);
+                uncheckMarker(mCourseFlags);
+                uncheckMarker(mBlueFirstFlag);
+                uncheckMarker(mBlueLastFlag);
+                break;
         }
     }
 
     private void uncheckMarker(View view) {
-        if (view != null) {
+        if (isAdded() && view != null) {
             if (!view.equals(mAbandonFlags)) {
-                setMarkerLevel(mAbandonFlags, R.id.abandon_flags_marker, 0);
+                setMarkerLevel(mAbandonFlags, R.id.abandon_flags_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mRecallFlags)) {
-                setMarkerLevel(mRecallFlags, R.id.recall_flags_marker, 0);
+                setMarkerLevel(mRecallFlags, R.id.recall_flags_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mPostponeFlags)) {
-                setMarkerLevel(mPostponeFlags, R.id.postpone_flags_marker, 0);
+                setMarkerLevel(mPostponeFlags, R.id.postpone_flags_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mCourseFlags)) {
-                setMarkerLevel(mCourseFlags, R.id.course_flags_marker, 0);
+                setMarkerLevel(mCourseFlags, R.id.course_flags_marker, LEVEL_NORMAL);
             }
 
-            if (!view.equals(mMoreFlags)) {
-                setMarkerLevel(mMoreFlags, R.id.more_flags_marker, 0);
+            if (!view.equals(mBlueFirstFlag)) {
+                setMarkerLevel(mBlueFirstFlag, R.id.first_blue_flags_marker, LEVEL_NORMAL);
+            }
+
+            if (!view.equals(mBlueLastFlag)) {
+                setMarkerLevel(mBlueLastFlag, R.id.blue_down_flags_marker, LEVEL_NORMAL);
             }
         }
     }
@@ -249,27 +287,31 @@ public class FlagPanelFragment extends BasePanelFragment {
 
         if (getRace() != null && getRaceState() != null) {
             switch (getRaceState().getStatus()) {
-            case RUNNING:
-                TimePoint start = getRaceState().getStartTime();
-                if (start != null) {
-                    long diff = now.minus(start.asMillis()).asMillis();
-                    if (diff >= 60000) {
-                        changeVisibility(mRecallLock, View.VISIBLE);
+                case RUNNING:
+                    TimePoint start = getRaceState().getStartTime();
+                    if (start != null) {
+                        long diff = now.minus(start.asMillis()).asMillis();
+                        if (diff >= 60000) {
+                            changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
+                        } else {
+                            changeVisibility(mRecallLock, mRecallLayer, View.GONE);
+                        }
                     } else {
-                        changeVisibility(mRecallLock, View.GONE);
+                        changeVisibility(mRecallLock, mRecallLayer, View.GONE);
                     }
-                } else {
-                    changeVisibility(mRecallLock, View.GONE);
-                }
-                break;
+                    break;
 
-            case FINISHING:
-            case FINISHED:
-                changeVisibility(mRecallLock, View.VISIBLE);
-                break;
+                case FINISHING:
+                    mBlueLastText.setText(TimeUtils.formatDurationSince(now.minus(getRaceState().getFinishingTime().asMillis()).asMillis()));
+                    changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
+                    break;
 
-            default:
-                // nothing
+                case FINISHED:
+                    changeVisibility(mRecallLock, mRecallLayer, View.VISIBLE);
+                    break;
+
+                default:
+                    // nothing
             }
         }
     }
@@ -307,16 +349,16 @@ public class FlagPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_ABANDON);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(AbortFlagsFragment.newInstance(Flags.NOVEMBER));
-                break;
+                case LEVEL_TOGGLED:
+                    replaceFragment(AbortFlagsFragment.newInstance(Flags.NOVEMBER, getString(R.string.flags_abandon)));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             disableToggle(container, markerId);
         }
@@ -346,16 +388,16 @@ public class FlagPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_RECALL);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(RecallFlagsFragment.newInstance());
-                break;
+                case LEVEL_TOGGLED:
+                    replaceFragment(RecallFlagsFragment.newInstance(getString(R.string.flags_recall)));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             disableToggle(container, markerId);
         }
@@ -385,16 +427,16 @@ public class FlagPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSTPONE);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(AbortFlagsFragment.newInstance(Flags.AP));
-                break;
+                case LEVEL_TOGGLED:
+                    replaceFragment(AbortFlagsFragment.newInstance(Flags.AP, getString(R.string.flags_postpone)));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             disableToggle(container, markerId);
         }
@@ -424,31 +466,31 @@ public class FlagPanelFragment extends BasePanelFragment {
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_COURSE);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(EmptyFragment.newInstance());
-                break;
+                case LEVEL_TOGGLED:
+                    replaceFragment(EmptyFragment.newInstance());
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             disableToggle(container, markerId);
         }
     }
 
-    private class MoreFlagsClick implements View.OnClickListener, DialogInterface.OnClickListener {
+    private class BlueFirstFlagClick implements View.OnClickListener, DialogInterface.OnClickListener {
 
-        private final String TAG = MoreFlagsClick.class.getName();
-        private final View container = mMoreFlags;
-        private final int markerId = R.id.more_flags_marker;
+        private final String TAG = BlueFirstFlagClick.class.getName();
+        private final View container = mBlueFirstFlag;
+        private final int markerId = R.id.first_blue_flags_marker;
 
         @Override
         public void onClick(View v) {
-            if (mMoreLock != null) {
-                if (mMoreLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
+            if (mBlueFirstLock != null) {
+                if (mBlueFirstLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
                     showChangeDialog(this);
                 } else {
                     toggleFragment();
@@ -462,18 +504,58 @@ public class FlagPanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_MORE);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_BLUE_FIRST);
             switch (toggleMarker(container, markerId)) {
-            case 0:
-                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-                break;
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
-            case 1:
-                replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(0));
-                break;
+                case LEVEL_TOGGLED:
+                    replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(0));
+                    break;
 
-            default:
-                ExLog.i(getActivity(), TAG, "Unknown return value");
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            }
+            disableToggle(container, markerId);
+        }
+    }
+
+    private class BlueLastFlagClick implements View.OnClickListener, DialogInterface.OnClickListener {
+
+        private final String TAG = BlueLastFlagClick.class.getName();
+        private final View container = mBlueLastFlag;
+        private final int markerId = R.id.blue_down_flags_marker;
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            if (mBlueLastLock != null) {
+                if (mBlueLastLock.getVisibility() == View.VISIBLE && isNormal(container, markerId)) {
+                    showChangeDialog(this);
+                } else {
+                    toggleFragment();
+                }
+            }
+        }
+
+        @Override
+        public void onClick(View v) {
+            toggleFragment();
+        }
+
+        private void toggleFragment() {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_BLUE_LAST);
+            switch (toggleMarker(container, markerId)) {
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
+
+                case LEVEL_TOGGLED:
+                    replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(1));
+                    break;
+
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
             }
             disableToggle(container, markerId);
         }
@@ -498,8 +580,10 @@ public class FlagPanelFragment extends BasePanelFragment {
                         uncheckMarker(mPostponeFlags);
                     } else if (AppConstants.INTENT_ACTION_TOGGLE_COURSE.equals(data)) {
                         uncheckMarker(mCourseFlags);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_MORE.equals(data)) {
-                        uncheckMarker(mMoreFlags);
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_BLUE_FIRST.equals(data)) {
+                        uncheckMarker(mBlueFirstFlag);
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_BLUE_LAST.equals(data)) {
+                        uncheckMarker(mBlueLastFlag);
                     } else {
                         uncheckMarker(new View(context));
                     }

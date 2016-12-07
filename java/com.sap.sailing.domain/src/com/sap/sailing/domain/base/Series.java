@@ -27,6 +27,8 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
  */
 public interface Series extends SeriesBase {
     
+    static public final String DEFAULT_NAME = "Default";
+    
     /**
      * A series consists of one or more "race columns." Some people would just say "race," but we use the term "race" for
      * something that has a single start time and start line; so if each fleet in a series gets their own start for
@@ -38,6 +40,8 @@ public interface Series extends SeriesBase {
     RaceColumnInSeries getRaceColumnByName(String columnName);
     
     void setIsMedal(boolean isMedal);
+
+    void setIsFleetsCanRunInParallel(boolean isFleetsCanRunInParallel);
 
     Fleet getFleetByName(String fleetName);
 
@@ -67,6 +71,18 @@ public interface Series extends SeriesBase {
     
     void setResultDiscardingRule(ThresholdBasedResultDiscardingRule resultDiscardingRule);
     
+    /**
+     * If not {@code null}, defines an upper inclusive limit for the number of races that may be discarded from
+     * this series. For example, when setting this to {@code 1} for a final series in a regatta that has a
+     * qualification and a final series, when the second discard becomes available and the series don't define
+     * their own discarding rules, two discards may be picked from the qualification series, but at most one
+     * could be selected in the final even if another final race has a score worse than that of all
+     * qualification races.
+     */
+    Integer getMaximumNumberOfDiscards();
+    
+    void setMaximumNumberOfDiscards(Integer maximumNumberOfDiscards);
+
     Regatta getRegatta();
     
     /**
@@ -114,4 +130,5 @@ public interface Series extends SeriesBase {
     boolean hasSplitFleetContiguousScoring();
 
     void setSplitFleetContiguousScoring(boolean hasSplitFleetScore);
+
 }

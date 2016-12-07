@@ -16,9 +16,10 @@ import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class SimpleQueryRunner implements QueryRunner {
+public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> implements QueryRunner {
 
     private final DataMiningSession session;
     private final StringMessages stringMessages;
@@ -27,12 +28,12 @@ public class SimpleQueryRunner implements QueryRunner {
     private final ManagedDataMiningQueriesCounter counter;
 
     private QueryRunnerSettings settings;
-    private final QueryDefinitionProvider queryDefinitionProvider;
+    private final QueryDefinitionProvider<?> queryDefinitionProvider;
     private final ResultsPresenter<?> resultsPresenter;
     private final Button runButton;
 
     public SimpleQueryRunner(DataMiningSession session, StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
-            ErrorReporter errorReporter, QueryDefinitionProvider queryDefinitionProvider,
+            ErrorReporter errorReporter, QueryDefinitionProvider<?> queryDefinitionProvider,
             ResultsPresenter<?> resultsPresenter) {
         this.session = session;
         this.stringMessages = stringMessages;
@@ -119,6 +120,11 @@ public class SimpleQueryRunner implements QueryRunner {
     @Override
     public boolean hasSettings() {
         return true;
+    }
+
+    @Override
+    public QueryRunnerSettings getSettings() {
+        return settings;
     }
 
     @Override

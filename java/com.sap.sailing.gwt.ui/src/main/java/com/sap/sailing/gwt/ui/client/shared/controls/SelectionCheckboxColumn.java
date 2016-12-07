@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.controls;
 
-import java.util.List;
-
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.NativeEvent;
@@ -15,11 +13,11 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.DefaultSelectionEventManager.EventTranslator;
 import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.SortingOrder;
-import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
 /**
  * A column to be used in a {@link CellTable} that controls and reflects a table's selection model using stylable
@@ -30,25 +28,31 @@ import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
  * updates work properly.
  * <p>
  * 
- * If clients don't choose to use this columns own {@link #getSelectionModel() selection model}, they have to ensure
- * that selection changes with subsequent {@link #redrawRow(Object, List) redraw requests} are triggered properly upon
- * selection status changes. Otherwise, the checkboxes will run out of sync with the selection status.
+ * Clients should use the column's own {@link #getSelectionModel() RefreshableMultiSelectionModel}. This will ensure that
+ * the {@link SelectionCheckboxColumn} will be refreshed correctly when the selection changes or the
+ * {@link ListDataProvider} has new elements. Clients should also ensure that the {@link Flushable} and the
+ * {@link ListDataProvider} are not <code>null</code>; otherwise the {@link RefreshableMultiSelectionModel selection model}
+ * won�t work correctly. The {@link Flushable} interface is used to ensure that the selection state is displayed
+ * correctly by {@link SelectionCheckboxColumn}. To ensure this, the {@link Flushable#flush()} method is called after
+ * every selection state change.
  * <p>
- * 
  * The column uses the {@link BetterCheckboxCell} cell to implement the display properties. Three CSS styles can be used
  * to parameterize this column: one for the <code>&lt;td&gt;</code> element rendering the cell, and two for the
  * <code>&lt;div&gt;</code> element representing a selected or deselected element.
  * 
  * @author Axel Uhl (D043530)
+ * @author Lukas Furmanek
  * 
  * @param <T>
  */
-public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnWithMinMax<T, Boolean> {
+public class SelectionCheckboxColumn<T> extends AbstractSortableColumnWithMinMax<T, Boolean> {
     private final BetterCheckboxCell cell;
     private final String checkboxColumnCellCSSClass;
     private final EventTranslator<T> selectionEventTranslator;
-    private final MultiSelectionModel<T> selectionModel;
-    
+    private final RefreshableMultiSelectionModel<T> selectionModel;
+    private final ListDataProvider<T> listDataProvider;
+    private final Flushable display;
+
     /**
      * @param selectedCheckboxCSSClass
      *            CSS class for the <code>&lt;div&gt;</code> element representing a selected element
@@ -56,26 +60,31 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
      *            CSS class for the <code>&lt;div&gt;</code> element representing a deselected element
      * @param checkboxColumnCellCSSClass
      *            CSS class for the <code>&lt;td&gt;</code> element rendering the cell
+     * @param entityIdentityComparator
+     *            {@link EntityIdentityComparator} to create a {@link RefreshableMultiSelectionModel}
+     * @param listDataProvider
+     *            {@link ListDataProvider} to create a {@link RefreshableMultiSelectionModel}
+     * @param display
+     *            {@link Flushable} to redraw the selected elements on the display
      */
-    protected SelectionCheckboxColumn(String selectedCheckboxCSSClass,
-            String deselectedCheckboxCSSClass, String checkboxColumnCellCSSClass) {
-        this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass);
+    public SelectionCheckboxColumn(String selectedCheckboxCSSClass, String deselectedCheckboxCSSClass,
+            String checkboxColumnCellCSSClass, EntityIdentityComparator<T> entityIdentityComparator,
+            ListDataProvider<T> listDataProvider, Flushable display) {
+        this(new BetterCheckboxCell(selectedCheckboxCSSClass, deselectedCheckboxCSSClass), checkboxColumnCellCSSClass,
+                entityIdentityComparator, listDataProvider, display);
     }
-
-    private SelectionCheckboxColumn(BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass) {
+    
+    private SelectionCheckboxColumn(BetterCheckboxCell checkboxCell, String checkboxColumnCellCSSClass,
+            EntityIdentityComparator<T> entityIdentityComparator, ListDataProvider<T> listDataProvider,
+            Flushable display) {
         super(checkboxCell, SortingOrder.DESCENDING);
+        this.display = display;
+        this.listDataProvider = listDataProvider;
         this.cell = checkboxCell;
         this.checkboxColumnCellCSSClass = checkboxColumnCellCSSClass;
         this.selectionEventTranslator = createSelectionEventTranslator();
-        this.selectionModel = createSelectionModel();
+        this.selectionModel = createSelectionModel(entityIdentityComparator);
     }
-    
-    /**
-     * Subclasses need to tell this column what the data list is. This is necessary in order to reach all rows after the
-     * selection is cleared, as well as to trigger the redraw of a row by setting it again in the list data provider which
-     * triggers the necessary redraw operation.
-     */
-    protected abstract ListDataProvider<T> getListDataProvider();
     
     /**
      * @return a selection manager that should be used for the table to which this column is added; use
@@ -85,37 +94,37 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
     public CellPreviewEvent.Handler<T> getSelectionManager() {
         return DefaultSelectionEventManager.createCustomManager(getSelectionEventTranslator());
     }
+    
+    protected ListDataProvider<T> getListDataProvider() {
+        return listDataProvider;
+    }
 
-    public MultiSelectionModel<T> getSelectionModel() {
+    public RefreshableMultiSelectionModel<T> getSelectionModel() {
         return selectionModel;
     }
 
     /**
-     * Clients should use the multi-selection model returned by this method for the {@link CellTable} to which they add this column.
-     * If they do so, the {@link #redrawRow(LeaderboardRowDTO, List)} method will be triggered correctly for all selection changes.
-     * Otherwise, clients or subclasses are responsible to issue the necessary calls to {@link #redrawRow(LeaderboardRowDTO, List)}
-     * after selection changes.
+     * Clients should use the {@link RefreshableMultiSelectionModel} returned by this method for the {@link CellTable}
+     * to which they add this column. If they do so, the {@link Flushable#flush()} method will be
+     * triggered correctly for all selection changes. Otherwise, clients or subclasses are responsible to issue the
+     * necessary calls to {@link Flushable#flush()} after selection changes.
      */
-    private MultiSelectionModel<T> createSelectionModel() {
-        return new MultiSelectionModel<T>() {
+    private RefreshableMultiSelectionModel<T> createSelectionModel(final EntityIdentityComparator<T> entityIdentityComparator) {
+        return new RefreshableMultiSelectionModel<T>(entityIdentityComparator, listDataProvider) {
             @Override
             public void clear() {
                 super.clear();
-                final List<T> list = getListDataProvider().getList();
-                for (T item : list) {
-                    redrawRow(item, list);
-                }
+                display.flush();
             }
 
             @Override
             public void setSelected(T item, boolean selected) {
-                final boolean redrawRequired = isSelected(item) != selected;
+                boolean wasSelected = isSelected(item);
                 super.setSelected(item, selected);
-                if (redrawRequired) {
-                    redrawRow(item, getListDataProvider().getList());
+                if (wasSelected != selected) {
+                    display.flush();
                 }
             }
-            
         };
     }
     
@@ -206,23 +215,5 @@ public abstract class SelectionCheckboxColumn<T> extends AbstractSortableColumnW
                 return result;
             }
         };
-    }
-
-    /**
-     * Subclasses shall use this after an update to the selection state of a row to ensure the checkboxes are
-     * displayed correctly and consistently again.
-     * 
-     * @param row
-     *            the row object to be re-drawn
-     * @param dataList
-     *            the result of calling {@link ListDataProvider#getList()} on the table's data provider which is
-     *            actually a list wrapper where updates to which are reflected in the table display
-     */
-    protected void redrawRow(final T row, final List<T> dataList) {
-        int rowIndex = dataList.indexOf(row);
-        if (rowIndex >= 0) {
-            dataList.set(rowIndex, row); // trigger row redraw to have check box shown in correct state
-        }
-        getListDataProvider().flush();
     }
 }

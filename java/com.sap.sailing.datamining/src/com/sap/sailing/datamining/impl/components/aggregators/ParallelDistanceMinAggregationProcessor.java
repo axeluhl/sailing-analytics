@@ -28,8 +28,8 @@ public class ParallelDistanceMinAggregationProcessor extends
     }
 
     @Override
-    protected Distance compareValuesAndReturnNewValue(Distance previousValue, Distance newValue) {
-        return previousValue.getMeters() <= newValue.getMeters() ? previousValue : newValue;
+    protected Distance compareValuesAndReturnNewResult(Distance currentResult, Distance newValue) {
+        return currentResult.getMeters() <= newValue.getMeters() ? currentResult : newValue;
     }
 
 }

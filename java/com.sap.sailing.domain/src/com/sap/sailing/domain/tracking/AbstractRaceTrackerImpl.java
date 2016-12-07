@@ -7,7 +7,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 
-public abstract class AbstractRaceTrackerImpl implements RaceTracker {
+public abstract class AbstractRaceTrackerImpl extends AbstractRaceTrackerBaseImpl {
+
     @Override
     public Set<RegattaAndRaceIdentifier> getRaceIdentifiers() {
         Set<RegattaAndRaceIdentifier> result = new HashSet<RegattaAndRaceIdentifier>();

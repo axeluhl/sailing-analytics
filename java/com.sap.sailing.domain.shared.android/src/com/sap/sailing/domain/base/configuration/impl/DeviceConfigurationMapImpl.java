@@ -47,7 +47,7 @@ public class DeviceConfigurationMapImpl extends ConcurrentHashMap<DeviceConfigur
         DeviceConfigurationMatcher match = null;
         for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry : entrySet()) {
             if (entry.getKey().matches(key)) {
-                if (match == null || match.getMatchingRank() > entry.getKey().getMatchingRank()) {
+                if (match == null) {
                     match = entry.getKey();
                 }
             }

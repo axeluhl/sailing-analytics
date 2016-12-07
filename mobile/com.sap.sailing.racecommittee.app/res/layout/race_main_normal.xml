@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/panels_pager"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/side_button_height"
+        android:layout_alignParentTop="true"
+        android:background="?attr/sap_gray" />
+
+    <FrameLayout
+        android:id="@+id/panels_top"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/side_button_height"
+        android:layout_alignParentTop="true"
+        android:visibility="gone">
+
+        <FrameLayout
+            android:id="@+id/race_panel_setup"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <FrameLayout
+            android:id="@+id/race_panel_time"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <FrameLayout
+            android:id="@+id/race_panel_extra"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/panel_switcher"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/panels_pager"
+        android:background="?attr/sap_gray">
+
+        <ImageView
+            android:id="@+id/nav_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:src="?attr/button_prev"/>
+
+        <ImageView
+            android:id="@+id/nav_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="?attr/button_next"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/dot_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                tools:src="@drawable/ic_dot" />
+
+            <ImageView
+                android:id="@+id/dot_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:src="@drawable/ic_dot" />
+
+            <ImageView
+                android:id="@+id/dot_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                tools:src="@drawable/ic_dot" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:layout_alignParentBottom="true"
+            android:background="?attr/black" />
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/race_panel_flags"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/side_button_height"
+        android:layout_alignParentBottom="true" />
+
+    <FrameLayout
+        android:id="@+id/race_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/race_panel_flags"
+        android:layout_below="@id/panel_switcher" />
+
+    <FrameLayout
+        android:id="@+id/race_edit"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/protest_time_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</RelativeLayout>

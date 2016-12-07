@@ -2,10 +2,6 @@ package com.sap.sailing.simulator.windfield.impl;
 
 import java.util.logging.Logger;
 
-import umontreal.iro.lecuyer.randvar.GeometricGen;
-import umontreal.iro.lecuyer.randvar.NormalGen;
-import umontreal.iro.lecuyer.rng.RandomStream;
-
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
@@ -22,9 +18,6 @@ import com.sap.sse.common.Util;
 
 public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implements WindFieldGenerator {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -188939912966537200L;
 
     private SpeedWithBearing[][] speedWithBearing;
@@ -148,35 +141,28 @@ public class WindFieldGeneratorBlastImpl extends WindFieldGeneratorImpl implemen
     }
 
     private boolean isBlastSeed() {
-        //return UniformGen.nextDouble(new LFSR113("BlastSeedStream"), 0, 1) < windParameters.blastProbability / 100.0;
         return windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.SEED.name()).nextDouble() < windParameters.blastProbability / 100.0;
     }
 
     private boolean isBlastCell() {
-        //return UniformGen.nextDouble(new LFSR113("BlastCellStream"), 0, 1) > this.blastEdgeProbability / 100.0;
         return windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.CELL.name()).nextDouble() > this.blastEdgeProbability / 100.0;
     }
 
     private double getBlastSpeed() {
         double bSpeedMean = windParameters.baseWindSpeed * (windParameters.blastWindSpeed / 100.0 - (defaultWindSpeed==0 ? 1. : 0.));
         double bSpeedVar = windParameters.baseWindSpeed * windParameters.blastWindSpeed / 100.0 * windParameters.blastWindSpeedVar / 100.0;
-        //System.out.println("blast par speed: "+windParameters.blastWindSpeed+" var: "+windParameters.blastWindSpeedVar);
-        //System.out.println("blast speed mean: "+bSpeedMean+" var: "+bSpeedVar);
-        //return NormalGen.nextDouble(new LFSR113("BlastSpeedStream"), bSpeedMean, bSpeedVar);
-        RandomStream speedStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.SPEED.name());
-        return Math.max(0.5*bSpeedMean, Math.min(1.5*bSpeedMean, NormalGen.nextDouble(speedStream, bSpeedMean, bSpeedVar)));
+        BlastRandom speedStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.SPEED.name());
+        return Math.max(0.5*bSpeedMean, Math.min(1.5*bSpeedMean, speedStream.nextGaussian(bSpeedMean, bSpeedVar)));
     }
 
     private int getBlastSize() {
-        //return GeometricGen.nextInt(new MRG32k3a("BlastSizeStream"), blastSizeProbability / 100.0);
-        RandomStream sizeStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.SIZE.name());
-        return GeometricGen.nextInt(sizeStream, blastSizeProbability / 100.0);
+        BlastRandom sizeStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.SIZE.name());
+        return (1 + sizeStream.nextGeometric(blastSizeProbability / 100.0));
     }
 
     private double getBlastAngle() {
-        //return NormalGen.nextDouble(new LFSR113("BlastAngleStream"), blastBearingMean, blastBearingVar);
-        RandomStream bearingStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.BEARING.name());
-        return Math.max(-1.5*blastBearingVar, Math.min(1.5*blastBearingVar, NormalGen.nextDouble(bearingStream, blastBearingMean, blastBearingVar)));
+        BlastRandom bearingStream = windParameters.getBlastRandomStreamManager().getRandomStream(BlastRandomSeedManagerImpl.BlastStream.BEARING.name());
+        return Math.max(-1.5*blastBearingVar, Math.min(1.5*blastBearingVar, bearingStream.nextGaussian(blastBearingMean, blastBearingVar)));
     }
 
     private SpeedWithBearing getSpeedWithBearing(TimedPosition timedPosition) {

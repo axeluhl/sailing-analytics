@@ -1,6 +1,10 @@
 package com.sap.sailing.domain.abstractlog.regatta;
 
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sse.common.WithID;
 /**
  * This log gathers information for regattas. {@link FlexibleLeaderboard}s are considered
@@ -9,5 +13,5 @@ import com.sap.sse.common.WithID;
  * uses the log supplied by its {@code Regatta}, whereas a {@link FlexibleLeaderboard} manages the log itself.
  */
 public interface RegattaLog extends AbstractLog<RegattaLogEvent, RegattaLogEventVisitor>, WithID {
-
+    public void revokeDefineMarkEventAndRelatedDeviceMappings(final RegattaLogDefineMarkEvent event, final AbstractLogEventAuthor author, final Logger logger);
 }

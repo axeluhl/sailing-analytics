@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/bin/s3cmd -c /root/.s3cfg sync s3://sapsailing-access-logs/elb-access-logs/ /var/log/old/elb-access-logs/ >/var/log/last-elb-access-logs-sync.out 2>/var/log/last-elb-access-logs-sync.err

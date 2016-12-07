@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -26,7 +27,7 @@ public class RaceLogFlagEventDeserializer extends BaseRaceLogEventDeserializer {
         Flags lowerFlag = Flags.valueOf(object.get(RaceLogFlagEventSerializer.FIELD_LOWER_FLAG).toString());
         boolean isDisplayed = (Boolean) object.get(RaceLogFlagEventSerializer.FIELD_DISPLAYED);
 
-        return factory.createFlagEvent(createdAt, author, timePoint, id, competitors, passId, upperFlag, lowerFlag, isDisplayed);
+        return new RaceLogFlagEventImpl(createdAt, timePoint, author, id, passId, upperFlag, lowerFlag, isDisplayed);
     }
 
 }

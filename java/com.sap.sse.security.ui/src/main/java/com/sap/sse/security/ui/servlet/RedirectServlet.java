@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gwt.safehtml.shared.UriUtils;
+
 public class RedirectServlet extends HttpServlet {
     
     private static final Logger logger = Logger.getLogger(RedirectServlet.class.getName());
@@ -57,7 +59,7 @@ public class RedirectServlet extends HttpServlet {
     
     private void doHiddenRedirect(HttpServletResponse resp, String target) throws IOException{
         String html = "<html><head><script type='text/javascript'>";
-        html += "window.location = '" + target +"';";
+        html += "window.location = '" + UriUtils.fromString(target) +"';";
         html +="</script></head><body></body></html>";
         resp.setContentType("text/html");
         resp.getWriter().append(html);
@@ -97,12 +99,12 @@ public class RedirectServlet extends HttpServlet {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        if (host.contains("local")){
+        if (host.startsWith("localhost")) {
             host = "127.0.0.1";
         }
         String link = "http://" + host + ":" + port + baseLink;
         int i = 1;
-        for(Entry<String, String> entry: parameters.entrySet()) {
+        for (Entry<String, String> entry : parameters.entrySet()) {
             link += i == 1 ? "?" : "&";
             link += entry.getKey() + "=" + entry.getValue();
             i++;
@@ -115,7 +117,7 @@ public class RedirectServlet extends HttpServlet {
             link += i == 1 ? "?" : "&";
             link += "locale=" + localeParam;
         }
-        logger.info("Redirecting from " + req.getRequestURL().toString() +" to: " + link);
+        logger.info("Redirecting from " + req.getRequestURL().toString() + " to: " + link);
         return link;
     }
 }

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -125,7 +126,7 @@ public class DomainFactoryImpl implements DomainFactory {
             }
             DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
             result = competitorStore.getOrCreateCompetitor(competitor.getID(), competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat,
-                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         }
         return result;
     }
@@ -142,7 +143,7 @@ public class DomainFactoryImpl implements DomainFactory {
         DynamicTeam team = new TeamImpl(competitor.getName(), teamMembers, /* coach */ null);
         result = baseDomainFactory.getCompetitorStore().getOrCreateCompetitor(getCompetitorID(competitor.getBoatID(), raceId, boatClass),
                 competitor.getName(), null /*displayColor*/, null /*email*/, null, team, boat,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         return result;
     }
 
@@ -196,7 +197,7 @@ public class DomainFactoryImpl implements DomainFactory {
         Iterable<Competitor> competitors = createCompetitorList(startList, race.getRaceID(), race.getBoatClass());
         logger.info("Creating RaceDefinitionImpl for race "+race.getRaceID());
         BoatClass boatClass = race.getBoatClass() != null ? race.getBoatClass() : getRaceTypeFromRaceID(race.getRaceID()).getBoatClass();
-        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitors, race.getRaceID());
+        RaceDefinition result = new RaceDefinitionImpl(race.getRaceName(), domainCourse, boatClass, competitors, /* competitorsAndTheirBoats */ Collections.emptyMap(), race.getRaceID());
         regatta.addRace(result);
         return result;
     }

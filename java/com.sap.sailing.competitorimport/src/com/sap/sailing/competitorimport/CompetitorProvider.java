@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
+import com.sap.sailing.competitorimport.CompetitorDescriptor;
+import com.sap.sse.common.Named;
 
 /**
  * Competitor data may come from various sources, such as external regatta management systems (RMS),
@@ -22,7 +24,7 @@ import javax.xml.bind.JAXBException;
  * @author Axel Uhl (d043530)
  *
  */
-public interface CompetitorProvider {
+public interface CompetitorProvider extends Named{
     /**
      * @return keys are event names, values are the names of the regatta in the event for which the connector has
      *         competitor names. Should the value for a key be <code>null</code>, competitors for the event may still

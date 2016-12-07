@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -85,6 +86,12 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
+    public void notifyListenersAboutIsFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.isFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
+        }
+    }
+
     public void notifyListenersAboutIsStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.isStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
@@ -154,6 +161,12 @@ public class RaceColumnListeners implements Serializable {
     public void notifyListenersAboutRaceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
             listener.raceLogEventAdded(raceColumn, raceLogIdentifier, event);
+        }
+    }
+
+    public void notifyListenersAboutRegattaLogEventAdded(RegattaLogEvent event) {
+        for (RaceColumnListener listener : getRaceColumnListeners()) {
+            listener.regattaLogEventAdded(event);
         }
     }
 }

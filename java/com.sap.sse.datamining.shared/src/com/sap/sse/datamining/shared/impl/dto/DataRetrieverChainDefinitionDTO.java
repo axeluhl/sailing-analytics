@@ -3,18 +3,16 @@ package com.sap.sse.datamining.shared.impl.dto;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.UUID;
 
 import com.sap.sse.common.settings.SerializableSettings;
 
 public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable<DataRetrieverChainDefinitionDTO> {
     private static final long serialVersionUID = 7806173601799997214L;
     
-    private UUID id;
-    private String name;
     private String dataSourceTypeName;
-    
     private ArrayList<DataRetrieverLevelDTO> retrieverLevels;
+
+    private String displayName;
 
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -22,19 +20,14 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
     @Deprecated
     DataRetrieverChainDefinitionDTO() { }
 
-    public DataRetrieverChainDefinitionDTO(UUID id, String name, String dataSourceTypeName, ArrayList<DataRetrieverLevelDTO> retrieverLevels) {
-        this.id = id;
-        this.name = name;
+    public DataRetrieverChainDefinitionDTO(String name, String dataSourceTypeName, ArrayList<DataRetrieverLevelDTO> retrieverLevels) {
+        this.displayName = name;
         this.dataSourceTypeName = dataSourceTypeName;
         this.retrieverLevels = new ArrayList<>(retrieverLevels);
     }
-
-    public UUID getId() {
-        return id;
-    }
-
+    
     public String getName() {
-        return name;
+        return displayName;
     }
 
     public String getDataSourceTypeName() {
@@ -112,15 +105,15 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
     
     @Override
     public String toString() {
-        return getDataSourceTypeName() + " -> " + getRetrievedDataTypeName() +
-               "[ID: " + id + ", name: " + name + "]";
+        return getDataSourceTypeName() + " -> " + getRetrievedDataTypeName() + "[name: " + displayName + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((dataSourceTypeName == null) ? 0 : dataSourceTypeName.hashCode());
+        result = prime * result + ((retrieverLevels == null) ? 0 : retrieverLevels.hashCode());
         return result;
     }
 
@@ -133,10 +126,15 @@ public class DataRetrieverChainDefinitionDTO implements Serializable, Comparable
         if (getClass() != obj.getClass())
             return false;
         DataRetrieverChainDefinitionDTO other = (DataRetrieverChainDefinitionDTO) obj;
-        if (id == null) {
-            if (other.id != null)
+        if (dataSourceTypeName == null) {
+            if (other.dataSourceTypeName != null)
                 return false;
-        } else if (!id.equals(other.id))
+        } else if (!dataSourceTypeName.equals(other.dataSourceTypeName))
+            return false;
+        if (retrieverLevels == null) {
+            if (other.retrieverLevels != null)
+                return false;
+        } else if (!retrieverLevels.equals(other.retrieverLevels))
             return false;
         return true;
     }

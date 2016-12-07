@@ -3,32 +3,53 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class RaceMapSettings extends AbstractSettings {
+    public static final String PARAM_SHOW_MAPCONTROLS = "showMapControls";
+    public static final String PARAM_SHOW_COURSE_GEOMETRY = "showCourseGeometry";
+    public static final String PARAM_MAP_ORIENTATION_WIND_UP = "windUp";
+    public static final String PARAM_VIEW_SHOW_STREAMLETS = "viewShowStreamlets";
+    public static final String PARAM_VIEW_SHOW_STREAMLET_COLORS = "viewShowStreamletColors";
+    public static final String PARAM_VIEW_SHOW_SIMULATION = "viewShowSimulation";
+    public static final String PARAM_BUOY_ZONE_RADIUS_IN_METERS = "buoyZoneRadiusInMeters";
 
-    private boolean showDouglasPeuckerPoints = false;
+    public static final Distance DEFAULT_BUOY_ZONE_RADIUS = new MeterDistance(15);
+
+    private final boolean showDouglasPeuckerPoints;
 
     private final Set<ManeuverType> maneuverTypesToShow;
 
-    private boolean showOnlySelectedCompetitors = false;
+    private final boolean showOnlySelectedCompetitors;
 
-    private RaceMapZoomSettings zoomSettings;
+    private final RaceMapZoomSettings zoomSettings;
 
-    private RaceMapHelpLinesSettings helpLinesSettings;
-
-    private long tailLengthInMilliseconds = 100000l;
-
-    private double buoyZoneRadiusInMeters = 0.0;
-
-    private boolean showSelectedCompetitorsInfo = true;
+    private final RaceMapHelpLinesSettings helpLinesSettings;
     
-    private boolean showWindStreamletOverlay = false;
+    private final boolean transparentHoverlines;
+    
+    private final int hoverlineStrokeWeight;
 
-    private boolean showSimulationOverlay = false;
+    private final long tailLengthInMilliseconds;
+
+    private final Distance buoyZoneRadius;
+
+    private final boolean showSelectedCompetitorsInfo;
+    
+    private final boolean showWindStreamletColors;
+    
+    private final boolean showWindStreamletOverlay;
+
+    private final boolean showSimulationOverlay;
+    
+    private final boolean showMapControls;
     
     /**
      * If <code>true</code>, all map contents will be transformed to a water-only environment, rotating all directions /
@@ -38,32 +59,103 @@ public class RaceMapSettings extends AbstractSettings {
      * positions to any other coordinate space that is translated and rotated compared to the original
      * coordinate space.
      */
-    private boolean windUp = false;
+    private final boolean windUp;
 
     public RaceMapSettings() {
-        // empty default settings; don't show maneuvers by default
-        maneuverTypesToShow = new HashSet<ManeuverType>();
-        this.zoomSettings = new RaceMapZoomSettings();
-        this.helpLinesSettings = new RaceMapHelpLinesSettings();
+        this(
+                /* showMapControls */ true,
+                new RaceMapHelpLinesSettings(),
+                /* windUp */ false,
+                /* buoyZoneRadius */ DEFAULT_BUOY_ZONE_RADIUS,
+                /* showWindStreamletOverlay */ false,
+                /* showWindStreamletColors */ false,
+                /* showSimulationOverlay */ false);
+    }
+
+    public RaceMapSettings(RaceMapZoomSettings zoomSettings, RaceMapHelpLinesSettings helpLinesSettings,
+            boolean transparentHoverlines, int hoverlineStrokeWeight, long tailLengthInMilliseconds, boolean windUp,
+            Distance buoyZoneRadius, boolean showOnlySelectedCompetitors, boolean showSelectedCompetitorsInfo,
+            boolean showWindStreamletColors, boolean showWindStreamletOverlay, boolean showSimulationOverlay,
+            boolean showMapControls, Set<ManeuverType> maneuverTypesToShow, boolean showDouglasPeuckerPoints) {
+        this.zoomSettings = zoomSettings;
+        this.helpLinesSettings = helpLinesSettings;
+        this.transparentHoverlines = transparentHoverlines;
+        this.hoverlineStrokeWeight = hoverlineStrokeWeight;
+        this.tailLengthInMilliseconds = tailLengthInMilliseconds;
+        this.windUp = windUp;
+        this.buoyZoneRadius = buoyZoneRadius;
+        this.showOnlySelectedCompetitors = showOnlySelectedCompetitors;
+        this.showSelectedCompetitorsInfo = showSelectedCompetitorsInfo;
+        this.showWindStreamletColors = showWindStreamletColors;
+        this.showWindStreamletOverlay = showWindStreamletOverlay;
+        this.showSimulationOverlay = showSimulationOverlay;
+        this.showMapControls = showMapControls;
+        this.maneuverTypesToShow = maneuverTypesToShow;
+        this.showDouglasPeuckerPoints = showDouglasPeuckerPoints;
+    }
+
+    private RaceMapSettings(boolean showMapControls, boolean showCourseGeometry, boolean windUp, Distance buoyZoneRadius, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
+        this(showMapControls, new RaceMapHelpLinesSettings(createHelpLineSettings(showCourseGeometry)), windUp, buoyZoneRadius, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
+    }
+
+    private RaceMapSettings(boolean showMapControls, RaceMapHelpLinesSettings helpLineSettings, boolean windUp, Distance buoyZoneRadius, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
+        this(
+                new RaceMapZoomSettings(),
+                helpLineSettings,
+                /* transparentHoverlines as discussed with Stefan on 2015-12-08 */ false,
+                /* hoverlineStrokeWeight as discussed with Stefan on 2015-12-08 */ 15,
+                /* tailLengthInMilliseconds */ 100000l,
+                /* windUp */ windUp,
+                /* buoyZoneRadius */ buoyZoneRadius,
+                /* showOnlySelectedCompetitors */ false,
+                /* showSelectedCompetitorsInfo */ true,
+                /* showWindStreamletColors */ showWindStreamletColors,
+                /* showWindStreamletOverlay */ showWindStreamletOverlay,
+                /* showSimulationOverlay */ showSimulationOverlay,
+                /* showMapControls */ showMapControls,
+                /* maneuverTypesToShow */ getDefaultManeuvers(),
+                /* showDouglasPeuckerPoints */ false);
+    }
+    
+    private static Set<HelpLineTypes> createHelpLineSettings(boolean showCourseGeometry) {
+        final Set<HelpLineTypes> helpLineTypes = new HashSet<>();
+        Util.addAll(new RaceMapHelpLinesSettings().getVisibleHelpLineTypes(), helpLineTypes);
+        if (showCourseGeometry) {
+            helpLineTypes.add(HelpLineTypes.COURSEGEOMETRY);
+        } else {
+            helpLineTypes.remove(HelpLineTypes.COURSEGEOMETRY);
+        }
+        return helpLineTypes;
     }
 
     /**
-     * "Copy constructor" that produces a new settings object that equals the one passed as argument
+     * copy constructor that produces a new settings object that equals the one passed as argument
      */
     public RaceMapSettings(RaceMapSettings settings) {
-        this.buoyZoneRadiusInMeters = settings.buoyZoneRadiusInMeters;
+        this(settings, new RaceMapZoomSettings(settings.zoomSettings.getTypesToConsiderOnZoom(), settings.zoomSettings.isZoomToSelectedCompetitors()));
+    }
+
+    /**
+     * copy constructor that produces a new settings object that equals the one passed as argument but takes the zoom settings from the second parameter
+     */
+    public RaceMapSettings(RaceMapSettings settings, RaceMapZoomSettings zoomSettings) {
+        this.buoyZoneRadius = settings.buoyZoneRadius;
         this.helpLinesSettings = new RaceMapHelpLinesSettings(settings.getHelpLinesSettings().getVisibleHelpLineTypes());
+        this.transparentHoverlines = settings.transparentHoverlines;
+        this.hoverlineStrokeWeight = settings.hoverlineStrokeWeight;
         this.maneuverTypesToShow = settings.maneuverTypesToShow;
         this.showDouglasPeuckerPoints = settings.showDouglasPeuckerPoints;
         this.showOnlySelectedCompetitors = settings.showOnlySelectedCompetitors;
         this.showSelectedCompetitorsInfo = settings.showSelectedCompetitorsInfo;
         this.showSimulationOverlay = settings.showSimulationOverlay;
         this.showWindStreamletOverlay = settings.showWindStreamletOverlay;
+        this.showWindStreamletColors = settings.showWindStreamletColors;
+        this.showMapControls = settings.showMapControls;
         this.tailLengthInMilliseconds = settings.tailLengthInMilliseconds;
         this.windUp = settings.windUp;
-        this.zoomSettings = new RaceMapZoomSettings(settings.zoomSettings.getTypesToConsiderOnZoom(), settings.zoomSettings.isZoomToSelectedCompetitors());
+        this.zoomSettings = zoomSettings;
     }
-
+    
     /**
      * @return 0 if the tails are not visible {@link #getTailLengthInMilliseconds()} otherwise
      */
@@ -79,40 +171,20 @@ public class RaceMapSettings extends AbstractSettings {
         return tailLengthInMilliseconds;
     }
 
-    public void setTailLengthInMilliseconds(long tailLengthInMilliseconds) {
-        this.tailLengthInMilliseconds = tailLengthInMilliseconds;
-    }
-
     public boolean isShowDouglasPeuckerPoints() {
         return showDouglasPeuckerPoints;
     }
     
-    public void setShowDouglasPeuckerPoints(boolean showDouglasPeuckerPoints) {
-        this.showDouglasPeuckerPoints = showDouglasPeuckerPoints;
-    }
-
     public boolean isShowWindStreamletOverlay() {
         return showWindStreamletOverlay;
     }
 
-    public void setShowWindStreamletOverlay(boolean showWindStreamletOverlay) {
-        this.showWindStreamletOverlay = showWindStreamletOverlay;
+    public boolean isShowWindStreamletColors() {
+        return showWindStreamletColors;
     }
 
     public boolean isShowSimulationOverlay() {
         return showSimulationOverlay;
-    }
-
-    public void setShowSimulationOverlay(boolean showSimulationOverlay) {
-        this.showSimulationOverlay = showSimulationOverlay;
-    }
-
-    public void showManeuverType(ManeuverType maneuverType, boolean show) {
-        if (show) {
-            maneuverTypesToShow.add(maneuverType);
-        } else {
-            maneuverTypesToShow.remove(maneuverType);
-        }
     }
 
     public boolean isShowManeuverType(ManeuverType maneuverType) {
@@ -123,47 +195,61 @@ public class RaceMapSettings extends AbstractSettings {
         return showOnlySelectedCompetitors;
     }
 
-    public void setShowOnlySelectedCompetitors(boolean showOnlySelectedCompetitors) {
-        this.showOnlySelectedCompetitors = showOnlySelectedCompetitors;
-    }
-
     public RaceMapZoomSettings getZoomSettings() {
         return zoomSettings;
-    }
-
-    public void setZoomSettings(RaceMapZoomSettings zoomSettings) {
-        this.zoomSettings = zoomSettings;
     }
 
     public RaceMapHelpLinesSettings getHelpLinesSettings() {
         return helpLinesSettings;
     }
 
-    public void setHelpLinesSettings(RaceMapHelpLinesSettings helpLinesSettings) {
-        this.helpLinesSettings = helpLinesSettings;
+    public boolean getTransparentHoverlines() {
+        return this.transparentHoverlines;
     }
-
+    
+    public int getHoverlineStrokeWeight() {
+        return this.hoverlineStrokeWeight;
+    }
+    
     public boolean isShowSelectedCompetitorsInfo() {
         return showSelectedCompetitorsInfo;
     }
 
-    public void setShowSelectedCompetitorsInfo(boolean showSelectedCompetitorsInfo) {
-        this.showSelectedCompetitorsInfo = showSelectedCompetitorsInfo;
-    }
-
-    public double getBuoyZoneRadiusInMeters() {
-        return buoyZoneRadiusInMeters;
-    }
-
-    public void setBuoyZoneRadiusInMeters(double buoyZoneRadiusInMeters) {
-        this.buoyZoneRadiusInMeters = buoyZoneRadiusInMeters;
+    public Distance getBuoyZoneRadius() {
+        return buoyZoneRadius;
     }
 
     public boolean isWindUp() {
         return windUp;
     }
 
-    public void setWindUp(boolean windUp) {
-        this.windUp = windUp;
+    public boolean isShowMapControls() {
+        return showMapControls;
+    }
+
+    private static HashSet<ManeuverType> getDefaultManeuvers() {
+        HashSet<ManeuverType> types = new HashSet<ManeuverType>();
+        types.add(ManeuverType.JIBE);
+        types.add(ManeuverType.TACK);
+        types.add(ManeuverType.PENALTY_CIRCLE);
+        return types;
+    }
+
+    public static RaceMapSettings readSettingsFromURL(boolean defaultForShowMapControls,
+            boolean defaultForShowCourseGeometry, boolean defaultForMapOrientationWindUp,
+            boolean defaultForViewShowStreamlets, boolean defaultForViewShowStreamletColors,
+            boolean defaultForViewShowSimulation) {
+        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_MAPCONTROLS, defaultForShowMapControls /* default */);
+        final boolean showCourseGeometry = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_COURSE_GEOMETRY, defaultForShowCourseGeometry /* default */);
+        final boolean windUp = GwtHttpRequestUtils.getBooleanParameter(PARAM_MAP_ORIENTATION_WIND_UP, defaultForMapOrientationWindUp /* default */);
+        final boolean showWindStreamletOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLETS, defaultForViewShowStreamlets /* default */);
+        final boolean showWindStreamletColors = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLET_COLORS, defaultForViewShowStreamletColors /* default */);
+        final boolean showSimulationOverlay = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_SIMULATION, defaultForViewShowSimulation /* default */);
+        final double buoyZoneRadiusInMeters = GwtHttpRequestUtils.getDoubleParameter(PARAM_BUOY_ZONE_RADIUS_IN_METERS, DEFAULT_BUOY_ZONE_RADIUS.getMeters() /* default */);
+        return new RaceMapSettings(showMapControls, showCourseGeometry, windUp, new MeterDistance(buoyZoneRadiusInMeters), showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
+    }
+
+    public Set<ManeuverType> getManeuverTypesToShow() {
+        return maneuverTypesToShow;
     }
 }

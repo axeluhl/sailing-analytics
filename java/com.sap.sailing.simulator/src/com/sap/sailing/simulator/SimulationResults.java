@@ -3,6 +3,7 @@ package com.sap.sailing.simulator;
 import java.util.Date;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.PathType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sse.common.TimePoint;
 

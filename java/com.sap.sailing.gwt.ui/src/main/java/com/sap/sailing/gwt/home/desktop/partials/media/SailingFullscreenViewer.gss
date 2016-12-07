@@ -1,0 +1,5 @@
+
+.is_autoplaying {
+  background-color: #f0ab00;
+}
+

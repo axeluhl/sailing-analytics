@@ -12,10 +12,10 @@ import com.sap.sse.common.TimePoint;
 public class RegattaLogRevokeEventImpl extends RevokeEventImpl<RegattaLogEventVisitor> implements RegattaLogRevokeEvent {
     private static final long serialVersionUID = -3470191515219206588L;
     
-    public RegattaLogRevokeEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
+    public RegattaLogRevokeEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId, Serializable revokedEventId, String revokedEventType, String revokedEventShortInfo,
             String reason) {
-        super(createdAt, author, logicalTimePoint, pId, revokedEventId, revokedEventType, revokedEventShortInfo, reason);
+        super(createdAt, logicalTimePoint, author, pId, revokedEventId, revokedEventType, revokedEventShortInfo, reason);
     }
     
     public RegattaLogRevokeEventImpl(AbstractLogEventAuthor author, RegattaLogEvent toRevoke, String reason) {

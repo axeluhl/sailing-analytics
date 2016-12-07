@@ -9,8 +9,8 @@ import com.sap.sailing.domain.abstractlog.BaseLogAnalyzer;
 
 /**
  * Finds all events in the log which is an {@code instanceof} {@link #ofType}.
+ * 
  * @author Fredrik Teschke
- *
  */
 public class AllEventsOfTypeFinder<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>,
 VisitorT> extends BaseLogAnalyzer<LogT, EventT, VisitorT, List<EventT>> {

@@ -6,17 +6,11 @@ package com.sap.sailing.gwt.home.shared;
 public class ExperimentalFeatures {
 
     /**
-     * Show new races list
+     * Provide button to show the competitor analytics in fullscreen view (work in progress)
      */
-    public static final boolean SHOW_NEW_RACES_LIST = true;
+    public static final boolean SHOW_COMPETITOR_ANALYTICS_FULLSCREEN_VIEWER = false;
     /**
-     * Show new regatta list
+     * Provide buttons for user management login via social services like facebook or google.
      */
-    public static final boolean SHOW_NEW_REGATTA_LIST = true;
-    /**
-     * Show overview tab for single-regatta events and series events.
-     */
-    public static final boolean SHOW_SINGLE_REGATTA_OVERVIEW = true;
-
-
+    public static final boolean SHOW_SOCIAL_LOGINS_FOR_USER_MANAGEMENT = false;
 }

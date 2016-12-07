@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.text.client.DateTimeFormatRenderer;
 
@@ -14,7 +15,11 @@ public class DateAndTimeFormatterUtil {
             DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     public static DateTimeFormatRenderer defaultTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
+    public static DateTimeFormatRenderer shortTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat(PredefinedFormat.TIME_SHORT));
 
+    public static DateTimeFormatRenderer weekdayMonthAbbrDayDateFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat("EEE, " + LocaleInfo.getCurrentLocale().getDateTimeFormatInfo().formatMonthAbbrevDay()));
     public static DateTimeFormatRenderer longDateFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG));
     public static DateTimeFormatRenderer longTimeFormatter = new DateTimeFormatRenderer(
@@ -31,6 +36,16 @@ public class DateAndTimeFormatterUtil {
         return defaultDateFormatter.render(startDate) + " - " + defaultDateFormatter.render(endDate);
     }
 
+    /**
+     * Formats a duration in a compact format so that hours and minutes are only shown if the duration is >1h to avoid
+     * unnecessary 00:yy or 00:xx:yy values.
+     * 
+     * Be aware that this method doesn't work for durations >= 24h.
+     * 
+     * @param timeInMilliseconds
+     *            the duration in milliseconds to format
+     * @return the formatted duration
+     */
     public static String formatElapsedTime(long timeInMilliseconds) {
         String result = "";
         int seconds = (int) (timeInMilliseconds / 1000) % 60 ;
@@ -54,5 +69,13 @@ public class DateAndTimeFormatterUtil {
         }
         
         return result;
+    }
+    
+    public static String getClientTimeZoneAsGMTString() {
+        Date now = new Date();
+        @SuppressWarnings("deprecation")
+        int localeTimezoneOffset = now.getTimezoneOffset();
+        TimeZone localeTimeZone = TimeZone.createTimeZone(localeTimezoneOffset);
+        return localeTimeZone.getGMTString(now);
     }
 }

@@ -9,7 +9,6 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.impl.TrackedRaces;
 import com.sap.sailing.domain.common.NoWindException;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -64,7 +63,7 @@ public interface TrackedRegatta extends Serializable {
      * @param raceLogResolver TODO
      */
     DynamicTrackedRace createTrackedRace(RaceDefinition raceDefinition, Iterable<Sideline> sidelines, WindStore windStore,
-    		GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver);
 
     /**
@@ -92,7 +91,7 @@ public interface TrackedRegatta extends Serializable {
     
     void removeRaceListener(RaceListener listener);
 
-    int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
+    int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException;
 
     void removeTrackedRace(RaceDefinition raceDefinition);
 

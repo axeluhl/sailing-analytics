@@ -10,7 +10,6 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventRestoreFactory;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -21,11 +20,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class BaseRaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
 
-    protected RaceLogEventRestoreFactory factory;
     protected JsonDeserializer<Competitor> competitorDeserializer;
     
     public BaseRaceLogEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
-        this.factory = RaceLogEventRestoreFactory.INSTANCE;
         this.competitorDeserializer = competitorDeserializer;
     }
     

@@ -8,7 +8,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 
 public interface SharedDomainFactory extends CompetitorFactory {
 
@@ -100,7 +99,7 @@ public interface SharedDomainFactory extends CompetitorFactory {
     /**
      * Hm.
      */
-    DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, List<String> clientIdentifiers);
+    DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(List<String> clientIdentifiers);
     
     Mark getExistingMarkByIdAsString(String toStringRepresentationOfID);
     

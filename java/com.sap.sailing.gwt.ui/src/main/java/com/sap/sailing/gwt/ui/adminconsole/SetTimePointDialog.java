@@ -2,19 +2,15 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
 
-import com.github.gwtbootstrap.datetimepicker.client.ui.base.HasViewMode.ViewMode;
-import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.event.logical.shared.AttachEvent.Handler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SetTimePointDialog extends DataEntryDialog<Date> {
+public class SetTimePointDialog extends DataEntryDialogWithBootstrap<Date> {
     private final BetterDateTimeBox time;
     private final StringMessages stringMessages;
     
@@ -29,29 +25,7 @@ public class SetTimePointDialog extends DataEntryDialog<Date> {
         
         this.stringMessages = stringMessages;
         
-        time = createTimeBox();
-    }
-    
-    private BetterDateTimeBox createTimeBox() {
-        final BetterDateTimeBox timeBox = new BetterDateTimeBox();
-        timeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Date> event) {
-                validate();
-            }
-        });
-        timeBox.addAttachHandler(new Handler() {
-            @Override
-            public void onAttachOrDetach(AttachEvent event) {
-                if (event.isAttached()) {
-                    addAutoHidePartner(timeBox.getPicker());
-                }
-            }
-        });
-        timeBox.setAutoClose(true);
-        timeBox.setStartView(ViewMode.HOUR);
-        timeBox.setFormat("dd/mm/yyyy hh:ii");
-        return timeBox;
+        time = createDateTimeBox(new Date());
     }
     
     @Override
@@ -66,5 +40,4 @@ public class SetTimePointDialog extends DataEntryDialog<Date> {
     protected Date getResult() {
         return time.getValue();
     }
-
 }

@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.racelog.tracking;
 
-import com.sap.sailing.domain.abstractlog.AbstractLog;
+import java.util.function.Consumer;
+
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -23,32 +25,26 @@ public enum EmptyGPSFixStore implements GPSFixStore {
 
     @Override
     public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-            AbstractLog<?, ?> log, Competitor competitor) {
+            RegattaLog log, Competitor competitor) {
     }
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
-            AbstractLog<?, ?> log, Mark mark) {
+            RegattaLog log, Mark mark) {
     }
 
     @Override
-    public void addListener(GPSFixReceivedListener listener, DeviceIdentifier device) {
+    public void addListener(FixReceivedListener<GPSFix> listener, DeviceIdentifier device) {
     }
 
     @Override
-    public void removeListener(GPSFixReceivedListener listener) {
+    public void removeListener(FixReceivedListener<GPSFix> listener) {
     }
 
-    @Override
-    public void loadCompetitorTrack(
-            DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-            DeviceMapping<Competitor> mapping) {
-
-    }
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
-            DeviceMapping<Mark> mapping) {
+            DeviceMapping<Mark> mapping, TimePoint start, TimePoint end) {
 
     }
 
@@ -68,12 +64,19 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     }
 
     @Override
-    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log,
-            Competitor competitor, TimePoint start, TimePoint end) throws TransformationException {
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark,
+            TimePoint start, TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
+    }
+    
+    @Override
+    public <FixT extends GPSFix> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier,
+            TimePoint start, TimePoint end, boolean inclusive)
+            throws NoCorrespondingServiceRegisteredException, TransformationException {
     }
 
     @Override
-    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark,
-            TimePoint start, TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end)
+            throws TransformationException, NoCorrespondingServiceRegisteredException {
     }
 }

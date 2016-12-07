@@ -7,6 +7,10 @@
       clear: both;
       visibility: hidden;
 */
+html {
+  	font-size: 15px;
+}
+
 .clearafter {
 	clear: both;
 	font-size: 1px;
@@ -48,6 +52,10 @@ table td,select,button {
 
 .gwt-DialogBox {
     z-index: 20;
+}
+
+.gwt-ToggleButton {
+	display: inline-block;
 }
 
 .gwt-PopupPanelGlass {
@@ -244,4 +252,9 @@ input.magnifier {
 
 .definitionProviderControlsElements {
 	margin: 2px;
+}
+
+.queryDefinitionViewerContent {
+	background-color: white;
+	padding: 5px;
 }

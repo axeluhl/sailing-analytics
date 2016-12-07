@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="HeaderLayout">
+        <attr name="headerText" format="reference|string" />
+        <attr name="showChevron" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="PanelButton">
+        <attr name="buttonHeader" format="reference|string" />
+
+        <attr name="buttonType" format="enum">
+            <enum name="typeValue" value="0" />
+            <enum name="typeImage" value="1" />
+            <enum name="typeSwitch" value="2" />
+            <enum name="typeFlag" value="3" />
+        </attr>
+
+        <attr name="buttonImage" format="reference" />
+        <attr name="buttonValue" format="reference|string" />
+        <attr name="buttonSwitch" format="reference|string" />
+
+        <attr name="linePosition" format="enum">
+            <enum name="none" value="-1" />
+            <enum name="left" value="0" />
+            <enum name="bottom" value="1" />
+            <enum name="right" value="2" />
+        </attr>
+
+        <attr name="showLock" format="boolean" />
+    </declare-styleable>
+
+</resources>

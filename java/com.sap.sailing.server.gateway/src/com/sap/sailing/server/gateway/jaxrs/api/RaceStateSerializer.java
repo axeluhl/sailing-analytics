@@ -38,6 +38,7 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         JSONObject result = new JSONObject();
         result.put("raceName", raceColumn.getName());
         result.put("fleetName", fleet.getName());
+        result.put("trackedRaceLinked", Boolean.valueOf(raceColumn.getTrackedRace(fleet) != null));
         RaceIdentifier raceIdentifier = raceColumn.getRaceIdentifier(fleet);
         result.put("trackedRaceName", raceIdentifier != null ? raceIdentifier.getRaceName() : null);
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);

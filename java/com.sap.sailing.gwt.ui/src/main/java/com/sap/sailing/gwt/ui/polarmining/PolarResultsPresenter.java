@@ -298,6 +298,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
 
     @Override
     public void updateSettings(Settings newSettings) {
+        // no-op
     }
 
     @Override
@@ -305,4 +306,8 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
         return "polarResultsPresenter";
     }
 
+    @Override
+    public Settings getSettings() {
+        return null;
+    }
 }

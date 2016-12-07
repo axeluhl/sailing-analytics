@@ -1,22 +1,21 @@
 package com.sap.sailing.racecommittee.app.utils.autoupdate;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
-import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class AutoUpdaterChecker {
 
@@ -47,11 +46,11 @@ public class AutoUpdaterChecker {
         dialog.setCancelable(true);
         dialog.setButton(DialogInterface.BUTTON_POSITIVE,
                 context.getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface arg0, int arg1) {
-                dialog.cancel();
-            }
-        });
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        dialog.cancel();
+                    }
+                });
     }
 
     public void check(URL serverUrl) {
@@ -62,7 +61,7 @@ public class AutoUpdaterChecker {
 
         private final boolean forceUpdate;
         private URL serverUrl;
-        
+
         public AutoUpdaterStateImpl(boolean forceUpdate) {
             this.forceUpdate = forceUpdate;
         }
@@ -74,7 +73,7 @@ public class AutoUpdaterChecker {
             dialog.setIndeterminate(true);
             dialog.setMessage(context.getString(R.string.auto_update_checking_version));
             dialog.show();
-            
+
             try {
                 URL versionUrl = composeVersionUrl();
                 ExLog.i(context, TAG, context.getString(R.string.auto_update_downloading_version, versionUrl.toString()));
@@ -98,7 +97,7 @@ public class AutoUpdaterChecker {
             int currentVersion = AppUtils.with(context).getPackageInfo().versionCode;
             boolean needsUpdate = currentVersion != serverVersion;
             ExLog.i(context, TAG, String.format("Server version is %d. Local version is %d.", serverVersion, currentVersion));
-            
+
             DialogInterface.OnClickListener dismissListener = new OnClickListener() {
                 @Override
                 public void onClick(DialogInterface prompt, int which) {
@@ -121,14 +120,17 @@ public class AutoUpdaterChecker {
             };
 
             String messageFormat = needsUpdate ? context.getString(R.string.auto_update_click_install) : context.getString(R.string.auto_update_force_install);
-            
-            AlertDialog.Builder updateDialog = new AlertDialog.Builder(context);
+            if (!AppUtils.with(context).isSideLoaded()) {
+                messageFormat += "\n\n" + context.getString(R.string.auto_update_with_store, AppUtils.with(context).getStoreName());
+            }
+
+            AlertDialog.Builder updateDialog = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
             updateDialog
-                .setTitle(R.string.auto_update)
-                .setMessage(String.format(messageFormat, serverVersion))
-                .setPositiveButton(context.getString(needsUpdate ? R.string.auto_update_install : android.R.string.ok), needsUpdate ? updateListener : dismissListener)
-                .setNegativeButton(context.getString(needsUpdate ?  android.R.string.cancel : R.string.auto_update_install_anyway), needsUpdate ? dismissListener : updateListener)
-                .setOnCancelListener(cancelListener);
+                    .setTitle(R.string.auto_update)
+                    .setMessage(String.format(messageFormat, serverVersion))
+                    .setPositiveButton(context.getString(needsUpdate ? R.string.auto_update_install : android.R.string.ok), needsUpdate ? updateListener : dismissListener)
+                    .setNegativeButton(context.getString(needsUpdate ? android.R.string.cancel : R.string.auto_update_install_anyway), needsUpdate ? dismissListener : updateListener)
+                    .setOnCancelListener(cancelListener);
             if (needsUpdate || forceUpdate) {
                 updateDialog.show();
             } else {
@@ -139,14 +141,14 @@ public class AutoUpdaterChecker {
 
         private void downloadUpdate(String apkFileName) {
             dialog.setMessage(context.getString(R.string.auto_update_downloading_apk));
-            
+
             try {
                 File target = updater.createApkTargetFile();
-                
+
                 final AutoUpdaterApkDownloader downloader = new AutoUpdaterApkDownloader(this, target, context);
-                
+
                 URL downloadUrl = composeDownloadUrl(apkFileName);
-                ExLog.i(context, TAG, String.format("Download from %s to file %s.", downloadUrl.toString() , target.getAbsolutePath()));
+                ExLog.i(context, TAG, String.format("Download from %s to file %s.", downloadUrl.toString(), target.getAbsolutePath()));
                 downloader.execute(downloadUrl);
                 dialog.setOnCancelListener(new OnCancelListener() {
                     @Override
@@ -180,22 +182,14 @@ public class AutoUpdaterChecker {
         @Override
         public void onError() {
             dialog.dismiss();
-            Drawable drawable = BitmapHelper.getDrawable(context, android.R.drawable.ic_dialog_alert);
             AlertDialog.Builder errorDialog = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
             errorDialog
-                .setTitle(R.string.auto_update)
-                .setMessage(R.string.auto_update_error)
-                .setIcon(drawable)
-                .setPositiveButton(context.getString(android.R.string.ok), new OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                .create()
-                .show();
+                    .setTitle(R.string.auto_update)
+                    .setMessage(R.string.auto_update_error)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
         }
-        
+
         protected URL composeVersionUrl() throws MalformedURLException {
             String packageName = context.getPackageName();
             return new URL(serverUrl.getProtocol(), serverUrl.getHost(), serverUrl.getPort(), serverUrl.getPath()

@@ -1,15 +1,15 @@
 package com.sap.sailing.dashboards.gwt.shared.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 /**
  * @author Alexander Ries (D062114)
  *
  */
-public class AverageDTO implements IsSerializable {
+public class AverageDTO implements Result {
 
-    public double average;
-    public double collectingTimeFrameInMilliseconds;
+    public Double average;
+    public Double collectingTimeFrameInMilliseconds;
     
     public AverageDTO(){}
 }

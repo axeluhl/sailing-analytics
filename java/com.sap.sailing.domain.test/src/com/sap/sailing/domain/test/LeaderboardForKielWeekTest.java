@@ -48,24 +48,24 @@ public class LeaderboardForKielWeekTest extends OnlineTracTracBasedTest {
         loadRace("event_20110609_KielerWoch-505_Race_2.txt", "event_20110609_KielerWoch-505_Race_2.mtb"); // 505 Race 2
         Competitor kevin = getCompetitorByName("Kevin");
         RaceColumn column = leaderboard.addRace(getTrackedRace(), "Test Race 1", /* medalRace */false);
-        assertEquals(17, leaderboard.getTotalPoints(kevin, now), 0.000000001);
+        assertEquals(17, leaderboard.getNetPoints(kevin, now), 0.000000001);
         Util.Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(kevin, column);
-        assertEquals(17, leaderboard.getContent(now).get(key).getTotalPoints(), 0.000000001);
-        assertEquals(17, leaderboard.getEntry(kevin, column, now).getTotalPoints(), 0.000000001);
+        assertEquals(17, leaderboard.getContent(now).get(key).getNetPoints(), 0.000000001);
+        assertEquals(17, leaderboard.getEntry(kevin, column, now).getNetPoints(), 0.000000001);
         loadRace("event_20110609_KielerWoch-505_Race_3.txt", "event_20110609_KielerWoch-505_Race_3.mtb"); // 505 Race 3
         column = leaderboard.addRace(getTrackedRace(), "Test Race 2", /* medalRace */false);
         key = new Util.Pair<Competitor, RaceColumn>(kevin, column);
         // In Race 3, Hasso ranked 31st
-        assertEquals(29, leaderboard.getTotalPoints(kevin, now), 0.000000001);
-        assertEquals(12, leaderboard.getContent(now).get(key).getTotalPoints(), 0.000000001);
-        assertEquals(12, leaderboard.getEntry(kevin, column, now).getTotalPoints(), 0.000000001);
+        assertEquals(29, leaderboard.getNetPoints(kevin, now), 0.000000001);
+        assertEquals(12, leaderboard.getContent(now).get(key).getNetPoints(), 0.000000001);
+        assertEquals(12, leaderboard.getEntry(kevin, column, now).getNetPoints(), 0.000000001);
         loadRace("event_20110609_KielerWoch-505_race_4.txt", "event_20110609_KielerWoch-505_race_4.mtb"); // 505 Race 4
         column = leaderboard.addRace(getTrackedRace(), "Test Race 3", /* medalRace */false);
         key = new Util.Pair<Competitor, RaceColumn>(kevin, column);
         // now the first race is discarded because Kevin ranked worst compared to the other two; in race 4 he ranked 10th
-        assertEquals(22, leaderboard.getTotalPoints(kevin, now), 0.000000001);
-        assertEquals(10, leaderboard.getContent(now).get(key).getTotalPoints(), 0.000000001);
-        assertEquals(10, leaderboard.getEntry(kevin, column, now).getTotalPoints(), 0.000000001);
+        assertEquals(22, leaderboard.getNetPoints(kevin, now), 0.000000001);
+        assertEquals(10, leaderboard.getContent(now).get(key).getNetPoints(), 0.000000001);
+        assertEquals(10, leaderboard.getEntry(kevin, column, now).getNetPoints(), 0.000000001);
     }
 
     private void loadRace(String paramsFile, String storedDataFile) throws MalformedURLException, IOException, InterruptedException,

@@ -2,12 +2,19 @@ package com.sap.sse.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import com.sap.sse.common.util.NaturalComparator;
 
 
 public class Util {
@@ -21,114 +28,120 @@ public class Util {
     
         private transient int hashCode;
     
-        @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
-        private Pair() {}
-        
-        public Pair( A a, B b ) {
+        @SuppressWarnings("unused")
+        // required for some serialization frameworks such as GWT RPC
+        private Pair() {
+        }
+
+        public Pair(A a, B b) {
             this.a = a;
             this.b = b;
             hashCode = 0;
         }
-    
-        public A getA( ) {
+
+        public A getA() {
             return a;
         }
-    
-        public B getB( ) {
+
+        public B getB() {
             return b;
         }
-    
+
         @Override
-        public int hashCode( ) {
-            if ( hashCode == 0 ) {
+        public int hashCode() {
+            if (hashCode == 0) {
                 hashCode = 17;
-                hashCode = 37 * hashCode + ( a != null ? a.hashCode( ) : 0 );
-                hashCode = 37 * hashCode + ( b != null ? b.hashCode( ) : 0 );
+                hashCode = 37 * hashCode + (a != null ? a.hashCode() : 0);
+                hashCode = 37 * hashCode + (b != null ? b.hashCode() : 0);
             }
             return hashCode;
         }
-    
+
         @Override
-        public boolean equals( Object obj ) {
+        public boolean equals(Object obj) {
             boolean result;
-            if ( this == obj ) {
+            if (this == obj) {
                 result = true;
-            } else if ( obj instanceof Pair<?, ?> ) {
+            } else if (obj instanceof Pair<?, ?>) {
                 Pair<?, ?> pair = (Pair<?, ?>) obj;
-                result = ( this.a != null && this.a.equals( pair.a ) || this.a == null && pair.a == null ) && ( this.b != null && this.b.equals( pair.b ) || this.b == null && pair.b == null );
+                result = (this.a != null && this.a.equals(pair.a) || this.a == null && pair.a == null)
+                        && (this.b != null && this.b.equals(pair.b) || this.b == null && pair.b == null);
             } else {
                 result = false;
             }
             return result;
         }
-    
+
         @Override
-        public String toString( ) {
-            return "[" + (a==null?"null":a.toString( )) + ", " +
-                (b==null?"null":b.toString( )) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        public String toString() {
+            return "[" + (a == null ? "null" : a.toString()) + ", " + (b == null ? "null" : b.toString()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
     }
 
     public static class Triple<A, B, C> implements Serializable {
         private static final long serialVersionUID = 6806146864367514601L;
-    
+
         private A a;
-    
+
         private B b;
-    
+
         private C c;
-    
+
         private transient int hashCode;
-    
-        @SuppressWarnings("unused") // required for some serialization frameworks such as GWT RPC
-        private Triple() {}
-    
-        public Triple( A a, B b, C c ) {
+
+        @SuppressWarnings("unused")
+        // required for some serialization frameworks such as GWT RPC
+        private Triple() {
+        }
+
+        public Triple(A a, B b, C c) {
             this.a = a;
             this.b = b;
             this.c = c;
             hashCode = 0;
         }
-    
-        public A getA( ) {
+
+        public A getA() {
             return a;
         }
-    
-        public B getB( ) {
+
+        public B getB() {
             return b;
         }
-    
-        public C getC( ) {
+
+        public C getC() {
             return c;
         }
-    
+
         @Override
-        public int hashCode( ) {
-            if ( hashCode == 0 ) {
+        public int hashCode() {
+            if (hashCode == 0) {
                 hashCode = 17;
-                hashCode = 37 * hashCode + ( a != null ? a.hashCode( ) : 0 );
-                hashCode = 37 * hashCode + ( b != null ? b.hashCode( ) : 0 );
-                hashCode = 37 * hashCode + ( c != null ? c.hashCode( ) : 0 );
+                hashCode = 37 * hashCode + (a != null ? a.hashCode() : 0);
+                hashCode = 37 * hashCode + (b != null ? b.hashCode() : 0);
+                hashCode = 37 * hashCode + (c != null ? c.hashCode() : 0);
             }
             return hashCode;
         }
-    
+
         @Override
-        public boolean equals( Object obj ) {
+        public boolean equals(Object obj) {
             boolean result;
-            if ( this == obj ) {
+            if (this == obj) {
                 result = true;
-            } else if ( obj instanceof Triple<?, ?, ?> ) {
+            } else if (obj instanceof Triple<?, ?, ?>) {
                 Triple<?, ?, ?> thrice = (Triple<?, ?, ?>) obj;
-                result = ( this.a != null && this.a.equals( thrice.a ) || this.a == null && thrice.a == null ) && ( this.b != null && this.b.equals( thrice.b ) || this.b == null && thrice.b == null ) && ( this.c != null && this.c.equals( thrice.c ) || this.c == null && thrice.c == null );
+                result = (this.a != null && this.a.equals(thrice.a) || this.a == null && thrice.a == null)
+                        && (this.b != null && this.b.equals(thrice.b) || this.b == null && thrice.b == null)
+                        && (this.c != null && this.c.equals(thrice.c) || this.c == null && thrice.c == null);
             } else {
                 result = false;
             }
             return result;
         }
-    
+
         @Override
-        public String toString( ) {
+        public String toString() {
             return "[" + a + ", " + b + ", " + c + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         }
     }
@@ -146,6 +159,19 @@ public class Util {
             }
         }
         return addTo;
+    }
+    
+    /**
+     * Adds <code>v</code> to the value set for key <code>k</code>. If no entry exists yet for <code>k</code>, the
+     * entry is created using a {@link HashSet} for the value set.
+     */
+    public static <K, V> void add(Map<K, Set<V>> map, K k, V v) {
+        Set<V> set = map.get(k);
+        if (set == null) {
+            set = new HashSet<>();
+            map.put(k, set);
+        }
+        set.add(v);
     }
 
     /**
@@ -233,13 +259,34 @@ public class Util {
             List<T> l = (List<T>) iterable;
             return l.get(i);
         } else {
-            Iterator<T> iter = iterable.iterator();
+            final Iterator<T> iter = iterable.iterator();
             T result = iter.next();
             for (int j=0; j<i; j++) {
                 result = iter.next();
             }
             return result;
         }
+    }
+    
+    public static <T> T first(Iterable<T> iterable) {
+        final Iterator<T> iter = iterable.iterator();
+        final T result;
+        if (iter.hasNext()) {
+            result = iter.next();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public static <T> T last(Iterable<T> iterable) {
+        final T result;
+        if (isEmpty(iterable)) {
+            result = null;
+        } else {
+            result = get(iterable, size(iterable)-1);
+        }
+        return result;
     }
 
     /**
@@ -316,14 +363,53 @@ public class Util {
         return defaultVal;
     }
 
+    /**
+     * Ensures that a {@link Set Set&lt;V&gt;} is contained in {@code map} for {@code key} and
+     * then adds {@code value} to that set. No synchronization / concurrency control effort is
+     * made. This is the caller's obligation.
+     */
     public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
-        if (! map.containsKey(key)) {
-            map.put(key, new HashSet<V>());
+        Set<V> set = map.get(key);
+        if (set == null) {
+            set = new HashSet<V>();
+            map.put(key, set);
         }
-        map.get(key).add(value);
+        set.add(value);
     }
 
-    public static String join(String separator, String...strings) {
+    /**
+     * Removes {@code value} from all sets contained as values in {@code map}. If a set is emptied by this removal it is
+     * removed from the map. No synchronization / concurrency control effort is made. This is the caller's obligation.
+     */
+    public static <K, V> void removeFromAllValueSets(Map<K, Set<V>> map, V value) {
+        for (final Iterator<Entry<K, Set<V>>> i=map.entrySet().iterator(); i.hasNext(); ) {
+            final Entry<K, Set<V>> e = i.next();
+            e.getValue().remove(value);
+            if (e.getValue().isEmpty()) {
+                i.remove();
+            }
+        }
+    }
+    
+    /**
+     * Removes {@code value} from the set that is the value for {@code key} in {@code map} if that key exists. If the
+     * set existed and is emptied by this removal it is removed from the map. No synchronization / concurrency control
+     * effort is made. This is the caller's obligation.
+     */
+    public static <K, V> void removeFromValueSet(Map<K, Set<V>> map, K key, V value) {
+        final Set<V> valuesPerKey = map.get(key);
+        if (valuesPerKey != null) {
+            if (valuesPerKey.remove(value) && valuesPerKey.isEmpty()) {
+                map.remove(key);
+            }
+        }
+    }
+
+    public static String join(String separator, String... strings) {
+        return joinStrings(separator, Arrays.asList(strings));
+    }
+
+    public static String joinStrings(String separator, Iterable<String> strings) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for (String string : strings) {
@@ -403,5 +489,65 @@ public class Util {
             result = timePoint.after(a) && timePoint.before(b);
         }
         return result;
+    }
+    
+    /**
+     * Searches the dominant object in an <code>Iterable&lt;T&gt;</code> collection.
+     * 
+     * @param objects
+     *            The <code>Iterable&lt;T&gt;</code> collection which should be analyzed. Objects are compared
+     *            by their definition of {@link Object#equals(Object)}.
+     * @return <code>T</code> Returns the dominant object. If the collection have two objects with the highest count,
+     *         you will get one of them returned. If the collection is <code>null</code> or empty, the method will
+     *         return <code>null</code>.
+     */
+    public static <T> T getDominantObject(Iterable<T> objects) {
+        T result = null;
+        if (objects != null) {
+            if (objects.iterator().hasNext()) {
+                HashMap<T, Integer> countPerObject = new HashMap<>();
+                int highestCount = 0;
+                for (T it : objects) {
+                    Integer objectCount = countPerObject.get(it);
+                    if (objectCount == null) {
+                        objectCount = 0;
+                    }
+                    objectCount++;
+                    countPerObject.put(it, objectCount);
+                    if (objectCount > highestCount) {
+                        highestCount = objectCount;
+                        result = it;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public static <T> List<T> asList(Iterable<T> visibleCourseAreas) {
+        ArrayList<T> list = new ArrayList<T>();
+        addAll(visibleCourseAreas, list);
+        return list;
+    }
+
+    public static <T> List<T> cloneListOrNull(List<T> list) {
+        final List<T> result;
+        if (list == null) {
+            result = null;
+        } else {
+            result = new ArrayList<T>(list);
+        }
+        return result;
+    }
+
+    public static <T extends Named> List<T> sortNamedCollection(Collection<T> collection) {
+        List<T> sortedCollection = new ArrayList<>(collection);
+        Collections.sort(sortedCollection, new Comparator<T>() {
+            @Override
+            public int compare(T o1, T o2) {
+                return new NaturalComparator().compare(o1.getName(), o2.getName());
+            }
+        });
+        return sortedCollection;
     }
 }

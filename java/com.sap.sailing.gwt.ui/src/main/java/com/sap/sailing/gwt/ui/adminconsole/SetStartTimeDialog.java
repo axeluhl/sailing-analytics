@@ -59,6 +59,7 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
         this.leaderboardName = leaderboardName;
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
+        this.ensureDebugId("SetStartTimeDialog");
     }
     
     @Override
@@ -101,14 +102,17 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
         Grid content = new Grid(5, 2);
         timeBox = createDateTimeBox(new Date());
         timeBox.setFormat("dd/mm/yyyy hh:ii:ss");
+        timeBox.ensureDebugId("StartTimeTimeBox");
         content.setWidget(0, 0, createLabel(stringMessages.startTime()));
         content.setWidget(0, 1, timeBox);
         
         
         authorNameBox = createTextBox("Shore");
+        authorNameBox.ensureDebugId("AuthorNameTextBox");
         content.setWidget(1, 0, createLabel(stringMessages.authorName()));
         content.setWidget(1, 1, authorNameBox);
         authorPriorityBox = createIntegerBox(4, 2);
+        authorPriorityBox.ensureDebugId("AuthorPriorityIntegerBox");
         content.setWidget(2, 0, createLabel(stringMessages.authorPriority()));
         content.setWidget(2, 1, authorPriorityBox);
         
@@ -118,11 +122,13 @@ public class SetStartTimeDialog extends DataEntryDialogWithBootstrap<RaceLogSetS
         for (RacingProcedureType racingType : RacingProcedureType.values()) {
             racingProcedureSelection.setValue(racingCounter++, racingType.name());
         }
+        racingProcedureSelection.ensureDebugId("RacingProcedureListBox");
         content.setWidget(3, 0, createLabel(stringMessages.racingProcedure()));
         content.setWidget(3, 1, racingProcedureSelection);
         
         advancePassIdCheckbox = createCheckbox(stringMessages.advancePassId());
         advancePassIdCheckbox.setValue(false);
+        advancePassIdCheckbox.ensureDebugId("AnvancePassIdCheckBox");
         content.setWidget(4, 1, advancePassIdCheckbox);
         return content;
     }

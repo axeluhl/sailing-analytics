@@ -21,10 +21,9 @@
 	<inherits name='com.google.gwt.maps.Maps' />
 	<!-- GWT JSON Support -->
 	<inherits name='com.google.gwt.json.JSON' />
-				
-	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow" />
+        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
+  	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.YoutubePopupWindow" />
 
-	<extend-property name="locale" values="de"/>
 	<source path='client'/>
 	<source path='shared'/>
 	<source path='actions'/>

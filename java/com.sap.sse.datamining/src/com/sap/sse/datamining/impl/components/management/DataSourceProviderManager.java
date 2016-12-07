@@ -8,8 +8,9 @@ import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.components.management.DataSourceProviderRegistry;
 
 public class DataSourceProviderManager implements DataSourceProviderRegistry {
+    
+    private static final Logger logger = Logger.getLogger(DataSourceProviderManager.class.getName());
 
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
     private final Map<Class<?>, DataSourceProvider<?>> sourceProvidersMappedBySourceType;
     
     public DataSourceProviderManager() {
@@ -29,7 +30,7 @@ public class DataSourceProviderManager implements DataSourceProviderRegistry {
         if (previousProvider == null) {
             logger.info("Registering data source provider " + dataSourceProvider + " for data source type " + dataSourceType.getName());
         } else {
-            logger.info("Replacing data source provider " + previousProvider + " with " + dataSourceProvider + " for data source type " + dataSourceType.getName());
+            logger.warning("Replacing data source provider " + previousProvider + " with " + dataSourceProvider + " for data source type " + dataSourceType.getName());
         }
         return true;
     }

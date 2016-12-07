@@ -7,6 +7,7 @@ import org.junit.Before;
 
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
+import com.sap.sse.mail.MailServiceResolver;
 import com.sap.sse.mail.impl.MailServiceImpl;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp;
 import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
@@ -24,7 +25,14 @@ public class AbstractMailServiceReplicationTest extends AbstractServerWithSingle
     }
     
     public static MailServiceImpl createMailCountingService(final boolean canSendMail) {
-        return new MailServiceImpl(null) {
+        final MailServiceImpl[] mailService = new MailServiceImpl[1];
+        MailServiceResolver mailServiceResolver = new MailServiceResolver() {
+            @Override
+            public MailService getMailService() {
+                return mailService[0];
+            }
+        };
+        mailService[0] = new MailServiceImpl(null, mailServiceResolver) {
             @Override
             protected void internalSendMail(String toAddress, String subject, ContentSetter contentSetter)
                     throws MailException {
@@ -34,6 +42,7 @@ public class AbstractMailServiceReplicationTest extends AbstractServerWithSingle
                 }
             }
         };
+        return mailService[0];
     }
 
     public static class MailServerReplicationTestSetUp extends AbstractServerReplicationTestSetUp<MailService, MailServiceImpl> {

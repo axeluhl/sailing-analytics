@@ -1,0 +1,11 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sse.gwt.common.CommonSharedResources" />
+    <ui:with field="local_res" type="com.sap.sse.security.ui.authentication.UserManagementResources" />
+    <g:HTMLPanel addStyleNames="{local_res.css.flyover_content_wrapper}">
+        <div ui:field="flyoverContentUi" class="{local_res.css.flyover_content}">
+            <div class="{local_res.css.form_title}" ui:field="headingUi"></div>
+            <g:SimplePanel ui:field="contentContainerUi"/>
+        </div>
+	</g:HTMLPanel>
+</ui:UiBinder>

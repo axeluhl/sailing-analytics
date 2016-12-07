@@ -1,0 +1,11 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+		xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials">
+ 	<ui:style>
+	 	.outerBox {
+			padding-top: 10px;
+		}
+    </ui:style>
+    <g:HTMLPanel styleName="{style.outerBox}">
+		<dp:old.competitorcharts.OldCompetitorCharts ui:field='competitorCharts'/>
+    </g:HTMLPanel>
+</ui:UiBinder>

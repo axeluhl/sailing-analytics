@@ -1,7 +1,6 @@
 package com.sap.sailing.selenium.pages.adminconsole.tractrac;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -229,7 +228,23 @@ public class TracTracEventManagementPanelPO extends PageArea {
     }
     
     public void startTrackingForRace(TrackableRaceDescriptor race) {
-        startTrackingForRaces(Arrays.asList(race));
+        //startTrackingForRaces(Arrays.asList(race));
+        CellTablePO<DataEntryPO> table = getTrackableRacesTable();
+        DataEntryPO entryToSelect = null;
+        for (DataEntryPO entry : table.getEntries()) {
+            TrackableRaceDescriptor entryDiscribtor = new TrackableRaceDescriptor(entry.getColumnContent("Event"),
+                    entry.getColumnContent("Race"), entry.getColumnContent("Boat Class"));
+            if (race.equals(entryDiscribtor)) {
+                entryToSelect = entry;
+                break;
+            }
+        }
+        table.selectEntry(entryToSelect);
+        this.startTrackingButton.click();
+        ExpectedCondition<Alert> condition = ExpectedConditions.alertIsPresent();
+        if (condition.apply(this.driver) == null) {
+            waitForAjaxRequests();
+        }
     }
     
     public void startTrackingForRaces(List<TrackableRaceDescriptor> races) {

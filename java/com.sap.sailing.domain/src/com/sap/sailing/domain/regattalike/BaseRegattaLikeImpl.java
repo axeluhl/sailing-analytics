@@ -20,18 +20,25 @@ public abstract class BaseRegattaLikeImpl implements IsRegattaLike {
     private final RegattaLikeIdentifier identifier;
     private transient Set<RegattaLikeListener> listeners = new HashSet<>();
     
+    private class RegattaLogEventForwarder extends RegattaLogEventListener {
+        private final RegattaLikeIdentifier identifier;
+
+        private RegattaLogEventForwarder(RegattaLikeIdentifier identifier) {
+            this.identifier = identifier;
+        }
+
+        @Override
+        protected void eventAdded(RegattaLogEvent event) {
+            for (RegattaLikeListener listener : listeners) {
+                listener.onRegattaLogEvent(identifier, event);
+            }
+        }
+    }
+
     public BaseRegattaLikeImpl(final RegattaLikeIdentifier identifier, RegattaLogStore store) {
         regattaLog = store.getRegattaLog(identifier, /*ignoreCache*/ true);
         this.identifier = identifier;
-        
-        regattaLog.addListener(new RegattaLogEventListener() {
-            @Override
-            protected void eventAdded(RegattaLogEvent event) {
-                for (RegattaLikeListener listener : listeners) {
-                    listener.onRegattaLogEvent(identifier, event);
-                }
-            }
-        });
+        regattaLog.addListener(new RegattaLogEventForwarder(identifier));
     }
     
     @Override
@@ -57,6 +64,7 @@ public abstract class BaseRegattaLikeImpl implements IsRegattaLike {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<>();
+        regattaLog.addListener(new RegattaLogEventForwarder(identifier));
     }
 
     @Override

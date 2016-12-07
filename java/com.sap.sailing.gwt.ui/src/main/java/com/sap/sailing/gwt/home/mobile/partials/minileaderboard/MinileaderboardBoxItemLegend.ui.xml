@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-	<ui:with field="res" type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 
 	<ui:style>
 		.minileaderboard_item_legend {
@@ -11,7 +11,7 @@
 			padding: 1em 0.75em;
 	  		font-size: 0.866666666666667em;
 	  		min-height: 4.5em;
-	  		background-color: #f2f2f2;
+	  		background-color: #fff;
 		}
 		.minileaderboard_item_legend_description, .minileaderboard_item_legend_score {
 			position: absolute;

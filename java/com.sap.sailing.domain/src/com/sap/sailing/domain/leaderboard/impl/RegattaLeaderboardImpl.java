@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
@@ -14,6 +15,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.RaceColumnInSeriesImpl;
+import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
@@ -52,10 +54,14 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     public Regatta getRegatta() {
         return regatta;
     }
-
+    
+    public static String getLeaderboardNameForRegatta(Regatta regatta) {
+        return regatta.getName();
+    }
+    
     @Override
     public String getName() {
-        return getRegatta().getName();
+        return getLeaderboardNameForRegatta(getRegatta());
     }
 
     @Override
@@ -113,5 +119,20 @@ public class RegattaLeaderboardImpl extends AbstractLeaderboardImpl implements R
     @Override
     public IsRegattaLike getRegattaLike() {
         return regatta;
+    }
+    
+    @Override
+    protected LeaderboardType getLeaderboardType() {
+        return LeaderboardType.RegattaLeaderboard;
+    }
+
+    @Override
+    public BoatClass getBoatClass() {
+        return getRegatta().getBoatClass();
+    }
+
+    @Override
+    public CompetitorProviderFromRaceColumnsAndRegattaLike getOrCreateCompetitorsProvider() {
+        return getRegatta().getOrCreateCompetitorsProvider();
     }
 }

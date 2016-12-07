@@ -13,7 +13,8 @@ import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
@@ -31,11 +32,11 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
         String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
         String viewModeParamValue = Window.Location.getParameter("viewMode");
         final boolean canReplayDuringLiveRaces = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, /* defaultValue */ false);
+                RaceBoardPerspectiveSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, /* defaultValue */ false);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, /* defaultValue */ true);
+                RaceMapSettings.PARAM_SHOW_MAPCONTROLS, /* defaultValue */ true);
         final boolean showNavigationPanel = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardViewConfiguration.PARAM_VIEW_SHOW_NAVIGATION_PANEL, true /* default */);
+                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_NAVIGATION_PANEL, true /* default */);
         boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null
                 && Window.Location.getParameter("showRaceDetails").equalsIgnoreCase("true");
         final String groupName;

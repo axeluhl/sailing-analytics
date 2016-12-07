@@ -9,7 +9,7 @@ import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 
 public class RegattaStructureManagementPanelPO extends PageArea {
-    public static final String DEFAULT_SERIES_NAME = "Default"; //$NON-NLS-1$
+    public static final String DEFAULT_SERIES_NAME = "DefaultSelenium"; //$NON-NLS-1$
     
     @FindBy(how = BySeleniumId.class, using = "AddRegattaButton")
     WebElement addRegattaButton;
@@ -47,8 +47,15 @@ public class RegattaStructureManagementPanelPO extends PageArea {
         addSeriesDialog.pressOk();
         // QUESTION: How do we handle an error (here or in the dialog)?
         createRegattaDialog.pressOk();
+        DefaultRegattaLeaderboardCreateDialogPO createDefaultRegattaLeaderboardDialog = createDefaultRegattaLeaderboard();
+        createDefaultRegattaLeaderboardDialog.pressCancel();
     }
     
+    private DefaultRegattaLeaderboardCreateDialogPO createDefaultRegattaLeaderboard() {
+        WebElement dialog = findElementBySeleniumId(this.driver, "CreateDefaultRegattaLeaderboardDialog"); //$NON-NLS-1$
+        return new DefaultRegattaLeaderboardCreateDialogPO(this.driver, dialog);
+    }
+
     public RegattaListCompositePO getRegattaList() {
         return new RegattaListCompositePO(this.driver, this.regattaList);
     }

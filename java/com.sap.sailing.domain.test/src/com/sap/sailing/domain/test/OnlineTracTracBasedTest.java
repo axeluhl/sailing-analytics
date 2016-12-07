@@ -34,6 +34,7 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -63,7 +64,7 @@ import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
  * @author Axel Uhl (d043530)
  * 
  */
-public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
+public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest implements TrackingDataLoader {
     private final Logger logger = Logger.getLogger(OnlineTracTracBasedTest.class.getName());
     private DomainFactoryImpl domainFactory;
     private Regatta domainEvent;
@@ -97,6 +98,12 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         finishSetUp(receiverTypes);
     }
 
+    protected void setUp(String regattaName, String raceId, URI liveUri, URI storedUri, ReceiverType... receiverTypes)
+            throws MalformedURLException, IOException, InterruptedException, URISyntaxException,
+            SubscriberInitializationException, CreateModelException {
+        setUpWithoutLaunchingController(regattaName, raceId, liveUri, storedUri);
+        finishSetUp(receiverTypes);
+    }
 
     private void finishSetUp(ReceiverType... receiverTypes) throws InterruptedException {
         assertEquals(getExpectedEventName(), getTracTracEvent().getName());
@@ -131,20 +138,20 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
                     logger.info("Stored data begin");
                     lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, 0);
                     if (getTrackedRace() != null) {
-                        getTrackedRace().setStatus(lastStatus);
+                        getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
                     }
                     break;
                 case End:
                     logger.info("Stored data end");
                     lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 1);
                     if (getTrackedRace() != null) {
-                        getTrackedRace().setStatus(lastStatus);
+                        getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
                     }
                     break;
                 case Progress:
                     lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, storedDataEvent.getProgress());
                     if (getTrackedRace() != null) {
-                        getTrackedRace().setStatus(lastStatus);
+                        getTrackedRace().onStatusChanged(OnlineTracTracBasedTest.this, lastStatus);
                     }
                     break;
                 default:
@@ -208,9 +215,16 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
 
     protected void setUpWithoutLaunchingController(String regattaName, String raceId) throws FileNotFoundException, MalformedURLException,
             URISyntaxException, SubscriberInitializationException, CreateModelException {
-        final URL paramUrl = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId);
         final URI liveUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE);
         final URI storedUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED);
+        setUpWithoutLaunchingController(regattaName, raceId, liveUri, storedUri);
+    }
+
+
+    protected void setUpWithoutLaunchingController(String regattaName, String raceId, final URI liveUri,
+            final URI storedUri) throws MalformedURLException, FileNotFoundException, URISyntaxException,
+            SubscriberInitializationException, CreateModelException {
+        final URL paramUrl = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/"+raceId+".txt");
         setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
     }
 

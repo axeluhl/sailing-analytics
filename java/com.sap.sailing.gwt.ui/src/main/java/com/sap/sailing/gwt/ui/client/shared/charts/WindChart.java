@@ -44,8 +44,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
@@ -58,16 +56,16 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class WindChart extends AbstractRaceChart implements Component<WindChartSettings>, RequiresResize {
+public class WindChart extends AbstractRaceChart<WindChartSettings> implements RequiresResize {
     public static final String LODA_WIND_CHART_DATA_CATEGORY = "loadWindChartData";
     
     private static final int LINE_WIDTH = 1;
 
     private final WindChartSettings settings;
+    private final WindChartLifecycle windChartLifecycle;
     
     /**
      * Holds one series for each wind source for which data has been received.
@@ -84,17 +82,18 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     private final ColorMapImpl<WindSource> colorMap;
 
     /**
-     * @param raceSelectionProvider
+     * @param selectedRaceIdentifier
      *            if <code>null</code>, this chart won't update its contents automatically upon race selection change;
      *            otherwise, whenever the selection changes, the wind data of the race selected now is loaded from the
      *            server and displayed in this chart. If no race is selected, the chart is cleared. The caller of this
      *            constructor must ensure to trigger {@link RaceSelectionChangeListener#onRaceSelectionChange(List)} at
      *            least once to ensure that this chart sets its {@link AbstractRaceChart#selectedRaceIdentifier} field.
      */
-    public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
+    public WindChart(WindChartLifecycle windChartLifecycle, SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
             TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
-        super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        this.windChartLifecycle = windChartLifecycle;
         this.settings = settings;
         windSourceDirectionSeries = new HashMap<WindSource, Series>();
         windSourceSpeedSeries = new HashMap<WindSource, Series>();
@@ -190,7 +189,14 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                  .getXAxis().setAxisTitle(null);
         }
         setSize("100%", "100%");
-        raceSelectionProvider.addRaceSelectionChangeListener(this);
+        if (selectedRaceIdentifier != null) {
+            clearCacheAndReload();
+            if (isVisible()) {
+                updateVisibleSeries();
+            }
+        } else {
+            clearChart();
+        }
     }
     
     @Override
@@ -201,7 +207,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.wind();
+        return windChartLifecycle.getLocalizedShortName();
     }
 
     @Override
@@ -414,14 +420,12 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
 
     @Override
     public boolean hasSettings() {
-        return true;
+        return windChartLifecycle.hasSettings();
     }
 
     @Override
     public SettingsDialogComponent<WindChartSettings> getSettingsDialogComponent() {
-        WindChartSettings windChartSettings = new WindChartSettings(settings.isShowWindSpeedSeries(), settings.getWindSpeedSourcesToDisplay(),
-                settings.isShowWindDirectionsSeries(), settings.getWindDirectionSourcesToDisplay(), settings.getResolutionInMilliseconds());
-        return new WindChartSettingsDialogComponent(windChartSettings, stringMessages);
+        return windChartLifecycle.getSettingsDialogComponent(windChartLifecycle.cloneSettings(settings));
     }
 
     /**
@@ -497,23 +501,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         chart.removeAllSeries();
     }
 
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            selectedRaceIdentifier = selectedRaces.iterator().next();
-        } else {
-            selectedRaceIdentifier = null;
-        }
-        
-        if(selectedRaceIdentifier != null) {
-            clearCacheAndReload();
-            if(isVisible())
-                updateVisibleSeries();
-        } else {
-            clearChart();
-        }
-    }
-
     /**
      * If in live mode, fetches what's missing since the last fix and <code>date</code>. If nothing has been loaded yet,
      * loads from the beginning up to <code>date</code>. If in replay mode, checks if anything has been loaded at all. If not,
@@ -553,12 +540,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
             }
         }
      }
-
-    private void updateTimePlotLine(Date date) {
-        chart.getXAxis().removePlotLine(timePlotLine);
-        timePlotLine.setValue(date.getTime());
-        chart.getXAxis().addPlotLines(timePlotLine);
-    }
 
     @Override
     public void onResize() {
@@ -640,5 +621,9 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     public String getDependentCssClassName() {
         return "windChart";
     }
-    
+
+    @Override
+    public WindChartSettings getSettings() {
+        return settings;
+    }
 }

@@ -195,14 +195,14 @@ public class SwissTimingReplayAdapterServiceTest {
     public void testStartPerformanceDetection() throws Exception {
         SwissTimingReplayToDomainAdapter replayListener = new SwissTimingReplayToDomainAdapter(null, DomainFactory.INSTANCE,
                 new DummyTrackedRegattaRegistry(), /* useInternalMarkPassingAlgorithm */ false, mock(RaceLogResolver.class));
-        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005906.20120805.replay"), replayListener);
+        new SwissTimingReplayParserImpl().readData(getClass().getResourceAsStream("/SAW005905.20120805.replay"), replayListener);
         Iterable<? extends TrackedRace> trackedRaces = replayListener.getTrackedRaces();
         TrackedRace trackedRace = trackedRaces.iterator().next();
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             assertSame(DomainFactory.INSTANCE.getBaseDomainFactory().getOrCreateBoatClass("470"), competitor.getBoat().getBoatClass());
             Distance distanceToLineAtStart = trackedRace.getDistanceToStartLine(competitor, trackedRace.getStartOfRace());
             assertTrue(distanceToLineAtStart.getMeters() > 0);
-            assertTrue(distanceToLineAtStart.getMeters() < 8.5);
+            assertTrue(distanceToLineAtStart.getMeters() < 20);
         }
     }
 

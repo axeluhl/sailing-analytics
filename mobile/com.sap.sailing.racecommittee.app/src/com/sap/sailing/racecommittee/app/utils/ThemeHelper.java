@@ -1,24 +1,26 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import java.lang.reflect.Field;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.AttrRes;
-import android.support.annotation.ColorRes;
+import android.support.annotation.ColorInt;
+import android.support.annotation.DimenRes;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TimePicker;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-
-import java.lang.reflect.Field;
 
 public class ThemeHelper {
 
@@ -33,7 +35,7 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerTextColor(Context context, TimePicker timePicker, @ColorRes int color) {
+    public static void setPickerTextColor(Context context, TimePicker timePicker, @ColorInt int color) {
         NumberPicker hourPicker = getHourPicker(timePicker);
         if (hourPicker != null) {
             setPickerTextColor(context, hourPicker, color);
@@ -45,7 +47,7 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerTextColor(Context context, NumberPicker numberPicker, @ColorRes int color) {
+    public static void setPickerTextColor(Context context, NumberPicker numberPicker, @ColorInt int color) {
         final int count = numberPicker.getChildCount();
         for (int i = 0; i < count; i++) {
             View child = numberPicker.getChildAt(i);
@@ -67,7 +69,7 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerDividerColor(Context context, TimePicker timePicker, @ColorRes int color) {
+    public static void setPickerDividerColor(Context context, TimePicker timePicker, @ColorInt int color) {
         NumberPicker hourPicker = getHourPicker(timePicker);
         if (hourPicker != null) {
             setPickerDividerColor(context, hourPicker, color);
@@ -79,7 +81,7 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerDividerColor(Context context, NumberPicker numberPicker, @ColorRes int color) {
+    public static void setPickerDividerColor(Context context, NumberPicker numberPicker, @ColorInt int color) {
         try {
             ColorDrawable drawable = new ColorDrawable(color);
             Field selectionDivider = numberPicker.getClass().getDeclaredField("mSelectionDivider");
@@ -94,17 +96,32 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerColor(Context context, TimePicker timePicker, @ColorRes int textColor, @ColorRes int dividerColor) {
+    public static void setPickerColor(Context context, TimePicker timePicker, @ColorInt int textColor, @ColorInt int dividerColor) {
         setPickerTextColor(context, timePicker, textColor);
         setPickerDividerColor(context, timePicker, dividerColor);
     }
 
-    public static void setPickerColor(Context context, NumberPicker numberPicker, @ColorRes int textColor, @ColorRes int dividerColor) {
+    public static void setPickerColor(Context context, NumberPicker numberPicker, @ColorInt int textColor, @ColorInt int dividerColor) {
         setPickerTextColor(context, numberPicker, textColor);
         setPickerDividerColor(context, numberPicker, dividerColor);
     }
 
-    public static @ColorRes int getColor(Context context, @AttrRes int colorId) {
+    public static void setPickerTextSize(Context context, NumberPicker numberPicker, @DimenRes int dimen) {
+        final int count = numberPicker.getChildCount();
+        for (int i = 0; i < count; i++) {
+            View child = numberPicker.getChildAt(i);
+            if (child instanceof EditText) {
+                try {
+                    ((EditText) child).setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources().getDimension(dimen));
+                    numberPicker.invalidate();
+                } catch (IllegalArgumentException e) {
+                    ExLog.w(context, TAG, "IllegalArgumentException - " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    public static @ColorInt int getColor(Context context, @AttrRes int colorId) {
         int color = 0;
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = context.getTheme();

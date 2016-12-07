@@ -30,7 +30,11 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     boolean startsBefore(TimeRange other);
     
+    boolean startsAfter(TimePoint timePoint);
+    
     boolean endsAfter(TimeRange other);
+    
+    boolean endsBefore(TimePoint timePoint);
     
     /**
      * Is the time range open ended towards older timepoints?
@@ -52,6 +56,10 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     /**
      * Merges the two ranges, only possible if {@code other} {@link #intersects()} this range.
+     * 
+     * @return the union of this and the {@code other} time range if they {@link #intersects(TimeRange) intersect} which
+     *         means that the result {@link #includes(TimeRange) includes} both this and the {@code other} time range;
+     *         {@code null} otherwise
      */
     TimeRange union(TimeRange other);
     

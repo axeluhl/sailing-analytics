@@ -23,7 +23,7 @@
 				
 	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow" />
 
-	<extend-property name="locale" values="de"/>
+        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
 	
 	<source path='client' />
 	<source path='actions'/>

@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.client.component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -23,7 +24,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -42,11 +45,22 @@ public class UserManagementPanel extends DockPanel {
     private UserListDataProvider userListDataProvider;
     
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages, PermissionsForRoleProvider permissionsForRoleProvider) {
+        this(userService, stringMessages, permissionsForRoleProvider, Collections.<Role>emptySet(), Collections.<Permission>emptySet());
+    }
+    
+    public UserManagementPanel(final UserService userService, final StringMessages stringMessages, PermissionsForRoleProvider permissionsForRoleProvider,
+            Iterable<Role> additionalRoles, Iterable<Permission> additionalPermissions) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         VerticalPanel west = new VerticalPanel();
         HorizontalPanel buttonPanel = new HorizontalPanel();
         west.add(buttonPanel);
         singleSelectionModel = new SingleSelectionModel<>();
+        buttonPanel.add(new Button(stringMessages.refresh(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                userListDataProvider.updateDisplays();
+            }
+        }));
         Button createButton = new Button(stringMessages.createUser(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -83,7 +97,9 @@ public class UserManagementPanel extends DockPanel {
         userList.setSelectionModel(singleSelectionModel);
         TextBox filterBox = new TextBox();
         userListDataProvider = new UserListDataProvider(userManagementService, filterBox);
-        final UserDetailsView userDetailsView = new UserDetailsView(userService, singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider, permissionsForRoleProvider);
+        final UserDetailsView userDetailsView = new UserDetailsView(userService,
+                singleSelectionModel.getSelectedObject(), stringMessages, userListDataProvider,
+                permissionsForRoleProvider, additionalRoles, additionalPermissions);
         add(userDetailsView, DockPanel.CENTER);
         userDetailsView.addUserChangeEventHandler(new UserChangeEventHandler() {
             @Override

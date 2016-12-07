@@ -30,8 +30,8 @@ public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProce
         super.onActivityCreated(savedInstanceState);
 
         if (getView() != null) {
-            replaceFragment(FinishedButtonFragment.newInstance(getArguments()), R.id.finished_panel_left);
-            replaceFragment(FinishedSubmitFragment.newInstance(getArguments()), R.id.finished_panel_right);
+            replaceFragment(FinishedButtonFragment.newInstance(getArguments()), R.id.finished_panel_buttons);
+            replaceFragment(FinishedSubmitFragment.newInstance(getArguments()), R.id.finished_panel_desc);
             replaceFragment(RaceSummaryFragment.newInstance(getArguments()), R.id.finished_content);
         }
     }

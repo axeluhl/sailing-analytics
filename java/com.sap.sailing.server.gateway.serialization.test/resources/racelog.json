@@ -1,0 +1,1543 @@
+{
+"events": [
+{
+"@class": "RaceLogPassChangeEvent",
+"id": "01a5fd6d-7b47-450d-bced-0b9e27540577",
+"createdAt": 1423107377658,
+"timestamp": 1423107377657,
+"passId": 1,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "ebd60d8a-a8a8-4e09-ad1d-2bc8920ad61e",
+"createdAt": 1423107377679,
+"timestamp": 1423107377657,
+"passId": 1,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "RRS26"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "0a8d6c02-4f99-4cef-bac7-d94a941377e3",
+"createdAt": 1423107377698,
+"timestamp": 1423107377657,
+"passId": 1,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1423117800000
+},
+{
+"@class": "RaceLogFlagEvent",
+"id": "8c06b01c-fa24-47b1-bc77-c768e49799fb",
+"createdAt": 1423107384197,
+"timestamp": 1423107384196,
+"passId": 1,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"upperFlag": "AP",
+"lowerFlag": "NONE",
+"displayed": true
+},
+{
+"@class": "RaceLogPassChangeEvent",
+"id": "d5b9bb62-a4db-4485-ba33-e80eb7e6137d",
+"createdAt": 1423107384211,
+"timestamp": 1423107384196,
+"passId": 2,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0
+},
+{
+"@class": "RaceLogPassChangeEvent",
+"id": "fcf85749-24de-403d-8aae-f8240706ca2a",
+"createdAt": 1423107436814,
+"timestamp": 1423107436814,
+"passId": 3,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "76251f44-a33f-4e1b-bda7-a904724ba25d",
+"createdAt": 1423107436835,
+"timestamp": 1423107436814,
+"passId": 3,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "ESS"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "7c8153d2-3354-4f68-bb23-c64828f26ad2",
+"createdAt": 1423107436856,
+"timestamp": 1423107436814,
+"passId": 3,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1423117800000
+},
+{
+"@class": "RaceLogCourseDesignChangedEvent",
+"id": "975e34ac-2dbe-477b-964a-635fa8ad8fbf",
+"createdAt": 1423107463987,
+"timestamp": 1423107463987,
+"passId": 3,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"courseDesign": {
+"name": "Course",
+"waypoints": [
+{
+"name": "ControlPointWithTwoMarks Race Committee / Black Cylinder",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks Race Committee / Black Cylinder",
+"left": {
+"@class": "Mark",
+"name": "Race Committee",
+"id": "3e6c1c94-83bf-11e2-88c0-10bf48d758ce",
+"type": "STARTBOAT"
+},
+"right": {
+"@class": "Mark",
+"name": "Black Cylinder",
+"id": "b153dfd6-83be-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"pattern": "Checkered",
+"shape": "Cylinder",
+"type": "BUOY"
+}
+}
+},
+{
+"name": "Red",
+"passingInstruction": "Port",
+"controlPoint": {
+"@class": "Mark",
+"name": "Red",
+"id": "5427c7d2-83be-11e2-88c0-10bf48d758ce",
+"color": "Red",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "Blue",
+"passingInstruction": "Starboard",
+"controlPoint": {
+"@class": "Mark",
+"name": "Blue",
+"id": "1286f15e-83be-11e2-88c0-10bf48d758ce",
+"color": "Blue",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "Green",
+"passingInstruction": "Starboard",
+"controlPoint": {
+"@class": "Mark",
+"name": "Green",
+"id": "785c3e44-83be-11e2-88c0-10bf48d758ce",
+"color": "Green",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "ControlPointWithTwoMarks White P / White S",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks White P / White S",
+"left": {
+"@class": "Mark",
+"name": "White P",
+"id": "e9ec42f8-83bd-11e2-88c0-10bf48d758ce",
+"color": "White",
+"shape": "Conical",
+"type": "BUOY"
+},
+"right": {
+"@class": "Mark",
+"name": "White S",
+"id": "bf6777e6-83bd-11e2-88c0-10bf48d758ce",
+"color": "White",
+"shape": "Conical",
+"type": "BUOY"
+}
+}
+},
+{
+"name": "Yellow",
+"passingInstruction": "Port",
+"controlPoint": {
+"@class": "Mark",
+"name": "Yellow",
+"id": "3fdd2402-83be-11e2-88c0-10bf48d758ce",
+"color": "Yellow",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "ControlPointWithTwoMarks Finish Pole / Black Conical",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks Finish Pole / Black Conical",
+"left": {
+"@class": "Mark",
+"name": "Finish Pole",
+"id": "3240586c-83c0-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"type": "LANDMARK"
+},
+"right": {
+"@class": "Mark",
+"name": "Black Conical",
+"id": "d78695ea-83be-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"pattern": "Checkered",
+"shape": "Conical",
+"type": "BUOY"
+}
+}
+}
+]
+}
+},
+{
+"@class": "RaceLogCourseDesignChangedEvent",
+"id": "ec7e158f-98c7-4e6d-b6e0-a93d82fa8cee",
+"createdAt": 1423117447335,
+"timestamp": 1423117447335,
+"passId": 3,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"courseDesign": {
+"name": "Course",
+"waypoints": [
+{
+"name": "ControlPointWithTwoMarks Race Committee / Black Conical",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks Race Committee / Black Conical",
+"left": {
+"@class": "Mark",
+"name": "Race Committee",
+"id": "3e6c1c94-83bf-11e2-88c0-10bf48d758ce",
+"type": "STARTBOAT"
+},
+"right": {
+"@class": "Mark",
+"name": "Black Conical",
+"id": "d78695ea-83be-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"pattern": "Checkered",
+"shape": "Conical",
+"type": "BUOY"
+}
+}
+},
+{
+"name": "Green",
+"passingInstruction": "Starboard",
+"controlPoint": {
+"@class": "Mark",
+"name": "Green",
+"id": "785c3e44-83be-11e2-88c0-10bf48d758ce",
+"color": "Green",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "Red",
+"passingInstruction": "Port",
+"controlPoint": {
+"@class": "Mark",
+"name": "Red",
+"id": "5427c7d2-83be-11e2-88c0-10bf48d758ce",
+"color": "Red",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "Green",
+"passingInstruction": "Starboard",
+"controlPoint": {
+"@class": "Mark",
+"name": "Green",
+"id": "785c3e44-83be-11e2-88c0-10bf48d758ce",
+"color": "Green",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "ControlPointWithTwoMarks White P / White S",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks White P / White S",
+"left": {
+"@class": "Mark",
+"name": "White P",
+"id": "e9ec42f8-83bd-11e2-88c0-10bf48d758ce",
+"color": "White",
+"shape": "Conical",
+"type": "BUOY"
+},
+"right": {
+"@class": "Mark",
+"name": "White S",
+"id": "bf6777e6-83bd-11e2-88c0-10bf48d758ce",
+"color": "White",
+"shape": "Conical",
+"type": "BUOY"
+}
+}
+},
+{
+"name": "Green",
+"passingInstruction": "Starboard",
+"controlPoint": {
+"@class": "Mark",
+"name": "Green",
+"id": "785c3e44-83be-11e2-88c0-10bf48d758ce",
+"color": "Green",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "Red",
+"passingInstruction": "Starboard",
+"controlPoint": {
+"@class": "Mark",
+"name": "Red",
+"id": "5427c7d2-83be-11e2-88c0-10bf48d758ce",
+"color": "Red",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "Green",
+"passingInstruction": "Starboard",
+"controlPoint": {
+"@class": "Mark",
+"name": "Green",
+"id": "785c3e44-83be-11e2-88c0-10bf48d758ce",
+"color": "Green",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "ControlPointWithTwoMarks Finish Pole / Black Cylinder",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks Finish Pole / Black Cylinder",
+"left": {
+"@class": "Mark",
+"name": "Finish Pole",
+"id": "3240586c-83c0-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"type": "LANDMARK"
+},
+"right": {
+"@class": "Mark",
+"name": "Black Cylinder",
+"id": "b153dfd6-83be-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"pattern": "Checkered",
+"shape": "Cylinder",
+"type": "BUOY"
+}
+}
+}
+]
+}
+},
+{
+"@class": "RaceLogFlagEvent",
+"id": "a5c73de6-39c7-4b65-9237-67efa87407a1",
+"createdAt": 1423117461037,
+"timestamp": 1423117461037,
+"passId": 3,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"upperFlag": "AP",
+"lowerFlag": "NONE",
+"displayed": true
+},
+{
+"@class": "RaceLogPassChangeEvent",
+"id": "34159312-ac38-4ead-9c38-c365ea8837f7",
+"createdAt": 1423117461050,
+"timestamp": 1423117461037,
+"passId": 4,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0
+},
+{
+"@class": "RaceLogPassChangeEvent",
+"id": "8f487b41-eda6-483b-a3b6-271ac5f1c1b7",
+"createdAt": 1423117469402,
+"timestamp": 1423117469401,
+"passId": 5,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "1dd3eda1-4e97-4526-8148-b3e5b76c5dc6",
+"createdAt": 1423117469427,
+"timestamp": 1423117469401,
+"passId": 5,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "ESS"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "832babce-2272-4267-9eb8-91d434d08e88",
+"createdAt": 1423117469449,
+"timestamp": 1423117469401,
+"passId": 5,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1423118700000
+},
+{
+"@class": "RaceLogCourseDesignChangedEvent",
+"id": "55322a06-0e83-4fe0-a086-c0cc8eb45f4c",
+"createdAt": 1423117559442,
+"timestamp": 1423117559442,
+"passId": 5,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"courseDesign": {
+"name": "Course",
+"waypoints": [
+{
+"name": "ControlPointWithTwoMarks Race Committee / Black Conical",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks Race Committee / Black Conical",
+"left": {
+"@class": "Mark",
+"name": "Race Committee",
+"id": "3e6c1c94-83bf-11e2-88c0-10bf48d758ce",
+"type": "STARTBOAT"
+},
+"right": {
+"@class": "Mark",
+"name": "Black Conical",
+"id": "d78695ea-83be-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"pattern": "Checkered",
+"shape": "Conical",
+"type": "BUOY"
+}
+}
+},
+{
+"name": "Red",
+"passingInstruction": "Port",
+"controlPoint": {
+"@class": "Mark",
+"name": "Red",
+"id": "5427c7d2-83be-11e2-88c0-10bf48d758ce",
+"color": "Red",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "ControlPointWithTwoMarks White P / White S",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks White P / White S",
+"left": {
+"@class": "Mark",
+"name": "White P",
+"id": "e9ec42f8-83bd-11e2-88c0-10bf48d758ce",
+"color": "White",
+"shape": "Conical",
+"type": "BUOY"
+},
+"right": {
+"@class": "Mark",
+"name": "White S",
+"id": "bf6777e6-83bd-11e2-88c0-10bf48d758ce",
+"color": "White",
+"shape": "Conical",
+"type": "BUOY"
+}
+}
+},
+{
+"name": "Red",
+"passingInstruction": "Starboard",
+"controlPoint": {
+"@class": "Mark",
+"name": "Red",
+"id": "5427c7d2-83be-11e2-88c0-10bf48d758ce",
+"color": "Red",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "ControlPointWithTwoMarks Finish Pole / Black Cylinder",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks Finish Pole / Black Cylinder",
+"left": {
+"@class": "Mark",
+"name": "Finish Pole",
+"id": "3240586c-83c0-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"type": "LANDMARK"
+},
+"right": {
+"@class": "Mark",
+"name": "Black Cylinder",
+"id": "b153dfd6-83be-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"pattern": "Checkered",
+"shape": "Cylinder",
+"type": "BUOY"
+}
+}
+}
+]
+}
+},
+{
+"@class": "RaceLogFlagEvent",
+"id": "73f137a8-6fda-4ed3-b887-2cdc90f31b07",
+"createdAt": 1423117577181,
+"timestamp": 1423117577180,
+"passId": 5,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"upperFlag": "AP",
+"lowerFlag": "NONE",
+"displayed": true
+},
+{
+"@class": "RaceLogPassChangeEvent",
+"id": "10eb3ada-9fd8-42a4-bad7-ca66b10a0a4b",
+"createdAt": 1423117577197,
+"timestamp": 1423117577180,
+"passId": 6,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0
+},
+{
+"@class": "RaceLogPassChangeEvent",
+"id": "8ea5ef0a-4d78-4a9c-acc0-43cfbed195b5",
+"createdAt": 1423117584106,
+"timestamp": 1423117584106,
+"passId": 7,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "61badd3b-152e-41cc-a834-ff466b389fd8",
+"createdAt": 1423117584134,
+"timestamp": 1423117584106,
+"passId": 7,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "ESS"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "1a42be34-143e-4a2a-b5eb-73c3ae91f4a0",
+"createdAt": 1423117584158,
+"timestamp": 1423117584106,
+"passId": 7,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1423118700000
+},
+{
+"@class": "RaceLogCourseDesignChangedEvent",
+"id": "b406fe97-23bf-4631-9482-bd46397e6eec",
+"createdAt": 1423117608140,
+"timestamp": 1423117608140,
+"passId": 7,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"courseDesign": {
+"name": "Course",
+"waypoints": [
+{
+"name": "ControlPointWithTwoMarks Race Committee / Black Conical",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks Race Committee / Black Conical",
+"left": {
+"@class": "Mark",
+"name": "Race Committee",
+"id": "3e6c1c94-83bf-11e2-88c0-10bf48d758ce",
+"type": "STARTBOAT"
+},
+"right": {
+"@class": "Mark",
+"name": "Black Conical",
+"id": "d78695ea-83be-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"pattern": "Checkered",
+"shape": "Conical",
+"type": "BUOY"
+}
+}
+},
+{
+"name": "Red",
+"passingInstruction": "Port",
+"controlPoint": {
+"@class": "Mark",
+"name": "Red",
+"id": "5427c7d2-83be-11e2-88c0-10bf48d758ce",
+"color": "Red",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "ControlPointWithTwoMarks White P / White S",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks White P / White S",
+"left": {
+"@class": "Mark",
+"name": "White P",
+"id": "e9ec42f8-83bd-11e2-88c0-10bf48d758ce",
+"color": "White",
+"shape": "Conical",
+"type": "BUOY"
+},
+"right": {
+"@class": "Mark",
+"name": "White S",
+"id": "bf6777e6-83bd-11e2-88c0-10bf48d758ce",
+"color": "White",
+"shape": "Conical",
+"type": "BUOY"
+}
+}
+},
+{
+"name": "Red",
+"passingInstruction": "Starboard",
+"controlPoint": {
+"@class": "Mark",
+"name": "Red",
+"id": "5427c7d2-83be-11e2-88c0-10bf48d758ce",
+"color": "Red",
+"shape": "Conical",
+"type": "BUOY"
+}
+},
+{
+"name": "ControlPointWithTwoMarks Finish Pole / Black Cylinder",
+"passingInstruction": "Gate",
+"controlPoint": {
+"@class": "ControlPointWithTwoMarks",
+"name": "ControlPointWithTwoMarks Finish Pole / Black Cylinder",
+"left": {
+"@class": "Mark",
+"name": "Finish Pole",
+"id": "3240586c-83c0-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"type": "LANDMARK"
+},
+"right": {
+"@class": "Mark",
+"name": "Black Cylinder",
+"id": "b153dfd6-83be-11e2-88c0-10bf48d758ce",
+"color": "Black",
+"pattern": "Checkered",
+"shape": "Cylinder",
+"type": "BUOY"
+}
+}
+}
+]
+}
+},
+{
+"@class": "RaceLogPassChangeEvent",
+"id": "e5b7ceda-54ac-4c64-ba87-3a4a0544b3a3",
+"createdAt": 1423118288283,
+"timestamp": 1423118288282,
+"passId": 8,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "dddc4f3d-eff3-4183-bd32-1c76075ffe7e",
+"createdAt": 1423118288313,
+"timestamp": 1423118288282,
+"passId": 8,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "ESS"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "a28e4656-1fa1-4229-9106-87c435e9d638",
+"createdAt": 1423118288343,
+"timestamp": 1423118288282,
+"passId": 8,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1423118528282
+},
+{
+"@class": "RaceLogPassChangeEvent",
+"id": "aa69491d-360c-4810-82d8-28c5023bcc76",
+"createdAt": 1423118459330,
+"timestamp": 1423118459330,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "46997e13-a445-4442-a7c8-d5894557977b",
+"createdAt": 1423118459357,
+"timestamp": 1423118459330,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "ESS"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "41ab547d-362c-4dae-83d9-34cd1f9152ed",
+"createdAt": 1423118459388,
+"timestamp": 1423118459330,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1423118519330
+},
+{
+"@class": "RaceLogRaceStatusEvent",
+"id": "acc4df30-2122-46b5-9bdd-ea4927206830",
+"createdAt": 1423119156823,
+"timestamp": 1423119156823,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "FINISHING"
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "17ec061a-ce68-4425-8243-1464c51faca6",
+"createdAt": 1423119194333,
+"timestamp": 1423119194333,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "e95294b5-d240-418d-90f6-6378b6dfb151",
+"createdAt": 1423119199327,
+"timestamp": 1423119199327,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "6349878d-e319-4114-b0cd-5e713fcec66f",
+"createdAt": 1423119201903,
+"timestamp": 1423119201903,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "65322500-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Red Bull Sailing Team",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "ab05cf79-8998-4f1b-99db-e8a9f5384da4",
+"createdAt": 1423119205872,
+"timestamp": 1423119205871,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "65322500-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Red Bull Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "f097f4f0-7ad9-0131-e5b4-60a44ce903c3",
+"competitorName": "Gazprom Team Russia",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "009f46a9-0800-4038-a3b2-c81883e2aeda",
+"createdAt": 1423119275124,
+"timestamp": 1423119275123,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "65322500-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Red Bull Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "f097f4f0-7ad9-0131-e5b4-60a44ce903c3",
+"competitorName": "Gazprom Team Russia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "8dd098a0-8ab6-0132-440b-448a5b8481d8",
+"competitorName": "Beko Team Turx",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "68ecbedd-8595-4e40-9f7d-632576e93623",
+"createdAt": 1423119281232,
+"timestamp": 1423119281232,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "65322500-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Red Bull Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "f097f4f0-7ad9-0131-e5b4-60a44ce903c3",
+"competitorName": "Gazprom Team Russia",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "6a4e849b-397b-4de4-914b-70101baf9d91",
+"createdAt": 1423119283110,
+"timestamp": 1423119283110,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "65322500-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Red Bull Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "f097f4f0-7ad9-0131-e5b4-60a44ce903c3",
+"competitorName": "Gazprom Team Russia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "655bd56c-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "SAP Extreme Sailing Team",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "90f04917-7ee9-4e08-bcba-1fb0dcdf9769",
+"createdAt": 1423119284281,
+"timestamp": 1423119284281,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "65322500-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Red Bull Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "f097f4f0-7ad9-0131-e5b4-60a44ce903c3",
+"competitorName": "Gazprom Team Russia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "655bd56c-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "SAP Extreme Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "8dd098a0-8ab6-0132-440b-448a5b8481d8",
+"competitorName": "Beko Team Turx",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "da6f8b98-cf23-4c6e-8440-fba744e69e34",
+"createdAt": 1423119311959,
+"timestamp": 1423119311959,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "65322500-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Red Bull Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "f097f4f0-7ad9-0131-e5b4-60a44ce903c3",
+"competitorName": "Gazprom Team Russia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "655bd56c-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "SAP Extreme Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "8dd098a0-8ab6-0132-440b-448a5b8481d8",
+"competitorName": "Beko Team Turx",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "657fa5a0-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "The Wave, Muscat",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "bc13fc88-293b-4b49-90d8-113b3c527bc3",
+"createdAt": 1423119316068,
+"timestamp": 1423119316068,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "65322500-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Red Bull Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "f097f4f0-7ad9-0131-e5b4-60a44ce903c3",
+"competitorName": "Gazprom Team Russia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "655bd56c-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "SAP Extreme Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "8dd098a0-8ab6-0132-440b-448a5b8481d8",
+"competitorName": "Beko Team Turx",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "657fa5a0-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "The Wave, Muscat",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "84e68b70-7ada-0131-e5b7-60a44ce903c3",
+"competitorName": "Oman Air",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogFinishPositioningListChangedEvent",
+"id": "3d088c22-e194-4e80-a2db-e789d0d09afd",
+"createdAt": 1423119317012,
+"timestamp": 1423119317012,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "65322500-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Red Bull Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "f097f4f0-7ad9-0131-e5b4-60a44ce903c3",
+"competitorName": "Gazprom Team Russia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "655bd56c-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "SAP Extreme Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "8dd098a0-8ab6-0132-440b-448a5b8481d8",
+"competitorName": "Beko Team Turx",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "657fa5a0-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "The Wave, Muscat",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "84e68b70-7ada-0131-e5b7-60a44ce903c3",
+"competitorName": "Oman Air",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "e442a414-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Team Aberdeen",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogRaceStatusEvent",
+"id": "dad64fc9-ede4-4426-95a1-cdedfed8893d",
+"createdAt": 1423119356092,
+"timestamp": 1423119356092,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "FINISHED"
+},
+{
+"@class": "RaceLogFinishPositioningConfirmedEvent",
+"id": "addd714b-31c5-49cd-9c71-eff2921a1c1a",
+"createdAt": 1423119365353,
+"timestamp": 1423119365353,
+"passId": 9,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"positionedCompetitors": [
+{
+"competitorId": "64bbff7e-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "GAC Pindar",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "d6c80fc0-8ab6-0132-440c-448a5b8481d8",
+"competitorName": "Lino Sonego Team Italia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "65322500-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Red Bull Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "f097f4f0-7ad9-0131-e5b4-60a44ce903c3",
+"competitorName": "Gazprom Team Russia",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "655bd56c-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "SAP Extreme Sailing Team",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "8dd098a0-8ab6-0132-440b-448a5b8481d8",
+"competitorName": "Beko Team Turx",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "657fa5a0-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "The Wave, Muscat",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "84e68b70-7ada-0131-e5b7-60a44ce903c3",
+"competitorName": "Oman Air",
+"maxPointsReason": "NONE"
+},
+{
+"competitorId": "e442a414-83db-11e2-88c0-10bf48d758ce",
+"competitorName": "Team Aberdeen",
+"maxPointsReason": "NONE"
+}
+]
+},
+{
+"@class": "RaceLogPassChangeEvent",
+"id": "c01e97a1-d4f4-48a2-a191-0d6cff641e05",
+"createdAt": 1434822148262,
+"timestamp": 1434822148261,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "cf071a03-def4-44c1-b1c6-4613d25656ee",
+"createdAt": 1434822163517,
+"timestamp": 1434822163516,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "ESS"
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "547b3955-6a48-4f23-b1d1-e3af59ed2f18",
+"createdAt": 1434822167246,
+"timestamp": 1434822167246,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "RRS26"
+},
+{
+"@class": "RaceLogFlagEvent",
+"id": "81a61916-cd59-4dc0-9943-e7ce188f0942",
+"createdAt": 1434822174067,
+"timestamp": 1434822174064,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"upperFlag": "INDIA",
+"lowerFlag": "NONE",
+"displayed": true
+},
+{
+"@class": "RaceLogCourseDesignChangedEvent",
+"id": "2241738c-d19e-4cbd-8f17-19f303c66584",
+"createdAt": 1434822178020,
+"timestamp": 1434822178019,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"courseDesign": {
+"name": "O2",
+"waypoints": []
+}
+},
+{
+"@class": "RaceLogWindFixEvent",
+"id": "b5bc664d-8f29-45cf-bd3a-5fea78f4b114",
+"createdAt": 1434822203426,
+"timestamp": 1434822203421,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"wind": {
+"position": {
+"latitude_deg": 53.2548194,
+"longitude_deg": 10.4268592
+},
+"timepoint": 1434822203421,
+"speedinknots": 6,
+"direction": 275.0006408691406
+},
+"magnetic": true
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "97d3703d-835b-459b-ad7a-ae3065c682fc",
+"createdAt": 1434822206193,
+"timestamp": 1434822206193,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "RRS26"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "081dac9f-b8e6-4ab5-afcf-d48faa5662d2",
+"createdAt": 1434822206214,
+"timestamp": 1434822206193,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1434822600000
+},
+{
+"@class": "RaceLogFlagEvent",
+"id": "1f7713d8-bd04-4a56-a53d-852d0e1a14ab",
+"createdAt": 1434822206262,
+"timestamp": 1434822206262,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"upperFlag": "INDIA",
+"lowerFlag": "NONE",
+"displayed": true
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "f761bcfb-990b-4b49-8994-97b41c5bcf66",
+"createdAt": 1434822219266,
+"timestamp": 1434822219263,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "RRS26"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "fa90e08f-379d-4e32-9069-c51d6b25b9fd",
+"createdAt": 1434822219287,
+"timestamp": 1434822219287,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1434822577561
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "48036626-1083-4a0c-9d72-4318d69d32bf",
+"createdAt": 1434822226241,
+"timestamp": 1434822226241,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "RRS26"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "59af7562-4558-43c3-93f1-5f48c4bee1d4",
+"createdAt": 1434822226264,
+"timestamp": 1434822226264,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1434822525417
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "0c9b4e1b-6839-4cdf-805e-32b50ae520f7",
+"createdAt": 1434822245101,
+"timestamp": 1434822245099,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "RRS26"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "df4bd8fb-6624-4afd-a183-1da78115a550",
+"createdAt": 1434822245123,
+"timestamp": 1434822245123,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1434822424290
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "eededc2c-c410-4ecb-93a8-01f161565c1d",
+"createdAt": 1434822255598,
+"timestamp": 1434822255597,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "RRS26"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "4aba00f9-07ca-4acf-b7e0-5fd8fa20f65a",
+"createdAt": 1434822255622,
+"timestamp": 1434822255622,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1434822314559
+},
+{
+"@class": "RaceLogStartProcedureChangedEvent",
+"id": "fb495017-b14e-4047-9467-197bd6ebbec8",
+"createdAt": 1434822264172,
+"timestamp": 1434822264172,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"startProcedureType": "RRS26"
+},
+{
+"@class": "RaceLogStartTimeEvent",
+"id": "866c1489-220d-4ad1-9d0c-3f99ab0c1296",
+"createdAt": 1434822264198,
+"timestamp": 1434822264198,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "SCHEDULED",
+"startTime": 1434822263525
+},
+{
+"@class": "RaceLogFlagEvent",
+"id": "92ba184f-c6dc-4191-acde-97349441f736",
+"createdAt": 1434822284470,
+"timestamp": 1434822284470,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"upperFlag": "XRAY",
+"lowerFlag": "NONE",
+"displayed": true
+},
+{
+"@class": "RaceLogFlagEvent",
+"id": "5b2581df-9155-4c78-bde0-66e4ebbd09f7",
+"createdAt": 1434822314815,
+"timestamp": 1434822314814,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"upperFlag": "XRAY",
+"lowerFlag": "NONE",
+"displayed": false
+},
+{
+"@class": "RaceLogRaceStatusEvent",
+"id": "b4850525-1581-48f7-949b-5e6616c7c2b5",
+"createdAt": 1434822335198,
+"timestamp": 1434822335197,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "FINISHING"
+},
+{
+"@class": "RaceLogRaceStatusEvent",
+"id": "173b43e7-f5a8-4233-81a9-6d42b9f7127e",
+"createdAt": 1434822340073,
+"timestamp": 1434822340072,
+"passId": 10,
+"competitors": [],
+"authorName": "Race Officer on Start Vessel",
+"authorPriority": 0,
+"nextStatus": "FINISHED"
+}
+],
+"racelog_id": "[ESS 2015 Singapore, R1, Default]"
+}

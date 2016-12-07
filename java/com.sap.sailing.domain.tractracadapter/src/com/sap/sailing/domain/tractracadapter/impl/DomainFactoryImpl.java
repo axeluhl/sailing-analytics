@@ -17,10 +17,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
@@ -51,8 +53,6 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -73,9 +73,11 @@ import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sailing.domain.tractracadapter.TracTracRaceTracker;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.WeakIdentityHashMap;
@@ -120,7 +122,7 @@ public class DomainFactoryImpl implements DomainFactory {
      * Maps from the TracTrac race UUIDs to the domain model's {@link RaceDefinition} objects that represent the race
      * identified by that UUID
      */
-    private final ConcurrentHashMap<UUID, RaceDefinition> raceCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, RaceDefinition> raceCache = new ConcurrentHashMap<>();
     
     private final MetadataParser metadataParser;
 
@@ -238,14 +240,14 @@ public class DomainFactoryImpl implements DomainFactory {
         final String name = competitor.getName();
         final String shortName = competitor.getShortName();
         Competitor result = getOrCreateCompetitor(competitorId, competitorClassName, nationalityAsString, name,
-                shortName, competitor.getHandicapToT(), competitor.getHandicapToD());
+                shortName, competitor.getHandicapToT(), competitor.getHandicapToD(), null);
         return result;
     }
 
     @Override
     public Competitor getOrCreateCompetitor(final UUID competitorId, final String competitorClassName,
             final String nationalityAsString, final String name, final String shortName, float timeOnTimeFactor,
-            float timeOnDistanceAllowanceInSecondsPerNauticalMile) {
+            float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag) {
         CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
         Competitor result = competitorStore.getExistingCompetitorById(competitorId);
         if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
@@ -262,7 +264,7 @@ public class DomainFactoryImpl implements DomainFactory {
             DynamicBoat boat = new BoatImpl(shortName, boatClass, shortName);
             result = competitorStore.getOrCreateCompetitor(competitorId, name, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, boat, (double) timeOnTimeFactor,
-                    new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)));
+                    new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
         }
         return result;
     }
@@ -503,7 +505,7 @@ public class DomainFactoryImpl implements DomainFactory {
 
     @Override
     public DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Course course,
+            String raceName, Iterable<Competitor> competitors, BoatClass boatClass, Map<Competitor, Boat> competitorBoats, Course course,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             URI tracTracUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver) {
@@ -511,7 +513,7 @@ public class DomainFactoryImpl implements DomainFactory {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
                 logger.info("Creating RaceDefinitionImpl for race "+raceName);
-                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, raceId);
+                raceDefinition = new RaceDefinitionImpl(raceName, course, boatClass, competitors, competitorBoats, raceId);
             } else {
                 logger.info("Already found RaceDefinitionImpl for race "+raceName);
             }
@@ -520,7 +522,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 // add to existing regatta only if boat class matches
                 if (raceDefinition.getBoatClass() == trackedRegatta.getRegatta().getBoatClass()) {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
-                    trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore, EmptyGPSFixStore.INSTANCE,
+                    trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
                             raceLogResolver);
                     logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
@@ -549,26 +551,44 @@ public class DomainFactoryImpl implements DomainFactory {
         trackedRace.addCourseDesignChangedListener(courseDesignHandler);
         TracTracStartTimeUpdateHandler startTimeHandler = new TracTracStartTimeUpdateHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
-                raceDefinition.getId());
+                raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta());
         trackedRace.addStartTimeChangedListener(startTimeHandler);
         TracTracRaceAbortedHandler raceAbortedHandler = new TracTracRaceAbortedHandler(
                 tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
                 raceDefinition.getId());
         trackedRace.addRaceAbortedListener(raceAbortedHandler);
+        trackedRace.addListener(new TracTracFinishTimeUpdateHandler(tracTracUpdateURI, tracTracUsername, tracTracPassword, tracTracEventUuid,
+                raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta()).getListener());
     }
 
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race,
-            Iterable<Sideline> sidelines, WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
+            Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
         return trackedRegatta.createTrackedRace(race, sidelines,
-                windStore, gpsFixStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+                windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver);
     }
+
+    @Override
+    public Map<Competitor, Boat> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass) {
+        final Map<Competitor, Boat> competitorBoatInfos = new HashMap<>();
+        for (IRaceCompetitor rc : race.getRaceCompetitors()) {
+            Util.Triple<String, String, String> competitorBoatInfo = getMetadataParser().parseCompetitorBoat(rc);
+            Competitor existingCompetitor = getOrCreateCompetitor(rc.getCompetitor());
+            if (existingCompetitor != null && competitorBoatInfo != null) {
+                Boat boatOfCompetitor = new BoatImpl(competitorBoatInfo.getA(), defaultBoatClass, 
+                        competitorBoatInfo.getB(), AbstractColor.getCssColor(competitorBoatInfo.getC()));
+                competitorBoatInfos.put(existingCompetitor, boatOfCompetitor);
+            }
+        }
+        return competitorBoatInfos;
+    }
+
     
     @Override
-    public com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {
+    public Util.Pair<Iterable<Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race) {
         List<ICompetitorClass> competitorClasses = new ArrayList<ICompetitorClass>();
         final List<Competitor> competitors = new ArrayList<Competitor>();
         for (IRaceCompetitor rc : race.getRaceCompetitors()) {
@@ -578,7 +598,7 @@ public class DomainFactoryImpl implements DomainFactory {
             competitorClasses.add(rc.getCompetitor().getCompetitorClass());
         }
         BoatClass dominantBoatClass = getDominantBoatClass(competitorClasses);
-        com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass>(
+        Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = new com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass>(
                 competitors, dominantBoatClass);
         return competitorsAndDominantBoatClass;
     }
@@ -593,24 +613,19 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public BoatClass getDominantBoatClass(List<String> competitorClassNames) {
-        Map<BoatClass, Integer> countsPerBoatClass = new HashMap<BoatClass, Integer>();
-        BoatClass dominantBoatClass = null;
-        int numberOfCompetitorsInDominantBoatClass = 0;
-        for (String competitorClassName : competitorClassNames) {
-            BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
-            Integer boatClassCount = countsPerBoatClass.get(boatClass);
-            if (boatClassCount == null) {
-                boatClassCount = 0;
+    public BoatClass getDominantBoatClass(Iterable<String> competitorClassNames) {
+        final BoatClass result;
+        if (competitorClassNames == null) {
+            result = null;
+        } else {
+            Collection<BoatClass> boatClasses = new ArrayList<>();
+            for (String competitorClassName : competitorClassNames) {
+                BoatClass boatClass = getOrCreateBoatClass(competitorClassName);
+                boatClasses.add(boatClass);
             }
-            boatClassCount = boatClassCount + 1;
-            countsPerBoatClass.put(boatClass, boatClassCount);
-            if (boatClassCount > numberOfCompetitorsInDominantBoatClass) {
-                numberOfCompetitorsInDominantBoatClass = boatClassCount;
-                dominantBoatClass = boatClass;
-            }
+            result = Util.getDominantObject(boatClasses);
         }
-        return dominantBoatClass;
+        return result;
     }
 
     @Override
@@ -639,28 +654,29 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
+            RegattaLogStore regattaLogStore, WindStore windStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws MalformedURLException, FileNotFoundException,
             URISyntaxException, CreateModelException, SubscriberInitializationException {
         return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
-                gpsFixStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver);
+                endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
+                tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry,
+                raceLogResolver);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
+            RegattaLogStore regattaLogStore, WindStore windStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
             SubscriberInitializationException {
         return new TracTracRaceTrackerImpl(regatta, this, paramURL, liveURI, storedURI, courseDesignUpdateURI,
-                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore,
-                regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
+                startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
+                regattaLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus,
                 raceVisibility, trackedRegattaRegistry, raceLogResolver);
     }
 
@@ -677,11 +693,11 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
-            long delayToLiveInMillis, boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
+            long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, String tracTracUsername, String tracTracPassword, String raceStatus,
             String raceVisibility) {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI,
-                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore,
+                startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, this, tracTracUsername, tracTracPassword, raceStatus, raceVisibility);
     }
 

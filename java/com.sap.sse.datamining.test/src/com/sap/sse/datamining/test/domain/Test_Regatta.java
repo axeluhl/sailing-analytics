@@ -8,6 +8,8 @@ public interface Test_Regatta extends Test_Named {
     
     public int getYear();
     
+    public Collection<Test_Series> getSeries();
+    
     public Collection<Test_Race> getRaces();
 
 }

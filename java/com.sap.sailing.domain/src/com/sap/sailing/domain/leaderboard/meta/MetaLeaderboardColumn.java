@@ -4,12 +4,15 @@ import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.impl.SimpleAbstractRaceColumn;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -42,7 +45,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
         return null;
     }
 
-    Leaderboard getLeaderboard() {
+    public Leaderboard getLeaderboard() {
         return leaderboard;
     }
     
@@ -116,6 +119,11 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         getRaceColumnListeners().notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+
+    @Override
+    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        getRaceColumnListeners().notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
     }
 
     @Override
@@ -218,5 +226,62 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
             result = Collections.emptySet();
         }
         return result;
+    }
+
+    @Override
+    public RegattaLog getRegattaLog() {
+        return null;
+    }
+
+    @Override
+    public Iterable<Mark> getCourseMarks() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Iterable<Mark> getCourseMarks(Fleet fleet) {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Iterable<Mark> getAvailableMarks() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Iterable<Mark> getAvailableMarks(Fleet fleet) {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public void registerCompetitor(Competitor competitor, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        throw new CompetitorRegistrationOnRaceLogDisabledException();
+    }
+
+    @Override
+    public void registerCompetitors(Iterable<Competitor> competitor, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        throw new CompetitorRegistrationOnRaceLogDisabledException();
+    }
+
+    @Override
+    public void deregisterCompetitor(Competitor competitors, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        throw new CompetitorRegistrationOnRaceLogDisabledException();
+    }
+
+    @Override
+    public void deregisterCompetitors(Iterable<Competitor> competitors, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        throw new CompetitorRegistrationOnRaceLogDisabledException();
+    }
+
+    @Override
+    public void enableCompetitorRegistrationOnRaceLog(Fleet fleetByName) {
+    }
+
+    @Override
+    public void disableCompetitorRegistrationOnRaceLog(Fleet fleetByName) {
     }
 }

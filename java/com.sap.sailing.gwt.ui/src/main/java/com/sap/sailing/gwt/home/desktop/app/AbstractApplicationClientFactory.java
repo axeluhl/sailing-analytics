@@ -5,9 +5,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.home.client.place.start.StartPlace;
-import com.sap.sailing.gwt.ui.client.HomeService;
-import com.sap.sailing.gwt.ui.client.HomeServiceAsync;
+import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
@@ -16,22 +14,19 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 
-public abstract class AbstractApplicationClientFactory extends
-        SecureClientFactoryImpl implements DesktopClientFactory {
+public abstract class AbstractApplicationClientFactory<ATLV extends ApplicationTopLevelView<?>> extends
+        SecureClientFactoryImpl<ATLV> implements DesktopClientFactory {
     private final SailingServiceAsync sailingService;
-    private final HomeServiceAsync homeService;
     private final MediaServiceAsync mediaService;
     private final DesktopPlacesNavigator navigator;
 
-    public AbstractApplicationClientFactory(ApplicationTopLevelView root, EventBus eventBus,
+    public AbstractApplicationClientFactory(ATLV root, EventBus eventBus,
             PlaceController placeController, final DesktopPlacesNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         sailingService = GWT.create(SailingService.class);
-        homeService = GWT.create(HomeService.class);
         mediaService = GWT.create(MediaService.class);
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
-        EntryPointHelper.registerASyncService((ServiceDefTarget) homeService, RemoteServiceMappingConstants.homeServiceRemotePath);
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
     }
     
@@ -43,11 +38,6 @@ public abstract class AbstractApplicationClientFactory extends
     @Override
     public SailingServiceAsync getSailingService() {
         return sailingService;
-    }
-
-    @Override
-    public HomeServiceAsync getHomeService() {
-        return homeService;
     }
 
     @Override

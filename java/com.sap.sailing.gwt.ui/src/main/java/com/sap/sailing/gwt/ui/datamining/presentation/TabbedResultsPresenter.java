@@ -22,9 +22,10 @@ import com.sap.sailing.gwt.ui.polarmining.PolarBackendResultsPresenter;
 import com.sap.sailing.gwt.ui.polarmining.PolarResultsPresenter;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
+public class TabbedResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
     
     private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
     
@@ -63,22 +64,24 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
 
     @Override
     public void showResult(QueryResultDTO<?> result) {
-        if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
-            CloseableTabHeader oldHeader = getSelectedHeader();
-            addTabAndFocus(new PolarResultsPresenter(stringMessages));
-            removeTab(oldHeader);
-        } else if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarBackendData")) {
-            CloseableTabHeader oldHeader = getSelectedHeader();
-            addTabAndFocus(new PolarBackendResultsPresenter(stringMessages));
-            removeTab(oldHeader);
-        } else {
-            if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
+        if (result != null) {
+            if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarAggregation")) {
                 CloseableTabHeader oldHeader = getSelectedHeader();
-                addTabAndFocus(new MultiResultsPresenter(stringMessages));
+                addTabAndFocus(new PolarResultsPresenter(stringMessages));
                 removeTab(oldHeader);
+            } else if (result.getResultType().equals("com.sap.sailing.polars.datamining.shared.PolarBackendData")) {
+                CloseableTabHeader oldHeader = getSelectedHeader();
+                addTabAndFocus(new PolarBackendResultsPresenter(stringMessages));
+                removeTab(oldHeader);
+            } else {
+                if (!(getSelectedPresenter() instanceof MultiResultsPresenter)) {
+                    CloseableTabHeader oldHeader = getSelectedHeader();
+                    addTabAndFocus(new MultiResultsPresenter(stringMessages));
+                    removeTab(oldHeader);
+                }
             }
+            getSelectedHeader().setText(result.getResultSignifier());
         }
-        getSelectedHeader().setText(result.getResultSignifier());
         getSelectedPresenter().showResult(result);
     }
 
@@ -160,6 +163,12 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
 
     @Override
     public void updateSettings(Settings newSettings) {
+        // no-op
+    }
+
+    @Override
+    public Settings getSettings() {
+        return null;
     }
 
     @Override
@@ -193,5 +202,4 @@ public class TabbedResultsPresenter implements ResultsPresenter<Settings> {
         }
         
     }
-
 }

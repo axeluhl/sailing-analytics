@@ -60,7 +60,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     
     private void initRace(int numberOfCompetitorsToUse, int[] numberOfMarksPassed, TimePoint timePointForFixes) {
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505",
-                competitors.subList(0, numberOfCompetitorsToUse), timePointForFixes));
+                competitors.subList(0, numberOfCompetitorsToUse), timePointForFixes, /* useMarkPassingCalculator */ false));
         for (int i=0; i<numberOfCompetitorsToUse; i++) {
             initializeMarkPassingForStartGate(competitors.get(i), numberOfMarksPassed[i], timePointForFixes);
         }
@@ -198,7 +198,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         Wind wind = getTrackedRace().getWind(null, checkTime, getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         Position newWindwardMarkPosition = leewardGatePosition.translateGreatCircle(wind.getBearing(), d);
         getTrackedRace().getOrCreateTrack(windwardMark.getMarks().iterator().next()).addGPSFix(
-                new GPSFixImpl(newWindwardMarkPosition, checkTime));
+                new GPSFixImpl(newWindwardMarkPosition, fixTime));
         assertEquals(LegType.DOWNWIND, firstLeg.getLegType(fixTime));
         Wind estimatedWindDirectionDownwind = track.getAveragedWind(/* position */ null, checkTime);
         assertNotNull(estimatedWindDirectionDownwind);

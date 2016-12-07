@@ -108,6 +108,7 @@ append_user_data_to_envsh ()
     echo "# User-Data: START ($DATE_OF_EXECUTION)" >> $SERVER_HOME/env.sh
     echo "INSTANCE_NAME=`ec2-metadata -i | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_IP4=`ec2-metadata -v | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
+    echo "INSTANCE_INTERNAL_IP4=`ec2-metadata -o | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
     echo "INSTANCE_DNS=`ec2-metadata -p | cut -f2 -d \" \"`" >> $SERVER_HOME/env.sh
 
     for var in `cat "$ec2EnvVars_tmpFile"`; do

@@ -88,7 +88,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         trackingParams = com.sap.sailing.domain.tractracadapter.DomainFactory.INSTANCE
                 .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
-                        0l, /* simulateWithStartTimeNow */false, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
+                        0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
     }
 
@@ -183,6 +183,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
         assertEquals(masterTrackedRace.getEndOfTracking(), replicaTrackedRace.getEndOfTracking());
         TimePoint now = MillisecondsTimePoint.now();
         assertFalse(now.equals(replicaTrackedRace.getStartOfRace()));
+        Thread.sleep(1000);
         ((DynamicTrackedRace) masterTrackedRace).setStartTimeReceived(now);
         Thread.sleep(1000);
         assertEquals(now, replicaTrackedRace.getStartOfRace());

@@ -217,7 +217,7 @@ public class ReverseGeocoderImpl implements ReverseGeocoder {
     private void updateCachedPlacemarks(Position cachedPoint, Double newRadius, List<Placemark> newPlacemarks) {
         if (cachedPoint != null) {
             synchronized (cache) {
-                cache.replace(cachedPoint, new Util.Triple<Position, Double, List<Placemark>>(cachedPoint, newRadius, newPlacemarks));
+                cache.put(cachedPoint, new Util.Triple<Position, Double, List<Placemark>>(cachedPoint, newRadius, newPlacemarks));
             }
         }
     }

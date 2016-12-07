@@ -23,4 +23,14 @@ public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
         displayLeaderboardsInReverseOrderCheckBox.setValue(false);
         useOverallLeaderboardCheckBox.setValue(false);
     }
+
+    public void setFieldsBasedOnEventName(String name, String description) {
+        nameEntryField.setText(name);
+        if (description != null && !description.trim().isEmpty()) {
+            descriptionEntryField.setText(description);
+        } else {
+            descriptionEntryField.setText(name); // make a valid default entry if possible
+        }
+        validate();
+    }
 }

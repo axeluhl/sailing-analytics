@@ -5,7 +5,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
@@ -24,10 +25,12 @@ public class DesktopApplicationView extends Composite implements ApplicationTopL
     private static ErrorReporter errorReporter = new DefaultErrorReporter<StringMessages>(StringMessages.INSTANCE);
 
     @UiField
-    SimplePanel mainContentPanel;
+    SimpleLayoutPanel mainContentPanel;
 
     public DesktopApplicationView(PlaceNavigator navigator) {
         initWidget(uiBinder.createAndBindUi(this));
+        
+        RootLayoutPanel.get().add(this.asWidget());
     }
 
     @Override

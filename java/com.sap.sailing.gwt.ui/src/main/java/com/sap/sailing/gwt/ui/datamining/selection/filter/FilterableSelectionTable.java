@@ -6,15 +6,24 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
+import com.google.gwt.view.client.DefaultSelectionEventManager.SelectAction;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
 public class FilterableSelectionTable<ContentType extends Serializable> {
@@ -35,7 +44,8 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
         
         allData = new ArrayList<ContentType>();
         
-        table = new CellTable<>(Integer.MAX_VALUE);
+        FilterTableResources tableRes = GWT.create(FilterTableResources.class);
+        table = new BaseCelltable<>(Integer.MAX_VALUE, tableRes);
         table.setWidth("100%");
         table.setAutoHeaderRefreshDisabled(true);
         table.setAutoFooterRefreshDisabled(true);
@@ -47,16 +57,15 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
             }
         };
         contentColumn.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-        table.addColumn(contentColumn);
-
-        selectionModel = new ControllableMultiSelectionModel<ContentType>();
-        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        
+        selectionModel = new ControllableMultiSelectionModel<>();
+        final Column<ContentType, Boolean> checkColumn = new Column<ContentType, Boolean>(
+                new CheckboxCell(true, false)) {
             @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                notifyListeners();
+            public Boolean getValue(ContentType object) {
+                return selectionModel.isSelected(object);
             }
-        });
-        table.setSelectionModel(selectionModel);
+        };
         
         dataProvider = new ListDataProvider<ContentType>(new ProvidesKey<ContentType>() {
             @Override
@@ -65,6 +74,43 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
             }
         });
         dataProvider.addDataDisplay(table);
+        
+        table.addColumn(checkColumn);
+        table.addColumn(contentColumn);
+        
+        selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                notifyListeners();
+            }
+        });
+        table.setSelectionModel(selectionModel, DefaultSelectionEventManager.<ContentType> createCustomManager(
+                new DefaultSelectionEventManager.CheckboxEventTranslator<ContentType>() {
+                    @Override
+                    public boolean clearCurrentSelection(CellPreviewEvent<ContentType> event) {
+                        return !isCheckboxColumn(event.getColumn());
+                    }
+
+                    @Override
+                    public SelectAction translateSelectionEvent(CellPreviewEvent<ContentType> event) {
+                        NativeEvent nativeEvent = event.getNativeEvent();
+                        if (BrowserEvents.CLICK.equals(nativeEvent.getType())) {
+                            if (nativeEvent.getCtrlKey()) {
+                                ContentType value = event.getValue();
+                                selectionModel.setSelected(value, !selectionModel.isSelected(value));
+                                return SelectAction.IGNORE;
+                            }
+                            if (!selectionModel.getSelectedSet().isEmpty() && !isCheckboxColumn(event.getColumn())) {
+                                return SelectAction.DEFAULT;
+                            }
+                        }
+                        return SelectAction.TOGGLE;
+                    }
+
+                    private boolean isCheckboxColumn(int columnIndex) {
+                        return columnIndex == table.getColumnIndex(checkColumn);
+                    }
+                }));
         
         filterPanel = new AbstractFilterablePanel<ContentType>(allData, table, dataProvider) {
             @Override

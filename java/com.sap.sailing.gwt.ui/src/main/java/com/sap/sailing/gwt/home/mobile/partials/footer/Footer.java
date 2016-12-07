@@ -25,11 +25,14 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.client.place.whatsnew.WhatsNewPlace;
+import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * Mobile page footer with several links and the ability to switch the language.
+ */
 public class Footer extends Composite {
     private static FooterPanelUiBinder uiBinder = GWT.create(FooterPanelUiBinder.class);
 
@@ -41,6 +44,7 @@ public class Footer extends Composite {
     private MobilePlacesNavigator placeNavigator;
 
     @UiField Anchor changeLanguageLink;
+    @UiField AnchorElement imprintAnchorLink;
     @UiField DivElement languageSelectionDiv;
     @UiField AnchorElement desktopUi;
 
@@ -67,6 +71,7 @@ public class Footer extends Composite {
         FooterResources.INSTANCE.css().ensureInjected();
 
         initWidget(uiBinder.createAndBindUi(this));
+        placeNavigator.getImprintNavigation().configureAnchorElement(imprintAnchorLink);
         
         updateUI();
         DOM.sinkEvents(desktopUi, Event.ONCLICK);

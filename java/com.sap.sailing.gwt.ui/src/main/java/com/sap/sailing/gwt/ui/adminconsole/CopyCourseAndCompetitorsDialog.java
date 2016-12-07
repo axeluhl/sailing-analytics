@@ -7,17 +7,18 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCompetitorCopyOperation> {
-    private final RaceTableWrapper<MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>
+    private final RaceTableWrapper<RefreshableMultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>
         racesTable;
     private final CheckBox courseCheckBox;
     private final CheckBox competitorCheckBox;
@@ -27,7 +28,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
     
     public CopyCourseAndCompetitorsDialog(SailingServiceAsync sailingService, ErrorReporter errorReporter, final StringMessages stringMessages,
             Collection<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
-            String leaderboardName, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
+            String leaderboardName, Distance buoyZoneRadius, DialogCallback<CourseAndCompetitorCopyOperation> dialogCallback) {
         super(stringMessages.selectRaces(), stringMessages.selectRaces(), stringMessages.ok(), stringMessages.cancel(),
                 new Validator<CourseAndCompetitorCopyOperation>() {
                     @Override
@@ -38,7 +39,7 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
                         return null;
                     }
         }, true, dialogCallback);
-        racesTable = new RaceTableWrapper<MultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
+        racesTable = new RaceTableWrapper<RefreshableMultiSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>(
                 sailingService, stringMessages, errorReporter, /* multiSelection */ true);
         racesTable.setSelectedLeaderboardName(leaderboardName);
         racesTable.getDataProvider().getList().addAll(races);
@@ -48,12 +49,10 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
                 validate();
             }
         });
-        
         courseCheckBox = new CheckBox(stringMessages.copyCourse());
         courseCheckBox.setValue(true);
         competitorCheckBox = new CheckBox(stringMessages.copyCompetitors());
-        competitorCheckBox.setValue(true);
-        
+        competitorCheckBox.setValue(false); // competitors are usually registered on the regatta
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
     }

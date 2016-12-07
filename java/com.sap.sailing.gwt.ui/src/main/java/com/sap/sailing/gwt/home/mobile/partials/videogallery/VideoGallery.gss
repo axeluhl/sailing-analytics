@@ -1,0 +1,90 @@
+/**
+ * A video gallery
+ */
+.videoitem {
+  font-size: inherit;
+}
+.videoitem .playbutton {
+  font-size: inherit;
+}
+.videoitem .info {
+  font-size: inherit;
+}
+.videoitem .playicon {
+  position: absolute;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  background: url("../images/home/play-icon.svg") no-repeat;
+  background-size: 2.333333333333333em 2.333333333333333em;
+  background-position: center;
+}
+.videoitem .videoplaceholder {
+  height: 100%;
+}
+.videoitem .videoplaceholder_image {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+.videoitem iframe {
+  width: 100%;
+}
+.video {
+  font-size: 1rem;
+  height: 13.333333333333334em;
+  position: relative;
+  border-top: 1px solid #ccc;
+  padding: 0;
+}
+.videohideinfo .video_info {
+  display: none;
+}
+.video_play {
+  font-size: inherit;
+}
+.video_info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  color: #f6f9fc;
+  padding: 1em;
+  background: rgba(0,0,0,0.6);
+}
+.video_info_text {
+  display: inline-block;
+}
+.video_info_text h3 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.066666666666667em;
+}
+.videogallery {
+  font-size: 1rem;
+}
+.videogallery_video {
+  padding: 0;
+  margin-bottom: 1.333333333333333em;
+}
+.videogallery_video .grid {
+  margin: 0;
+}
+.videogallery_video_info {
+  padding: 0;
+  margin-top: 1em;
+}
+.videogallery_video_info_title {
+  padding: 0 40% 0 0.9375em;
+  font-size: 1.066666666666667em;
+  line-height: 1.125em;
+  font-weight: 700;
+  color: #0a0a0a;
+}
+.videogallery_video_info_subtitle {
+  padding: 0 40% 0 1.153846153846154em;
+  font-size: 0.866666666666667em;
+  line-height: 1.384615384615385em;
+  color: #0a0a0a;
+}
