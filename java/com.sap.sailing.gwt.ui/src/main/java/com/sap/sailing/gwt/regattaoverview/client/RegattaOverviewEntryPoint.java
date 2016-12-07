@@ -83,9 +83,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     }
     
     private void toggleDetailPanel(boolean visibile) {
-        containerPanel.setWidgetSize(detailPanel, visibile ? 110 : 0);
+        containerPanel.setWidgetSize(detailPanel, visibile ? 125 : 0);
         containerPanel.animate(500);
-        // containerPanel.setWidgetHidden(detailPanel, !visibile);
     }
 
     private void createAndAddRegattaPanel(UUID eventId, boolean ignoreLocalSettings) {

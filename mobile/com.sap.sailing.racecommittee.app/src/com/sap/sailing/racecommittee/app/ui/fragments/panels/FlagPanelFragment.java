@@ -205,9 +205,7 @@ public class FlagPanelFragment extends BasePanelFragment {
                 break;
 
             case FINISHING:
-                changeVisibility(mPostponeLock, mPostponeLayer, View.VISIBLE);
-
-                changeVisibility(mPostponeFlags, null, View.VISIBLE);
+                changeVisibility(mPostponeFlags, null, View.GONE);
                 changeVisibility(mAbandonFlags, null, View.VISIBLE);
                 changeVisibility(mRecallFlags, null, View.GONE);
                 changeVisibility(mCourseFlags, null, View.GONE);
@@ -223,8 +221,6 @@ public class FlagPanelFragment extends BasePanelFragment {
                 break;
 
             case FINISHED:
-                changeVisibility(mPostponeLock, mPostponeLayer, View.VISIBLE);
-
                 changeVisibility(mPostponeFlags, null, View.GONE);
                 changeVisibility(mAbandonFlags, null, View.GONE);
                 changeVisibility(mRecallFlags, null, View.GONE);

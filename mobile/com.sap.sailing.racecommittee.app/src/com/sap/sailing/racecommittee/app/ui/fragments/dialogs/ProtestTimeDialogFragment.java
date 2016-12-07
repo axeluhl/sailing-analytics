@@ -7,6 +7,8 @@ import java.util.List;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -18,8 +20,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.BitmapHelper;
@@ -31,13 +36,17 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class ProtestTimeDialogFragment extends AttachedDialogFragment implements View.OnClickListener {
 
@@ -51,9 +60,12 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     private List<ManagedRace> races;
     private ListView mRacesList;
     private TimePicker mTimePicker;
+    private TextView mProtestDuration;
+    private TextView mProtestEndTime;
     private View customView;
     private View mHome;
     private Button mChoose;
+    private AppPreferences mPreferences;
 
     public ProtestTimeDialogFragment() {
         races = new ArrayList<>();
@@ -88,6 +100,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mPreferences = AppPreferences.on(getActivity());
         View layout = super.onCreateView(inflater, container, savedInstanceState);
         if (customView == null) {
             layout = inflater.inflate(R.layout.protest_time_fragment, container, false);
@@ -146,6 +159,14 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
                 });
             }
 
+            mProtestDuration = ViewHelper.get(layout, R.id.protest_duration);
+            mProtestEndTime = ViewHelper.get(layout, R.id.protest_end);
+            View changeDuration = ViewHelper.get(layout, R.id.change_duration);
+            if (changeDuration != null) {
+                changeDuration.setOnClickListener(new DurationChangeListener());
+            }
+            updateProtestRange();
+
             viewPanel(MOVE_NONE);
         }
         return layout;
@@ -189,12 +210,20 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     }
 
     private View setupView() {
+        mPreferences = AppPreferences.on(getActivity());
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.protest_time_dialog, null);
         mRacesList = (ListView) view.findViewById(R.id.protest_time_races_list);
         setupRacesList(mRacesList);
         mTimePicker = (TimePicker) view.findViewById(R.id.protest_time_time_picker);
         setupTimePicker(mTimePicker);
+        mProtestDuration = (TextView) view.findViewById(R.id.protest_duration);
+        mProtestEndTime = (TextView) view.findViewById(R.id.protest_end);
+        View changeDuration = view.findViewById(R.id.change_duration);
+        if (changeDuration != null) {
+            changeDuration.setOnClickListener(new DurationChangeListener());
+        }
+        updateProtestRange();
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             // TODO: @Samuel -> please check, why we did this, because I can't remember
@@ -249,6 +278,13 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         timePicker.setCurrentHour(hours);
         timePicker.setCurrentMinute(minutes);
 
+        timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+            @Override
+            public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
+                updateProtestRange();
+            }
+        });
+
         ThemeHelper.setPickerColor(getActivity(), timePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
             .getColor(getActivity(), R.attr.sap_yellow_1));
     }
@@ -270,9 +306,11 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
     private void setAndAnnounceProtestTime() {
         List<ManagedRace> selectedRaces = getSelectedRaces();
-        TimePoint protestTime = TimeUtils.getTime(mTimePicker);
+        TimePoint startTime = TimeUtils.getTime(mTimePicker);
         TimePoint now = MillisecondsTimePoint.now();
         for (ManagedRace race : selectedRaces) {
+            Duration duration = Duration.ONE_MINUTE.times(AppPreferences.on(getActivity()).getProtestTimeDuration());
+            TimeRange protestTime = new TimeRangeImpl(startTime, startTime.plus(duration));
             race.getState().setProtestTime(now, protestTime);
         }
         if (mHome != null) {
@@ -306,7 +344,6 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
                 viewPanel(MOVE_UP);
                 break;
         }
-
     }
 
     protected void viewPanel(int direction) {
@@ -353,6 +390,18 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         }
     }
 
+    private void updateProtestRange() {
+        int duration = mPreferences.getProtestTimeDuration();
+        if (mProtestDuration != null) {
+            mProtestDuration.setText(getString(R.string.protest_duration, duration));
+        }
+        if (mProtestEndTime != null) {
+            TimePoint startTime = TimeUtils.getTime(mTimePicker);
+            TimePoint endTime = startTime.plus(Duration.ONE_MINUTE.times(duration));
+            mProtestEndTime.setText(getString(R.string.protest_end_time, TimeUtils.formatTime(endTime)));
+        }
+    }
+
     private static class ProtestTimeAdapter extends ArrayAdapter<ManagedRaceItem> {
 
         public ProtestTimeAdapter(Context context, List<ManagedRace> objects) {
@@ -360,7 +409,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         }
 
         private static List<ManagedRaceItem> wrap(List<ManagedRace> races) {
-            List<ManagedRaceItem> wrapped = new ArrayList<ManagedRaceItem>();
+            List<ManagedRaceItem> wrapped = new ArrayList<>();
             for (ManagedRace race : races) {
                 wrapped.add(new ManagedRaceItem(race));
             }
@@ -382,6 +431,30 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
         @Override
         public String toString() {
             return String.format("%s - %s", group.getDisplayName(true), race.getRaceColumnName());
+        }
+    }
+
+    private class DurationChangeListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            FrameLayout layout = (FrameLayout) LayoutInflater.from(v.getContext()).inflate(R.layout.protest_duration, null);
+            final EditText duration = (EditText) layout.findViewById(R.id.protest_duration);
+            duration.setText(String.valueOf(mPreferences.getProtestTimeDuration()));
+            duration.setSelection(duration.length());
+            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextWrapper(v.getContext()), R.style.AppTheme_AlertDialog);
+            builder.setTitle(v.getContext().getString(R.string.protest_duration_dialog_title));
+            builder.setView(layout);
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    int value = Integer.parseInt(duration.getText().toString());
+                    mPreferences.setProtestTimeDuration(value);
+                    updateProtestRange();
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, null);
+            builder.show();
         }
     }
 }

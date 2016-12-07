@@ -65,14 +65,6 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
         boolean embedded = Window.Location.getParameter("embedded") != null
                 && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
-        if (!embedded) {
-            String title = groupName != null ? groupName : getStringMessages().overview();
-            SAPSailingHeaderWithAuthentication header  = getHeader(title);
-            rootPanel.add(header);
-        } else {
-            RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
-            RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
-        }
         if (groupName == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
@@ -102,6 +94,14 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
             }
             rootPanel.add(groupAndFeedbackPanel);
         }
+        if (!embedded) {
+            String title = groupName != null ? groupName : getStringMessages().overview();
+            SAPSailingHeaderWithAuthentication header  = getHeader(title);
+            rootPanel.add(header);
+        } else {
+            RootPanel.getBodyElement().getStyle().setPadding(0, Unit.PX);
+            RootPanel.getBodyElement().getStyle().setPaddingTop(20, Unit.PX);
+        }
         fillRegattas();
     }
 
@@ -111,7 +111,6 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
         header.getElement().getStyle().setPosition(Position.FIXED);
         header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);
-        header.getElement().getStyle().setZIndex(100);
         return header;
     }
 

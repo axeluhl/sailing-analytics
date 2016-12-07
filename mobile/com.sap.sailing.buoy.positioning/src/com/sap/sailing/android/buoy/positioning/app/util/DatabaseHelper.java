@@ -11,6 +11,7 @@ import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.C
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Mark;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.MarkPing;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
@@ -109,9 +110,9 @@ public class DatabaseHelper {
         if (mpc != null) {
             mpc.moveToFirst();
             while (!mpc.isAfterLast()) {
-                long timeStamp = Long.parseLong(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP))));
-                double longitude = Double.parseDouble(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE))));
-                double latitude = Double.parseDouble(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
+                long timeStamp = mpc.getLong(mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP));
+                double longitude = mpc.getDouble(mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE));
+                double latitude = mpc.getDouble(mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE));
                 MarkPingInfo markPingInfo = new MarkPingInfo(markID, GPSFixImpl.create(longitude, latitude, timeStamp),
                         mpc.getDouble((mpc.getColumnIndex(MarkPing.MARK_PING_ACCURACY))));
                 marks.add(markPingInfo);
@@ -163,15 +164,11 @@ public class DatabaseHelper {
      */
     public void storeCheckinRow(Context context, List<MarkInfo> markList, LeaderboardInfo leaderboard,
             CheckinUrlInfo checkinURL, List<MarkPingInfo> pings) throws GeneralDatabaseHelperException {
-
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "New data stored");
         }
         // inserting leaderboard first
-
-
         ContentResolver cr = context.getContentResolver();
-
         ContentValues clv = new ContentValues();
         clv.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
         clv.put(Leaderboard.LEADERBOARD_SERVER_URL, leaderboard.serverUrl);
@@ -228,49 +225,38 @@ public class DatabaseHelper {
         }
     }
 
-    public void updateMarks(Context context, List<MarkInfo> markList, LeaderboardInfo leaderboard) throws GeneralDatabaseHelperException {
+    public void updateMarks(Context context, CheckinData data) throws GeneralDatabaseHelperException {
         ContentResolver cr = context.getContentResolver();
 
         // Update Leaderboard
+        LeaderboardInfo leaderboard = data.getLeaderboard();
         ContentValues leaderboardValues = new ContentValues();
         leaderboardValues.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
         leaderboardValues.put(Leaderboard.LEADERBOARD_SERVER_URL, leaderboard.serverUrl);
         leaderboardValues.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
         cr.update(Leaderboard.CONTENT_URI, leaderboardValues, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] {leaderboard.checkinDigest});
+
+        // Delete all marks for this leaderboard
         List<MarkInfo> currentMarks = getMarks(context, leaderboard.checkinDigest);
-        // Delete marks which where deleted on the server
-        for (MarkInfo currentMark : currentMarks){
-            if (!markList.contains(currentMark)) {
-                deleteMark(context, currentMark);
-            }
+        for (MarkInfo mark : currentMarks){
+            deleteMark(context, mark);
         }
-        // Update marks
-        for (MarkInfo mark : markList) {
+        // insert marks from server into database
+        for (MarkInfo mark : data.marks) {
+            for (MarkPingInfo ping : data.pings) {
+                storeMarkPing(context, ping);
+            }
+
             ContentValues cmv = new ContentValues();
             cmv.put(Mark.MARK_CHECKIN_DIGEST, mark.getCheckinDigest());
             cmv.put(Mark.MARK_ID, mark.getId().toString());
             cmv.put(Mark.MARK_NAME, mark.getName());
             cmv.put(Mark.MARK_TYPE, mark.getType().toString());
             cmv.put(Mark.MARK_CLASS_NAME, mark.getClassName());
-            if (!dataBaseContainsMark(context, mark)) {
-                cr.insert(Mark.CONTENT_URI, cmv);
-            } else {
-                cr.update(Mark.CONTENT_URI, cmv, Mark.MARK_ID + " = ?", new String[] { mark.getId().toString() });
-            }
+            cr.insert(Mark.CONTENT_URI, cmv);
         }
+
         LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(context.getString(R.string.database_changed)));
-    }
-
-    private boolean dataBaseContainsMark(Context context, MarkInfo mark) {
-        Cursor contentResolver = context.getContentResolver().query(Mark.CONTENT_URI, null, Mark.MARK_CHECKIN_DIGEST + " = ?" +
-            " AND " + Mark.MARK_ID + " = ? ", new String[] { mark.getCheckinDigest(), mark.getId().toString() }, "");
-        int count = 0;
-        if (contentResolver != null) {
-            count = contentResolver.getCount();
-
-            contentResolver.close();
-        }
-        return count != 0;
     }
 
     public void storeMarkPing(Context context, MarkPingInfo markPing) throws GeneralDatabaseHelperException {
