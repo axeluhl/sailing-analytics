@@ -19,16 +19,8 @@ public class CompetitorWithToolTipDTO {
         return competitor;
     }
 
-    public void setCompetitor(CompetitorDTO competitor) {
-        this.competitor = competitor;
-    }
-
     public String getToolTipMessage() {
         return toolTipMessage;
-    }
-
-    public void setToolTipMessage(String toolTipMessage) {
-        this.toolTipMessage = toolTipMessage;
     }
 
     @Override

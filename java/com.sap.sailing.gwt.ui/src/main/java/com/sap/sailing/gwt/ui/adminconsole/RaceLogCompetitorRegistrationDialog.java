@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -18,6 +19,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
+import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -101,43 +104,49 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass, validator);
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
-        fleetNameWithCompetitors = new HashMap<>();
-        findCompetitorsFromTheSameRaceColumn(fleets);
-        competitorRegistrationInRaceLogCheckBox = new CheckBox(stringMessages.registerCompetitorsOnRace());
+        fleetNameWithCompetitors = findCompetitorsFromTheSameRaceColumn(fleets);
+        competitorRegistrationInRaceLogCheckBox = createCheckbox(stringMessages.registerCompetitorsOnRace());
         validator.setCompetitorRegistrationInRaceLogCheckBox(competitorRegistrationInRaceLogCheckBox);
         validator.setFleetWithCompetitors(fleetNameWithCompetitors);
         setupCompetitorRegistationsOnRaceCheckbox();
     }
 
     /**
-     * Finds the competitors from the fleets of the same race column and puts them to the map
+     * For all {@code fleets} passed and not equal to {@link #fleetName} retrieves the competitor-per-race registrations
+     * for the {@link #raceColumnName}. 
      */
-    private void findCompetitorsFromTheSameRaceColumn(final List<FleetDTO> fleets) {
-        fleetNameWithCompetitors.clear();
+    private Map<String, Set<CompetitorDTO>> findCompetitorsFromTheSameRaceColumn(final List<FleetDTO> fleets) {
+        final Map<String, Set<CompetitorDTO>> result = new HashMap<>();
+        final Map<String, ParallelExecutionCallback<Collection<CompetitorDTO>>> callbacksForFleetNames = new HashMap<>();
         for (FleetDTO fleetDTO : fleets) {
             final String curFleetName = fleetDTO.getName();
             if (!curFleetName.equals(fleetName)) {
-                sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, curFleetName,
-                        new AsyncCallback<Collection<CompetitorDTO>>() {
-
-                            @Override
-                            public void onSuccess(Collection<CompetitorDTO> result) {
-                                fleetNameWithCompetitors.put(curFleetName, new HashSet<>(result));
-                                // if the data was gained completely then gray out specific rows
-                                // TODO : maybe, there is a way to make it better
-                                if (fleetNameWithCompetitors.size() == fleets.size() - 1) {
-                                    grayOutRows();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError(
-                                        "Could not load already registered competitors: " + caught.getMessage());
-                            }
-                        });
+                callbacksForFleetNames.put(curFleetName, new ParallelExecutionCallback<Collection<CompetitorDTO>>() {
+                    @Override
+                    public void onSuccess(Collection<CompetitorDTO> competitorRegistrationsForRace) {
+                        result.put(curFleetName, new HashSet<>(competitorRegistrationsForRace));
+                        super.onSuccess(competitorRegistrationsForRace);
+                    }
+                });
             }
         }
+        new ParallelExecutionHolder(callbacksForFleetNames.values().toArray(new ParallelExecutionCallback<?>[0])) {
+            @Override
+            protected void handleSuccess() {
+                // if the data was gained completely then gray out specific rows
+                grayOutRows();
+            }
+
+            @Override
+            protected void handleFailure(Throwable t) {
+                errorReporter.reportError(
+                        "Could not load already registered competitors: " + t.getMessage());
+            }
+        };
+        for (final Entry<String, ParallelExecutionCallback<Collection<CompetitorDTO>>> fleetNameAndCallback : callbacksForFleetNames.entrySet()) {
+            sailingService.getCompetitorRegistrationsForRace(leaderboardName, raceColumnName, fleetNameAndCallback.getKey(), fleetNameAndCallback.getValue());
+        }
+        return result;
     }
 
     /**
@@ -165,6 +174,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                         @Override
                         public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
                             move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
+                            validate();
                         }
 
                         @Override
@@ -179,6 +189,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                         @Override
                         public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
                             move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
+                            validate();
                         }
 
                         @Override
