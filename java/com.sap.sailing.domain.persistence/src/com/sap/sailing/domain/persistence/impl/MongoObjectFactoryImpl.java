@@ -1250,7 +1250,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeCompetitors(Iterable<Competitor> competitors) {
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
         List<DBObject> competitorsDB = new ArrayList<>();
-        for (Competitor competitor: competitors){
+        for (Competitor competitor : competitors) {
             JSONObject json = competitorSerializer.serialize(competitor);
             DBObject entry = (DBObject) JSON.parse(json.toString());
             competitorsDB.add(entry);

@@ -597,6 +597,11 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
+    /**
+     * The {@link CompetitorDTO#getIdAsString() ID} of the {@code competitorDTOs} (should they contain any) are
+     * ignored here, and new {@code Competitor} objects with new, random UUIDs will be created on the server that
+     * otherwise obtain their properties from the {@code competitorDTOs} passed here.
+     */
     void addCompetitors(Iterable<CompetitorDTO> competitorDTOs, AsyncCallback<Void> asyncCallback);
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
