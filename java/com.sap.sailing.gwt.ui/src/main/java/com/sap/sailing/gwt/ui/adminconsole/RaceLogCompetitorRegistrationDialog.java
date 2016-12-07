@@ -149,7 +149,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
             if (!entry.getKey().equals(fleetName)) {
                 for (CompetitorDTO competitor : entry.getValue()) {
                     competitors.add(new CompetitorWithToolTipDTO(competitor, stringMessages
-                            .toolTipMessage(competitor.getName(), fleetName, entry.getKey(), raceColumnName)));
+                            .competitorToolTipMessage(competitor.getName(), fleetName, entry.getKey(), raceColumnName)));
                 }
             }
         }
