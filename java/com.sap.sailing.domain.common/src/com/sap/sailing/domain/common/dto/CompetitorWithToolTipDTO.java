@@ -3,26 +3,30 @@ package com.sap.sailing.domain.common.dto;
 import java.util.Objects;
 
 public class CompetitorWithToolTipDTO {
-    
+
     private CompetitorDTO competitor;
     private String toolTipMessage;
-    
-    public CompetitorWithToolTipDTO() {   
+
+    public CompetitorWithToolTipDTO() {
     }
-    
+
     public CompetitorWithToolTipDTO(CompetitorDTO competitor, String toolTipMessage) {
         this.competitor = competitor;
         this.toolTipMessage = toolTipMessage;
     }
+
     public CompetitorDTO getCompetitor() {
         return competitor;
     }
+
     public void setCompetitor(CompetitorDTO competitor) {
         this.competitor = competitor;
     }
+
     public String getToolTipMessage() {
         return toolTipMessage;
     }
+
     public void setToolTipMessage(String toolTipMessage) {
         this.toolTipMessage = toolTipMessage;
     }
