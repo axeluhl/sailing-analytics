@@ -597,6 +597,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
+    void addCompetitors(Iterable<CompetitorDTO> competitorDTOs, AsyncCallback<Void> asyncCallback);
+
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
 
     void getDeviceConfigurationMatchers(AsyncCallback<List<DeviceConfigurationMatcherDTO>> asyncCallback);

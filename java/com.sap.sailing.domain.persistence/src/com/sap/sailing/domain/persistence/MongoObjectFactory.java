@@ -125,6 +125,8 @@ public interface MongoObjectFactory {
      */
     void storeCompetitor(Competitor competitor);
 
+    void storeCompetitors(Iterable<Competitor> competitor);
+
     void removeAllCompetitors();
 
     void removeCompetitor(Competitor competitor);

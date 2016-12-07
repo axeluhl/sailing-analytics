@@ -12,10 +12,12 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTOImpl;
 import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
+import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -155,9 +157,10 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Set<Competit
     }
 
     private CompetitorDTO convertCompetitorDescriptorToCompetitorDTO(CompetitorDescriptorDTO competitorDescriptor) {
-        BoatDTO boat = new BoatDTO(null, competitorDescriptor.getSailNumber());
+        BoatDTO defaultBoat = new BoatDTO(null, competitorDescriptor.getSailNumber());
+        BoatClassDTO defaultBoatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length */ new MeterDistance(5));
         return new CompetitorDTOImpl(competitorDescriptor.getName(), null, null,
                 competitorDescriptor.getTwoLetterIsoCountryCode(), competitorDescriptor.getThreeLetterIocCountryCode(),
-                competitorDescriptor.getCountryName(), null, null, null, boat, null, null, null, null);
+                competitorDescriptor.getCountryName(), null, null, null, defaultBoat, defaultBoatClass, null, null, null);
     }
 }

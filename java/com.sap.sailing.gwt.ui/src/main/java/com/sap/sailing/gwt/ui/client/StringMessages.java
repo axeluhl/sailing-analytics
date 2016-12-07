@@ -1749,4 +1749,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String filterImportedCompetitorsByNameSailRaceFleet();
     String errorLoadingCompetitorImportProviders(String message);
     String errorLoadingCompetitorImportDescriptors(String message);
+    String couldNotSaveCompetitorRegistrations(String message);
 }

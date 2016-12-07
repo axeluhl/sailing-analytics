@@ -205,6 +205,8 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     busynessPanel.setBusy(false);
+                                    errorReporter.reportError(
+                                            stringMessages.errorMessageLoadingData());
                                 }
 
                                 @Override

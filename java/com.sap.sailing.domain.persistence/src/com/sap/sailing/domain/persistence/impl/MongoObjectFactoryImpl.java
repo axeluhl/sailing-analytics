@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1242,6 +1243,18 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
         DBObject entry = (DBObject) JSON.parse(json.toString());
         collection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void storeCompetitors(Iterable<Competitor> competitors) {
+        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+        List<DBObject> competitorsDB = new ArrayList<>();
+        for (Competitor competitor: competitors){
+            JSONObject json = competitorSerializer.serialize(competitor);
+            DBObject entry = (DBObject) JSON.parse(json.toString());
+            competitorsDB.add(entry);
+        }
+        collection.insert(competitorsDB);
     }
 
     @Override
