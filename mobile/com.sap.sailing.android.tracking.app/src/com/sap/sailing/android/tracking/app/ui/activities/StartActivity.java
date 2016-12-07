@@ -24,7 +24,7 @@ import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
 
-public class StartActivity extends AbstractStartActivity {
+public class StartActivity extends AbstractStartActivity<CheckinData> {
 
     private AppPreferences prefs;
     private final String TAG = StartActivity.class.getName();
@@ -102,12 +102,11 @@ public class StartActivity extends AbstractStartActivity {
     }
 
     @Override
-    public void onCheckinDataAvailable(BaseCheckinData data) {
-        if (data != null && data instanceof CheckinData) {
-            CheckinData checkinData = (CheckinData) data;
-            if (!checkinData.isUpdate()) {
+    public void onCheckinDataAvailable(CheckinData data) {
+        if (data != null) {
+            if (!data.isUpdate()) {
                 getHomeFragment().displayUserConfirmationScreen(data);
-            } else if (checkinData.isUpdate()) {
+            } else if (data.isUpdate()) {
                 updateRegatta(data);
             }
         }

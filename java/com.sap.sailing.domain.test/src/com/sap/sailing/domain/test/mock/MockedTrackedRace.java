@@ -1129,6 +1129,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public NavigableSet<MarkPassing> getMarkPassings(Competitor competitor, boolean waitForLatestUpdates) {
+        return null;
+    }
+    
+    @Override
     public Distance getAverageRideHeight(Competitor competitor, TimePoint timePoint) {
         return null;
     }
