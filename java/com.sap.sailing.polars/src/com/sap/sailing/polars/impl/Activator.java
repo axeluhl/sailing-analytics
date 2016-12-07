@@ -63,7 +63,7 @@ public class Activator implements BundleActivator {
                         } catch (Exception e) {
                             logger.log(Level.SEVERE, "Exception while trying to import polar data from "+polarDataSourceURL, e);
                         }
-                        });
+                    });
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }
