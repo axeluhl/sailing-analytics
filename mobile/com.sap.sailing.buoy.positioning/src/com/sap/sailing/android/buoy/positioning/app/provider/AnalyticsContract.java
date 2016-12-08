@@ -10,6 +10,12 @@ public class AnalyticsContract {
 
     interface LeaderboardColumns {
         String LEADERBOARD_NAME = "leaderboard_name";
+        /**
+         * The values in this column either equal those of the {@link #LEADERBOARD_NAME} column in case no explicit
+         * display name has been provided for the leaderboard, or they hold the explicit display name. Note that this
+         * makes it impossible to tell whether the display name was inferred from the regular name or has been
+         * explicitly provided.
+         */
         String LEADERBOARD_DISPLAY_NAME = "leaderboard_display_name";
         String LEADERBOARD_SERVER_URL = "leaderboard_server_url";
         String LEADERBOARD_CHECKIN_DIGEST = "leaderboard_checkin_digest";
