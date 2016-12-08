@@ -153,9 +153,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
     /**
      * Helper method that synchronizes the scroll position of the target scrollpanel, using the data gathered from the
      * source scrollpanel
-     * 
-     * @param source
-     * @param target
      */
     private void syncScrollers(ScrollPanel source, ScrollPanel target) {
         target.setHorizontalScrollPosition(source.getHorizontalScrollPosition());
@@ -174,7 +171,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
 
     /**
      * This methods triggers the animation that shows/ hides the overlay scrollbar.
-     *
      */
     private void updateOverlayDisplay() {
         // docViewTop and docViewBottom contain the window viewport size
@@ -192,8 +188,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
 
     /**
      * Checks if the content in the scrollpanel fits in the scrollpanel without scrolling
-     * 
-     * @return
      */
     public boolean isElementHorizontalScrollShown() {
         return contentToSyncWith.getClientWidth() > this.getElement().getClientWidth();
@@ -202,10 +196,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
     /**
      * Uses JSNI to setup a mutation observer. This way we get notified when the content inside the scrollpanel changes
      * on dom-level. As soon as we have changes, we execute the command provided by this method.
-     * 
-     * @param elementToObserve
-     * @param onChangeCommand
-     * @return
      */
     private native JavaScriptObject setupObserver(final Element elementToObserve, Command onChangeCommand) /*-{
 	if (MutationObserver) {
@@ -227,8 +217,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
 
     /**
      * Disconnect the mutation observer.
-     * 
-     * @param observer
      */
     private native void disconnectObserver(final JavaScriptObject observer) /*-{
 	if (observer) {
@@ -237,9 +225,7 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
     }-*/;
 
     /**
-     * Check if the browser provides the mutation observer api.
-     * 
-     * @return
+     * Check if the browser provides the mutation observer API.
      */
     private native boolean weCanObserve() /*-{
 	return (MutationObserver);
@@ -254,8 +240,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
 
         /**
          * Convenience method to trigger animation.
-         * 
-         * @param doShowOverlay
          */
         public void updateOverlayToState(boolean doShowOverlay) {
             animate(doShowOverlay, 200);
@@ -271,9 +255,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
         /**
          * Trigger overlay display animation The animation only fires if the current internal state and the target state
          * are differ.
-         * 
-         * @param requestedVisibleState
-         * @param duration
          */
         public void animate(boolean requestedVisibleState, int duration) {
             boolean changed = overlayToolbarIsCurrentlyVisible != requestedVisibleState;
@@ -282,7 +263,6 @@ public class OverlayAssistantScrollPanel extends ScrollPanel {
             overlayRequestedTargetState = requestedVisibleState;
             run(duration);
         }
-
 
         @Override
         protected void onStart() {
