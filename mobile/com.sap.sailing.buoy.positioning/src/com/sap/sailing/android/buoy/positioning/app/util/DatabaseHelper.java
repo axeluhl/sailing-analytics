@@ -41,14 +41,12 @@ public class DatabaseHelper {
         if (mInstance == null) {
             mInstance = new DatabaseHelper();
         }
-
         return mInstance;
     }
 
     public LeaderboardInfo getLeaderboard(Context context, String checkinDigest) {
         LeaderboardInfo leaderboard = new LeaderboardInfo();
         leaderboard.checkinDigest = checkinDigest;
-
         Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null,
                 Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (lc != null) {
@@ -57,17 +55,14 @@ public class DatabaseHelper {
                 leaderboard.name = lc.getString(lc.getColumnIndex(Leaderboard.LEADERBOARD_NAME));
                 leaderboard.serverUrl = lc.getString(lc.getColumnIndex(Leaderboard.LEADERBOARD_SERVER_URL));
             }
-
             lc.close();
         }
-
         return leaderboard;
     }
 
     public CheckinUrlInfo getCheckinUrl(Context context, String checkinDigest) {
         CheckinUrlInfo checkinUrlInfo = new CheckinUrlInfo();
         checkinUrlInfo.checkinDigest = checkinDigest;
-
         Cursor uc = context.getContentResolver().query(CheckinUri.CONTENT_URI, null,
             CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (uc != null) {
@@ -75,10 +70,8 @@ public class DatabaseHelper {
                 checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndex(BaseColumns._ID));
                 checkinUrlInfo.urlString = uc.getString(uc.getColumnIndex(CheckinUri.CHECKIN_URI_VALUE));
             }
-
             uc.close();
         }
-
         return checkinUrlInfo;
     }
 
@@ -126,7 +119,6 @@ public class DatabaseHelper {
     public void deletePingsFromDataBase(Context context, String markIdAsString) {
         ContentResolver cr = context.getContentResolver();
         int d1 = cr.delete(MarkPing.CONTENT_URI, MarkPing.MARK_ID + " = ?", new String[] { markIdAsString });
-
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Checkout, number of markpings for mark: " + markIdAsString + " deleted: " + d1);
         }
@@ -134,17 +126,13 @@ public class DatabaseHelper {
 
     public void deleteRegattaFromDatabase(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();
-
         List<MarkInfo> marks = getMarks(context, checkinDigest);
-
         for (MarkInfo mark : marks) {
             deletePingsFromDataBase(context, mark.getId().toString());
         }
-
         int d2 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
         int d3 = cr.delete(Mark.CONTENT_URI, Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
         int d4 = cr.delete(CheckinUri.CONTENT_URI, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
-
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d2);
             ExLog.i(context, TAG, "Checkout, number of marks deleted: " + d3);
@@ -177,9 +165,7 @@ public class DatabaseHelper {
         cr.insert(Leaderboard.CONTENT_URI, cv);
 
         // now insert marks
-
         ArrayList<ContentProviderOperation> opList = new ArrayList<>();
-
         // marks
         for (MarkInfo mark : markList) {
             cv.clear();
@@ -191,23 +177,17 @@ public class DatabaseHelper {
 
             opList.add(ContentProviderOperation.newInsert(Mark.CONTENT_URI).withValues(cv).build());
         }
-
         for (MarkPingInfo ping : pings) {
             storeMarkPing(context, ping);
         }
-
         // checkin url
-
         cv.put(CheckinUri.CHECKIN_URI_VALUE, checkinURL.urlString);
         cv.put(CheckinUri.CHECKIN_URI_CHECKIN_DIGEST, checkinURL.checkinDigest);
         cr.insert(CheckinUri.CONTENT_URI, cv);
-
         opList.add(ContentProviderOperation.newInsert(CheckinUri.CONTENT_URI).withValues(cv).build());
-
         try {
             cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
             LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(context.getString(R.string.database_changed)));
-
         } catch (RemoteException e) {
             throw new GeneralDatabaseHelperException(e.getMessage());
         } catch (OperationApplicationException e) {
@@ -218,7 +198,6 @@ public class DatabaseHelper {
     private void deleteMark(Context context, MarkInfo markInfo) {
         ContentResolver cr = context.getContentResolver();
         cr.delete(Mark.CONTENT_URI, Mark.MARK_ID + " = ?", new String[] { markInfo.getId().toString() });
-
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Deleted mark with id: " + markInfo.getId());
         }
@@ -282,13 +261,11 @@ public class DatabaseHelper {
     }
 
     public boolean markLeaderboardCombinationAvailable(Context context, String checkinDigest) {
-
         Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null,
             Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         int count = 0;
         if (lc != null) {
             count = lc.getCount();
-
             lc.close();
         }
         return count == 0;
