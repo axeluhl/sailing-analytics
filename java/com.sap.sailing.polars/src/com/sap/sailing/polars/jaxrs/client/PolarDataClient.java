@@ -6,7 +6,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.SystemDefaultHttpClient;
@@ -57,10 +56,11 @@ public class PolarDataClient {
             polarDataServiceImpl.initiallyFillFrom(inputStream);
             logger.log(Level.INFO,
                     "Loading polar regression data from remote server " + polarDataSourceURL + " succeeded");
-        } catch (ClientProtocolException e) {
+        } catch (Exception e) {
             // Catching ClientProtocolException to indicate problems with HTTP protocol
             logger.log(Level.WARNING, "Failed to load polar regression data from remote server " + polarDataSourceURL
-                    + ", " + e.getMessage());
+                    + ", " + e.getMessage()+"; resetting polar data miner");
+            polarDataServiceImpl.resetState();
         }
     }
 

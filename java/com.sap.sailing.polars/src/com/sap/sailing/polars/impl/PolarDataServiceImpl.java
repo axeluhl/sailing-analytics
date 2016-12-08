@@ -88,15 +88,18 @@ public class PolarDataServiceImpl implements ReplicablePolarService {
      * Constructs the polar data service with default generation settings.
      */
     public PolarDataServiceImpl() {
+        resetState();
+        this.operationsSentToMasterForReplication = new HashSet<>();
+        this.operationExecutionListeners = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public void resetState() {
         PolarSheetGenerationSettings settings = PolarSheetGenerationSettingsImpl.createBackendPolarSettings();
         ClusterGroup<Bearing> angleClusterGroup = createAngleClusterGroup();
         CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor = new CubicRegressionPerCourseProcessor();
-        SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(
-                angleClusterGroup);
-        this.polarDataMiner = new PolarDataMiner(settings, cubicRegressionPerCourseProcessor,
-                speedRegressionPerAngleClusterProcessor, angleClusterGroup);
-        this.operationsSentToMasterForReplication = new HashSet<>();
-        this.operationExecutionListeners = new ConcurrentHashMap<>();
+        SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor = new SpeedRegressionPerAngleClusterProcessor(angleClusterGroup);
+        this.polarDataMiner = new PolarDataMiner(settings, cubicRegressionPerCourseProcessor, speedRegressionPerAngleClusterProcessor, angleClusterGroup);
     }
 
     private ClusterGroup<Bearing> createAngleClusterGroup() {
@@ -310,12 +313,8 @@ public class PolarDataServiceImpl implements ReplicablePolarService {
     public void initiallyFillFromInternal(ObjectInputStream is) throws IOException, ClassNotFoundException,
             InterruptedException {
         PolarSheetGenerationSettings backendPolarSettings = (PolarSheetGenerationSettings) is.readObject();
-
-        CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor = (CubicRegressionPerCourseProcessor) is
-                .readObject();
-        SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor = (SpeedRegressionPerAngleClusterProcessor) is
-                .readObject();
-
+        CubicRegressionPerCourseProcessor cubicRegressionPerCourseProcessor = (CubicRegressionPerCourseProcessor) is.readObject();
+        SpeedRegressionPerAngleClusterProcessor speedRegressionPerAngleClusterProcessor = (SpeedRegressionPerAngleClusterProcessor) is.readObject();
         polarDataMiner = new PolarDataMiner(backendPolarSettings, cubicRegressionPerCourseProcessor,
                 speedRegressionPerAngleClusterProcessor, speedRegressionPerAngleClusterProcessor.getAngleCluster());
     }
