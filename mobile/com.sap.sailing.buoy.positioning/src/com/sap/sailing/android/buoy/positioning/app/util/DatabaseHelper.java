@@ -181,6 +181,7 @@ public class DatabaseHelper {
             storeMarkPing(context, ping);
         }
         // checkin url
+        cv.clear();
         cv.put(CheckinUri.CHECKIN_URI_VALUE, checkinURL.urlString);
         cv.put(CheckinUri.CHECKIN_URI_CHECKIN_DIGEST, checkinURL.checkinDigest);
         cr.insert(CheckinUri.CONTENT_URI, cv);
