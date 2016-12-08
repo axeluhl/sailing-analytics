@@ -6,7 +6,6 @@ import java.util.HashSet;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
