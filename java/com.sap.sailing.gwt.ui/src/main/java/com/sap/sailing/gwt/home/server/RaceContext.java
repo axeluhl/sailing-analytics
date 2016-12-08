@@ -591,6 +591,11 @@ public class RaceContext {
         if (startTime != null && now.before(startTime)) {
             return RaceViewState.SCHEDULED;
         }
+        if (state != null && state.getStatus() == RaceLogRaceStatus.FINISHING) {
+            // someone pulled up the blue flag; it's pretty likely that we'll also see the blue flag down
+            // event for the transition into the FINISHED state, so we can report FINISHING for now:
+            return RaceViewState.FINISHING;
+        }
         if (finishTime != null && now.after(finishTime)) {
             return RaceViewState.FINISHED;
         }
