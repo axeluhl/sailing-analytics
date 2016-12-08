@@ -371,7 +371,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
      * Whether or not a second scroll bar, synchronized with the invisible native scroll bar, shall appear at
      * the bottom of the viewport. See {@link OverlayAssistantScrollPanel}.
      */
-    private boolean enableSyncedScroller = false;
+    private final boolean enableSyncedScroller;
 
     protected StringMessages getStringMessages() {
         return stringMessages;
@@ -1913,10 +1913,6 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(/* showProgress */ false);
         }
-    }
-
-    public void setEnableSyncedScroller(boolean enableSyncedScroller) {
-        this.enableSyncedScroller = enableSyncedScroller;
     }
 
     private Widget createToolbarPanel() {
