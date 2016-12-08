@@ -342,19 +342,13 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         NetworkHelperSuccessListener successListener = new NetworkHelperSuccessListener() {
             @Override
             public void performAction(JSONObject response) {
-                StartActivity startActivity = (StartActivity) getActivity();
-                startActivity.dismissProgressDialog();
-                DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
-                reloadList();
+                dismissProgressDialogDeleteRegattaAndReloadList(checkinDigest);
             }
         };
         NetworkHelperFailureListener failureListener = new NetworkHelperFailureListener() {
             @Override
             public void performAction(NetworkHelperError e) {
-                StartActivity startActivity = (StartActivity) getActivity();
-                startActivity.dismissProgressDialog();
-                startActivity.showErrorPopup(R.string.error,
-                    R.string.error_could_not_complete_operation_on_server_try_again);
+                dismissProgressDialogDeleteRegattaAndReloadList(checkinDigest);
             }
         };
         CheckoutHelper checkoutHelper = new CheckoutHelper();
@@ -369,6 +363,13 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             checkoutHelper.checkoutMark((StartActivity) getActivity(), leaderboardInfo.name, eventInfo.server, markInfo.markId,
                 successListener, failureListener);
         }
+    }
+
+    public void dismissProgressDialogDeleteRegattaAndReloadList(final String checkinDigest) {
+        StartActivity startActivity = (StartActivity) getActivity();
+        startActivity.dismissProgressDialog();
+        DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinDigest);
+        reloadList();
     }
 
     private class ItemClickListener implements OnItemClickListener {
