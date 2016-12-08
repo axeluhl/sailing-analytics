@@ -115,10 +115,7 @@ public class CheckinManager {
         }
         if (urlData != null) {
             urlData.leaderboardName = leaderboardNameFromQR;
-
-            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid
-                    .getUniqueId(mContext)));
-
+            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid.getUniqueId(mContext)));
             urlData.getLeaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
         }
         return urlData;
@@ -142,17 +139,11 @@ public class CheckinManager {
                             }
                             return;
                         }
-
-                        try {
-                            urlData.leaderboardDisplayName = response.getString("displayName");
-                        } catch (JSONException e) {
-                            urlData.leaderboardDisplayName = leaderboardName;
-                        }
-
+                        final String leaderboardDisplayName = response.optString("displayName", leaderboardName);
                         HttpGetRequest getMarksRequest;
                         try {
                             getMarksRequest = new HttpGetRequest(new URL(urlData.getMarkUrl), mContext);
-                            getMarksFromServer(leaderboardName, getMarksRequest, urlData);
+                            getMarksFromServer(leaderboardName, leaderboardDisplayName, getMarksRequest, urlData);
                         } catch (MalformedURLException e1) {
                             ExLog.e(mContext, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e1.getMessage());
                         }
@@ -169,7 +160,12 @@ public class CheckinManager {
                 });
     }
 
-    private void getMarksFromServer(final String leaderboardName, HttpGetRequest getMarksRequest, final URLData urlData) {
+    /**
+     * @param leaderboardDisplayName
+     *            the leaderboard's display name if one has been explicitly provided, otherwise the same as
+     *            {@code leaderboardName}
+     */
+    private void getMarksFromServer(final String leaderboardName, final String leaderboardDisplayName, HttpGetRequest getMarksRequest, final URLData urlData) {
         NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsync(getMarksRequest,
                 new NetworkHelperSuccessListener() {
 
@@ -210,7 +206,7 @@ public class CheckinManager {
                             }
                             urlData.marks = marks;
                             urlData.pings = pings;
-                            saveCheckinDataAndNotifyListeners(urlData, leaderboardName);
+                            saveCheckinDataAndNotifyListeners(urlData, leaderboardName, leaderboardDisplayName);
 
                         } catch (JSONException | ParseException | JsonDeserializationException e) {
                             ExLog.e(mContext, TAG, "Error getting data from call on URL: " + urlData.getMarkUrl
@@ -236,11 +232,16 @@ public class CheckinManager {
                 });
     }
 
-    private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
+    /**
+     * @param leaderboardDisplayName
+     *            the leaderboard's display name if one has been explicitly provided, otherwise the same as
+     *            {@code leaderboardName}
+     */
+    private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName, String leaderboardDisplayName) {
         CheckinData data = new CheckinData();
         data.serverWithPort = urlData.hostWithPort;
         data.leaderboardName = leaderboardName;
-        data.leaderboardDisplayName = urlData.leaderboardDisplayName;
+        data.leaderboardDisplayName = leaderboardDisplayName;
         data.marks = urlData.marks;
         data.pings = urlData.pings;
         data.deviceUid = urlData.deviceUuid.getStringRepresentation();
@@ -330,13 +331,8 @@ public class CheckinManager {
         public List<MarkInfo> marks;
         public List<MarkPingInfo> pings;
         public String leaderboardName;
-        public String leaderboardDisplayName;
         public DeviceIdentifier deviceUuid;
         public String getMarkUrl;
         public String getLeaderboardUrl;
-
-        public URLData() {
-
-        }
     }
 }
