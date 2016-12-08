@@ -26,17 +26,15 @@ import com.google.gwt.user.client.ui.Widget;
 
 /**
  * This scrollpanel overlays a second scrollbar fixed to the bottom of the viewport as soon as the original scrollbar is
- * not visible anymore.
+ * not visible anymore.<p>
  * 
  * This class observes a set of events to properly synchronize scrollbar states:
  * 
  * <ul>
  * <li>scrollevents on both scrollbars</li>
  * <li>window resize events</li>
- * <li>dom mutation events on the scrollpanel child widget</li>
+ * <li>DOM mutation events on the scrollpanel child widget</li>
  * </ul>
- * 
- * 
  */
 public class OverlayAssistantScrollPanel extends ScrollPanel {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
