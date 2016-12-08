@@ -1843,7 +1843,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         });
         leaderboardTable.ensureDebugId("LeaderboardCellTable");
         selectionCheckboxColumn = new LeaderboardSelectionCheckboxColumn(competitorSelectionProvider);
-        getLeaderboardTable().setWidth("100%");
+        leaderboardTable.setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         // remember handler registration so we can temporarily remove it and re-add it to suspend selection events while we're actively changing it
         selectionChangeHandler = new Handler() {
@@ -1891,14 +1891,13 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             });
             this.competitorFilterPanel = competitorSearchTextBox;
         }
-        // SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
-        // leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
         filterControlPanel = new HorizontalPanel();
         filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
-        if (enableSyncedScroller)
+        if (enableSyncedScroller) {
             contentPanel.add(new OverlayAssistantScrollPanel(leaderboardTable));
-        else
+        } else {
             contentPanel.add(leaderboardTable);
+        }
         if (showCompetitorFilterStatus) {
             contentPanel.add(createFilterDeselectionControl());
         }
@@ -1908,7 +1907,6 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(/* showProgress */ false);
         }
-
     }
 
     private boolean enableSyncedScroller = false;
