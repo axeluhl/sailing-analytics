@@ -26,6 +26,7 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
                         @Override
                         public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
                             move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
+                            validate();
                         }
 
                         @Override
@@ -41,6 +42,7 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
                         @Override
                         public void onSuccess(Collection<CompetitorDTO> registeredCompetitors) {
                             move(allCompetitorsTable, registeredCompetitorsTable, registeredCompetitors);
+                            validate();
                         }
 
                         @Override

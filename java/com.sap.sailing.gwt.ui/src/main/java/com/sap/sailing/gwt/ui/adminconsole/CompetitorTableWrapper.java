@@ -18,7 +18,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -376,6 +378,27 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             public void onSuccess(Void result) {
                 Window.alert(stringMessages.successfullyAllowedCompetitorReset(competitors.toString()));
             }
+        });
+    }
+
+    /**
+     * This method makes rows grayed out with a tool tip
+     */
+    public void grayOutCompetitors(final List<CompetitorWithToolTipDTO> competitors) {
+        table.addCellPreviewHandler((CellPreviewEvent<CompetitorDTO> event) -> {
+            for (CompetitorWithToolTipDTO competitor : competitors) {
+                if (competitor.getCompetitor().equals(event.getValue())) {
+                    table.getRowElement(event.getIndex()).setTitle(competitor.getToolTipMessage());
+                }
+            }
+        });
+        table.setRowStyles((CompetitorDTO row, int rowIndex) -> {
+            for (CompetitorWithToolTipDTO competitor : competitors) {
+                if (competitor.getCompetitor().equals(row)) {
+                    return tableRes.cellTableStyle().cellTableDisabledRow();
+                }
+            }
+            return "";
         });
     }
 }
