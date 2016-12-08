@@ -201,7 +201,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
                 leaderboardName, errorReporter, stringMessages,
                 userAgent, /*showRaceDetails */false, /* competitorSearchTextBox */ null, /* showRegattaRank */
                 /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
-                /* adjustTimerDelay */true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
+                /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
 
         return leaderboardPanel;
     }

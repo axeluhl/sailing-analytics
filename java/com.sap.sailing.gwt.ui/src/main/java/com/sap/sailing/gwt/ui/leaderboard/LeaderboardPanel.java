@@ -1752,8 +1752,8 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* optionalRaceTimesInfoProvider */ null,
-                /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true, /* autoApplyTop30Filter */ false,
-                false, false);
+                /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
+                /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,

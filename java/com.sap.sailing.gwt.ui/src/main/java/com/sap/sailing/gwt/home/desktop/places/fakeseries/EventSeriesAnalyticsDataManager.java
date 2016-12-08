@@ -65,7 +65,7 @@ public class EventSeriesAnalyticsDataManager {
             overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
-                    /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */true, /* autoApplyTopNFilter */ false,
+                    /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                     /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
         }
         return overallLeaderboardPanel;
