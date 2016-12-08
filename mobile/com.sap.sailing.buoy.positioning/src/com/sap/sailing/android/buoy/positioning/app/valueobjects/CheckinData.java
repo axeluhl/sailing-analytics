@@ -11,6 +11,9 @@ import com.sap.sailing.android.shared.data.LeaderboardInfo;
 
 public class CheckinData extends BaseCheckinData {
     public String leaderboardName;
+    /**
+     * the leaderboard's display name if one has been explicitly provided, otherwise the same as {@link #leaderboardName}
+     */
     public String leaderboardDisplayName;
     public String deviceUid;
     public String uriString;
