@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class SAPHeader extends Composite {
     
-    private static final String LOGO_URL = "https://sapsponsorships.com/";
+    private static final String LOGO_URL = "https://www.sap.com/sponsorships";
     
     private static SAPHeaderUiBinder uiBinder = GWT.create(SAPHeaderUiBinder.class);
 

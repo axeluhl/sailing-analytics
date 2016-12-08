@@ -44,7 +44,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
     private SelectionCheckboxColumn<T> selectionCheckboxColumn;
     private final EntityIdentityComparator<T> entityIdentityComparator;
 
-    private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    protected final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final ListHandler<T> columnSortHandler;
     
     @Override

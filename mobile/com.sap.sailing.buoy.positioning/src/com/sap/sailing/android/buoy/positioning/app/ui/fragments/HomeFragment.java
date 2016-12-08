@@ -90,12 +90,13 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         }
         startRegatta(checkinData.leaderboardDisplayName, checkinData.checkinDigest);
     }
-
+    
     @Override
     public void handleScannedOrUrlMatchedUri(Uri uri) {
-        CheckinManager manager = new CheckinManager(uri.toString(), (CheckinDataActivity) getActivity());
+        @SuppressWarnings("unchecked")
+        final CheckinDataActivity<CheckinData> activity = (CheckinDataActivity<CheckinData>) getActivity();
+        CheckinManager manager = new CheckinManager(uri.toString(), activity);
         manager.callServerAndGenerateCheckinData();
-
     }
 
     /**
