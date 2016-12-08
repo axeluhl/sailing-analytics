@@ -2,9 +2,9 @@ package com.sap.sse.datamining.impl.data;
 
 import java.io.Serializable;
 
-import com.sap.sse.datamining.data.ClusterBoundary;
+import com.sap.sse.datamining.data.restricted.ClusterBoundaryExtended;
 
-public abstract class AbstractClusterBoundary<ElementType extends Serializable> implements ClusterBoundary<ElementType> {
+public abstract class AbstractClusterBoundary<ElementType extends Serializable> implements ClusterBoundaryExtended<ElementType> {
     private static final long serialVersionUID = 513488430319010656L;
     
     private final ElementType boundaryValue;
@@ -22,7 +22,7 @@ public abstract class AbstractClusterBoundary<ElementType extends Serializable> 
 
     protected abstract int compare(ElementType value);
     
-    protected ElementType getBoundaryValue() {
+    public ElementType getBoundaryValue() {
         return boundaryValue;
     }
 

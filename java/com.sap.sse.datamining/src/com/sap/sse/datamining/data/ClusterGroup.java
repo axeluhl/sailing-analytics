@@ -2,7 +2,6 @@ package com.sap.sse.datamining.data;
 
 import java.io.Serializable;
 
-
 /**
  * Represents a collection of {@link Cluster Clusters} and provides a method to get the
  * <code>Cluster</code> for an element.

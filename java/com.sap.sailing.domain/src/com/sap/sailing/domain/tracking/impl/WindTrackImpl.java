@@ -422,4 +422,9 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
         notifyListenersAboutRemoval(wind);
     }
 
+    @Override
+    public boolean isUseSpeed() {
+        return useSpeed;
+    }
+
 }

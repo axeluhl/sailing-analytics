@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.jaxrs.api;
+package com.sap.sailing.server.gateway.serialization;
 
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.WindTrack;

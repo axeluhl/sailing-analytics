@@ -471,6 +471,10 @@ public class PolarDataMiner {
     public SpeedRegressionPerAngleClusterProcessor getSpeedRegressionPerAngleClusterProcessor() {
         return speedRegressionPerAngleClusterProcessor;
     }
+    
+    public ClusterGroup<Bearing> getAngleClusterGroup() {
+        return angleClusterGroup;
+    }
 
     public PolarSheetGenerationSettings getPolarSheetGenerationSettings() {
         return backendPolarSheetGenerationSettings;

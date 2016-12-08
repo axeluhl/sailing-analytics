@@ -69,6 +69,10 @@ public class GPSFixMovingWithPolarContext implements LegTypePolarClusterKey, Ang
     public Competitor getCompetitor() {
         return competitor;
     }
+    
+    public ClusterGroup<Bearing> getAngleClusterGroup() {
+        return angleClusterGroup;
+    }
 
     public BearingWithConfidence<Void> getAbsoluteAngleToTheWind() {
         return absTrueWindAngle;

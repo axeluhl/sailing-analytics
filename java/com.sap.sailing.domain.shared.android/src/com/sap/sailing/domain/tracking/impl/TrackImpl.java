@@ -23,6 +23,8 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     private final ArrayListNavigableSet<Timed> fixes;
 
     private final NamedReentrantReadWriteLock readWriteLock;
+    
+    private final String nameForReadWriteLock;
 
     protected static class DummyTimed implements Timed {
         private static final long serialVersionUID = 6047311973718918856L;
@@ -48,6 +50,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     protected TrackImpl(ArrayListNavigableSet<Timed> fixes, String nameForReadWriteLock) {
         this.readWriteLock = new NamedReentrantReadWriteLock(nameForReadWriteLock, /* fair */ false);
         this.fixes = fixes;
+        this.nameForReadWriteLock = nameForReadWriteLock;
     }
     
     /**
@@ -377,5 +380,9 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         } finally {
             unlockAfterRead();
         }
+    }
+
+    public String getNameForReadWriteLock() {
+        return nameForReadWriteLock;
     }
 }
