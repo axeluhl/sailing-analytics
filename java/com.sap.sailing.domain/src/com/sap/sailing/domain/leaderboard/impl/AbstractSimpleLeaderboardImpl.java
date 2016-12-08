@@ -1219,6 +1219,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         result.type = getLeaderboardType();
         result.competitors = new ArrayList<CompetitorDTO>();
         result.name = this.getName();
+        result.displayName = this.getDisplayName();
         result.competitorDisplayNames = new HashMap<CompetitorDTO, String>();
         for (Competitor suppressedCompetitor : this.getSuppressedCompetitors()) {
             result.setSuppressed(baseDomainFactory.convertToCompetitorDTO(suppressedCompetitor), true);
