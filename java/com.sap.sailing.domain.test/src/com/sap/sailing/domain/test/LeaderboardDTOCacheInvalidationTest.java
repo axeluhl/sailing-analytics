@@ -39,4 +39,26 @@ public class LeaderboardDTOCacheInvalidationTest {
                 /* fillTotalPointsUncorrected */ false);
         assertEquals(newName, dtoNew.name);
     }
+
+    @Test
+    public void testFlexibleLeaderboardDisplayNameChangeInvalidatesCache()
+            throws NoWindException, InterruptedException, ExecutionException {
+        final String name = "My Flexible Leaderboard";
+        final String oldDisplayName = "D1";
+        final String newDisplayName = "D2";
+        FlexibleLeaderboard l = new FlexibleLeaderboardImpl(name,
+                new ThresholdBasedResultDiscardingRuleImpl(new int[0]), new LowPoint(),
+                new CourseAreaImpl("My Course Area", UUID.randomUUID()));
+        l.setDisplayName(oldDisplayName);
+        final TimePoint now = MillisecondsTimePoint.now();
+        LeaderboardDTO dto = l.getLeaderboardDTO(now, Collections.<String> emptySet(),
+                /* addOverallDetails */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE,
+                /* fillTotalPointsUncorrected */ false);
+        assertEquals(oldDisplayName, dto.getDisplayName());
+        l.setDisplayName(newDisplayName);
+        LeaderboardDTO dtoNew = l.getLeaderboardDTO(now, Collections.<String> emptySet(),
+                /* addOverallDetails */ false, /* trackedRegattaRegistry */ null, DomainFactory.INSTANCE,
+                /* fillTotalPointsUncorrected */ false);
+        assertEquals(newDisplayName, dtoNew.getDisplayName());
+    }
 }
