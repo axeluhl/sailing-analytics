@@ -32,8 +32,6 @@
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.gwt/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.common/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry id=&quot;org.eclipse.jdt.launching.classpathentry.defaultClasspath&quot;&gt;&#10;&lt;memento exportedEntriesOnly=&quot;false&quot; project=&quot;com.sap.sailing.dashboards.gwt&quot;/&gt;&#10;&lt;/runtimeClasspathEntry&gt;&#10;"/>
-<listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.google.gwt.osgi/lib/gwt-servlet.jar&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
-<listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.google.gwt.osgi/lib/gwt-user.jar&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sailing.domain.common/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/org.moxieapps.gwt.highcharts/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.gwt.adminconsole/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
@@ -44,5 +42,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.DevMode"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-incremental -war &quot;${project_loc:com.sap.sailing.dashboards.gwt}&quot; -startupUrl /dashboards/RibDashboard.html -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9874 com.sap.sailing.dashboards.gwt.RibDashboard"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sailing.dashboards.gwt"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx2048m"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx2048m -Dgwt.watchFileChanges=false"/>
 </launchConfiguration>

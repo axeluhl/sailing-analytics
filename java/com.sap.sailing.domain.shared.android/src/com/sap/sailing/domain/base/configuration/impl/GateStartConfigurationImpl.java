@@ -41,12 +41,16 @@ public class GateStartConfigurationImpl extends RacingProcedureConfigurationImpl
         return target;
     }
     
+    
+    @Override
+    protected GateStartConfigurationImpl newInstance() {
+        return new GateStartConfigurationImpl();
+    }
+
     protected GateStartConfiguration copy() {
-        GateStartConfigurationImpl copy = (GateStartConfigurationImpl) super.copy(new GateStartConfigurationImpl());
+        GateStartConfigurationImpl copy = (GateStartConfigurationImpl) super.copy();
         copy.setHasPathfinder(hasPathfinder);
         copy.setHasAdditionalGolfDownTime(hasAdditionalGolfDownTime);
         return copy;
     }
-    
-
 }

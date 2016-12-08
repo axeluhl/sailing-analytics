@@ -65,6 +65,7 @@ import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
@@ -287,8 +288,8 @@ public class RaceContext {
         }
         switch (state.getStatus()) {
         case FINISHED:
-            TimePoint protestStartTime = state.getProtestTime();
-            if (protestStartTime != null) {
+            TimeRange protestTime = state.getProtestTime();
+            if (protestTime != null) {
                 lastUpperFlag = Flags.BRAVO;
                 lastLowerFlag = Flags.NONE;
                 lastFlagsAreDisplayed = true;
