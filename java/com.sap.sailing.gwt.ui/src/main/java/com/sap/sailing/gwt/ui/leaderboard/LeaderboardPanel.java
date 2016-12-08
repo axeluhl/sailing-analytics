@@ -366,6 +366,12 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
     private final boolean showCompetitorFilterStatus;
 
     private CompetitorFilterPanel competitorFilterPanel;
+    
+    /**
+     * Whether or not a second scroll bar, synchronized with the invisible native scroll bar, shall appear at
+     * the bottom of the viewport. See {@link OverlayAssistantScrollPanel}.
+     */
+    private boolean enableSyncedScroller = false;
 
     protected StringMessages getStringMessages() {
         return stringMessages;
@@ -1908,8 +1914,6 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             loadCompleteLeaderboard(/* showProgress */ false);
         }
     }
-
-    private boolean enableSyncedScroller = false;
 
     public void setEnableSyncedScroller(boolean enableSyncedScroller) {
         this.enableSyncedScroller = enableSyncedScroller;
