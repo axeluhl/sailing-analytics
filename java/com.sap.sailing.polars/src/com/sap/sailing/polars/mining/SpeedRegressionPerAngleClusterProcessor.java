@@ -1,8 +1,8 @@
 package com.sap.sailing.polars.mining;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -55,8 +55,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
      */
     private transient ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners;
 
-    private final Set<BoatClass> availableBoatClasses = new HashSet<BoatClass>();
-
     public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
     }
@@ -87,7 +85,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         regression.addData(fix.getWind().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
-        availableBoatClasses.add(boatClass);
         Set<PolarsChangedListener> listenersForBoatClass = listeners.get(fix.getBoatClass());
         if (listenersForBoatClass != null) {
             for (PolarsChangedListener listener : listenersForBoatClass) {
@@ -187,7 +184,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     }
 
     Set<BoatClass> getAvailableBoatClasses() {
-        return availableBoatClasses;
+        return Collections.unmodifiableSet(fixCountPerBoatClass.keySet());
     }
 
     @Override
@@ -233,4 +230,37 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         return angleClusterGroup;
     }
 
+    public Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> getRegressionsImpl() {
+        synchronized (regressions) {
+            Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> map = new HashMap<>();
+            
+            regressions.keySet().stream().forEach(key -> map.put(key, (IncrementalAnyOrderLeastSquaresImpl) regressions.get(key)));
+            
+            return Collections.unmodifiableMap(map);
+        }
+    }
+
+    public Map<GroupKey, IncrementalLeastSquares> getRegressions() {
+        synchronized (regressions) {
+            return Collections.unmodifiableMap(regressions);
+        }
+    }
+
+    public void updateRegressions(Map<GroupKey, ? extends IncrementalLeastSquares> regressionsToUpdate) {
+        synchronized (regressions) {
+            regressions.putAll(regressionsToUpdate);
+        }
+    }
+
+    public Map<BoatClass, Long> getFixCountPerBoatClass() {
+        synchronized (fixCountPerBoatClass) {
+            return Collections.unmodifiableMap(fixCountPerBoatClass);
+        }
+    }
+
+    public void updateFixCountPerBoatClass(Map<BoatClass, Long> fixCountPerBoatClass) {
+        synchronized (this.fixCountPerBoatClass) {
+            this.fixCountPerBoatClass.putAll(fixCountPerBoatClass);
+        }
+    }
 }
