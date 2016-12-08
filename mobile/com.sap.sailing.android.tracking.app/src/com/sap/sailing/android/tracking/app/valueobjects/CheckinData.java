@@ -25,9 +25,9 @@ public abstract class CheckinData extends BaseCheckinData {
     public String checkinDigest;
     private boolean update;
 
-    public CheckinData(UrlData data) {
+    public CheckinData(UrlData data, String leaderboardDisplayName) {
         leaderboardName = Uri.decode(data.leaderboardName);
-        leaderboardDisplayName = data.leaderboardDisplayName;
+        this.leaderboardDisplayName = leaderboardDisplayName;
         deviceUid = data.deviceUuid.getStringRepresentation();
         eventId = data.eventId;
         eventName = data.eventName;

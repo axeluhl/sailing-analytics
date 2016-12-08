@@ -121,8 +121,8 @@ public class AnalyticsProvider extends ContentProvider {
             builder.setTables(table);
             cursor = builder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
         } else {
-                final SelectionBuilder selectionBuilder = buildExpandedSelection(uri);
-                cursor = selectionBuilder.where(selection, selectionArgs).query(db, false, projection, sortOrder, null);
+            final SelectionBuilder selectionBuilder = buildExpandedSelection(uri);
+            cursor = selectionBuilder.where(selection, selectionArgs).query(db, false, projection, sortOrder, null);
         }
         Context context = getContext();
         if (context != null) {
