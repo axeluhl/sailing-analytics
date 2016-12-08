@@ -45,7 +45,6 @@ import com.sap.sailing.polars.mining.BearingClusterGroup;
 import com.sap.sailing.polars.mining.CubicRegressionPerCourseProcessor;
 import com.sap.sailing.polars.mining.PolarDataMiner;
 import com.sap.sailing.polars.mining.SpeedRegressionPerAngleClusterProcessor;
-import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.data.ClusterGroup;
@@ -388,18 +387,6 @@ public class PolarDataServiceImpl implements ReplicablePolarService {
         }
     }
 
-    /**
-     * This method is used to update polar data miner processors' regressions
-     * 
-     * @param cubicRegression new map of cubic regressions
-     * @param speedRegression new map of speed regressions
-     */
-    public void updateRegressions(Map<GroupKey, AngleAndSpeedRegression> cubicRegression,
-            Map<GroupKey, ? extends IncrementalLeastSquares> speedRegression) {
-        polarDataMiner.getCubicRegressionPerCourseProcessor().updateRegressions(cubicRegression);
-        polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().updateRegressions(speedRegression);
-    }
-    
     public Map<GroupKey, AngleAndSpeedRegression> getCubicRegressionsPerCourse() {
         return polarDataMiner.getCubicRegressionPerCourseProcessor().getRegressions();
     }
@@ -411,9 +398,4 @@ public class PolarDataServiceImpl implements ReplicablePolarService {
     public Map<BoatClass, Long> getFixCointPerBoatClass() {
         return polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().getFixCountPerBoatClass();
     }
-
-    public void updateFixCountPerBoatClass(Map<BoatClass, Long> fixCountPerBoatClass) {
-        polarDataMiner.getSpeedRegressionPerAngleClusterProcessor().updateFixCountPerBoatClass(fixCountPerBoatClass);
-    }
-
 }
