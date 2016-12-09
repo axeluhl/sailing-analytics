@@ -146,8 +146,9 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     private void moveSelected(CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> from,
             CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> to) {
         move(from, to, from.getSelectionModel().getSelectedSet());
+        validate();
     }
-    
+
     protected boolean showOnlyCompetitorsOfLog(){
         return showOnlyCompetitorsOfLogCheckBox.getValue();
     }

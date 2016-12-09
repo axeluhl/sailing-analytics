@@ -140,5 +140,4 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     public BoatHullType getHullType() {
         return hullType;
     }
-
 }
