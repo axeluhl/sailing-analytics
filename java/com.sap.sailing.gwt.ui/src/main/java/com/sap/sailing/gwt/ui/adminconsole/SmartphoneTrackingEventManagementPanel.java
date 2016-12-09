@@ -284,6 +284,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         public void showWithBoatClass(String boatClassName) {
                             new RaceLogCompetitorRegistrationDialog(boatClassName, sailingService, stringMessages,
                                     errorReporter, editable, leaderboardName, raceColumnName, fleetName,
+                                    raceColumnDTOAndFleetDTO.getA().getFleets(),
                                     new DialogCallback<Set<CompetitorDTO>>() {
 
                                         @Override

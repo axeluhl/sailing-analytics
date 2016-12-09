@@ -11,8 +11,8 @@ public class CompoundGroupKey extends AbstractGroupKey {
 
     private static final long serialVersionUID = -7902450253393172550L;
     
-    private List<? extends GroupKey> keys;
-    private boolean hasSubKeys;
+    private List<? extends GroupKey> keys; // non-final only due to GWT serialization; custom field serializer would change this
+    private boolean hasSubKeys; // non-final only due to GWT serialization; custom field serializer would change this
 
     /**
      * Constructor for the GWT-Serialization. Don't use this!
@@ -24,7 +24,6 @@ public class CompoundGroupKey extends AbstractGroupKey {
         if (keys == null || keys.isEmpty()) {
             throw new IllegalArgumentException("The keys mustn't be null or empty");
         }
-        
         this.keys = new ArrayList<>(keys);
         hasSubKeys = this.keys.size() > 1;
     }
