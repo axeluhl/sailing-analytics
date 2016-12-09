@@ -15,7 +15,6 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.TimeUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -26,6 +25,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlag;
 import com.sap.sailing.racecommittee.app.ui.adapters.MoreFlagsAdapter.MoreFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
