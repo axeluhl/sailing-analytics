@@ -5,7 +5,7 @@ import com.sap.sse.common.settings.Settings;
 public interface SettingsStorageManager<S extends Settings> {
 
     void retrieveDefaultSettings(S defaultSettings,
-            DefaultSettingsLoadedCallback<S> asyncCallback);
+            OnSettingsLoadedCallback<S> asyncCallback);
 
     void storeGlobalSettings(S globalSettings);
 

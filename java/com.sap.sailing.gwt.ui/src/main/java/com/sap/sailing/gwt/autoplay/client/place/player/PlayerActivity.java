@@ -9,15 +9,17 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderComponentContext;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardComponentContext;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContextInitialisationUtils;
-import com.sap.sse.gwt.client.shared.perspective.IOnDefaultSettingsLoaded;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.perspective.SettingsReceiverCallback;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
@@ -66,23 +68,32 @@ public class PlayerActivity extends AbstractActivity {
                 final RaceBoardComponentContext raceBoardContext = new RaceBoardComponentContext(clientFactory.getUserService(), "AutoPlay.RaceBoard", raceboardPerspectiveLifecycle, null, null, playerPlace.getConfiguration().getLeaderboardName(), null, eventUUID);
                 final LeaderboardWithHeaderComponentContext leaderboardWithHeaderContext = new LeaderboardWithHeaderComponentContext(clientFactory.getUserService(), "AutoPlay.Leaderboard", leaderboardPerspectiveLifecycle);
                 
-
+                raceBoardContext.initInitialSettings();
+                leaderboardWithHeaderContext.initInitialSettings();
                 
-                ComponentContextInitialisationUtils.initTwoComponentContexts(raceBoardContext, leaderboardWithHeaderContext, new IOnDefaultSettingsLoaded() {
+                clientFactory.getUserService().updateUser(true);
+                
+                UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
+                PlayerView view = clientFactory.createPlayerView();
+                panel.setWidget(view.asWidget());
+                
+                autoPlayController = new AutoPlayController(leaderboardWithHeaderContext, raceBoardContext, clientFactory.getSailingService(), clientFactory
+                        .getMediaService(), clientFactory.getUserService(), clientFactory.getErrorReporter(), 
+                        playerPlace.getConfiguration(), userAgent, delayToLiveMillis, showRaceDetails, view);
+                raceBoardContext.receiveInitialSettings(new SettingsReceiverCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>() {
                     
                     @Override
-                    public void onLoaded() {
-                        UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
-                        PlayerView view = clientFactory.createPlayerView();
-                        panel.setWidget(view.asWidget());
-                        
-                        autoPlayController = new AutoPlayController(leaderboardWithHeaderContext, raceBoardContext, clientFactory.getSailingService(), clientFactory
-                                .getMediaService(), clientFactory.getUserService(), clientFactory.getErrorReporter(), 
-                                playerPlace.getConfiguration(), userAgent, delayToLiveMillis, showRaceDetails, view);
-                        autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
+                    public void receiveSettings(PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> initialSettings) {
+                        leaderboardWithHeaderContext.receiveInitialSettings(new SettingsReceiverCallback<PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>>() {
+
+                            @Override
+                            public void receiveSettings(
+                                    PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> initialSettings) {
+                                autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
+                            }
+                        });
                     }
                 });
-                clientFactory.getUserService().updateUser(true);
             }
 
             @Override

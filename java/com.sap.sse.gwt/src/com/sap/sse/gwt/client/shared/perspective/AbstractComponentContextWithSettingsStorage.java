@@ -1,8 +1,10 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
@@ -14,6 +16,8 @@ public abstract class AbstractComponentContextWithSettingsStorage<L extends Comp
     
     private final SettingsStorageManager<S> settingsStorageManager;
     
+    private Queue<SettingsReceiverCallback<S>> settingsReceiverCallbacks = new LinkedList<>();
+    
     /**
      * Current default settings for the whole settings tree.
      */
@@ -24,24 +28,44 @@ public abstract class AbstractComponentContextWithSettingsStorage<L extends Comp
         this.settingsStorageManager = settingsStorageManager;
     }
     
-    public void initDefaultSettings(final DefaultSettingsLoadedCallback<S> asyncCallback) {
+    public void initInitialSettings() {
+        initInitialSettings(null);
+    }
+    
+    public void initInitialSettings(final OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {
         if(currentDefaultSettings != null) {
             throw new IllegalStateException("Settings have been already initialized. You may only call this method once.");
         }
         S systemDefaultSettings = rootLifecycle.createDefaultSettings();
-        settingsStorageManager.retrieveDefaultSettings(systemDefaultSettings, new DefaultSettingsLoadedCallback<S>() {
+        settingsStorageManager.retrieveDefaultSettings(systemDefaultSettings, new OnSettingsLoadedCallback<S>() {
 
             @Override
             public void onError(Throwable caught, S fallbackDefaultSettings) {
-                asyncCallback.onError(caught, fallbackDefaultSettings);
+                if(onInitialSettingsLoaded != null) {
+                    onInitialSettingsLoaded.onError(caught, fallbackDefaultSettings);
+                }
             }
 
             @Override
             public void onSuccess(S result) {
-                currentDefaultSettings = rootLifecycle.cloneSettings(result);
-                asyncCallback.onSuccess(result);
+                currentDefaultSettings = result;
+                if(onInitialSettingsLoaded != null) {
+                    onInitialSettingsLoaded.onSuccess(rootLifecycle.cloneSettings(result));
+                }
+                SettingsReceiverCallback<S> callback;
+                while((callback = settingsReceiverCallbacks.poll()) != null) {
+                    callback.receiveSettings(rootLifecycle.cloneSettings(result));
+                }
             }
         });
+    }
+    
+    public void receiveInitialSettings(SettingsReceiverCallback<S> settingsReceiverCallback) {
+        if(currentDefaultSettings == null) {
+            settingsReceiverCallbacks.add(settingsReceiverCallback);
+        } else {
+            settingsReceiverCallback.receiveSettings(currentDefaultSettings);
+        }
     }
 
     @SuppressWarnings("unchecked")

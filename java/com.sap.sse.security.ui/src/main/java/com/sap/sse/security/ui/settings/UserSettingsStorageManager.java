@@ -6,7 +6,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.perspective.CallbacksJoinerHelper;
-import com.sap.sse.gwt.client.shared.perspective.DefaultSettingsLoadedCallback;
+import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -84,7 +84,7 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
         }
     }
 
-    public void retrieveDefaultSettings(S defaultSettings, final DefaultSettingsLoadedCallback<S> asyncCallback) {
+    public void retrieveDefaultSettings(S defaultSettings, final OnSettingsLoadedCallback<S> asyncCallback) {
         final SettingsJsonRetrievement settingsJsonRetrievement = new SettingsJsonRetrievement(defaultSettings);
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             
@@ -140,7 +140,7 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
     }
     
     private void continueRetrieveDefaultSettings(
-            UserSettingsStorageManager<S>.SettingsJsonRetrievement settingsJsonRetrievement, DefaultSettingsLoadedCallback<S> callback) {
+            UserSettingsStorageManager<S>.SettingsJsonRetrievement settingsJsonRetrievement, OnSettingsLoadedCallback<S> callback) {
         S defaultSettings = settingsJsonRetrievement.getDefaultSettings();
         
         // has been any global settings from server retrieved? yes => apply as default and override LocalStorage
