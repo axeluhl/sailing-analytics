@@ -18,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.TimeUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
@@ -32,6 +31,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartTimeFragment
 import com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;

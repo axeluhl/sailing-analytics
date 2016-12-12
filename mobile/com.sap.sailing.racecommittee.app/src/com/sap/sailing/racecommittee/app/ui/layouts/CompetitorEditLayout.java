@@ -20,7 +20,6 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 
 import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.TimeUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
@@ -29,6 +28,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
