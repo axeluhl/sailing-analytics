@@ -6,6 +6,10 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import com.sap.sailing.android.shared.R;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -14,11 +18,6 @@ import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
-
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.android.shared.R;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TimeUtils {
 
