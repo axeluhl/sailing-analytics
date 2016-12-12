@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.dev.util.collect.HashMap;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sse.common.Util;
