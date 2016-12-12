@@ -27,7 +27,7 @@ public class PlayerMode extends AbstractRaceBoardMode {
     
     private void adjustLeaderboardSettings() {
         final LeaderboardSettings existingSettings = getLeaderboardPanel().getSettings();
-        final List<DetailType> raceDetailsToShow = new ArrayList<>();
+        final List<DetailType> raceDetailsToShow = new ArrayList<>(existingSettings.getRaceDetailsToShow());
         raceDetailsToShow.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
         final LeaderboardSettings newSettings = LeaderboardSettingsFactory.getInstance().overrideDefaultValuesForRaceDetails(existingSettings, raceDetailsToShow);

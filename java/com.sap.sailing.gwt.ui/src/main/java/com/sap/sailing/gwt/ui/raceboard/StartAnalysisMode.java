@@ -157,7 +157,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
 
     private void adjustLeaderboardSettings() {
         final LeaderboardSettings existingSettings = getLeaderboardPanel().getSettings();
-        final List<DetailType> raceDetailsToShow = new ArrayList<>();
+        final List<DetailType> raceDetailsToShow = new ArrayList<>(existingSettings.getRaceDetailsToShow());
         raceDetailsToShow.add(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START);
         raceDetailsToShow.add(DetailType.DISTANCE_TO_START_AT_RACE_START);

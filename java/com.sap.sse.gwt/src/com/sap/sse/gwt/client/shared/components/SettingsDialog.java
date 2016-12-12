@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class SettingsDialog<SettingsType extends Settings> extends DataEntryDialog<SettingsType> {
     private final SettingsDialogComponent<SettingsType> settingsDialogComponent;
@@ -74,7 +75,9 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
         this.settingsDialogComponent = dialogComponent;
         
         //TODO make all Components to have some ComponentContext
-        if(component.getComponentTreeNodeInfo().getComponentContext() != null && component.getComponentTreeNodeInfo().getComponentContext().hasMakeCustomDefaultSettingsSupport(component)) {
+        ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = component.getComponentTreeNodeInfo();
+        ComponentContext<?, ?> componentContext = componentTreeNodeInfo.getComponentContext();
+        if(componentContext != null && componentContext.hasMakeCustomDefaultSettingsSupport(component)) {
             initMakeDefaultButtons(component, stringMessages);
         }
     }
