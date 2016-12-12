@@ -59,7 +59,7 @@ public abstract class SortableRaceListColumn<T extends RaceMetadataDTO<?>, C> ex
     }
     
     public void setRacesInNaturalOrder(List<T> racesInNaturalOrder) {
-        if(this.comparator != null) {
+        if (this.comparator != null) {
             this.comparator.setRacesInNaturalOrder(racesInNaturalOrder);
         }
     }

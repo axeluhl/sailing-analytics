@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
 import java.util.List;
+import java.util.Map;
 
+import com.google.gwt.dev.util.collect.HashMap;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
+import com.sap.sse.common.Util;
 
 /**
  * Special Comparator with following precedences:
@@ -31,6 +34,7 @@ public abstract class RaceListColumnComparator<R extends RaceMetadataDTO<?>, S e
         extends InvertibleComparatorAdapter<R> {
 
     private List<R> racesInNaturalOrder = null;
+    private final Map<R, Integer> positionInNaturalOrder = new HashMap<>();
 
     @Override
     public int compare(R o1, R o2) {
@@ -44,16 +48,34 @@ public abstract class RaceListColumnComparator<R extends RaceMetadataDTO<?>, S e
         } else {
             compareResult = getValue(o1).compareTo(getValue(o2));
         }
-        if (compareResult == 0 && racesInNaturalOrder != null) {
-            compareResult = Integer.compare(racesInNaturalOrder.indexOf(o1), racesInNaturalOrder.indexOf(o2));
+        if (compareResult == 0) {
+            compareResult = compareByNaturalOrder(o1, o2);
         }
-        
         if (compareResult == 0) {
             // RaceListRaceDTO implements Comparable which considers race names for its comparison
             compareResult = o1.compareTo(o2);
         }
-
         return compareResult;
+    }
+
+    protected int compareByNaturalOrder(R o1, R o2) {
+        final int compareResult;
+        if (racesInNaturalOrder != null) {
+            getAndCacheIndexInNaturalOrder(o1);
+            compareResult = Util.compareToWithNull(getAndCacheIndexInNaturalOrder(o1),  getAndCacheIndexInNaturalOrder(o2), /* nullIsLess */ !isAscending());
+        } else {
+            compareResult = 0;
+        }
+        return compareResult;
+    }
+
+    private Integer getAndCacheIndexInNaturalOrder(R o) {
+        Integer i = positionInNaturalOrder.get(o);
+        if (i == null) {
+            i = racesInNaturalOrder.indexOf(o);
+            positionInNaturalOrder.put(o, i);
+        }
+        return i;
     }
 
     public abstract S getValue(R object);
@@ -66,5 +88,6 @@ public abstract class RaceListColumnComparator<R extends RaceMetadataDTO<?>, S e
      */
     public void setRacesInNaturalOrder(List<R> racesInNaturalOrder) {
         this.racesInNaturalOrder = racesInNaturalOrder;
+        positionInNaturalOrder.clear();
     }
 }
