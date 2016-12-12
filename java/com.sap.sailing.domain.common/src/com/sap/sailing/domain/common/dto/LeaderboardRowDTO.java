@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Duration;
+
 /**
  * Holds data about one competitor and all races represented by the owning {@link LeaderboardDTO leaderboard}.
  * 
@@ -115,6 +118,28 @@ public class LeaderboardRowDTO implements Serializable {
         } else if (!whenMaximumSpeedOverGroundWasAchieved.equals(other.whenMaximumSpeedOverGroundWasAchieved))
             return false;
         return true;
+    }
+    
+    public Distance getDistanceTraveledInMeters(String raceColumnName) {
+        final Distance result;
+        LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
+        if (fieldsForRace != null) {
+            result = fieldsForRace.getDistanceTraveledInMeters();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public Duration getTimeSailed(String raceColumnName) {
+        final Duration result;
+        LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
+        if (fieldsForRace != null) {
+            result = fieldsForRace.getTimeSailedInMillis();
+        } else {
+            result = null;
+        }
+        return result;
     }
     
     @Override

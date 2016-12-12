@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Checkin;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Competitor;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CompetitorColumns;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
@@ -20,8 +21,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "sap_sailing_analytics.db";
 
-    private static final int VER_2016_RELEASE_1 = 2;
-    private static final int CUR_DATABASE_VERSION = VER_2016_RELEASE_1;
+    private static final int DATABASE_VERSION = 3;
 
     private static final String createMarkTable = "CREATE TABLE " + Tables.MARKS + " (" + BaseColumns._ID
         + " INTEGER PRIMARY KEY AUTOINCREMENT, " + AnalyticsContract.Mark.MARK_ID + " TEXT, "
@@ -33,15 +33,16 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     public interface Tables {
         String COMPETITORS = "competitors";
         String EVENTS = "events";
-        String EVENTS_COMPETITORS = "events_competitors";
         String LEADERBOARDS = "leaderboards";
         String CHECKIN_URIS = "checkin_uris";
         String MARKS = "marks";
+
         String EVENTS_JOIN_LEADERBOARDS_JOIN_MARKS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
             + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
             + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.MARKS + " ON ("
             + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.MARKS + "."
             + AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + ") ";
+
         String EVENTS_JOIN_LEADERBOARDS_JOIN_COMPETITORS = Tables.LEADERBOARDS + " INNER JOIN " + Tables.EVENTS
                 + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
                 + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.COMPETITORS + " ON ("
@@ -52,7 +53,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
             + " ON (" + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.EVENTS
             + "." + Event.EVENT_CHECKIN_DIGEST + ") " + " INNER JOIN " + Tables.CHECKIN_URIS + " ON ("
             + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.CHECKIN_URIS + "."
-            + AnalyticsContract.Checkin.CHECKIN_URI_CHECKIN_DIGEST + ") "
+            + Checkin.CHECKIN_URI_CHECKIN_DIGEST + ") "
             + " LEFT OUTER JOIN " + Tables.COMPETITORS + " ON ("
             + Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = " + Tables.COMPETITORS + "."
             + Competitor.COMPETITOR_CHECKIN_DIGEST + ") "
@@ -62,7 +63,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     }
 
     public AnalyticsDatabase(Context context) {
-        super(context, DATABASE_NAME, null, CUR_DATABASE_VERSION);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mContext = context;
     }
 
@@ -70,7 +71,8 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + Tables.LEADERBOARDS + " (" + BaseColumns._ID
                 + " INTEGER PRIMARY KEY AUTOINCREMENT, " + LeaderboardColumns.LEADERBOARD_CHECKIN_DIGEST + " TEXT, "
-                + LeaderboardColumns.LEADERBOARD_NAME + " TEXT );");
+                + LeaderboardColumns.LEADERBOARD_NAME + " TEXT, "
+                + LeaderboardColumns.LEADERBOARD_DISPLAY_NAME + " TEXT);");
 
         db.execSQL("CREATE TABLE " + Tables.CHECKIN_URIS + " (" + BaseColumns._ID
                 + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CheckinColumns.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, "
@@ -96,9 +98,13 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         ExLog.i(mContext, TAG, "onUpgrade() from " + oldVersion + " to " + newVersion);
-        if (oldVersion == 1 && newVersion == 2) {
+        if (oldVersion < 2) {
             db.execSQL(createMarkTable);
-            db.execSQL("ALTER TABLE " + Tables.CHECKIN_URIS + " ADD COLUMN " + AnalyticsContract.Checkin.CHECKIN_TYPE + " INTEGER DEFAULT 0");
+            db.execSQL("ALTER TABLE " + Tables.CHECKIN_URIS + " ADD COLUMN " + Checkin.CHECKIN_TYPE + " INTEGER DEFAULT 0");
+        }
+        if (oldVersion < 3) {
+            db.execSQL("ALTER TABLE " + Tables.LEADERBOARDS + " ADD COLUMN " + Leaderboard.LEADERBOARD_DISPLAY_NAME + " TEXT");
+            db.execSQL("UPDATE " + Tables.LEADERBOARDS + " SET " + Leaderboard.LEADERBOARD_DISPLAY_NAME + " = " + Leaderboard.LEADERBOARD_NAME);
         }
     }
 

@@ -23,6 +23,36 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">November 2016</h2>
+                    <ul class="bulletList">
+			 <li>When launching a server, a system property <tt>polardata.source.url</tt> can
+			     be provided in order to specify a server base URL from where to import polar
+			     data into the upstarting server. Usually, this would be the "archive" server's
+			     base URL, such as https://www.sapsailing.com. Note that the exporting server
+			     needs to already support this feature and the importing and exporting server
+			     should be at roughly the same version to ensure binary compatibility for the
+			     polar sheet data.
+			 </li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">October 2016</h2>
+                    <ul class="bulletList">
+			<li>A regatta now has an additional property: "Buoy zone radius in hull lengths." It
+			    can be used to determine the radius of the zone around the marks in terms of
+			    hull lengths. This sets the default for the race viewer (RaceBoard.html entry point)
+			    based on the hull length as known from the boat class.</li>
+			<li>When producing the QR code for the Race Management App's device configurations,
+			    the access token parameter was not properly URL-encoded. In case the access token
+			    contains a '+' character it is incorrectly decoded by the app, letting the authentication
+			    fail. This issue has now been fixed in the AdminConsole, and the access token parameter is
+			    now properly URL-encoded.</li>
+			 <li>Tracked races can now also be filtered by the regatta to which they belong.
+			     When selecting a regatta leaderboard, by default the table of tracked races will be
+			     filtered by the regatta whose leaderboard was selected. The regatta filter can be
+			     used in conjunction with the regular text filter field.
+			 </li>
+                    </ul>
+
                     <h2 class="articleSubheadline">September 2016</h2>
                     <ul class="bulletList">
 			<li>When denoting a regatta for smartphone tracking, the "By Marks" course designer is

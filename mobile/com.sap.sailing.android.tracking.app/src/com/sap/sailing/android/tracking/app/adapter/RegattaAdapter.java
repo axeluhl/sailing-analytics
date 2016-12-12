@@ -21,7 +21,7 @@ public class RegattaAdapter extends AbstractRegattaAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         TextView regattaName = ViewHelper.get(view,R.id.regattaName);
         if (regattaName != null) {
-            String regatteNameText = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_NAME));
+            String regatteNameText = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
             regattaName.setText(regatteNameText);
         }
         TextView regattaEvent = ViewHelper.get(view, R.id.regatta_event);

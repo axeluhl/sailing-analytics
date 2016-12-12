@@ -37,6 +37,12 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
                 return StringMessages.INSTANCE.raceIsFinished();
             }
         },
+        FINISHING {      // the blue flag has gone up but has not gone down yet
+            @Override
+            public String getLabel() {
+                return StringMessages.INSTANCE.raceIsFinishing();
+            }
+        },
         POSTPONED {     // the start has been postponed
             @Override
             public String getLabel() {
@@ -159,12 +165,21 @@ public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadata
     /**
      * Convenience method to check if this {@link SimpleRaceMetadataDTO race} is currently running.
      * 
-     * @return <code>true</code> if the {@link #getViewState() view state} is {@link RaceViewState#RUNNING},
-     *         <code>false</code> otherwise
+     * @return <code>true</code> if the {@link #getViewState() view state} is {@link RaceViewState#RUNNING} or
+     *         {@link RaceViewState#FINISHING}, <code>false</code> otherwise
      */
     public boolean isRunning() {
-        return getViewState() == RaceViewState.RUNNING;
+        return getViewState() == RaceViewState.RUNNING || getViewState() == RaceViewState.FINISHING;
     }
     
+    /**
+     * Convenience method to check if this {@link SimpleRaceMetadataDTO race} is scheduled.
+     * 
+     * @return <code>true</code> if the {@link #getViewState() view state} is {@link RaceViewState#SCHEDULED},
+     *         <code>false</code> otherwise
+     */
+    public boolean isScheduled() {
+        return getViewState() == RaceViewState.SCHEDULED;
+    }
     
 }

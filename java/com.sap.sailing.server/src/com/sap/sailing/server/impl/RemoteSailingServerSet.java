@@ -33,6 +33,8 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
@@ -44,15 +46,16 @@ import com.sap.sse.util.HttpUrlConnectionHelper;
  */
 public class RemoteSailingServerSet {
     private static final int POLLING_INTERVAL_IN_SECONDS = 60;
+    private NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("lock for RemoteSailingServerSet", true);
 
     private static final Logger logger = Logger.getLogger(RemoteSailingServerSet.class.getName());
-    
+
     /**
      * Holds the remote server references managed by this set. Keys are the
      * {@link RemoteSailingServerReference#getName() names} of the server references.
      */
     private final ConcurrentMap<String, RemoteSailingServerReference> remoteSailingServers;
-    
+
     private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
 
     /**
@@ -62,53 +65,63 @@ public class RemoteSailingServerSet {
     public RemoteSailingServerSet(ScheduledExecutorService scheduler) {
         remoteSailingServers = new ConcurrentHashMap<>();
         cachedEventsForRemoteSailingServers = new ConcurrentHashMap<>();
-        scheduler.scheduleAtFixedRate(new Runnable() { @Override public void run() { updateRemoteSailingServerReferenceEventCaches(); } },
-                /* initialDelay */ 0, POLLING_INTERVAL_IN_SECONDS, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                updateRemoteSailingServerReferenceEventCaches();
+            }
+        }, /* initialDelay */ 0, POLLING_INTERVAL_IN_SECONDS, TimeUnit.SECONDS);
     }
 
     public void clear() {
-        remoteSailingServers.clear();
-        cachedEventsForRemoteSailingServers.clear();
+        LockUtil.executeWithWriteLock(lock, () -> {
+            remoteSailingServers.clear();
+            cachedEventsForRemoteSailingServers.clear();
+        });
     }
 
     public void add(RemoteSailingServerReference remoteSailingServerReference) {
-        remoteSailingServers.put(remoteSailingServerReference.getName(), remoteSailingServerReference);
-        triggerAsynchronousEventCacheUpdate(remoteSailingServerReference);
+        LockUtil.executeWithWriteLock(lock, () -> {
+            remoteSailingServers.put(remoteSailingServerReference.getName(), remoteSailingServerReference);
+            triggerAsynchronousEventCacheUpdate(remoteSailingServerReference);
+        });
     }
-    
+
     private void updateRemoteSailingServerReferenceEventCaches() {
-        for (RemoteSailingServerReference ref : remoteSailingServers.values()) {
-            triggerAsynchronousEventCacheUpdate(ref);
-        }
+        LockUtil.executeWithReadLock(lock, () -> {
+            for (RemoteSailingServerReference ref : remoteSailingServers.values()) {
+                triggerAsynchronousEventCacheUpdate(ref);
+            }
+        });
     }
-    
+
     /**
-     * If this set has a {@link RemoteSailingServerReference} whose {@link RemoteSailingServerReference#getName() name} equals
-     * <code>name</code>, it is returned. Otherwise, <code>null</code> is returned.
+     * If this set has a {@link RemoteSailingServerReference} whose {@link RemoteSailingServerReference#getName() name}
+     * equals <code>name</code>, it is returned. Otherwise, <code>null</code> is returned.
      */
     public RemoteSailingServerReference getServerReferenceByName(String name) {
         return remoteSailingServers.get(name);
     }
 
     private void triggerAsynchronousEventCacheUpdate(final RemoteSailingServerReference ref) {
-        new Thread("Event Cache Updater for remote server "+ref) {
-            @Override public void run() { updateRemoteServerEventCacheSynchronously(ref); }
-        }.start();
+        new Thread(() -> updateRemoteServerEventCacheSynchronously(ref), "Event Cache Updater for remote server " + ref).start();
     }
 
-    private Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(RemoteSailingServerReference ref) {
+    private Util.Pair<Iterable<EventBase>, Exception> updateRemoteServerEventCacheSynchronously(
+            RemoteSailingServerReference ref) {
         BufferedReader bufferedReader = null;
         Util.Pair<Iterable<EventBase>, Exception> result;
         try {
             try {
                 final URL eventsURL = getEventsURL(ref.getURL());
-                logger.fine("Updating events for remote server "+ref+" from URL "+eventsURL);
+                logger.fine("Updating events for remote server " + ref + " from URL " + eventsURL);
                 URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 JSONParser parser = new JSONParser();
                 Object eventsAsObject = parser.parse(bufferedReader);
-                EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(
-                        new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());
+                EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(
+                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)),
+                        new LeaderboardGroupBaseJsonDeserializer());
                 JSONArray eventsAsJsonArray = (JSONArray) eventsAsObject;
                 final Set<EventBase> events = new HashSet<>();
                 for (Object eventAsObject : eventsAsJsonArray) {
@@ -123,13 +136,22 @@ public class RemoteSailingServerSet {
                 }
             }
         } catch (IOException | ParseException e) {
-            logger.log(Level.INFO, "Exception trying to fetch events from remote server "+ref+": "+e.getMessage(), e);
+            logger.log(Level.INFO, "Exception trying to fetch events from remote server " + ref + ": " + e.getMessage(),
+                    e);
             result = new Util.Pair<Iterable<EventBase>, Exception>(/* events */ null, e);
         }
-        cachedEventsForRemoteSailingServers.put(ref, result);
+        final Pair<Iterable<EventBase>, Exception> finalResult = result;
+        LockUtil.executeWithWriteLock(lock, () -> {
+            // check that the server was not removed while no lock was held
+            if (remoteSailingServers.containsValue(ref)) {
+                cachedEventsForRemoteSailingServers.put(ref, finalResult);
+            } else {
+                logger.fine("Omitted update for " + ref + " as it was removed");
+            }
+        });
         return result;
     }
-    
+
     private URL getEventsURL(URL remoteServerBaseURL) throws MalformedURLException {
         String getEventsUrl = remoteServerBaseURL.toExternalForm();
         if (!getEventsUrl.endsWith("/")) {
@@ -140,36 +162,55 @@ public class RemoteSailingServerSet {
     }
 
     public Map<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> getCachedEventsForRemoteSailingServers() {
-        return Collections.unmodifiableMap(cachedEventsForRemoteSailingServers);
+        LockUtil.lockForRead(lock);
+        try {
+            return Collections.unmodifiableMap(cachedEventsForRemoteSailingServers);
+        } finally {
+            LockUtil.unlockAfterRead(lock);
+        }
     }
 
     public RemoteSailingServerReference remove(String name) {
-        RemoteSailingServerReference ref = remoteSailingServers.remove(name);
-        if (ref != null) {
-            cachedEventsForRemoteSailingServers.remove(ref);
+        LockUtil.lockForWrite(lock);
+        try{
+            RemoteSailingServerReference ref = remoteSailingServers.remove(name);
+            if (ref != null) {
+                cachedEventsForRemoteSailingServers.remove(ref);
+            }
+            return ref;
+        }finally{
+            LockUtil.unlockAfterWrite(lock);
         }
-        return ref;
     }
 
     /**
-     * Synchronously fetches the latest events list for the remote server reference specified. The
-     * result is cached. If <code>ref</code> was not yet part of this remote sailing server reference set,
-     * it is automatically added.
+     * Synchronously fetches the latest events list for the remote server reference specified. The result is cached. If
+     * <code>ref</code> was not yet part of this remote sailing server reference set, it is automatically added.
      */
     public Util.Pair<Iterable<EventBase>, Exception> getEventsOrException(RemoteSailingServerReference ref) {
-        if (!remoteSailingServers.containsKey(ref.getName())) {
-            remoteSailingServers.put(ref.getName(), ref);
+        LockUtil.lockForWrite(lock);
+        try {
+            if (!remoteSailingServers.containsKey(ref.getName())) {
+                remoteSailingServers.put(ref.getName(), ref);
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
         }
         return updateRemoteServerEventCacheSynchronously(ref);
     }
 
     public Iterable<RemoteSailingServerReference> getLiveRemoteServerReferences() {
         List<RemoteSailingServerReference> result = new ArrayList<>();
-        for (Map.Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> e : cachedEventsForRemoteSailingServers.entrySet()) {
-            if (e.getValue().getB() == null) {
-                // no exception; reference considered live
-                result.add(e.getKey());
+        LockUtil.lockForRead(lock);
+        try {
+            for (Map.Entry<RemoteSailingServerReference, Pair<Iterable<EventBase>, Exception>> e : cachedEventsForRemoteSailingServers.entrySet()) {
+                if (e.getValue().getB() == null) {
+                    // no exception; reference considered live
+                    result.add(e.getKey());
+                }
             }
+        } finally {
+            LockUtil.unlockAfterRead(lock);
         }
         return result;
     }

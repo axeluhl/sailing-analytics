@@ -31,6 +31,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.CourseDesignerMode;
+import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -49,6 +50,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -282,6 +284,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         public void showWithBoatClass(String boatClassName) {
                             new RaceLogCompetitorRegistrationDialog(boatClassName, sailingService, stringMessages,
                                     errorReporter, editable, leaderboardName, raceColumnName, fleetName,
+                                    raceColumnDTOAndFleetDTO.getA().getFleets(),
                                     new DialogCallback<Set<CompetitorDTO>>() {
 
                                         @Override
@@ -336,8 +339,11 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races =
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());
                     races.remove(raceColumnDTOAndFleetDTO);
+                    Distance buoyZoneRadius = getSelectedRegatta() == null
+                            ? RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS
+                            : getSelectedRegatta().getCalculatedBuoyZoneRadius();
                     new CopyCourseAndCompetitorsDialog(sailingService, errorReporter, stringMessages, races,
-                            leaderboardName, new DialogCallback<CourseAndCompetitorCopyOperation>() {
+                            leaderboardName, buoyZoneRadius, new DialogCallback<CourseAndCompetitorCopyOperation>() {
                                 @Override
                                 public void ok(CourseAndCompetitorCopyOperation operation) {
                                     operation.perform(leaderboardName, raceColumnDTOAndFleetDTO, /* onSuccessCallback */ new Runnable() {
@@ -518,6 +524,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             selectedLeaderBoardPanel.setVisible(true);
             selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + selectedLeaderboard.name + "'");
             if (!selectedLeaderboard.type.isMetaLeaderboard()) {
+                trackedRacesListComposite.setRegattaFilterValue(selectedLeaderboard.regattaName);
                 trackedRacesCaptionPanel.setVisible(true);
             }
             sailingService.doesRegattaLogContainCompetitors(((StrippedLeaderboardDTO) leaderboardSelectionModel.getSelectedSet().toArray()[0]).name, new RegattaLogCallBack());
@@ -618,7 +625,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             DeviceConfigurationDTO.RegattaConfigurationDTO configuration) {
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         sailingService.updateRegatta(regattaIdentifier, regatta.startDate, regatta.endDate,
-                regatta.defaultCourseAreaUuid, configuration, regatta.useStartTimeInference,
+                regatta.defaultCourseAreaUuid, configuration, regatta.buoyZoneRadiusInHullLengths, regatta.useStartTimeInference,
                 regatta.controlTrackingFromStartAndFinishTimes,
                 new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                     @Override

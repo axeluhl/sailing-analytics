@@ -228,7 +228,8 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
                     /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     null, newSelectedLeaderboardName, errorReporter, stringMessages, userAgent,
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
-                    false, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false);
+                    false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
+                    /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
             selectedLeaderboardFlowPanel.add(newSelectedLeaderboardPanel);
             for (LeaderboardUpdateListener listener : leaderboardUpdateListeners) {
                 newSelectedLeaderboardPanel.addLeaderboardUpdateListener(listener);
@@ -280,5 +281,9 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
                 listener.onSelectedLeaderboardChanged(selectedLeaderboardPanel);
             }
         }
+    }
+
+    public void removeLeaderboardUpdateListener(LeaderboardUpdateListener leaderboardUpdateListener) {
+        leaderboardUpdateListeners.remove(leaderboardUpdateListener);
     }
 }

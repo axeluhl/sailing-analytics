@@ -23,6 +23,8 @@ public class PlayerPlace extends AbstractBasePlace {
         Integer timeToSwitchBeforeRaceStartInSeconds = Integer.valueOf(getParameter(AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START));
         
         this.playerConfiguration = new AutoPlayerConfiguration(eventUuidAsString, leaderboardName, fullscreen, timeToSwitchBeforeRaceStartInSeconds);
+        
+        //these are currently regenerated in the PlayerActivity, based on the historydata. Once the settings are properly stored, this should be replaced.
         this.leaderboardPerspectiveLifecycleWithAllSettings = null;
         this.raceboardPerspectiveLifecycleWithAllSettings = null;
     }

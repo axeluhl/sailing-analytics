@@ -51,8 +51,8 @@ public class RegattaAnalyticsDataManager {
         if (leaderboardPanel == null) {
             leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                    StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */
-                    true, false, false);
+                    StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null, autoExpandLastRaceColumn,
+                    /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true);
         }
         return leaderboardPanel;
     }

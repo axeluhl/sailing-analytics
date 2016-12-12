@@ -288,6 +288,15 @@ public class Util {
         }
         return result;
     }
+    
+    public static <T> List<T> createList(Iterable<T> iterable) {
+        List<T> list = new ArrayList<>();
+        Iterator<T> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            list.add(iterator.next());
+        }
+        return list;
+    }
 
     /**
      * A null-safe check whether <code>t</code> is contained in <code>ts</code>. For <code>ts==null</code> the method

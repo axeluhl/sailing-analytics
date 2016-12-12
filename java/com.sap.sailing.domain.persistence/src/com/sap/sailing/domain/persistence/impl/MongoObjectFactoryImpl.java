@@ -646,6 +646,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             DBObject configurationObject = (DBObject) JSON.parse(json.toString());
             dbRegatta.put(FieldNames.REGATTA_REGATTA_CONFIGURATION.name(), configurationObject);
         }
+        dbRegatta.put(FieldNames.REGATTA_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS.name(), regatta.getBuoyZoneRadiusInHullLengths());
         dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
         dbRegatta.put(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name(), regatta.isControlTrackingFromStartAndFinishTimes());
         dbRegatta.put(FieldNames.REGATTA_RANKING_METRIC.name(), storeRankingMetric(regatta));
@@ -923,7 +924,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogProtestStartTimeEvent.class.getSimpleName());
-        storeTimePoint(event.getProtestStartTime(), result, FieldNames.RACE_LOG_PROTEST_START_TIME);
+        storeTimePoint(event.getProtestTime().from(), result, FieldNames.RACE_LOG_PROTEST_START_TIME);
+        storeTimePoint(event.getProtestTime().to(), result, FieldNames.RACE_LOG_PROTEST_END_TIME);
         return result;
     }
 

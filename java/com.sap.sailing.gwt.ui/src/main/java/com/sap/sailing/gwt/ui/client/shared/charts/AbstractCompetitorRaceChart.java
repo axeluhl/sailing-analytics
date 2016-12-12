@@ -136,6 +136,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
         Chart chart = new Chart().setZoomType(BaseChart.ZoomType.X)
                 .setPersistent(true)
+                .setReflow(false)
                 .setWidth100()
                 .setAlignTicks(true)
                 .setHeight100()
@@ -220,7 +221,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     private void loadData(final Date from, final Date to, final List<CompetitorDTO> competitors, final boolean append) {
         if (isVisible()) {
-            showLoading(stringMessages.loadingCompetitorData());
+            // if no data is loaded yet, or if it is not playing and not live (append loading every second) show loading
+            // indicator
+            if (shouldShowLoading(primary.timeOfLatestRequestInMillis)) {
+                showLoading(stringMessages.loadingCompetitorData());
+            }
             ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
             for (CompetitorDTO competitorDTO : competitors) {
                 competitorsToLoad.add(competitorDTO);
@@ -281,6 +286,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
         if (isVisible()) {
+            showLoading(stringMessages.loadingCompetitorData());
             ArrayList<CompetitorDTO> competitorsToLoad = new ArrayList<CompetitorDTO>();
             competitorsToLoad.add(competitor);
             
@@ -383,6 +389,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 if (!chartSeries.contains(competitorDataSeries)) {
                     chart.addSeries(competitorDataSeries);
                     chart.addSeries(markPassingSeries);
+                    //this is to prevent a bug, that will prohibit the initial rendering
+                    chart.setSizeToMatchContainer();
                     
                 }
             }
