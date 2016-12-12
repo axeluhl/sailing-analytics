@@ -12,26 +12,70 @@ import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
+/**
+ * Manages all default settings of a component/perspective and its subcomponents if there are any.
+ * It supplies components with initial settings and determines whether the settings of components are storable or not.
+ * This abstract implementation provides settings storage support if the storable settings either implement {@link SettingsMap}
+ * or {@link GenericSerializableSettings}.
+ * There are two kinds of settings which are stored separately - <b>global settings</b> and <b>context specific settings</b>.
+ * <ul>
+ * <li>Global settings are the settings which are applied globally to all components</li>
+ * <li>Context specific settings have higher precedence than global settings and are applied to components only if the current
+ * context (e.g. event or race) matches the context when the settings have been stored.</li>
+ * </ul>
+ * That means that context specific settings are stored per context (e.g. race or event) whereas global settings are stored
+ * globally for all possible contexts (independent of event or race).
+ * 
+ * 
+ * @author Vladislav Chumak
+ *
+ * @param <L> The {@link ComponentLifecycle} type of the root component/perspective containing all the settings for itself and its subcomponents
+ * @param <S> The {@link Settings} type of the settings of the root component/perspective containing all the settings for itself and its subcomponents
+ */
 public abstract class AbstractComponentContextWithSettingsStorage<L extends ComponentLifecycle<S, ?>, S extends Settings> extends AbstractComponentContext<L, S> {
     
+    /**
+     * Manages the persistence layer of settings.
+     */
     private final SettingsStorageManager<S> settingsStorageManager;
     
+    /**
+     * Contains {@link SettingsReceiverCallback}s which are waiting to receive the initial settings of the root component.
+     */
     private Queue<SettingsReceiverCallback<S>> settingsReceiverCallbacks = new LinkedList<>();
     
     /**
-     * Current default settings for the whole settings tree.
+     * Current initial/default settings for the whole settings tree which corresponds to the root component and its subcomponents.
      */
     private S currentDefaultSettings = null;
     
+    /**
+     * 
+     * @param rootLifecycle The {@link ComponentLifecycle} of the root component/perspective
+     * @param settingsStorageManager The {@link SettingsStorageManager} to be used access stored settings and store new settings
+     */
     public AbstractComponentContextWithSettingsStorage(L rootLifecycle, SettingsStorageManager<S> settingsStorageManager) {
         super(rootLifecycle);
         this.settingsStorageManager = settingsStorageManager;
     }
     
+    /**
+     * Initialises the instance with initial settings. This method may be called only once during the whole lifecycle
+     * of this instance. The call of this method is mandatory, otherwise it will not be possible to obtain initial settings.
+     * 
+     * @see #initInitialSettings(OnSettingsLoadedCallback)
+     */
     public void initInitialSettings() {
         initInitialSettings(null);
     }
     
+    /**
+     * Initialises the instance with initial settings. This method may be called only once during the whole lifecycle
+     * of this instance. The call of this method is mandatory, otherwise it will not be possible to obtain initial settings.
+     * 
+     * @param onInitialSettingsLoaded Callback to be called when the settings initialisation finishes
+     * @see #initInitialSettings()
+     */
     public void initInitialSettings(final OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {
         if(currentDefaultSettings != null) {
             throw new IllegalStateException("Settings have been already initialized. You may only call this method once.");
@@ -60,6 +104,17 @@ public abstract class AbstractComponentContextWithSettingsStorage<L extends Comp
         });
     }
     
+    /**
+     * Retrieve settings for the root component managed by this context.
+     * The provided callback gets called when initial/default settings are available. That means
+     * if the initialisation of this instance is finished, the provided callback is called
+     * immediately. If initialisation is not done yet, then the callback gets called when
+     * the initialisation gets finished and thus, initial settings are available.
+     * Make sure to call {@link #initInitialSettings()} when using this method, otherwise
+     * the provided callback will be never called.
+     * 
+     * @param settingsReceiverCallback The callback which supplies the caller with initial settings
+     */
     public void receiveInitialSettings(SettingsReceiverCallback<S> settingsReceiverCallback) {
         if(currentDefaultSettings == null) {
             settingsReceiverCallbacks.add(settingsReceiverCallback);
@@ -68,6 +123,14 @@ public abstract class AbstractComponentContextWithSettingsStorage<L extends Comp
         }
     }
 
+    /**
+     * Stores the {@link Settings} of the passed {@link Component} in the default component settings tree.
+     * Make sure to call this method only when {@link #hasMakeCustomDefaultSettingsSupport(Component)}
+     * method returns {@code true} for the passed {@link Component}.
+     * 
+     * @param component The component which the passed {@link Settings} correspond to
+     * @param newDefaultSettings The {@link Settings} to be stored
+     */
     @SuppressWarnings("unchecked")
     @Override
     public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings) {
@@ -109,8 +172,23 @@ public abstract class AbstractComponentContextWithSettingsStorage<L extends Comp
         }
     }
 
+    /**
+     * Extracts context specific settings from provided {@link Settings} of the root component.
+     * 
+     * @param newRootSettings The settings of the root component
+     * @return The context specific settings extracted, or {@code null} if there aren't any
+     * context specific settings to be stored
+     * @see AbstractComponentContextWithSettingsStorage
+     */
     protected abstract S extractContextSpecificSettings(S newRootSettings);
 
+    /**
+     * Extracts global settings from provided {@link Settings} of the root component.
+     * 
+     * @param newRootSettings The settings of the root component
+     * @return The global settings extracted, or {@code null} if there aren't any
+     * context specific settings to be stored
+     */
     protected abstract S extractGlobalSettings(
             S newRootSettings);
 
@@ -139,10 +217,24 @@ public abstract class AbstractComponentContextWithSettingsStorage<L extends Comp
         }
     }
     
+    /**
+     * Gets the last error occurred during settings initialisation.
+     * 
+     * @return The last error as {@link Throwable}, if an error occurred, otherwise {@code null}
+     */
     public Throwable getLastError() {
         return settingsStorageManager.getLastError();
     }
     
+    /**
+     * Gets the current default {@link Settings} of the root component managed
+     * by this {@link ComponentContext}. The returned {@link Settings} should
+     * contain all settings for the root component and its subcomponents.
+     * 
+     * @return The {@link Settings} of the root component
+     * @throws IllegalStateException When the instance has not been initialised yet
+     * @see #initInitialSettings()
+     */
     @Override
     public S getDefaultSettings() {
         if(currentDefaultSettings == null) {
@@ -151,6 +243,9 @@ public abstract class AbstractComponentContextWithSettingsStorage<L extends Comp
         return rootLifecycle.cloneSettings(currentDefaultSettings);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean hasMakeCustomDefaultSettingsSupport(Component<?> component) {
         if(!component.hasSettings()) {

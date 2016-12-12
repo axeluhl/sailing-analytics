@@ -75,7 +75,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
         this.settingsDialogComponent = dialogComponent;
         
         //TODO make all Components to have some ComponentContext
-        ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = component.getComponentTreeNodeInfo();
+        ComponentTreeNodeInfo componentTreeNodeInfo = component.getComponentTreeNodeInfo();
         ComponentContext<?, ?> componentContext = componentTreeNodeInfo.getComponentContext();
         if(componentContext != null && componentContext.hasMakeCustomDefaultSettingsSupport(component)) {
             initMakeDefaultButtons(component, stringMessages);

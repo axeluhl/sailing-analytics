@@ -8,20 +8,18 @@ import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 public class LeaderboardWithHeaderComponentContext extends AbstractComponentContextWithSettingsStorage<LeaderboardWithHeaderPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>> {
 
     public LeaderboardWithHeaderComponentContext(UserService userService, String entryPointId, LeaderboardWithHeaderPerspectiveLifecycle rootPerspectiveLifecycle) {
-        super(rootPerspectiveLifecycle, new UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>>(userService, entryPointId));
+        super(rootPerspectiveLifecycle, new UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>>(userService, entryPointId, "global"));
     }
 
     @Override
     protected PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> extractContextSpecificSettings(
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> newRootPerspectiveSettings) {
-        // TODO Auto-generated method stub
-        return newRootPerspectiveSettings;
+        return null;
     }
 
     @Override
     protected PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> extractGlobalSettings(
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> newRootPerspectiveSettings) {
-        // TODO Auto-generated method stub
         return newRootPerspectiveSettings;
     }
 

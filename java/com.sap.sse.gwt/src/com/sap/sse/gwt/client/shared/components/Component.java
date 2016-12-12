@@ -61,5 +61,9 @@ public interface Component<SettingsType extends Settings> {
      */
     String getDependentCssClassName();
 
-    ComponentTreeNodeInfo<SettingsType> getComponentTreeNodeInfo();
+    /**
+     * Gets the {@link ComponentTreeNodeInfo} instance corresponding to this component.
+     * @see ComponentTreeNodeInfo
+     */
+    ComponentTreeNodeInfo getComponentTreeNodeInfo();
 }

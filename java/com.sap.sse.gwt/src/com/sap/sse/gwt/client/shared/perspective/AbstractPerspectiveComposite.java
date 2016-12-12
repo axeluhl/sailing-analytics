@@ -10,6 +10,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
+import com.sap.sse.gwt.client.shared.components.ComponentTreeNodeInfo;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -27,6 +28,12 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     private final Map<String, Component<? extends Settings>> childComponents = new HashMap<>();
     
+    /**
+     * Adds the provided component as a child to this perspective and sets the {@link ComponentTreeNodeInfo}
+     * of the provided component accordingly.
+     * 
+     * @param childComponent The component to be added as a child to this perspective
+     */
     protected void addChildComponent(Component<? extends Settings> childComponent) {
         childComponents.put(childComponent.getId(), childComponent);
         childComponent.getComponentTreeNodeInfo().setParentPerspective(this);

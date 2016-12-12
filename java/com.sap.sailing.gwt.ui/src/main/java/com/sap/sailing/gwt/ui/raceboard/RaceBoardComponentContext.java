@@ -16,8 +16,8 @@ public class RaceBoardComponentContext
 
     public RaceBoardComponentContext(UserService userService, String entryPointId, RaceBoardPerspectiveLifecycle raceBoardPerspectiveLifecycle,
             String regattaName, String raceName, String leaderboardName, String leaderboardGroupName, UUID eventId) {
-        super(raceBoardPerspectiveLifecycle, new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>(userService, entryPointId + "." + raceBoardPerspectiveLifecycle.getComponentId(), regattaName, raceName, leaderboardName, leaderboardGroupName,
-                eventId == null ? null : eventId.toString()));
+        super(raceBoardPerspectiveLifecycle, new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>(userService, entryPointId + "." + raceBoardPerspectiveLifecycle.getComponentId(), UserSettingsStorageManager.buildContextDefinitionId(regattaName, raceName, leaderboardName, leaderboardGroupName,
+                eventId == null ? null : eventId.toString())));
     }
 
     @Override

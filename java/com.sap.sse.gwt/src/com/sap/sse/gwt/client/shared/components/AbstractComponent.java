@@ -4,10 +4,10 @@ import com.sap.sse.common.settings.Settings;
 
 public abstract class AbstractComponent<SettingsType extends Settings> implements Component<SettingsType> {
     
-    private ComponentTreeNodeInfo<SettingsType> componentTreeNodeInfo = new ComponentTreeNodeInfo<>();
+    private ComponentTreeNodeInfo componentTreeNodeInfo = new ComponentTreeNodeInfo();
     
     @Override
-    public ComponentTreeNodeInfo<SettingsType> getComponentTreeNodeInfo() {
+    public ComponentTreeNodeInfo getComponentTreeNodeInfo() {
         return componentTreeNodeInfo;
     }
 }

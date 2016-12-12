@@ -1,5 +1,11 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
+/**
+ * Helper class to leverage two parallel server calls and provide the results when both call results have been arrived.
+ * 
+ * @author Vladislav Chumak
+ *
+ */
 public class CallbacksJoinerHelper<F, S> {
     
     private boolean firstCallbackReceived = false;

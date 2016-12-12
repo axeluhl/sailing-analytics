@@ -5,6 +5,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
+import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.CallbacksJoinerHelper;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
@@ -15,16 +16,26 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
+ * The settings are stored in HTML5 LocalStorage, as well as on server in the user's
+ * account, in case the user is logged.
  * 
- * @author Vlad
+ * @author Vladislav Chumak
  *
- * @param <R>
- * @param <S>
+ * @param <S> The {@link Settings} type of the settings of the root component/perspective containing all the settings for itself and its subcomponents
+ * @see SettingsStorageManager
  */
 public class UserSettingsStorageManager<S extends Settings> implements SettingsStorageManager<S> {
     
+    /**
+     * The key which is associated with the global settings. Different keys will cause multiple/different settings instances stored in the storage.
+     */
     private final String storageGlobalKey;
+    
+    /**
+     * The key which is used to store the context specific settings. Each context with own context specific settings must have a unique key.
+     */
     private final String storageContextSpecificKey;
+    
     private Throwable lastError = null;
     
     private UserService userService;
@@ -38,18 +49,30 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
      */
     private boolean initialUserSetting = false;
 
-    public UserSettingsStorageManager(UserService userService, String globalDefinitionId, String... contextDefinitionParameters) {
+    /**
+     * 
+     * @param userService The {@link UserService} which is used for settings storage on server when the current user is logged in
+     * @param globalDefinitionId  The key which is associated with the global settings. Different keys will cause multiple/different settings instances stored in the storage.
+     * @param contextDefinitionId The key which is used to store the context specific settings. Each context with own context specific settings must have a unique key.
+     */
+    public UserSettingsStorageManager(UserService userService, String globalDefinitionId, String contextDefinitionId) {
         this.userService = userService;
         this.storageGlobalKey = globalDefinitionId;
-        this.storageContextSpecificKey = this.storageGlobalKey + "#" + buildContextDefinitionId(contextDefinitionParameters);
+        this.storageContextSpecificKey = this.storageGlobalKey + "#" + contextDefinitionId;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public void storeGlobalSettings(S globalSettings) {
         String serializedSettings = serializeToJson(globalSettings);
         storeGlobalSettingsJsonOnServer(serializedSettings);
         storeGlobalSettingsJsonOnLocalStorage(serializedSettings);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public void storeContextSpecificSettings(S contextSpecificSettings) {
         String serializedSettings = serializeToJson(contextSpecificSettings);
         storeContextSpecificSettingsJsonOnServer(serializedSettings);
@@ -84,6 +107,9 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void retrieveDefaultSettings(S defaultSettings, final OnSettingsLoadedCallback<S> asyncCallback) {
         final SettingsJsonRetrievement settingsJsonRetrievement = new SettingsJsonRetrievement(defaultSettings);
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
@@ -237,6 +263,14 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
         return deserializeFromCurrentUrl(defaultSettings);
     }
     
+    /**
+     * Helper class to leverage two parallel server calls in order to retrieve global and context specific settings
+     * without additional unnecessary server-roundtrips and provide the results when both call results have been received.
+     * 
+     * @author Vladislav Chumak
+     * @see CallbacksJoinerHelper
+     *
+     */
     private class SettingsJsonRetrievement extends CallbacksJoinerHelper<String, String> {
         private S defaultSettings;
         
@@ -261,11 +295,21 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
         }
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public Throwable getLastError() {
         return lastError;
     }
     
-    private static String buildContextDefinitionId(String[] contextDefinitionParameters) {
+    /**
+     * Utility method used to build a {@link AbstractComponentContextWithSettingsStorage#contextDefinitionId context definition id}
+     * in order to construct an object of this class.
+     * 
+     * @param contextDefinitionParameters The parameters which shape the context
+     * @return The generated context definition id from the provided parameters
+     */
+    public static String buildContextDefinitionId(String... contextDefinitionParameters) {
         StringBuilder str = new StringBuilder("");
         boolean first = true;
         for(String contextDefinitionParameter : contextDefinitionParameters) {
