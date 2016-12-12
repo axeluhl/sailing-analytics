@@ -102,7 +102,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             LeaderboardInfo leaderboardInfo = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setTitle(leaderboardInfo.name);
+            getSupportActionBar().setTitle(leaderboardInfo.displayName);
             getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
             ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
