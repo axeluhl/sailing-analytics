@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.partials.racelist;
 
-import static com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState.TRACKED_VALID_DATA;
 import static com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil.shortTimeFormatter;
 
 import java.util.Date;
@@ -478,25 +477,18 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, T> getRaceViewerButtonColumn(final EventView.Presenter presenter) {
+        final RaceviewerLaunchPadCell<T> raceviewerLaunchPadCell = new RaceviewerLaunchPadCell<T>(presenter);
         DefaultRaceListColumnComparator<T> comparator = new DefaultRaceListColumnComparator<T>() {
             @Override
             public int compare(T o1, T o2) {
-                if (o1.getTrackingState() == TRACKED_VALID_DATA && o2.getTrackingState() == TRACKED_VALID_DATA) {
-                    if (o1.getViewState() == RaceViewState.FINISHED && o2.getViewState() != RaceViewState.FINISHED) {
-                        return 1;
-                    }
-                    if (o1.getViewState() != RaceViewState.FINISHED && o2.getViewState() == RaceViewState.FINISHED) {
-                        return -1;
-                    }
-                }
-                int compareResult = -o1.getTrackingState().compareTo(o2.getTrackingState());
-                if(compareResult == 0) {
+                int compareResult = raceviewerLaunchPadCell.getRenderingStyle(o1).compareTo(raceviewerLaunchPadCell.getRenderingStyle(o2));
+                if (compareResult == 0) {
                     compareResult = super.compare(o1, o2);
                 }
                 return compareResult;
             }
         };
-        return new SortableRaceListColumn<T, T>("", new RaceviewerLaunchPadCell<T>(presenter), comparator) {
+        return new SortableRaceListColumn<T, T>("", raceviewerLaunchPadCell, comparator) {
             @Override
             public String getHeaderStyle() {
                 return getStyleNamesString(CSS.raceslist_head_item(), CSS.raceslist_head_itembutton());

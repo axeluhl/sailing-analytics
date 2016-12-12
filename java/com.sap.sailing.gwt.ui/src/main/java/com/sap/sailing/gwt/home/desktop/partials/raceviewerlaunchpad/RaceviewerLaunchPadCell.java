@@ -76,17 +76,39 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
     
     @Override
     public void render(Context context, T data, SafeHtmlBuilder sb) {
-        if (data.hasValidTrackingData()) {
-            if (renderAsDirectLinkButton(data)) {
+        switch (getRenderingStyle(data)) {
+        case WATCH_LIVE_ONLY:
                 sb.append(TEMPLATE.standaloneButton(plannedStyleNames, iconStyleNames, I18N.watchLive(), 
                         "launch-play", presenter.getRaceViewerURL(data, RaceBoardModes.PLAYER.name())));
+                break;
+        case WATCH_LIVE_OR_ANALYZE:
+            sb.append(TEMPLATE.raceviewerLaunchPad(liveStyleNames, iconStyleNames, I18N.raceDetailsToShow()));
+            break;
+        case ANALYZE:
+            sb.append(TEMPLATE.raceviewerLaunchPad(analyzeStyleNames, iconStyleNames, I18N.raceDetailsToShow()));
+            break;
+        case NOT_TRACKED:
+            sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, I18N.eventRegattaRaceNotTracked()));
+            break;
+        }
+    }
+    
+    public static enum RenderingStyle {
+        WATCH_LIVE_ONLY, WATCH_LIVE_OR_ANALYZE, ANALYZE, NOT_TRACKED
+    }
+    
+    public RenderingStyle getRenderingStyle(T data) {
+        final RenderingStyle result;
+        if (data.hasValidTrackingData()) {
+            if (renderAsDirectLinkButton(data)) {
+                result = RenderingStyle.WATCH_LIVE_ONLY;
             } else {
-                String styleNames = data.isFinished() ? analyzeStyleNames : liveStyleNames;
-                sb.append(TEMPLATE.raceviewerLaunchPad(styleNames, iconStyleNames, I18N.raceDetailsToShow()));
+                result = data.isFinished() ? RenderingStyle.ANALYZE : RenderingStyle.WATCH_LIVE_OR_ANALYZE;
             }
         } else {
-            sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, I18N.eventRegattaRaceNotTracked()));
+            result = RenderingStyle.NOT_TRACKED;
         }
+        return result;
     }
     
     /** 
