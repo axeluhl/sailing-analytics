@@ -42,6 +42,5 @@ public interface CompetitorProvider extends Named {
      *            <code>eventName</code>, or a regatta name as provided in the value set for the key
      *            <code>eventName</code> as returned by {@link #getHasCompetitorsForRegattasInEvent()}.
      */
-    Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException,
-            IOException;
+    Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException, IOException;
 }
