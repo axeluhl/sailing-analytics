@@ -9,8 +9,7 @@ public class PersonDTO extends NamedDTO {
     private String description;
     private String nationalityThreeLetterIOCAcronym;
 
-    public PersonDTO() {
-    }
+    PersonDTO() {} // for GWT de-serialization only
 
     public PersonDTO(String name, Date dateOfBirth, String description, String nationalityThreeLetterIOCAcronym) {
         super(name);
@@ -23,24 +22,12 @@ public class PersonDTO extends NamedDTO {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Date dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getNationalityThreeLetterIOCAcronym() {
         return nationalityThreeLetterIOCAcronym;
-    }
-
-    public void setNationalityThreeLetterIOCAcronym(String nationalityThreeLetterIOCAcronym) {
-        this.nationalityThreeLetterIOCAcronym = nationalityThreeLetterIOCAcronym;
     }
 
     @Override
