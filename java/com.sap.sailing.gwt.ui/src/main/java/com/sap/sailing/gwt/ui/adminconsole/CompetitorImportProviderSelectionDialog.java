@@ -159,17 +159,17 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
     }
 
     private static class Callback implements DialogCallback<CompetitorImportSelectionDialogResult> {
-        private final BusyDisplay busynessPanel;
+        private final BusyDisplay busyDisplay;
         private final SailingServiceAsync sailingService;
         private final ErrorReporter errorReporter;
         private final StringMessages stringMessages;
         private final MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory;
 
         public Callback(MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory,
-                SailingServiceAsync sailingService, BusyDisplay busynessPanel, ErrorReporter errorReporter,
+                SailingServiceAsync sailingService, BusyDisplay busyDisplay, ErrorReporter errorReporter,
                 StringMessages stringMessages) {
             this.sailingService = sailingService;
-            this.busynessPanel = busynessPanel;
+            this.busyDisplay = busyDisplay;
             this.errorReporter = errorReporter;
             this.stringMessages = stringMessages;
             this.matchCompetitorsDialogFactory = matchCompetitorsDialogFactory;
@@ -189,13 +189,13 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
             final String eventName = competitorImportDialogResult.getEventName();
             final String regattaName = competitorImportDialogResult.getRegattaName();
 
-            busynessPanel.setBusy(true);
+            busyDisplay.setBusy(true);
             sailingService.getCompetitorDescriptors(competitorProviderName, eventName, regattaName,
                     new AsyncCallback<Iterable<CompetitorDescriptorDTO>>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            busynessPanel.setBusy(false);
+                            busyDisplay.setBusy(false);
                             errorReporter.reportError(
                                     stringMessages.errorLoadingCompetitorImportDescriptors(caught.getMessage()));
                         }
@@ -205,15 +205,14 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                             sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    busynessPanel.setBusy(false);
+                                    busyDisplay.setBusy(false);
                                     errorReporter.reportError(
                                             stringMessages.errorMessageLoadingData());
                                 }
 
                                 @Override
                                 public void onSuccess(Iterable<CompetitorDTO> competitors) {
-                                    busynessPanel.setBusy(false);
-
+                                    busyDisplay.setBusy(false);
                                     matchCompetitorsDialogFactory
                                             .createMatchImportedCompetitorsDialog(competitorDescriptors, competitors)
                                             .show();

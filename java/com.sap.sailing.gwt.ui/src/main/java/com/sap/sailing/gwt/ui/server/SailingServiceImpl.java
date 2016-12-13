@@ -699,13 +699,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Iterable<String> getCompetitorProviderNames() {
         List<String> result = new ArrayList<>();
-        for (CompetitorProvider competitorProvider : getAllCompetotorProviders()) {
+        for (CompetitorProvider competitorProvider : getAllCompetitorProviders()) {
             result.add(competitorProvider.getName());
         }
         return result;
     }
 
-    private Iterable<CompetitorProvider> getAllCompetotorProviders() {
+    private Iterable<CompetitorProvider> getAllCompetitorProviders() {
         final Object[] services = competitorProviderServiceTracker.getServices();
         List<CompetitorProvider> result = new ArrayList<>();
         if (services != null) {
@@ -718,7 +718,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public CompetitorProviderDTO getCompetitorProviderDTOByName(String providerName) throws Exception {
-        for (CompetitorProvider competitorProvider : getAllCompetotorProviders()) {
+        for (CompetitorProvider competitorProvider : getAllCompetitorProviders()) {
             if (competitorProvider.getName().equals(providerName)) {
                 return new CompetitorProviderDTO(competitorProvider.getName(),
                         new HashMap<>(competitorProvider.getHasCompetitorsForRegattasInEvent()));
@@ -730,7 +730,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Iterable<CompetitorDescriptorDTO> getCompetitorDescriptors(String competitorProviderName, String eventName,
             String regattaName) throws Exception {
-        for (CompetitorProvider cp : getAllCompetotorProviders()) {
+        for (CompetitorProvider cp : getAllCompetitorProviders()) {
             if (cp.getName().equals(competitorProviderName)) {
                 Iterable<CompetitorDescriptor> competitorDescriptors = cp.getCompetitorDescriptors(eventName, regattaName);
                 Set<CompetitorDescriptorDTO> competitorDescriptorDTOs = getCompetitorProviderDTOs(competitorDescriptors);
