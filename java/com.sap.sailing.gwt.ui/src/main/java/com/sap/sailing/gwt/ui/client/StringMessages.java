@@ -1501,6 +1501,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String warningDirectCompetitorRegistration();
     String warningRegattaCompetitorRegistration();
     String competitorRegistrationsOnRaceDisabled();
+    String warningForDisabledCompetitors(String competitorsSet);
+    String competitorToolTipMessage(String competitorName, String currentFleetName, String assignedToFleet, String raceName);
     String addMarkToRegatta();
     String selectALeaderboardGroup();
     @Override
