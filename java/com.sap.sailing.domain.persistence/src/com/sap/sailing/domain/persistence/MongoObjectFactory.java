@@ -125,7 +125,11 @@ public interface MongoObjectFactory {
      */
     void storeCompetitor(Competitor competitor);
 
-    void storeCompetitors(Iterable<Competitor> competitor);
+    /**
+     * Like {@link #storeCompetitor(Competitor)}, but for a collection of competitors that are all
+     * expected to be new, having a unique {@link Competitor#getId() ID}.
+     */
+    void storeCompetitors(Iterable<Competitor> competitors);
 
     void removeAllCompetitors();
 
