@@ -5,14 +5,14 @@ import com.sap.sse.common.CountryCode;
 
 
 public class CompetitorDescriptor {
-    private String eventName;
-    private String regattaName;
-    private String raceName;
-    private String fleetName;
-    private String sailNumber;
-    private String competitorName;
-    private CountryCode countryCode;
-    private Iterable<Person> persons;
+    private final String eventName;
+    private final String regattaName;
+    private final String raceName;
+    private final String fleetName;
+    private final String sailNumber;
+    private final String competitorName;
+    private final CountryCode countryCode;
+    private final Iterable<Person> persons;
 
     public CompetitorDescriptor(String eventName, String regattaName, String raceName, String fleetName,
             String sailNumber, String competitorName, CountryCode countryCode, Iterable<Person> persons) {
@@ -31,64 +31,32 @@ public class CompetitorDescriptor {
         return eventName;
     }
 
-    public void setEventName(String eventName) {
-        this.eventName = eventName;
-    }
-
     public String getRegattaName() {
         return regattaName;
-    }
-
-    public void setRegattaName(String regattaName) {
-        this.regattaName = regattaName;
     }
 
     public String getRaceName() {
         return raceName;
     }
 
-    public void setRaceName(String raceName) {
-        this.raceName = raceName;
-    }
-
     public String getFleetName() {
         return fleetName;
-    }
-
-    public void setFleetName(String fleetName) {
-        this.fleetName = fleetName;
     }
 
     public String getSailNumber() {
         return sailNumber;
     }
 
-    public void setSailNumber(String sailNumber) {
-        this.sailNumber = sailNumber;
-    }
-
     public String getCompetitorName() {
         return competitorName;
-    }
-
-    public void setCompetitorName(String competitorName) {
-        this.competitorName = competitorName;
     }
 
     public CountryCode getCountryCode() {
         return countryCode;
     }
 
-    public void setCountryCode(CountryCode threeLetterIOCCountryCode) {
-        this.countryCode = threeLetterIOCCountryCode;
-    }
-
     public Iterable<Person> getPersons() {
         return persons;
-    }
-
-    public void setPersons(Iterable<Person> persons) {
-        this.persons = persons;
     }
 
     @Override
