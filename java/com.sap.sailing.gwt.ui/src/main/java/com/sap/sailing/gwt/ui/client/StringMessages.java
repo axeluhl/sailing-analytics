@@ -1576,6 +1576,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String mapControls();
     String manage2SailEvent();
     String noEventsYet();
+    String selectCompetitorImportProvider();
     String selectResultImportProvider();
     String buildVersion();
     String serverInformation();

@@ -85,7 +85,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
 
     private void addProviderNamesToListBox(Iterable<String> competitorProviderNames, StringMessages stringMessages) {
         List<String> sortedProviderNames = getSortedProviderNames(competitorProviderNames);
-        competitorProviderListBox.addItem(stringMessages.selectResultImportProvider());
+        competitorProviderListBox.addItem(stringMessages.selectCompetitorImportProvider());
         for (String providerName : sortedProviderNames) {
             competitorProviderListBox.addItem(providerName);
         }
