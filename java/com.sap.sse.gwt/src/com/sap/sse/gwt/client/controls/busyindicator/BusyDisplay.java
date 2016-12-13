@@ -1,10 +1,10 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sse.gwt.client.controls.busyindicator;
 
 /**
  * Declare that we can change the busy state when some actions are performed.
  * 
- * @author Alexander_Tatarinovich
+ * @author Alexander Tatarinovich
  */
-public interface Busyness {
+public interface BusyDisplay {
     void setBusy(boolean isBusy);
 }

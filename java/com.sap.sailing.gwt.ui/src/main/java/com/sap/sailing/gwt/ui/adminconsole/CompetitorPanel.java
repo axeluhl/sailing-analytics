@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 
 /**
@@ -28,7 +29,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
  * @author Axel Uhl (d043530)
  * 
  */
-public class CompetitorPanel extends SimplePanel implements Busyness{
+public class CompetitorPanel extends SimplePanel implements BusyDisplay {
     private final CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> competitorTable;
     private final RefreshableMultiSelectionModel<CompetitorDTO> refreshableCompetitorSelectionModel;
     private final String leaderboardName;

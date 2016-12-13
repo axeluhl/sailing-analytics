@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -50,7 +51,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
     private final LinkedHashMap<String, Pair<String, String>> eventRagateNamesByCompetitorListItem;
 
     public CompetitorImportProviderSelectionDialog(MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory,
-            Busyness busynessPanel, Iterable<String> competitorProviderNames, SailingServiceAsync sailingService,
+            BusyDisplay busynessPanel, Iterable<String> competitorProviderNames, SailingServiceAsync sailingService,
             StringMessages stringMessages, ErrorReporter errorReporter) {
         super(stringMessages.importCompetitors(), null, stringMessages.ok(), stringMessages.cancel(), null,
                 new Callback(matchCompetitorsDialogFactory, sailingService, busynessPanel, errorReporter,
@@ -158,14 +159,14 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
     }
 
     private static class Callback implements DialogCallback<CompetitorImportSelectionDialogResult> {
-        private final Busyness busynessPanel;
+        private final BusyDisplay busynessPanel;
         private final SailingServiceAsync sailingService;
         private final ErrorReporter errorReporter;
         private final StringMessages stringMessages;
         private final MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory;
 
         public Callback(MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory,
-                SailingServiceAsync sailingService, Busyness busynessPanel, ErrorReporter errorReporter,
+                SailingServiceAsync sailingService, BusyDisplay busynessPanel, ErrorReporter errorReporter,
                 StringMessages stringMessages) {
             this.sailingService = sailingService;
             this.busynessPanel = busynessPanel;
