@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
@@ -32,6 +34,7 @@ import com.sap.sailing.xrr.schema.Team;
 
 public class CompetitorImporter extends AbstractManage2SailProvider implements CompetitorProvider {
     private static final long serialVersionUID = 7389956404604333931L;
+    private static final Logger logger = Logger.getLogger(CompetitorImporter.class.getName());
     private final CompetitorDocumentProvider documentProvider;
 
     public CompetitorImporter(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
@@ -69,40 +72,45 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
             if (resultDocDescr.getEventName().equals(eventName) &&
                     (regattaName == null || regattaName.equals(resultDocDescr.getRegattaName()))) {
                 final Parser parser = getParserFactory().createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
-                final RegattaResults regattaResults = parser.parse();
-                for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
-                    if (o instanceof Team) {
-                        final Team team = (Team) o;
-                        teamsWithoutRaceAssignments.put(team.getTeamID(),
-                                createCompetitorDescriptor(team, parser, /* event */ null, /* division */ null, /* raceID */ null));
-                    } else if (o instanceof Event) {
-                        Event event = (Event) o;
-                        for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
-                            if (eventO instanceof Division) {
-                                Division division = (Division) eventO;
-                                if (regattaName == null || regattaName.equals(division.getTitle())) {
-                                    for (Object divisionO : division.getSeriesResultOrRaceResultOrTRResult()) {
-                                        String raceID = null;
-                                        Team team = null;
-                                        if (divisionO instanceof RaceResult) {
-                                            RaceResult raceResult = (RaceResult) divisionO;
-                                            raceID = raceResult.getRaceID();
-                                            team = parser.getTeam(raceResult.getTeamID());
-                                        } else if (divisionO instanceof SeriesResult) {
-                                            SeriesResult seriesResult = (SeriesResult) divisionO;
-                                            team = parser.getTeam(seriesResult.getTeamID());
-                                        }
-                                        if (team != null) {
-                                            final CompetitorDescriptor competitorDescriptor = createCompetitorDescriptor(
-                                                    team, parser, event, division, raceID);
-                                            resultsByTeamID.put(team.getTeamID(), competitorDescriptor);
-                                            result.add(competitorDescriptor);
+                try {
+                    final RegattaResults regattaResults = parser.parse();
+                    for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
+                        if (o instanceof Team) {
+                            final Team team = (Team) o;
+                            teamsWithoutRaceAssignments.put(team.getTeamID(),
+                                    createCompetitorDescriptor(team, parser, /* event */ null, /* division */ null, /* raceID */ null));
+                        } else if (o instanceof Event) {
+                            Event event = (Event) o;
+                            for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
+                                if (eventO instanceof Division) {
+                                    Division division = (Division) eventO;
+                                    if (regattaName == null || regattaName.equals(division.getTitle())) {
+                                        for (Object divisionO : division.getSeriesResultOrRaceResultOrTRResult()) {
+                                            String raceID = null;
+                                            Team team = null;
+                                            if (divisionO instanceof RaceResult) {
+                                                RaceResult raceResult = (RaceResult) divisionO;
+                                                raceID = raceResult.getRaceID();
+                                                team = parser.getTeam(raceResult.getTeamID());
+                                            } else if (divisionO instanceof SeriesResult) {
+                                                SeriesResult seriesResult = (SeriesResult) divisionO;
+                                                team = parser.getTeam(seriesResult.getTeamID());
+                                            }
+                                            if (team != null) {
+                                                final CompetitorDescriptor competitorDescriptor = createCompetitorDescriptor(
+                                                        team, parser, event, division, raceID);
+                                                resultsByTeamID.put(team.getTeamID(), competitorDescriptor);
+                                                result.add(competitorDescriptor);
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
+                } catch (JAXBException e) {
+                    logger.log(Level.WARNING, "Exception trying to read competitors for event "+resultDocDescr.getEventName()+
+                            ", regatta "+resultDocDescr.getRegattaName()+" from document "+resultDocDescr.getDocumentName(), e);
                 }
             }
         }
@@ -135,7 +143,7 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
                         teamNationality[0] = nationality;
                     }
                 }
-                com.sap.sailing.domain.base.Person person = new PersonImpl(name, nationality, /* date of birth */ null, /* description */ xrrPerson.getGender().name());
+                com.sap.sailing.domain.base.Person person = new PersonImpl(name, nationality, /* date of birth */ null, /* description */ xrrPerson.getGender()==null?null:xrrPerson.getGender().name());
                 return person;
         }).collect(Collectors.toList());
         final CompetitorDescriptor competitorDescriptor = new CompetitorDescriptor(

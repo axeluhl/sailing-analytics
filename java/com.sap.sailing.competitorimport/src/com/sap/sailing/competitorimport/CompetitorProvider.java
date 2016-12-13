@@ -33,7 +33,7 @@ public interface CompetitorProvider extends Named {
     Map<String, Set<String>> getHasCompetitorsForRegattasInEvent() throws IOException;
 
     /**
-     * Obtains competitor records from an XRR file
+     * Obtains competitor records from the source of import
      * 
      * @param eventName
      *            an event name as obtained as a key in {@link #getHasCompetitorsForRegattasInEvent()}'s result
@@ -41,7 +41,6 @@ public interface CompetitorProvider extends Named {
      *            <code>null</code> to get the competitors for all regattas in the event specified by
      *            <code>eventName</code>, or a regatta name as provided in the value set for the key
      *            <code>eventName</code> as returned by {@link #getHasCompetitorsForRegattasInEvent()}.
-     * @return
      */
     Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException,
             IOException;
