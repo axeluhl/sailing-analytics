@@ -706,11 +706,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private Iterable<CompetitorProvider> getAllCompetitorProviders() {
-        final Object[] services = competitorProviderServiceTracker.getServices();
+        final CompetitorProvider[] services = competitorProviderServiceTracker.getServices(new CompetitorProvider[0]);
         List<CompetitorProvider> result = new ArrayList<>();
         if (services != null) {
-            for (Object service : services) {
-                result.add((CompetitorProvider) service);
+            for (final CompetitorProvider service : services) {
+                result.add(service);
             }
         }
         return result;
