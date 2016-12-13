@@ -672,11 +672,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private Iterable<ScoreCorrectionProvider> getAllScoreCorrectionProviders() {
-        final Object[] services = scoreCorrectionProviderServiceTracker.getServices();
+        final ScoreCorrectionProvider[] services = scoreCorrectionProviderServiceTracker.getServices(new ScoreCorrectionProvider[0]);
         List<ScoreCorrectionProvider> result = new ArrayList<ScoreCorrectionProvider>();
         if (services != null) {
-            for (Object service : services) {
-                result.add((ScoreCorrectionProvider) service);
+            for (final ScoreCorrectionProvider service : services) {
+                result.add(service);
             }
         }
         return result;
