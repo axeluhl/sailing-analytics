@@ -17,8 +17,7 @@ public class CompetitorDescriptorDTO extends NamedDTO {
 
     private Set<PersonDTO> persons;
 
-    public CompetitorDescriptorDTO() {
-    }
+    CompetitorDescriptorDTO() {} // for GWT de-serialization only
 
     public CompetitorDescriptorDTO(String eventName, String regattaName, String raceName, String fleetName,
             String sailNumber, String competitorName, String countryName, String twoLetterIsoCountryCode,
@@ -39,72 +38,36 @@ public class CompetitorDescriptorDTO extends NamedDTO {
         return eventName;
     }
 
-    public void setEventName(String eventName) {
-        this.eventName = eventName;
-    }
-
     public String getRegattaName() {
         return regattaName;
-    }
-
-    public void setRegattaName(String regattaName) {
-        this.regattaName = regattaName;
     }
 
     public String getRaceName() {
         return raceName;
     }
 
-    public void setRaceName(String raceName) {
-        this.raceName = raceName;
-    }
-
     public String getFleetName() {
         return fleetName;
-    }
-
-    public void setFleetName(String fleetName) {
-        this.fleetName = fleetName;
     }
 
     public String getSailNumber() {
         return sailNumber;
     }
 
-    public void setSailNumber(String sailNumber) {
-        this.sailNumber = sailNumber;
-    }
-
     public Iterable<PersonDTO> getPersons() {
         return persons;
-    }
-
-    public void setPersons(Set<PersonDTO> persons) {
-        this.persons = persons;
     }
 
     public String getCountryName() {
         return countryName;
     }
 
-    public void setCountryName(String countryName) {
-        this.countryName = countryName;
-    }
-
     public String getTwoLetterIsoCountryCode() {
         return twoLetterIsoCountryCode;
     }
 
-    public void setTwoLetterIsoCountryCode(String twoLetterIsoCountryCode) {
-        this.twoLetterIsoCountryCode = twoLetterIsoCountryCode;
-    }
-
     public String getThreeLetterIocCountryCode() {
         return threeLetterIocCountryCode;
-    }
-
-    public void setThreeLetterIocCountryCode(String threeLetterIocCountryCode) {
-        this.threeLetterIocCountryCode = threeLetterIocCountryCode;
     }
 
     @Override
