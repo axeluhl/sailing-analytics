@@ -4,34 +4,40 @@
 
 ## Introduction
 
-TODO
+The current fixes and tracks implementation provides an extensible micro-framework. The framework implements all the moving parts required for persisting and loading fixes and tracks. By defining interfaces and sticking to the visitor pattern, the framework also does help to implement new fix types.
+
+The framework also provides a generic double fix vector implementation that can be used to store fixes that consist of double values. 
 
 ### Fixes and Tracks
 
-In the domain model, Fixes are held by Tracks that allow access to the fixes and support some useful operations. `Tracks` are associated to a `TrackedRace` that gives access to its `Track` instances.
+In the domain model, `Tracks` hold and provide access to the `Fix` instances and provide some useful operations. `Tracks` themselves associated to a `TrackedRace`. `TrackedRace` instances hold and provide access to associated `Track` instances.
 
 There are abstract `Track` implementations that e.g. provide `Timepoint` based access. Typically there are specific implementations that provide calculations based on the concrete `Fix` type.
 
-### Something about mappings
+### Mappings
 
-In the RegattaLog, there are specific event implementations that are subtypes of `RegattaLogDeviceMappingEvent`. These events map domain objects (e.g. `Competitor` or `Mark`) to `DeviceIdentifiers`. In the persistence, fixes are saved for a `DeviceIdentifier`.
-The concrete type of the mapping event is used when loading fixes so that specific mappings can be handled specifically.
+In the persistence, fixes are saved for a given `DeviceIdentifier`. In the RegattaLog, specific `RegattaLogDeviceMappingEvent` subtype events map domain objects (e.g. `Competitor` or `Mark`) to `DeviceIdentifiers`.
 
-### Persistence of Fixes
+The concrete mapping type event is used when loading fixes: this allows us to handle specific mappings according to the underlying mapping type.
 
-The persistence of fixes is defined by `SensorFixStore` that supports saving fixes as well as loading fixes. To be able to work with fixes on the persistence, a `DeviceIdentifier` needs to be mapped as described above.
+### Persisting Fixes
 
-Fixes can be saved one by one or in batches. Saving single fixes is meant to be used in live mode when a device submits single fixes to the backend. When importing archived fixes, this should always be done in batches to reduce the load on the DB as well as the time for the save operation.
+The persistence of fixes is implemented by a `SensorFixStore` instance that supports saving and loading fixes. To be able to work with fixes on the persistence, a `DeviceIdentifier` needs to be mapped as described in "Mappings" above.
+
+Fixes can be saved one by one or in batches. Saving single fixes is meant to be used in live mode when a device submits single fixes to the server. When importing archived fixes, this should always be done in batches to reduce the load on the DB as well as the time for the save operation.
 
 The concrete MongoDB-based implementation of `SensorFixStore` is `MongoSensorFixStoreImpl`.
 
 ## Fixes on the persistence and in the domain model
 
-There are different types of fixes used by the persistence and domain model. There are different ways to implement extensions to handle new types of fixes.
+The persistence and domain model fixes build upon on different type of Fixes: 
+while we persist a certain sensor data in the persistence layer, the domain model can define a typed view on top of the underlying sensor datatype.
+ 
+There are different ways to implement extensions to handle new types of fixes.
 
 The persistence defined by `SensorFixStore` implementations can be extended to store custom fix implementations.
 
-In addition there is a special type of fix called DoubleVectorFix that can be used for a generic persistence that is based on a specific amount of double values. Based on this persistent fix type you can also define a mapping to be processed when loading fixes. Doing this, you do not need to extend the persistence but map such generic fixes to concrete ones.
+In addition there is a special type of fix called `DoubleVectorFix` that can be used as a generic persistence that is based on a specific amount of double values. Based on this persistent fix type you can also define a mapping to be processed when loading fixes. Doing this, you do not need to extend the persistence but map such generic fixes to concrete ones.
 
 The further chapters will guide through the process of extending the system for a new fix type or the usage of already existing fix types.
 
@@ -82,8 +88,18 @@ In addition there's a generic association of `SensorFixTracks` that are not only
 
 ## Import of Fixes
 
-TODO
+Importing Fixes uses the the defined persistence to store fix data uploaded through the admin console. The upload is a simple http form based upload that delivers a file to be parsed. The servlet than delivers the imported devide uuid, so the frontend can properly load the persisted data.
+
+The `SensorDataImportServlet` does process the uploaded file by extending `AbstractFileUploadServlet` and retrieving available importers through the OSGi registry. The `AbstractFileUploadServlet` does process the incoming http file upload. The OSGi registry delivers instance references to previously registered importers.
+
+It is possible to register different `DoubleVectorFixImporter` implementations. The `SensorDataImportServlet` matches the `getType` information provided by the importers found in the registry against the selected importer information in the upload form in the admin console. The first importer to match the requested import type is used to process/ import the uploaded file.
+
 
 ### Adding importer
 
-TODO
+Further `DoubleVectorFixImporter` implementations can be registered to the OSGi registry through a bundle activator, e.g.: `com.sap.sailing.server.trackfiles.impl.Activator`.
+
+The importer to be used to process the file is defined by the user by choosing the appropriate importer in the admin console upload formular. 
+The list available importer types is retrieved dynamically in the administration console. Therefore, simply registering an importer as a service in the OSGi registry makes it available in the admin ui.
+
+
