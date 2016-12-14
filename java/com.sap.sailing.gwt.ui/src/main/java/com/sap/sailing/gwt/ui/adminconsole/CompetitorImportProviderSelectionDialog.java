@@ -80,7 +80,6 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                 }
             }
         });
-
         addProviderNamesToListBox(competitorProviderNames, stringMessages);
     }
 
