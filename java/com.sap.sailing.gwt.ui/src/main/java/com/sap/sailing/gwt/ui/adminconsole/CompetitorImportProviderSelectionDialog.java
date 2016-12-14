@@ -17,11 +17,14 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
+import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
+import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
@@ -183,34 +186,44 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                 final String eventName = competitorImportDialogResult.getEventName();
                 final String regattaName = competitorImportDialogResult.getRegattaName();
                 busyDisplay.setBusy(true);
-                sailingService.getCompetitorDescriptors(competitorProviderName, eventName, regattaName,
-                        new AsyncCallback<Iterable<CompetitorDescriptorDTO>>() {
+                @SuppressWarnings("unchecked")
+                final Iterable<CompetitorDescriptorDTO>[] competitorDescriptors = (Iterable<CompetitorDescriptorDTO>[]) new Iterable<?>[1];
+                @SuppressWarnings("unchecked")
+                final Iterable<CompetitorDTO>[] competitors = (Iterable<CompetitorDTO>[]) new Iterable<?>[1];
+                final ParallelExecutionCallback<Iterable<CompetitorDescriptorDTO>> getCompetitorDescriptorsCallback =
+                        new ParallelExecutionCallback<Iterable<CompetitorDescriptorDTO>>() {
+                    @Override
+                    public void onSuccess(Iterable<CompetitorDescriptorDTO> myCompetitorDescriptors) {
+                        competitorDescriptors[0] = myCompetitorDescriptors;
+                        super.onSuccess(myCompetitorDescriptors);
+                    }
+                };
+                final ParallelExecutionCallback<Iterable<CompetitorDTO>> getCompetitorsCallback =
+                        new ParallelExecutionCallback<Iterable<CompetitorDTO>>() {
                             @Override
-                            public void onFailure(Throwable caught) {
-                                busyDisplay.setBusy(false);
-                                errorReporter.reportError(
-                                        stringMessages.errorLoadingCompetitorImportDescriptors(caught.getMessage()));
+                            public void onSuccess(Iterable<CompetitorDTO> myCompetitors) {
+                                competitors[0] = myCompetitors;
+                                super.onSuccess(myCompetitors);
                             }
-    
-                            @Override
-                            public void onSuccess(final Iterable<CompetitorDescriptorDTO> competitorDescriptors) {
-                                sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        busyDisplay.setBusy(false);
-                                        errorReporter.reportError(stringMessages.errorMessageLoadingData());
-                                    }
-    
-                                    @Override
-                                    public void onSuccess(Iterable<CompetitorDTO> competitors) {
-                                        busyDisplay.setBusy(false);
-                                        matchCompetitorsDialogFactory
-                                                .createMatchImportedCompetitorsDialog(competitorDescriptors, competitors)
-                                                .show();
-                                    }
-                                });
-                            }
-                        });
+                };
+                // the following parallel execution holder fires its handleSuccess method after both callbacks have succeeded
+                new ParallelExecutionHolder(getCompetitorDescriptorsCallback, getCompetitorsCallback) {
+                    @Override
+                    protected void handleSuccess() {
+                        busyDisplay.setBusy(false);
+                        matchCompetitorsDialogFactory.createMatchImportedCompetitorsDialog(competitorDescriptors[0], competitors[0]).show();
+                    }
+                    
+                    @Override
+                    protected void handleFailure(Throwable t) {
+                        busyDisplay.setBusy(false);
+                        errorReporter.reportError(
+                                stringMessages.errorLoadingCompetitorImportDescriptors(t.getMessage()));
+                    }
+                };
+                // trigger both calls, allowing for parallel execution, synchronizing with the parallel execution holder above:
+                sailingService.getCompetitorDescriptors(competitorProviderName, eventName, regattaName, new MarkedAsyncCallback<>(getCompetitorDescriptorsCallback));
+                sailingService.getCompetitors(new MarkedAsyncCallback<>(getCompetitorsCallback));
             }
         }
     }
