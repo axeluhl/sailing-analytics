@@ -105,7 +105,6 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
                     public void onSuccess(Iterable<String> providerNames) {
                         MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
                                 sailingService, stringMessages, errorReporter);
-
                         CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
                                 matchCompetitorsDialogFactory, CompetitorPanel.this, providerNames, sailingService,
                                 stringMessages, errorReporter);
@@ -129,7 +128,6 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
                 @Override
                 public void onClick(ClickEvent event) {
                     Set<CompetitorDTO> competitors = refreshableCompetitorSelectionModel.getSelectedSet();
-
                     CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages, errorReporter);
                     helper.inviteCompetitors(competitors, leaderboardName);
                 }

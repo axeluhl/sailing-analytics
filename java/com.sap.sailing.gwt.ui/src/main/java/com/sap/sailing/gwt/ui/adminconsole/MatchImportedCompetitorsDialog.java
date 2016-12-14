@@ -28,7 +28,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 /**
  * Defines dialog where we can match and choose imported competitors.
  * 
- * @author Alexander_Tatarinovich
+ * @author Alexander Tatarinovich
  *
  */
 public class MatchImportedCompetitorsDialog extends DataEntryDialog<Set<CompetitorDTO>> {
