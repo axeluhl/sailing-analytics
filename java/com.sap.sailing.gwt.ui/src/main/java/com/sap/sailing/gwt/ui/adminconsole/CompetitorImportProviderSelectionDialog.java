@@ -29,10 +29,10 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
  * Defines the dialog for displaying competitor provider names and list box of pair "event, regatta" names where we have
- * competitors are available for importing. Also defines which dialog would be created for matching imported competitors
+ * competitors available for importing. Also defines which dialog would be created for matching imported competitors
  * using the factory {@link MatchImportedCompetitorsDialogFactory}
  * 
- * @author Alexander_Tatarinovich
+ * @author Alexander Tatarinovich
  *
  */
 public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<CompetitorImportSelectionDialogResult> {
@@ -48,7 +48,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
     /**
      * a unique and human-readable string key for a eventNameRegattaName pair
      */
-    private final LinkedHashMap<String, Pair<String, String>> eventRagateNamesByCompetitorListItem;
+    private final LinkedHashMap<String, Pair<String, String>> eventRegattaNamesByCompetitorListItem;
 
     public CompetitorImportProviderSelectionDialog(MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory,
             BusyDisplay busynessPanel, Iterable<String> competitorProviderNames, SailingServiceAsync sailingService,
@@ -64,9 +64,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
         competitorListBox = createListBox(/* isMultipleSelect */ false);
         competitorListBox.setVisible(false);
         busyIndicator = new SimpleBusyIndicator();
-
-        eventRagateNamesByCompetitorListItem = new LinkedHashMap<>();
-
+        eventRegattaNamesByCompetitorListItem = new LinkedHashMap<>();
         competitorProviderListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -131,24 +129,22 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
     }
 
     private void updateCompetitorListBox(CompetitorProviderDTO competitorProvider) {
-        eventRagateNamesByCompetitorListItem.clear();
+        eventRegattaNamesByCompetitorListItem.clear();
         competitorListBox.clear();
         if (competitorProvider != null) {
             competitorListBox.addItem(stringMessages.pleaseSelectAScoringResult());
-            List<Pair<String, String>> eventAndRegattaNames = getEventAndRegattaNamesWhichHasCompetitors(
-                    competitorProvider);
+            List<Pair<String, String>> eventAndRegattaNames = getEventAndRegattaNamesWhichHasCompetitors(competitorProvider);
             for (Pair<String, String> pair : eventAndRegattaNames) {
                 String eventName = pair.getA();
                 String ragattaName = pair.getB();
-                String scoreCorrectionName = eventName + ", " + ragattaName;
-                eventRagateNamesByCompetitorListItem.put(scoreCorrectionName, pair);
-                competitorListBox.addItem(scoreCorrectionName);
+                String competitorImportSourceName = eventName + ", " + ragattaName;
+                eventRegattaNamesByCompetitorListItem.put(competitorImportSourceName, pair);
+                competitorListBox.addItem(competitorImportSourceName);
             }
         }
     }
 
-    private List<Pair<String, String>> getEventAndRegattaNamesWhichHasCompetitors(
-            CompetitorProviderDTO competitorProvider) {
+    private List<Pair<String, String>> getEventAndRegattaNamesWhichHasCompetitors(CompetitorProviderDTO competitorProvider) {
         List<Pair<String, String>> eventAndRegattaNames = new ArrayList<>();
         for (Entry<String, Set<String>> entry : competitorProvider.getHasCompetitorsForRegattasInEvent().entrySet()) {
             for (String ragattaName : entry.getValue()) {
@@ -182,44 +178,40 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
 
         @Override
         public void ok(final CompetitorImportSelectionDialogResult competitorImportDialogResult) {
-            if (competitorImportDialogResult == null) {
-                return;
+            if (competitorImportDialogResult != null) {
+                final String competitorProviderName = competitorImportDialogResult.getProviderName();
+                final String eventName = competitorImportDialogResult.getEventName();
+                final String regattaName = competitorImportDialogResult.getRegattaName();
+                busyDisplay.setBusy(true);
+                sailingService.getCompetitorDescriptors(competitorProviderName, eventName, regattaName,
+                        new AsyncCallback<Iterable<CompetitorDescriptorDTO>>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                busyDisplay.setBusy(false);
+                                errorReporter.reportError(
+                                        stringMessages.errorLoadingCompetitorImportDescriptors(caught.getMessage()));
+                            }
+    
+                            @Override
+                            public void onSuccess(final Iterable<CompetitorDescriptorDTO> competitorDescriptors) {
+                                sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        busyDisplay.setBusy(false);
+                                        errorReporter.reportError(stringMessages.errorMessageLoadingData());
+                                    }
+    
+                                    @Override
+                                    public void onSuccess(Iterable<CompetitorDTO> competitors) {
+                                        busyDisplay.setBusy(false);
+                                        matchCompetitorsDialogFactory
+                                                .createMatchImportedCompetitorsDialog(competitorDescriptors, competitors)
+                                                .show();
+                                    }
+                                });
+                            }
+                        });
             }
-            final String competitorProviderName = competitorImportDialogResult.getProviderName();
-            final String eventName = competitorImportDialogResult.getEventName();
-            final String regattaName = competitorImportDialogResult.getRegattaName();
-
-            busyDisplay.setBusy(true);
-            sailingService.getCompetitorDescriptors(competitorProviderName, eventName, regattaName,
-                    new AsyncCallback<Iterable<CompetitorDescriptorDTO>>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            busyDisplay.setBusy(false);
-                            errorReporter.reportError(
-                                    stringMessages.errorLoadingCompetitorImportDescriptors(caught.getMessage()));
-                        }
-
-                        @Override
-                        public void onSuccess(final Iterable<CompetitorDescriptorDTO> competitorDescriptors) {
-                            sailingService.getCompetitors(new AsyncCallback<Iterable<CompetitorDTO>>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    busyDisplay.setBusy(false);
-                                    errorReporter.reportError(
-                                            stringMessages.errorMessageLoadingData());
-                                }
-
-                                @Override
-                                public void onSuccess(Iterable<CompetitorDTO> competitors) {
-                                    busyDisplay.setBusy(false);
-                                    matchCompetitorsDialogFactory
-                                            .createMatchImportedCompetitorsDialog(competitorDescriptors, competitors)
-                                            .show();
-                                }
-                            });
-                        }
-                    });
         }
     }
 
@@ -231,7 +223,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
      *            imported competitor descriptors {@link CompetitorDescriptorDTO}
      * @param competitors
      *            existing competitors from {@link CompetitorStore}
-     * @author Alexander_Tatarinovich
+     * @author Alexander Tatarinovich
      *
      */
     public interface MatchImportedCompetitorsDialogFactory {
@@ -261,7 +253,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
             String selectedProviderName = competitorProviderListBox.getItemText(selectedProviderIndex);
             int selectedScoreCorrectionIndex = competitorListBox.getSelectedIndex();
             if (selectedScoreCorrectionIndex > 0) {
-                Pair<String, String> pair = eventRagateNamesByCompetitorListItem
+                Pair<String, String> pair = eventRegattaNamesByCompetitorListItem
                         .get(competitorListBox.getValue(selectedScoreCorrectionIndex));
                 String eventName = pair.getA();
                 String regattaName = pair.getB();
