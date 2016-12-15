@@ -27,7 +27,7 @@ import com.sap.sse.common.settings.generic.ValueSetting;
  */
 public class SettingsToStringMapSerializer {
     
-    public Map<String, Iterable<String>> serialize(SettingsMap settingsMap) {
+    public final Map<String, Iterable<String>> serialize(SettingsMap settingsMap) {
         final Map<String, Iterable<String>> result = new HashMap<>();
         serialize("", settingsMap, result);
         return result;
@@ -45,7 +45,7 @@ public class SettingsToStringMapSerializer {
         }
     }
 
-    public Map<String, Iterable<String>> serialize(GenericSerializableSettings settings) {
+    public final Map<String, Iterable<String>> serialize(GenericSerializableSettings settings) {
         final Map<String, Iterable<String>> result = new HashMap<>();
         serialize("", settings, result);
         return result;
@@ -101,7 +101,7 @@ public class SettingsToStringMapSerializer {
         return result;
     }
     
-    public <T extends SettingsMap> T deserialize(T settingsMap, Map<String, Iterable<String>> values) {
+    public final <T extends SettingsMap> T deserialize(T settingsMap, Map<String, Iterable<String>> values) {
         Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
         for (Map.Entry<String, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
             Settings settings = entry.getValue();
@@ -117,7 +117,7 @@ public class SettingsToStringMapSerializer {
         return settingsMap;
     }
 
-    public <T extends GenericSerializableSettings> T deserialize(T settings, Map<String, Iterable<String>> values) {
+    public final <T extends GenericSerializableSettings> T deserialize(T settings, Map<String, Iterable<String>> values) {
         Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
         for (Map.Entry<String, Setting> entry : settings.getChildSettings().entrySet()) {
             final String key = entry.getKey();

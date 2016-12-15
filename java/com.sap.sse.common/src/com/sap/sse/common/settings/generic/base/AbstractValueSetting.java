@@ -45,12 +45,12 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     }
     
     @Override
-    public void resetToDefault() {
+    public final void resetToDefault() {
         setValue(defaultValue);
     }
     
     @Override
-    public void setDefaultValue(T defaultValue) {
+    public final void setDefaultValue(T defaultValue) {
         boolean wasDefault = isDefaultValue();
         this.defaultValue = defaultValue;
         if(wasDefault) {
@@ -59,7 +59,7 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     }
     
     @Override
-    public T getDefaultValue() {
+    public final T getDefaultValue() {
         return defaultValue;
     }
     

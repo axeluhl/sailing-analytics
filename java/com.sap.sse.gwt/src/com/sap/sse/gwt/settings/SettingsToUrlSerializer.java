@@ -23,31 +23,31 @@ public class SettingsToUrlSerializer {
     
     private final SettingsToStringMapSerializer settingsToStringMapSerializer = new SettingsToStringMapSerializer();
     
-    public String serializeBasedOnCurrentLocation(GenericSerializableSettings settings) {
+    public final String serializeBasedOnCurrentLocation(GenericSerializableSettings settings) {
         final UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
         serializeToUrlBuilder(settings, urlBuilder);
         return urlBuilder.buildString();
     }
     
-    public String serializeBasedOnCurrentLocationWithCleanParameters(GenericSerializableSettings settings) {
+    public final String serializeBasedOnCurrentLocationWithCleanParameters(GenericSerializableSettings settings) {
         final UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
         serializeToUrlBuilder(settings, urlBuilder);
         return urlBuilder.buildString();
     }
     
-    public UrlBuilder serializeUrlBuilderBasedOnCurrentLocation(GenericSerializableSettings settings) {
+    public final UrlBuilder serializeUrlBuilderBasedOnCurrentLocation(GenericSerializableSettings settings) {
         final UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
         serializeToUrlBuilder(settings, urlBuilder);
         return urlBuilder;
     }
     
-    public UrlBuilder serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(GenericSerializableSettings settings) {
+    public final UrlBuilder serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(GenericSerializableSettings settings) {
         final UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
         serializeToUrlBuilder(settings, urlBuilder);
         return urlBuilder;
     }
 
-    public void serializeToUrlBuilder(GenericSerializableSettings settings, UrlBuilder urlBuilder) {
+    public final void serializeToUrlBuilder(GenericSerializableSettings settings, UrlBuilder urlBuilder) {
         Map<String, Iterable<String>> serializedValues = settingsToStringMapSerializer.serialize(settings);
         for(Map.Entry<String, Iterable<String>> entry : serializedValues.entrySet()) {
             Iterable<String> parameterValues = entry.getValue();
@@ -58,13 +58,13 @@ public class SettingsToUrlSerializer {
         }
     }
     
-    public <T extends GenericSerializableSettings> T deserializeFromCurrentLocation(T settings) {
+    public final <T extends GenericSerializableSettings> T deserializeFromCurrentLocation(T settings) {
         @SuppressWarnings({ "rawtypes", "unchecked" })
         Map<String, Iterable<String>> values = (Map) Window.Location.getParameterMap();
         return settingsToStringMapSerializer.deserialize(settings, values);
     }
     
-    public <T extends SettingsMap> T deserializeFromCurrentLocation(T settings) {
+    public final <T extends SettingsMap> T deserializeFromCurrentLocation(T settings) {
         @SuppressWarnings({ "rawtypes", "unchecked" })
         Map<String, Iterable<String>> values = (Map) Window.Location.getParameterMap();
         return settingsToStringMapSerializer.deserialize(settings, values);
