@@ -188,9 +188,9 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
 
             @Override
             public int compare(CompetitorDescriptorDTO cd1, CompetitorDescriptorDTO cd2) {
-                Boolean hasMathes1 = competitorImportMatcher.getMatchesCompetitors(cd1).isEmpty();
-                Boolean hasMathes2 = competitorImportMatcher.getMatchesCompetitors(cd2).isEmpty();
-                return hasMathes1 == hasMathes2 ? 0 : hasMathes1 ? 1 : -1;
+                Boolean hasMatches1 = competitorImportMatcher.getMatchesCompetitors(cd1).isEmpty();
+                Boolean hasMatches2 = competitorImportMatcher.getMatchesCompetitors(cd2).isEmpty();
+                return hasMatches1 == hasMatches2 ? 0 : hasMatches1 ? 1 : -1;
             }
         });
         return competitorColumnListHandler;
