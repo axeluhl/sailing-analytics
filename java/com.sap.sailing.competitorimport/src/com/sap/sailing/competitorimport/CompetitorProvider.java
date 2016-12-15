@@ -5,7 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
-import com.sap.sailing.competitorimport.CompetitorDescriptor;
+
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sse.common.Named;
 
 /**

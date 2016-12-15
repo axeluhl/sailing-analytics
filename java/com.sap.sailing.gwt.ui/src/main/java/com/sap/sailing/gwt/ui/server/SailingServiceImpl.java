@@ -55,7 +55,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.competitorimport.CompetitorDescriptor;
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
@@ -108,7 +107,6 @@ import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.Person;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -148,6 +146,7 @@ import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
@@ -190,13 +189,11 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
-import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTOFactory;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -728,50 +725,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDescriptorDTO> getCompetitorDescriptors(String competitorProviderName, String eventName,
+    public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String competitorProviderName, String eventName,
             String regattaName) throws Exception {
         for (CompetitorProvider cp : getAllCompetitorProviders()) {
             if (cp.getName().equals(competitorProviderName)) {
-                Iterable<CompetitorDescriptor> competitorDescriptors = cp.getCompetitorDescriptors(eventName, regattaName);
-                Set<CompetitorDescriptorDTO> competitorDescriptorDTOs = getCompetitorProviderDTOs(competitorDescriptors);
-                return competitorDescriptorDTOs;
+                return cp.getCompetitorDescriptors(eventName, regattaName);
             }
         }
         return Collections.emptySet();
-    }
-
-    private Set<CompetitorDescriptorDTO> getCompetitorProviderDTOs(
-            Iterable<CompetitorDescriptor> competitorDescriptors) {
-        Set<CompetitorDescriptorDTO> competitorDescriptorDTOs = new HashSet<>();
-        for (CompetitorDescriptor cd : competitorDescriptors) {
-            CompetitorDescriptorDTO cdDTO = convertToCompetitorDescriptorDTO(cd);
-            competitorDescriptorDTOs.add(cdDTO);
-        }
-        return competitorDescriptorDTOs;
-    }
-
-    private CompetitorDescriptorDTO convertToCompetitorDescriptorDTO(CompetitorDescriptor competitorDescriptor) {
-        Set<PersonDTO> persons = new HashSet<>();
-        for (Person person : competitorDescriptor.getPersons()) {
-            String nationalityThreeLetterIOCAcronym = person.getNationality() != null
-                    ? person.getNationality().getThreeLetterIOCAcronym() : null;
-            PersonDTO personDTO = new PersonDTO(person.getName(), person.getDateOfBirth(), person.getDescription(),
-                    nationalityThreeLetterIOCAcronym);
-            persons.add(personDTO);
-        }
-
-        CountryCode countryCode = competitorDescriptor.getCountryCode();
-        String countryName = countryCode == null ? null : countryCode.getName();
-        String twoLetterIsoCountryCode = countryCode == null ? null : countryCode.getTwoLetterISOCode();
-        String threeLetterIocCountryCode = countryCode == null ? null : countryCode.getThreeLetterIOCCode();
-
-        CompetitorDescriptorDTO competitorDescriptorDTO = new CompetitorDescriptorDTO(
-                competitorDescriptor.getEventName(), competitorDescriptor.getRegattaName(),
-                competitorDescriptor.getBoatClassName(), competitorDescriptor.getRaceName(),
-                competitorDescriptor.getFleetName(), competitorDescriptor.getSailNumber(), competitorDescriptor.getCompetitorName(),
-                countryName, twoLetterIsoCountryCode, threeLetterIocCountryCode, persons);
-
-        return competitorDescriptorDTO;
     }
 
     /**
@@ -4867,10 +4828,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<CompetitorDTO> addCompetitors(Iterable<CompetitorDTO> competitorDTOs) throws URISyntaxException {
+    public List<CompetitorDTO> addCompetitors(Iterable<CompetitorDescriptor> competitorDescriptors, String searchTag) throws URISyntaxException {
         List<Competitor> competitorsForSaving = new ArrayList<>();
-        for (CompetitorDTO competitorDTO : competitorDTOs) {
-            Competitor competitor = convertCompetitorDTOToCompetitor(competitorDTO);
+        for (final CompetitorDescriptor competitorDescriptor : competitorDescriptors) {
+            Competitor competitor = convertCompetitorDescriptorToCompetitor(competitorDescriptor, searchTag);
             competitorsForSaving.add(competitor);
         }
         getBaseDomainFactory().getCompetitorStore().addCompetitors(competitorsForSaving);
@@ -4878,24 +4839,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     /**
-     * Creates a new {@link Competitor} object from a {@link CompetitorDTO}, assuming that the DTO does not have
-     * a valid {@link CompetitorDTO#getIdAsString() ID} set.
+     * Creates a new {@link Competitor} object from a {@link CompetitorDescriptor} with a new random {@link UUID}.
+     * 
+     * @param searchTag
+     *            set as the {@link Competitor#getSearchTag() searchTag} property of all new competitors
      */
-    private Competitor convertCompetitorDTOToCompetitor(CompetitorDTO competitorDTO) throws URISyntaxException {
-        assert competitorDTO.getIdAsString() == null;
-        Nationality nationality = (competitorDTO.getThreeLetterIocCountryCode() == null
-                || competitorDTO.getThreeLetterIocCountryCode().isEmpty()) ? null
-                        : getBaseDomainFactory()
-                                .getOrCreateNationality(competitorDTO.getThreeLetterIocCountryCode());
-        BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDTO.getBoatClass().getName());
-        DynamicPerson sailor = new PersonImpl(competitorDTO.getName(), nationality, null, null);
-        DynamicTeam team = new TeamImpl(competitorDTO.getName(), Collections.singleton(sailor), null);
-        DynamicBoat boat = new BoatImpl(competitorDTO.getSailID(), boatClass, competitorDTO.getSailID());
-        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), competitorDTO.getName(),
-                competitorDTO.getColor(), competitorDTO.getEmail(),
-                competitorDTO.getFlagImageURL() == null ? null : new URI(competitorDTO.getFlagImageURL()), team,
-                boat, competitorDTO.getTimeOnTimeFactor(),
-                competitorDTO.getTimeOnDistanceAllowancePerNauticalMile(), competitorDTO.getSearchTag());
+    private Competitor convertCompetitorDescriptorToCompetitor(CompetitorDescriptor competitorDescriptor, String searchTag) throws URISyntaxException {
+        Nationality nationality = (competitorDescriptor.getCountryCode() == null
+                || competitorDescriptor.getCountryCode().getThreeLetterIOCCode() == null
+                || competitorDescriptor.getCountryCode().getThreeLetterIOCCode().isEmpty()) ? null
+                        : getBaseDomainFactory().getOrCreateNationality(competitorDescriptor.getCountryCode().getThreeLetterIOCCode());
+        BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDescriptor.getBoatClassName());
+        DynamicPerson sailor = new PersonImpl(competitorDescriptor.getName(), nationality, null, null);
+        DynamicTeam team = new TeamImpl(competitorDescriptor.getName(), Collections.singleton(sailor), null);
+        DynamicBoat boat = new BoatImpl(competitorDescriptor.getSailNumber(), boatClass, competitorDescriptor.getSailNumber());
+        Competitor competitor = new CompetitorImpl(UUID.randomUUID(), competitorDescriptor.getName(),
+                /* color */ null, /* eMail */ null,
+                /* flag image */ null, team,
+                boat, competitorDescriptor.getTimeOnTimeFactor(),
+                competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag);
         return competitor;
     }
 

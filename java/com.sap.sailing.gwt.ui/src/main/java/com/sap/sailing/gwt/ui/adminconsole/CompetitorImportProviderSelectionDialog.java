@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -15,8 +15,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionCallback;
 import com.sap.sailing.gwt.ui.client.ParallelExecutionHolder;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -25,8 +25,8 @@ import com.sap.sailing.gwt.ui.shared.CompetitorProviderDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -186,13 +186,13 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                 final String regattaName = competitorImportDialogResult.getRegattaName();
                 busyDisplay.setBusy(true);
                 @SuppressWarnings("unchecked")
-                final Iterable<CompetitorDescriptorDTO>[] competitorDescriptors = (Iterable<CompetitorDescriptorDTO>[]) new Iterable<?>[1];
+                final Iterable<CompetitorDescriptor>[] competitorDescriptors = (Iterable<CompetitorDescriptor>[]) new Iterable<?>[1];
                 @SuppressWarnings("unchecked")
                 final Iterable<CompetitorDTO>[] competitors = (Iterable<CompetitorDTO>[]) new Iterable<?>[1];
-                final ParallelExecutionCallback<Iterable<CompetitorDescriptorDTO>> getCompetitorDescriptorsCallback =
-                        new ParallelExecutionCallback<Iterable<CompetitorDescriptorDTO>>() {
+                final ParallelExecutionCallback<Iterable<CompetitorDescriptor>> getCompetitorDescriptorsCallback =
+                        new ParallelExecutionCallback<Iterable<CompetitorDescriptor>>() {
                     @Override
-                    public void onSuccess(Iterable<CompetitorDescriptorDTO> myCompetitorDescriptors) {
+                    public void onSuccess(Iterable<CompetitorDescriptor> myCompetitorDescriptors) {
                         competitorDescriptors[0] = myCompetitorDescriptors;
                         super.onSuccess(myCompetitorDescriptors);
                     }
@@ -232,7 +232,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
      * competitors.
      * 
      * @param competitorDescriptors
-     *            imported competitor descriptors {@link CompetitorDescriptorDTO}
+     *            imported competitor descriptors {@link CompetitorDescriptor}
      * @param competitors
      *            existing competitors from {@link CompetitorStore}
      * @author Alexander Tatarinovich
@@ -240,7 +240,7 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
      */
     public interface MatchImportedCompetitorsDialogFactory {
         MatchImportedCompetitorsDialog createMatchImportedCompetitorsDialog(
-                Iterable<CompetitorDescriptorDTO> competitorDescriptors, Iterable<CompetitorDTO> competitors);
+                Iterable<CompetitorDescriptor> competitorDescriptors, Iterable<CompetitorDTO> competitors);
     }
 
     @Override

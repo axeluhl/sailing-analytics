@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
 import com.sap.sse.common.Util;
 
 /**
@@ -22,7 +22,7 @@ public class CompetitorImportMatcher {
         this.existingCompetitorDTOs = existingCompetitors;
     }
 
-    public Set<CompetitorDTO> getMatchesCompetitors(CompetitorDescriptorDTO competitorDescriptor) {
+    public Set<CompetitorDTO> getMatchesCompetitors(CompetitorDescriptor competitorDescriptor) {
         Set<CompetitorDTO> matchesCompetitor = new HashSet<>();
         if (competitorDescriptor == null) {
             return matchesCompetitor;
@@ -35,7 +35,7 @@ public class CompetitorImportMatcher {
         return matchesCompetitor;
     }
 
-    private boolean isEqual(CompetitorDescriptorDTO competitorDescriptor, CompetitorDTO existingCompetitor) {
+    private boolean isEqual(CompetitorDescriptor competitorDescriptor, CompetitorDTO existingCompetitor) {
         return Util.equalsWithNull(competitorDescriptor.getName(), existingCompetitor.getName(), /* ignoreCase */ true)
                 && Util.equalsWithNull(removeSpaces(competitorDescriptor.getSailNumber()), removeSpaces(existingCompetitor.getSailID()), /* ignoreCase */ true)
                 && compareCountryCode(competitorDescriptor, existingCompetitor);
@@ -45,11 +45,8 @@ public class CompetitorImportMatcher {
         return s==null?null:s.replace(" ", "").replace("\t", "");
     }
 
-    private boolean compareCountryCode(CompetitorDescriptorDTO competitorDescriptor, CompetitorDTO existingCompetitor) {
-        return Util.equalsWithNull(competitorDescriptor.getCountryName(), existingCompetitor.getCountryName(), /* ignoreCase */ true)
-                && Util.equalsWithNull(competitorDescriptor.getThreeLetterIocCountryCode(),
-                        existingCompetitor.getThreeLetterIocCountryCode(), /* ignoreCase */ true)
-                && Util.equalsWithNull(competitorDescriptor.getTwoLetterIsoCountryCode(),
-                        existingCompetitor.getTwoLetterIsoCountryCode(), /* ignoreCase */ true);
+    private boolean compareCountryCode(CompetitorDescriptor competitorDescriptor, CompetitorDTO existingCompetitor) {
+        return Util.equalsWithNull(competitorDescriptor.getCountryCode().getThreeLetterIOCCode(),
+                        existingCompetitor.getThreeLetterIocCountryCode(), /* ignoreCase */ true);
     }
 }

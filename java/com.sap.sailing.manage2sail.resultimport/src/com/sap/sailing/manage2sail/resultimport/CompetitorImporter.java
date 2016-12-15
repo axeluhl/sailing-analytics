@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBException;
 
-import com.sap.sailing.competitorimport.CompetitorDescriptor;
 import com.sap.sailing.competitorimport.CompetitorProvider;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
-import com.sap.sailing.domain.base.impl.PersonImpl;
+import com.sap.sailing.domain.common.CompetitorDescriptor;
+import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.xrr.resultimport.Parser;
@@ -153,7 +153,7 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
             team.getNOC() == null ? null : new NationalityImpl(team.getNOC().name())
         };
         final String boatClassName = parser.getBoatClassName(division);
-        List<com.sap.sailing.domain.base.Person> persons = team.getCrew().stream().sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew)->{
+        List<PersonDTO> persons = team.getCrew().stream().sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew)->{
                 Person xrrPerson = parser.getPerson(crew.getPersonID());
                 String name = xrrPerson.getGivenName()+" "+xrrPerson.getFamilyName();
                 final Nationality nationality;
@@ -165,14 +165,18 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
                         teamNationality[0] = nationality;
                     }
                 }
-                com.sap.sailing.domain.base.Person person = new PersonImpl(name, nationality, /* date of birth */ null, /* description */ xrrPerson.getGender()==null?null:xrrPerson.getGender().name());
+                PersonDTO person = new PersonDTO(
+                        name, /* dateOfBirth */ null, /* description */ xrrPerson.getGender()==null?null:xrrPerson.getGender().name(),
+                                nationality.getCountryCode().getThreeLetterIOCCode());
                 return person;
         }).collect(Collectors.toList());
         final CompetitorDescriptor competitorDescriptor = new CompetitorDescriptor(
                             event==null?null:event.getTitle(),
                             division==null?null:(division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
                             boatClassName, race != null ? race.getRaceName() : null, /* fleetName */ null, sailNumber,
-                            team.getTeamName(), teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), persons);
+                            team.getTeamName(), team.getTeamName(), boat.getBoatName(),
+                            teamNationality[0] == null ? null : teamNationality[0].getCountryCode(),
+                            persons, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         return competitorDescriptor;
     }
 

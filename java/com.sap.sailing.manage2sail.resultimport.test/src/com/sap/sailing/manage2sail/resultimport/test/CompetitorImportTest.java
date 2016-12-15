@@ -15,8 +15,8 @@ import javax.xml.bind.JAXBException;
 
 import org.junit.Test;
 
-import com.sap.sailing.competitorimport.CompetitorDescriptor;
 import com.sap.sailing.competitorimport.CompetitorProvider;
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.manage2sail.resultimport.AbstractManage2SailProvider;
 import com.sap.sailing.manage2sail.resultimport.CompetitorDocumentProvider;

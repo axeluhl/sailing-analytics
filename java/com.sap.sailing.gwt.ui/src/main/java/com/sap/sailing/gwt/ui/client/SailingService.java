@@ -11,6 +11,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -32,7 +33,6 @@ import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -348,7 +348,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     CompetitorProviderDTO getCompetitorProviderDTOByName(String providerName) throws Exception;
 
-    Iterable<CompetitorDescriptorDTO> getCompetitorDescriptors(String competitorProviderName, String eventName,
+    Iterable<CompetitorDescriptor> getCompetitorDescriptors(String competitorProviderName, String eventName,
             String regattaName) throws Exception;
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
@@ -445,7 +445,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws Exception;
 
-    List<CompetitorDTO> addCompetitors(Iterable<CompetitorDTO> competitorDTOs) throws Exception;
+    List<CompetitorDTO> addCompetitors(Iterable<CompetitorDescriptor> competitorsForSaving, String searchTag) throws Exception;
     
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
     

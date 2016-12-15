@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
@@ -27,7 +28,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -469,8 +469,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getCompetitorProviderDTOByName(String providerName, AsyncCallback<CompetitorProviderDTO> callback);
 
-    void getCompetitorDescriptors(String competitorProviderName, String eventName, String regattaName,
-            AsyncCallback<Iterable<CompetitorDescriptorDTO>> callback);
+    void getCompetitorDescriptors(String competitorProviderName, String eventName, String regattaName, AsyncCallback<Iterable<CompetitorDescriptor>> callback);
 
     void getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<WindInfoForRaceDTO> callback);
 
@@ -597,7 +596,12 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
-    void addCompetitors(Iterable<CompetitorDTO> competitorDTOs, AsyncCallback<List<CompetitorDTO>> asyncCallback);
+    /**
+     * @param searchTag
+     *            set as the {@code searchTag} property on all new competitors created and therefore returned in the
+     *            {@link CompetitorDTO#getSearchTag()} properties
+     */
+    void addCompetitors(Iterable<CompetitorDescriptor> competitorsForSaving, String searchTag, AsyncCallback<List<CompetitorDTO>> asyncCallback);
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
 
