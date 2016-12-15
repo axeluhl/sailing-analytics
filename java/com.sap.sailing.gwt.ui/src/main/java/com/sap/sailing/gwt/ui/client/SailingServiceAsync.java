@@ -596,12 +596,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void addOrUpdateCompetitor(CompetitorDTO competitor, AsyncCallback<CompetitorDTO> asyncCallback);
 
-    /**
-     * @param searchTag
-     *            set as the {@code searchTag} property on all new competitors created and therefore returned in the
-     *            {@link CompetitorDTO#getSearchTag()} properties
-     */
-    void addCompetitors(Iterable<CompetitorDescriptor> competitorsForSaving, String searchTag, AsyncCallback<List<CompetitorDTO>> asyncCallback);
+    void addCompetitors(List<CompetitorDescriptor> competitorsForSaving, String searchTag,
+            AsyncCallback<List<CompetitorDTO>> asyncCallback);
 
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors, AsyncCallback<Void> asyncCallback);
 

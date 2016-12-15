@@ -1,9 +1,13 @@
 package com.sap.sailing.domain.common;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
 
 
@@ -20,7 +24,7 @@ public class CompetitorDescriptor extends NamedImpl implements Named {
     private final String sailNumber;
     private final String name;
     private final CountryCode countryCode;
-    private final Iterable<PersonDTO> persons;
+    private final List<PersonDTO> persons;
     private final Double timeOnTimeFactor;
     private final Duration timeOnDistanceAllowancePerNauticalMile;
 
@@ -38,7 +42,8 @@ public class CompetitorDescriptor extends NamedImpl implements Named {
         this.name = name;
         this.teamName = teamName;
         this.countryCode = countryCode;
-        this.persons = persons;
+        this.persons = new ArrayList<>();
+        Util.addAll(persons, this.persons);
         this.timeOnTimeFactor = timeOnTimeFactor;
         this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
     }

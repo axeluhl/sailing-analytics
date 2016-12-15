@@ -4828,7 +4828,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<CompetitorDTO> addCompetitors(Iterable<CompetitorDescriptor> competitorDescriptors, String searchTag) throws URISyntaxException {
+    public List<CompetitorDTO> addCompetitors(List<CompetitorDescriptor> competitorDescriptors, String searchTag) throws URISyntaxException {
         List<Competitor> competitorsForSaving = new ArrayList<>();
         for (final CompetitorDescriptor competitorDescriptor : competitorDescriptors) {
             Competitor competitor = convertCompetitorDescriptorToCompetitor(competitorDescriptor, searchTag);
