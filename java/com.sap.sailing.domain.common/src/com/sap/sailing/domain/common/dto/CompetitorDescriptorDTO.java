@@ -7,6 +7,7 @@ public class CompetitorDescriptorDTO extends NamedDTO {
     private static final long serialVersionUID = 4855053239521181610L;
     private String eventName;
     private String regattaName;
+    private String boatClassName;
     private String raceName;
     private String fleetName;
     private String sailNumber;
@@ -19,12 +20,13 @@ public class CompetitorDescriptorDTO extends NamedDTO {
 
     CompetitorDescriptorDTO() {} // for GWT de-serialization only
 
-    public CompetitorDescriptorDTO(String eventName, String regattaName, String raceName, String fleetName,
-            String sailNumber, String competitorName, String countryName, String twoLetterIsoCountryCode,
-            String threeLetterIocCountryCode, Set<PersonDTO> persons) {
+    public CompetitorDescriptorDTO(String eventName, String regattaName, String boatClassName, String raceName,
+            String fleetName, String sailNumber, String competitorName, String countryName,
+            String twoLetterIsoCountryCode, String threeLetterIocCountryCode, Set<PersonDTO> persons) {
         super(competitorName);
         this.eventName = eventName;
         this.regattaName = regattaName;
+        this.boatClassName = boatClassName;
         this.raceName = raceName;
         this.fleetName = fleetName;
         this.sailNumber = sailNumber;
@@ -40,6 +42,10 @@ public class CompetitorDescriptorDTO extends NamedDTO {
 
     public String getRegattaName() {
         return regattaName;
+    }
+
+    public String getBoatClassName() {
+        return boatClassName;
     }
 
     public String getRaceName() {
@@ -74,7 +80,7 @@ public class CompetitorDescriptorDTO extends NamedDTO {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + Objects.hash(eventName, regattaName, raceName, fleetName, sailNumber, persons,
+        result = prime * result + Objects.hash(eventName, regattaName, boatClassName, raceName, fleetName, sailNumber, persons,
                 countryName, twoLetterIsoCountryCode, threeLetterIocCountryCode);
         return result;
     }
@@ -93,6 +99,7 @@ public class CompetitorDescriptorDTO extends NamedDTO {
         CompetitorDescriptorDTO other = (CompetitorDescriptorDTO) obj;
         return Objects.equals(countryName, other.countryName) && Objects.equals(eventName, other.eventName)
                 && Objects.equals(fleetName, other.fleetName) && Objects.deepEquals(persons, other.persons)
+                && Objects.equals(boatClassName, other.boatClassName)
                 && Objects.equals(raceName, other.raceName) && Objects.equals(regattaName, other.regattaName)
                 && Objects.equals(sailNumber, other.sailNumber)
                 && Objects.equals(threeLetterIocCountryCode, other.threeLetterIocCountryCode)

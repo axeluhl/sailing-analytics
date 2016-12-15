@@ -767,9 +767,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         CompetitorDescriptorDTO competitorDescriptorDTO = new CompetitorDescriptorDTO(
                 competitorDescriptor.getEventName(), competitorDescriptor.getRegattaName(),
-                competitorDescriptor.getRaceName(), competitorDescriptor.getFleetName(),
-                competitorDescriptor.getSailNumber(), competitorDescriptor.getCompetitorName(), countryName,
-                twoLetterIsoCountryCode, threeLetterIocCountryCode, persons);
+                competitorDescriptor.getBoatClassName(), competitorDescriptor.getRaceName(),
+                competitorDescriptor.getFleetName(), competitorDescriptor.getSailNumber(), competitorDescriptor.getCompetitorName(),
+                countryName, twoLetterIsoCountryCode, threeLetterIocCountryCode, persons);
 
         return competitorDescriptorDTO;
     }

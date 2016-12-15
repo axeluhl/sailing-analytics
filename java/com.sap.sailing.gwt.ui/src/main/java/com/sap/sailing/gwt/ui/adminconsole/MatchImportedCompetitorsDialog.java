@@ -128,7 +128,6 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Set<Competit
                     existingCompetitorsTable.getFilterField().removeAll();
                     return;
                 }
-
                 CompetitorDescriptorDTO selectedCompetitorDescriptor = selectedCompetitorDescriptors.isEmpty() ? null
                         : importedCompetitorSelectionModel.getSelectedSet().iterator().next();
                 existingCompetitorsTable.refreshCompetitorList(
@@ -144,8 +143,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Set<Competit
     @Override
     protected Set<CompetitorDTO> getResult() {
         final Set<CompetitorDTO> competitorsForSave = new HashSet<>();
-        for (CompetitorDescriptorDTO competitorDescriptor : importedCompetitorsTable.getSelectionModel()
-                .getSelectedSet()) {
+        for (CompetitorDescriptorDTO competitorDescriptor : importedCompetitorsTable.getSelectionModel().getSelectedSet()) {
             CompetitorDTO existingCompetitor = existingCompetitorsByImported.get(competitorDescriptor);
             if (existingCompetitor != null) {
                 competitorsForSave.add(existingCompetitor);
@@ -158,7 +156,9 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Set<Competit
 
     private CompetitorDTO convertCompetitorDescriptorToCompetitorDTO(CompetitorDescriptorDTO competitorDescriptor) {
         BoatDTO defaultBoat = new BoatDTO(null, competitorDescriptor.getSailNumber());
-        BoatClassDTO defaultBoatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length */ new MeterDistance(5));
+        BoatClassDTO defaultBoatClass = new BoatClassDTO(competitorDescriptor.getBoatClassName() == null
+                ? BoatClassDTO.DEFAULT_NAME : competitorDescriptor.getBoatClassName(),
+                /* some default hull length; not used if boat class name can be resolved on the server */ new MeterDistance(5));
         return new CompetitorDTOImpl(competitorDescriptor.getName(), null, null,
                 competitorDescriptor.getTwoLetterIsoCountryCode(), competitorDescriptor.getThreeLetterIocCountryCode(),
                 competitorDescriptor.getCountryName(), null, null, null, defaultBoat, defaultBoatClass, null, null, null);

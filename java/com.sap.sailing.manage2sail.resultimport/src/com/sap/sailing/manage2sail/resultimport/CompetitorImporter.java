@@ -67,23 +67,31 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
     public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String eventName, String regattaName) throws JAXBException, IOException {
         final List<CompetitorDescriptor> result = new ArrayList<>();
         final Map<String, CompetitorDescriptor> resultsByTeamID = new HashMap<>();
-        final Map<String, CompetitorDescriptor> teamsWithoutRaceAssignments = new HashMap<>();
+        final Map<String, CompetitorDescriptor> teamsWithoutRaceAssignments = new HashMap<>(); // keys are the teamID
         for (ResultDocumentDescriptor resultDocDescr : getDocumentProvider().getResultDocumentDescriptors()) {
             if (resultDocDescr.getEventName().equals(eventName) &&
                     (regattaName == null || regattaName.equals(resultDocDescr.getRegattaName()))) {
                 final Parser parser = getParserFactory().createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
                 try {
                     final RegattaResults regattaResults = parser.parse();
+                    // If teams are found outside of a Division context then no boat class would be assigned to the
+                    // competitor. However, if only one Division exists it can be used as default and the boat class
+                    // can therefore be derived from it. This, however, is not clear until the document has been fully
+                    // consumed. So we keep track of the teams found outside of Divisions, and if exactly one division
+                    // is found we create the CompetitorDescriptors as if they were part of that Division; otherwise
+                    // we need to come up with a default boat class instead.
+                    final Set<Team> teamsOutsideOfDivision = new HashSet<>();
+                    Map<Division, Event> divisions = new HashMap<>();
                     for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
                         if (o instanceof Team) {
                             final Team team = (Team) o;
-                            teamsWithoutRaceAssignments.put(team.getTeamID(),
-                                    createCompetitorDescriptor(team, parser, /* event */ null, /* division */ null, /* raceID */ null));
+                            teamsOutsideOfDivision.add(team);
                         } else if (o instanceof Event) {
                             Event event = (Event) o;
                             for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
                                 if (eventO instanceof Division) {
                                     Division division = (Division) eventO;
+                                    divisions.put(division, event);
                                     if (regattaName == null || regattaName.equals(division.getTitle())) {
                                         for (Object divisionO : division.getSeriesResultOrRaceResultOrTRResult()) {
                                             String raceID = null;
@@ -106,6 +114,19 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
                                     }
                                 }
                             }
+                        }
+                    }
+                    for (final Team teamOutsideOfDivision : teamsOutsideOfDivision) {
+                        if (divisions.size() == 1) { // exactly one Division; use as default for teams outside of division that were not assigned to a division later
+                            if (!resultsByTeamID.containsKey(teamOutsideOfDivision.getTeamID())) {
+                                final CompetitorDescriptor competitorDescriptor = createCompetitorDescriptor(
+                                        teamOutsideOfDivision, parser, divisions.values().iterator().next(), divisions.keySet().iterator().next(), /* raceID */ null);
+                                resultsByTeamID.put(teamOutsideOfDivision.getTeamID(), competitorDescriptor);
+                                result.add(competitorDescriptor);
+                            }
+                        } else {
+                            teamsWithoutRaceAssignments.put(teamOutsideOfDivision.getTeamID(),
+                                    createCompetitorDescriptor(teamOutsideOfDivision, parser, /* event */ null, /* division */ null, /* raceID */ null));
                         }
                     }
                 } catch (JAXBException e) {
@@ -131,6 +152,7 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
             // use that of team; if not defined for team, use first nationality of a team member that has one defined
             team.getNOC() == null ? null : new NationalityImpl(team.getNOC().name())
         };
+        final String boatClassName = parser.getBoatClassName(division);
         List<com.sap.sailing.domain.base.Person> persons = team.getCrew().stream().sorted((c1, c2) -> -c1.getPosition().name().compareTo(c2.getPosition().name())).map((crew)->{
                 Person xrrPerson = parser.getPerson(crew.getPersonID());
                 String name = xrrPerson.getGivenName()+" "+xrrPerson.getFamilyName();
@@ -149,8 +171,8 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
         final CompetitorDescriptor competitorDescriptor = new CompetitorDescriptor(
                             event==null?null:event.getTitle(),
                             division==null?null:(division.getTitle() + (division.getGender() == null ? "" : division.getGender().name())),
-                            race != null ? race.getRaceName() : null, /* fleetName */ null, sailNumber, team.getTeamName(),
-                            teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), persons);
+                            boatClassName, race != null ? race.getRaceName() : null, /* fleetName */ null, sailNumber,
+                            team.getTeamName(), teamNationality[0] == null ? null : teamNationality[0].getCountryCode(), persons);
         return competitorDescriptor;
     }
 

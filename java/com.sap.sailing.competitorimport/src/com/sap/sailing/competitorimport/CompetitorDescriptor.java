@@ -7,6 +7,7 @@ import com.sap.sse.common.CountryCode;
 public class CompetitorDescriptor {
     private final String eventName;
     private final String regattaName;
+    private final String boatClassName;
     private final String raceName;
     private final String fleetName;
     private final String sailNumber;
@@ -14,11 +15,12 @@ public class CompetitorDescriptor {
     private final CountryCode countryCode;
     private final Iterable<Person> persons;
 
-    public CompetitorDescriptor(String eventName, String regattaName, String raceName, String fleetName,
-            String sailNumber, String competitorName, CountryCode countryCode, Iterable<Person> persons) {
+    public CompetitorDescriptor(String eventName, String regattaName, String boatClassName, String raceName,
+            String fleetName, String sailNumber, String competitorName, CountryCode countryCode, Iterable<Person> persons) {
         super();
         this.eventName = eventName;
         this.regattaName = regattaName;
+        this.boatClassName = boatClassName;
         this.raceName = raceName;
         this.fleetName = fleetName;
         this.sailNumber = sailNumber;
@@ -33,6 +35,10 @@ public class CompetitorDescriptor {
 
     public String getRegattaName() {
         return regattaName;
+    }
+
+    public String getBoatClassName() {
+        return boatClassName;
     }
 
     public String getRaceName() {
@@ -61,7 +67,7 @@ public class CompetitorDescriptor {
 
     @Override
     public String toString() {
-        return ""+countryCode+" "+sailNumber+" "+getCompetitorName()+" at event: "+eventName+", regatta: "+regattaName+", race: "+raceName+
-                ", fleet: "+fleetName+", "+persons;
+        return ""+countryCode+" "+sailNumber+" "+getCompetitorName()+" at event: "+eventName+", regatta: "+regattaName+
+                ", boat class: "+boatClassName+", race: "+raceName+", fleet: "+fleetName+", "+persons;
     }
 }

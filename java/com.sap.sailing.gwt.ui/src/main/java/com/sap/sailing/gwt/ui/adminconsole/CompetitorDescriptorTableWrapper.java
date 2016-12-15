@@ -57,6 +57,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                 List<String> string = new ArrayList<String>();
                 string.add(competitorDescriptor.getName());
                 string.add(competitorDescriptor.getSailNumber());
+                string.add(competitorDescriptor.getBoatClassName());
                 string.add(competitorDescriptor.getRaceName());
                 string.add(competitorDescriptor.getFleetName());
                 return string;
@@ -97,6 +98,14 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
         };
         sailIdColumn.setSortable(true);
 
+        TextColumn<CompetitorDescriptorDTO> boatClassNameColumn = new TextColumn<CompetitorDescriptorDTO>() {
+            @Override
+            public String getValue(CompetitorDescriptorDTO competitorDescriptor) {
+                return competitorDescriptor.getBoatClassName();
+            }
+        };
+        boatClassNameColumn.setSortable(true);
+        
         TextColumn<CompetitorDescriptorDTO> raceNameColumn = new TextColumn<CompetitorDescriptorDTO>() {
             @Override
             public String getValue(CompetitorDescriptorDTO competitorDescriptor) {
@@ -121,14 +130,13 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             }
         };
         isHasMatchesColumn.setSortable(true);
-
         mainPanel.insert(filterablePanelCompetitorDescriptor, 0);
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(competitorNameColumn, stringMessages.name());
+        table.addColumn(boatClassNameColumn, stringMessages.boatClass());
         table.addColumn(raceNameColumn, stringMessages.race());
         table.addColumn(fleetNameColumn, stringMessages.fleet());
         table.addColumn(isHasMatchesColumn, stringMessages.hasMatches());
-
         table.addColumnSortHandler(getCompetitorDescriptorTableColumnListSortHandler(competitorNameColumn, sailIdColumn,
                 raceNameColumn, fleetNameColumn, isHasMatchesColumn));
     }
