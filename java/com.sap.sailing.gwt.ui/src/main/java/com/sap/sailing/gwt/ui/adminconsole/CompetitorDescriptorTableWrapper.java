@@ -1,23 +1,26 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-
+import java.util.Arrays;
 import java.util.List;
 
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDescriptorDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -30,10 +33,56 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
     private final LabeledAbstractFilterablePanel<CompetitorDescriptorDTO> filterablePanelCompetitorDescriptor;
 
     private final CompetitorImportMatcher competitorImportMatcher;
+    
+    private static class CompetitorImportTableActionIcons extends ImagesBarCell {
+        static final String ACTION_UNLINK = "ACTION_UNLINK";
+        private final StringMessages stringMessages;
+        private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+
+        public CompetitorImportTableActionIcons(StringMessages stringMessages) {
+            super();
+            this.stringMessages = stringMessages;
+        }
+
+        @Override
+        protected Iterable<ImageSpec> getImageSpecs() {
+            return Arrays.asList(
+                    new ImageSpec(ACTION_UNLINK, stringMessages.actionEdit(), makeImagePrototype(resources.unlinkIcon()))
+                    );
+        }
+
+        /**
+         * An unlink button is rendered if an only if the {@code data} value is not an empty string.
+         */
+        @Override
+        protected void render(Context context, SafeHtml data, SafeHtmlBuilder sb) {
+            if (!data.asString().isEmpty()) {
+                super.render(context, data, sb);
+            }
+        }
+    }
+    
+    /**
+     * An instance implementing this interface may be passed to the constructor of the table wrapper. It will then receive
+     * a callback whenever the unlink action has been triggered. This way the table of importable competitors doesn't need
+     * to know about how the selection models are used outside of the table itself to establish the link between the
+     * importable and existing competitor.<p>
+     * 
+     * Furthermore, the {@link #getExigetExistingCompetitorToUseInsteadOf} method tells the existing competitor to which
+     * a competitor that can be imported is mapped. If {@code null} is returned, no such mapping exists for an importable
+     * competitor, and calling {@link #unlinkCompetitor} will not have any effect.
+     * 
+     * @author Axel Uhl (d043530)
+     *
+     */
+    public static interface CompetitorsToImportToExistingLinking {
+        void unlinkCompetitor(CompetitorDescriptorDTO competitor);
+        CompetitorDTO getExistingCompetitorToUseInsteadOf(CompetitorDescriptorDTO competitor);
+    }
 
     public CompetitorDescriptorTableWrapper(CompetitorImportMatcher competitorImportMatcherParam,
             SailingServiceAsync sailingService, final StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager) {
+            boolean multiSelection, boolean enablePager, final CompetitorsToImportToExistingLinking unlinkCallback) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<CompetitorDescriptorDTO>() {
                     @Override
@@ -46,9 +95,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                         return dto.hashCode();
                     }
                 });
-
         this.competitorImportMatcher = competitorImportMatcherParam;
-
         filterablePanelCompetitorDescriptor = new LabeledAbstractFilterablePanel<CompetitorDescriptorDTO>(
                 new Label(stringMessages.filterImportedCompetitorsByNameSailRaceFleet()),
                 new ArrayList<CompetitorDescriptorDTO>(), table, dataProvider) {
@@ -130,6 +177,24 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
             }
         };
         isHasMatchesColumn.setSortable(true);
+        // alters the getValue method such that it returns an empty string if the competitor to import is not linked to an existing one, non-null otherwise
+        ImagesBarColumn<CompetitorDescriptorDTO, CompetitorImportTableActionIcons> actionColumn =
+                new ImagesBarColumn<CompetitorDescriptorDTO, CompetitorDescriptorTableWrapper.CompetitorImportTableActionIcons>(new CompetitorImportTableActionIcons(stringMessages)) {
+                    @Override
+                    public String getValue(CompetitorDescriptorDTO competitor) {
+                        return unlinkCallback.getExistingCompetitorToUseInsteadOf(competitor)==null?"":"linked";
+                    }
+        };
+        actionColumn.setFieldUpdater(new FieldUpdater<CompetitorDescriptorDTO, String>() {
+            @Override
+            public void update(int index, final CompetitorDescriptorDTO competitor, String value) {
+                if (CompetitorImportTableActionIcons.ACTION_UNLINK.equals(value)) {
+                    if (unlinkCallback != null) {
+                        unlinkCallback.unlinkCompetitor(competitor);
+                    }
+                }
+            }
+        });
         mainPanel.insert(filterablePanelCompetitorDescriptor, 0);
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(competitorNameColumn, stringMessages.name());
@@ -137,62 +202,25 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
         table.addColumn(raceNameColumn, stringMessages.race());
         table.addColumn(fleetNameColumn, stringMessages.fleet());
         table.addColumn(isHasMatchesColumn, stringMessages.hasMatches());
-        table.addColumnSortHandler(getCompetitorDescriptorTableColumnListSortHandler(competitorNameColumn, sailIdColumn,
-                raceNameColumn, fleetNameColumn, isHasMatchesColumn));
+        table.addColumn(actionColumn, stringMessages.unlink());
+        table.addColumnSortHandler(getCompetitorDescriptorTableColumnListSortHandler(competitorNameColumn, boatClassNameColumn,
+                sailIdColumn, raceNameColumn, fleetNameColumn, isHasMatchesColumn));
     }
 
     private ListHandler<CompetitorDescriptorDTO> getCompetitorDescriptorTableColumnListSortHandler(
             TextColumn<CompetitorDescriptorDTO> competitorNameColumn,
-            Column<CompetitorDescriptorDTO, SafeHtml> sailIdColumn, TextColumn<CompetitorDescriptorDTO> raceNameColumn,
-            TextColumn<CompetitorDescriptorDTO> fleetNameColumn,
-            TextColumn<CompetitorDescriptorDTO> isHasMatchesColumn) {
+            TextColumn<CompetitorDescriptorDTO> boatClassNameColumn, Column<CompetitorDescriptorDTO, SafeHtml> sailIdColumn,
+            TextColumn<CompetitorDescriptorDTO> raceNameColumn,
+            TextColumn<CompetitorDescriptorDTO> fleetNameColumn, TextColumn<CompetitorDescriptorDTO> isHasMatchesColumn) {
         ListHandler<CompetitorDescriptorDTO> competitorColumnListHandler = getColumnSortHandler();
-
-        competitorColumnListHandler.setComparator(competitorNameColumn, new Comparator<CompetitorDescriptorDTO>() {
-            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
-
-            @Override
-            public int compare(CompetitorDescriptorDTO cd1, CompetitorDescriptorDTO cd2) {
-                return comparator.compare(cd1.getName(), cd2.getName());
-            }
-        });
-
-        competitorColumnListHandler.setComparator(sailIdColumn, new Comparator<CompetitorDescriptorDTO>() {
-            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
-
-            @Override
-            public int compare(CompetitorDescriptorDTO cd1, CompetitorDescriptorDTO cd2) {
-                return comparator.compare(cd1.getSailNumber(), cd2.getSailNumber());
-            }
-        });
-
-        competitorColumnListHandler.setComparator(raceNameColumn, new Comparator<CompetitorDescriptorDTO>() {
-            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
-
-            @Override
-            public int compare(CompetitorDescriptorDTO cd1, CompetitorDescriptorDTO cd2) {
-                return comparator.compare(cd1.getRaceName(), cd2.getRaceName());
-            }
-        });
-
-        competitorColumnListHandler.setComparator(fleetNameColumn, new Comparator<CompetitorDescriptorDTO>() {
-            private final NaturalComparator comparator = new NaturalComparator(/* case sensitive */ false);
-
-            @Override
-            public int compare(CompetitorDescriptorDTO cd1, CompetitorDescriptorDTO cd2) {
-                return comparator.compare(cd1.getFleetName(), cd2.getFleetName());
-            }
-        });
-
-        competitorColumnListHandler.setComparator(isHasMatchesColumn, new Comparator<CompetitorDescriptorDTO>() {
-
-            @Override
-            public int compare(CompetitorDescriptorDTO cd1, CompetitorDescriptorDTO cd2) {
-                Boolean hasMatches1 = competitorImportMatcher.getMatchesCompetitors(cd1).isEmpty();
-                Boolean hasMatches2 = competitorImportMatcher.getMatchesCompetitors(cd2).isEmpty();
-                return hasMatches1 == hasMatches2 ? 0 : hasMatches1 ? 1 : -1;
-            }
-        });
+        final NaturalComparator caseInsensitiveNaturalComparator = new NaturalComparator(/* case sensitive */ false);
+        competitorColumnListHandler.setComparator(competitorNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getName(), cd2.getName()));
+        competitorColumnListHandler.setComparator(boatClassNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getBoatClassName(), cd2.getBoatClassName()));
+        competitorColumnListHandler.setComparator(sailIdColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getSailNumber(), cd2.getSailNumber()));
+        competitorColumnListHandler.setComparator(raceNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getRaceName(), cd2.getRaceName()));
+        competitorColumnListHandler.setComparator(fleetNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getFleetName(), cd2.getFleetName()));
+        competitorColumnListHandler.setComparator(isHasMatchesColumn, (cd1, cd2)->((Boolean) competitorImportMatcher.getMatchesCompetitors(cd1).isEmpty()).compareTo(
+                competitorImportMatcher.getMatchesCompetitors(cd2).isEmpty()));
         return competitorColumnListHandler;
     }
 
