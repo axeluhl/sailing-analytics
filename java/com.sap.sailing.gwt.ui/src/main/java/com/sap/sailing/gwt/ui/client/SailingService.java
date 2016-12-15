@@ -445,7 +445,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws Exception;
 
-    void addCompetitors(Iterable<CompetitorDTO> competitorDTOs) throws Exception;
+    List<CompetitorDTO> addCompetitors(Iterable<CompetitorDTO> competitorDTOs) throws Exception;
     
     void allowCompetitorResetToDefaults(Iterable<CompetitorDTO> competitors);
     

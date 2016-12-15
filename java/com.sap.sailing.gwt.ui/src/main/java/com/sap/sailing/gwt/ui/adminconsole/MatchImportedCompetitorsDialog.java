@@ -29,7 +29,23 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 /**
- * Defines dialog where we can match and choose imported competitors.
+ * Defines dialog where we can match and choose imported competitors. It mainly consists of two tables: one showing
+ * competitor records coming from an source for import, such as an external regatta management system, and another table
+ * that---upon selecting a single record in the table with the importable records--- displays potentially matching
+ * existing competitors from the server's competitor base. The user can then assemble a set of competitors by first
+ * optionally defining mappings from the importable competitors to existing competitors where instead of creating a new
+ * competitor by means of import the existing one shall be used. Then, the user can make a selection in the table with
+ * the importable competitors, including those for which a mapping to an existing competitor was defined. Pressing OK
+ * will produce a set of {@link CompetitorDTO}s where the ones coming from the set of already existing competitors have
+ * a non-{@code null} {@link CompetitorDTO#getIdAsString() ID} whereas the ones to import have all <em>but</em> an
+ * {@link CompetitorDTO#getIdAsString() ID}.
+ * <p>
+ * 
+ * Use an {@link ImportCompetitorCallback} or subclass thereof as the {@link DialogCallback} passed to the constructor
+ * for conveniently saving imported competitors to the store using
+ * {@link SailingServiceAsync#addCompetitors(Iterable, com.google.gwt.user.client.rpc.AsyncCallback)}. Define a subclass
+ * thereof and override {@link ImportCompetitorCallback#registerCompetitors(Set)} to determine what should happen with
+ * the set of competitors the user has assembled through this dialog.
  * 
  * @author Alexander Tatarinovich
  *

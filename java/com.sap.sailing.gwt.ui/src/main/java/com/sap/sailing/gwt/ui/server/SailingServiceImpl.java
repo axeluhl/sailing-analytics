@@ -4867,24 +4867,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void addCompetitors(Iterable<CompetitorDTO> competitorDTOs) throws URISyntaxException {
+    public List<CompetitorDTO> addCompetitors(Iterable<CompetitorDTO> competitorDTOs) throws URISyntaxException {
         List<Competitor> competitorsForSaving = new ArrayList<>();
         for (CompetitorDTO competitorDTO : competitorDTOs) {
             Competitor competitor = convertCompetitorDTOToCompetitor(competitorDTO);
             competitorsForSaving.add(competitor);
         }
         getBaseDomainFactory().getCompetitorStore().addCompetitors(competitorsForSaving);
+        return convertToCompetitorDTOs(competitorsForSaving);
     }
 
+    /**
+     * Creates a new {@link Competitor} object from a {@link CompetitorDTO}, assuming that the DTO does not have
+     * a valid {@link CompetitorDTO#getIdAsString() ID} set.
+     */
     private Competitor convertCompetitorDTOToCompetitor(CompetitorDTO competitorDTO) throws URISyntaxException {
+        assert competitorDTO.getIdAsString() == null;
         Nationality nationality = (competitorDTO.getThreeLetterIocCountryCode() == null
                 || competitorDTO.getThreeLetterIocCountryCode().isEmpty()) ? null
                         : getBaseDomainFactory()
                                 .getOrCreateNationality(competitorDTO.getThreeLetterIocCountryCode());
         BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitorDTO.getBoatClass().getName());
         DynamicPerson sailor = new PersonImpl(competitorDTO.getName(), nationality, null, null);
-        DynamicTeam team = new TeamImpl(competitorDTO.getName() + " team", Collections.singleton(sailor), null);
-        DynamicBoat boat = new BoatImpl(competitorDTO.getName() + " boat", boatClass, competitorDTO.getSailID());
+        DynamicTeam team = new TeamImpl(competitorDTO.getName(), Collections.singleton(sailor), null);
+        DynamicBoat boat = new BoatImpl(competitorDTO.getSailID(), boatClass, competitorDTO.getSailID());
         Competitor competitor = new CompetitorImpl(UUID.randomUUID(), competitorDTO.getName(),
                 competitorDTO.getColor(), competitorDTO.getEmail(),
                 competitorDTO.getFlagImageURL() == null ? null : new URI(competitorDTO.getFlagImageURL()), team,

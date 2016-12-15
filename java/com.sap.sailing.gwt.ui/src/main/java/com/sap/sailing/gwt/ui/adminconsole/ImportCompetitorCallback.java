@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -12,10 +13,12 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
- * Ñallback is responsible for saving competitors in store and registering them if necessary. Logic for registering
- * should be implemented in child's classes.
+ * Callback is responsible for saving competitors that have a {@code null} {@link CompetitorDTO#getIdAsString() ID} to
+ * the competitor store using {@link SailingServiceAsync#addCompetitors(Iterable, AsyncCallback)} and registering them
+ * if necessary. Logic for registering should be implemented in subclasses by overriding the {@link #registerCompetitors(Set)}
+ * method which does nothing in this class.
  * 
- * @author Alexander_Tatarinovich
+ * @author Alexander Tatarinovich
  *
  */
 public class ImportCompetitorCallback implements DialogCallback<Set<CompetitorDTO>> {
@@ -52,14 +55,20 @@ public class ImportCompetitorCallback implements DialogCallback<Set<CompetitorDT
 
     private void registerCompetitorsAfterSaving(final List<CompetitorDTO> competitorsForSaving,
             final Set<CompetitorDTO> competitorsForRegistration) {
-        sailingService.addCompetitors(competitorsForSaving, new AsyncCallback<Void>() {
+        sailingService.addCompetitors(competitorsForSaving, new AsyncCallback<List<CompetitorDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
+                errorReporter.reportError(caught.getMessage());
             }
 
             @Override
-            public void onSuccess(Void result) {
-                registerCompetitors(competitorsForRegistration);
+            public void onSuccess(List<CompetitorDTO> result) {
+                final Set<CompetitorDTO> competitorsToAddWithNewOnesReplacedBySavedOnesWithId = new HashSet<>(competitorsForRegistration);
+                // remove the locally constructed CompetitorDTOs that had null as their ID...
+                competitorsToAddWithNewOnesReplacedBySavedOnesWithId.removeAll(competitorsForSaving);
+                // ...and replace by those returned by the server after saving to the competitor store where they received an ID:
+                competitorsToAddWithNewOnesReplacedBySavedOnesWithId.addAll(result);
+                registerCompetitors(competitorsToAddWithNewOnesReplacedBySavedOnesWithId);
             }
         });
     }
