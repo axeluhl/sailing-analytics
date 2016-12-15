@@ -250,6 +250,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         /* ADVANCED */
         
         final HorizontalTabLayoutPanel advancedTabPanel = panel.addVerticalTab(getStringMessages().advanced(), "AdvancedPanel");
+        advancedTabPanel.ensureDebugId("AdvancedTab");
         final ReplicationPanel replicationPanel = new ReplicationPanel(sailingService, this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<ReplicationPanel>(replicationPanel) {
             @Override
@@ -260,6 +261,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), sailingService,
                 this, eventManagementPanel, this, this);
+        masterDataImportPanel.ensureDebugId("MasterDataImport");
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanel),
                 getStringMessages().masterDataImportPanel(), Permission.MANAGE_MASTERDATA_IMPORT);
 

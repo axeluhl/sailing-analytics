@@ -724,11 +724,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         final Component<RaceMapSettings> component = this;
         Button settingsButton = new Button();
         settingsButton.setStyleName("gwt-MapSettingsButton");
+        settingsButton.ensureDebugId("raceMapSettingsButton");
         settingsButton.setTitle(stringMessages.settings());
         settingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new SettingsDialog<RaceMapSettings>(component, stringMessages).show();
+                SettingsDialog<RaceMapSettings> dialog = new SettingsDialog<RaceMapSettings>(component, stringMessages);
+                dialog.ensureDebugId("raceMapSettings");
+                dialog.show();
             }
         });
         map.setControls(ControlPosition.RIGHT_TOP, settingsButton);

@@ -75,6 +75,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         hostBox.setWidth("300px");
         serverAddressPanel.add(hostBox);
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
+        fetchIdsButton.ensureDebugId("fetchLeaderboardGroupList");
         serverAddressPanel.add(fetchIdsButton);
         this.add(serverAddressPanel);
 
@@ -122,6 +123,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         final Label overallName = new Label(stringMessages.overallProgress() + ":");
         this.add(overallName);
         final ProgressBar overallProgressBar = new ProgressBar(Style.ANIMATED);
+        overallProgressBar.ensureDebugId("overallProgressBar");
         this.add(overallProgressBar);
         final Label subProgressName = new Label();
         this.add(subProgressName);
@@ -326,12 +328,14 @@ public class MasterDataImportPanel extends VerticalPanel {
         contentPanel.add(filterPanel);
 
         leaderboardgroupListBox = new ListBox();
+        leaderboardgroupListBox.ensureDebugId("LeaderBoardGroupListBox");
         leaderboardgroupListBox.setMultipleSelect(true);
 
         addSelectionChangedListener();
         contentPanel.add(leaderboardgroupListBox);
         
         overrideSwitch = new CheckBox(stringMessages.importOverrideSwitchLabel());
+        overrideSwitch.ensureDebugId("overrideExisting");
         overrideSwitch.setValue(false);
         contentPanel.add(overrideSwitch);
         
@@ -343,6 +347,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         exportWindSwitch = new CheckBox(stringMessages.importWind());
         exportWindSwitch.setTitle(stringMessages.importWindTooltip());
         exportWindSwitch.setValue(true);
+        exportWindSwitch.ensureDebugId("wind");
         contentPanel.add(exportWindSwitch);
         
         exportDeviceConfigsSwitch = new CheckBox(stringMessages.importDeviceConfigurations());
@@ -351,6 +356,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         contentPanel.add(exportDeviceConfigsSwitch);
 
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
+        importLeaderboardGroupsButton.ensureDebugId("import");
         importLeaderboardGroupsButton.setEnabled(false);
         contentPanel.add(importLeaderboardGroupsButton);
     }

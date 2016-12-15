@@ -67,12 +67,13 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-
         Label generalLabel = dialog.createHeadlineLabel(stringMessages.general());
         vp.add(generalLabel);
        
         windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
         windUpCheckbox.setValue(initialSettings.isWindUp());
+        windUpCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isWindUp()));
+        windUpCheckbox.ensureDebugId("raceMapSettingsWindChart");
         vp.add(windUpCheckbox);
 
         showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());

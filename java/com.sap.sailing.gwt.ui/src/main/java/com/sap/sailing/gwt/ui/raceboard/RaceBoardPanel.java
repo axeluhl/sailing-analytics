@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -438,7 +439,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     @SuppressWarnings("unused")
     private <SettingsType extends AbstractSettings> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
         if (component.hasSettings()) {
-            settingsMenu.addItem(component.getLocalizedShortName(), new Command() {
+            MenuItem settingsMenuItem = settingsMenu.addItem(component.getLocalizedShortName(), new Command() {
                 public void execute() {
                     new SettingsDialog<SettingsType>(component, stringMessages).show();
                   }
