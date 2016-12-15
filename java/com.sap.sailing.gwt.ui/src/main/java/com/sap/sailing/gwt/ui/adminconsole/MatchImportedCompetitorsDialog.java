@@ -123,8 +123,6 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Set<Competit
             final RefreshableMultiSelectionModel<CompetitorDescriptorDTO> importedCompetitorSelectionModel,
             final RefreshableSingleSelectionModel<CompetitorDTO> existingCompetitorSelectionModel) {
         return new Handler() {
-            private boolean refreshing = false;
-            
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 Set<CompetitorDescriptorDTO> competitorDescriptors = importedCompetitorSelectionModel.getSelectedSet();

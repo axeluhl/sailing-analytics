@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.cell.client.FieldUpdater;
@@ -178,14 +179,14 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
         };
         isHasMatchesColumn.setSortable(true);
         // alters the getValue method such that it returns an empty string if the competitor to import is not linked to an existing one, non-null otherwise
-        ImagesBarColumn<CompetitorDescriptorDTO, CompetitorImportTableActionIcons> actionColumn =
+        ImagesBarColumn<CompetitorDescriptorDTO, CompetitorImportTableActionIcons> unlinkColumn =
                 new ImagesBarColumn<CompetitorDescriptorDTO, CompetitorDescriptorTableWrapper.CompetitorImportTableActionIcons>(new CompetitorImportTableActionIcons(stringMessages)) {
                     @Override
                     public String getValue(CompetitorDescriptorDTO competitor) {
                         return unlinkCallback.getExistingCompetitorToUseInsteadOf(competitor)==null?"":"linked";
                     }
         };
-        actionColumn.setFieldUpdater(new FieldUpdater<CompetitorDescriptorDTO, String>() {
+        unlinkColumn.setFieldUpdater(new FieldUpdater<CompetitorDescriptorDTO, String>() {
             @Override
             public void update(int index, final CompetitorDescriptorDTO competitor, String value) {
                 if (CompetitorImportTableActionIcons.ACTION_UNLINK.equals(value)) {
@@ -195,6 +196,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                 }
             }
         });
+        unlinkColumn.setSortable(true);
         mainPanel.insert(filterablePanelCompetitorDescriptor, 0);
         table.addColumn(sailIdColumn, stringMessages.sailNumber());
         table.addColumn(competitorNameColumn, stringMessages.name());
@@ -202,18 +204,20 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
         table.addColumn(raceNameColumn, stringMessages.race());
         table.addColumn(fleetNameColumn, stringMessages.fleet());
         table.addColumn(isHasMatchesColumn, stringMessages.hasMatches());
-        table.addColumn(actionColumn, stringMessages.unlink());
+        table.addColumn(unlinkColumn, stringMessages.unlink());
         table.addColumnSortHandler(getCompetitorDescriptorTableColumnListSortHandler(competitorNameColumn, boatClassNameColumn,
-                sailIdColumn, raceNameColumn, fleetNameColumn, isHasMatchesColumn));
+                sailIdColumn, raceNameColumn, fleetNameColumn, isHasMatchesColumn, unlinkColumn, unlinkCallback));
     }
 
     private ListHandler<CompetitorDescriptorDTO> getCompetitorDescriptorTableColumnListSortHandler(
             TextColumn<CompetitorDescriptorDTO> competitorNameColumn,
             TextColumn<CompetitorDescriptorDTO> boatClassNameColumn, Column<CompetitorDescriptorDTO, SafeHtml> sailIdColumn,
             TextColumn<CompetitorDescriptorDTO> raceNameColumn,
-            TextColumn<CompetitorDescriptorDTO> fleetNameColumn, TextColumn<CompetitorDescriptorDTO> isHasMatchesColumn) {
+            TextColumn<CompetitorDescriptorDTO> fleetNameColumn, TextColumn<CompetitorDescriptorDTO> isHasMatchesColumn,
+            ImagesBarColumn<CompetitorDescriptorDTO, CompetitorImportTableActionIcons> unlinkColumn, CompetitorsToImportToExistingLinking unlinkCallback) {
         ListHandler<CompetitorDescriptorDTO> competitorColumnListHandler = getColumnSortHandler();
         final NaturalComparator caseInsensitiveNaturalComparator = new NaturalComparator(/* case sensitive */ false);
+        final Comparator<CompetitorDTO> nullFirstComparator = Comparator.nullsFirst(/* real comparator */ null);
         competitorColumnListHandler.setComparator(competitorNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getName(), cd2.getName()));
         competitorColumnListHandler.setComparator(boatClassNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getBoatClassName(), cd2.getBoatClassName()));
         competitorColumnListHandler.setComparator(sailIdColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getSailNumber(), cd2.getSailNumber()));
@@ -221,6 +225,8 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
         competitorColumnListHandler.setComparator(fleetNameColumn, (cd1, cd2)->caseInsensitiveNaturalComparator.compare(cd1.getFleetName(), cd2.getFleetName()));
         competitorColumnListHandler.setComparator(isHasMatchesColumn, (cd1, cd2)->((Boolean) competitorImportMatcher.getMatchesCompetitors(cd1).isEmpty()).compareTo(
                 competitorImportMatcher.getMatchesCompetitors(cd2).isEmpty()));
+        competitorColumnListHandler.setComparator(unlinkColumn, (cd1, cd2)->(nullFirstComparator.compare(
+                unlinkCallback.getExistingCompetitorToUseInsteadOf(cd1), unlinkCallback.getExistingCompetitorToUseInsteadOf(cd2))));
         return competitorColumnListHandler;
     }
 
