@@ -120,7 +120,8 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         stopTrackerIfStillRunning(preemptive);
         trackedRace.removeListener(raceChangeListener);
         synchronized (knownRaceLogs) {
-            for (RaceLog raceLog : knownRaceLogs) {
+            final Set<RaceLog> tempSet = new HashSet<>(knownRaceLogs);
+            for (RaceLog raceLog : tempSet) {
                 removeRaceLogUnlocked(raceLog);
             }
         }
