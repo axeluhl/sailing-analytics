@@ -119,6 +119,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -1248,14 +1249,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void storeCompetitors(Iterable<Competitor> competitors) {
-        DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
-        List<DBObject> competitorsDB = new ArrayList<>();
-        for (Competitor competitor : competitors) {
-            JSONObject json = competitorSerializer.serialize(competitor);
-            DBObject entry = (DBObject) JSON.parse(json.toString());
-            competitorsDB.add(entry);
+        if (competitors != null && !Util.isEmpty(competitors)) {
+            DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+            List<DBObject> competitorsDB = new ArrayList<>();
+            for (Competitor competitor : competitors) {
+                JSONObject json = competitorSerializer.serialize(competitor);
+                DBObject entry = (DBObject) JSON.parse(json.toString());
+                competitorsDB.add(entry);
+            }
+            collection.insert(competitorsDB);
         }
-        collection.insert(competitorsDB);
     }
 
     @Override

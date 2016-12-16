@@ -46,7 +46,7 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
 
     @Override
     public void ok(final Pair<Map<CompetitorDescriptor, CompetitorDTO>, String> competitorsForRegisteringAndSearchTag) {
-        registerCompetitorsAfterSaving(competitorsForRegisteringAndSearchTag.getA().entrySet().stream().filter((e->e.getValue() != null)).map(e->e.getKey()).
+        registerCompetitorsAfterSaving(competitorsForRegisteringAndSearchTag.getA().entrySet().stream().filter((e->e.getValue() == null)).map(e->e.getKey()).
                 collect(Collectors.toList()),
                 competitorsForRegisteringAndSearchTag.getA().values(), competitorsForRegisteringAndSearchTag.getB());
     }
