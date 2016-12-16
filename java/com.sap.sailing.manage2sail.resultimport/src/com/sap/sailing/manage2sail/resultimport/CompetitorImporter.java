@@ -167,7 +167,7 @@ public class CompetitorImporter extends AbstractManage2SailProvider implements C
                 }
                 PersonDTO person = new PersonDTO(
                         name, /* dateOfBirth */ null, /* description */ xrrPerson.getGender()==null?null:xrrPerson.getGender().name(),
-                                nationality.getCountryCode().getThreeLetterIOCCode());
+                                nationality==null?null:nationality.getCountryCode().getThreeLetterIOCCode());
                 return person;
         }).collect(Collectors.toList());
         final CompetitorDescriptor competitorDescriptor = new CompetitorDescriptor(
