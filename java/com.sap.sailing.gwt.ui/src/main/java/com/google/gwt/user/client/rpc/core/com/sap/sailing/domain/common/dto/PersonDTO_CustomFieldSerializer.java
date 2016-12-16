@@ -18,10 +18,10 @@ public class PersonDTO_CustomFieldSerializer extends CustomFieldSerializer<Perso
     
     public static void serialize(SerializationStreamWriter streamWriter, PersonDTO instance)
             throws SerializationException {
-        streamWriter.writeObject(instance.getName());
+        streamWriter.writeString(instance.getName());
         streamWriter.writeObject(instance.getDateOfBirth());
-        streamWriter.writeObject(instance.getDescription());
-        streamWriter.writeObject(instance.getNationalityThreeLetterIOCAcronym());
+        streamWriter.writeString(instance.getDescription());
+        streamWriter.writeString(instance.getNationalityThreeLetterIOCAcronym());
     }
 
     @Override
