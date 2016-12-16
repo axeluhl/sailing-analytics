@@ -12,11 +12,11 @@
     <string name="tracking_unsent_fixes">Unsent Messages</string>
     <string name="tracking_mode_caching">Offline</string>
     <string name="tracking_mode_api_error">API-Error</string>
-    <string name="tracking_mode_offline">Offline</string>
+    <string name="tracking_mode_no_attempt">Initialise</string>
     <string name="tracking_time">Tracking Time</string>
     <string name="tracking_status" translatable="false">Status</string>
     <string name="tracking_status_tracking">Tracking</string>
-    <string name="tracking_status_no_gps_signal">No GPS Signal!</string>
+    <string name="tracking_status_no_gps_signal">No GPS Changes or Signal!</string>
     <string name="desc_regatta_user_image">Regatta User Image</string>
     <string name="desc_add_photo_button">Add Photo Button</string>
     <string name="tracking_status_gps_found">GPS signal found!</string>

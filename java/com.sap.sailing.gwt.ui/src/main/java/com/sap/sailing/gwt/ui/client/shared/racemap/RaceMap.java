@@ -2766,7 +2766,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         sapLogo.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.open("http://www.sap.com", "_blank", null);
+                Window.open("https://www.sap.com/sponsorships", "_blank", null);
             }
         });
         sapLogo.setStyleName("raceBoard-Logo");

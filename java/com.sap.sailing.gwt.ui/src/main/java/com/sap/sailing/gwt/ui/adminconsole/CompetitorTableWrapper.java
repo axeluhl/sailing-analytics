@@ -333,23 +333,26 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         final CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(final CompetitorDTO competitor) {
-                sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
+                final List<CompetitorDTO> competitors = new ArrayList<>();
+                competitors.add(competitor);
+                sailingService.addOrUpdateCompetitor(competitors, new AsyncCallback<List<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update competitor: " + caught.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(CompetitorDTO updatedCompetitor) {
+                    public void onSuccess(List<CompetitorDTO> updatedCompetitor) {
+                        assert updatedCompetitor.size() == 1;
                         //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
                         int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
                         getFilterField().remove(originalCompetitor);
                         if (editedCompetitorIndex >= 0){
-                            getFilterField().add(editedCompetitorIndex, updatedCompetitor);
+                            getFilterField().add(editedCompetitorIndex, updatedCompetitor.iterator().next());
                         } else {
                             //in case competitor was not present --> not edit, but create
-                            getFilterField().add(updatedCompetitor);
+                            getFilterField().add(updatedCompetitor.iterator().next());
                         }
                         getDataProvider().refresh();
                     }  

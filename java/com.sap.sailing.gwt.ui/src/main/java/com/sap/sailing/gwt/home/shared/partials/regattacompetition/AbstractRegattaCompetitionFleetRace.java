@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.DateUtil;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTrackingState;
-import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.home.desktop.partials.raceviewerlaunchpad.RaceviewerLaunchPad;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionRaceView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -36,7 +35,7 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
         this.race = race;
         this.presenter = presenter;
         this.mainElement = getMainUiElement();
-        setupRaceState(race.getTrackingState(), race.getViewState());
+        setupRaceState(race);
         getRaceNameUiElement().setInnerText(race.getRaceName());
         setupRaceStart(race.getStart());
         setElement(mainElement);
@@ -82,17 +81,20 @@ public abstract class AbstractRegattaCompetitionFleetRace extends Widget impleme
         });
     }
     
-    private void setupRaceState(RaceTrackingState trackingState, RaceViewState viewState) {
-        boolean isUntrackedRace = trackingState != RaceTrackingState.TRACKED_VALID_DATA;
-        if (viewState == RaceViewState.RUNNING) {
+    private void setupRaceState(SimpleRaceMetadataDTO race) {
+        boolean isUntrackedRace = race.getTrackingState() != RaceTrackingState.TRACKED_VALID_DATA;
+        if (race.isRunning()) {
             mainElement.addClassName(getRaceLiveStyleName());
             getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.live() : I18N.actionWatch());
-        } else if (viewState == RaceViewState.FINISHED) {
+        } else if (race.isFinished()) {
             getRaceStateUiElement().setInnerText(isUntrackedRace ? I18N.raceIsFinished() : I18N.actionAnalyze());
         } else {
             mainElement.addClassName(getRacePlannedStyleName());
-            if (viewState == RaceViewState.SCHEDULED) getRaceStateUiElement().setInnerText(I18N.raceIsPlanned());
-            else getRaceStateUiElement().setInnerText(viewState.getLabel());
+            if (race.isScheduled()) {
+                getRaceStateUiElement().setInnerText(I18N.raceIsPlanned());
+            } else {
+                getRaceStateUiElement().setInnerText(race.getViewState().getLabel());
+            }
         }
         setStyleName(mainElement, getRaceUntrackedStyleName(), isUntrackedRace);
     }

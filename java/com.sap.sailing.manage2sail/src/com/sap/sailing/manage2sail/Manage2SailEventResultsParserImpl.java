@@ -31,7 +31,6 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
 
     /**
      * @param is closed before the method returns, also in case of exception
-     * @throws IOException 
      */
     public EventResultDescriptor getEventResult(InputStream is) throws IOException {
         EventResultDescriptor result = null;
