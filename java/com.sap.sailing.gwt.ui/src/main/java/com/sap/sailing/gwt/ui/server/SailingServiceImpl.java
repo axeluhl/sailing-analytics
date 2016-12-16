@@ -4802,35 +4802,40 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public CompetitorDTO addOrUpdateCompetitor(CompetitorDTO competitor) throws URISyntaxException {
-        Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
-    	Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
-            getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
-    	final CompetitorDTO result;
-    	// new competitor
-    	if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
-    	    BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitor.getBoatClass().getName());
-    	    DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
-    	    DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
-    	    DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
-            result = getBaseDomainFactory().convertToCompetitorDTO(
-                    getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(),
-                            competitor.getColor(), competitor.getEmail(), 
-                            competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team, boat,
-                                    competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
-        } else {
-            result = getBaseDomainFactory().convertToCompetitorDTO(
-                    getService().apply(
-                            new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
-                                    .getColor(), competitor.getEmail(), competitor.getSailID(), nationality,
-                                    competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
-                                    competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
-                                    competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), 
-                                    competitor.getSearchTag())));
+    public List<CompetitorDTO> addOrUpdateCompetitor(List<CompetitorDTO> competitors) throws URISyntaxException {
+        final List<CompetitorDTO> results = new ArrayList<>();
+        for (final CompetitorDTO competitor : competitors) {
+            Competitor existingCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
+            Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null
+                    || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null
+                            : getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
+            final CompetitorDTO result;
+            // new competitor
+            if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
+                BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(competitor.getBoatClass().getName());
+                DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
+                DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
+                DynamicBoat boat = new BoatImpl(competitor.getName() + " boat", boatClass, competitor.getSailID());
+                result = getBaseDomainFactory().convertToCompetitorDTO(
+                        getBaseDomainFactory().getOrCreateCompetitor(UUID.randomUUID(), competitor.getName(),
+                                competitor.getColor(), competitor.getEmail(), 
+                                competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team, boat,
+                                        competitor.getTimeOnTimeFactor(),
+                                        competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
+            } else {
+                result = getBaseDomainFactory().convertToCompetitorDTO(
+                        getService().apply(
+                                new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor
+                                        .getColor(), competitor.getEmail(), competitor.getSailID(), nationality,
+                                        competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
+                                        competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
+                                        competitor.getTimeOnTimeFactor(),
+                                        competitor.getTimeOnDistanceAllowancePerNauticalMile(), 
+                                        competitor.getSearchTag())));
+            }
+            results.add(result);
         }
-        return result;
+        return results;
     }
 
     @Override

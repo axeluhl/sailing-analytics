@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -46,6 +48,24 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
 
     @Override
     public void ok(final Pair<Map<CompetitorDescriptor, CompetitorDTO>, String> competitorsForRegisteringAndSearchTag) {
+        final Set<CompetitorDTO> existingCompetitorsSelected = new HashSet<>();
+        for (final CompetitorDTO existingCompetitor : competitorsForRegisteringAndSearchTag.getA().values()) {
+            if (existingCompetitor != null) {
+                existingCompetitor.addToSearchTag(competitorsForRegisteringAndSearchTag.getB());
+                existingCompetitorsSelected.add(existingCompetitor);
+            }
+        }
+        sailingService.addOrUpdateCompetitor(new ArrayList<>(existingCompetitorsSelected), new MarkedAsyncCallback<>(
+                new AsyncCallback<List<CompetitorDTO>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(caught.getMessage());
+                    }
+                    @Override
+                    public void onSuccess(List<CompetitorDTO> result) {
+                        // TODO trigger an update of any client-side competitor display
+                    }
+                }));
         registerCompetitorsAfterSaving(competitorsForRegisteringAndSearchTag.getA().entrySet().stream().filter((e->e.getValue() == null)).map(e->e.getKey()).
                 collect(Collectors.toList()),
                 competitorsForRegisteringAndSearchTag.getA().values(), competitorsForRegisteringAndSearchTag.getB());
@@ -53,8 +73,6 @@ public class ImportCompetitorCallback implements DialogCallback<Pair<Map<Competi
 
     private void registerCompetitorsAfterSaving(final List<CompetitorDescriptor> competitorsForSaving,
             final Iterable<CompetitorDTO> competitorsForRegistration, String searchTag) {
-        // TODO for those competitors that already exist, update their search tag accordingly, using
-        // sailingService.addOrUpdateCompetitor(competitor, asyncCallback);
         sailingService.addCompetitors(competitorsForSaving, searchTag, new AsyncCallback<List<CompetitorDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
