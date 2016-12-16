@@ -107,4 +107,10 @@ public class PersistentCompetitorStore extends TransientCompetitorStoreImpl impl
         storeTo.storeCompetitor(result);
         return result;
     }
+
+    @Override
+    public void addCompetitors(Iterable<Competitor> competitors) {
+        storeTo.storeCompetitors(competitors);
+        super.addCompetitors(competitors);
+    }
 }
