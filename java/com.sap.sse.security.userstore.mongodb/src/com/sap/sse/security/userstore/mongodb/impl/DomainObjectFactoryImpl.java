@@ -60,7 +60,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         Tenant result = new Tenant(name, owner);
         for (String user : users) {
-            result.addUser(user);
+            result.add(user);
         }
         return result;
     }

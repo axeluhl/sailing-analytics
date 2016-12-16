@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -30,11 +31,13 @@ import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.security.AccessControlList;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
+import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
@@ -47,10 +50,12 @@ import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
+import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.ui.shared.UserGroupDTO;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 public class UserManagementServiceImpl extends RemoteServiceServlet implements UserManagementService {
@@ -89,8 +94,30 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }.start();
     }
     
+    private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
+        return new TenantDTO(userGroup.getName(), 
+                createTenantDTOFromTenant(userGroup.getAccessControlList().getOwner()), 
+                createAclDTOFromAcl(userGroup.getAccessControlList()), userGroup.getUsernames());
+    }
+    
     private TenantDTO createTenantDTOFromTenant(Tenant tenant) {
-        return new TenantDTO(tenant.getName(), tenant.getOwner(), tenant.getUsernames());
+        if (tenant == null) {
+            return null;
+        } else {
+            return new TenantDTO(tenant.getName(), 
+                    createTenantDTOFromTenant(tenant.getAccessControlList().getOwner()), 
+                    createAclDTOFromAcl(tenant.getAccessControlList()), tenant.getUsernames());
+        }
+    }
+    
+    private AccessControlListDTO createAclDTOFromAcl(AccessControlList acl) {
+        Map<UserGroupDTO, Set<com.sap.sse.security.shared.Permission>> permissionMapDTO = new HashMap<>();
+        for (Map.Entry<UserGroup, Set<com.sap.sse.security.shared.Permission>> entry : acl.getPermissionMap().entrySet()) {
+            permissionMapDTO.put(createUserGroupDTOFromUserGroup(entry.getKey()), 
+                    entry.getValue());
+        }
+        return new AccessControlListDTO(acl.getName(), createTenantDTOFromTenant(acl.getOwner()),
+                permissionMapDTO);
     }
     
     @Override

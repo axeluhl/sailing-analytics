@@ -278,14 +278,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public Tenant addUserToTenant(String user, String tenant) {
-        Tenant updatedTenant = store.getTenantByName(tenant).addUser(user);
+        Tenant updatedTenant = store.getTenantByName(tenant).add(user);
         store.updateTenant(updatedTenant);
         return updatedTenant;
     }
 
     @Override
     public Tenant removeUserFromTenant(String user, String tenant) {
-        Tenant updatedTenant = store.getTenantByName(tenant).removeUser(user);
+        Tenant updatedTenant = store.getTenantByName(tenant).remove(user);
         store.updateTenant(updatedTenant);
         return updatedTenant;
     }

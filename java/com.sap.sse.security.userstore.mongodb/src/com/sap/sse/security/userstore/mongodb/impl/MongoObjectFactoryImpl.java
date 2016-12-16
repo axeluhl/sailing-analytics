@@ -38,7 +38,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject dbTenant = new BasicDBObject();
         DBObject query = new BasicDBObject(FieldNames.Tenant.NAME.name(), tenant.getName());
         dbTenant.put(FieldNames.Tenant.NAME.name(), tenant.getName());
-        dbTenant.put(FieldNames.Tenant.OWNER.name(), tenant.getOwner());
+        dbTenant.put(FieldNames.Tenant.OWNER.name(), tenant.getAccessControlList().getOwner());
         dbTenant.put(FieldNames.Tenant.USERS.name(), tenant.getUsernames());
         tenantCollection.update(query, dbTenant, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }

@@ -4,10 +4,9 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.WithID;
 
-public class Tenant implements OwnedBy, NamedWithID {
+public class Tenant implements UserGroup {
     private static final long serialVersionUID = 897323675055025836L;
 
     /**
@@ -15,13 +14,13 @@ public class Tenant implements OwnedBy, NamedWithID {
      */
     private final String name;
     
-    private String owner;
-    private Set<String> userNames;
+    private AccessControlList acl;
+    private Set<String> usernames;
     
-    public Tenant(String name, String owner) {
+    public Tenant(String name, AccessControlList acl) {
         this.name = name;
-        this.owner = owner;
-        this.userNames = new HashSet<>();
+        this.acl = acl;
+        this.usernames = new HashSet<>();
     }
     
     @Override
@@ -35,21 +34,29 @@ public class Tenant implements OwnedBy, NamedWithID {
     }
 
     @Override
-    public String getOwner() {
-        return owner;
+    public AccessControlList getAccessControlList() {
+        return acl;
     }
     
-    public Tenant addUser(String name) {
-        userNames.add(name);
+    @Override
+    public Tenant add(String name) {
+        usernames.add(name);
         return this;
     }
     
-    public Tenant removeUser(String user) {
-        userNames.remove(user);
+    @Override
+    public Tenant remove(String user) {
+        usernames.remove(user);
         return this;
+    }
+    
+    @Override
+    public boolean contains(String user) {
+        return usernames.contains(user);
     }
 
-    public Iterable<String> getUsernames() {
-        return userNames;
-    }    
+    @Override
+    public Set<String> getUsernames() {
+        return usernames;
+    }  
 }
