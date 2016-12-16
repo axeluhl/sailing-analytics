@@ -32,7 +32,7 @@ public class CompetitorDescriptor_CustomFieldSerializer extends CustomFieldSeria
         streamWriter.writeString(instance.getTeamName());
         streamWriter.writeString(instance.getBoatName());
         streamWriter.writeObject(instance.getCountryCode());
-        streamWriter.writeDouble(instance.getTimeOnTimeFactor());
+        streamWriter.writeObject(instance.getTimeOnTimeFactor());
         streamWriter.writeObject(instance.getTimeOnDistanceAllowancePerNauticalMile());
     }
 
@@ -55,7 +55,7 @@ public class CompetitorDescriptor_CustomFieldSerializer extends CustomFieldSeria
                 streamReader.readString(), streamReader.readString(), streamReader.readString(),
                 streamReader.readString(), streamReader.readString(), streamReader.readString(),
                 streamReader.readString(), (CountryCode) streamReader.readObject(),
-                persons, streamReader.readDouble(), (Duration) streamReader.readObject());
+                persons, (Double) streamReader.readObject(), (Duration) streamReader.readObject());
     }
 
     @Override

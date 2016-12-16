@@ -1,4 +1,4 @@
-package com.google.gwt.user.client.rpc.core.com.sap.sse.common;
+package com.google.gwt.user.client.rpc.core.com.sap.sse.common.impl;
 
 import com.google.gwt.user.client.rpc.CustomFieldSerializer;
 import com.google.gwt.user.client.rpc.SerializationException;

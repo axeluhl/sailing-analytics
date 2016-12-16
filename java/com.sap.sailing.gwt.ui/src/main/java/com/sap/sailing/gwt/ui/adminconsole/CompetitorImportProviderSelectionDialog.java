@@ -189,10 +189,10 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
                 final Iterable<CompetitorDescriptor>[] competitorDescriptors = (Iterable<CompetitorDescriptor>[]) new Iterable<?>[1];
                 @SuppressWarnings("unchecked")
                 final Iterable<CompetitorDTO>[] competitors = (Iterable<CompetitorDTO>[]) new Iterable<?>[1];
-                final ParallelExecutionCallback<Iterable<CompetitorDescriptor>> getCompetitorDescriptorsCallback =
-                        new ParallelExecutionCallback<Iterable<CompetitorDescriptor>>() {
+                final ParallelExecutionCallback<List<CompetitorDescriptor>> getCompetitorDescriptorsCallback =
+                        new ParallelExecutionCallback<List<CompetitorDescriptor>>() {
                     @Override
-                    public void onSuccess(Iterable<CompetitorDescriptor> myCompetitorDescriptors) {
+                    public void onSuccess(List<CompetitorDescriptor> myCompetitorDescriptors) {
                         competitorDescriptors[0] = myCompetitorDescriptors;
                         super.onSuccess(myCompetitorDescriptors);
                     }

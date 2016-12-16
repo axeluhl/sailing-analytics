@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -96,6 +97,7 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -348,7 +350,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     CompetitorProviderDTO getCompetitorProviderDTOByName(String providerName) throws Exception;
 
-    Iterable<CompetitorDescriptor> getCompetitorDescriptors(String competitorProviderName, String eventName,
+    List<CompetitorDescriptor> getCompetitorDescriptors(String competitorProviderName, String eventName,
             String regattaName) throws Exception;
 
     WindInfoForRaceDTO getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier);
@@ -677,4 +679,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void editMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO oldFix, Position newPosition) throws NotRevokableException;
 
     Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> getTrackingTimes(Collection<Triple<String, String, String>> raceColumnsAndFleets);
+
+    Pair<PersonDTO, CountryCode> makePersonDTOSerializableAndDeserializableDummy(PersonDTO dummy, CountryCode ccDummy);
 }

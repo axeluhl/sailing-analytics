@@ -194,6 +194,7 @@ import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTOFactory;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
@@ -725,15 +726,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDescriptor> getCompetitorDescriptors(String competitorProviderName, String eventName,
+    public List<CompetitorDescriptor> getCompetitorDescriptors(String competitorProviderName, String eventName,
             String regattaName) throws Exception {
         for (CompetitorProvider cp : getAllCompetitorProviders()) {
             if (cp.getName().equals(competitorProviderName)) {
-                return cp.getCompetitorDescriptors(eventName, regattaName);
+                final List<CompetitorDescriptor> result = new ArrayList<>();
+                Util.addAll(cp.getCompetitorDescriptors(eventName, regattaName), result);
+                return result;
             }
         }
-        return Collections.emptySet();
+        return Collections.emptyList();
     }
+    
+    @Override
+    public Pair<PersonDTO, CountryCode> makePersonDTOSerializableAndDeserializableDummy(PersonDTO dummy, CountryCode ccDummy) { return null; }
 
     /**
      * If <code>date</code> is <code>null</code>, the {@link LiveLeaderboardUpdater} for the

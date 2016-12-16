@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
+import com.sap.sailing.domain.common.dto.PersonDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
@@ -86,6 +87,7 @@ import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -469,7 +471,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getCompetitorProviderDTOByName(String providerName, AsyncCallback<CompetitorProviderDTO> callback);
 
-    void getCompetitorDescriptors(String competitorProviderName, String eventName, String regattaName, AsyncCallback<Iterable<CompetitorDescriptor>> callback);
+    void getCompetitorDescriptors(String competitorProviderName, String eventName, String regattaName, AsyncCallback<List<CompetitorDescriptor>> callback);
 
     void getWindSourcesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<WindInfoForRaceDTO> callback);
 
@@ -823,4 +825,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     
     void getTrackingTimes(Collection<Triple<String, String, String>> raceColumnsAndFleets,
             AsyncCallback<Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>>> asyncCallback);
+
+    void makePersonDTOSerializableAndDeserializableDummy(PersonDTO dummy, CountryCode ccDummy,
+            AsyncCallback<Pair<PersonDTO, CountryCode>> callback);
 }
