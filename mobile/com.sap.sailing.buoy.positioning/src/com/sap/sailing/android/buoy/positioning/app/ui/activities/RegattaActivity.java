@@ -1,5 +1,19 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
+import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
+import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
+import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
+import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
+import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
+import com.sap.sailing.android.buoy.positioning.app.util.MarkerUtils;
+import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
+import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,22 +27,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
-import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
-import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
-import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
-import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
-import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
-import com.sap.sailing.android.buoy.positioning.app.util.MarkerUtils;
-import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.shared.data.BaseCheckinData;
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.services.sending.MessageSendingService;
-import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
-import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
-
-public class RegattaActivity extends AbstractRegattaActivity {
+public class RegattaActivity extends AbstractRegattaActivity<CheckinData> {
 
     private String leaderboardName;
     private String checkinDigest;
@@ -44,7 +43,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
         AppPreferences prefs = new AppPreferences(this);
         prefs.setLastScannedQRCode(null);
         Intent intent = getIntent();
-
 
         checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
         leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
@@ -68,8 +66,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             getSupportActionBar().setTitle(leaderboardName);
         }
-        RegattaFragment regattaFragment = new RegattaFragment();
-        replaceFragment(R.id.content_frame, regattaFragment);
+        replaceFragment(R.id.content_frame, RegattaFragment.newInstance());
 
         MarkerUtils.withContext(this).startMarkerService(checkinUrl);
     }
@@ -146,12 +143,10 @@ public class RegattaActivity extends AbstractRegattaActivity {
     }
 
     @Override
-    public void onCheckinDataAvailable(BaseCheckinData checkinData) {
-        if (checkinData != null) {
-            CheckinData data = (CheckinData) checkinData;
+    public void onCheckinDataAvailable(CheckinData data) {
+        if (data != null) {
             try {
-                DatabaseHelper.getInstance().updateMarks(this, data.marks, data.getLeaderboard());
-                getRegattaFragment().getAdapter().notifyDataSetChanged();
+                DatabaseHelper.getInstance().updateMarks(this, data);
             } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                 ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                 displayDatabaseError();
@@ -187,10 +182,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     public String getCheckinDigest() {
         return checkinDigest;
-    }
-
-    public RegattaFragment getRegattaFragment() {
-        return (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
     }
 
     /**
