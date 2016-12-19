@@ -46,7 +46,7 @@ public class CompetitorImportTest extends AbstractEventResultJsonServiceTest {
         assertTrue(competitorImporter.getHasCompetitorsForRegattasInEvent().get("YES - Young Europeans Sailing 2013").contains("29er"));
         final Iterable<CompetitorDescriptor> competitorDescriptors = competitorImporter.getCompetitorDescriptors("YES - Young Europeans Sailing 2013", null); // get competitors for all regattas in event
         assertNotNull(competitorDescriptors);
-        assertEquals(933, Util.size(competitorDescriptors));
+        assertEquals(1270, Util.size(competitorDescriptors));
         final Iterable<CompetitorDescriptor> competitorDescriptors29er = competitorImporter.getCompetitorDescriptors("YES - Young Europeans Sailing 2013", "29er"); // get competitors only for 29er regatta
         assertNotNull(competitorDescriptors29er);
         assertEquals(134, Util.size(competitorDescriptors29er));
