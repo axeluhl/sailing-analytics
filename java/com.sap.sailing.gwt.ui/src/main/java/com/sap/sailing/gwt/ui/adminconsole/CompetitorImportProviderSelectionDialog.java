@@ -54,10 +54,10 @@ public class CompetitorImportProviderSelectionDialog extends DataEntryDialog<Com
     private final LinkedHashMap<String, Pair<String, String>> eventRegattaNamesByCompetitorListItem;
 
     public CompetitorImportProviderSelectionDialog(MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory,
-            BusyDisplay busynessPanel, Iterable<String> competitorProviderNames, SailingServiceAsync sailingService,
+            BusyDisplay busyDisplay, Iterable<String> competitorProviderNames, SailingServiceAsync sailingService,
             StringMessages stringMessages, ErrorReporter errorReporter) {
         super(stringMessages.importCompetitors(), null, stringMessages.ok(), stringMessages.cancel(), null,
-                new Callback(matchCompetitorsDialogFactory, sailingService, busynessPanel, errorReporter,
+                new Callback(matchCompetitorsDialogFactory, sailingService, busyDisplay, errorReporter,
                         stringMessages));
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
