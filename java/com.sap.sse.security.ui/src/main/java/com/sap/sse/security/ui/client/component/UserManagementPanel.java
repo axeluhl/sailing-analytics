@@ -162,7 +162,7 @@ public class UserManagementPanel extends DockPanel {
                 sb.appendEscaped(value.getName());
                 sb.appendHtmlConstant("</td>");
                 sb.appendHtmlConstant("<td>");
-                sb.appendEscaped(value.getOwner() == null? "" : value.getOwner().getName());
+                sb.appendEscaped(value.getAccessControlList().getOwner() == null? "" : value.getAccessControlList().getOwner());
                 sb.appendHtmlConstant("</td>");
                 sb.appendHtmlConstant("<td>");
                 String concated = "";

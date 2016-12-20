@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,10 +27,12 @@ import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserGroup;
+import com.sap.sse.security.UserGroupImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 
 /**
@@ -52,7 +55,8 @@ public class UserStoreImpl implements UserStore {
     
     private final AccessControlListStore aclStore;
     
-    private final ConcurrentHashMap<String, Tenant> tenants;
+    private final ConcurrentSkipListSet<String> tenants;
+    private final ConcurrentHashMap<String, UserGroup> userGroups;
     
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Set<User>> usersByEmail;
@@ -100,7 +104,8 @@ public class UserStoreImpl implements UserStore {
     
     public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory, final AccessControlListStore aclStore) {
         this.aclStore = aclStore;
-        tenants = new ConcurrentHashMap<>();
+        tenants = new ConcurrentSkipListSet<>();
+        userGroups = new ConcurrentHashMap<>();
         users = new ConcurrentHashMap<>();
         usersByEmail = new ConcurrentHashMap<>();
         emailForUsername = new ConcurrentHashMap<>();
@@ -130,8 +135,9 @@ public class UserStoreImpl implements UserStore {
                 mongoObjectFactory.storeSettingTypes(settingTypes);
                 mongoObjectFactory.storeSettings(settings);
             }
-            for (Tenant t : domainObjectFactory.loadAllTenants(aclStore)) {
-                tenants.put(t.getName(), t);
+            tenants.addAll(domainObjectFactory.loadAllTenantnames());
+            for (UserGroup group : domainObjectFactory.loadAllUserGroups(aclStore)) {
+                userGroups.put(group.getName(), group);
             }
             for (User u : domainObjectFactory.loadAllUsers()) {
                 users.put(u.getName(), u);
@@ -303,61 +309,103 @@ public class UserStoreImpl implements UserStore {
     
     @Override
     public Iterable<UserGroup> getUserGroups() {
-        return null; //TODO
+        return new ArrayList<>(userGroups.values());
     }
 
     @Override
     public UserGroup getUserGroupByName(String name) {
-        if (name == null)
-            return null;
-        return tenants.get(name); //TODO
+        return userGroups.get(name);
+    }
+    
+    @Override
+    public UserGroup createUserGroup(String name, String owner) throws UserGroupManagementException {
+        if (userGroups.contains(name)) {
+            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
+        }
+        logger.info("Creating user group: " + name + " with owner " + owner);
+        UserGroup group = new UserGroupImpl(name, aclStore.createAccessControlList(name, owner));
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeUserGroup(group);
+        }
+        userGroups.put(name, group);
+        return group;
+    }
+
+    @Override
+    public void updateUserGroup(UserGroup group) {
+        logger.info("Updating user group " + group.getName() + " in DB");
+        userGroups.put(group.getName(), group);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.storeUserGroup(group);
+        }
+    }
+
+    @Override
+    public void deleteUserGroup(String name) throws UserGroupManagementException {
+        if (!userGroups.contains(name)) {
+            throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_DOES_NOT_EXIST);
+        }
+        logger.info("Deleting user group: " + name);
+        userGroups.remove(name);
+        if (mongoObjectFactory != null) {
+            mongoObjectFactory.deleteUserGroup(name);
+        }
     }
     
     @Override
     public Iterable<Tenant> getTenants() {
-        return new ArrayList<>(tenants.values());
+        Set<Tenant> result = new HashSet<>();
+        for (String name : tenants) {
+            result.add(getTenantByName(name));
+        }
+        return result;
     }
 
     @Override
     public Tenant getTenantByName(String name) {
-        if (name == null)
-            return null;
-        return tenants.get(name);
+        if (tenants.contains(name)) {
+            return new Tenant(userGroups.get(name));
+        }
+        return null;
     }
 
     @Override
-    public Tenant createTenant(String name, String owner) throws TenantManagementException {
-        if (getTenantByName(name) != null) {
+    public Tenant createTenant(String name, String owner) throws TenantManagementException, UserGroupManagementException {
+        if (tenants.contains(name)) {
             throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
         }
-        Tenant tenant = new Tenant(name, aclStore.createAccessControlList(name, "superadmin")); //TODO: change this from superadmin
-        logger.info("Creating tenant: " + tenant + " with owner " + owner);
+        UserGroup group = createUserGroup(name, owner);
+        logger.info("Creating tenant: " + name + " with owner " + owner);
+        Tenant tenant = new Tenant(group);
         if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeTenant(tenant);
+            mongoObjectFactory.storeTenant(name);
         }
-        tenants.put(name, tenant);
+        tenants.add(name);
         return tenant;
     }
 
     @Override
     public void updateTenant(Tenant tenant) {
-        logger.info("Updating tenant " + tenant + " in DB");
-        tenants.put(tenant.getName(), tenant);
-        if (mongoObjectFactory != null) {
-            mongoObjectFactory.storeTenant(tenant);
-        }
+        updateUserGroup(tenant);
+        logger.info("Updating tenant " + tenant.getName() + " in DB");
     }
 
     @Override
     public void deleteTenant(String name) throws TenantManagementException {
-        Tenant tenant = tenants.get(name);
-        if (tenant == null) {
+        if (!tenants.contains(name)) {
             throw new TenantManagementException(TenantManagementException.TENANT_DOES_NOT_EXIST);
         }
-        logger.info("Deleting tenant: " + tenant);
+        logger.info("Deleting tenant: " + name);
+        tenants.remove(name);
         if (mongoObjectFactory != null) {
-            mongoObjectFactory.deleteTenant(tenant);
+            mongoObjectFactory.deleteTenant(name);
         }
+    }
+    
+    @Override
+    public void deleteTenantWithUserGroup(String name) throws TenantManagementException, UserGroupManagementException {
+        deleteTenant(name);
+        deleteUserGroup(name);
     }
 
     @Override

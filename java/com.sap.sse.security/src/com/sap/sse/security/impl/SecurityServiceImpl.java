@@ -89,6 +89,7 @@ import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -272,22 +273,24 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public Tenant createTenant(String name, String owner) throws TenantManagementException {
+    public Tenant createTenant(String name, String owner) throws TenantManagementException, UserGroupManagementException {
         return store.createTenant(name, owner);
     }
     
     @Override
-    public Tenant addUserToTenant(String user, String tenant) {
-        Tenant updatedTenant = store.getTenantByName(tenant).add(user);
-        store.updateTenant(updatedTenant);
-        return updatedTenant;
+    public Tenant addUserToTenant(String user, String name) {
+        Tenant tenant = store.getTenantByName(name);
+        tenant.add(user);
+        store.updateTenant(tenant);
+        return tenant;
     }
 
     @Override
-    public Tenant removeUserFromTenant(String user, String tenant) {
-        Tenant updatedTenant = store.getTenantByName(tenant).remove(user);
-        store.updateTenant(updatedTenant);
-        return updatedTenant;
+    public Tenant removeUserFromTenant(String user, String name) {
+        Tenant tenant = store.getTenantByName(name);
+        tenant.remove(user);
+        store.updateTenant(tenant);
+        return tenant;
     }
 
     @Override

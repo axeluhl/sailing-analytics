@@ -1,6 +1,7 @@
 package com.sap.sse.security.userstore.mongodb.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -20,8 +21,9 @@ import com.sap.sse.security.AccessControlList;
 import com.sap.sse.security.AccessControlListStore;
 import com.sap.sse.security.AccessControlListWithStore;
 import com.sap.sse.security.Social;
-import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
+import com.sap.sse.security.UserGroup;
+import com.sap.sse.security.UserGroupImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
@@ -74,33 +76,40 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<Tenant> loadAllTenants(AccessControlListStore aclStore) {
-        ArrayList<Tenant> result = new ArrayList<>();
+    public Collection<String> loadAllTenantnames() {
+        Set<String> result = new HashSet<>();
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
-        try {
-            for (DBObject o : tenantCollection.find()) {
-                result.add(loadTenant(o, aclStore));
-            }
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load tenants.");
-            logger.log(Level.SEVERE, "loadAllTenants", e);
+        for (DBObject o : tenantCollection.find()) {
+            result.add((String) o.get(FieldNames.Tenant.NAME.name()));
         }
         return result;
     }
     
-    private Tenant loadTenant(DBObject tenantDBObject, AccessControlListStore aclStore) {
-        final String name = (String) tenantDBObject.get(FieldNames.Tenant.NAME.name());
+    @Override
+    public Iterable<UserGroup> loadAllUserGroups(AccessControlListStore aclStore) {
+        ArrayList<UserGroup> result = new ArrayList<>();
+        DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
+        try {
+            for (DBObject o : userGroupCollection.find()) {
+                result.add(loadUserGroup(o, aclStore));
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load user groups.");
+            logger.log(Level.SEVERE, "loadAllUserGroups", e);
+        }
+        return result;
+    }
+    
+    private UserGroup loadUserGroup(DBObject groupDBObject, AccessControlListStore aclStore) {
+        final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
         Set<String> users = new HashSet<String>();
-        BasicDBList usersO = (BasicDBList) tenantDBObject.get(FieldNames.Tenant.USERS.name());
+        BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERS.name());
         if (usersO != null) {
             for (Object o : usersO) {
                 users.add((String) o);
             }
         }
-        Tenant result = new Tenant(name, aclStore.getAccessControlListByName(name));
-        for (String user : users) {
-            result.add(user);
-        }
+        UserGroup result = new UserGroupImpl(name, users, aclStore.getAccessControlListByName(name));
         return result;
     }
 

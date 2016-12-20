@@ -4,17 +4,16 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.security.shared.Permission;
 
 public class AccessControlListDTO implements IsSerializable {
     private String id;
     private String owner;
     
-    private Map<UserGroupDTO, Set<Permission>> permissionMap;
+    private Map<UserGroupDTO, Set<String>> permissionMap;
     
     AccessControlListDTO() {} // for serialization only
     
-    public AccessControlListDTO(String id, String owner, Map<UserGroupDTO, Set<Permission>> permissionMap) {
+    public AccessControlListDTO(String id, String owner, Map<UserGroupDTO, Set<String>> permissionMap) {
         this.id = id;
         this.owner = owner;
         this.permissionMap = permissionMap;
@@ -28,8 +27,8 @@ public class AccessControlListDTO implements IsSerializable {
         return owner;
     }
     
-    public boolean hasPermission(String user, Permission permission) {
-        for (Map.Entry<UserGroupDTO, Set<Permission>> entry : permissionMap.entrySet()) {
+    public boolean hasPermission(String user, String permission) {
+        for (Map.Entry<UserGroupDTO, Set<String>> entry : permissionMap.entrySet()) {
             if (entry.getKey().contains(user) && entry.getValue().contains(permission)) {
                 return true;
             }

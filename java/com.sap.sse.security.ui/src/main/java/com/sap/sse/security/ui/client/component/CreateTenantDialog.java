@@ -78,7 +78,7 @@ public class CreateTenantDialog extends DataEntryDialog<TenantData> {
         ownerBox.setName("owner");
         if (tenant != null) {
             nameBox.setText(tenant.getName());
-            ownerBox.setText(tenant.getOwner() == null ? "" : tenant.getOwner().getName());
+            ownerBox.setText(tenant.getAccessControlList().getOwner() == null ? "" : tenant.getAccessControlList().getOwner());
         }
         this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;

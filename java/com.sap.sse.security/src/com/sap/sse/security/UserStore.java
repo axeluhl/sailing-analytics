@@ -7,12 +7,19 @@ import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 
 public interface UserStore extends Named {
     Iterable<UserGroup> getUserGroups();
     
     UserGroup getUserGroupByName(String name);
+    
+    UserGroup createUserGroup(String name, String owner) throws UserGroupManagementException;
+    
+    void updateUserGroup(UserGroup tenant);
+    
+    void deleteUserGroup(String name) throws UserGroupManagementException;
     
     Iterable<Tenant> getTenants();
     
@@ -21,11 +28,13 @@ public interface UserStore extends Named {
      */
     Tenant getTenantByName(String name);
     
-    Tenant createTenant(String name, String owner) throws TenantManagementException;
+    Tenant createTenant(String name, String owner) throws TenantManagementException, UserGroupManagementException;
     
     void updateTenant(Tenant tenant);
     
     void deleteTenant(String name) throws TenantManagementException;
+    
+    void deleteTenantWithUserGroup(String name) throws TenantManagementException, UserGroupManagementException;
     
     Iterable<User> getUsers();
 

@@ -4,17 +4,21 @@ import java.util.Map;
 
 import com.mongodb.DB;
 import com.sap.sse.security.AccessControlList;
-import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
+import com.sap.sse.security.UserGroup;
 
 public interface MongoObjectFactory {
     public void storeAccessControlList(AccessControlList acl);
     
-    public void deleteAccessControlList(String name);
+    public void deleteAccessControlList(AccessControlList acl);
     
-    public void storeTenant(Tenant tenant);
+    public void storeTenant(String name);
     
-    public void deleteTenant(Tenant tenant);
+    public void deleteTenant(String name);
+    
+    public void storeUserGroup(UserGroup group);
+    
+    public void deleteUserGroup(String name);
 
     public void storeUser(User user);
     

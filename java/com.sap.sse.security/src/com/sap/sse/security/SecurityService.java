@@ -17,6 +17,7 @@ import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 
 /**
@@ -33,7 +34,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     Iterable<Tenant> getTenantList();
     
-    Tenant createTenant(String name, String owner) throws TenantManagementException;
+    Tenant createTenant(String name, String owner) throws TenantManagementException, UserGroupManagementException;
     
     Tenant addUserToTenant(String user, String tenant);
 

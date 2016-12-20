@@ -9,9 +9,10 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
+import com.sap.sse.security.AccessControlList;
 import com.sap.sse.security.Social;
-import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
+import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -32,23 +33,60 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     @Override
-    public void storeTenant(Tenant tenant) {
+    public void storeAccessControlList(AccessControlList acl) {
+        DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
+        aclCollection.createIndex(new BasicDBObject(FieldNames.AccessControlList.NAME.name(), null));
+        DBObject dbACL = new BasicDBObject();
+        DBObject query = new BasicDBObject(FieldNames.AccessControlList.NAME.name(), acl.getName());
+        dbACL.put(FieldNames.AccessControlList.NAME.name(), acl.getName());
+        dbACL.put(FieldNames.AccessControlList.OWNER.name(), acl.getOwner());
+        dbACL.put(FieldNames.AccessControlList.PERMISSION_MAP.name(), acl.getPermissionMap());
+        aclCollection.update(query, dbACL, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+    
+    @Override
+    public void deleteAccessControlList(AccessControlList acl) {
+        DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
+        DBObject dbACL = new BasicDBObject();
+        dbACL.put(FieldNames.AccessControlList.NAME.name(), acl.getName());
+        aclCollection.remove(dbACL);
+    }
+    
+    @Override
+    public void storeTenant(String name) {
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         tenantCollection.createIndex(new BasicDBObject(FieldNames.Tenant.NAME.name(), null));
         DBObject dbTenant = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.Tenant.NAME.name(), tenant.getName());
-        dbTenant.put(FieldNames.Tenant.NAME.name(), tenant.getName());
-        dbTenant.put(FieldNames.Tenant.OWNER.name(), tenant.getAccessControlList().getOwner());
-        dbTenant.put(FieldNames.Tenant.USERS.name(), tenant.getUsernames());
+        DBObject query = new BasicDBObject(FieldNames.Tenant.NAME.name(), name);
+        dbTenant.put(FieldNames.Tenant.NAME.name(), name);
         tenantCollection.update(query, dbTenant, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
 
     @Override
-    public void deleteTenant(Tenant tenant) {
+    public void deleteTenant(String name) {
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         DBObject dbTenant = new BasicDBObject();
-        dbTenant.put(FieldNames.Tenant.NAME.name(), tenant.getName());
+        dbTenant.put(FieldNames.Tenant.NAME.name(), name);
         tenantCollection.remove(dbTenant);
+    }
+    
+    @Override
+    public void storeUserGroup(UserGroup group) {
+        DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
+        userGroupCollection.createIndex(new BasicDBObject(FieldNames.UserGroup.NAME.name(), null));
+        DBObject dbUserGroup = new BasicDBObject();
+        DBObject query = new BasicDBObject(FieldNames.UserGroup.NAME.name(), group.getName());
+        dbUserGroup.put(FieldNames.UserGroup.NAME.name(), group.getName());
+        dbUserGroup.put(FieldNames.UserGroup.USERS.name(), group.getUsernames());
+        userGroupCollection.update(query, dbUserGroup, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+    
+    @Override
+    public void deleteUserGroup(String name) {
+        DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
+        DBObject dbUserGroup = new BasicDBObject();
+        dbUserGroup.put(FieldNames.UserGroup.NAME.name(), name);
+        userGroupCollection.remove(dbUserGroup);
     }
 
     @Override

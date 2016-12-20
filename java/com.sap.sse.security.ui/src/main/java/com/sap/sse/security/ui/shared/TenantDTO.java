@@ -5,7 +5,7 @@ import java.util.Set;
 public class TenantDTO extends UserGroupDTO {
     TenantDTO() {} // just for serialization
     
-    public TenantDTO(String name, TenantDTO owner, AccessControlListDTO acl, Set<String> usernames) {
-        super(name, owner, acl, usernames);
+    public TenantDTO(String name, AccessControlListDTO acl, Set<String> usernames) {
+        super(name, acl, usernames);
     }
 }

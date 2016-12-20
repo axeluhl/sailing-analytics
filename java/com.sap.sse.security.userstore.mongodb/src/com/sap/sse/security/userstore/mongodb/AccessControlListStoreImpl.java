@@ -84,8 +84,8 @@ public class AccessControlListStoreImpl implements AccessControlListStore {
 
     @Override
     public AccessControlListStore removeAccessControlList(String name) {
-        accessControlLists.remove(name);
-        mongoObjectFactory.deleteAccessControlList(name);
+        AccessControlList acl = accessControlLists.remove(name);
+        mongoObjectFactory.deleteAccessControlList(acl);
         return this;
     }
 

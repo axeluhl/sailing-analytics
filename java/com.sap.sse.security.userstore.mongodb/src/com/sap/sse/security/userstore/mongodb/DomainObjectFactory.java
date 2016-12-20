@@ -1,11 +1,12 @@
 package com.sap.sse.security.userstore.mongodb;
 
+import java.util.Collection;
 import java.util.Map;
 
 import com.sap.sse.security.AccessControlList;
 import com.sap.sse.security.AccessControlListStore;
-import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
+import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserStore;
 
 public interface DomainObjectFactory {
@@ -13,7 +14,9 @@ public interface DomainObjectFactory {
     
     AccessControlList loadAccessControlList(String name, UserStore userStore, AccessControlListStore aclStore);
 
-    Iterable<Tenant> loadAllTenants(AccessControlListStore aclStore);
+    Collection<String> loadAllTenantnames();
+    
+    Iterable<UserGroup> loadAllUserGroups(AccessControlListStore aclStore);
     
     Iterable<User> loadAllUsers();
     

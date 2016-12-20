@@ -38,12 +38,14 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserGroup;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.TenantManagementException;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.ui.client.UserManagementService;
@@ -65,6 +67,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     private final BundleContext context;
     private final FutureTask<SecurityService> securityService;
+    private final UserStore userStore;
 
     public UserManagementServiceImpl() {
         context = Activator.getContext();
@@ -92,11 +95,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 SecurityUtils.setSecurityManager(getSecurityService().getSecurityManager());
             }
         }.start();
+        userStore = context.getService(context.getServiceReference(UserStore.class));
     }
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
         return new TenantDTO(userGroup.getName(), 
-                createTenantDTOFromTenant(userGroup.getAccessControlList().getOwner()), 
                 createAclDTOFromAcl(userGroup.getAccessControlList()), userGroup.getUsernames());
     }
     
@@ -104,19 +107,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (tenant == null) {
             return null;
         } else {
-            return new TenantDTO(tenant.getName(), 
-                    createTenantDTOFromTenant(tenant.getAccessControlList().getOwner()), 
+            return new TenantDTO(tenant.getName(),
                     createAclDTOFromAcl(tenant.getAccessControlList()), tenant.getUsernames());
         }
     }
     
     private AccessControlListDTO createAclDTOFromAcl(AccessControlList acl) {
-        Map<UserGroupDTO, Set<com.sap.sse.security.shared.Permission>> permissionMapDTO = new HashMap<>();
-        for (Map.Entry<UserGroup, Set<com.sap.sse.security.shared.Permission>> entry : acl.getPermissionMap().entrySet()) {
-            permissionMapDTO.put(createUserGroupDTOFromUserGroup(entry.getKey()), 
+        Map<UserGroupDTO, Set<String>> permissionMapDTO = new HashMap<>();
+        for (Map.Entry<String, Set<String>> entry : acl.getPermissionMap().entrySet()) {
+            UserGroup group = userStore.getUserGroupByName(entry.getKey());
+            permissionMapDTO.put(createUserGroupDTOFromUserGroup(group), 
                     entry.getValue());
         }
-        return new AccessControlListDTO(acl.getName(), createTenantDTOFromTenant(acl.getOwner()),
+        return new AccessControlListDTO(acl.getName(), acl.getOwner(),
                 permissionMapDTO);
     }
     
@@ -135,7 +138,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         // TODO: create TenantManagementException_CustomSeri.....?
         try {
             return createTenantDTOFromTenant(getSecurityService().createTenant(name, owner));
-        } catch (TenantManagementException e) {
+        } catch (TenantManagementException | UserGroupManagementException e) {
             return null;
         }
     }
