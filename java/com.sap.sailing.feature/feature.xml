@@ -25,7 +25,7 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
       <import plugin="org.eclipse.osgi" version="3.10.1" match="greaterOrEqual"/>
       <import plugin="javax.servlet" version="3.1.0" match="greaterOrEqual"/>
       <import plugin="org.mongodb.mongo-java-driver" version="2.13.0" match="greaterOrEqual"/>
-      <import plugin="com.google.gwt.osgi" version="2.7.0" match="greaterOrEqual"/>
+      <import plugin="com.google.gwt.servlet" version="2.8.0" match="greaterOrEqual"/>
       <import plugin="org.json.simple" version="1.1.0" match="greaterOrEqual"/>
       <import plugin="org.moxieapps.gwt.highcharts" version="1.6.0" match="greaterOrEqual"/>
       <import plugin="com.rabbitmq.client"/>
@@ -459,6 +459,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.polars.datamining"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.competitorimport"
          download-size="0"
          install-size="0"
          version="0.0.0"

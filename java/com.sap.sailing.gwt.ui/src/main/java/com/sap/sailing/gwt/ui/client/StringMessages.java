@@ -811,6 +811,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showingDetailsOfRace(String raceName);
     String startAt();
     String finishAt();
+    String protestStartsAt();
     String protestEndsAt();
     String unknown();
     String raceLog();
@@ -987,6 +988,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String activateIndividualRecall();
     String activateResultEntry();
     String rrs26Start();
+    String sailingWorldCupStart();
     String setConfiguration();
     String classFlag();
     String classFlagHelpText(String procedure);
@@ -1183,6 +1185,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String raceIsInLiveTimePanelMode();
     String backToLiveTimePanelMode();
     String windChart();
+    String windChartLoading();
     String mediaNoVideosCaption();
     String mediaShowVideoCaption();
     String mediaShowVideoTooltip(String title);
@@ -1498,6 +1501,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String warningDirectCompetitorRegistration();
     String warningRegattaCompetitorRegistration();
     String competitorRegistrationsOnRaceDisabled();
+    String warningForDisabledCompetitors(String competitorsSet);
+    String competitorToolTipMessage(String competitorName, String currentFleetName, String assignedToFleet, String raceName);
     String addMarkToRegatta();
     String selectALeaderboardGroup();
     @Override
@@ -1571,6 +1576,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String mapControls();
     String manage2SailEvent();
     String noEventsYet();
+    String selectCompetitorImportProvider();
     String selectResultImportProvider();
     String buildVersion();
     String serverInformation();
@@ -1744,4 +1750,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String externalLinks();
     String buoyZoneRadiusInHullLengths();
     String incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
+    String importCompetitors();
+    String chooseWhichCompetitorsShouldBeImported();
+    String existingCompetitors();
+    String importedCompetitors();
+    String hasMatches();
+    String filterImportedCompetitorsByNameSailRaceFleet();
+    String errorLoadingCompetitorImportProviders(String message);
+    String errorLoadingCompetitorImportDescriptors(String message);
+    String couldNotSaveCompetitorRegistrations(String message);
+    String searchTagForImportedCompetitorPlaceholder();
 }

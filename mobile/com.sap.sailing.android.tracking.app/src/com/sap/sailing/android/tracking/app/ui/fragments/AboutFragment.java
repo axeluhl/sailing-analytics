@@ -62,6 +62,7 @@ public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFrag
         notices.addNotice(licenseHelper.getDialogNotice(getActivity()));
         LicensesDialog.Builder builder = new LicensesDialog.Builder(getActivity());
         builder.setTitle(getString(R.string.license_information));
+        builder.setThemeResourceId(R.style.AppTheme_AlertDialog);
         builder.setNotices(notices);
         builder.build().show();
     }

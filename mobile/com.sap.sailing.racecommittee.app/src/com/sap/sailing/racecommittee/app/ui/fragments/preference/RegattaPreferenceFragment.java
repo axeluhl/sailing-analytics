@@ -8,6 +8,7 @@ import java.util.Set;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
+import android.support.annotation.StringRes;
 import android.text.TextUtils;
 
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
@@ -39,6 +40,8 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
 
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
         bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key));
+        bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_swc_classflag_key));
+        bindPreferenceSummaryToSet(findPreference(R.string.preference_racing_procedure_swc_startmode_flags_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_gatestart_classflag_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_ess_classflag_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_racing_procedure_basic_classflag_key));
@@ -46,6 +49,7 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
 
         setupGeneral();
         setupRRS26();
+        setupSWC();
         setupGateStart();
         setupESS();
         setupBasic();
@@ -53,8 +57,13 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
     }
 
     private void setupRRS26() {
-        setupRRS26StartmodeFlagsList();
+        setupStartmodeFlagsList(R.string.preference_racing_procedure_rrs26_startmode_flags_key);
         setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_rrs26_classflag_key));
+    }
+
+    private void setupSWC() {
+        setupStartmodeFlagsList(R.string.preference_racing_procedure_swc_startmode_flags_key);
+        setupClassFlagList(this.<ListPreference>findPreference(R.string.preference_racing_procedure_swc_classflag_key));
     }
 
     private void setupGateStart() {
@@ -77,6 +86,7 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         setupRacingProcedureTypePreference();
         setupCourseDesignerTypePreference();
         setupDependentRacesPreference();
+        setupProtestTimePreference();
     }
 
     private void setupRacingProcedureTypePreference() {
@@ -117,8 +127,12 @@ public class RegattaPreferenceFragment extends BasePreferenceFragment {
         bindPreferenceSummaryToInteger(findPreference(R.string.preference_dependent_races_offset_key));
     }
 
-    private void setupRRS26StartmodeFlagsList() {
-        MultiSelectListPreference preference = findPreference(R.string.preference_racing_procedure_rrs26_startmode_flags_key);
+    private void setupProtestTimePreference() {
+        bindPreferenceSummaryToInteger(findPreference(R.string.preference_protest_time_duration_key));
+    }
+
+    private void setupStartmodeFlagsList(@StringRes int prefId) {
+        MultiSelectListPreference preference = findPreference(prefId);
         List<String> flags = new ArrayList<>();
         for (Flags flag : Flags.validValues()) {
             flags.add(flag.name());

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -118,6 +119,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -924,7 +926,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = new BasicDBObject();
         storeRaceLogEventProperties(event, result);
         result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogProtestStartTimeEvent.class.getSimpleName());
-        storeTimePoint(event.getProtestStartTime(), result, FieldNames.RACE_LOG_PROTEST_START_TIME);
+        storeTimePoint(event.getProtestTime().from(), result, FieldNames.RACE_LOG_PROTEST_START_TIME);
+        storeTimePoint(event.getProtestTime().to(), result, FieldNames.RACE_LOG_PROTEST_END_TIME);
         return result;
     }
 
@@ -1242,6 +1245,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject query = (DBObject) JSON.parse(CompetitorJsonSerializer.getCompetitorIdQuery(competitor).toString());
         DBObject entry = (DBObject) JSON.parse(json.toString());
         collection.update(query, entry, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
+    }
+
+    @Override
+    public void storeCompetitors(Iterable<Competitor> competitors) {
+        if (competitors != null && !Util.isEmpty(competitors)) {
+            DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+            List<DBObject> competitorsDB = new ArrayList<>();
+            for (Competitor competitor : competitors) {
+                JSONObject json = competitorSerializer.serialize(competitor);
+                DBObject entry = (DBObject) JSON.parse(json.toString());
+                competitorsDB.add(entry);
+            }
+            collection.insert(competitorsDB);
+        }
     }
 
     @Override

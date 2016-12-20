@@ -152,6 +152,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
+    public static final Color WATER_COLOR = new RGBColor(0, 67, 125);
     
     private MapWidget map;
     
@@ -2765,7 +2766,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         sapLogo.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                Window.open("http://www.sap.com", "_blank", null);
+                Window.open("https://www.sap.com/sponsorships", "_blank", null);
             }
         });
         sapLogo.setStyleName("raceBoard-Logo");
@@ -2805,10 +2806,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
           // simplify road display
           mapTypeStyles[2] = GoogleMapStyleHelper.createSimplifiedStyle(MapTypeStyleFeatureType.ROAD);
           // set water color
-          // To play with the styles, check out http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html.
-          // To convert an RGB color into the strange hue/saturation/lightness model used by the Google Map use
-          // http://software.stadtwerk.org/google_maps_colorizr/#water/all/123456/.
-          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, new RGBColor(0, 136, 255), 0, -70);
+          mapTypeStyles[3] = GoogleMapStyleHelper.createColorStyle(MapTypeStyleFeatureType.WATER, WATER_COLOR);
           
           MapTypeControlOptions mapTypeControlOptions = MapTypeControlOptions.newInstance();
           mapTypeControlOptions.setPosition(ControlPosition.BOTTOM_RIGHT);

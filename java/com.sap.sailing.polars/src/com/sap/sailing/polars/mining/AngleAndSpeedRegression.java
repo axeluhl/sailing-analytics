@@ -39,10 +39,27 @@ import com.sap.sse.common.Util.Pair;
 public class AngleAndSpeedRegression implements Serializable {
 
     private static final long serialVersionUID = 6343595388753945979L;
-    private final IncrementalLeastSquares speedRegression = new IncrementalAnyOrderLeastSquaresImpl(3, false);
-    private final IncrementalLeastSquares angleRegression = new IncrementalAnyOrderLeastSquaresImpl(3);
+    private final IncrementalLeastSquares speedRegression;
+    private final IncrementalLeastSquares angleRegression;
 
-    private double maxWindSpeedInKnots = -1;
+    private double maxWindSpeedInKnots;
+
+    public AngleAndSpeedRegression() {
+        speedRegression = new IncrementalAnyOrderLeastSquaresImpl(3, false);
+        angleRegression = new IncrementalAnyOrderLeastSquaresImpl(3);
+        maxWindSpeedInKnots = -1;
+    }
+
+    /**
+     * Constructor with parameters used by {@link AngleAndSpeedRegressionDeserializer} to deserialize regression data
+     * from remote server
+     */
+    public AngleAndSpeedRegression(double maxWindSpeedInKnots, IncrementalLeastSquares speedRegression,
+            IncrementalLeastSquares angleRegression) {
+        this.speedRegression = speedRegression;
+        this.angleRegression = angleRegression;
+        this.maxWindSpeedInKnots = maxWindSpeedInKnots;
+    }
 
     public void addData(WindWithConfidence<Pair<Position, TimePoint>> windSpeed,
             BearingWithConfidence<Void> angleToTheWind, SpeedWithBearingWithConfidence<TimePoint> boatSpeed) {
@@ -116,4 +133,16 @@ public class AngleAndSpeedRegression implements Serializable {
         return angleRegression.getOrCreatePolynomialFunction();
     }
 
+    public IncrementalAnyOrderLeastSquaresImpl getSpeedRegression() {
+        return (IncrementalAnyOrderLeastSquaresImpl) speedRegression;
+    }
+
+    public IncrementalAnyOrderLeastSquaresImpl getAngleRegression() {
+        return (IncrementalAnyOrderLeastSquaresImpl) angleRegression;
+    }
+
+    public double getMaxWindSpeedInKnots() {
+        return maxWindSpeedInKnots;
+    }
+    
 }

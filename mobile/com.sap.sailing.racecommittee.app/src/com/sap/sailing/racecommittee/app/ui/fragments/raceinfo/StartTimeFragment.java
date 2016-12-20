@@ -204,7 +204,7 @@ public class StartTimeFragment extends BaseFragment
                             time.setTime(mStartTime.asDate());
                         }
                     }
-                    if (AppUtils.with(getActivity()).isLand()) {
+                    if (AppUtils.with(getActivity()).isLandscape()) {
                         if (header != null) {
                             header.setVisibility(View.GONE);
                         }

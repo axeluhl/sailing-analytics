@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.polars;
 
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
@@ -162,22 +163,21 @@ public interface PolarDataService {
     void insertExistingFixes(TrackedRace trackedRace);
     
     /**
-     * 
      * @param boatClass When polars of this boat class change, the listener will be notified. May not be null.
      * @param listener may not be null
      */
     void registerListener(BoatClass boatClass, PolarsChangedListener listener);
     
-    /**
-     * 
-     * @param boatClass
-     * @param listener
-     */
     void unregisterListener(BoatClass boatClass, PolarsChangedListener listener);
 
     void registerDomainFactory(DomainFactory domainFactory);
     
     void unregisterDomainFactory(DomainFactory domainFactory);
-    
 
+    /**
+     * When called, the method blocks until a {@link DomainFactory} has been {@link #registerDomainFactory(DomainFactory) registered}
+     * with this service, then lets the {@code consumer} accept that domain factory.
+     * @throws InterruptedException 
+     */
+    void runWithDomainFactory(Consumer<DomainFactory> consumer) throws InterruptedException;
 }

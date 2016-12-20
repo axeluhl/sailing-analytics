@@ -12,8 +12,8 @@ public class CompetitorCheckinData extends CheckinData {
     public String competitorNationality;
     public String competitorCountryCode;
 
-    public CompetitorCheckinData(CompetitorUrlData urlData) {
-        super(urlData);
+    public CompetitorCheckinData(CompetitorUrlData urlData, String leaderboardDisplayName) {
+        super(urlData, leaderboardDisplayName);
         competitorName = urlData.competitorName;
         competitorId = urlData.competitorId;
         competitorUrl = urlData.competitorUrl;

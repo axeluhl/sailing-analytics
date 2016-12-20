@@ -274,4 +274,17 @@ public class TransientCompetitorStoreImpl implements CompetitorStore, Serializab
             LockUtil.unlockAfterWrite(lock);
         }
     }
+
+    @Override
+    public void addCompetitors(Iterable<Competitor> competitors) {
+        LockUtil.lockForWrite(lock);
+        try {
+            for (Competitor competitor: competitors) {
+                competitorCache.put(competitor.getId(), competitor);
+                competitorsByIdAsString.put(competitor.getId().toString(), competitor);
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(lock);
+        }
+    }
 }

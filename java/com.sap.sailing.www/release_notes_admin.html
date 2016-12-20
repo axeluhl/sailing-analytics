@@ -23,6 +23,28 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">November 2016</h2>
+                    <ul class="bulletList">
+			 <li>When launching a server, a system property <tt>polardata.source.url</tt> can
+			     be provided in order to specify a server base URL from where to import polar
+			     data into the upstarting server. Usually, this would be the "archive" server's
+			     base URL, such as https://www.sapsailing.com. Note that the exporting server
+			     needs to already support this feature and the importing and exporting server
+			     should be at roughly the same version to ensure binary compatibility for the
+			     polar sheet data.
+			 </li>
+			 <li>In the <em>Tracked Races / Competitors</em> tab there is now a new button "Import Competitor"
+			     that opens a dialog for selecting an import source. The Manage2Sail source is configured through
+			     the same URL as used for the result importer. Select the regatta from which you want to import,
+			     then check for which competitors there are matching / similar existing competitors. Single
+			     selection on the left lets you map to one of the matching existing competitors. Ultimately,
+			     select those competitors (including those you mapped to existing ones) you want to import.
+			     Optionally provide a search tag for them which will be added to the new and mapped-to
+			     competitors for easy retrieval later when selecting competitors to add to a regatta
+			     or race.
+			 </li>
+                    </ul>
+
                     <h2 class="articleSubheadline">October 2016</h2>
                     <ul class="bulletList">
 			<li>A regatta now has an additional property: "Buoy zone radius in hull lengths." It

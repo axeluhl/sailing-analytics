@@ -70,7 +70,7 @@ public class PasswordResetActivity extends AbstractActivity implements PasswordR
     }
     
     private class ResetPasswordFormValues {
-        private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
+        private final NewAccountValidator validator = new ResetPasswordAccountValidator(i18n_sec);
         private final String username, resetSecret;
         private String password, passwordConfirmation;
         
