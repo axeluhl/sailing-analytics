@@ -4,16 +4,15 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sse.common.NamedWithID;
-import com.sap.sse.security.shared.Permission;
 
 public interface AccessControlList extends NamedWithID {
-    Tenant getOwner();
+    String getOwner();
     
-    boolean hasPermission(User user, Permission permission);
+    boolean hasPermission(String user, String permission);
     
-    AccessControlList putPermissions(UserGroup group, Set<Permission> permissions);
-    AccessControlList addPermission(UserGroup group, Permission permission);
-    AccessControlList removePermission(UserGroup group, Permission permission);
+    AccessControlList putPermissions(String group, Set<String> permissions);
+    AccessControlList addPermission(String group, String permission);
+    AccessControlList removePermission(String group, String permission);
     
-    Map<UserGroup, Set<Permission>> getPermissionMap();
+    Map<String, Set<String>> getPermissionMap();
 }

@@ -19,11 +19,13 @@ import org.apache.shiro.SecurityUtils;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.security.AccessControlListStore;
 import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.security.PreferenceObjectListener;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
+import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.DefaultRoles;
@@ -47,6 +49,8 @@ public class UserStoreImpl implements UserStore {
     private static final String ACCESS_TOKEN_KEY = "___access_token___";
 
     private String name = "MongoDB user store";
+    
+    private final AccessControlListStore aclStore;
     
     private final ConcurrentHashMap<String, Tenant> tenants;
     
@@ -90,11 +94,12 @@ public class UserStoreImpl implements UserStore {
      */
     private final transient MongoObjectFactory mongoObjectFactory;
 
-    public UserStoreImpl() {
-        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
+    public UserStoreImpl(final AccessControlListStore aclStore) {
+        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), aclStore);
     }
     
-    public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
+    public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory, final AccessControlListStore aclStore) {
+        this.aclStore = aclStore;
         tenants = new ConcurrentHashMap<>();
         users = new ConcurrentHashMap<>();
         usersByEmail = new ConcurrentHashMap<>();
@@ -125,7 +130,7 @@ public class UserStoreImpl implements UserStore {
                 mongoObjectFactory.storeSettingTypes(settingTypes);
                 mongoObjectFactory.storeSettings(settings);
             }
-            for (Tenant t : domainObjectFactory.loadAllTenants()) {
+            for (Tenant t : domainObjectFactory.loadAllTenants(aclStore)) {
                 tenants.put(t.getName(), t);
             }
             for (User u : domainObjectFactory.loadAllUsers()) {
@@ -297,6 +302,18 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
+    public Iterable<UserGroup> getUserGroups() {
+        return null; //TODO
+    }
+
+    @Override
+    public UserGroup getUserGroupByName(String name) {
+        if (name == null)
+            return null;
+        return tenants.get(name); //TODO
+    }
+    
+    @Override
     public Iterable<Tenant> getTenants() {
         return new ArrayList<>(tenants.values());
     }
@@ -313,7 +330,7 @@ public class UserStoreImpl implements UserStore {
         if (getTenantByName(name) != null) {
             throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
         }
-        Tenant tenant = new Tenant(name, owner);
+        Tenant tenant = new Tenant(name, aclStore.createAccessControlList(name, "superadmin")); //TODO: change this from superadmin
         logger.info("Creating tenant: " + tenant + " with owner " + owner);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeTenant(tenant);

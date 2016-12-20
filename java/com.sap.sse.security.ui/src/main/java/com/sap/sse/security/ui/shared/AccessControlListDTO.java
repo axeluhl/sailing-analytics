@@ -8,13 +8,13 @@ import com.sap.sse.security.shared.Permission;
 
 public class AccessControlListDTO implements IsSerializable {
     private String id;
-    private TenantDTO owner;
+    private String owner;
     
     private Map<UserGroupDTO, Set<Permission>> permissionMap;
     
     AccessControlListDTO() {} // for serialization only
     
-    public AccessControlListDTO(String id, TenantDTO owner, Map<UserGroupDTO, Set<Permission>> permissionMap) {
+    public AccessControlListDTO(String id, String owner, Map<UserGroupDTO, Set<Permission>> permissionMap) {
         this.id = id;
         this.owner = owner;
         this.permissionMap = permissionMap;
@@ -24,7 +24,7 @@ public class AccessControlListDTO implements IsSerializable {
         return id;
     }
     
-    public TenantDTO getOwner() {
+    public String getOwner() {
         return owner;
     }
     

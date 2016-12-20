@@ -3,10 +3,14 @@ package com.sap.sse.security.userstore.mongodb;
 import java.util.Map;
 
 import com.mongodb.DB;
+import com.sap.sse.security.AccessControlList;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
 
 public interface MongoObjectFactory {
+    public void storeAccessControlList(AccessControlList acl);
+    
+    public void deleteAccessControlList(String name);
     
     public void storeTenant(Tenant tenant);
     

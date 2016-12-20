@@ -10,6 +10,10 @@ import com.sap.sse.security.shared.TenantManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 
 public interface UserStore extends Named {
+    Iterable<UserGroup> getUserGroups();
+    
+    UserGroup getUserGroupByName(String name);
+    
     Iterable<Tenant> getTenants();
     
     /**

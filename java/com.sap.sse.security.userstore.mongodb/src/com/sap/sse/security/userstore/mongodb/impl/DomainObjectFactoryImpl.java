@@ -14,10 +14,15 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.sap.sse.security.AccessControlList;
+import com.sap.sse.security.AccessControlListStore;
+import com.sap.sse.security.AccessControlListWithStore;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -34,12 +39,47 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<Tenant> loadAllTenants() {
+    public Iterable<AccessControlList> loadAllAccessControlLists(UserStore userStore, AccessControlListStore aclStore) {
+        ArrayList<AccessControlList> result = new ArrayList<>();
+        DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
+        try {
+            for (DBObject o : aclCollection.find()) {
+                result.add(loadAccessControlList(o, userStore, aclStore));
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load ACLs.");
+            logger.log(Level.SEVERE, "loadAllAccessControlLists", e);
+        }
+        return result;
+    }
+    
+    @Override
+    public AccessControlList loadAccessControlList(String name, UserStore userStore, AccessControlListStore aclStore) {
+        DBObject query = new BasicDBObject();
+        query.put(FieldNames.AccessControlList.NAME.name(), name);
+        DBCursor cursor = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name()).find(query);
+        if (cursor.hasNext()) {
+            return loadAccessControlList(cursor.next(), userStore, aclStore);
+        }
+        return null;
+    }
+
+    public AccessControlList loadAccessControlList(DBObject aclDBObject, UserStore userStore, AccessControlListStore aclStore) {
+        final String name = (String) aclDBObject.get(FieldNames.AccessControlList.NAME.name());
+        final String owner = (String) aclDBObject.get(FieldNames.AccessControlList.OWNER.name());
+        @SuppressWarnings("unchecked")
+        Map<String, Set<String>> permissionMap = (Map<String, Set<String>>) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name());
+        AccessControlList result = new AccessControlListWithStore(name, owner, permissionMap, userStore, aclStore);
+        return result;
+    }
+    
+    @Override
+    public Iterable<Tenant> loadAllTenants(AccessControlListStore aclStore) {
         ArrayList<Tenant> result = new ArrayList<>();
         DBCollection tenantCollection = db.getCollection(CollectionNames.TENANTS.name());
         try {
             for (DBObject o : tenantCollection.find()) {
-                result.add(loadTenant(o));
+                result.add(loadTenant(o, aclStore));
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load tenants.");
@@ -48,9 +88,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    private Tenant loadTenant(DBObject tenantDBObject) {
+    private Tenant loadTenant(DBObject tenantDBObject, AccessControlListStore aclStore) {
         final String name = (String) tenantDBObject.get(FieldNames.Tenant.NAME.name());
-        final String owner = (String) tenantDBObject.get(FieldNames.Tenant.OWNER.name());
         Set<String> users = new HashSet<String>();
         BasicDBList usersO = (BasicDBList) tenantDBObject.get(FieldNames.Tenant.USERS.name());
         if (usersO != null) {
@@ -58,7 +97,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 users.add((String) o);
             }
         }
-        Tenant result = new Tenant(name, owner);
+        Tenant result = new Tenant(name, aclStore.getAccessControlListByName(name));
         for (String user : users) {
             result.add(user);
         }

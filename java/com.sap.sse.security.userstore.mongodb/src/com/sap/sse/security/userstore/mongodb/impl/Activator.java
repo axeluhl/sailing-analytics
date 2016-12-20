@@ -7,14 +7,17 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.AccessControlListStore;
 import com.sap.sse.security.PreferenceConverterRegistrationManager;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class Activator implements BundleActivator {
 
     private static BundleContext context;
-    private ServiceRegistration<?> registration;
+    private ServiceRegistration<?> aclStoreRegistration;
+    private ServiceRegistration<?> userStoreRegistration;
     private PreferenceConverterRegistrationManager preferenceConverterRegistrationManager;
 
     static BundleContext getContext() {
@@ -28,8 +31,13 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
-        UserStoreImpl userStore = new UserStoreImpl();
-        registration = context.registerService(UserStore.class.getName(),
+        AccessControlListStoreImpl aclStore = new AccessControlListStoreImpl();
+        UserStoreImpl userStore = new UserStoreImpl(aclStore);
+        aclStore.setStore(userStore);
+        aclStore.loadRemainingACLs();
+        aclStoreRegistration = context.registerService(AccessControlListStore.class.getName(),
+                aclStore, null);
+        userStoreRegistration = context.registerService(UserStore.class.getName(),
                 userStore, null);
         preferenceConverterRegistrationManager = new PreferenceConverterRegistrationManager(bundleContext, userStore);
         Logger.getLogger(Activator.class.getName()).info("User store registered.");
@@ -45,7 +53,8 @@ public class Activator implements BundleActivator {
      */
     public void stop(BundleContext bundleContext) throws Exception {
         preferenceConverterRegistrationManager.stop();
-        registration.unregister();
+        aclStoreRegistration.unregister();
+        userStoreRegistration.unregister();
         Activator.context = null;
     }
 
