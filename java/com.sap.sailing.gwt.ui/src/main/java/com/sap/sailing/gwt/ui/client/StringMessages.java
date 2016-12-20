@@ -1576,6 +1576,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String mapControls();
     String manage2SailEvent();
     String noEventsYet();
+    String selectCompetitorImportProvider();
     String selectResultImportProvider();
     String buildVersion();
     String serverInformation();
@@ -1749,4 +1750,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String externalLinks();
     String buoyZoneRadiusInHullLengths();
     String incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
+    String importCompetitors();
+    String chooseWhichCompetitorsShouldBeImported();
+    String existingCompetitors();
+    String importedCompetitors();
+    String hasMatches();
+    String filterImportedCompetitorsByNameSailRaceFleet();
+    String errorLoadingCompetitorImportProviders(String message);
+    String errorLoadingCompetitorImportDescriptors(String message);
+    String couldNotSaveCompetitorRegistrations(String message);
+    String searchTagForImportedCompetitorPlaceholder();
 }

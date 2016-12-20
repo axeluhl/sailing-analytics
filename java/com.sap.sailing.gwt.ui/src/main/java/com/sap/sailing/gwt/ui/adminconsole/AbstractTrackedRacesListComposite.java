@@ -543,9 +543,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
         listBoxRegattas.clear();
         listBoxRegattas.addItem(stringMessages.all(), "");
-        for (String regatta : regattaNames) {
-            listBoxRegattas.addItem(regatta, regatta);
-        }
+        regattaNames.stream().sorted().forEach(regatta->listBoxRegattas.addItem(regatta, regatta));
         allRaces = newAllRaces;
         filterablePanelRaces.updateAll(allRaces);
     }

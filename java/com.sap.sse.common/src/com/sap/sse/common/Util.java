@@ -348,6 +348,12 @@ public class Util {
         }
         return result;
     }
+    
+    public static boolean equalsWithNull(String s1, String s2, boolean ignoreCase) {
+        final String s1LC = ignoreCase?s1==null?null:s1.toLowerCase():s1;
+        final String s2LC = ignoreCase?s2==null?null:s2.toLowerCase():s2;
+        return equalsWithNull(s1LC, s2LC);
+    }
 
     /**
      * <code>null</code> is permissible for both, <code>o1</code> and <code>o2</code>, where a <code>null</code> value

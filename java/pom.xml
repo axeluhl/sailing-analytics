@@ -92,6 +92,7 @@
         <module>com.sap.sse.replication</module>
         <module>com.sap.sse.threadmanager</module>
         <module>com.sap.sse.filestorage</module>
+        <module>com.sap.sailing.competitorimport</module>
         <module>com.sap.sailing.domain</module>
         <module>com.sap.sailing.geocoding</module>
         <module>com.sap.sailing.datamining</module>
