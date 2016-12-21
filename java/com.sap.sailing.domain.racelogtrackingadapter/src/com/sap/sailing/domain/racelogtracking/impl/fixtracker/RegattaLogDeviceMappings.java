@@ -277,15 +277,17 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
                 final List<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings = previousMappings.containsKey(item)
                         ? previousMappings.get(item) : Collections.emptyList();
                 
+                final List<DeviceMappingWithRegattaLogEvent<ItemT>> addedMappings= new ArrayList<>();
                 for (DeviceMappingWithRegattaLogEvent<ItemT> newMapping : newMappings.get(item)) {
                     DeviceMappingWithRegattaLogEvent<ItemT> oldMapping = findAndRemoveMapping(newMapping,
                             oldMappings);
                     if (oldMapping == null) {
-                        mappingAddedInternal(newMapping);
+                        addedMappings.add(newMapping);
                     } else if (!newMapping.getTimeRange().equals(oldMapping.getTimeRange())) {
                         mappingChangedInternal(oldMapping, newMapping);
                     }
                 }
+                mappingsAddedInternal(addedMappings, item);
                 oldMappings.forEach(this::mappingRemovedInternal);
             }
         }
@@ -310,12 +312,13 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * Called when a {@link DeviceMapping} was added.
      * 
      * @param mapping the new mapping
+     * @param item 
      */
-    protected abstract void mappingAdded(DeviceMappingWithRegattaLogEvent<ItemT> mapping);
+    protected abstract void mappingsAdded(List<DeviceMappingWithRegattaLogEvent<ItemT>> mapping, ItemT item);
     
-    private void mappingAddedInternal(DeviceMappingWithRegattaLogEvent<ItemT> mapping) {
+    private void mappingsAddedInternal(List<DeviceMappingWithRegattaLogEvent<ItemT>> mapping, ItemT item) {
         try {
-            mappingAdded(mapping);
+            mappingsAdded(mapping, item);
         } catch(Exception e) {
             logger.log(Level.SEVERE, "error while adding mapping " + mapping, e);
         }

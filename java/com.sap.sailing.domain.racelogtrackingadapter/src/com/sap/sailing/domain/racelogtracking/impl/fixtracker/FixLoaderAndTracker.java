@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -160,6 +161,51 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         startTracking();
     }
 
+    private void loadFixesForNewMappings(List<DeviceMappingWithRegattaLogEvent<WithID>> mappings, WithID item) {
+        TimeRange trackingTimeRange = getTrackingTimeRange();
+        if(item instanceof Mark) {
+            Mark mark = (Mark) item;
+            final boolean loadAllMappedFixes;
+            if(containsMappingThatIntersectsTimeRange(mappings, trackingTimeRange)) {
+                loadFixesInTimeRange(mappings, trackingTimeRange);
+                DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+                // load all mapped fixes if there was no fix in the tracking TimeRange
+                loadAllMappedFixes = (track.getFirstRawFix() == null);
+            } else {
+                // There is no mapping that intersects the tracking TimeRange at all
+                // Loading all mapped fixes instead
+                loadAllMappedFixes = true;
+            }
+            if(loadAllMappedFixes) {
+                // either got an empty track of there is no mapping for the TimeRange of the race at all.
+                // try again without constraining the mapping interval by start/end of tracking to at
+                // least attempt to get fixes at all in case there were any within the device mapping interval specified
+                mappings.forEach(mapping -> loadFixes(mapping.getTimeRange(), mapping));
+            }
+        } else {
+            loadFixesInTimeRange(mappings, trackingTimeRange);
+        }
+    }
+
+    private void loadFixesInTimeRange(List<DeviceMappingWithRegattaLogEvent<WithID>> mappings, TimeRange trackingTimeRange) {
+        mappings.forEach(mapping -> loadFixes(trackingTimeRange.intersection(mapping.getTimeRange()), mapping));
+    }
+
+    
+    /**
+     * Calls the given callback for every known mapping of the given item.
+     * 
+     * @param callback the callback to call for every known mapping
+     */
+    public boolean containsMappingThatIntersectsTimeRange(List<DeviceMappingWithRegattaLogEvent<WithID>> mappings, TimeRange timeRange) {
+        for (DeviceMappingWithRegattaLogEvent<WithID> mapping : mappings) {
+            if(timeRange.intersects(mapping.getTimeRange())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     private void loadFixes(TimeRange timeRangeToLoad, DeviceMappingWithRegattaLogEvent<? extends WithID> mapping) {
         if(timeRangeToLoad == null) {
             return;
@@ -211,16 +257,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 try {
                     @SuppressWarnings("unchecked")
                     DeviceMapping<Mark> markMapping = (DeviceMapping<Mark>) mapping;
+                    
                     gpsFixStore.loadMarkTrack(track, markMapping, timeRangeToLoad.from(), timeRangeToLoad.to());
-                    if (track.getFirstRawFix() == null) {
-                        logger.fine("Loading mark positions from outside of start/end of tracking interval (" + timeRangeToLoad.from()
-                                + ".." + timeRangeToLoad.to() + ") because no fixes were found in that interval");
-                        // got an empty track for the mark; try again without constraining the mapping interval
-                        // by start/end of tracking to at least attempt to get fixes at all in case there were any
-                        // within the device mapping interval specified
-                        gpsFixStore.loadMarkTrack(track, markMapping, /* startOfTimeWindowToLoad */ null,
-                                /* endOfTimeWindowToLoad */ null);
-                    }
                 } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                     logger.log(Level.WARNING, "Could not load mark track " + mapping.getMappedTo());
                 }
@@ -355,10 +393,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
 
         @Override
-        protected void mappingAdded(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
+        protected void mappingsAdded(List<DeviceMappingWithRegattaLogEvent<WithID>> mappings, WithID item) {
             // The listener is first added to not lose any fix after loading the initial fixes and adding the listener.
-            sensorFixStore.addListener(listener, mapping.getDevice());
-            loadFixes(getTrackingTimeRange().intersection(mapping.getTimeRange()), mapping);
+            mappings.forEach(mapping -> sensorFixStore.addListener(listener, mapping.getDevice()));
+            loadFixesForNewMappings(mappings, item);
         }
 
         @Override
