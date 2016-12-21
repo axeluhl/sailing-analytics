@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -144,6 +146,44 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         testNumberOfRawFixes(trackedRace.getTrack(comp2), 1);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark2), 1);
+    }
+    
+    /**
+     * Bug 4008
+     */
+    @Test
+    public void testFixesForMarkAreLoadedIfMappingDoesNotIntersectWithTrackingInterval() throws TransformationException, NoCorrespondingServiceRegisteredException,
+    InterruptedException {
+        Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
+        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
+        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
+
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(new MillisecondsTimePoint(200), author, 0));
+        raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(300), author, 0));
+        
+        Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
+                new WaypointImpl(mark2) }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp));
+        
+        map(mark, device, 0, 100);
+        
+        store.storeFix(device, createFix(10, 10, 20, 30, 40));
+        store.storeFix(device, createFix(20, 10, 20, 30, 40));
+        
+        DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
+                /* startDate */ null, /* endDate */null, null, null, "a", null));
+        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(regatta, race,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
+                /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));
+        
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        
+        new FixLoaderAndTracker(trackedRace, store, null);
+        trackedRace.waitForLoadingToFinish();
+        
+        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
     }
 
     @Test
