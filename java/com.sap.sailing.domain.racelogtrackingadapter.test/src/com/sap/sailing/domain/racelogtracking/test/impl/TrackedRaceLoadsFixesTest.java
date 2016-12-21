@@ -199,13 +199,13 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         testFixesForMarks(100, 300, mark2 -> {
             map(mark, device, 0, 200);
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
-            store.storeFix(device, createFix(150, 10, 20, 30, 40));
+            store.storeFix(device, createFix(250, 10, 20, 30, 40));
             
             map(mark, device, 350, 500);
             store.storeFix(device, createFix(400, 10, 20, 30, 40));
             store.storeFix(device, createFix(450, 10, 20, 30, 40));
         }, (trackedRace, mark2) -> {
-            testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 4);
+            testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 3);
         });
     }
     
