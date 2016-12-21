@@ -3455,26 +3455,25 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (startWaypoint == null) {
             result = null;
         } else {
-            Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */false);
+            Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ false);
             if (competitorPosition == null) {
                 result = null;
             } else {
                 Iterable<Mark> marks = startWaypoint.getControlPoint().getMarks();
                 Iterator<Mark> marksIterator = marks.iterator();
                 Mark first = marksIterator.next();
-                Position firstPosition = getOrCreateTrack(first).getEstimatedPosition(timePoint, /* extrapolate */false);
+                Position firstPosition = getOrCreateTrack(first).getEstimatedPosition(timePoint, /* extrapolate */ false);
                 if (firstPosition == null) {
                     result = null;
                 } else {
                     if (marksIterator.hasNext()) {
                         // it's a line / gate
                         Mark second = marksIterator.next();
-                        Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */
-                                false);
-                        final Bearing bearingGreatCircle = firstPosition.getBearingGreatCircle(secondPosition);
-                        if (bearingGreatCircle == null) {
+                        Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */ false);
+                        if (secondPosition == null) {
                             result = null;
                         } else {
+                            final Bearing bearingGreatCircle = firstPosition.getBearingGreatCircle(secondPosition);
                             Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(
                                     firstPosition, bearingGreatCircle);
                             result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
