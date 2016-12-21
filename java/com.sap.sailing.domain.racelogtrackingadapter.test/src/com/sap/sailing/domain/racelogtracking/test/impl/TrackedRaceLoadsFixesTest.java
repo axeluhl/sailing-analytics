@@ -214,7 +214,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         defineMarks(mark, mark2);
-        setStartAndEndOfTracking(400, 500);
+        setStartAndEndOfTracking(startOfTracking, endOfTracking);
 
         Course course = createCourse("course", mark, mark2);
         RaceDefinition raceDefinition = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp));
