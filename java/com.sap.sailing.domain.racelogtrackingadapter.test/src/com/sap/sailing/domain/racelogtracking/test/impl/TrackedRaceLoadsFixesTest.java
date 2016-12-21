@@ -118,6 +118,35 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark2), 1);
     }
     
+    @Test
+    public void testFixesForCompetitorsAreNotLoadedIfMappingDoesNotIntersectWithTrackingInterval()
+            throws InterruptedException {
+        testFixes(/* start of tracking */ 200, /* end of tracking */ 300, /* mappings and fixes */ () -> {
+            map(comp, device, 0, 100);
+            store.storeFix(device, createFix(10, 10, 20, 30, 40));
+            store.storeFix(device, createFix(20, 10, 20, 30, 40));
+        }, /* tests and expectations */ trackedRace -> {
+            testNumberOfRawFixes(trackedRace.getTrack(comp), 0);
+        });
+    }
+    
+    @Test
+    public void testFixesForCompetitorsAreLoadedIfMappingDoesIntersectWithTrackingIntervalFixesWithinIntersectionOnly()
+            throws InterruptedException {
+        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings and fixes */ () -> {
+            map(comp, device, 0, 200);
+            store.storeFix(device, createFix(50, 10, 20, 30, 40));
+            store.storeFix(device, createFix(150, 10, 20, 30, 40));
+            store.storeFix(device, createFix(250, 10, 20, 30, 40));
+            
+            map(comp, device, 350, 500);
+            store.storeFix(device, createFix(400, 10, 20, 30, 40));
+            store.storeFix(device, createFix(450, 10, 20, 30, 40));
+        }, /* tests and expectations */ trackedRace -> {
+            testNumberOfRawFixes(trackedRace.getTrack(comp), 1);
+        });
+    }
+    
     /** Regression test for bug 4008 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4008 */
     @Test
     public void testFixesForMarkAreLoadedIfMappingDoesNotIntersectWithTrackingInterval() throws InterruptedException {
