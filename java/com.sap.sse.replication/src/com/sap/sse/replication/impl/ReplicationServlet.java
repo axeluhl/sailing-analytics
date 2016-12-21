@@ -138,13 +138,13 @@ public class ReplicationServlet extends AbstractHttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        logger.info("Received request to apply and replicate an operation from a replica");
         InputStream is = req.getInputStream();
         DataInputStream dis = new DataInputStream(is);
         String replicableIdAsString = dis.readUTF();
         try {
             Replicable<?, ?> replicable = replicablesProvider.getReplicable(replicableIdAsString, /* wait */ false);
             if (replicable != null) {
+                logger.info("Received request to apply and replicate an operation from a replica for replicable "+replicable);
                 applyOperationToReplicable(replicable, is);
             } else {
                 logger.warning("Received operation for replicable "+replicableIdAsString+

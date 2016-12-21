@@ -18,4 +18,8 @@ public interface StringMessages extends Messages {
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
     
     String send();
+
+    String version(String buildVersion);
+
+    String unknown();
 }
