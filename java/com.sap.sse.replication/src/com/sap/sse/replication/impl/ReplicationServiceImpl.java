@@ -79,7 +79,8 @@ public class ReplicationServiceImpl implements ReplicationService {
 
     /**
      * <code>null</code>, if this instance is not currently replicating from some master; the master's descriptor
-     * otherwise
+     * otherwise; note that partial replication is supported, meaning that only operations for a subset of the
+     * {@link Replicable}s running on this server will be considered when received from the master.
      */
     private ReplicationMasterDescriptor replicatingFromMaster;
 

@@ -44,6 +44,10 @@ public class ReplicationMasterDescriptorImpl implements ReplicationMasterDescrip
 
     private QueueingConsumer consumer;
 
+    // TODO bug 2465: add the set of {@link Replicable}s that are replicated from the master represented by this descriptor,
+    // considering that this may be a subset only of the replicables running on this instance or the master server. Example:
+    //replicating only the SecurityService from some other server but being a master regarding all other Replicables.
+
     /**
      * @param messagingHostname
      *            name of the host on which the exchange is hosted to which this replica connects with a queue whose

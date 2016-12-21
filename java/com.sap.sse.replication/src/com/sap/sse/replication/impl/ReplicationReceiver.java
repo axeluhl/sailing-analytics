@@ -66,7 +66,11 @@ public class ReplicationReceiver implements Runnable {
     private static final long CHECK_INTERVAL_MILLIS = 2000; // how long (milliseconds) to pause before checking connection again
     private static final int CHECK_COUNT = 150; // how long to check, value is CHECK_INTERVAL second steps
     
+    /**
+     * descriptor of the master server from which this replicator receives messages
+     */
     private final ReplicationMasterDescriptor master;
+    
     private final ReplicablesProvider replicableProvider;
     
     /**
@@ -138,12 +142,14 @@ public class ReplicationReceiver implements Runnable {
     }
     
     /**
-     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's an
-     * {@link Iterable} of serialized {@link RacingEventServiceOperation} objects, and applies it to the
-     * {@link RacingEventService} which is obtained from the service tracker passed to this replicator at construction
-     * time.
+     * Starts fetching messages from the {@link #consumer}. After receiving a single message, assumes it's a
+     * {@link ReplicationServiceImpl#createUncompressingInputStream(InputStream) compressed} stream that first
+     * {@link DataInputStream#readUTF() encodes a UTF string} representing the {@link Replicable#getId() replicable ID},
+     * followed by a sequence of serialized {@code byte[]} objects which each can be {@link Replicable#readOperation(InputStream) de-serialized}
+     * by the receiving {@link Replicable} identified by the ID received as a prefix. This method then applies these operations to the
+     * {@link Replicable} identified by the ID, retrieved through the {@link #replicableProvider}.
      * 
-     * @see ReplicationServiceImpl#executed(RacingEventServiceOperation)
+     * @see ReplicationServiceExecutionListener#executed(OperationWithResult)
      */
     @Override
     public void run() {
@@ -170,12 +176,12 @@ public class ReplicationReceiver implements Runnable {
                         }
                     }
                 }
-                byte[] bytesFromMessage = delivery.getBody();
+                final byte[] bytesFromMessage = delivery.getBody();
                 checksPerformed = 0;
                 // Set the replicable's class's class loader as context for deserialization so that all exported classes
                 // of all required bundles/packages can be deserialized at least
                 final InputStream uncompressingInputStream = ReplicationServiceImpl.createUncompressingInputStream(new ByteArrayInputStream(bytesFromMessage));
-                String replicableIdAsString = new DataInputStream(uncompressingInputStream).readUTF();
+                final String replicableIdAsString = new DataInputStream(uncompressingInputStream).readUTF();
                 Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable != null) {
                     ObjectInputStream ois = new ObjectInputStream(uncompressingInputStream); // no special stream required; only reading a generic byte[]

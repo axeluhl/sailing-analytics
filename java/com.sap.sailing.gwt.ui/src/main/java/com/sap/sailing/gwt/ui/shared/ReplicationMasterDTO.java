@@ -8,7 +8,13 @@ public class ReplicationMasterDTO implements IsSerializable {
     private int servletPort;
     private String messagingHostname;
     private String exchangeName;
-    ReplicationMasterDTO() {}
+
+    // TODO bug 2465: capture the set of replicables that are replicated from this master; this may be a subset of the
+    // replica's / master's Replicables
+
+    ReplicationMasterDTO() {
+    }
+
     public ReplicationMasterDTO(String hostname, int servletPort, String messagingHostname, int messagingPort, String exchangeName) {
         super();
         this.hostname = hostname;
@@ -17,18 +23,23 @@ public class ReplicationMasterDTO implements IsSerializable {
         this.messagingPort = messagingPort;
         this.exchangeName = exchangeName;
     }
+
     public String getHostname() {
         return hostname;
     }
+
     public int getMessagingPort() {
         return messagingPort;
     }
+
     public int getServletPort() {
         return servletPort;
     }
+
     public String getMessagingHostname() {
         return messagingHostname;
     }
+
     public String getExchangeName() {
         return exchangeName;
     }

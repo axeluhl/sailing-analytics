@@ -268,9 +268,8 @@ public class ReplicationPanel extends FlowPanel {
                 registeredMasters.insertRow(i);
                 registeredMasters.setWidget(i, 0, new Label("Client UUID: " + replicas.getServerIdentifier()));
                 i++;
-                
                 final ReplicationMasterDTO replicatingFromMaster = replicas.getReplicatingFromMaster();
-                if (replicatingFromMaster != null) {
+                if (replicatingFromMaster != null) { // TODO bug 2465: replicating only the user service from a "domain controller master" shouldn't lead to a warning here...
                     errorReporter.reportPersistentInformation(stringMessages.warningServerIsReplica());
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
