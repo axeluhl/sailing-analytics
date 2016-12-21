@@ -3473,10 +3473,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                         if (secondPosition == null) {
                             result = null;
                         } else {
-                            final Bearing bearingGreatCircle = firstPosition.getBearingGreatCircle(secondPosition);
-                            Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(
-                                    firstPosition, bearingGreatCircle);
-                            result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                            final Bearing lineBearingGreatCircleFromFirstToSecond = firstPosition.getBearingGreatCircle(secondPosition);
+                            // if the competitor is outside of the line when projected orthogonally, compute the distance to
+                            // the nearest of the line's marks (see also bug 1952):
+                            final Bearing bearingFromFirstToCompetitor = firstPosition.getBearingGreatCircle(competitorPosition);
+                            final Bearing angleBetweenFromFirstToCompetitorAndLine = lineBearingGreatCircleFromFirstToSecond.getDifferenceTo(bearingFromFirstToCompetitor);
+                            if (angleBetweenFromFirstToCompetitorAndLine.getDegrees() < -90 || angleBetweenFromFirstToCompetitorAndLine.getDegrees() > 90) {
+                                // competitor's orthogonal projection onto the line's extension is outside of the line's ends on the side
+                                // of the first mark; use distance between competitor and first mark:
+                                result = competitorPosition.getDistance(firstPosition);
+                            } else {
+                                final Bearing bearingFromSecondToCompetitor = secondPosition.getBearingGreatCircle(competitorPosition);
+                                final Bearing angleBetweenFromSecondToCompetitorAndReversedLine = lineBearingGreatCircleFromFirstToSecond.reverse().getDifferenceTo(bearingFromSecondToCompetitor);
+                                if (angleBetweenFromSecondToCompetitorAndReversedLine.getDegrees() < -90 || angleBetweenFromSecondToCompetitorAndReversedLine.getDegrees() > 90) {
+                                    // competitor's orthogonal projection onto the line's extension is outside of the line's ends on the side
+                                    // of the first mark; use distance between competitor and first mark:
+                                    result = competitorPosition.getDistance(secondPosition);
+                                } else {
+                                    Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(
+                                            firstPosition, lineBearingGreatCircleFromFirstToSecond);
+                                    result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                                }
+                            }
                         }
                     } else {
                         result = competitorPosition.getDistance(firstPosition);

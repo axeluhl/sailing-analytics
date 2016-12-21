@@ -90,7 +90,7 @@ public class LineAnalysisTest extends TrackBasedTest {
         final Position behindOutsideOfLine = outsideOfLine.translateGreatCircle(awayFromCourseSideOrthogonalToLine, distanceBehindLine);
         trackedRace.getTrack(competitor).add(new GPSFixMovingImpl(behindOutsideOfLine, now, new KnotSpeedWithBearingImpl(5, new DegreeBearingImpl(45))));
         // the distance is that of the hypotenuse formed by the two cathesuses of 10m and 30m length, respectively:
-        assertEquals(Math.sqrt(10.*10.+30.*30.), trackedRace.getDistanceToStartLine(competitor, now).getMeters(), 0.000001);
+        assertEquals(Math.sqrt(10.*10.+30.*30.), trackedRace.getDistanceToStartLine(competitor, now).getMeters(), 0.001);
     }
 
     private Mark getMark(String name) {
