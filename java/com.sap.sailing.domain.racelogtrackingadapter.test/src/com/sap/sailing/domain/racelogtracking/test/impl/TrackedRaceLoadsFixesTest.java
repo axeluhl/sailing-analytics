@@ -152,7 +152,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixesForMarkAreLoadedIfMappingDoesNotIntersectWithTrackingInterval()
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixesForMarks(mark2 -> {
+        testFixesForMarks(200, 300, mark2 -> {
             map(mark, device, 0, 100);
             store.storeFix(device, createFix(10, 10, 20, 30, 40));
             store.storeFix(device, createFix(20, 10, 20, 30, 40));
@@ -164,7 +164,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixesForTwoMarksAreLoadedIfMappingsDoNotIntersectWithTrackingInterval()
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixesForMarks(mark2 -> {
+        testFixesForMarks(400, 500, mark2 -> {
             map(mark, device, 0, 100);
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             
@@ -179,7 +179,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixesForMarkAreLoadedIfMappingDoesIntersectWithTrackingIntervalFixesWithinIntersectionOnly()
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixesForMarks(mark2 -> {
+        testFixesForMarks(100, 300, mark2 -> {
             map(mark, device, 0, 200);
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             store.storeFix(device, createFix(150, 10, 20, 30, 40));
@@ -196,7 +196,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixesForMarkAreLoadedIfMappingDoesIntersectWithTrackingIntervalAllFixesBecauseOfNoFixesWithIntersection() 
         throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixesForMarks(mark2 -> {
+        testFixesForMarks(100, 300, mark2 -> {
             map(mark, device, 0, 200);
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             store.storeFix(device, createFix(150, 10, 20, 30, 40));
@@ -209,21 +209,22 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         });
     }
     
-    private void testFixesForMarks(Consumer<Mark> mappingAndFixes, BiConsumer<DynamicTrackedRace, Mark> tests)
+    private void testFixesForMarks(long startOfTracking, long endOfTracking, Consumer<Mark> mappingAndFixes,
+            BiConsumer<DynamicTrackedRace, Mark> tests)
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         defineMarks(mark, mark2);
         setStartAndEndOfTracking(400, 500);
-        
+
         Course course = createCourse("course", mark, mark2);
         RaceDefinition raceDefinition = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp));
-        
+
         mappingAndFixes.accept(mark2);
-        
+
         DynamicTrackedRace trackedRace = createDynamikTrackedRace(boatClass, raceDefinition);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        
+
         new FixLoaderAndTracker(trackedRace, store, null);
         trackedRace.waitForLoadingToFinish();
 
