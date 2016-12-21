@@ -6,6 +6,8 @@ import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -150,30 +152,64 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixesForMarkAreLoadedIfMappingDoesNotIntersectWithTrackingInterval()
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
-        defineMarks(mark, mark2);
-        setStartAndEndOfTracking(200, 300);
-
-        Course course = createCourse("course", mark, mark2);
-        RaceDefinition raceDefinition = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp));
-        
-        map(mark, device, 0, 100);
-        
-        store.storeFix(device, createFix(10, 10, 20, 30, 40));
-        store.storeFix(device, createFix(20, 10, 20, 30, 40));
-
-        DynamicTrackedRace trackedRace = createDynamikTrackedRace(boatClass, raceDefinition);
-        trackedRace.attachRaceLog(raceLog);
-        trackedRace.attachRegattaLog(regattaLog);
-        
-        new FixLoaderAndTracker(trackedRace, store, null);
-        trackedRace.waitForLoadingToFinish();
-        
-        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
+        testFixesForMarks(mark2 -> {
+            map(mark, device, 0, 100);
+            store.storeFix(device, createFix(10, 10, 20, 30, 40));
+            store.storeFix(device, createFix(20, 10, 20, 30, 40));
+        }, (trackedRace, mark2) -> {
+            testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
+        });
     }
     
     @Test
     public void testFixesForTwoMarksAreLoadedIfMappingsDoNotIntersectWithTrackingInterval()
+            throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
+        testFixesForMarks(mark2 -> {
+            map(mark, device, 0, 100);
+            store.storeFix(device, createFix(50, 10, 20, 30, 40));
+            
+            map(mark2, device, 200, 300);
+            store.storeFix(device, createFix(250, 10, 20, 30, 40));
+        }, (trackedRace, mark2) -> {
+            testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
+            testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark2), 1);
+        });
+    }
+    
+    @Test
+    public void testFixesForMarkAreLoadedIfMappingDoesIntersectWithTrackingIntervalFixesWithinIntersectionOnly()
+            throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
+        testFixesForMarks(mark2 -> {
+            map(mark, device, 0, 200);
+            store.storeFix(device, createFix(50, 10, 20, 30, 40));
+            store.storeFix(device, createFix(150, 10, 20, 30, 40));
+            store.storeFix(device, createFix(250, 10, 20, 30, 40));
+            
+            map(mark, device, 350, 500);
+            store.storeFix(device, createFix(400, 10, 20, 30, 40));
+            store.storeFix(device, createFix(450, 10, 20, 30, 40));
+        }, (trackedRace, mark2) -> {
+            testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
+        });
+    }
+    
+    @Test
+    public void testFixesForMarkAreLoadedIfMappingDoesIntersectWithTrackingIntervalAllFixesBecauseOfNoFixesWithIntersection() 
+        throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
+        testFixesForMarks(mark2 -> {
+            map(mark, device, 0, 200);
+            store.storeFix(device, createFix(50, 10, 20, 30, 40));
+            store.storeFix(device, createFix(150, 10, 20, 30, 40));
+            
+            map(mark, device, 350, 500);
+            store.storeFix(device, createFix(400, 10, 20, 30, 40));
+            store.storeFix(device, createFix(450, 10, 20, 30, 40));
+        }, (trackedRace, mark2) -> {
+            testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 4);
+        });
+    }
+    
+    private void testFixesForMarks(Consumer<Mark> mappingAndFixes, BiConsumer<DynamicTrackedRace, Mark> tests)
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         defineMarks(mark, mark2);
@@ -182,11 +218,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         Course course = createCourse("course", mark, mark2);
         RaceDefinition raceDefinition = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp));
         
-        map(mark, device, 0, 100);
-        store.storeFix(device, createFix(50, 10, 20, 30, 40));
-        
-        map(mark2, device, 200, 300);
-        store.storeFix(device, createFix(250, 10, 20, 30, 40));
+        mappingAndFixes.accept(mark2);
         
         DynamicTrackedRace trackedRace = createDynamikTrackedRace(boatClass, raceDefinition);
         trackedRace.attachRaceLog(raceLog);
@@ -194,9 +226,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         
         new FixLoaderAndTracker(trackedRace, store, null);
         trackedRace.waitForLoadingToFinish();
-        
-        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
-        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark2), 1);
+
+        tests.accept(trackedRace, mark2);
     }
     
     @Test
