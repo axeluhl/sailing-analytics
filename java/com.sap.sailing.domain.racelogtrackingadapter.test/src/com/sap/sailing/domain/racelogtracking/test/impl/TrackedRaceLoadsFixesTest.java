@@ -171,7 +171,34 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
     }
-
+    
+    @Test
+    public void testFixesForTwoMarksAreLoadedIfMappingsDoNotIntersectWithTrackingInterval()
+            throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
+        Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
+        defineMarks(mark, mark2);
+        setStartAndEndOfTracking(400, 500);
+        
+        Course course = createCourse("course", mark, mark2);
+        RaceDefinition raceDefinition = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp));
+        
+        map(mark, device, 0, 100);
+        store.storeFix(device, createFix(50, 10, 20, 30, 40));
+        
+        map(mark2, device, 200, 300);
+        store.storeFix(device, createFix(250, 10, 20, 30, 40));
+        
+        DynamicTrackedRace trackedRace = createDynamikTrackedRace(boatClass, raceDefinition);
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.attachRegattaLog(regattaLog);
+        
+        new FixLoaderAndTracker(trackedRace, store, null);
+        trackedRace.waitForLoadingToFinish();
+        
+        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
+        testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark2), 1);
+    }
+    
     @Test
     public void metadataStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException {
         assertEquals(0, store.getNumberOfFixes(device));
