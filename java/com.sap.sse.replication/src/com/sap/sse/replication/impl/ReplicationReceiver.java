@@ -182,6 +182,7 @@ public class ReplicationReceiver implements Runnable {
                 // of all required bundles/packages can be deserialized at least
                 final InputStream uncompressingInputStream = ReplicationServiceImpl.createUncompressingInputStream(new ByteArrayInputStream(bytesFromMessage));
                 final String replicableIdAsString = new DataInputStream(uncompressingInputStream).readUTF();
+                // TODO bug 2465: decide based on the master descriptor whether we want to process this message; if it's for a Replicable we're not replicating from that master, drop the message
                 Replicable<?, ?> replicable = replicableProvider.getReplicable(replicableIdAsString, /* wait */ false);
                 if (replicable != null) {
                     ObjectInputStream ois = new ObjectInputStream(uncompressingInputStream); // no special stream required; only reading a generic byte[]
