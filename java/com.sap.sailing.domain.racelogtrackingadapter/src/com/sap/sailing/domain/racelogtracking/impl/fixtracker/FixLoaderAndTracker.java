@@ -136,13 +136,45 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         final DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
                         final GPSFix firstFixAtOrAfter;
                         final boolean forceFix;
-                        markTrack.lockForRead();
-                        try {
-                            forceFix = Util.isEmpty(markTrack.getRawFixes())
-                                    || (firstFixAtOrAfter = markTrack.getFirstFixAtOrAfter(timePoint)) != null
-                                            && firstFixAtOrAfter.getTimePoint().equals(timePoint);
-                        } finally {
-                            markTrack.unlockAfterRead();
+                        if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
+                            forceFix = false;
+                        } else {
+                            markTrack.lockForRead();
+                            try {
+                                if (Util.isEmpty(markTrack.getRawFixes())
+                                        || (firstFixAtOrAfter = markTrack.getFirstFixAtOrAfter(timePoint)) != null
+                                                && firstFixAtOrAfter.getTimePoint().equals(timePoint)) {
+                                    // either the first fix or overwriting an existing one
+                                    forceFix = true;
+                                } else {
+                                    // checking if the given fix is "better" than an existing one
+                                    TimePoint startOfTracking = trackedRace.getStartOfTracking();
+                                    TimePoint endOfTracking = trackedRace.getStartOfTracking();
+                                    if(startOfTracking != null) {
+                                        GPSFix fixAfterStartOfTracking = markTrack.getFirstFixAtOrAfter(startOfTracking);
+                                        if(fixAfterStartOfTracking == null || !trackedRace.isWithinStartAndEndOfTracking(fixAfterStartOfTracking.getTimePoint())) {
+                                            if (timePoint.before(startOfTracking)) {
+                                                GPSFix fixBeforeStartOfTracking = markTrack
+                                                        .getLastFixAtOrBefore(startOfTracking);
+                                                forceFix = (fixBeforeStartOfTracking == null
+                                                        || fixBeforeStartOfTracking.getTimePoint().before(timePoint));
+                                            } else if (endOfTracking != null && timePoint.after(endOfTracking)) {
+                                                GPSFix fixAfterEndOfTracking = markTrack.getFirstFixAtOrAfter(endOfTracking);
+                                                forceFix = (fixAfterEndOfTracking == null
+                                                        || fixAfterEndOfTracking.getTimePoint().after(timePoint));
+                                            } else {
+                                                forceFix = false;
+                                            }
+                                        } else {
+                                            forceFix = false;
+                                        }
+                                    } else {
+                                        forceFix = false;
+                                    }
+                                }
+                            } finally {
+                                markTrack.unlockAfterRead();
+                            }
                         }
                         trackedRace.recordFix(mark, (GPSFix) fix, /* only when in tracking interval */ !forceFix);
                     }
