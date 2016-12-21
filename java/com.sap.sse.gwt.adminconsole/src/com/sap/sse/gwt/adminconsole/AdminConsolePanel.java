@@ -152,7 +152,7 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
 
     public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
             ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
-            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
+            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, StringMessages stringMessages) {
         super(Unit.EM);
         this.permissionsForRoleProvider = permissionsForRoleProvider;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
@@ -206,7 +206,7 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
         informationPanel.setSize("100%", "95%");
         informationPanel.setSpacing(10);
         informationPanel.add(errorReporter.getPersistentInformationWidget(), DockPanel.CENTER);
-        SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter);
+        SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter, stringMessages);
         sysinfoPanel.ensureDebugId("SystemInformation");
         final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
         sysinfoPanel.add(releaseNotesLink);
