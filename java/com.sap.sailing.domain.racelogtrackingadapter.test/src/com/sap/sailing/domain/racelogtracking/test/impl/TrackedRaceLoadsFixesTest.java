@@ -1,45 +1,34 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
-import com.sap.sailing.domain.base.Sideline;
-import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
-import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.FixLoaderAndTracker;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
-import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
-import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
-import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
-import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -47,6 +36,12 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
+    
+    private final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
+    private final Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null,
+            null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    private final Course course =  new CourseImpl("course", Arrays.asList(new WaypointImpl(mark), new WaypointImpl(mark2)));
+    private final RaceDefinition raceDefinition = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp, comp2));
 
     @Rule
     public Timeout TrackedRaceLoadsFixesTestTimeout = new Timeout(3 * 60 * 1000);
@@ -54,15 +49,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         DeviceIdentifier markDevice = new SmartphoneImeiIdentifier("imei2");
-        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
-        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
-        Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
-                new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
+        defineMarksOnRegattaLog(mark, mark2);
         map(comp, device, 0, 10000);
         map(mark, markDevice, 0, 10000);
 
@@ -73,13 +61,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         store.storeFix(markDevice, createFix(1100, 10, 20, 30, 40));
         store.storeFix(markDevice, createFix(2100, 10, 20, 30, 40));
 
-        DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
-                null, /* endDate */null, null, null, "a", null));
-        final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
-                /* useMarkPassingCalculator */ false,
-                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
+        final DynamicTrackedRaceImpl trackedRace = createDynamikTrackedRace(boatClass, raceDefinition);
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(1000));
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2000));
         new FixLoaderAndTracker(trackedRace, store, null);
@@ -102,16 +84,9 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void areFixesStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException,
             InterruptedException {
-        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
-        Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
-        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
-        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
+        defineMarksOnRegattaLog(mark, mark2);
         DeviceIdentifier device2 = new SmartphoneImeiIdentifier("imei2");
         DeviceIdentifier device3 = new SmartphoneImeiIdentifier("imei3");
-        Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
-                new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp, comp2));
 
         map(comp, device, 0, 20000);
         map(comp2, device2, 0, 600);
@@ -129,12 +104,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(i + 1000, 10, 20, 30, 40));
         }
 
-        DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
-        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
-                /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));
+        DynamicTrackedRace trackedRace = createDynamikTrackedRace(boatClass, raceDefinition);
 
         new FixLoaderAndTracker(trackedRace, store, null);
         
@@ -148,38 +118,39 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark2), 1);
     }
     
-    /** Bug 4008 */
+    /** Regression test for bug 4008 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4008 */
     @Test
-    public void testFixesForMarkAreLoadedIfMappingDoesNotIntersectWithTrackingInterval()
-            throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixesForMarks(200, 300, mark2 -> {
+    public void testFixesForMarkAreLoadedIfMappingDoesNotIntersectWithTrackingInterval() throws InterruptedException {
+        testFixes(/* start of tracking */ 200, /* end of tracking */ 300, /* mappings and fixes */ () -> {
             map(mark, device, 0, 100);
             store.storeFix(device, createFix(10, 10, 20, 30, 40));
             store.storeFix(device, createFix(20, 10, 20, 30, 40));
-        }, (trackedRace, mark2) -> {
+        }, /* tests and expectations */ trackedRace -> {
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
         });
     }
     
+    /** Regression test for bug 4008 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4008 */
     @Test
     public void testFixesForTwoMarksAreLoadedIfMappingsDoNotIntersectWithTrackingInterval()
-            throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixesForMarks(400, 500, mark2 -> {
+            throws InterruptedException {
+        testFixes(/* start of tracking */ 400, /* end of tracking */ 500, /* mappings and fixes */ () -> {
             map(mark, device, 0, 100);
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
-            
+
             map(mark2, device, 200, 300);
             store.storeFix(device, createFix(250, 10, 20, 30, 40));
-        }, (trackedRace, mark2) -> {
+        }, /* tests and expectations */ trackedRace -> {
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark2), 1);
         });
     }
     
+    /** Regression test for bug 4008 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4008 */
     @Test
     public void testFixesForMarkAreLoadedIfMappingDoesIntersectWithTrackingIntervalFixesWithinIntersectionOnly()
-            throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixesForMarks(100, 300, mark2 -> {
+            throws InterruptedException {
+        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings and fixes */ () -> {
             map(mark, device, 0, 200);
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             store.storeFix(device, createFix(150, 10, 20, 30, 40));
@@ -188,15 +159,16 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             map(mark, device, 350, 500);
             store.storeFix(device, createFix(400, 10, 20, 30, 40));
             store.storeFix(device, createFix(450, 10, 20, 30, 40));
-        }, (trackedRace, mark2) -> {
+        }, /* tests and expectations */ trackedRace -> {
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
         });
     }
     
+    /** Regression test for bug 4008 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4008 */
     @Test
     public void testFixesForMarkAreLoadedIfMappingDoesIntersectWithTrackingIntervalAllFixesBecauseOfNoFixesWithIntersection() 
         throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixesForMarks(100, 300, mark2 -> {
+        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings and fixes */ () -> {
             map(mark, device, 0, 200);
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             store.storeFix(device, createFix(250, 10, 20, 30, 40));
@@ -204,31 +176,26 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             map(mark, device, 350, 500);
             store.storeFix(device, createFix(400, 10, 20, 30, 40));
             store.storeFix(device, createFix(450, 10, 20, 30, 40));
-        }, (trackedRace, mark2) -> {
+        }, /* tests and expectations */ trackedRace -> {
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 3);
         });
     }
     
-    private void testFixesForMarks(long startOfTracking, long endOfTracking, Consumer<Mark> mappingAndFixes,
-            BiConsumer<DynamicTrackedRace, Mark> tests)
-            throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
-        defineMarks(mark, mark2);
-        setStartAndEndOfTracking(startOfTracking, endOfTracking);
+    private void testFixes(long startOfTracking, long endOfTracking, Runnable mappingAndFixes,
+            Consumer<DynamicTrackedRace> tests) throws InterruptedException {
+        defineMarksOnRegattaLog(mark, mark2);
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(new MillisecondsTimePoint(startOfTracking), author, 0));
+        raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(endOfTracking), author, 0));
 
-        Course course = createCourse("course", mark, mark2);
-        RaceDefinition raceDefinition = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp));
-
-        mappingAndFixes.accept(mark2);
+        mappingAndFixes.run();
 
         DynamicTrackedRace trackedRace = createDynamikTrackedRace(boatClass, raceDefinition);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-
         new FixLoaderAndTracker(trackedRace, store, null);
         trackedRace.waitForLoadingToFinish();
 
-        tests.accept(trackedRace, mark2);
+        tests.accept(trackedRace);
     }
     
     @Test
