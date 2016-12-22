@@ -1760,4 +1760,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String errorLoadingCompetitorImportDescriptors(String message);
     String couldNotSaveCompetitorRegistrations(String message);
     String searchTagForImportedCompetitorPlaceholder();
+    String version(String version);
 }
