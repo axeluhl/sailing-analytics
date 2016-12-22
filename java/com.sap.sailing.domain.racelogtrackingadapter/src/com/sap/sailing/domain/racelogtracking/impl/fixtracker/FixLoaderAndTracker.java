@@ -153,12 +153,16 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                     if(startOfTracking != null) {
                                         GPSFix fixAfterStartOfTracking = markTrack.getFirstFixAtOrAfter(startOfTracking);
                                         if(fixAfterStartOfTracking == null || !trackedRace.isWithinStartAndEndOfTracking(fixAfterStartOfTracking.getTimePoint())) {
+                                            // There is no fix in the tracking interval, so this fix could be "better" than ones already available in the track
+                                            // Better means closer before/after the beginning/end of the tracking interval
                                             if (timePoint.before(startOfTracking)) {
+                                                // check if it is closer to the beginning of the tracking interval
                                                 GPSFix fixBeforeStartOfTracking = markTrack
                                                         .getLastFixAtOrBefore(startOfTracking);
                                                 forceFix = (fixBeforeStartOfTracking == null
                                                         || fixBeforeStartOfTracking.getTimePoint().before(timePoint));
                                             } else if (endOfTracking != null && timePoint.after(endOfTracking)) {
+                                                // check if it is closer to the end of the tracking interval
                                                 GPSFix fixAfterEndOfTracking = markTrack.getFirstFixAtOrAfter(endOfTracking);
                                                 forceFix = (fixAfterEndOfTracking == null
                                                         || fixAfterEndOfTracking.getTimePoint().after(timePoint));
@@ -166,6 +170,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                                 forceFix = false;
                                             }
                                         } else {
+                                            // there is already a fix in the tracking interval
                                             forceFix = false;
                                         }
                                     } else {
