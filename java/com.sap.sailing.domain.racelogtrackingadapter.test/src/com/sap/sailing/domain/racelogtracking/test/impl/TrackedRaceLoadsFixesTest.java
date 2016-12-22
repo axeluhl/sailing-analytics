@@ -141,9 +141,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             map(comp, device, 350, 500);
             store.storeFix(device, createFix(400, 10, 20, 30, 40));
             store.storeFix(device, createFix(450, 10, 20, 30, 40));
-        }, /* tests and expectations */ trackedRace -> {
-            testNumberOfRawFixes(trackedRace.getTrack(comp), 1);
-        });
+        }, /* tests and expectations */ trackedRace -> testNumberOfRawFixes(trackedRace.getTrack(comp), 1));
     }
     
     /** Regression test for bug 4008 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4008 */
