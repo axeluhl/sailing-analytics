@@ -276,11 +276,9 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
             } else {
                 final List<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings = previousMappings.containsKey(item)
                         ? previousMappings.get(item) : Collections.emptyList();
-                
-                final List<DeviceMappingWithRegattaLogEvent<ItemT>> addedMappings= new ArrayList<>();
+                final List<DeviceMappingWithRegattaLogEvent<ItemT>> addedMappings = new ArrayList<>();
                 for (DeviceMappingWithRegattaLogEvent<ItemT> newMapping : newMappings.get(item)) {
-                    DeviceMappingWithRegattaLogEvent<ItemT> oldMapping = findAndRemoveMapping(newMapping,
-                            oldMappings);
+                    DeviceMappingWithRegattaLogEvent<ItemT> oldMapping = findAndRemoveMapping(newMapping, oldMappings);
                     if (oldMapping == null) {
                         addedMappings.add(newMapping);
                     } else if (!newMapping.getTimeRange().equals(oldMapping.getTimeRange())) {
