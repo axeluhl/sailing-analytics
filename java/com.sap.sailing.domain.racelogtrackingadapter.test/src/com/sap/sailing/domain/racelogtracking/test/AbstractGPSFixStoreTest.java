@@ -76,7 +76,6 @@ public class AbstractGPSFixStoreTest {
         service = new RacingEventServiceImpl(null, null, serviceFinderFactory);
         raceLog = new RaceLogImpl("racelog");
         regattaLog = new RegattaLogImpl("regattalog");
-        
         store = new MongoSensorFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
                 serviceFinderFactory);
     }
@@ -110,11 +109,10 @@ public class AbstractGPSFixStoreTest {
         for (int i = 0; i < marks.length; i++) {
             regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(i + 1), author,
                     new MillisecondsTimePoint(1), 0, marks[i]));
-
         }
     }
 
-    protected DynamicTrackedRaceImpl createDynamikTrackedRace(BoatClass boatClass, RaceDefinition raceDefinition) {
+    protected DynamicTrackedRaceImpl createDynamicTrackedRace(BoatClass boatClass, RaceDefinition raceDefinition) {
         DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
                 /* startDate */ null, /* endDate */null, null, null, "a", null));

@@ -61,7 +61,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         store.storeFix(markDevice, createFix(1100, 10, 20, 30, 40));
         store.storeFix(markDevice, createFix(2100, 10, 20, 30, 40));
 
-        final DynamicTrackedRaceImpl trackedRace = createDynamikTrackedRace(boatClass, raceDefinition);
+        final DynamicTrackedRaceImpl trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(1000));
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2000));
         new FixLoaderAndTracker(trackedRace, store, null);
@@ -104,7 +104,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(i + 1000, 10, 20, 30, 40));
         }
 
-        DynamicTrackedRace trackedRace = createDynamikTrackedRace(boatClass, raceDefinition);
+        DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
 
         new FixLoaderAndTracker(trackedRace, store, null);
         
@@ -138,7 +138,6 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             store.storeFix(device, createFix(150, 10, 20, 30, 40));
             store.storeFix(device, createFix(250, 10, 20, 30, 40));
-            
             map(comp, device, 350, 500);
             store.storeFix(device, createFix(400, 10, 20, 30, 40));
             store.storeFix(device, createFix(450, 10, 20, 30, 40));
@@ -154,9 +153,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             map(mark, device, 0, 100);
             store.storeFix(device, createFix(10, 10, 20, 30, 40));
             store.storeFix(device, createFix(20, 10, 20, 30, 40));
-        }, /* tests and expectations */ trackedRace -> {
-            testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
-        });
+        }, /* tests and expectations */ trackedRace -> testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2));
     }
     
     /** Regression test for bug 4008 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4008 */
@@ -166,7 +163,6 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         testFixes(/* start of tracking */ 400, /* end of tracking */ 500, /* mappings and fixes */ () -> {
             map(mark, device, 0, 100);
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
-
             map(mark2, device, 200, 300);
             store.storeFix(device, createFix(250, 10, 20, 30, 40));
         }, /* tests and expectations */ trackedRace -> {
@@ -201,7 +197,6 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             map(mark, device, 0, 200);
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             store.storeFix(device, createFix(250, 10, 20, 30, 40));
-            
             map(mark, device, 350, 500);
             store.storeFix(device, createFix(400, 10, 20, 30, 40));
             store.storeFix(device, createFix(450, 10, 20, 30, 40));
@@ -213,9 +208,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixForMarkIsAddedIfBeforeTrackingIntervalAndNoOtherFixExists() 
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> {
-            map(mark, device, 0, 200);
-        }, /* fixes and tests/expectations */ trackedRace -> {
+        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> map(mark, device, 0, 200),
+                /* fixes and tests/expectations */ trackedRace -> {
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
         });
@@ -224,9 +218,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixForMarkIsAddedIfAfterTrackingIntervalAndNoOtherFixExists() 
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> {
-            map(mark, device, 0, 400);
-        }, /* fixes and tests/expectations */ trackedRace -> {
+        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> map(mark, device, 0, 400), /* fixes and tests/expectations */ trackedRace -> {
             store.storeFix(device, createFix(350, 10, 20, 30, 40));
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
         });
@@ -235,9 +227,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixForMarkIsAddedIfBeforeTrackingIntervalAndBetterThanAnExistingOne() 
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> {
-            map(mark, device, 0, 400);
-        }, /* fixes and tests/expectations */ trackedRace -> {
+        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> map(mark, device, 0, 400),
+                /* fixes and tests/expectations */ trackedRace -> {
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             store.storeFix(device, createFix(75, 10, 20, 30, 40));
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
@@ -247,9 +238,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixForMarkIsNotAddedIfBeforeTrackingIntervalAndWorseThanAnExistingOne() 
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> {
-            map(mark, device, 0, 400);
-        }, /* fixes and tests/expectations */ trackedRace -> {
+        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> map(mark, device, 0, 400),
+                /* fixes and tests/expectations */ trackedRace -> {
             store.storeFix(device, createFix(75, 10, 20, 30, 40));
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
@@ -259,9 +249,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixForMarkIsAddedIfAfterTrackingIntervalAndBetterThanAnExistingOne() 
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> {
-            map(mark, device, 0, 400);
-        }, /* fixes and tests/expectations */ trackedRace -> {
+        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> map(mark, device, 0, 400),
+                /* fixes and tests/expectations */ trackedRace -> {
             store.storeFix(device, createFix(375, 10, 20, 30, 40));
             store.storeFix(device, createFix(350, 10, 20, 30, 40));
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
@@ -271,9 +260,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixForMarkIsNotAddedIfAfterTrackingIntervalAndWorseThanAnExistingOne() 
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> {
-            map(mark, device, 0, 400);
-        }, /* fixes and tests/expectations */ trackedRace -> {
+        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> map(mark, device, 0, 400),
+                /* fixes and tests/expectations */ trackedRace -> {
             store.storeFix(device, createFix(350, 10, 20, 30, 40));
             store.storeFix(device, createFix(375, 10, 20, 30, 40));
             testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
@@ -283,9 +271,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     @Test
     public void testFixForMarkIsNotAddedIfNotWithinTrackingIntervalAndFixWithinTrackingIntervalExists() 
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
-        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> {
-            map(mark, device, 0, 400);
-        }, /* fixes and tests/expectations */ trackedRace -> {
+        testFixes(/* start of tracking */ 100, /* end of tracking */ 300, /* mappings */ () -> map(mark, device, 0, 400),
+                /* fixes and tests/expectations */ trackedRace -> {
             store.storeFix(device, createFix(200, 10, 20, 30, 40));
             store.storeFix(device, createFix(50, 10, 20, 30, 40));
             store.storeFix(device, createFix(350, 10, 20, 30, 40));
@@ -301,7 +288,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
         beforeTrackingStarted.run();
 
-        DynamicTrackedRace trackedRace = createDynamikTrackedRace(boatClass, raceDefinition);
+        DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         new FixLoaderAndTracker(trackedRace, store, null);
