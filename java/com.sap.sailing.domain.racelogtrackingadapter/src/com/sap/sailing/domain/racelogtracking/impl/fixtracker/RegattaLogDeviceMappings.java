@@ -285,6 +285,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
                     }
                 }
                 mappingsAddedInternal(addedMappings, item);
+                // oldMappings now still contains those mappings that were not entirely substituted by the new mappings
                 oldMappings.forEach(this::mappingRemovedInternal);
             }
         }
@@ -322,7 +323,10 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
 
     /**
      * Called when a {@link DeviceMapping} was changed regarding its mapped time range.
-     * This can occur if an open ended mapping is being closed or a close event gets revoked.
+     * This can occur if an open ended mapping is being closed or a close event gets revoked
+     * or a new mapping is added that may partly overlap with an old mapping such that only
+     * parts of the fixes covered by the new mapping need to be loaded (the ones not already
+     * covered by the old mapping).
      * 
      * @param oldMapping the old mapping
      * @param newMapping the new mapping

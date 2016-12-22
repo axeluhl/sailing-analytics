@@ -153,9 +153,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(350, 10, 20, 30, 40)); // in second mapping
         }, /* tests and expectations */ trackedRace -> {
             testNumberOfRawFixes(trackedRace.getTrack(comp), 3);
-            map(comp, device, 0, 500);                              // covers fix at 250ms
-            store.storeFix(device, createFix(400, 10, 20, 30, 40)); // in third mapping
-            testNumberOfRawFixes(trackedRace.getTrack(comp), 5);
+            map(comp, device, 0, 500);                              // covers fix at 250ms; assert that only that fix is loaded
+            testNumberOfRawFixes(trackedRace.getTrack(comp), 4);
         });
     }
     
