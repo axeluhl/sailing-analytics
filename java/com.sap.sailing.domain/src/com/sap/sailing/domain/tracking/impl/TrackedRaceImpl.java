@@ -913,22 +913,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             TimePoint newStartTime = null;
             TimePoint newStartTimeWithoutInferenceFromStartMarkPassings = null;
             for (RaceLog raceLog : attachedRaceLogs.values()) {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
-                }
+                logger.finest(()->"Analyzing race log "+raceLog+" for race "+this.getRace().getName());
                 newStartTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
                 if (newStartTime != null) {
                     newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Found start time "+newStartTime+" in race log "+raceLog+" for race "+this.getRace().getName());
-                    }
+                    final TimePoint finalNewStartTime = newStartTime;
+                    logger.finest(()->"Found start time "+finalNewStartTime+" in race log "+raceLog+" for race "+this.getRace().getName());
                     break;
                 }
             }
             if (newStartTime == null) {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("No start time found in race logs for race "+getRace().getName());
-                }
+                logger.finest(()->"No start time found in race logs for race "+getRace().getName());
                 newStartTime = getStartTimeReceived();
                 if (newStartTime != null) {
                     newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
@@ -951,14 +946,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
                                 newStartTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
                                         - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
-                                if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+newStartTime);
-                                }
+                                final TimePoint finalNewStartTime = newStartTime;
+                                logger.finest(()->"Using start mark passings for start time of race "+this.getRace().getName()+": "+finalNewStartTime);
                             } else {
                                 newStartTime = startTimeReceived;
-                                if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest("Using start mark received for race "+this.getRace().getName()+": "+newStartTime);
-                                }
+                                final TimePoint finalNewStartTime = newStartTime;
+                                logger.finest(()->"Using start mark received for race "+this.getRace().getName()+": "+finalNewStartTime);
                             }
                         }
                     } else {

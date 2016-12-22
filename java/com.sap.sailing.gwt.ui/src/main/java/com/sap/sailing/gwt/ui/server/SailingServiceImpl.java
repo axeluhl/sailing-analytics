@@ -1816,9 +1816,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             GPSFixMoving fix = fixIter.next();
                             if (fix.getTimePoint().before(toTimePointExcluding) ||
                                     (extrapolate && fix.getTimePoint().equals(toTimePointExcluding))) {
-                                if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest(""+competitor.getName()+": " + fix);
-                                }
+                                logger.finest(()->""+competitor.getName()+": " + fix);
                                 fixes.add(fix);
                             } else {
                                 break;
@@ -4555,7 +4553,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void stopAllReplicas() {
         try {
-            getReplicationService().stopAllReplica();
+            getReplicationService().stopAllReplicas();
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);

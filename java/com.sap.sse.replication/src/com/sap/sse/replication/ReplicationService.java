@@ -85,7 +85,7 @@ public interface ReplicationService {
     /**
      * Stops all replica currently registered with this server.
      */
-    void stopAllReplica() throws IOException;
+    void stopAllReplicas() throws IOException;
     
     /**
      * Returns an unique server identifier

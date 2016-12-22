@@ -12,7 +12,9 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -242,10 +244,11 @@ public class ReplicationServiceImpl implements ReplicationService {
     private class LifeCycleListener implements ReplicableLifeCycleListener {
         @Override
         public void replicableAdded(Replicable<?, ?> replicable) {
-            // add a replication listener to the new replicable only if there are replicas currently registered
+            // add a replication listener to the new replicable only if there are replicas currently registered...
             synchronized (replicationInstancesManager) {
-                if (replicationInstancesManager.hasReplicas()) {
-                    addNewOperationExecutionListener(replicable);
+                // .. and at least one of them wants to replicate the replicable with that ID
+                if (Util.contains(replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating(), replicable.getId().toString())) {
+                    ensureOperationExecutionListener(replicable);
                 }
             }
         }
@@ -341,12 +344,16 @@ public class ReplicationServiceImpl implements ReplicationService {
     private Iterable<Replicable<?, ?>> getReplicables() {
         return replicablesProvider.getReplicables();
     }
-
+    
+    private Replicable<?, ?> getReplicable(String replicableIdAsString, boolean wait) {
+        return replicablesProvider.getReplicable(replicableIdAsString, wait);
+    }
+    
     @Override
     public void registerReplica(ReplicaDescriptor replica) throws IOException {
         synchronized (replicationInstancesManager) {
             if (!replicationInstancesManager.hasReplicas()) {
-                addAsListenerToReplicables();
+                addAsListenerToReplicables(replica.getReplicableIdsAsStrings());
                 synchronized (this) {
                     if (masterChannel == null) {
                         masterChannel = createMasterChannelAndDeclareFanoutExchange();
@@ -358,25 +365,34 @@ public class ReplicationServiceImpl implements ReplicationService {
         logger.info("Registered replica " + replica);
     }
 
-    private void addAsListenerToReplicables() {
-        for (Replicable<?, ?> replicable : getReplicables()) {
-            addNewOperationExecutionListener(replicable);
+    private void addAsListenerToReplicables(String[] replicableIdsAsStringForReplicablesToReplicate) {
+        for (final String replicableIdAsStringForReplicableToReplicate : replicableIdsAsStringForReplicablesToReplicate) {
+            Replicable<?, ?> replicable = getReplicable(replicableIdAsStringForReplicableToReplicate, /* wait */ true);
+            ensureOperationExecutionListener(replicable);
         }
     }
 
-    private <S> void addNewOperationExecutionListener(Replicable<S, ?> replicable) {
-        final ReplicationServiceExecutionListener<S> listener = new ReplicationServiceExecutionListener<S>(this,
-                replicable);
-        executionListenersByReplicableIdAsString.put(replicable.getId().toString(), listener);
+    /**
+     * If no listener exists yet for {@code replicable}, a new one is created, registered as listener on
+     * {@code replicable} and remembered in {@link #executionListenersByReplicableIdAsString}. Otherwise, this method is
+     * a no-op.
+     */
+    private <S> void ensureOperationExecutionListener(Replicable<S, ?> replicable) {
+        if (!executionListenersByReplicableIdAsString.containsKey(replicable.getId().toString())) {
+            final ReplicationServiceExecutionListener<S> listener = new ReplicationServiceExecutionListener<S>(this, replicable);
+            executionListenersByReplicableIdAsString.put(replicable.getId().toString(), listener);
+        }
     }
 
     @Override
     public ReplicaDescriptor unregisterReplica(UUID replicaUuid) throws IOException {
         logger.info("Unregistering replica with ID " + replicaUuid);
         synchronized (replicationInstancesManager) {
+            final Iterable<String> oldReplicablesInReplication = replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating();
             final ReplicaDescriptor unregisteredReplica = replicationInstancesManager.unregisterReplica(replicaUuid);
-            if (!replicationInstancesManager.hasReplicas()) {
-                removeAsListenerFromReplicables();
+            final Iterable<String> newReplicablesInReplication = replicationInstancesManager.getAllReplicableIdsAtLeastOneReplicaIsReplicating();
+            for (final String idAsStringOfReplicableNoReplicaIsInterestedInAnymore : Util.removeAll(newReplicablesInReplication, Util.addAll(oldReplicablesInReplication, new HashSet<>()))) {
+                removeAsListenerFromReplicable(idAsStringOfReplicableNoReplicaIsInterestedInAnymore);
                 synchronized (this) {
                     if (masterChannel != null) {
                         masterChannel.getConnection().close();
@@ -392,6 +408,16 @@ public class ReplicationServiceImpl implements ReplicationService {
     public void unregisterReplica(ReplicaDescriptor replica) throws IOException {
         logger.info("Unregistering replica " + replica);
         unregisterReplica(replica.getUuid());
+    }
+
+    private void removeAsListenerFromReplicable(String idAsStringOfReplicableNoReplicaIsInterestedInAnymore) {
+        ReplicationServiceExecutionListener<?> listener = executionListenersByReplicableIdAsString.remove(idAsStringOfReplicableNoReplicaIsInterestedInAnymore);
+        if (listener != null) {
+            logger.info("Unsubscribed replication listener from replicable with ID "+idAsStringOfReplicableNoReplicaIsInterestedInAnymore);
+            listener.unsubscribe();
+        } else {
+            logger.warning("Couldn't find a replication listener on replicable with ID "+idAsStringOfReplicableNoReplicaIsInterestedInAnymore);
+        }
     }
 
     private void removeAsListenerFromReplicables() {
@@ -758,7 +784,7 @@ public class ReplicationServiceImpl implements ReplicationService {
     }
 
     @Override
-    public void stopAllReplica() throws IOException {
+    public void stopAllReplicas() throws IOException {
         if (replicationInstancesManager.hasReplicas()) {
             replicationInstancesManager.removeAll();
             removeAsListenerFromReplicables();

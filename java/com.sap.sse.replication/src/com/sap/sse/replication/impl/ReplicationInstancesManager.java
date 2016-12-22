@@ -1,7 +1,9 @@
 package com.sap.sse.replication.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -76,6 +78,11 @@ public class ReplicationInstancesManager {
 
     public ReplicationMasterDescriptor getReplicationMasterDescriptor() {
         return replicationMasterDescriptor;
+    }
+    
+    public Iterable<String> getAllReplicableIdsAtLeastOneReplicaIsReplicating() {
+        return replicaDescriptors.values().stream().map(replicableDescriptor->Arrays.asList(replicableDescriptor.getReplicableIdsAsStrings())).reduce(new HashSet<String>(),
+                (result, ids)->{result.addAll(ids); return result;}, (r1, r2)->{r1.addAll(r2); return r1;});
     }
     
     public void registerReplica(ReplicaDescriptor replica) {

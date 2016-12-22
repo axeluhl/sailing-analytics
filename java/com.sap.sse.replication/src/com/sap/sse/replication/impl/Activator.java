@@ -173,7 +173,7 @@ public class Activator implements BundleActivator {
             serverReplicationMasterService.stopToReplicateFromMaster();
         }
         // stop sending stuff to the exchange for other replicas (if this is a master)
-        serverReplicationMasterService.stopAllReplica();
+        serverReplicationMasterService.stopAllReplicas();
     }
     
     public static BundleContext getDefaultContext() {
