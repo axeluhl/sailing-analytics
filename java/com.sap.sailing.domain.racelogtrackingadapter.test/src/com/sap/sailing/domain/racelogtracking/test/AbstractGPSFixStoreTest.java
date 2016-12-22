@@ -76,12 +76,17 @@ public class AbstractGPSFixStoreTest {
         service = new RacingEventServiceImpl(null, null, serviceFinderFactory);
         raceLog = new RaceLogImpl("racelog");
         regattaLog = new RegattaLogImpl("regattalog");
+        dropPersistedData();
         store = new MongoSensorFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
                 serviceFinderFactory);
     }
 
     @After
     public void after() {
+        dropPersistedData();
+    }
+
+    private void dropPersistedData() {
         MongoObjectFactoryImpl mongoOF = (MongoObjectFactoryImpl) service.getMongoObjectFactory();
         mongoOF.getGPSFixCollection().drop();
         mongoOF.getGPSFixMetadataCollection().drop();

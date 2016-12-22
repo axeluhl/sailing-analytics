@@ -141,6 +141,39 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(450, 10, 20, 30, 40));
         }, /* tests and expectations */ trackedRace -> testNumberOfRawFixes(trackedRace.getTrack(comp), 1));
     }
+
+    @Test
+    public void testAddingMappingLoadsFixesPreviouslyNotCovered() throws InterruptedException {
+        testFixes(/* start of tracking */ 10, /* end of tracking */ 500, /* mappings and fixes */ () -> {
+            map(comp, device, 0, 200);
+            map(comp, device, 300, 400);
+            store.storeFix(device, createFix(50, 10, 20, 30, 40));  // in first mapping
+            store.storeFix(device, createFix(150, 10, 20, 30, 40)); // in first mapping
+            store.storeFix(device, createFix(250, 10, 20, 30, 40)); // outside both mappings
+            store.storeFix(device, createFix(350, 10, 20, 30, 40)); // in second mapping
+        }, /* tests and expectations */ trackedRace -> {
+            testNumberOfRawFixes(trackedRace.getTrack(comp), 3);
+            map(comp, device, 0, 500);                              // covers fix at 250ms
+            store.storeFix(device, createFix(400, 10, 20, 30, 40)); // in third mapping
+            testNumberOfRawFixes(trackedRace.getTrack(comp), 5);
+        });
+    }
+    
+    @Test
+    public void testAddingMappingDoesNotLoadFixesAlreadyCoveredByExistingMapping() throws InterruptedException {
+        testFixes(/* start of tracking */ 10, /* end of tracking */ 500, /* mappings and fixes */ () -> {
+            map(comp, device, 0, 200);
+            map(comp, device, 300, 400);
+            store.storeFix(device, createFix(50, 10, 20, 30, 40));  // in first mapping
+            store.storeFix(device, createFix(150, 10, 20, 30, 40)); // in first mapping
+            store.storeFix(device, createFix(250, 10, 20, 30, 40)); // outside both mappings
+            store.storeFix(device, createFix(350, 10, 20, 30, 40)); // in second mapping
+        }, /* tests and expectations */ trackedRace -> {
+            map(comp, device, 0, 500);                              // covers fix at 250ms
+            store.storeFix(device, createFix(400, 10, 20, 30, 40)); // in third mapping
+            testNumberOfRawFixes(trackedRace.getTrack(comp), 5);
+        });
+    }
     
     /** Regression test for bug 4008 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4008 */
     @Test
