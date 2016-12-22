@@ -125,9 +125,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             map(comp, device, 0, 100);
             store.storeFix(device, createFix(10, 10, 20, 30, 40));
             store.storeFix(device, createFix(20, 10, 20, 30, 40));
-        }, /* tests and expectations */ trackedRace -> {
-            testNumberOfRawFixes(trackedRace.getTrack(comp), 0);
-        });
+        }, /* tests and expectations */ trackedRace -> testNumberOfRawFixes(trackedRace.getTrack(comp), 0));
     }
     
     @Test
