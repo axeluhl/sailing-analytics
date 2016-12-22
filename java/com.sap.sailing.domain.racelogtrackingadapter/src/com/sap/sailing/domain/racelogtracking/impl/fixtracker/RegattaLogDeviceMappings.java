@@ -309,16 +309,15 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     /**
      * Called when a {@link DeviceMapping} was added.
      * 
-     * @param mapping the new mapping
-     * @param item 
+     * @param mappings the new mapping
      */
-    protected abstract void mappingsAdded(List<DeviceMappingWithRegattaLogEvent<ItemT>> mapping, ItemT item);
+    protected abstract void mappingsAdded(List<DeviceMappingWithRegattaLogEvent<ItemT>> mappings, ItemT item);
     
-    private void mappingsAddedInternal(List<DeviceMappingWithRegattaLogEvent<ItemT>> mapping, ItemT item) {
+    private void mappingsAddedInternal(List<DeviceMappingWithRegattaLogEvent<ItemT>> mappings, ItemT item) {
         try {
-            mappingsAdded(mapping, item);
+            mappingsAdded(mappings, item);
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "error while adding mapping " + mapping, e);
+            logger.log(Level.SEVERE, "error while adding mapping " + mappings, e);
         }
     }
 
@@ -344,10 +343,9 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     private DeviceMappingWithRegattaLogEvent<ItemT> findAndRemoveMapping(
             DeviceMappingWithRegattaLogEvent<ItemT> mappingToFind,
             List<DeviceMappingWithRegattaLogEvent<ItemT>> newItemsToProcess) {
-        for (Iterator<DeviceMappingWithRegattaLogEvent<ItemT>> iterator = newItemsToProcess.iterator(); iterator
-                .hasNext();) {
+        for (Iterator<DeviceMappingWithRegattaLogEvent<ItemT>> iterator = newItemsToProcess.iterator(); iterator.hasNext();) {
             DeviceMappingWithRegattaLogEvent<ItemT> deviceMapping = iterator.next();
-            if(isSame(mappingToFind, deviceMapping)) {
+            if (isSame(mappingToFind, deviceMapping)) {
                 iterator.remove();
                 return deviceMapping;
             }
@@ -355,6 +353,11 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         return null;
     }
     
+    /**
+     * Compares two device mappings based on their device, the item mapped to and the race/regatta log event type
+     * that usually corresponds with the type of item to which the device is mapped. Note that in particular the
+     * mappings' time ranges are ignored for this comparison.
+     */
     private boolean isSame(DeviceMappingWithRegattaLogEvent<ItemT> mapping1,
             DeviceMappingWithRegattaLogEvent<ItemT> mapping2) {
         return mapping1.getDevice().equals(mapping2.getDevice()) && mapping1.getMappedTo().equals(mapping2.getMappedTo())
