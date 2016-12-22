@@ -242,7 +242,6 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         LockUtil.lockForWrite(mappingsLock);
         try {
             oldMappings.putAll(mappings);
-            
             mappings.clear();
             mappings.putAll(newMappings);
             mappingsByDevice.clear();

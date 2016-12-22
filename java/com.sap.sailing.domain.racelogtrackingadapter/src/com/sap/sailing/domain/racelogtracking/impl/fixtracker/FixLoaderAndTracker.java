@@ -454,6 +454,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             loadFixesForNewMappings(mappings, item);
         }
 
+        /**
+         * {@link #loadFixes loads fixes} that are captured by {@code newMapping} but not by {@code oldMapping}. This
+         * may require up to two {@link #loadFixes} calls: one for the fixes after and one for the fixes before the old
+         * mapping.
+         */
         @Override
         protected void mappingChanged(DeviceMappingWithRegattaLogEvent<WithID> oldMapping,
                 DeviceMappingWithRegattaLogEvent<WithID> newMapping) {
