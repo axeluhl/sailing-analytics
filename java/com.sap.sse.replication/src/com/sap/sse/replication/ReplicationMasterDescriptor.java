@@ -68,4 +68,6 @@ public interface ReplicationMasterDescriptor {
      */
     Channel createChannel() throws IOException;
 
+    Iterable<Replicable<?, ?>> getReplicables();
+
 }

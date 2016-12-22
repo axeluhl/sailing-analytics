@@ -371,10 +371,10 @@ public class ReplicationServiceImpl implements ReplicationService {
     }
 
     @Override
-    public void unregisterReplica(ReplicaDescriptor replica) throws IOException {
-        logger.info("Unregistering replica " + replica);
+    public ReplicaDescriptor unregisterReplica(UUID replicaUuid) throws IOException {
+        logger.info("Unregistering replica with ID " + replicaUuid);
         synchronized (replicationInstancesManager) {
-            replicationInstancesManager.unregisterReplica(replica);
+            final ReplicaDescriptor unregisteredReplica = replicationInstancesManager.unregisterReplica(replicaUuid);
             if (!replicationInstancesManager.hasReplicas()) {
                 removeAsListenerFromReplicables();
                 synchronized (this) {
@@ -384,7 +384,14 @@ public class ReplicationServiceImpl implements ReplicationService {
                     }
                 }
             }
+            return unregisteredReplica;
         }
+    }
+    
+    @Override
+    public void unregisterReplica(ReplicaDescriptor replica) throws IOException {
+        logger.info("Unregistering replica " + replica);
+        unregisterReplica(replica.getUuid());
     }
 
     private void removeAsListenerFromReplicables() {
@@ -556,7 +563,7 @@ public class ReplicationServiceImpl implements ReplicationService {
         } else {
             logger.info("Starting to replicate from " + master);
             try {
-                registerReplicaWithMaster(master);
+                registerReplicaWithMaster(master, replicables);
             } catch (Exception ex) {
                 logger.log(Level.SEVERE, "ERROR", ex);
                 throw ex;
@@ -628,9 +635,14 @@ public class ReplicationServiceImpl implements ReplicationService {
     }
 
     /**
+     * @param replicables
+     *            the replica is registered for these {@link Replicable}s. The master sends operations only for
+     *            replicables that at least one replica has registered for. This may mean that operations are received
+     *            for replicables for which no replicable was requested. Replicas shall drop such operations silently.
+     * 
      * @return the UUID that the master generated for this client which is also entered into {@link #replicaUUIDs}
      */
-    private String registerReplicaWithMaster(ReplicationMasterDescriptor master) throws IOException,
+    private String registerReplicaWithMaster(ReplicationMasterDescriptor master, Iterable<Replicable<?, ?>> replicables) throws IOException,
             ClassNotFoundException {
         URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(),
                 ServerInfo.getBuildVersion());
@@ -701,6 +713,11 @@ public class ReplicationServiceImpl implements ReplicationService {
     @Override
     public double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica) {
         return replicationInstancesManager.getAverageNumberOfBytesPerMessage(replica);
+    }
+
+    @Override
+    public Iterable<Replicable<?, ?>> getAllReplicables() {
+        return getReplicablesProvider().getReplicables();
     }
 
     @Override

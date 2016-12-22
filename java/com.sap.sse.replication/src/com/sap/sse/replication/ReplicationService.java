@@ -62,6 +62,11 @@ public interface ReplicationService {
      * {@link #registerReplica(ReplicaDescriptor) registered} again.
      */
     void unregisterReplica(ReplicaDescriptor replica) throws IOException;
+    
+    /**
+     * Same as {@link #unregisterReplica(ReplicaDescriptor)}, identifying the replica by its {@link ReplicaDescriptor#getUuid() ID}.
+     */
+    ReplicaDescriptor unregisterReplica(UUID replicaId) throws IOException;
 
     /**
      * For a replica replicating off this master, provides statistics in the form of number of operations sent to that
@@ -94,4 +99,6 @@ public interface ReplicationService {
     long getNumberOfBytesSent(ReplicaDescriptor replica);
 
     double getAverageNumberOfBytesPerMessage(ReplicaDescriptor replica);
+
+    Iterable<Replicable<?, ?>> getAllReplicables();
 }

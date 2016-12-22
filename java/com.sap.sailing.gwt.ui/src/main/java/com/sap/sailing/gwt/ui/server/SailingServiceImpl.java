@@ -3450,11 +3450,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void startReplicatingFromMaster(String messagingHost, String masterHost, String exchangeName, int servletPort, int messagingPort) throws IOException, ClassNotFoundException, InterruptedException {
-        // the queue name must be always the same for this server. in order to achieve
+        // The queue name must always be the same for this server. In order to achieve
         // this we're using the unique server identifier
         getReplicationService().startToReplicateFrom(
                 ReplicationFactory.INSTANCE.createReplicationMasterDescriptor(messagingHost, masterHost, exchangeName, servletPort, messagingPort, 
-                        getReplicationService().getServerIdentifier().toString()));
+                        /* use local server identifier as queue name */ getReplicationService().getServerIdentifier().toString(), getReplicationService().getAllReplicables()));
     }
 
     @Override
@@ -4565,9 +4565,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void stopSingleReplicaInstance(String identifier) {
         UUID uuid = UUID.fromString(identifier);
-        ReplicaDescriptor replicaDescriptor = new ReplicaDescriptor(null, uuid, "");
         try {
-            getReplicationService().unregisterReplica(replicaDescriptor);
+            getReplicationService().unregisterReplica(uuid);
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
