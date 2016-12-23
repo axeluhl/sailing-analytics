@@ -441,7 +441,16 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
 
         @Override
         protected void mappingsAdded(Iterable<DeviceMappingWithRegattaLogEvent<WithID>> mappings, WithID item) {
-            // The listener is first added to not lose any fix after loading the initial fixes and adding the listener.
+            // The listener is first added. This causes that no fix is lost but potentially fixes are being processes twice.
+            // There are the following cases:
+            // 1. A fix is added before the mapping update started
+            //    -> the fix is dropped but during mapping update the whole mapping is being loaded including this fix.
+            // 2. A fix is added while the write lock is being held for the mappings
+            //    -> The fix will be processed after the write lock is removed. In this state
+            //       the mappings are up-to-date and in a consequence the fix is loaded into the track.
+            //       In addition, the fix is loaded on mapping update, but both fix instances consistently have the same state.
+            // 3. A fix is added after a successful mapping update
+            //    -> The fix is only added once, because the initial loading during mapping update is finished
             mappings.forEach(mapping -> sensorFixStore.addListener(listener, mapping.getDevice()));
             loadFixesForNewMappings(mappings, item);
         }
