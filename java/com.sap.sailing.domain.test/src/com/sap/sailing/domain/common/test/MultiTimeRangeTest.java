@@ -29,6 +29,8 @@ public class MultiTimeRangeTest {
     @Test
     public void testEmptyMultiTimeRange() {
         assertTrue(createMulti().isEmpty());
+        assertTrue(createMulti(100, 200).intersection(create(200, 300)).isEmpty());
+        assertTrue(createMulti(100, 100).isEmpty());
     }
     
     @Test

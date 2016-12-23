@@ -45,25 +45,27 @@ public class MultiTimeRangeImpl implements MultiTimeRange {
         final List<TimeRange> minimalTimeRanges = new ArrayList<>();
         TimeRange lastAdded = null;
         for (final TimeRange timeRange : sortedTimeRanges) {
-            if (lastAdded == null) {
-                lastAdded = timeRange;
-                minimalTimeRanges.add(lastAdded);
-            } else {
-                if (timeRange.touches(lastAdded)) {
-                    // ranges touch or even overlap; join into one:
-                    lastAdded = lastAdded.union(timeRange);
-                    minimalTimeRanges.set(minimalTimeRanges.size()-1, lastAdded); // replace
-                } else {
-                    // Since the time ranges are sorted by ascending start time and because timeRange
-                    // does not touch lastAdded, timeRange must be after lastAdded, with a gap in between.
-                    // Add timeRange as the next element:
+            if (!timeRange.isEmpty()) { // ignore empty time ranges
+                if (lastAdded == null) {
                     lastAdded = timeRange;
                     minimalTimeRanges.add(lastAdded);
+                } else {
+                    if (timeRange.touches(lastAdded)) {
+                        // ranges touch or even overlap; join into one:
+                        lastAdded = lastAdded.union(timeRange);
+                        minimalTimeRanges.set(minimalTimeRanges.size()-1, lastAdded); // replace
+                    } else {
+                        // Since the time ranges are sorted by ascending start time and because timeRange
+                        // does not touch lastAdded, timeRange must be after lastAdded, with a gap in between.
+                        // Add timeRange as the next element:
+                        lastAdded = timeRange;
+                        minimalTimeRanges.add(lastAdded);
+                    }
                 }
-            }
-            assert lastAdded != null;
-            if (lastAdded.to().equals(TimePoint.EndOfTime)) {
-                break; // nothing more to minimize; the last time range added extends until the end of time
+                assert lastAdded != null;
+                if (lastAdded.to().equals(TimePoint.EndOfTime)) {
+                    break; // nothing more to minimize; the last time range added extends until the end of time
+                }
             }
         }
         return minimalTimeRanges.toArray(new TimeRange[minimalTimeRanges.size()]);
