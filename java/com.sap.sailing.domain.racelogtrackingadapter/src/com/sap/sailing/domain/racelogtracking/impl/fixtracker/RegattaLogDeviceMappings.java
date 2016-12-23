@@ -364,6 +364,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     private boolean isSame(DeviceMappingWithRegattaLogEvent<ItemT> mapping1,
             DeviceMappingWithRegattaLogEvent<ItemT> mapping2) {
         return mapping1.getDevice().equals(mapping2.getDevice()) && mapping1.getMappedTo().equals(mapping2.getMappedTo())
-                && mapping1.getEventType().equals(mapping2.getEventType());
+                && mapping1.getEventType().equals(mapping2.getEventType())
+                && mapping1.getRegattaLogEvent().getId().equals(mapping2.getRegattaLogEvent().getId());
     }
 }
