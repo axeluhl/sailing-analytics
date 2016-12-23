@@ -8,32 +8,13 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import static com.sap.sailing.domain.common.test.TimeTestHelpers.*;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TimeRangeTest {
-    protected TimeRange create(Long from, Long to) {
-        return new TimeRangeImpl(from==null?null:new MillisecondsTimePoint(from), to==null?null:new MillisecondsTimePoint(to));
-    }
-    
-    protected TimeRange create(int from, int to) {
-        return create((long) from, (long) to);
-    }
-    
-    protected TimeRange create(int from, long to) {
-        return create((long) from, to);
-    }
-    
-    protected TimeRange create(long from, int to) {
-        return create(from, (long) to);
-    }
-    
-    protected TimePoint create(long millis) {
-        return new MillisecondsTimePoint(millis);
-    }
-    
     private void liesWithin(long fromOuter, long toOuter, long fromInner, long toInner) {
         TimeRange outer = create(fromOuter, toOuter);
         TimeRange inner = create(fromInner, toInner);
@@ -104,6 +85,11 @@ public class TimeRangeTest {
     	two = create(11, 16);
     	assertNull(one.union(two));
     	
+    	assertEquals(create(5, 20), one.union(create(10, 20)));
+    	assertEquals(create(5, 10), create(5, 10).union(create(5, 10)));
+    	assertEquals(create(5, 10), create(5, 10).union(create(6, 7)));
+    	assertEquals(create(5, 10), create(5, 10).union(create(6, 6)));
+    	
     	two = create(7, TimePoint.EndOfTime.asMillis());
     	union = two.union(one);
     	TimeRange union2 = one.union(two);
@@ -140,6 +126,26 @@ public class TimeRangeTest {
     	intersection = two.intersection(one);
     	assertEquals(0, intersection.from().asMillis());
     	assertEquals(10, intersection.to().asMillis());
+    }
+    
+    @Test
+    public void startAfterTest() {
+        assertTrue(create(100, 200).startsAtOrAfter(create(100)));
+        assertTrue(create(100, 200).startsAtOrAfter(create(99)));
+        assertFalse(create(100, 200).startsAtOrAfter(create(101)));
+        assertTrue(create(100, 200).startsAfter(create(50, 100)));
+        assertFalse(create(100, 200).startsAfter(create(50, 150)));
+        assertFalse(create(100, 200).startsAfter(create(50l, null))); // can't start after a range that extends until the end of time
+    }
+    
+    @Test
+    public void touches() {
+        assertTrue(create(100, 200).touches(create(100, 200))); // touches is reflexive
+        assertTrue(create(100, 200).touches(create(50, 150)));
+        assertTrue(create(100, 200).touches(create(50, 100)));
+        assertTrue(create(100, 200).touches(create(200, 350)));
+        assertFalse(create(100, 200).touches(create(201, 250)));
+        assertFalse(create(100, 200).touches(create(50, 99)));
     }
     
     @Test

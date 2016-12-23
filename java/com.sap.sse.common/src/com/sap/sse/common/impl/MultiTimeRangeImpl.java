@@ -3,6 +3,7 @@ package com.sap.sse.common.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,6 +13,13 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 
 public class MultiTimeRangeImpl implements MultiTimeRange {
+    private static class TimeRangeByStartTimeComparator implements Comparator<TimeRange> {
+        @Override
+        public int compare(TimeRange tr1, TimeRange tr2) {
+            return tr1.from().compareTo(tr2.from());
+        }
+    }
+
     private static final long serialVersionUID = -2440743542692297352L;
     private final TimeRange[] timeRanges;
     
@@ -20,21 +28,53 @@ public class MultiTimeRangeImpl implements MultiTimeRange {
     }
     
     public MultiTimeRangeImpl(Iterable<TimeRange> timeRanges) {
-        this.timeRanges = new TimeRange[Util.size(timeRanges)];
+        final TimeRange[] timeRangesAsArray = new TimeRange[Util.size(timeRanges)];
         int i=0;
         for (final TimeRange timeRange : timeRanges) {
-            this.timeRanges[i++] = timeRange;
+            timeRangesAsArray[i++] = timeRange;
         }
+        this.timeRanges = minimizeAndSort(timeRangesAsArray);
     }
 
     private TimeRange[] minimizeAndSort(TimeRange... timeRanges) {
-        // TODO Auto-generated method stub
-        return null;
+        final TimeRange[] sortedTimeRanges = new TimeRange[timeRanges.length];
+        System.arraycopy(timeRanges, 0, sortedTimeRanges, 0, timeRanges.length);
+        Arrays.sort(sortedTimeRanges, new TimeRangeByStartTimeComparator());
+        final List<TimeRange> minimalTimeRanges = new ArrayList<>();
+        TimeRange lastAdded = null;
+        for (final TimeRange timeRange : sortedTimeRanges) {
+            if (lastAdded == null) {
+                lastAdded = timeRange;
+                minimalTimeRanges.add(lastAdded);
+            } else {
+                if (timeRange.touches(lastAdded)) {
+                    // ranges touch or even overlap; join into one:
+                    lastAdded = lastAdded.union(timeRange);
+                    minimalTimeRanges.set(minimalTimeRanges.size()-1, lastAdded); // replace
+                } else {
+                    // Since the time ranges are sorted by ascending start time and because timeRange
+                    // does not touch lastAdded, timeRange must be after lastAdded, with a gap in between.
+                    // Add timeRange as the next element:
+                    lastAdded = timeRange;
+                    minimalTimeRanges.add(lastAdded);
+                }
+            }
+            assert lastAdded != null;
+            if (lastAdded.to().equals(TimePoint.EndOfTime)) {
+                break; // nothing more to minimize; the last time range added extends until the end of time
+            }
+        }
+        return minimalTimeRanges.toArray(new TimeRange[minimalTimeRanges.size()]);
     }
 
     @Override
     public Iterator<TimeRange> iterator() {
         return Collections.unmodifiableCollection(Arrays.asList(timeRanges)).iterator();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return timeRanges.length == 0;
     }
 
     @Override
@@ -103,8 +143,17 @@ public class MultiTimeRangeImpl implements MultiTimeRange {
 
     @Override
     public boolean includes(TimePoint timePoint) {
-        // TODO Auto-generated method stub
-        return false;
+        // do a binary search for timePoint by looking for the last time range in timeRanges that starts at or before timePoint
+        int pos = Arrays.binarySearch(timeRanges, 0, timeRanges.length, new TimeRangeImpl(timePoint, null),
+                new TimeRangeByStartTimeComparator());
+        if (pos < 0) { // no exact match; -pos-1 would be "insertion point", but in this case
+            // not having an exact match means that we're interested in the last time range that
+            // starts before timePoint, so we'll subtract one from -pos-1, resulting in -pos-2. This may
+            // then be -1 in case there is no time range starting before timePoint.
+            pos = -pos-2;
+        }
+        assert pos==-1 || timeRanges[pos].from().compareTo(timePoint) <= 0;
+        return pos >= 0 && timePoint.before(timeRanges[pos].to());
     }
 
     @Override

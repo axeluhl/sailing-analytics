@@ -4,16 +4,23 @@ import java.io.Serializable;
 
 /**
  * A range between two {@link TimePoint}s, including the {@link #from()} time point and excluding the {@link #to} time
- * point. A time range is {@link #isEmpty()} if its {@link #from()} and {@link #to()} are equal and both not {@code null}.
+ * point. A time range is {@link #isEmpty()} if its {@link #from()} and {@link #to()} are equal.
  * Time ranges never have a {@link #from()} that is {@link TimePoint#after(TimePoint) after} {@link #to()}.
  * 
  * @author Axel Uhl (d043530)
  *
  */
 public interface TimeRange extends Comparable<TimeRange>, Serializable {
-    
+    /**
+     * @return a valid, non-{@code null} time point marking the inclusive beginning of this time range.
+     * {@link #includes(TimePoint) includes(from())} always returns {@code true}.
+     */
     TimePoint from();
     
+    /**
+     * @return a valid, non-{@code null} time point marking the exclusive end of this time range;
+     * {@link #includes(TimePoint) includes(to())} always returns {@code false}.
+     */
     TimePoint to();
     
     boolean isEmpty();
@@ -36,11 +43,27 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     boolean includes(TimePoint timePoint);
     
+    /**
+     * @return {@code true} if and only if at least one {@link TimePoint} exists that is {@link #includes(TimePoint) included} in
+     * both, {@code this} and the {@code other} time range. This in particular means that an {@link #isEmpty() empty}
+     * time range intersects with no other time range and nothing intersects with an {@link #isEmpty() empty} time range.
+     * 
+     * @see #touches(TimeRange)
+     */
     boolean intersects(TimeRange other);
+    
+    /**
+     * @return {@code true} if and only if {@code this} time range {@link #intersects(TimeRange)} with the {@code other} time range
+     * or its {@link #to() exclusive end} equals the {@code other} time range's {@link #from() start}, or the {@code other} time
+     * range's {@link #to() end} equals {@code this} time range's {@link #from() start}.
+     */
+    boolean touches(TimeRange other);
     
     boolean startsBefore(TimeRange other);
     
-    boolean startsAfter(TimePoint timePoint);
+    boolean startsAtOrAfter(TimePoint timePoint);
+    
+    boolean startsAfter(TimeRange other);
     
     boolean endsAfter(TimeRange other);
     
@@ -67,7 +90,7 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     Duration timeDifference(TimePoint timePoint);
     
     /**
-     * Merges the two ranges, only possible if {@code other} {@link #intersects()} this range.<p>
+     * Merges the two ranges, only possible if {@code other} {@link #touches()} this range.<p>
      * 
      * If you want to join two or more {@link TimeRange} objects, consider using {@link MultiTimeRange} instead.
      * 

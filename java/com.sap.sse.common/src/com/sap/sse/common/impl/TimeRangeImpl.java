@@ -59,7 +59,7 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
 
     @Override
     public boolean isEmpty() {
-        return from() != null && Util.equalsWithNull(from(), to());
+        return from().equals(to());
     }
     
     @Override
@@ -76,6 +76,11 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
     public boolean intersects(TimeRange other) {
         return includes(other.from()) || includes(other.to()) || liesWithin(other);
     }
+    
+    @Override
+    public boolean touches(TimeRange other) {
+        return intersects(other) || from().equals(other.to()) || to().equals(other.from());
+    }
 
     @Override
     public boolean includes(TimePoint timePoint) {
@@ -88,8 +93,13 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
     }
 
     @Override
-    public boolean startsAfter(TimePoint timePoint) {
+    public boolean startsAtOrAfter(TimePoint timePoint) {
         return !from().before(timePoint);
+    }
+
+    @Override
+    public boolean startsAfter(TimeRange other) {
+        return startsAtOrAfter(other.to());
     }
 
     @Override
@@ -118,7 +128,7 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
     @Override
     public TimeRange union(TimeRange other) {
         final TimeRange result;
-        if (!intersects(other)) {
+        if (!touches(other)) {
             result = null;
         } else {
             TimePoint newFrom = startsBefore(other) ? from() : other.from();
