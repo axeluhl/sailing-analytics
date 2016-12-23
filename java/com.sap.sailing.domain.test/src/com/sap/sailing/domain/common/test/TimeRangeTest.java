@@ -1,18 +1,21 @@
 package com.sap.sailing.domain.common.test;
 
+import static com.sap.sailing.domain.common.test.TimeTestHelpers.create;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import junit.framework.Assert;
 
 import org.junit.Test;
 
-import static com.sap.sailing.domain.common.test.TimeTestHelpers.*;
+import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
+
+import junit.framework.Assert;
 
 public class TimeRangeTest {
     private void liesWithin(long fromOuter, long toOuter, long fromInner, long toInner) {
@@ -215,13 +218,15 @@ public class TimeRangeTest {
     private void testSubtraction(long allFrom, long allTo, long minuendFrom, long minuendTo, long... expected) {
         TimeRange all = create(allFrom, allTo);
         TimeRange minuend = create(minuendFrom, minuendTo);
-        TimeRange[] diff = all.subtract(minuend);
-        assertEquals("Expected to obtain "+expected.length/2+" time ranges but got "+diff.length, expected.length/2, diff.length);
-        for (int i=0; i<expected.length/2; i++) {
-            assertEquals("expected "+i+"-th time range's \"from\" time point with millis "+expected[2*i]+" but got "+diff[i].from().asMillis(),
-                    create(expected[2*i]), diff[i].from());
-            assertEquals("expected "+i+"-th time range's \"to\" time point with millis "+expected[2*i+1]+" but got "+diff[i].to().asMillis(),
-                    create(expected[2*i+1]), diff[i].to());
+        MultiTimeRange diff = all.subtract(minuend);
+        assertEquals("Expected to obtain "+expected.length/2+" time ranges but got "+Util.size(diff), expected.length/2, Util.size(diff));
+        int i=0;
+        for (final TimeRange timeRangeFromDiff : diff) {
+            assertEquals("expected "+i+"-th time range's \"from\" time point with millis "+expected[2*i]+" but got "+timeRangeFromDiff.from().asMillis(),
+                    create(expected[2*i]), timeRangeFromDiff.from());
+            assertEquals("expected "+i+"-th time range's \"to\" time point with millis "+expected[2*i+1]+" but got "+timeRangeFromDiff.to().asMillis(),
+                    create(expected[2*i+1]), timeRangeFromDiff.to());
+            i++;
         }
     }
 }

@@ -78,7 +78,7 @@ public class MultiTimeRangeImpl implements MultiTimeRange {
     }
 
     @Override
-    public MultiTimeRange add(MultiTimeRange other) {
+    public MultiTimeRange union(MultiTimeRange other) {
         final List<TimeRange> newTimeRanges = new ArrayList<>();
         for (final TimeRange timeRange : timeRanges) {
             newTimeRanges.add(timeRange);
@@ -88,45 +88,76 @@ public class MultiTimeRangeImpl implements MultiTimeRange {
     }
 
     @Override
-    public MultiTimeRange add(TimeRange timeRange) {
-        return add(new MultiTimeRangeImpl(timeRange));
+    public MultiTimeRange union(TimeRange timeRange) {
+        return union(new MultiTimeRangeImpl(timeRange));
     }
 
+    private TimeRange nextOrNull(Iterator<TimeRange> i) {
+        final TimeRange result;
+        if (i.hasNext()) {
+            result = i.next();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
     /**
      * The implementation uses the fact that both multi time ranges' contained {@link TimeRange}s are ordered by
-     * ascending {@link TimeRange#from() start} time points. For each of object's time ranges and each time range from
-     * {@code other} that it overlaps with, one new {@link TimeRange} that represents the intersection is added to the
-     * new result. Since between all adjacent {@link TimeRange} objects in each sequence there must have been a gap
-     * (invariant of all {@link MultiTimeRange}s), the resulting sequence must also have a gap between all adjacent
-     * ranges. 
+     * ascending {@link TimeRange#from() start} time points. For each of {@code this} object's time ranges and each time
+     * range from {@code other} that it overlaps with, one new {@link TimeRange} that represents the intersection is
+     * added to the new result. Since between all adjacent {@link TimeRange} objects in each sequence there must have
+     * been a gap (invariant of all {@link MultiTimeRange}s), the resulting sequence must also have a gap between all
+     * adjacent ranges.
      */
     @Override
-    public MultiTimeRange intersect(MultiTimeRange other) {
-        final Iterator<TimeRange> otherI = other.iterator();
+    public MultiTimeRange intersection(MultiTimeRange other) {
         List<TimeRange> preResult = new ArrayList<>();
-        if (otherI.hasNext()) {
-            TimeRange nextRangeFromOther = otherI.next();
-            for (final TimeRange nextRangeFromThis : this) {
-                while (nextRangeFromOther.endsBefore(nextRangeFromThis.from())) {
-                    if (otherI.hasNext()) {
-                        nextRangeFromOther = otherI.next();
-                    } else {
-                        break; // all other time ranges ended before nextRangeFromThis; we're done
-                    }
+        final Iterator<TimeRange> thisI = iterator();
+        final Iterator<TimeRange> otherI = other.iterator();
+        TimeRange thisRange = nextOrNull(thisI);
+        TimeRange otherRange = nextOrNull(otherI);
+        while (thisRange != null && otherRange != null) {
+            if (thisRange.endsBefore(otherRange.from())) { // no intersection; move thisI forward
+                thisRange = nextOrNull(thisI);
+            } else if (otherRange.endsBefore(thisRange.from())) { // no intersection; move otherI forward
+                otherRange = nextOrNull(otherI);
+            } else {
+                assert thisRange.from().compareTo(otherRange.to()) < 0 &&
+                       thisRange.to().compareTo(otherRange.from()) > 0;
+                // ...which, in short, is:
+                assert thisRange.intersects(otherRange);
+                final TimeRange intersection = thisRange.intersection(otherRange);
+                assert intersection != null;
+                preResult.add(intersection);
+                // If thisRange been fully "consumed" by the otherRange move thisI forward:
+                final boolean needToMoveThisI = !thisRange.to().after(otherRange.to());
+                // If otherRange been fully "consumed" by the thisRange move otherI forward (IMPORTANT: decide before moving thisI/thisRange)
+                final boolean needToMoveOtherI = !otherRange.to().after(thisRange.to());
+                if (needToMoveThisI) {
+                    thisRange = nextOrNull(thisI);
                 }
-                // Here, we have a valid nextRangeFromOther that does not end before nextRangeFromThis.
-                // If it starts at or before nextRangeFromThis's start, we have an intersection.
-                
+                if (needToMoveOtherI) {
+                    otherRange = nextOrNull(otherI);
+                }
             }
         }
-        // TODO Auto-generated method stub
         return new MultiTimeRangeImpl(preResult);
     }
 
     @Override
-    public MultiTimeRange intersect(TimeRange timeRange) {
-        // TODO Auto-generated method stub
-        return null;
+    public MultiTimeRange intersection(TimeRange timeRange) {
+        return intersection(new MultiTimeRangeImpl(timeRange));
+    }
+
+    @Override
+    public boolean intersects(MultiTimeRange other) {
+        return !intersection(other).isEmpty();
+    }
+
+    @Override
+    public boolean intersects(TimeRange other) {
+        return !intersection(other).isEmpty();
     }
 
     @Override
@@ -137,8 +168,7 @@ public class MultiTimeRangeImpl implements MultiTimeRange {
 
     @Override
     public MultiTimeRange subtract(TimeRange timeRange) {
-        // TODO Auto-generated method stub
-        return null;
+        return subtract(new MultiTimeRangeImpl(timeRange));
     }
 
     @Override
@@ -158,14 +188,22 @@ public class MultiTimeRangeImpl implements MultiTimeRange {
 
     @Override
     public boolean includes(TimeRange timeRange) {
-        // TODO Auto-generated method stub
+        for (final TimeRange tr : this) {
+            if (tr.includes(timeRange)) {
+                return true;
+            }
+        }
         return false;
     }
 
     @Override
     public boolean includes(MultiTimeRange other) {
-        // TODO Auto-generated method stub
-        return false;
+        for (final TimeRange otherTimeRange : other) {
+            if (!includes(otherTimeRange)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -188,5 +226,10 @@ public class MultiTimeRangeImpl implements MultiTimeRange {
         if (!Arrays.equals(timeRanges, other.timeRanges))
             return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(timeRanges);
     }
 }

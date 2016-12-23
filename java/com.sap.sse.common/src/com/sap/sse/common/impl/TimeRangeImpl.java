@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
@@ -177,7 +178,7 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
     }
     
     @Override
-    public TimeRange[] subtract(TimeRange other) {
+    public MultiTimeRange subtract(TimeRange other) {
         final List<TimeRange> result = new ArrayList<>();
         if (this.startsBefore(other)) {
             final TimePoint otherFrom = other.from();
@@ -193,7 +194,7 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
             final TimeRange remainder = new TimeRangeImpl(from, this.to());
             result.add(remainder);
         }
-        return result.toArray(new TimeRange[result.size()]);
+        return new MultiTimeRangeImpl(result);
     }
 
     @Override

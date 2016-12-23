@@ -67,6 +67,9 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     boolean endsAfter(TimeRange other);
     
+    /**
+     * @return {@code true} if and only if this range's {@link #to() exclusive end} is at or before {@code timePoint}
+     */
     boolean endsBefore(TimePoint timePoint);
     
     /**
@@ -113,5 +116,5 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
      * in case two {@link TimeRange}s are returned, the first one {@link #startsBefore(TimeRange) is before} the second
      * one.
      */
-    TimeRange[] subtract(TimeRange other);
+    MultiTimeRange subtract(TimeRange other);
 }
