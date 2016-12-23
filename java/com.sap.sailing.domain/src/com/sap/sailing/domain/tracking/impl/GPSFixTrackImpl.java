@@ -783,7 +783,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
         } finally {
             unlockAfterRead();
         }
-        return new TimeRangeImpl(intervalStart, intervalEnd.plus(1) /* need to add one millisecond to make intervalEnd included in time range */);
+        return new TimeRangeImpl(intervalStart, intervalEnd, /* inclusive */ true);
     }
     
     protected FixType createDummyGPSFix(TimePoint at) {

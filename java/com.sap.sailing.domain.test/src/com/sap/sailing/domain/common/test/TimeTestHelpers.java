@@ -7,20 +7,20 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TimeTestHelpers {
 
-    protected static TimeRange create(Long from, Long to) {
-        return new TimeRangeImpl(from==null?null:new MillisecondsTimePoint(from), to==null?null:new MillisecondsTimePoint(to));
+    protected static TimeRange create(Long from, Long toExclusive) {
+        return new TimeRangeImpl(from==null?null:new MillisecondsTimePoint(from), toExclusive==null?null:new MillisecondsTimePoint(toExclusive));
     }
 
-    protected static TimeRange create(int from, int to) {
-        return create((long) from, (long) to);
+    protected static TimeRange create(int from, int toExclusive) {
+        return create((long) from, (long) toExclusive);
     }
 
-    protected static TimeRange create(int from, long to) {
-        return create((long) from, to);
+    protected static TimeRange create(int from, long toExclusive) {
+        return create((long) from, toExclusive);
     }
 
-    protected static TimeRange create(long from, int to) {
-        return create(from, (long) to);
+    protected static TimeRange create(long from, int toExclusive) {
+        return create(from, (long) toExclusive);
     }
 
     protected static TimePoint create(long millis) {

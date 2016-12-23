@@ -13,18 +13,18 @@ public class RegattaLogCloseOpenEndedDeviceMappingEventImpl extends AbstractLogE
     private static final long serialVersionUID = -5114645637316367845L;
 
     private final Serializable deviceMappingEventId;
-    private final TimePoint closingTimePoint;
+    private final TimePoint closingTimePointInclusive;
 
     public RegattaLogCloseOpenEndedDeviceMappingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
-             Serializable pId, Serializable deviceMappingEventId, TimePoint closingTimePoint) {
+             Serializable pId, Serializable deviceMappingEventId, TimePoint closingTimePointInclusive) {
         super(createdAt, logicalTimePoint, author, pId);
         this.deviceMappingEventId = deviceMappingEventId;
-        this.closingTimePoint = closingTimePoint;
+        this.closingTimePointInclusive = closingTimePointInclusive;
     }
 
     public RegattaLogCloseOpenEndedDeviceMappingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,  
-            Serializable deviceMappingEventId, TimePoint closingTimePoint) {
-        this( now(), author, logicalTimePoint, randId(), deviceMappingEventId, closingTimePoint);
+            Serializable deviceMappingEventId, TimePoint closingTimePointInclusive) {
+        this(now(), author, logicalTimePoint, randId(), deviceMappingEventId, closingTimePointInclusive);
     }
 
     @Override
@@ -34,12 +34,12 @@ public class RegattaLogCloseOpenEndedDeviceMappingEventImpl extends AbstractLogE
 
     @Override
     public TimePoint getClosingTimePointInclusive() {
-        return closingTimePoint;
+        return closingTimePointInclusive;
     }
 
     @Override
     public String getShortInfo() {
-        return "closing mapping (id: " + deviceMappingEventId + ") at " + closingTimePoint;
+        return "closing mapping (id: " + deviceMappingEventId + ") at " + closingTimePointInclusive;
     }
     
     @Override

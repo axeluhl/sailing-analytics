@@ -24,20 +24,20 @@ public class RegattaLogOpenEndedDeviceMappingCloser extends
         RegattaLogAnalyzer<List<RegattaLogCloseOpenEndedDeviceMappingEvent>> {
     private final DeviceMapping<?> mapping;
     protected final AbstractLogEventAuthor author;
-    protected final TimePoint closingTimePoint;
+    protected final TimePoint closingTimePointInclusive;
 
     public RegattaLogOpenEndedDeviceMappingCloser(RegattaLog log, DeviceMapping<?> mapping,
-            AbstractLogEventAuthor author, TimePoint closingTimePoint) {
+            AbstractLogEventAuthor author, TimePoint closingTimePointInclusive) {
         super(log);
         this.mapping = mapping;
         this.author = author;
-        this.closingTimePoint = closingTimePoint;
+        this.closingTimePointInclusive = closingTimePointInclusive;
     }
 
     protected RegattaLogCloseOpenEndedDeviceMappingEvent createCloseEvent(TimePoint logicalTimePoint,
             Serializable eventToCloseId) {
         return new RegattaLogCloseOpenEndedDeviceMappingEventImpl(logicalTimePoint, author, eventToCloseId,
-                closingTimePoint);
+                closingTimePointInclusive);
     }
 
     @Override

@@ -67,7 +67,7 @@ public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping
     
     public static <T extends WithID> DeviceMapping<T> convertToDeviceMapping(RegattaLogDeviceMappingEvent<T> event) {
         return new DeviceMappingImpl<T>(event.getMappedTo(), event.getDevice(),
-                new TimeRangeImpl(event.getFrom(), event.getToInclusive().plus(1) /* TimeRange uses exclusive end */),
+                new TimeRangeImpl(event.getFrom(), event.getToInclusive(), /* inclusive */ true),
                 event.getId(), event.getClass());
     }
     

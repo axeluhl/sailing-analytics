@@ -52,9 +52,9 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
         return mapping.getId();
     }
     
-    private void closeMapping(AbstractLogEventAuthor author, DeviceIdentifier device, Serializable mappingId, long millis) {
+    private void closeMapping(AbstractLogEventAuthor author, DeviceIdentifier device, Serializable mappingId, long closingTimePointInclusiveAsMillis) {
         RegattaLogEvent mapping = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(t(), author, t(), UUID.randomUUID(), mappingId,
-                new MillisecondsTimePoint(millis));
+                new MillisecondsTimePoint(closingTimePointInclusiveAsMillis));
         log.add(mapping);
     }
     

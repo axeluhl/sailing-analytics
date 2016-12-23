@@ -52,7 +52,7 @@ public abstract class BaseRegattaLogDeviceMappingFinder<ItemT extends WithID>
             final TimePoint from = event.getFrom();
             final RegattaLogCloseOpenEndedDeviceMappingEvent closingEvent = closingEvents.get(event.getId());
             final TimePoint toInclusive = closingEvent != null ? closingEvent.getClosingTimePointInclusive() : event.getToInclusive();
-            final TimeRange mappingTimeRange = new TimeRangeImpl(from, toInclusive.plus(1) /* convert from inclusive to exclusive end */);
+            final TimeRange mappingTimeRange = new TimeRangeImpl(from, toInclusive, /* inclusive */ true);
             if (mappingTimeRange.includes(fixTimePoint)) {
                 if (closingEvent != null) {
                     log.revokeEvent(closingEvent.getAuthor(), closingEvent,

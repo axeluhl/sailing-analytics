@@ -12,10 +12,27 @@ import com.sap.sse.common.Util;
 public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements TimeRange {
     private static final long serialVersionUID = 8710198176227507300L;
     
-    public static TimeRange create(long fromMillis, long toMillis) {
-        return new TimeRangeImpl(new MillisecondsTimePoint(fromMillis), new MillisecondsTimePoint(toMillis));
+    public static TimeRange create(long fromMillis, long toMillisExclusive) {
+        return new TimeRangeImpl(new MillisecondsTimePoint(fromMillis), new MillisecondsTimePoint(toMillisExclusive));
     }
 
+    public TimeRangeImpl(TimePoint from, TimePoint to, boolean toIsInclusive) {
+        this(from, computeInclusiveOrExclusiveTo(to, toIsInclusive));
+    }
+
+    private static TimePoint computeInclusiveOrExclusiveTo(TimePoint to, boolean toIsInclusive) {
+        final TimePoint finalTo;
+        if (toIsInclusive) {
+            if (to == null) {
+                finalTo = null;
+            } else {
+                finalTo = to.plus(1); // add the smallest increment possible with the current time point representation
+            }
+        } else {
+            finalTo = to;
+        }
+        return finalTo;
+    }
     /**
      * @param from
      *            if {@code null}, the time range is considered open on its "left" end, and all {@link TimePoint}s at or
