@@ -25,11 +25,13 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.FixLoaderAndTracker;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
@@ -155,6 +157,26 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(250, 10, 20, 30, 40)); // outside both mappings
             store.storeFix(device, createFix(350, 10, 20, 30, 40)); // in second mapping
         }, /* tests and expectations */ trackedRace -> {
+            final int[] fixInsertionCount = new int[1];
+            trackedRace.getTrack(comp).addListener(new GPSTrackListener<Competitor, GPSFixMoving>() {
+                private static final long serialVersionUID = 1933664210766279523L;
+
+                @Override
+                public boolean isTransient() {
+                    return true;
+                }
+
+                @Override
+                public void gpsFixReceived(GPSFixMoving fix, Competitor item, boolean firstFixInTrack) {
+                    fixInsertionCount[0]++;
+                }
+
+                @Override
+                public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage,
+                        long newMillisecondsOverWhichToAverage) {
+                    // no-op
+                }
+            });
             testNumberOfRawFixes(trackedRace.getTrack(comp), 3);
             map(comp, device, 0, 500);                              // covers fix at 250ms; assert that only that fix is loaded
             try {
@@ -163,6 +185,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 logger.log(Level.SEVERE, "Exception waiting for loading to finish", e);
             }
             testNumberOfRawFixes(trackedRace.getTrack(comp), 4);
+            assertEquals(1, fixInsertionCount[0]);
         });
     }
     
