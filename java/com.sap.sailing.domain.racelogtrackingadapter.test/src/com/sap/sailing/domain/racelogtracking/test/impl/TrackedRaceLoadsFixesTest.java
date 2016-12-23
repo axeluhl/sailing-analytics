@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,6 +37,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
+    private static final Logger logger = Logger.getLogger(TrackedRaceLoadsFixesTest.class.getName());
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
     
     private final Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
@@ -154,6 +157,11 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         }, /* tests and expectations */ trackedRace -> {
             testNumberOfRawFixes(trackedRace.getTrack(comp), 3);
             map(comp, device, 0, 500);                              // covers fix at 250ms; assert that only that fix is loaded
+            try {
+                trackedRace.waitForLoadingToFinish();
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception waiting for loading to finish", e);
+            }
             testNumberOfRawFixes(trackedRace.getTrack(comp), 4);
         });
     }
@@ -169,6 +177,11 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(350, 10, 20, 30, 40)); // in second mapping
         }, /* tests and expectations */ trackedRace -> {
             map(comp, device, 0, 500);                              // covers fix at 250ms
+            try {
+                trackedRace.waitForLoadingToFinish();
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception waiting for loading to finish", e);
+            }
             store.storeFix(device, createFix(400, 10, 20, 30, 40)); // in third mapping
             testNumberOfRawFixes(trackedRace.getTrack(comp), 5);
         });
@@ -313,15 +326,12 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         defineMarksOnRegattaLog(mark, mark2);
         raceLog.add(new RaceLogStartOfTrackingEventImpl(new MillisecondsTimePoint(startOfTracking), author, 0));
         raceLog.add(new RaceLogEndOfTrackingEventImpl(new MillisecondsTimePoint(endOfTracking), author, 0));
-
         beforeTrackingStarted.run();
-
         DynamicTrackedRace trackedRace = createDynamicTrackedRace(boatClass, raceDefinition);
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         new FixLoaderAndTracker(trackedRace, store, null);
         trackedRace.waitForLoadingToFinish();
-
         afterTrackingStarted.accept(trackedRace);
     }
     
@@ -329,12 +339,9 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     public void metadataStoredInDb() throws TransformationException, NoCorrespondingServiceRegisteredException {
         assertEquals(0, store.getNumberOfFixes(device));
         assertEquals(null, store.getTimeRangeCoveredByFixes(device));
-
         map(comp, device, 0, 600);
-
         store.storeFix(device, createFix(100, 10, 20, 30, 40));
         store.storeFix(device, createFix(200, 10, 20, 30, 40));
-
         assertEquals(2, store.getNumberOfFixes(device));
         assertEquals(TimeRangeImpl.create(100, 200), store.getTimeRangeCoveredByFixes(device));
     }

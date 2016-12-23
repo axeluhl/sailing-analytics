@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -216,7 +215,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * @param item
      *            the item the mappings belong to
      */
-    private void loadFixesForNewMappings(List<DeviceMappingWithRegattaLogEvent<WithID>> mappings, WithID item) {
+    private void loadFixesForNewMappings(Iterable<DeviceMappingWithRegattaLogEvent<WithID>> mappings, WithID item) {
         TimeRange trackingTimeRange = getTrackingTimeRange();
         if (item instanceof Mark) {
             Mark mark = (Mark) item;
@@ -242,7 +241,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    private void loadFixesInTimeRange(List<DeviceMappingWithRegattaLogEvent<WithID>> mappings, TimeRange trackingTimeRange) {
+    private void loadFixesInTimeRange(Iterable<DeviceMappingWithRegattaLogEvent<WithID>> mappings, TimeRange trackingTimeRange) {
         mappings.forEach(mapping -> loadFixes(trackingTimeRange.intersection(mapping.getTimeRange()), mapping));
     }
     
@@ -251,7 +250,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * 
      * @param callback the callback to call for every known mapping
      */
-    public boolean containsMappingThatIntersectsTimeRange(List<DeviceMappingWithRegattaLogEvent<WithID>> mappings, TimeRange timeRange) {
+    public boolean containsMappingThatIntersectsTimeRange(Iterable<DeviceMappingWithRegattaLogEvent<WithID>> mappings, TimeRange timeRange) {
         for (DeviceMappingWithRegattaLogEvent<WithID> mapping : mappings) {
             if(timeRange.intersects(mapping.getTimeRange())) {
                 return true;
@@ -446,7 +445,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
 
         @Override
-        protected void mappingsAdded(List<DeviceMappingWithRegattaLogEvent<WithID>> mappings, WithID item) {
+        protected void mappingsAdded(Iterable<DeviceMappingWithRegattaLogEvent<WithID>> mappings, WithID item) {
             // The listener is first added to not lose any fix after loading the initial fixes and adding the listener.
             mappings.forEach(mapping -> sensorFixStore.addListener(listener, mapping.getDevice()));
             loadFixesForNewMappings(mappings, item);

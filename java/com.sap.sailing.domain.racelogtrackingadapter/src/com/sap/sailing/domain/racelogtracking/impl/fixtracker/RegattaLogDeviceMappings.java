@@ -265,15 +265,15 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * Calculates <em>and applies</em> the mapping changes by removing listeners no longer needed for the mappings removed,
      * and by loading and adding the fixes for extended or added mappings.
      */
-    private void calculateDiff(Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
-            Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings) {
+    private void calculateDiff(Map<ItemT, ? extends Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
+            Map<ItemT, ? extends Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings) {
         Set<ItemT> itemsToProcess = new HashSet<ItemT>(previousMappings.keySet());
         itemsToProcess.addAll(newMappings.keySet());
         for (ItemT item : itemsToProcess) {
             if (!newMappings.containsKey(item)) {
                 previousMappings.get(item).forEach(this::mappingRemovedInternal);
             } else {
-                final List<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings = previousMappings.containsKey(item)
+                final Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings = previousMappings.containsKey(item)
                         ? previousMappings.get(item) : Collections.emptyList();
                 final List<DeviceMappingWithRegattaLogEvent<ItemT>> addedMappings = new ArrayList<>();
                 for (DeviceMappingWithRegattaLogEvent<ItemT> newMapping : newMappings.get(item)) {
@@ -311,9 +311,9 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * 
      * @param mappings the new mapping
      */
-    protected abstract void mappingsAdded(List<DeviceMappingWithRegattaLogEvent<ItemT>> mappings, ItemT item);
+    protected abstract void mappingsAdded(Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappings, ItemT item);
     
-    private void mappingsAddedInternal(List<DeviceMappingWithRegattaLogEvent<ItemT>> mappings, ItemT item) {
+    private void mappingsAddedInternal(Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappings, ItemT item) {
         try {
             mappingsAdded(mappings, item);
         } catch(Exception e) {
@@ -345,7 +345,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     
     private DeviceMappingWithRegattaLogEvent<ItemT> findAndRemoveMapping(
             DeviceMappingWithRegattaLogEvent<ItemT> mappingToFind,
-            List<DeviceMappingWithRegattaLogEvent<ItemT>> newItemsToProcess) {
+            Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> newItemsToProcess) {
         for (Iterator<DeviceMappingWithRegattaLogEvent<ItemT>> iterator = newItemsToProcess.iterator(); iterator.hasNext();) {
             DeviceMappingWithRegattaLogEvent<ItemT> deviceMapping = iterator.next();
             if (isSame(mappingToFind, deviceMapping)) {
