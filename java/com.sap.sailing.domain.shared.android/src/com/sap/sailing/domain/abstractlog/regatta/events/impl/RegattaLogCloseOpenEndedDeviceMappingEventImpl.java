@@ -33,7 +33,7 @@ public class RegattaLogCloseOpenEndedDeviceMappingEventImpl extends AbstractLogE
     }
 
     @Override
-    public TimePoint getClosingTimePoint() {
+    public TimePoint getClosingTimePointInclusive() {
         return closingTimePoint;
     }
 

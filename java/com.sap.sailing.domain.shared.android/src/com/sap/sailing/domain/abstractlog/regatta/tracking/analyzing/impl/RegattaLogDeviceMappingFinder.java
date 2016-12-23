@@ -48,8 +48,8 @@ public class RegattaLogDeviceMappingFinder<ItemT extends WithID>
     }
 
     protected DeviceMappingWithRegattaLogEvent<ItemT> createMapping(DeviceIdentifier device, ItemT item,
-            TimePoint from, TimePoint to, Serializable originalEventId, RegattaLogDeviceMappingEvent<ItemT> event) {
-        return new DeviceMappingWithRegattaLogEventImpl<ItemT>(item, device, new TimeRangeImpl(from, to),
+            TimePoint from, TimePoint toInclusive, Serializable originalEventId, RegattaLogDeviceMappingEvent<ItemT> event) {
+        return new DeviceMappingWithRegattaLogEventImpl<ItemT>(item, device, new TimeRangeImpl(from, toInclusive.plus(1) /* TimeRange uses exclusive end */),
                 Collections.singletonList(originalEventId), event);
     }
 
@@ -95,16 +95,16 @@ public class RegattaLogDeviceMappingFinder<ItemT extends WithID>
         List<DeviceMappingWithRegattaLogEvent<ItemT>> result = new ArrayList<>();
         for (final RegattaLogDeviceMappingEvent<ItemT> event : events) {
             TimePoint from = event.getFrom();
-            TimePoint to = event.getTo();
+            TimePoint toInclusive = event.getToInclusive();
             TimePoint closingTimePoint = closingEvents.containsKey(event.getId()) ? closingEvents.get(event.getId())
-                    .getClosingTimePoint() : null;
+                    .getClosingTimePointInclusive() : null;
             if (from == null) {
                 logger.severe("No start time set for DeviceMappingEvent with ID: " + event.getId());
             }
-            if (to == null) {
-                to = closingTimePoint;
+            if (toInclusive == null) {
+                toInclusive = closingTimePoint;
             }
-            result.add(createMapping(event.getDevice(), item, from, to, event.getId(), event));
+            result.add(createMapping(event.getDevice(), item, from, toInclusive, event.getId(), event));
         }
         return result;
     }

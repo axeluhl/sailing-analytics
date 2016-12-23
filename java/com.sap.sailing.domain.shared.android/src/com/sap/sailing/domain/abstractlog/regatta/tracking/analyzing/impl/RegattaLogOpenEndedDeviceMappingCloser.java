@@ -46,7 +46,7 @@ public class RegattaLogOpenEndedDeviceMappingCloser extends
 
         for (Serializable eventId : mapping.getOriginalRaceLogEventIds()) {
             RegattaLogDeviceMappingEvent<?> event = (RegattaLogDeviceMappingEvent<?>) getLog().getEventById(eventId);
-            if (event.getFrom() == null || event.getTo() == null) {
+            if (event.getFrom() == null || event.getToInclusive() == null) {
                 result.add(createCloseEvent(MillisecondsTimePoint.now(), event.getId()));
             }
         }
