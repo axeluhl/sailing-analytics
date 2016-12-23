@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import com.google.gwt.dev.util.collect.HashSet;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -162,8 +164,53 @@ public class MultiTimeRangeImpl implements MultiTimeRange {
 
     @Override
     public MultiTimeRange subtract(MultiTimeRange other) {
-        // TODO Auto-generated method stub
-        return null;
+        // loops over the two time range sequences; when a time range in this multi time range is skipped because it does not
+        // intersect with any time range from other, add it; subtracting time ranges that do not intersect with any time range
+        // from this are a no-op.
+        List<TimeRange> preResult = new ArrayList<>();
+        final Iterator<TimeRange> thisI = iterator();
+        final Iterator<TimeRange> otherI = other.iterator();
+        TimeRange thisRange = nextOrNull(thisI);
+        TimeRange otherRange = nextOrNull(otherI);
+        Set<TimeRange> unaffectedTimeRangesFromThis = new HashSet<>();
+        Util.addAll(this, unaffectedTimeRangesFromThis);
+        while (thisRange != null && otherRange != null) {
+            if (thisRange.endsBefore(otherRange.from())) { // no intersection; move thisI forward
+                thisRange = nextOrNull(thisI);
+            } else if (otherRange.endsBefore(thisRange.from())) { // no intersection; move otherI forward
+                otherRange = nextOrNull(otherI);
+            } else {
+                assert thisRange.from().compareTo(otherRange.to()) < 0 &&
+                       thisRange.to().compareTo(otherRange.from()) > 0;
+                // ...which, in short, is:
+                assert thisRange.intersects(otherRange);
+                unaffectedTimeRangesFromThis.remove(thisRange); // we cut off a bit from thisRange; don't add unchanged
+                // now add all subtraction results except for the last one in case it ends after otherRange because
+                // in that case the next otherRange candidate may chop off something or split this remaining part again
+                for (final TimeRange subtractResult : thisRange.subtract(otherRange)) {
+                    if (subtractResult.to().before(thisRange.to())) {
+                        preResult.add(subtractResult);
+                    } else {
+                        thisRange = subtractResult;
+                    }
+                }
+                // If thisRange been fully "consumed" by the otherRange move thisI forward:
+                final boolean needToMoveThisI = !thisRange.to().after(otherRange.to());
+                // If otherRange been fully "consumed" by the thisRange move otherI forward (IMPORTANT: decide before moving thisI/thisRange)
+                final boolean needToMoveOtherI = !otherRange.to().after(thisRange.to());
+                if (needToMoveThisI) {
+                    thisRange = nextOrNull(thisI);
+                }
+                if (needToMoveOtherI) {
+                    otherRange = nextOrNull(otherI);
+                }
+            }
+        }
+        preResult.addAll(unaffectedTimeRangesFromThis);
+        if (thisRange != null) {
+            preResult.add(thisRange); // a left-over of this multi range that wasn't canceled out by any of the other time ranges
+        }
+        return new MultiTimeRangeImpl(preResult);
     }
 
     @Override

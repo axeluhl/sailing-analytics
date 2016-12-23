@@ -90,4 +90,16 @@ public class MultiTimeRangeTest {
         assertTrue(createMulti(100, 200, 300, 400).intersects(createMulti(350, 370)));
         assertFalse(createMulti(100, 200, 300, 400).intersects(createMulti(250, 270)));
     }
+    
+    @Test
+    public void subtract() {
+        assertEquals(createMulti(100, 120, 180, 200), createMulti(100, 200).subtract(createMulti(120, 180)));
+        assertTrue(createMulti(100, 200).subtract(createMulti(100, 200)).isEmpty());
+        assertEquals(createMulti(100, 120), createMulti(100, 200).subtract(createMulti(120, 200)));
+        assertEquals(createMulti(100, 120, 300, 400), createMulti(100, 200, 300, 400).subtract(createMulti(120, 250)));
+        assertEquals(createMulti(100, 120, 180, 200, 300, 400), createMulti(100, 200, 300, 400).subtract(createMulti(120, 180)));
+        assertEquals(createMulti(100, 120, 300, 400), createMulti(100, 200, 300, 400).subtract(createMulti(120, 300)));
+        assertEquals(createMulti(100, 120, 350, 400), createMulti(100, 200, 300, 400).subtract(createMulti(120, 350)));
+        assertEquals(createMulti(100, 120, 350, 360, 370, 400), createMulti(100, 200, 300, 400).subtract(createMulti(120, 350, 360, 370)));
+    }
 }

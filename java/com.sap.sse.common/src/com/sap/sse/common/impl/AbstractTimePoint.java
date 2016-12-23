@@ -100,7 +100,15 @@ public abstract class AbstractTimePoint implements TimePoint {
 
     @Override
     public String toString() {
-        return asDate().toString();
+        long millis = asMillis() % 1000l;
+        final String fullSeconds = asDate().toString();
+        final String result;
+        if (millis == 0) {
+            result = fullSeconds;
+        } else {
+            result = fullSeconds + " (+"+millis+"ms)";
+        }
+        return result;
     }
 
     /**
