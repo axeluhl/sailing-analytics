@@ -219,17 +219,12 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         TimeRange trackingTimeRange = getTrackingTimeRange();
         if (item instanceof Mark) {
             Mark mark = (Mark) item;
-            final boolean loadAllMappedFixes;
             if (containsMappingThatIntersectsTimeRange(mappings, trackingTimeRange)) {
                 loadFixesInTimeRange(mappings, trackingTimeRange);
-                DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
-                // load all mapped fixes if there was no fix in the tracking TimeRange
-                loadAllMappedFixes = (track.getFirstRawFix() == null);
-            } else {
-                // There is no mapping that intersects the tracking TimeRange at all
-                // Loading all mapped fixes instead
-                loadAllMappedFixes = true;
             }
+            DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
+            // load all mapped fixes if there was no fix in the tracking TimeRange
+            final boolean loadAllMappedFixes = (track.getFirstRawFix() == null);
             if (loadAllMappedFixes) {
                 // either got an empty track of there is no mapping for the TimeRange of the race at all.
                 // try again without constraining the mapping interval by start/end of tracking to at
