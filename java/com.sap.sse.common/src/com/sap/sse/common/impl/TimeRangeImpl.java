@@ -38,7 +38,11 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
         if (other.from().equals(from()) && other.to().equals(to())) {
             result = 0;
         } else {
-            result = startsBefore(other) ? -1 : 1;
+            if (from().equals(other.from())) {
+                result = to().compareTo(other.to());
+            } else {
+                result = from().compareTo(other.from());
+            }
         }
         return result;
     }
@@ -53,6 +57,11 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
         return getB();
     }
 
+    @Override
+    public boolean isEmpty() {
+        return from() != null && Util.equalsWithNull(from(), to());
+    }
+    
     @Override
     public boolean liesWithin(TimeRange other) {
         return from().compareTo(other.from()) >= 0 && to().compareTo(other.to()) <= 0;
@@ -70,7 +79,7 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
 
     @Override
     public boolean includes(TimePoint timePoint) {
-        return from().compareTo(timePoint) <= 0 && to().compareTo(timePoint) >= 0;
+        return from().compareTo(timePoint) <= 0 && to().compareTo(timePoint) > 0;
     }
 
     @Override
@@ -80,7 +89,7 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
 
     @Override
     public boolean startsAfter(TimePoint timePoint) {
-        return from().after(timePoint);
+        return !from().before(timePoint);
     }
 
     @Override
@@ -90,7 +99,7 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
 
     @Override
     public boolean endsBefore(TimePoint timePoint) {
-        return to().before(timePoint);
+        return !to().after(timePoint);
     }
 
     @Override
@@ -163,14 +172,14 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
         if (this.startsBefore(other)) {
             final TimePoint otherFrom = other.from();
             final TimePoint thisTo = this.to();
-            final TimePoint to = otherFrom.after(thisTo) ? thisTo : otherFrom.minus(1);
+            final TimePoint to = otherFrom.after(thisTo) ? thisTo : otherFrom;
             final TimeRange remainder = new TimeRangeImpl(this.from(), to);
             result.add(remainder);
         }
         if (this.endsAfter(other)) {
             final TimePoint otherTo = other.to();
             final TimePoint thisFrom = this.from();
-            final TimePoint from = otherTo.after(thisFrom) ? otherTo.plus(1) : thisFrom;
+            final TimePoint from = otherTo.after(thisFrom) ? otherTo : thisFrom;
             final TimeRange remainder = new TimeRangeImpl(from, this.to());
             result.add(remainder);
         }

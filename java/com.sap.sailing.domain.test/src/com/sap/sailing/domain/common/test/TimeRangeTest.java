@@ -14,8 +14,20 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TimeRangeTest {
-    protected TimeRange create(long from, long to) {
-        return new TimeRangeImpl(new MillisecondsTimePoint(from), new MillisecondsTimePoint(to));
+    protected TimeRange create(Long from, Long to) {
+        return new TimeRangeImpl(from==null?null:new MillisecondsTimePoint(from), to==null?null:new MillisecondsTimePoint(to));
+    }
+    
+    protected TimeRange create(int from, int to) {
+        return create((long) from, (long) to);
+    }
+    
+    protected TimeRange create(int from, long to) {
+        return create((long) from, to);
+    }
+    
+    protected TimeRange create(long from, int to) {
+        return create(from, (long) to);
     }
     
     protected TimePoint create(long millis) {
@@ -44,10 +56,18 @@ public class TimeRangeTest {
         TimeRange range = create(0, 100);
         Assert.assertTrue(range.includes(create(0)));
         Assert.assertTrue(range.includes(create(1)));
-        Assert.assertTrue(range.includes(create(100)));
+        Assert.assertTrue(range.includes(create(99)));
+        Assert.assertFalse(range.includes(create(100))); // exclusive end
         Assert.assertFalse(range.includes(create(101)));
     }
     
+    @Test
+    public void empty() {
+        assertTrue(create(100, 100).isEmpty());
+        assertFalse(create(100, 101).isEmpty());
+        assertFalse(create(null, 100l).isEmpty());
+        assertFalse(create(100l, null).isEmpty());
+    }
     @Test
     public void intersects() {
         TimeRange one = create(0, 50);
@@ -138,17 +158,17 @@ public class TimeRangeTest {
     
     @Test
     public void testSubtractionWithMinuendCompletelyWithin() {
-        testSubtraction(5, 10, 7, 8, /* expected */ 5, 6, 9, 10);
+        testSubtraction(5, 10, 7, 8, /* expected */ 5, 7, 8, 10);
     }
 
     @Test
     public void testSubtractionWithMinuendStartingAtFrom() {
-        testSubtraction(5, 10, 5, 8, /* expected */ 9, 10);
+        testSubtraction(5, 10, 5, 8, /* expected */ 8, 10);
     }
 
     @Test
     public void testSubtractionWithMinuendEndingAtTo() {
-        testSubtraction(5, 10, 7, 10, /* expected */ 5, 6);
+        testSubtraction(5, 10, 7, 10, /* expected */ 5, 7);
     }
 
     @Test
@@ -158,14 +178,34 @@ public class TimeRangeTest {
 
     @Test
     public void testSubtractionWithMinuendOverlappingAtFrom() {
-        testSubtraction(5, 10, 4, 7, /* expected */ 8, 10);
+        testSubtraction(5, 10, 4, 7, /* expected */ 7, 10);
     }
 
     @Test
     public void testSubtractionWithMinuendOverlappingAtto() {
-        testSubtraction(5, 10, 7, 12, /* expected */ 5, 6);
+        testSubtraction(5, 10, 7, 12, /* expected */ 5, 7);
+    }
+    
+    @Test
+    public void testExclusiveEnd() {
+        assertFalse(create(100, 200).includes(create(200)));
+        assertTrue(create(100, 200).includes(create(199)));
     }
 
+    @Test
+    public void testEndsBeforeWithExclusiveEnd() {
+        assertTrue(create(100, 200).endsBefore(create(200)));
+        assertTrue(create(100, 200).endsBefore(create(201)));
+        assertFalse(create(100, 200).endsBefore(create(199)));
+    }
+    
+    @Test
+    public void testEndsAfterWithExclusiveEnd() {
+        assertFalse(create(100, 200).endsAfter(create(100, 200)));
+        assertFalse(create(100, 200).endsAfter(create(100, 201)));
+        assertTrue(create(100, 200).endsAfter(create(100, 199)));
+    }
+    
     private void testSubtraction(long allFrom, long allTo, long minuendFrom, long minuendTo, long... expected) {
         TimeRange all = create(allFrom, allTo);
         TimeRange minuend = create(minuendFrom, minuendTo);

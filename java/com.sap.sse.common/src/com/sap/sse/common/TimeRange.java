@@ -2,11 +2,21 @@ package com.sap.sse.common;
 
 import java.io.Serializable;
 
+/**
+ * A range between two {@link TimePoint}s, including the {@link #from()} time point and excluding the {@link #to} time
+ * point. A time range is {@link #isEmpty()} if its {@link #from()} and {@link #to()} are equal and both not {@code null}.
+ * Time ranges never have a {@link #from()} that is {@link TimePoint#after(TimePoint) after} {@link #to()}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public interface TimeRange extends Comparable<TimeRange>, Serializable {
     
     TimePoint from();
     
     TimePoint to();
+    
+    boolean isEmpty();
     
     /**
      * Also returns true if (either or both) the from or to timepoints are equal.
@@ -47,15 +57,19 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
     boolean hasOpenEnd();
     
     /**
-     * Get time-difference between the timepoint and this timerange.
-     * It will be 0 if the timepoint lies within the timerange, otherwise the time-difference
-     * to either the start or end of the timerange, depending on which is closer. The
-     * time difference is a duration that is guaranteed to be positive.
+     * Get time-difference between the timepoint and this timerange. It will be 0 if the timepoint lies within the
+     * timerange, otherwise the time-difference to either the start or end of the timerange, depending on which is
+     * closer. The time difference is a duration that is guaranteed to be positive. Although the end of a time range is
+     * exclusive, a {@link TimePoint} that equals the {@link #to()} time point of this time range is defined to have a
+     * {@link Duration#NULL zero duration} as conceptually the time range ends infinitely close to the {@link #to()}
+     * time point, regardless the resolution of the {@link TimePoint} implementation chosen.
      */
     Duration timeDifference(TimePoint timePoint);
     
     /**
-     * Merges the two ranges, only possible if {@code other} {@link #intersects()} this range.
+     * Merges the two ranges, only possible if {@code other} {@link #intersects()} this range.<p>
+     * 
+     * If you want to join two or more {@link TimeRange} objects, consider using {@link MultiTimeRange} instead.
      * 
      * @return the union of this and the {@code other} time range if they {@link #intersects(TimeRange) intersect} which
      *         means that the result {@link #includes(TimeRange) includes} both this and the {@code other} time range;

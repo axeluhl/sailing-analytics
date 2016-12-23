@@ -454,6 +454,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         @Override
         protected void mappingChanged(DeviceMappingWithRegattaLogEvent<WithID> oldMapping,
                 DeviceMappingWithRegattaLogEvent<WithID> newMapping) {
+            // TODO bug 4008: use a new MultiTimeRange and TimeRange.subtract to figure out the ranges for which to call loadFixes
             final TimeRange newTimeRange = newMapping.getTimeRange();
             final TimeRange oldTimeRange = oldMapping.getTimeRange();
             if (newTimeRange.endsAfter(oldTimeRange)) {
