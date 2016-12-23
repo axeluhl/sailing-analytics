@@ -12,7 +12,6 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,9 +22,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import net.jpountz.lz4.LZ4BlockInputStream;
-import net.jpountz.lz4.LZ4BlockOutputStream;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -44,6 +40,9 @@ import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.util.HttpUrlConnectionHelper;
+
+import net.jpountz.lz4.LZ4BlockInputStream;
+import net.jpountz.lz4.LZ4BlockOutputStream;
 
 /**
  * Manages a set of observers of {@link Replicable}, receiving notifications for the operations they perform that
