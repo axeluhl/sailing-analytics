@@ -101,7 +101,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             queryBuilder.greaterThanEquals(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name())
                     .lessThanEquals(loadFixesTo.asMillis());
         } else {
-            queryBuilder.greaterThan(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name()).lessThan(loadFixesTo.asMillis());
+            queryBuilder.greaterThanEquals(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name()).lessThan(loadFixesTo.asMillis());
         }
         DBObject query = queryBuilder.get();
         DBCursor result = fixesCollection.find(query);

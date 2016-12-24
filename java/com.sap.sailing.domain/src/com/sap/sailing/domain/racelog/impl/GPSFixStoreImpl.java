@@ -38,9 +38,9 @@ public class GPSFixStoreImpl implements GPSFixStore {
     }
 
     private <FixT extends GPSFix> void loadTrack(DynamicGPSFixTrack<?, FixT> track, DeviceIdentifier device,
-            TimePoint from, TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException,
+            TimePoint from, TimePoint to, boolean toIsInclusive) throws NoCorrespondingServiceRegisteredException,
             TransformationException {
-        sensorFixStore.<FixT>loadFixes(fix->track.add(fix, /* replace */ true), device, from, to, inclusive);
+        sensorFixStore.<FixT>loadFixes(fix->track.add(fix, /* replace */ true), device, from, to, toIsInclusive);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class GPSFixStoreImpl implements GPSFixStore {
                 .analyze().get(competitor);
         if (mappings != null) {
             for (DeviceMapping<Competitor> mapping : mappings) {
-                loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+                loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), false /*toIsInclusive*/);
             }
         }
     }
@@ -62,7 +62,7 @@ public class GPSFixStoreImpl implements GPSFixStore {
                 .get(mark);
         if (mappings != null) {
             for (DeviceMapping<Mark> mapping : mappings) {
-                loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+                loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), false /*toIsInclusive*/);
             }
         }
     }
@@ -90,7 +90,7 @@ public class GPSFixStoreImpl implements GPSFixStore {
         // /*inclusive*/);
         final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
         final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
-        loadTrack(track, mapping.getDevice(), from, to, true /* inclusive */);
+        loadTrack(track, mapping.getDevice(), from, to, false /* toIsInclusive */);
     }
 
 
@@ -100,7 +100,7 @@ public class GPSFixStoreImpl implements GPSFixStore {
     throws TransformationException, NoCorrespondingServiceRegisteredException {
         final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
         final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
-        loadTrack(track, mapping.getDevice(), from, to, true /* inclusive */);
+        loadTrack(track, mapping.getDevice(), from, to, false /* toIsInclusive */);
     }
     
     @Override
@@ -112,7 +112,7 @@ public class GPSFixStoreImpl implements GPSFixStore {
             for (DeviceMapping<Mark> mapping : mappings) {
                 final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
                 final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
-                loadTrack(track, mapping.getDevice(), from, to, true /*inclusive*/);
+                loadTrack(track, mapping.getDevice(), from, to, false /*toIsInclusive*/);
             }
         }
     }
@@ -120,7 +120,7 @@ public class GPSFixStoreImpl implements GPSFixStore {
     @Override
     public void loadTrack(DynamicGPSFixTrack<WithID, ?> track, DeviceMapping<WithID> mapping)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
-        loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true);
+        loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), false /* toIsInlusive */);
     }
     
     @Override
@@ -136,9 +136,9 @@ public class GPSFixStoreImpl implements GPSFixStore {
     
     @Override
     public <FixT extends GPSFix> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier,
-            TimePoint start, TimePoint end, boolean inclusive)
+            TimePoint start, TimePoint end, boolean endIsInclusive)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
-        sensorFixStore.loadFixes(consumer, deviceIdentifier, start, end, inclusive);
+        sensorFixStore.loadFixes(consumer, deviceIdentifier, start, end, endIsInclusive);
     }
 
 }

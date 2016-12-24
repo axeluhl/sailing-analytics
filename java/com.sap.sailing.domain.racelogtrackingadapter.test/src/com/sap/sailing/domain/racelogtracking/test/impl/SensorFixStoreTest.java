@@ -114,10 +114,10 @@ public class SensorFixStoreTest {
     }
     
     @Test
-    public void testFixesOnExclusiveBoundsArentLoaded() throws Exception {
-        addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+    public void testFixesOnExclusiveEndBoundsArentLoaded() throws Exception {
+        DoubleVectorFix fix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
         addBravoFix(device, FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2);
-        verifyNoFix(FIX_TIMESTAMP, FIX_TIMESTAMP2, device, false);
+        verifySingleFix(fix, FIX_TIMESTAMP, FIX_TIMESTAMP2, device, false);
     }
     
     @Test
@@ -268,22 +268,17 @@ public class SensorFixStoreTest {
         return listener;
     }
     
-    private void verifySingleFix(Timed expectedFix, long start, long end, DeviceIdentifier device, boolean inclusive) throws Exception {
-        List<Timed> loadedFixes = loadFixes(start, end, device, inclusive);
+    private void verifySingleFix(Timed expectedFix, long start, long end, DeviceIdentifier device, boolean endIsInclusive) throws Exception {
+        List<Timed> loadedFixes = loadFixes(start, end, device, endIsInclusive);
         assertEquals(1, loadedFixes.size());
         assertEquals(expectedFix, loadedFixes.get(0));
     }
     
-    private void verifyNoFix(long start, long end, DeviceIdentifier device, boolean inclusive) throws Exception {
-        List<Timed> loadedFixes = loadFixes(start, end, device, inclusive);
-        assertEquals(0, loadedFixes.size());
-    }
-
-    private List<Timed> loadFixes(long start, long end, DeviceIdentifier device, boolean inclusive)
+    private List<Timed> loadFixes(long start, long end, DeviceIdentifier device, boolean endIsInclusive)
             throws TransformationException {
         List<Timed> loadedFixes = new ArrayList<>();
         
-        store.loadFixes(loadedFixes::add, device, new MillisecondsTimePoint(start), new MillisecondsTimePoint(end), inclusive);
+        store.loadFixes(loadedFixes::add, device, new MillisecondsTimePoint(start), new MillisecondsTimePoint(end), endIsInclusive);
         return loadedFixes;
     }
 

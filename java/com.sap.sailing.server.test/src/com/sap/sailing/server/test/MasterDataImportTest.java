@@ -471,10 +471,10 @@ public class MasterDataImportTest {
         Assert.assertEquals(registerEvent.getId(), registerEventOnTarget2.getId());
     }
     
-    private void verifyFix(Timed expectedFix, SensorFixStore store, TimePoint start, TimePoint end, DeviceIdentifier deviceIdentifier) {
+    private void verifyFix(Timed expectedFix, SensorFixStore store, TimePoint start, TimePoint endInclusive, DeviceIdentifier deviceIdentifier) {
         List<Timed> fixes = new ArrayList<>(1);
         try {
-            store.loadFixes(fixes::add, deviceIdentifier, start, end, true);
+            store.loadFixes(fixes::add, deviceIdentifier, start, endInclusive, /* toIsInclusive */ true);
             assertEquals(1, fixes.size());
             assertEquals(expectedFix, fixes.get(0));
         } catch (Exception e) {

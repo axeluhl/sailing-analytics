@@ -273,7 +273,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     // competitor retrieved from the mapping event does not have a track in trackedRace
                     try {
                         sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(),
-                                timeRangeToLoad.from(), timeRangeToLoad.to(), true);
+                                timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false);
                     } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
                         logger.log(Level.WARNING, "Could not load track for competitor: " + mapping.getMappedTo()
                                 + "; device: " + mapping.getDevice());
