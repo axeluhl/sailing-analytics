@@ -73,7 +73,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             assertEquals(1, deviceMappings.size());
             final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
-            assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
+            assertEquals(new MillisecondsTimePoint(201) /* exclusive vs. inclusive */, mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(150));
         {
@@ -86,10 +86,10 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             for (final DeviceMappingWithRegattaLogEvent<Competitor> mapping : deviceMappings) {
                 if (mapping.getTimeRange().from().asMillis() == 100) {
                     found100 = true;
-                    assertEquals(149, mapping.getTimeRange().to().asMillis());
+                    assertEquals(150 /* exclusive */, mapping.getTimeRange().to().asMillis());
                 } else {
                     assertEquals(151, mapping.getTimeRange().from().asMillis());
-                    assertEquals(200, mapping.getTimeRange().to().asMillis());
+                    assertEquals(201 /* exclusive vs. inclusive */, mapping.getTimeRange().to().asMillis());
                 }
             }
             assertTrue(found100);
@@ -109,7 +109,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             assertEquals(1, deviceMappings.size());
             final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
-            assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
+            assertEquals(new MillisecondsTimePoint(201 /* exclusive vs. inclusive */), mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(150));
         {
@@ -120,10 +120,10 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             assertEquals(2, deviceMappings.size());
             for (final DeviceMappingWithRegattaLogEvent<Competitor> mapping : deviceMappings) {
                 if (mapping.getTimeRange().from().asMillis() == 100) {
-                    assertEquals(149, mapping.getTimeRange().to().asMillis());
+                    assertEquals(150 /* exclusive */, mapping.getTimeRange().to().asMillis());
                 } else {
                     assertEquals(151, mapping.getTimeRange().from().asMillis());
-                    assertEquals(200, mapping.getTimeRange().to().asMillis());
+                    assertEquals(201 /* exclusive vs. inclusive */, mapping.getTimeRange().to().asMillis());
                 }
             }
         }
@@ -141,7 +141,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             assertEquals(1, deviceMappings.size());
             final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
-            assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
+            assertEquals(new MillisecondsTimePoint(201) /* exclusive vs. inclusive */, mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(100));
         {
@@ -151,7 +151,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
             assertEquals(101, deviceMappings.get(0).getTimeRange().from().asMillis());
-            assertEquals(200, deviceMappings.get(0).getTimeRange().to().asMillis());
+            assertEquals(201 /* exclusive vs. inclusive */, deviceMappings.get(0).getTimeRange().to().asMillis());
         }
     }
     
@@ -168,7 +168,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             assertEquals(1, deviceMappings.size());
             final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
-            assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
+            assertEquals(new MillisecondsTimePoint(201) /* exclusive vs. inclusive */, mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(100));
         {
@@ -178,7 +178,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
             assertEquals(101, deviceMappings.get(0).getTimeRange().from().asMillis());
-            assertEquals(200, deviceMappings.get(0).getTimeRange().to().asMillis());
+            assertEquals(201 /* exclusive */, deviceMappings.get(0).getTimeRange().to().asMillis());
         }
     }
 
@@ -194,7 +194,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             assertEquals(1, deviceMappings.size());
             final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
-            assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
+            assertEquals(new MillisecondsTimePoint(201) /* exclusive vs. inclusive */, mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(200));
         {
@@ -204,7 +204,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
             assertEquals(100, deviceMappings.get(0).getTimeRange().from().asMillis());
-            assertEquals(199, deviceMappings.get(0).getTimeRange().to().asMillis());
+            assertEquals(200 /* exclusive */, deviceMappings.get(0).getTimeRange().to().asMillis());
         }
     }
     
@@ -221,7 +221,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             assertEquals(1, deviceMappings.size());
             final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
-            assertEquals(new MillisecondsTimePoint(200), mapping.getTimeRange().to());
+            assertEquals(new MillisecondsTimePoint(201) /* exclusive vs. inclusive */, mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(200));
         {
@@ -231,7 +231,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             final List<DeviceMappingWithRegattaLogEvent<Competitor>> deviceMappings = mappings.get(competitor);
             assertEquals(1, deviceMappings.size());
             assertEquals(100, deviceMappings.get(0).getTimeRange().from().asMillis());
-            assertEquals(199, deviceMappings.get(0).getTimeRange().to().asMillis());
+            assertEquals(200 /* exclusive */, deviceMappings.get(0).getTimeRange().to().asMillis());
         }
     }
 
@@ -247,7 +247,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             assertEquals(1, deviceMappings.size());
             final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
-            assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().to());
+            assertEquals(new MillisecondsTimePoint(101) /* exclusive vs. inclusive */, mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(100));
         {
@@ -269,7 +269,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
             assertEquals(1, deviceMappings.size());
             final DeviceMappingWithRegattaLogEvent<Competitor> mapping = deviceMappings.iterator().next();
             assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
-            assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().to());
+            assertEquals(new MillisecondsTimePoint(101) /* exclusive vs. inclusive */, mapping.getTimeRange().to());
         }
         finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(100));
         {
@@ -301,7 +301,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
     	assertEquals(1, mappings.size());
         DeviceMappingWithRegattaLogEvent<Competitor> mapping = mappings.get(0);
     	assertEquals(10, mapping.getTimeRange().from().asMillis());
-    	assertEquals(20, mapping.getTimeRange().to().asMillis());
+    	assertEquals(21 /* exclusive vs. inclusive */, mapping.getTimeRange().to().asMillis());
     	
     	//another independent range
     	id = addMapping(author, device, 0L, null, competitor);
@@ -312,7 +312,7 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
     	//another closing mapping, that should take precedence (because added later)
         closeMapping(author, device, id, 3);
     	assertEquals(2, getMappings().size());
-    	assertEquals(3, getMappings().get(1).getTimeRange().to().asMillis());
+    	assertEquals(4 /* exclusive vs. inclusive */, getMappings().get(1).getTimeRange().to().asMillis());
     	
     	//open-ended at end, not closed
     	addMapping(author, device, 30L, null, competitor);
