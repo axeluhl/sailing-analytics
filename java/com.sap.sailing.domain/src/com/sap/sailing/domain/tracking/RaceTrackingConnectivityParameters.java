@@ -5,9 +5,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 
-
-
-
 /**
  * Different tracking providers require different sets of arguments to start tracking a race.
  * This interface represents the functionality required to start tracking a race, agnostic of the
@@ -19,7 +16,10 @@ import com.sap.sailing.domain.base.Series;
  */
 public interface RaceTrackingConnectivityParameters {
     /**
-     * Starts a {@link RaceTracker} using the connectivity parameters provided by this object.
+     * Starts a {@link RaceTracker} using the connectivity parameters provided by this object. As no specific
+     * {@link Regatta} is provided, this will first look up a regatta for the race from
+     * {@link TrackedRegattaRegistry#getRememberedRegattaForRace(java.io.Serializable)} and if not found
+     * will look up or create a default regatta based on race data such as an event name and the boat class.
      */
     RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogResolver raceLogResolver) throws Exception;

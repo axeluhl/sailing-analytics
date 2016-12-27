@@ -117,19 +117,22 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     /**
      * @param regattaToAddTo
-     *            if <code>null</code>, an existing regatta by the name of the TracTrac event with the boat class name
-     *            appended in parentheses will be looked up; if not found, a default regatta with that name will be
-     *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
-     *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
-     *            to add the races to. Otherwise, a default regatta as described above will be created and used.
+     *            if <code>null</code>, the regatta into which the race has previously been loaded will be looked up; if
+     *            found, the race will be loaded into that regatta; otherwise, an existing regatta by the name of the
+     *            TracTrac event with the boat class name appended in parentheses will be looked up; if not found, a
+     *            default regatta with that name will be created, with a single default series and a single default
+     *            fleet. If a valid {@link RegattaIdentifier} is specified, a regatta lookup is performed with that
+     *            identifier; if the regatta is found, it is used to add the races to. Otherwise, a default regatta as
+     *            described above will be created and used.
      * @param liveURI
      *            may be <code>null</code> or the empty string in which case the server will use the
      *            {@link TracTracRaceRecordDTO#liveURI} from the <code>rr</code> race record.
      * @param offsetToStartTimeOfSimulatedRace
-     *            if not <code>null</code>, the connector will adjust the time stamps of all events received such that the
-     *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
-     *            events received such that they seem to be sent in "real-time" plus the <code>offsetToStartTimeOfSimulatedRace</code>. So, more or less the time points
-     *            attached to the events sent to the receivers will again approximate the wall time.
+     *            if not <code>null</code>, the connector will adjust the time stamps of all events received such that
+     *            the first mark passing for the first waypoint will be set to "now." It will delay the forwarding of
+     *            all events received such that they seem to be sent in "real-time" plus the
+     *            <code>offsetToStartTimeOfSimulatedRace</code>. So, more or less the time points attached to the events
+     *            sent to the receivers will again approximate the wall time.
      * @param useInternalMarkPassingAlgorithm
      *            whether or not to ignore the TracTrac-provided mark passings; if <code>true</code>, a separate mark
      *            passing calculator is used, and the TracTrac-provided ones are ignored.
