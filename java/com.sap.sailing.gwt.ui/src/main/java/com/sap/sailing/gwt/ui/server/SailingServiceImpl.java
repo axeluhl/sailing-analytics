@@ -488,6 +488,7 @@ import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
@@ -3450,6 +3451,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new ReplicationStateDTO(master, replicaDTOs, service.getServerIdentifier().toString());
     }
 
+    /**
+     * A warning shall be issued to the administration user if the {@link RacingEventService} is a replica. For all
+     * other {@link Replicable}s such as the {@link SecurityService} we don't care.
+     */
+    @Override
+    public String[] getReplicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica() {
+        return new String[] { getService().getId().toString() };
+    }
+    
     @Override
     public void startReplicatingFromMaster(String messagingHost, String masterHost, String exchangeName, int servletPort, int messagingPort) throws IOException, ClassNotFoundException, InterruptedException {
         // The queue name must always be the same for this server. In order to achieve

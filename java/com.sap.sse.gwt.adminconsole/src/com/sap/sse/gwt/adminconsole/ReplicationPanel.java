@@ -1,8 +1,11 @@
 package com.sap.sse.gwt.adminconsole;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -20,10 +23,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.gwt.client.replication.ReplicationServiceAsync;
+import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
 import com.sap.sse.gwt.shared.replication.ReplicaDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
@@ -39,7 +43,7 @@ public class ReplicationPanel extends FlowPanel {
     private final Grid registeredReplicas;
     private final Grid registeredMasters;
     
-    private final ReplicationServiceAsync replicationServiceAsync;
+    private final RemoteReplicationServiceAsync replicationServiceAsync;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     
@@ -47,10 +51,35 @@ public class ReplicationPanel extends FlowPanel {
     private final Button stopReplicationButton;
     private final Button removeAllReplicas;
     
-    public ReplicationPanel(ReplicationServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages) {
-        this.replicationServiceAsync = sailingService;
+    /**
+     * For administrators it is important to understand whether an instance is a replica. A
+     * {@link ErrorReporter#reportPersistentInformation(String) persistent error message} shall be shown
+     * in this case; however, some replicables may not be considered part of the "domain-based" replication.
+     * For example, if only a security service for user management is replicated in order to implement
+     * central user and session management then this shall not lead to the warning being displayed.
+     * This set contains the stringified IDs of those replicables for which being a replica shall
+     * lead to a warnings.
+     */
+    private final Set<String> replicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica;
+    
+    public ReplicationPanel(RemoteReplicationServiceAsync replicationService, ErrorReporter errorReporter, final StringMessages stringMessages) {
+        this.replicationServiceAsync = replicationService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        this.replicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica = new HashSet<>();
+        replicationService.getReplicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica(new MarkedAsyncCallback<>(new AsyncCallback<String[]>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log(stringMessages.errorFetchingReplicaData(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(String[] result) {
+                for (final String replicableIdAsStringThatShallLeadToWarningAboutInstanceBeingReplica : result) {
+                    replicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica.add(replicableIdAsStringThatShallLeadToWarningAboutInstanceBeingReplica);
+                }
+            }
+        }));
         
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
@@ -277,7 +306,12 @@ public class ReplicationPanel extends FlowPanel {
                 i++;
                 final ReplicationMasterDTO replicatingFromMaster = replicas.getReplicatingFromMaster();
                 if (replicatingFromMaster != null) { // TODO bug 2465: replicating only the user service from a "domain controller master" shouldn't lead to a warning here...
-                    errorReporter.reportPersistentInformation(stringMessages.warningServerIsReplica());
+                    for (final String replicableIdAsStringOfReplicableThatWeAreReplicatingCurrently : replicatingFromMaster.getReplicableIdsAsString()) {
+                        if (Util.contains(replicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica, replicableIdAsStringOfReplicableThatWeAreReplicatingCurrently)) {
+                            errorReporter.reportPersistentInformation(stringMessages.warningServerIsReplica());
+                            break;
+                        }
+                    }
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
                             replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort(),
