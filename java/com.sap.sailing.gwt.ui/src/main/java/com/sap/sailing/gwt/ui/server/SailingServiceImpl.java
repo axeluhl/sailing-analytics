@@ -359,9 +359,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -482,6 +479,9 @@ import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
+import com.sap.sse.gwt.shared.replication.ReplicaDTO;
+import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
+import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
@@ -4561,7 +4561,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         try {
             getReplicationService().stopToReplicateFromMaster();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Exception trying to stop replicating from master", e);
             throw new RuntimeException(e);
         }
     }
@@ -4571,7 +4571,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         try {
             getReplicationService().stopAllReplicas();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Exception trying to stop all replicas from receiving updates from this master", e);
             throw new RuntimeException(e);
         }
     }
@@ -4582,7 +4582,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         try {
             getReplicationService().unregisterReplica(uuid);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Exception trying to unregister replica with UUID "+uuid, e);
             throw new RuntimeException(e);
         }
     }

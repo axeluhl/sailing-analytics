@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sse.gwt.shared.replication;
 
 import java.util.Date;
 import java.util.Map;
