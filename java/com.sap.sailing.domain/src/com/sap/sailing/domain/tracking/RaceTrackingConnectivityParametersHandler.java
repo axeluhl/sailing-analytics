@@ -1,12 +1,10 @@
-package com.sap.sailing.domain.persistence;
+package com.sap.sailing.domain.tracking;
 
 import java.util.Map;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
 
-import com.mongodb.BasicDBObject;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**
@@ -18,7 +16,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RaceTrackingConnectivityParametersMongoHandler {
+public interface RaceTrackingConnectivityParametersHandler {
     /**
      * Produces a map that has the value for the {@link TypeBasedServiceFinder#TYPE} key set such that this handler
      * can be {@link TypeBasedServiceFinder#findService(String) found} based on that value again; furthermore, all

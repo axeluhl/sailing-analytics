@@ -34,5 +34,6 @@ Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.racelog,
  com.sap.sailing.domain.common.racelog.tracking,
  com.sap.sailing.domain.common.tracking,
- com.sap.sailing.domain.common.tracking.impl
+ com.sap.sailing.domain.common.tracking.impl,
+ com.sap.sailing.domain.tractracadapter.persistence.impl
 

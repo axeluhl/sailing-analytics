@@ -100,13 +100,13 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.RaceTrackingConnectivityParametersMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -131,7 +131,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
-    private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersMongoHandler> raceTrackingConnectivityParamsServiceFinder;
+    private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
 
     /**
      * Uses <code>null</code> for the device type service finder and hence will be unable to store device identifiers.
@@ -147,7 +147,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
             this.deviceIdentifierServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierMongoHandler());
-            this.raceTrackingConnectivityParamsServiceFinder = serviceFinderFactory.createServiceFinder(RaceTrackingConnectivityParametersMongoHandler.class);
+            this.raceTrackingConnectivityParamsServiceFinder = serviceFinderFactory.createServiceFinder(RaceTrackingConnectivityParametersHandler.class);
         } else {
             this.deviceIdentifierServiceFinder = null;
             this.raceTrackingConnectivityParamsServiceFinder = null;
@@ -1525,7 +1525,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) {
         final String typeIdentifier = params.getTypeIdentifier();
-        final RaceTrackingConnectivityParametersMongoHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
+        final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
         if (paramsPersistenceService != null) {
             final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
             DBObject key = new BasicDBObject();
@@ -1539,7 +1539,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) {
         final String typeIdentifier = params.getTypeIdentifier();
-        final RaceTrackingConnectivityParametersMongoHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
+        final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
         if (paramsPersistenceService != null) {
             final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
             DBObject key = new BasicDBObject();

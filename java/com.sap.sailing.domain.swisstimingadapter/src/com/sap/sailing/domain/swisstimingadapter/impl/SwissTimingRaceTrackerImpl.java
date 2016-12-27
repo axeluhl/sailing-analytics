@@ -112,7 +112,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     protected SwissTimingRaceTrackerImpl(String raceID, String raceName, String raceDescription, BoatClass boatClass,
             String hostname, int port, StartList startList, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm) throws InterruptedException,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, long delayToLiveInMillis,
+            boolean useInternalMarkPassingAlgorithm) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
         this(domainFactory.getOrCreateDefaultRegatta(raceLogStore, regattaLogStore, raceID,
                 boatClass, trackedRegattaRegistry), raceID, raceName,

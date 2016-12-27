@@ -188,7 +188,6 @@ import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
-import com.sap.sailing.domain.persistence.RaceTrackingConnectivityParametersMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
@@ -201,6 +200,7 @@ import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
@@ -239,7 +239,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private final DomainFactory baseDomainFactory;
     private final TypeBasedServiceFinderFactory serviceFinderFactory;
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
-    private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersMongoHandler> raceTrackingConnectivityParamsServiceFinder;
+    private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
     
     /**
      * Uses <code>null</code> as the {@link TypeBasedServiceFinder}, meaning that no {@link DeviceIdentifier}s can be loaded
@@ -255,7 +255,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
             this.deviceIdentifierServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierMongoHandler());
-            this.raceTrackingConnectivityParamsServiceFinder = serviceFinderFactory.createServiceFinder(RaceTrackingConnectivityParametersMongoHandler.class);
+            this.raceTrackingConnectivityParamsServiceFinder = serviceFinderFactory.createServiceFinder(RaceTrackingConnectivityParametersHandler.class);
         } else {
             this.deviceIdentifierServiceFinder = null;
             this.raceTrackingConnectivityParamsServiceFinder = null;
@@ -2288,7 +2288,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
         for (final DBObject o : collection.find()) {
             final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
-            final RaceTrackingConnectivityParametersMongoHandler connectivityParamsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(type);
+            final RaceTrackingConnectivityParametersHandler connectivityParamsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(type);
             if (connectivityParamsPersistenceService != null) {
                 final Map<String, Object> map = new HashMap<>();
                 for (final String key : o.keySet()) {
