@@ -30,7 +30,12 @@
 			     list of replicables, the connection to the master server (configured by the other
 			     replication-related system properties such as <tt>replicate.master.servlet.host</tt> etc.)
 			     will be used to replicate only those replicables whose IDs are specified in
-			     <tt>replicate.on.start</tt>. All other replicables will operate locally.<p>
+			     <tt>replicate.on.start</tt>. All other replicables will operate locally.
+			     Usually, the <tt>replicate.on.start</tt> system property is controlled
+			     by the environment variable <tt>REPLICATE_ON_START</tt> that is set in the <tt>env.sh</tt>
+			     configuration file used during server startup and influenced by the server environments
+			     from <a href="http://releases.sapsailing.com/environments">http://releases.sapsailing.com/environments</a>
+			     and overridden by the user details provided to the instance through the AWS EC2 machinery.<p>
 			     The Administration Console (<tt>/gwt/AdminConsole.html</tt> entry point) will now
 			     show which replicables a replica replicates, both, on the replica's administration
 			     console's "Replication" panel, as well as on the master's "Replication" panel, there
