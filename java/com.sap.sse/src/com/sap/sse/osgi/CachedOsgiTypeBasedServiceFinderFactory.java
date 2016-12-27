@@ -13,13 +13,16 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 
 /**
  * Use the OSGi service registry to find the desired services.
+ * <p>
  * 
- * Using this indirection it is possible to integrate new service types into the system without
- * the need to change any existing code.<p>
+ * Using this indirection it is possible to integrate new service types into the system without the need to change any
+ * existing code.
+ * <p>
  * 
- * Note that it is not easily possible to use the {@link CachedOsgiTypeBasedServiceFinderFactory} in test
- * case scenarios because there is usually no OSGi context available during test execution.
- * Consider using the {@link MockServiceFinderFactory} instead.
+ * Note that it is not easily possible to use the {@link CachedOsgiTypeBasedServiceFinderFactory} in test case scenarios
+ * because there is usually no OSGi context available during test execution. Consider using the
+ * {@link MockServiceFinderFactory} instead.
+ * 
  * @author Fredrik Teschke
  *
  */

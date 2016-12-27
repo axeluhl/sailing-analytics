@@ -21,6 +21,8 @@ import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
 public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConnectivityParameters {
+    public static final String TYPE = "TRAC_TRAC";
+    
     private final URL paramURL;
     private final URI liveURI;
     private final URI storedURI;
@@ -60,6 +62,11 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
         this.raceStatus = raceStatus;
         this.raceVisibility = raceVisibility;
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
+    }
+
+    @Override
+    public String getTypeIdentifier() {
+        return TYPE;
     }
 
     @Override

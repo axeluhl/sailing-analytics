@@ -15,6 +15,8 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 
 public class SwissTimingTrackingConnectivityParameters implements RaceTrackingConnectivityParameters {
+    public static final String TYPE = "SWISS_TIMING";
+    
     private final String hostname;
     private final int port;
     private final String raceID;
@@ -49,6 +51,11 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
     }
     
+    @Override
+    public String getTypeIdentifier() {
+        return TYPE;
+    }
+
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogResolver raceLogResolver) throws Exception {

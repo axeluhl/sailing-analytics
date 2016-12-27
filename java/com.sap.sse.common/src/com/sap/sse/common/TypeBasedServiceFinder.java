@@ -5,10 +5,10 @@ import java.util.Set;
 /**
  * Manages a set of services implementing {@code ServiceType}. Each of these services provides similar functionality
  * (e.g. a storage service), but for a different {@code type} of input/output (e.g. storage for competitors or GPS
- * fixes).
+ * fixes).<p>
  * 
  * Methods exist for {@link #findService(String) finding a service for a certain type}, or {@link #findAllServices()
- * finding all services} that implement {@code ServiceType}.
+ * finding all services} that implement {@code ServiceType}.<p>
  * 
  * An implementation of this interface might e.g. be backed by the OSGi service registry. For that case, this
  * OSGi-agnostic interface allows such a {@code TypeBasedServiceFinder} object to be introduced in contexts that are not

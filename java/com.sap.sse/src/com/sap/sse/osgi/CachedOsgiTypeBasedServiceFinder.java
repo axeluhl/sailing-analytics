@@ -14,8 +14,14 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**
- * Caches OSGI services of a certain type, based on their type property. Has to be registered as the
- * {@link ServiceTrackerCustomizer} of a {@link ServiceTracker}.
+ * Caches OSGI services of a certain type, based on their {@link TypeBasedServiceFinder#TYPE}
+ * {@link BundleContext#registerService(Class, Object, java.util.Dictionary) property}. Has to be registered as the
+ * {@link ServiceTrackerCustomizer} of a {@link ServiceTracker}. The {@link #findService(String)} method looks
+ * up the requested type string against the {@link TypeBasedServiceFinder#TYPE} property that OSGi-based
+ * service implementations must have provided as a property during service registration with the OSGi service
+ * registry. Don't confuse this "type" string with the classes of the service implementations which all
+ * have to implement {@code ServiceT} but whose name has nothing to do with the type string used here for
+ * service lookup.
  * 
  * @author Fredrik Teschke
  * 

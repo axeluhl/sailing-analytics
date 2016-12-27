@@ -43,4 +43,10 @@ public interface RaceTrackingConnectivityParameters {
      * Gets the configured delay time to the 'live' timepoint for this tracker
      */
     public long getDelayToLiveInMillis();
+    
+    /**
+     * A non-{@code null} unique type identifier that helps finding services that need to deal with connectivity
+     * parameters in a type-specific way
+     */
+    public String getTypeIdentifier();
 }

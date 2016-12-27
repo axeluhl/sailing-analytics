@@ -28,6 +28,11 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.RacingEventService;
 
 public class RaceLogConnectivityParams implements RaceTrackingConnectivityParameters {
+    /**
+     * A type identifier that needs to be unique for the 
+     */
+    public static final String TYPE = "RACE_LOG_TRACKING";
+    
     private final RacingEventService service;
     private final RaceColumn raceColumn;
     private final Fleet fleet;
@@ -49,6 +54,11 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
         if (!new RaceLogTrackingStateAnalyzer(getRaceLog()).analyze().isForTracking()) {
             throw new RaceNotCreatedException(String.format("Racelog (%s) is not denoted for tracking", getRaceLog()));
         }
+    }
+
+    @Override
+    public String getTypeIdentifier() {
+        return TYPE;
     }
 
     @Override

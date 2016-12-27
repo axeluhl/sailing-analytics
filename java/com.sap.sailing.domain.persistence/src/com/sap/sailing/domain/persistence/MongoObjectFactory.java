@@ -19,6 +19,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 
@@ -149,4 +150,24 @@ public interface MongoObjectFactory {
 
     void removeResultUrl(String resultProviderName, URL url);
 
+    
+    /**
+     * Updates the database such that the next call to
+     * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore()} won't return an object equivalent to
+     * {@code params} anymore; in other words, the race whose connectivity parameters are described by {@code params}
+     * will no longer be considered as to be restored.
+     * 
+     * @see #addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
+     */
+    void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params);
+    
+    /**
+     * Updates the database such that the next call to
+     * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore()} will return an object equivalent to
+     * {@code params}; in other words, the race whose connectivity parameters are described by {@code params} will be
+     * considered as to be restored.
+     * 
+     * @see #removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
+     */
+    void addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params);
 }
