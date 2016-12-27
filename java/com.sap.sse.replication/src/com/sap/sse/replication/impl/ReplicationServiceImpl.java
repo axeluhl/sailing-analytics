@@ -573,19 +573,13 @@ public class ReplicationServiceImpl implements ReplicationService {
      * which implements the initial load sending process.
      */
     @Override
-    public void startToReplicateFrom(ReplicationMasterDescriptor master) throws IOException, ClassNotFoundException,
-            InterruptedException {
-        final Iterable<Replicable<?, ?>> replicables = getReplicables();
-        startToReplicateFrom(master, replicables);
-    }
-
-    @Override
-    public void startToReplicateFrom(final ReplicationMasterDescriptor master, final Iterable<Replicable<?, ?>> replicables)
+    public void startToReplicateFrom(final ReplicationMasterDescriptor master)
             throws IOException, ClassNotFoundException, InterruptedException {
         if (initialLoadChannels.containsKey(master)) {
             logger.warning("An initial load from "+master+" is already running, replicating the following replicables: "+
                             initialLoadChannels.get(master).getReplicables()+". Not starting a second time.");
         } else {
+            final Iterable<Replicable<?, ?>> replicables = master.getReplicables();
             logger.info("Starting to replicate from " + master);
             try {
                 registerReplicaWithMaster(master, replicables);
