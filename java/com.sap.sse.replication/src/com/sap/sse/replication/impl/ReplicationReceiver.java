@@ -190,11 +190,15 @@ public class ReplicationReceiver implements Runnable {
                     try {
                         while (true) {
                             byte[] serializedOperation = (byte[]) ois.readObject();
-                            readOperationAndApplyOrQueueIt(replicable, serializedOperation);
-                            operationCount++;
-                            operationsInMessage++;
-                            if (operationCount % 10000l == 0) {
-                                logger.info("Received " + operationCount + " operations so far");
+                            if (Util.contains(master.getReplicables(), replicable)) {
+                                readOperationAndApplyOrQueueIt(replicable, serializedOperation);
+                                operationCount++;
+                                operationsInMessage++;
+                                if (operationCount % 10000l == 0) {
+                                    logger.info("Received " + operationCount + " operations so far");
+                                }
+                            } else {
+                                logger.fine("Dropping operation for non-replicated replicable "+replicable.getId());
                             }
                         }
                     } catch (EOFException eof) {

@@ -334,7 +334,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
-    String replicatingFromMaster(String hostname, int jmsPort, int servletPort, String messagingHostname, String exchangeName);
+    String replicatingFromMaster(String hostname, int jmsPort, int servletPort, String messagingHostname, String exchangeName, String replicableIdsAsString);
     String showWindSpeedSeries();
     String showWindDirectionSeries();
     String fleet();
@@ -1761,4 +1761,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String couldNotSaveCompetitorRegistrations(String message);
     String searchTagForImportedCompetitorPlaceholder();
     String version(String version);
+    String replicables();
 }

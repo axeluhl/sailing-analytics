@@ -1,15 +1,18 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -222,6 +225,11 @@ public class ReplicationPanel extends FlowPanel {
                     registeredReplicas.setWidget(i, 2, removeReplicaButton);
                     i++;
                     registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 1, new Label(stringMessages.replicables()));
+                    HTML replicablesLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(Arrays.toString(replica.getReplicableIdsAsStrings()).replaceAll(",", "\n")).toSafeHtml());
+                    registeredReplicas.setWidget(i, 2, replicablesLabel);
+                    i++;
+                    registeredReplicas.insertRow(i);
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.averageNumberOfOperationsPerMessage()));
                     registeredReplicas.setWidget(i, 2, new Label(""+replica.getAverageNumberOfOperationsPerMessage()));
                     i++;
@@ -274,7 +282,8 @@ public class ReplicationPanel extends FlowPanel {
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
                             replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort(),
-                            replicatingFromMaster.getMessagingHostname(), replicatingFromMaster.getExchangeName())));
+                            replicatingFromMaster.getMessagingHostname(), replicatingFromMaster.getExchangeName(),
+                            Arrays.toString(replicatingFromMaster.getReplicableIdsAsString()))));
                     i++;
                     addButton.setEnabled(false);
                     stopReplicationButton.setEnabled(true);

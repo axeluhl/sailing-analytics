@@ -14,12 +14,14 @@ public class ReplicaDTO implements IsSerializable {
     private long numberOfMessagesSent;
     private double averageMessageSizeInBytes;
     private long totalNumberOfBytesSent;
+    private String[] replicableIdsAsStrings;
     ReplicaDTO() {}
     public ReplicaDTO(String hostname, Date registrationTime,
-            String identifier, Map<String, Integer> operationCountByOperationClassName, double averageNumberOfOperationsPerMessage,
-            long numberOfMessagesSent, long totalNumberOfBytesSent, double averageMessageSizeInBytes) {
+            String identifier, String[] replicableIdsAsStrings, Map<String, Integer> operationCountByOperationClassName,
+            double averageNumberOfOperationsPerMessage, long numberOfMessagesSent, long totalNumberOfBytesSent, double averageMessageSizeInBytes) {
         this.hostname = hostname;
         this.identifier = identifier;
+        this.replicableIdsAsStrings = replicableIdsAsStrings;
         this.registrationTime = registrationTime;
         this.operationCountByOperationClassName = operationCountByOperationClassName;
         this.averageNumberOfOperationsPerMessage = averageNumberOfOperationsPerMessage;
@@ -50,5 +52,8 @@ public class ReplicaDTO implements IsSerializable {
     }
     public String getIdentifier() {
         return identifier;
+    }
+    public String[] getReplicableIdsAsStrings() {
+        return replicableIdsAsStrings;
     }
 }
