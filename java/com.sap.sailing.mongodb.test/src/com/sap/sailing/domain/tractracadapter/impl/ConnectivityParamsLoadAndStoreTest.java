@@ -1,6 +1,7 @@
-package com.sap.sailing.mongodb.test;
+package com.sap.sailing.domain.tractracadapter.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -18,6 +19,8 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
+import com.sap.sailing.mongodb.test.AbstractMongoDBTest;
+import com.sap.sailing.mongodb.test.MockConnectivityParamsServiceFinderFactory;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -55,6 +58,19 @@ public class ConnectivityParamsLoadAndStoreTest extends AbstractMongoDBTest {
         final Iterable<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = domainObjectFactory.loadConnectivityParametersForRacesToRestore();
         assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
         final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
-        assertEquals(delayToLiveInMillis, paramsReadFromDB.getDelayToLiveInMillis());
+        assertTrue(paramsReadFromDB instanceof RaceTrackingConnectivityParametersImpl);
+        RaceTrackingConnectivityParametersImpl tracTracParamsReadFromDB = (RaceTrackingConnectivityParametersImpl) paramsReadFromDB;
+        assertEquals(delayToLiveInMillis, tracTracParamsReadFromDB.getDelayToLiveInMillis());
+        assertEquals(paramURL, tracTracParamsReadFromDB.getParamURL());
+        assertEquals(storedURI, tracTracParamsReadFromDB.getStoredURI());
+        assertEquals(courseDesignUpdateURI, tracTracParamsReadFromDB.getCourseDesignUpdateURI());
+        assertEquals(startOfTracking, tracTracParamsReadFromDB.getStartOfTracking());
+        assertEquals(endOfTracking, tracTracParamsReadFromDB.getEndOfTracking());
+        assertEquals(offsetToStartTimeOfSimulatedRace, tracTracParamsReadFromDB.getOffsetToStartTimeOfSimulatedRace());
+        assertEquals(useInternalMarkPassingAlgorithm, tracTracParamsReadFromDB.isUseInternalMarkPassingAlgorithm());
+        assertEquals(tracTracUsername, tracTracParamsReadFromDB.getTracTracUsername());
+        assertEquals(tracTracPassword, tracTracParamsReadFromDB.getTracTracPassword());
+        assertEquals(raceStatus, tracTracParamsReadFromDB.getRaceStatus());
+        assertEquals(raceVisibility, tracTracParamsReadFromDB.getRaceVisibility());
     }
 }
