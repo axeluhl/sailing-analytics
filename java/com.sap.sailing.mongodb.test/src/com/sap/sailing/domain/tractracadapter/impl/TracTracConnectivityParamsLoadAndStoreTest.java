@@ -21,8 +21,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class ConnectivityParamsLoadAndStoreTest extends AbstractConnectivityParamsLoadAndStoreTest {
-    public ConnectivityParamsLoadAndStoreTest() throws UnknownHostException, MongoException {
+public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnectivityParamsLoadAndStoreTest {
+    public TracTracConnectivityParamsLoadAndStoreTest() throws UnknownHostException, MongoException {
         super();
     }
 
@@ -67,10 +67,6 @@ public class ConnectivityParamsLoadAndStoreTest extends AbstractConnectivityPara
         assertEquals(tracTracPassword, tracTracParamsReadFromDB.getTracTracPassword());
         assertEquals(raceStatus, tracTracParamsReadFromDB.getRaceStatus());
         assertEquals(raceVisibility, tracTracParamsReadFromDB.getRaceVisibility());
-    }
-    
-    @Test
-    public void testStoreAndLoadRaceLogTrackingParams() {
-        // TODO
+        assertEquals(tracTracParams.getTrackerID(), tracTracParamsReadFromDB.getTrackerID());
     }
 }

@@ -18,8 +18,8 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.mongodb.test.AbstractConnectivityParamsLoadAndStoreTest;
 import com.sap.sse.common.Util;
 
-public class ConnectivityParamsLoadAndStoreTest extends AbstractConnectivityParamsLoadAndStoreTest {
-    public ConnectivityParamsLoadAndStoreTest() throws UnknownHostException, MongoException {
+public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConnectivityParamsLoadAndStoreTest {
+    public SwissTimingConnectivityParamsLoadAndStoreTest() throws UnknownHostException, MongoException {
         super();
     }
 
@@ -62,6 +62,7 @@ public class ConnectivityParamsLoadAndStoreTest extends AbstractConnectivityPara
         assertEquals(raceName, stParamsReadFromDB.getRaceName());
         assertEquals(startList.getRaceID(), stParamsReadFromDB.getStartList().getRaceID());
         assertEquals(startList.getCompetitors(), stParamsReadFromDB.getStartList().getCompetitors());
+        assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
     }
     
     @Test
@@ -99,6 +100,7 @@ public class ConnectivityParamsLoadAndStoreTest extends AbstractConnectivityPara
         assertEquals(raceName, stParamsReadFromDB.getRaceName());
         assertEquals(startList.getRaceID(), stParamsReadFromDB.getStartList().getRaceID());
         assertEquals(startList.getCompetitors(), stParamsReadFromDB.getStartList().getCompetitors());
+        assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
     }
     
     @Test

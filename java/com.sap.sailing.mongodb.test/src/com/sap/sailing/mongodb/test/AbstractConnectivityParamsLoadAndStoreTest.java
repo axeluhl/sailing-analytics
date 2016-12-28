@@ -7,13 +7,14 @@ import org.junit.Before;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sse.common.TypeBasedServiceFinderFactory;
+import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.impl.RacingEventServiceImpl;
 
 public abstract class AbstractConnectivityParamsLoadAndStoreTest extends AbstractMongoDBTest {
-    protected TypeBasedServiceFinderFactory serviceFinderFactory;
+    protected MockConnectivityParamsServiceFinderFactory serviceFinderFactory;
     protected MongoObjectFactory mongoObjectFactory;
     protected DomainObjectFactory domainObjectFactory;
+    protected RacingEventService racingEventService;
 
     public AbstractConnectivityParamsLoadAndStoreTest() throws UnknownHostException, MongoException {
         super();
@@ -22,7 +23,9 @@ public abstract class AbstractConnectivityParamsLoadAndStoreTest extends Abstrac
     @Before
     public void setUp() {
         serviceFinderFactory = new MockConnectivityParamsServiceFinderFactory();
-        mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService(), serviceFinderFactory);
-        domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), com.sap.sailing.domain.base.DomainFactory.INSTANCE, serviceFinderFactory);
+        racingEventService = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, serviceFinderFactory);
+        serviceFinderFactory.setRacingEventService(racingEventService);
+        mongoObjectFactory = racingEventService.getMongoObjectFactory();
+        domainObjectFactory = racingEventService.getDomainObjectFactory();
     }
 }
