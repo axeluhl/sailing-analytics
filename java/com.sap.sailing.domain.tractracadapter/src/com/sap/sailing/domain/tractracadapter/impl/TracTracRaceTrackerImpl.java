@@ -385,13 +385,15 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             }
         });
         // Start live and stored data streams
-        Regatta effectiveRegatta = regatta;
+        final Regatta effectiveRegatta;
         raceSubscriber = subscriberFactory.createRaceSubscriber(tractracRace, liveURI, storedURI);
         raceSubscriber.subscribeConnectionStatus(this);
         // Try to find a pre-associated event based on the Race ID
-        if (effectiveRegatta == null) {
+        if (regatta == null) {
             Serializable raceID = domainFactory.getRaceID(tractracRace);
             effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
+        } else {
+            effectiveRegatta = regatta;
         }
         // removeRace may detach the domain regatta from the domain factory if that
         // removed the last race; therefore, it's important to getOrCreate the
