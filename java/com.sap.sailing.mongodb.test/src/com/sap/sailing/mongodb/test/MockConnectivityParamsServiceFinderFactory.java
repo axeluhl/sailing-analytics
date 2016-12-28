@@ -17,7 +17,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingAdapterFactoryI
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
-import com.sap.sailing.domain.tractracadapter.impl.ConnectivityParamsHandler;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracConnectivityParamsHandler;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -44,7 +44,7 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
                 final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, DomainFactory.INSTANCE, MockConnectivityParamsServiceFinderFactory.this);
                 switch (type) {
                 case RaceTrackingConnectivityParametersImpl.TYPE:
-                    return new ConnectivityParamsHandler(
+                    return new TracTracConnectivityParamsHandler(
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                             MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
                             TracTracAdapterFactory.INSTANCE.getOrCreateTracTracAdapter(domainObjectFactory.getBaseDomainFactory()).getTracTracDomainFactory());

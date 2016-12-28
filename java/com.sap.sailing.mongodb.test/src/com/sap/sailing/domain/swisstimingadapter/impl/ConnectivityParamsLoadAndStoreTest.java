@@ -65,8 +65,40 @@ public class ConnectivityParamsLoadAndStoreTest extends AbstractConnectivityPara
     }
     
     @Test
-    public void testStoreAndLoadSwissTimingLiveParamsWithCompetitorsWithoutID() {
-        // TODO
+    public void testStoreAndLoadSwissTimingLiveParamsWithCompetitorsWithoutID() throws MalformedURLException, URISyntaxException {
+        final String hostname = "a.b.com";
+        final int port = 1234;
+        final String raceID = "Race ID 123";
+        final String raceName = "The Race";
+        final String raceDescription = null;
+        final BoatClass boatClass = domainObjectFactory.getBaseDomainFactory().getOrCreateBoatClass("49er");
+        final CompetitorWithoutID c1 = new CompetitorWithoutID("b1", "GER", "C1");
+        final CompetitorWithoutID c2 = new CompetitorWithoutID("b2", "GER", "21");
+        final StartList startList = new StartListImpl(raceID, Arrays.asList(c1, c2));
+        final boolean useInternalMarkPassingAlgorithm = false;
+        final long delayToLiveInMillis = 30000;
+        final SwissTimingTrackingConnectivityParameters stParams = new SwissTimingTrackingConnectivityParameters(
+                hostname, port, raceID, raceName, raceDescription, boatClass, startList, delayToLiveInMillis,
+                SwissTimingFactory.INSTANCE, new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory(),
+                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm);
+        // store
+        mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
+        // load
+        final Iterable<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = domainObjectFactory.loadConnectivityParametersForRacesToRestore();
+        // compare
+        assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
+        final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
+        assertTrue(paramsReadFromDB instanceof SwissTimingTrackingConnectivityParameters);
+        SwissTimingTrackingConnectivityParameters stParamsReadFromDB = (SwissTimingTrackingConnectivityParameters) paramsReadFromDB;
+        assertEquals(delayToLiveInMillis, stParamsReadFromDB.getDelayToLiveInMillis());
+        assertEquals(hostname, stParamsReadFromDB.getHostname());
+        assertEquals(boatClass, stParamsReadFromDB.getBoatClass());
+        assertEquals(port, stParamsReadFromDB.getPort());
+        assertEquals(raceDescription, stParamsReadFromDB.getRaceDescription());
+        assertEquals(raceID, stParamsReadFromDB.getRaceID());
+        assertEquals(raceName, stParamsReadFromDB.getRaceName());
+        assertEquals(startList.getRaceID(), stParamsReadFromDB.getStartList().getRaceID());
+        assertEquals(startList.getCompetitors(), stParamsReadFromDB.getStartList().getCompetitors());
     }
     
     @Test

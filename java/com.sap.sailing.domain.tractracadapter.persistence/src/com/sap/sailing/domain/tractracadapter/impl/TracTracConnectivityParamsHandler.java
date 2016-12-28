@@ -26,7 +26,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Axel Uhl (d043530)
  *
  */
-public class ConnectivityParamsHandler implements RaceTrackingConnectivityParametersHandler {
+public class TracTracConnectivityParamsHandler implements RaceTrackingConnectivityParametersHandler {
     private static final String USE_INTERNAL_MARK_PASSING_ALGORITHM = "useInternalMarkPassingAlgorithm";
     private static final String TRAC_TRAC_USERNAME = "tracTracUsername";
     private static final String TRAC_TRAC_PASSWORD = "tracTracPassword";
@@ -44,7 +44,7 @@ public class ConnectivityParamsHandler implements RaceTrackingConnectivityParame
     private final RegattaLogStore regattaLogStore;
     private final DomainFactory domainFactory;
 
-    public ConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory) {
+    public TracTracConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory) {
         super();
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;

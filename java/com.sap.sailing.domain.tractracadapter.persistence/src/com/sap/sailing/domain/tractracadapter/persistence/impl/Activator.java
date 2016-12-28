@@ -18,7 +18,7 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
-import com.sap.sailing.domain.tractracadapter.impl.ConnectivityParamsHandler;
+import com.sap.sailing.domain.tractracadapter.impl.TracTracConnectivityParamsHandler;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.mongodb.MongoDBService;
@@ -47,7 +47,7 @@ public class Activator implements BundleActivator {
                 final Dictionary<String, Object> properties = new Hashtable<String, Object>();
                 final com.sap.sailing.domain.tractracadapter.DomainFactory domainFactory = TracTracAdapterFactory.INSTANCE.getOrCreateTracTracAdapter(
                         domainObjectFactory.getBaseDomainFactory()).getTracTracDomainFactory();
-                final ConnectivityParamsHandler paramsHandler = new ConnectivityParamsHandler(
+                final TracTracConnectivityParamsHandler paramsHandler = new TracTracConnectivityParamsHandler(
                         MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                         MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
                         domainFactory);
