@@ -23,6 +23,51 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">December 2016</h2>
+                    <ul class="bulletList">
+			 <li>Partial replication is now possible. If the system property <tt>replicate.on.start</tt>
+			     that controls automatic replication upon start-up provides only a partial comma-separated
+			     list of replicables, the connection to the master server (configured by the other
+			     replication-related system properties such as <tt>replicate.master.servlet.host</tt> etc.)
+			     will be used to replicate only those replicables whose IDs are specified in
+			     <tt>replicate.on.start</tt>. All other replicables will operate locally.
+			     Usually, the <tt>replicate.on.start</tt> system property is controlled
+			     by the environment variable <tt>REPLICATE_ON_START</tt> that is set in the <tt>env.sh</tt>
+			     configuration file used during server startup and influenced by the server environments
+			     from <a href="http://releases.sapsailing.com/environments">http://releases.sapsailing.com/environments</a>
+			     and overridden by the user details provided to the instance through the AWS EC2 machinery.<p>
+			     The Administration Console (<tt>/gwt/AdminConsole.html</tt> entry point) will now
+			     show which replicables a replica replicates, both, on the replica's administration
+			     console's "Replication" panel, as well as on the master's "Replication" panel, there
+			     for each replica.<p>
+			     The master will restrict broadcasting its operations to those replicables for which
+			     at least one replica has subscribed. While the initial load is requested individually
+			     for each replica and can therefore be tailored to the replicas requested, the operation
+			     broadcast channel is not specific to any replica. It therefore contains the operations
+			     of all replicables for which at least one replica has subscribed. Replicas receiving
+			     operations for replicables for which they did not subscribe will simply drop those
+			     operations (note, however, that the replica will still have to read the operations from the
+			     channel before dropping; this way, registering a replica may have bandwidth effects for
+			     other replicas). Similarly, "backward replication" from a replica to a master will only
+			     take place for those replicables for which the replica has requested replication from (and
+			     therefore also "to") the master.<p>
+			     With this it is now possible to replicate only the Security Service, using ID
+			     <tt>com.sap.sse.security.impl.SecurityServiceImpl</tt>, running all other replicables
+			     in "master mode." This will let the instance share user, permission, role and session management
+			     details with the instance from which the Security Service is being replicated while
+			     having its own master objects for all other replicables, such as the sailing application
+			     (RacingEventService),  mail service or the polar data service. Note that with this feature
+			     the server replicating another instance's Security Service will grant the roles and permissions
+			     to subjects authenticated against that replicated Security Service. For example, if a user
+			     has been granted the <tt>admin</tt> role by that service then the user has that role also
+			     in all other server instances replicating that Security Service. Therefore, use this feature
+			     with extreme caution. Keep in mind that in the near future we will extend the permissions and
+			     role concept by the possibility to restrict permissions and roles to "scopes" such as an
+			     event or a regatta or an account. See also
+			     <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3504">https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3504</a>.
+			 </li>
+                    </ul>
+
                     <h2 class="articleSubheadline">November 2016</h2>
                     <ul class="bulletList">
 			 <li>When launching a server, a system property <tt>polardata.source.url</tt> can

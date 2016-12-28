@@ -170,9 +170,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
     
         @Override
         public void onWebSocketText(String message) {
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Received "+message+" in "+this);
-            }
+            logger.finest(()->"Received "+message+" in "+this);
             if (message.equals("1")) {
                 logger.fine("Received server heartbeat for "+this);
                 receivedServerHeartbeatInInterval = true;
@@ -193,9 +191,7 @@ public class WebSocketConnectionManager implements LiveDataConnection {
                             }
                         }
                     }
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Received fixes"+fixes+" for "+this);
-                    }
+                    logger.finest(()->"Received fixes"+fixes+" for "+this);
                     notifyListeners(fixes);
                 } catch (ParseException e) {
                     logger.log(Level.SEVERE, "Error trying to parse a web socket data package coming from Igtimi "+this, e);

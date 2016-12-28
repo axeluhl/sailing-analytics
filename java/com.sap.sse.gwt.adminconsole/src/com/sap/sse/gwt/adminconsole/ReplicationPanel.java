@@ -1,30 +1,36 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sse.gwt.adminconsole;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
+import com.sap.sse.gwt.shared.replication.ReplicaDTO;
+import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
+import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 
 /**
  * Allows administrators to manage all aspects of server instance replication such as showing whether the instance
@@ -37,7 +43,7 @@ public class ReplicationPanel extends FlowPanel {
     private final Grid registeredReplicas;
     private final Grid registeredMasters;
     
-    private final SailingServiceAsync sailingService;
+    private final RemoteReplicationServiceAsync replicationServiceAsync;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     
@@ -45,10 +51,35 @@ public class ReplicationPanel extends FlowPanel {
     private final Button stopReplicationButton;
     private final Button removeAllReplicas;
     
-    public ReplicationPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter, StringMessages stringMessages) {
-        this.sailingService = sailingService;
+    /**
+     * For administrators it is important to understand whether an instance is a replica. A
+     * {@link ErrorReporter#reportPersistentInformation(String) persistent error message} shall be shown
+     * in this case; however, some replicables may not be considered part of the "domain-based" replication.
+     * For example, if only a security service for user management is replicated in order to implement
+     * central user and session management then this shall not lead to the warning being displayed.
+     * This set contains the stringified IDs of those replicables for which being a replica shall
+     * lead to a warnings.
+     */
+    private final Set<String> replicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica;
+    
+    public ReplicationPanel(RemoteReplicationServiceAsync replicationService, ErrorReporter errorReporter, final StringMessages stringMessages) {
+        this.replicationServiceAsync = replicationService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        this.replicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica = new HashSet<>();
+        replicationService.getReplicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica(new MarkedAsyncCallback<>(new AsyncCallback<String[]>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log(stringMessages.errorFetchingReplicaData(caught.getMessage()));
+            }
+
+            @Override
+            public void onSuccess(String[] result) {
+                for (final String replicableIdAsStringThatShallLeadToWarningAboutInstanceBeingReplica : result) {
+                    replicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica.add(replicableIdAsStringThatShallLeadToWarningAboutInstanceBeingReplica);
+                }
+            }
+        }));
         
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
@@ -113,7 +144,7 @@ public class ReplicationPanel extends FlowPanel {
     }
 
     protected void stopAllReplicas() {
-        sailingService.stopAllReplicas(new AsyncCallback<Void>() {
+        replicationServiceAsync.stopAllReplicas(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
@@ -129,7 +160,7 @@ public class ReplicationPanel extends FlowPanel {
 
     private void stopReplication() {
         stopReplicationButton.setEnabled(false);
-        sailingService.stopReplicatingFromMaster(new AsyncCallback<Void>() {
+        replicationServiceAsync.stopReplicatingFromMaster(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
@@ -158,7 +189,7 @@ public class ReplicationPanel extends FlowPanel {
                         registeredMasters.setWidget(0, 0, new Label(stringMessages.loading()));
                         addButton.setEnabled(false);
                         stopReplicationButton.setEnabled(false);
-                        sailingService.startReplicatingFromMaster(masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
+                        replicationServiceAsync.startReplicatingFromMaster(masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getA(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getB(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getA().getC(),
                                 masterNameAndExchangeNameAndMessagingPortNumberAndServletPortNumber.getC(),
@@ -190,7 +221,7 @@ public class ReplicationPanel extends FlowPanel {
     }
 
     public void updateReplicaList() {
-        sailingService.getReplicaInfo(new AsyncCallback<ReplicationStateDTO>() {
+        replicationServiceAsync.getReplicaInfo(new AsyncCallback<ReplicationStateDTO>() {
             @Override
             public void onSuccess(ReplicationStateDTO replicas) {
                 int i=0;
@@ -206,7 +237,7 @@ public class ReplicationPanel extends FlowPanel {
                     removeReplicaButton.addClickHandler(new ClickHandler() {
                         @Override
                         public void onClick(ClickEvent event) {
-                            sailingService.stopSingleReplicaInstance(replica.getIdentifier(), new AsyncCallback<Void>() {
+                            replicationServiceAsync.stopSingleReplicaInstance(replica.getIdentifier(), new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     errorReporter.reportError(caught.getMessage());
@@ -220,6 +251,11 @@ public class ReplicationPanel extends FlowPanel {
                         }
                     });
                     registeredReplicas.setWidget(i, 2, removeReplicaButton);
+                    i++;
+                    registeredReplicas.insertRow(i);
+                    registeredReplicas.setWidget(i, 1, new Label(stringMessages.replicables()));
+                    HTML replicablesLabel = new HTML(new SafeHtmlBuilder().appendEscapedLines(Arrays.toString(replica.getReplicableIdsAsStrings()).replaceAll(",", "\n")).toSafeHtml());
+                    registeredReplicas.setWidget(i, 2, replicablesLabel);
                     i++;
                     registeredReplicas.insertRow(i);
                     registeredReplicas.setWidget(i, 1, new Label(stringMessages.averageNumberOfOperationsPerMessage()));
@@ -268,14 +304,19 @@ public class ReplicationPanel extends FlowPanel {
                 registeredMasters.insertRow(i);
                 registeredMasters.setWidget(i, 0, new Label("Client UUID: " + replicas.getServerIdentifier()));
                 i++;
-                
                 final ReplicationMasterDTO replicatingFromMaster = replicas.getReplicatingFromMaster();
-                if (replicatingFromMaster != null) {
-                    errorReporter.reportPersistentInformation(stringMessages.warningServerIsReplica());
+                if (replicatingFromMaster != null) { // TODO bug 2465: replicating only the user service from a "domain controller master" shouldn't lead to a warning here...
+                    for (final String replicableIdAsStringOfReplicableThatWeAreReplicatingCurrently : replicatingFromMaster.getReplicableIdsAsString()) {
+                        if (Util.contains(replicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica, replicableIdAsStringOfReplicableThatWeAreReplicatingCurrently)) {
+                            errorReporter.reportPersistentInformation(stringMessages.warningServerIsReplica());
+                            break;
+                        }
+                    }
                     registeredMasters.insertRow(i);
                     registeredMasters.setWidget(i, 0, new Label(stringMessages.replicatingFromMaster(replicatingFromMaster.getHostname(),
                             replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getServletPort(),
-                            replicatingFromMaster.getMessagingHostname(), replicatingFromMaster.getExchangeName())));
+                            replicatingFromMaster.getMessagingHostname(), replicatingFromMaster.getExchangeName(),
+                            Arrays.toString(replicatingFromMaster.getReplicableIdsAsString()))));
                     i++;
                     addButton.setEnabled(false);
                     stopReplicationButton.setEnabled(true);
