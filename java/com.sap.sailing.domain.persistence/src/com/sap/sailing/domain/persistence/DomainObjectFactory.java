@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.persistence;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
@@ -153,5 +155,5 @@ public interface DomainObjectFactory {
      * @see MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      * @see MongoObjectFactory#removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      */
-    Iterable<RaceTrackingConnectivityParameters> loadConnectivityParametersForRacesToRestore();
+    Iterable<RaceTrackingConnectivityParameters> loadConnectivityParametersForRacesToRestore() throws MalformedURLException, URISyntaxException;
 }

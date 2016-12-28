@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -2283,7 +2284,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<RaceTrackingConnectivityParameters> loadConnectivityParametersForRacesToRestore() {
+    public Iterable<RaceTrackingConnectivityParameters> loadConnectivityParametersForRacesToRestore() throws MalformedURLException, URISyntaxException {
         Set<RaceTrackingConnectivityParameters> result = new HashSet<>();
         final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
         for (final DBObject o : collection.find()) {
@@ -2296,7 +2297,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         map.put(key, o.get(key));
                     }
                 }
-                connectivityParamsPersistenceService.mapTo(map);
+                result.add(connectivityParamsPersistenceService.mapTo(map));
             }
         }
         return result;

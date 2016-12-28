@@ -28,7 +28,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.replication,
  com.sap.sse,
  com.sap.sse.filestorage,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sailing.domain.tractracadapter.persistence
 Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.common.racelog,

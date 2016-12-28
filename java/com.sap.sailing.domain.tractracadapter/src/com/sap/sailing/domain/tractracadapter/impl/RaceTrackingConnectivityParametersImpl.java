@@ -100,4 +100,52 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
         return delayToLiveInMillis;
     }
 
+    URL getParamURL() {
+        return paramURL;
+    }
+
+    URI getLiveURI() {
+        return liveURI;
+    }
+
+    URI getStoredURI() {
+        return storedURI;
+    }
+
+    URI getCourseDesignUpdateURI() {
+        return courseDesignUpdateURI;
+    }
+
+    TimePoint getStartOfTracking() {
+        return startOfTracking;
+    }
+
+    TimePoint getEndOfTracking() {
+        return endOfTracking;
+    }
+
+    Duration getOffsetToStartTimeOfSimulatedRace() {
+        return offsetToStartTimeOfSimulatedRace;
+    }
+
+    String getTracTracUsername() {
+        return tracTracUsername;
+    }
+
+    String getTracTracPassword() {
+        return tracTracPassword;
+    }
+
+    String getRaceStatus() {
+        return raceStatus;
+    }
+
+    String getRaceVisibility() {
+        return raceVisibility;
+    }
+
+    boolean isUseInternalMarkPassingAlgorithm() {
+        return useInternalMarkPassingAlgorithm;
+    }
+
 }
