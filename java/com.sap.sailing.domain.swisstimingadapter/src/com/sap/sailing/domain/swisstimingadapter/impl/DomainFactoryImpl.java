@@ -313,9 +313,8 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
-    private ControlPoint getOrCreateMark(String next, MarkType markType) {
-        // TODO Auto-generated method stub
-        return null;
+    private ControlPoint getOrCreateMark(String name, MarkType markType) {
+        return baseDomainFactory.getOrCreateMark(name, markType);
     }
 
     /**
