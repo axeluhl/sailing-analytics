@@ -161,7 +161,7 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
 
     @Override
     public Mark getOrCreateMark(String toStringRepresentationOfID, String name) {
-        return getOrCreateMark(toStringRepresentationOfID, name, null, null, null, null);
+        return getOrCreateMark(toStringRepresentationOfID, name, /* type */ null, /* color */ null, /* shape */ null, /* pattern */ null);
     }
     
     @Override
