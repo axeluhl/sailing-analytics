@@ -31,7 +31,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
  * @author Axel Uhl (d043530)
  *
  */
-public class ConnectivityParamsHandler implements RaceTrackingConnectivityParametersHandler {
+public class SwissTimingConnectivityParamsHandler implements RaceTrackingConnectivityParametersHandler {
     private static final String CREW_MEMBER_POSITION = "crewMemberPosition";
     private static final String CREW_MEMBER_NATIONALITY = "crewMemberNationality";
     private static final String CREW_MEMBER_NAME = "crewMemberName";
@@ -54,7 +54,7 @@ public class ConnectivityParamsHandler implements RaceTrackingConnectivityParame
     private final DomainFactory domainFactory;
     private final SwissTimingFactory swissTimingFactory;
 
-    public ConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory) {
+    public SwissTimingConnectivityParamsHandler(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, DomainFactory domainFactory) {
         super();
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
