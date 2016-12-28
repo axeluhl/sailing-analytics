@@ -13,6 +13,8 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
+import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingAdapterFactoryImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.ConnectivityParamsHandler;
@@ -38,14 +40,19 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
             @Override
             public RaceTrackingConnectivityParametersHandler findService(String type)
                     throws NoCorrespondingServiceRegisteredException {
+                final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(MockConnectivityParamsServiceFinderFactory.this);
+                final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, DomainFactory.INSTANCE, MockConnectivityParamsServiceFinderFactory.this);
                 switch (type) {
                 case RaceTrackingConnectivityParametersImpl.TYPE:
-                    final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(MockConnectivityParamsServiceFinderFactory.this);
-                    final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, DomainFactory.INSTANCE, MockConnectivityParamsServiceFinderFactory.this);
                     return new ConnectivityParamsHandler(
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                             MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
                             TracTracAdapterFactory.INSTANCE.getOrCreateTracTracAdapter(domainObjectFactory.getBaseDomainFactory()).getTracTracDomainFactory());
+                case SwissTimingTrackingConnectivityParameters.TYPE:
+                    return new com.sap.sailing.domain.swisstimingadapter.impl.ConnectivityParamsHandler(
+                            MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
+                            MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
+                            new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory());
                 default:
                     return null;
                 }

@@ -56,7 +56,6 @@ public class ConnectivityParamsHandler implements RaceTrackingConnectivityParame
         assert params instanceof RaceTrackingConnectivityParametersImpl;
         final RaceTrackingConnectivityParametersImpl ttParams = (RaceTrackingConnectivityParametersImpl) params;
         final Map<String, Object> result = getKey(params);
-        result.put(PARAM_URL, ttParams.getParamURL().toString());
         result.put(COURSE_DESIGN_UPDATE_URI, ttParams.getCourseDesignUpdateURI()==null?null:ttParams.getCourseDesignUpdateURI().toString());
         result.put(DELAY_TO_LIVE_IN_MILLIS, ttParams.getDelayToLiveInMillis());
         result.put(END_OF_TRACKING_MILLIS, ttParams.getEndOfTracking()==null?null:ttParams.getEndOfTracking().asMillis());

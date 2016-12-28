@@ -82,4 +82,52 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     public long getDelayToLiveInMillis() {
         return delayToLiveInMillis;
     }
+
+    String getHostname() {
+        return hostname;
+    }
+
+    int getPort() {
+        return port;
+    }
+
+    String getRaceID() {
+        return raceID;
+    }
+
+    String getRaceName() {
+        return raceName;
+    }
+
+    String getRaceDescription() {
+        return raceDescription;
+    }
+
+    BoatClass getBoatClass() {
+        return boatClass;
+    }
+
+    SwissTimingFactory getSwissTimingFactory() {
+        return swissTimingFactory;
+    }
+
+    DomainFactory getDomainFactory() {
+        return domainFactory;
+    }
+
+    RaceLogStore getRaceLogStore() {
+        return raceLogStore;
+    }
+
+    RegattaLogStore getRegattaLogStore() {
+        return regattaLogStore;
+    }
+
+    StartList getStartList() {
+        return startList;
+    }
+
+    boolean isUseInternalMarkPassingAlgorithm() {
+        return useInternalMarkPassingAlgorithm;
+    }
 }

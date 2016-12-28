@@ -12,28 +12,23 @@ import java.net.UnknownHostException;
 import org.junit.Test;
 
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.persistence.DomainObjectFactory;
-import com.sap.sailing.domain.persistence.MongoObjectFactory;
-import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
-import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
-import com.sap.sailing.mongodb.test.AbstractMongoDBTest;
-import com.sap.sailing.mongodb.test.MockConnectivityParamsServiceFinderFactory;
+import com.sap.sailing.mongodb.test.AbstractConnectivityParamsLoadAndStoreTest;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class ConnectivityParamsLoadAndStoreTest extends AbstractMongoDBTest {
+public class ConnectivityParamsLoadAndStoreTest extends AbstractConnectivityParamsLoadAndStoreTest {
     public ConnectivityParamsLoadAndStoreTest() throws UnknownHostException, MongoException {
         super();
     }
 
     @Test
     public void testStoreAndLoadSimpleTracTracParams() throws MalformedURLException, URISyntaxException {
+        // set up
         final URL paramURL = new URL("http://tractrac.com/some/url");
         final URI storedURI = new URI("live://tractrac.com/storedURI");
         final URI courseDesignUpdateURI = new URI("https://skitrac.dk/reverse/update");
@@ -46,16 +41,16 @@ public class ConnectivityParamsLoadAndStoreTest extends AbstractMongoDBTest {
         final String tracTracPassword = "pass";
         final String raceStatus = (String) TracTracConnectionConstants.REPLAY_STATUS;
         final String raceVisibility = (String) TracTracConnectionConstants.REPLAY_VISIBILITY;
-        RaceTrackingConnectivityParameters tracTracParams = new RaceTrackingConnectivityParametersImpl(
+        final RaceTrackingConnectivityParameters tracTracParams = new RaceTrackingConnectivityParametersImpl(
                 paramURL, /* live URI */ null, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm,
                 /* raceLogStore */ null, /* regattaLogStore */ null, DomainFactory.INSTANCE, tracTracUsername, tracTracPassword,
                 raceStatus, raceVisibility);
-        TypeBasedServiceFinderFactory serviceFinderFactory = new MockConnectivityParamsServiceFinderFactory();
-        final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService(), serviceFinderFactory);
-        final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), com.sap.sailing.domain.base.DomainFactory.INSTANCE, serviceFinderFactory);
+        // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(tracTracParams);
+        // load
         final Iterable<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = domainObjectFactory.loadConnectivityParametersForRacesToRestore();
+        // compare
         assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
         final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
         assertTrue(paramsReadFromDB instanceof RaceTrackingConnectivityParametersImpl);
@@ -72,5 +67,10 @@ public class ConnectivityParamsLoadAndStoreTest extends AbstractMongoDBTest {
         assertEquals(tracTracPassword, tracTracParamsReadFromDB.getTracTracPassword());
         assertEquals(raceStatus, tracTracParamsReadFromDB.getRaceStatus());
         assertEquals(raceVisibility, tracTracParamsReadFromDB.getRaceVisibility());
+    }
+    
+    @Test
+    public void testStoreAndLoadRaceLogTrackingParams() {
+        // TODO
     }
 }
