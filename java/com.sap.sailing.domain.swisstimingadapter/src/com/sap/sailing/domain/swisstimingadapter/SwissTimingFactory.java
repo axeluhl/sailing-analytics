@@ -59,9 +59,10 @@ public interface SwissTimingFactory {
 
     RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
-            WindStore windStore, boolean useInternalMarkPassingAlgorithm,
-            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws UnknownHostException,
-            InterruptedException, IOException, ParseException;
+            WindStore windStore, boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceLogStore raceLogStore,
+            RegattaLogStore regattaLogStore)
+            throws UnknownHostException, InterruptedException, IOException, ParseException;
 
     Race createRace(String raceId, String raceName, String description, BoatClass boatClass);
 

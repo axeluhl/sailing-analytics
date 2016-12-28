@@ -364,5 +364,4 @@ public class DomainFactoryImpl implements DomainFactory {
                 boatClass, startList, delayToLiveInMillis, swissTimingFactory, domainFactory, raceLogStore,
                 regattaLogStore, useInternalMarkPassingAlgorithm);
     }
-
 }

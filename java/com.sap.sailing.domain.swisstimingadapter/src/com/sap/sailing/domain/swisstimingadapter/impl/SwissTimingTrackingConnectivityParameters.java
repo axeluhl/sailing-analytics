@@ -70,7 +70,7 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
             WindStore windStore, RaceLogResolver raceLogResolver) throws Exception {
         return swissTimingFactory.createRaceTracker(regatta, raceID, raceName, raceDescription, boatClass, hostname,
                 port, startList, delayToLiveInMillis, windStore, useInternalMarkPassingAlgorithm,
-                domainFactory, trackedRegattaRegistry, raceLogResolver);
+                domainFactory, trackedRegattaRegistry, raceLogResolver, raceLogStore, regattaLogStore);
     }
 
     @Override

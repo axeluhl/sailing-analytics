@@ -102,12 +102,13 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
-            WindStore windStore, boolean useInternalMarkPassingAlgorithm,
-            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
+            WindStore windStore, boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceLogStore raceLogStore,
+            RegattaLogStore regattaLogStore)
             throws UnknownHostException, InterruptedException, IOException, ParseException {
         return new SwissTimingRaceTrackerImpl(regatta, raceID, raceName, raceDescription, boatClass, hostname, port,
-                startList, windStore, domainFactory, this, trackedRegattaRegistry, raceLogResolver, delayToLiveInMillis,
-                useInternalMarkPassingAlgorithm);
+                startList, windStore, domainFactory, this, trackedRegattaRegistry, raceLogStore, regattaLogStore,
+                raceLogResolver, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
     }
 
     @Override

@@ -140,11 +140,8 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.DynamicPerson;
 import com.sap.sailing.domain.base.impl.DynamicTeam;
-import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
-import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
-import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
@@ -261,7 +258,6 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
-import com.sap.sailing.domain.ranking.RankingMetricsFactory;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -484,6 +480,7 @@ import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
 import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.replication.OperationWithResult;
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
@@ -2857,35 +2854,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void replaySwissTimingRace(RegattaIdentifier regattaIdentifier, Iterable<SwissTimingReplayRaceDTO> replayRaceDTOs,
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm) {
         logger.info("replaySwissTimingRace for regatta "+regattaIdentifier+" for races "+replayRaceDTOs);
-        Regatta regatta;
         for (SwissTimingReplayRaceDTO replayRaceDTO : replayRaceDTOs) {
             try {
+                String boatClassName;
                 if (regattaIdentifier == null) {
-                    String boatClass = replayRaceDTO.boat_class;
+                    boatClassName = replayRaceDTO.boat_class;
                     for (String genderIndicator : new String[] { "Man", "Woman", "Men", "Women", "M", "W" }) {
                         Pattern p = Pattern.compile("(( - )|-| )" + genderIndicator + "$");
-                        Matcher m = p.matcher(boatClass.trim());
+                        Matcher m = p.matcher(boatClassName.trim());
                         if (m.find()) {
-                            boatClass = boatClass.trim().substring(0, m.start(1));
+                            boatClassName = boatClassName.trim().substring(0, m.start(1));
                             break;
                         }
                     }
-                    regatta = getService().createRegatta(
-                            RegattaImpl.getDefaultName(replayRaceDTO.rsc, boatClass.trim()),
-                            boatClass.trim(),
-                            /* startDate*/ null, /*endDate*/ null,
-                            RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
-                            Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
-                            /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(new FleetImpl(
-                                    LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
-                            /* race column names */new ArrayList<String>(), getService())), false,
-                            baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true,
-                            /* controlTrackingFromStartAndFinishTimes */ false, RankingMetricsFactory.getRankingMetricConstructor(RankingMetrics.ONE_DESIGN));
-                    // TODO: is course area relevant for swiss timing replay?
                 } else {
-                    regatta = getService().getRegatta(regattaIdentifier);
+                    boatClassName = null;
                 }
-                getSwissTimingReplayService().loadRaceData(replayRaceDTO.link, regatta, getService(), useInternalMarkPassingAlgorithm);
+                getSwissTimingReplayService().loadRaceData(regattaIdentifier, replayRaceDTO.link, replayRaceDTO.race_id,
+                        replayRaceDTO.rsc, boatClassName, getService(), getService(), useInternalMarkPassingAlgorithm, getRaceLogStore(), getRegattaLogStore());
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load SwissTimingReplay race " + replayRaceDTO, e);
             }

@@ -31,6 +31,9 @@ public interface DomainFactory {
     
     com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory();
 
+    /**
+     * @param boatClass if {@code null}, the boat class will be inferred from the Race ID
+     */
     Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String raceID, BoatClass boatClass, TrackedRegattaRegistry trackedRegattaRegistry);
 
     Nationality getOrCreateNationality(String threeLetterIOCCode);
@@ -68,5 +71,4 @@ public interface DomainFactory {
 
     RaceDefinition createRaceDefinition(Regatta regatta, String raceID, Iterable<Competitor> competitors,
             List<ControlPoint> courseDefinition);
-
 }
