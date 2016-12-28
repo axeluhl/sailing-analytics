@@ -274,7 +274,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             String tracTracPassword, String raceStatus, String raceVisibility,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws URISyntaxException, MalformedURLException,
             FileNotFoundException, SubscriberInitializationException {
-        this(tractracRace, null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
+        this(tractracRace, /* regatta */ null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
                 endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
                 tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry,
                 raceLogResolver);
