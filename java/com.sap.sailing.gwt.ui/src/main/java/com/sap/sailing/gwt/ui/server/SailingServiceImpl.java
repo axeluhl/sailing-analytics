@@ -44,6 +44,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
 import javax.servlet.ServletContext;
@@ -358,9 +359,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicaDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicationMasterDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
@@ -481,12 +479,16 @@ import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
+import com.sap.sse.gwt.shared.replication.ReplicaDTO;
+import com.sap.sse.gwt.shared.replication.ReplicationMasterDTO;
+import com.sap.sse.gwt.shared.replication.ReplicationStateDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
@@ -1816,9 +1818,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             GPSFixMoving fix = fixIter.next();
                             if (fix.getTimePoint().before(toTimePointExcluding) ||
                                     (extrapolate && fix.getTimePoint().equals(toTimePointExcluding))) {
-                                if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest(""+competitor.getName()+": " + fix);
-                                }
+                                logger.finest(()->""+competitor.getName()+": " + fix);
                                 fixes.add(fix);
                             } else {
                                 break;
@@ -3432,10 +3432,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (Entry<Class<? extends OperationWithResult<?, ?>>, Integer> e : statistics.entrySet()) {
                 replicationCountByOperationClassName.put(e.getKey().getName(), e.getValue());
             }
-            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(), replicaDescriptor
-                    .getRegistrationTime().asDate(), replicaDescriptor.getUuid().toString(),
-                    replicationCountByOperationClassName, service.getAverageNumberOfOperationsPerMessage(replicaDescriptor),
-                    service.getNumberOfMessagesSent(replicaDescriptor), service.getNumberOfBytesSent(replicaDescriptor), service.getAverageNumberOfBytesPerMessage(replicaDescriptor)));
+            replicaDTOs.add(new ReplicaDTO(replicaDescriptor.getIpAddress().getHostName(),
+                    replicaDescriptor.getRegistrationTime().asDate(), replicaDescriptor.getUuid().toString(),
+                    replicaDescriptor.getReplicableIdsAsStrings(), replicationCountByOperationClassName,
+                    service.getAverageNumberOfOperationsPerMessage(replicaDescriptor),
+                    service.getNumberOfMessagesSent(replicaDescriptor), service.getNumberOfBytesSent(replicaDescriptor),
+                    service.getAverageNumberOfBytesPerMessage(replicaDescriptor)));
         }
         ReplicationMasterDTO master;
         ReplicationMasterDescriptor replicatingFromMaster = service.getReplicatingFromMaster();
@@ -3443,18 +3445,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             master = null;
         } else {
             master = new ReplicationMasterDTO(replicatingFromMaster.getHostname(), replicatingFromMaster.getServletPort(),
-                    replicatingFromMaster.getMessagingHostname(), replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getExchangeName());
+                    replicatingFromMaster.getMessagingHostname(), replicatingFromMaster.getMessagingPort(), replicatingFromMaster.getExchangeName(),
+                    StreamSupport.stream(replicatingFromMaster.getReplicables().spliterator(), /* parallel */ false).map(r->r.getId()).toArray(s->new String[s]));
         }
         return new ReplicationStateDTO(master, replicaDTOs, service.getServerIdentifier().toString());
     }
 
+    /**
+     * A warning shall be issued to the administration user if the {@link RacingEventService} is a replica. For all
+     * other {@link Replicable}s such as the {@link SecurityService} we don't care.
+     */
+    @Override
+    public String[] getReplicableIdsAsStringThatShallLeadToWarningAboutInstanceBeingReplica() {
+        return new String[] { getService().getId().toString() };
+    }
+    
     @Override
     public void startReplicatingFromMaster(String messagingHost, String masterHost, String exchangeName, int servletPort, int messagingPort) throws IOException, ClassNotFoundException, InterruptedException {
-        // the queue name must be always the same for this server. in order to achieve
+        // The queue name must always be the same for this server. In order to achieve
         // this we're using the unique server identifier
         getReplicationService().startToReplicateFrom(
                 ReplicationFactory.INSTANCE.createReplicationMasterDescriptor(messagingHost, masterHost, exchangeName, servletPort, messagingPort, 
-                        getReplicationService().getServerIdentifier().toString()));
+                        /* use local server identifier as queue name */ getReplicationService().getServerIdentifier().toString(), getReplicationService().getAllReplicables()));
     }
 
     @Override
@@ -4559,7 +4571,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         try {
             getReplicationService().stopToReplicateFromMaster();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Exception trying to stop replicating from master", e);
             throw new RuntimeException(e);
         }
     }
@@ -4567,9 +4579,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void stopAllReplicas() {
         try {
-            getReplicationService().stopAllReplica();
+            getReplicationService().stopAllReplicas();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Exception trying to stop all replicas from receiving updates from this master", e);
             throw new RuntimeException(e);
         }
     }
@@ -4577,11 +4589,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void stopSingleReplicaInstance(String identifier) {
         UUID uuid = UUID.fromString(identifier);
-        ReplicaDescriptor replicaDescriptor = new ReplicaDescriptor(null, uuid, "");
         try {
-            getReplicationService().unregisterReplica(replicaDescriptor);
+            getReplicationService().unregisterReplica(uuid);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Exception trying to unregister replica with UUID "+uuid, e);
             throw new RuntimeException(e);
         }
     }
