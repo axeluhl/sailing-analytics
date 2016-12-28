@@ -28,6 +28,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -264,7 +265,7 @@ public class DomainFactoryImpl implements DomainFactory {
     private com.sap.sailing.domain.base.Course createCourse(String courseName, Course course) {
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
         for (Mark mark : course.getMarks()) {
-            ControlPoint controlPoint = getOrCreateControlPoint(mark.getDevices());
+            ControlPoint controlPoint = getOrCreateControlPoint(mark.getDevices(), getMarkType(mark.getMarkType()));
             Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
             waypoints.add(waypoint);
         }
@@ -272,15 +273,28 @@ public class DomainFactoryImpl implements DomainFactory {
         return result;
     }
 
+    /**
+     * Converts a mark type as defined by SwissTiming into a {@link MarkType} as defined by the domain model
+     */
+    private MarkType getMarkType(com.sap.sailing.domain.swisstimingadapter.Mark.MarkType markType) {
+        final MarkType result;
+        if (markType == null) {
+            result = null;
+        } else {
+            result = MarkType.BUOY;
+        }
+        return result;
+    }
+
     @Override
-    public ControlPoint getOrCreateControlPoint(Iterable<String> devices) {
+    public ControlPoint getOrCreateControlPoint(Iterable<String> devices, MarkType markType) {
         ControlPoint result;
         synchronized (controlPointCache) {
             result = controlPointCache.get(devices);
             if (result == null) {
                 switch (Util.size(devices)) {
                 case 1:
-                    result = getOrCreateMark(devices.iterator().next());
+                    result = getOrCreateMark(devices.iterator().next(), markType);
                     break;
                 case 2:
                     Iterator<String> markNameIter = devices.iterator();
@@ -297,6 +311,11 @@ public class DomainFactoryImpl implements DomainFactory {
             }
         }
         return result;
+    }
+
+    private ControlPoint getOrCreateMark(String next, MarkType markType) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /**
@@ -321,7 +340,7 @@ public class DomainFactoryImpl implements DomainFactory {
         List<com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>> newDomainControlPoints = new ArrayList<com.sap.sse.common.Util.Pair<com.sap.sailing.domain.base.ControlPoint, PassingInstruction>>();
         for (Mark mark : marks) {
             // TODO bug 1043: propagate the mark names to the waypoint names
-            com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDevices());
+            com.sap.sailing.domain.base.ControlPoint domainControlPoint = getOrCreateControlPoint(mark.getDevices(), getMarkType(mark.getMarkType()));
             newDomainControlPoints.add(new com.sap.sse.common.Util.Pair<>(domainControlPoint, PassingInstruction.None));
         }
         courseToUpdate.update(newDomainControlPoints, baseDomainFactory);
