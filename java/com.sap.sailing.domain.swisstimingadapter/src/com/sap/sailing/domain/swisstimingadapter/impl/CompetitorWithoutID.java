@@ -9,7 +9,7 @@ public class CompetitorWithoutID implements Competitor {
     private final String boatID;
     private final String threeLetterIOCCode;
     private final String name;
-    
+
     public CompetitorWithoutID(String boatID, String threeLetterIOCCode, String name) {
         super();
         this.boatID = boatID;
@@ -31,20 +31,18 @@ public class CompetitorWithoutID implements Competitor {
     public String getName() {
         return name;
     }
-    
+
     public String getID() {
         return null;
     }
 
-	@Override
-	public String toString() {
-		return "CompetitorWithoutID [boatID=" + boatID + ", threeLetterIOCCode="
-				+ threeLetterIOCCode + ", name=" + name + "]";
-	}
+    @Override
+    public String toString() {
+        return "CompetitorWithoutID [boatID=" + boatID + ", threeLetterIOCCode=" + threeLetterIOCCode + ", name=" + name + "]";
+    }
 
-	@Override
-	public List<CrewMember> getCrew() {
-		return null;
-	}
-
+    @Override
+    public List<CrewMember> getCrew() {
+        return null;
+    }
 }
