@@ -1551,7 +1551,11 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             logger.warning("Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier+
                     ". Couldn't store race "+params.getTrackerID()+" for restoring.");
         }
-        
+    }
+    
+    @Override
+    public void removeAllConnectivityParametersForRacesToRestore() {
+        database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name()).drop();
     }
 
 }

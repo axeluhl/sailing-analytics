@@ -98,7 +98,8 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private EndOfTrackingController endOfTrackingController;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            RaceLogResolver raceLogResolver) {
+            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams) {
+        super(connectivityParams);
         this.params = params;
         this.windStore = windStore;
         this.trackedRegatta = regatta;
@@ -204,7 +205,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     }
 
     @Override
-    public RaceHandle getRacesHandle() {
+    public RaceHandle getRaceHandle() {
         return new RaceLogRacesHandle(this);
     }
 

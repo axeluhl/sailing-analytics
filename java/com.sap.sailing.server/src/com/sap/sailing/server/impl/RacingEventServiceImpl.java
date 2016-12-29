@@ -96,6 +96,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -464,7 +465,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * compatibility with prior releases that did not support a persistent competitor collection.
      */
     public RacingEventServiceImpl() {
-        this(true, null);
+        this(true, /* serviceFinderFactory */ null);
     }
 
     public RacingEventServiceImpl(WindStore windStore, SensorFixStore sensorFixStore,
@@ -641,6 +642,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 mongoObjectFactory.storeEvent(eventAndRequireStoreFlag.getA());
             }
         }
+        // TODO bug 2: decide whether to call getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore() or getDomainObjectFactory().loadConnectivityParametersForRacesToRestore() to restore last set of tracked races
     }
 
     @Override
@@ -1429,6 +1431,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 } else {
                     cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                 }
+                // TODO bug 2: we need to link the params to the TrackedRace / RaceDefinition such that when the RaceDefinition is removed using removeRace(Regatta, RaceDefinition) then we know which params to remove from the restore store again
+                getMongoObjectFactory().addConnectivityParametersForRaceToRestore(params);
             } else {
                 logger.warning("Race tracker with ID "+trackerID+" already found; not tracking twice to avoid race duplication");
                 WindStore existingTrackersWindStore = tracker.getWindStore();
@@ -1440,7 +1444,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             if (timeoutInMilliseconds != -1) {
                 scheduleAbortTrackerAfterInitialTimeout(tracker, timeoutInMilliseconds);
             }
-            return tracker.getRacesHandle();
+            return tracker.getRaceHandle();
         } finally {
             unlockRaceTrackersById(trackerID, raceTrackersByIdLock);
         }
@@ -2090,6 +2094,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logger.warning("Didn't find any trackers for regatta " + regatta);
         }
         stopTrackingWind(regatta, race);
+        // TODO bug 2: update the "restore" handle for race in DB such that when restoring, no wind tracker will be requested for race
         // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
         if (trackerSet == null || trackerSet.isEmpty()) {
             stopTracking(regatta);
@@ -2189,6 +2194,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,
             InterruptedException {
         logger.info("Removing the race " + race + "...");
+        getRaceTrackerByRegattaAndRaceIdentifier(new RegattaNameAndRaceName(regatta.getName(), race.getName()),
+                tracker->getMongoObjectFactory().removeConnectivityParametersForRaceToRestore(tracker.getConnectivityParams()));
         stopAllTrackersForWhichRaceIsLastReachable(regatta, race);
         stopTrackingWind(regatta, race);
         TrackedRace trackedRace = getExistingTrackedRace(regatta, race);
@@ -3562,14 +3569,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public void getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier,
             Consumer<RaceTracker> callback) {
+        final Regatta regatta;
         LockUtil.lockForRead(regattasByNameLock);
-        Regatta regatta = regattasByName.get(raceIdentifier.getRegattaName());
-        LockUtil.unlockAfterRead(regattasByNameLock);
+        try {
+            regatta = regattasByName.get(raceIdentifier.getRegattaName());
+        } finally {
+            LockUtil.unlockAfterRead(regattasByNameLock);
+        }
         if (regatta != null) {
             LockUtil.lockForRead(raceTrackersByRegattaLock);
             try {
                 Set<RaceTracker> raceTrackersForRegatta = raceTrackersByRegatta.get(regatta);
-                if(raceTrackersForRegatta != null) {
+                if (raceTrackersForRegatta != null) {
                     for (RaceTracker raceTracker : raceTrackersForRegatta) {
                         if (raceTracker.getRaceIdentifiers().contains(raceIdentifier)) {
                             callback.accept(raceTracker);

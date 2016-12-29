@@ -92,11 +92,11 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
             BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore,
             boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams)
             throws InterruptedException, UnknownHostException, IOException, ParseException {
         return new SwissTimingRaceTrackerImpl(raceID, raceName, raceDescription, boatClass, hostname, port, startList,
                 raceLogStore, regattaLogStore, windStore, domainFactory, this,
-                trackedRegattaRegistry, raceLogResolver, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
+                trackedRegattaRegistry, raceLogResolver, delayToLiveInMillis, useInternalMarkPassingAlgorithm, connectivityParams);
     }
 
     @Override
@@ -104,11 +104,11 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
             BoatClass boatClass, String hostname, int port, StartList startList, long delayToLiveInMillis,
             WindStore windStore, boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore)
+            RegattaLogStore regattaLogStore, SwissTimingTrackingConnectivityParameters connectivityParams)
             throws UnknownHostException, InterruptedException, IOException, ParseException {
         return new SwissTimingRaceTrackerImpl(regatta, raceID, raceName, raceDescription, boatClass, hostname, port,
                 startList, windStore, domainFactory, this, trackedRegattaRegistry, raceLogStore, regattaLogStore,
-                raceLogResolver, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
+                raceLogResolver, delayToLiveInMillis, useInternalMarkPassingAlgorithm, connectivityParams);
     }
 
     @Override

@@ -76,7 +76,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
         RaceTracker tracker = domainFactory.createRaceTracker(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus,
-                raceVisibility, trackedRegattaRegistry, raceLogResolver);
+                raceVisibility, trackedRegattaRegistry, raceLogResolver, this);
         return tracker;
     }
 
@@ -86,7 +86,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, paramURL, liveURI, storedURI,
                 courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm,
                 raceLogStore, regattaLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus,
-                raceVisibility, trackedRegattaRegistry, raceLogResolver);
+                raceVisibility, trackedRegattaRegistry, raceLogResolver, this);
         return tracker;
     }
 

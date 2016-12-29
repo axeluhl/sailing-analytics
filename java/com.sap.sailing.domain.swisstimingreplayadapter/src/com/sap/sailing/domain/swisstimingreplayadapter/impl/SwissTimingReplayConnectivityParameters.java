@@ -36,7 +36,8 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
         private final WindStore windStore;
         private SwissTimingReplayToDomainAdapter listener;
 
-        private SwissTimingReplayRaceTracker(WindStore windStore, SwissTimingReplayToDomainAdapter listener) {
+        private SwissTimingReplayRaceTracker(WindStore windStore, SwissTimingReplayToDomainAdapter listener, SwissTimingReplayConnectivityParameters connectivityParams) {
+            super(connectivityParams);
             this.windStore = windStore;
             this.listener = listener;
         }
@@ -69,7 +70,7 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
         }
 
         @Override
-        public RaceHandle getRacesHandle() {
+        public RaceHandle getRaceHandle() {
             return new RaceHandle() {
                 @Override
                 public Regatta getRegatta() {
@@ -139,7 +140,7 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
                 trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver, raceLogStore,
                 regattaLogStore);
         replayService.loadRaceData(link, listener);
-        return new SwissTimingReplayRaceTracker(windStore, listener);
+        return new SwissTimingReplayRaceTracker(windStore, listener, this);
     }
 
     @Override
@@ -150,7 +151,7 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
                 domainFactory, trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver,
                 raceLogStore, regattaLogStore);
         replayService.loadRaceData(link, listener);
-        return new SwissTimingReplayRaceTracker(windStore, listener);
+        return new SwissTimingReplayRaceTracker(windStore, listener, this);
     }
 
     @Override

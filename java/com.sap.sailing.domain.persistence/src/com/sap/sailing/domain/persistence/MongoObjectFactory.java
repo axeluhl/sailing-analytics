@@ -170,4 +170,11 @@ public interface MongoObjectFactory {
      * @see #removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      */
     void addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params);
+
+    /**
+     * Removes all {@link RaceTrackingConnectivityParameters} objects from those to restore; short for calling
+     * {@link #removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)} for all parameter
+     * objects obtained through {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore()}.
+     */
+    void removeAllConnectivityParametersForRacesToRestore();
 }

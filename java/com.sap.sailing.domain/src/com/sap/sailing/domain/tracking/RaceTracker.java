@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
  * {@link RaceDefinition races} that are {@link Regatta#getAllRaces() part of} a common {@link #getRegatta() Event}. Some
  * tracker architectures may not be able to deliver all data for the {@link RaceDefinition} when created or started.
  * Therefore, {@link #getRaces()} may return <code>null</code> if the race information hasn't been received by the
- * tracker yet. Through the {@link RaceHandle} returned by {@link #getRacesHandle()} it is also possible to perform a
+ * tracker yet. Through the {@link RaceHandle} returned by {@link #getRaceHandle()} it is also possible to perform a
  * {@link RaceHandle#getRace() blocking get} for the race tracked by this tracker.
  * <p>
  * 
@@ -66,7 +66,7 @@ public interface RaceTracker {
     
     Set<RegattaAndRaceIdentifier> getRaceIdentifiers();
 
-    RaceHandle getRacesHandle();
+    RaceHandle getRaceHandle();
 
     DynamicTrackedRegatta getTrackedRegatta();
     
@@ -98,10 +98,18 @@ public interface RaceTracker {
     boolean add(RaceTracker.Listener newListener);
 
     /**
-     * Remove listener from racetracker
+     * Remove listener from race tracker
      * 
      * @param newListener
      * @return the listener registration for listener removal
      */
     void remove(RaceTracker.Listener newListener);
+
+    /**
+     * The connectivity parameters used to create this tracker. Can be used, e.g., to add or remove those parameters to
+     * the set of trackers to restore after a server restart. May return {@code null}, e.g., in case the tracker was
+     * created by a test case that did not use a {@link RaceTrackingConnectivityParameters} object to describe what to
+     * track.
+     */
+    RaceTrackingConnectivityParameters getConnectivityParams();
 }

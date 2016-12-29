@@ -113,21 +113,20 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             String hostname, int port, StartList startList, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, long delayToLiveInMillis,
-            boolean useInternalMarkPassingAlgorithm) throws InterruptedException,
+            boolean useInternalMarkPassingAlgorithm, SwissTimingTrackingConnectivityParameters connectivityParams) throws InterruptedException,
             UnknownHostException, IOException, ParseException {
-        this(/* regatta */ null, raceID, raceName,
-                raceDescription, boatClass, hostname, port, startList, windStore, domainFactory, factory,
-                trackedRegattaRegistry,
-                raceLogStore, regattaLogStore, raceLogResolver, delayToLiveInMillis, useInternalMarkPassingAlgorithm);
+        this(/* regatta */ null, raceID, raceName, raceDescription, boatClass, hostname, port, startList, windStore,
+                domainFactory, factory, trackedRegattaRegistry, raceLogStore, regattaLogStore, raceLogResolver,
+                delayToLiveInMillis, useInternalMarkPassingAlgorithm, connectivityParams);
     }
 
     protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceName, String raceDescription,
             BoatClass boatClass, String hostname, int port, StartList startList, WindStore windStore,
             DomainFactory domainFactory, SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, RaceLogResolver raceLogResolver,
-            long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm)
+            long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm, SwissTimingTrackingConnectivityParameters connectivityParams)
             throws InterruptedException, UnknownHostException, IOException, ParseException {
-        super();
+        super(connectivityParams);
         this.raceLogResolver = raceLogResolver;
         this.tmdMessageQueue = new TMDMessageQueue(this);
         final Regatta effectiveRegatta;
@@ -152,7 +151,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         this.windStore = windStore;
         this.id = createID(raceID, hostname, port);
         connector.addSailMasterListener(this);
-        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
+        trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.competitorsByBoatId = new HashMap<String, Competitor>();
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
@@ -183,7 +182,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
 
     @Override
-    public RaceHandle getRacesHandle() {
+    public RaceHandle getRaceHandle() {
         return new RaceHandle() {
             @Override
             public Regatta getRegatta() {

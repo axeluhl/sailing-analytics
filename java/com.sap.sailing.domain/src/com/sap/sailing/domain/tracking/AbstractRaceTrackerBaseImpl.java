@@ -8,6 +8,12 @@ import java.net.MalformedURLException;
  */
 public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
     private final RaceTrackerListeners listeners = new RaceTrackerListeners();
+    private final RaceTrackingConnectivityParameters connectivityParams;
+
+    public AbstractRaceTrackerBaseImpl(RaceTrackingConnectivityParameters connectivityParams) {
+        super();
+        this.connectivityParams = connectivityParams;
+    }
 
     /**
      * Ensure stop method does notify all listeners after tracker stopped.
@@ -40,5 +46,10 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
     @Override
     public void remove(Listener listener) {
         listeners.removeListener(listener);
+    }
+
+    @Override
+    public RaceTrackingConnectivityParameters getConnectivityParams() {
+        return connectivityParams;
     }
 }

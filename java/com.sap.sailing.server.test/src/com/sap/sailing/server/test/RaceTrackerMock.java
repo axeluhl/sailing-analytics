@@ -20,13 +20,13 @@ public class RaceTrackerMock extends AbstractRaceTrackerBaseImpl {
     private boolean isTracking;
     
     public RaceTrackerMock() {
-        // TODO check if necesary
+        super(null);
     }
     
     
     
     public RaceTrackerMock(Long id, Regatta regatta, Set<RaceDefinition> raceDefinitions, boolean isTracking) {
-        super();
+        super(null);
         this.id = id;
         this.regatta = regatta;
         this.raceDefinitions = raceDefinitions;
@@ -42,6 +42,7 @@ public class RaceTrackerMock extends AbstractRaceTrackerBaseImpl {
     }
 
     public RaceTrackerMock(Long id) {
+        super(null);
         this.id = id;
     }
 
@@ -61,7 +62,7 @@ public class RaceTrackerMock extends AbstractRaceTrackerBaseImpl {
     }
 
     @Override
-    public RaceHandle getRacesHandle() {
+    public RaceHandle getRaceHandle() {
         throw new RuntimeException("No race Handle in RaceTrackerMock");
     }
 

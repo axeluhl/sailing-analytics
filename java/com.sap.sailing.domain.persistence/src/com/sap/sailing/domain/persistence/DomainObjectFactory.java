@@ -149,7 +149,7 @@ public interface DomainObjectFactory {
      * marked as to be restored} before the server got re-started. Callers that would like to use the result to re-connect to
      * those races should take care not to flood servers with requests. Instead, ideally, callers would monitor the
      * loading {@link TrackedRace#getStatus() status} or the resulting {@link TrackedRace}s (see
-     * {@link RaceTracker#getRacesHandle()}, {@link RaceHandle#getRace(long)}, {@link RaceHandle#getTrackedRegatta()}
+     * {@link RaceTracker#getRaceHandle()}, {@link RaceHandle#getRace(long)}, {@link RaceHandle#getTrackedRegatta()}
      * and {@link TrackedRegatta#getTrackedRace(RaceDefinition)}.
      * 
      * @see MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
