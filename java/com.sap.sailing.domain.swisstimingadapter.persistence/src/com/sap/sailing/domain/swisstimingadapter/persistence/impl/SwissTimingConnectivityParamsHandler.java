@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.swisstimingadapter.impl;
+package com.sap.sailing.domain.swisstimingadapter.persistence.impl;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -17,6 +17,11 @@ import com.sap.sailing.domain.swisstimingadapter.CrewMember;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithID;
+import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithoutID;
+import com.sap.sailing.domain.swisstimingadapter.impl.CrewMemberImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;

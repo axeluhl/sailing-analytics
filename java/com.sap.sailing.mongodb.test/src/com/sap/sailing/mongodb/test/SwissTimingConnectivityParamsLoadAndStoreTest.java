@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.swisstimingadapter.impl;
+package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -14,8 +14,13 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithID;
+import com.sap.sailing.domain.swisstimingadapter.impl.CompetitorWithoutID;
+import com.sap.sailing.domain.swisstimingadapter.impl.CrewMemberImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingAdapterFactoryImpl;
+import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.mongodb.test.AbstractConnectivityParamsLoadAndStoreTest;
 import com.sap.sse.common.Util;
 
 public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConnectivityParamsLoadAndStoreTest {

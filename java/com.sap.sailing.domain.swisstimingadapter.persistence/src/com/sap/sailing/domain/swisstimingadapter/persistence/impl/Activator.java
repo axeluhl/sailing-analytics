@@ -14,7 +14,6 @@ import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingAdapterFactoryImpl;
-import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingConnectivityParamsHandler;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;

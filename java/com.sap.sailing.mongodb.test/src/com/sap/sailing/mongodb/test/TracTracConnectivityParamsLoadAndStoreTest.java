@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tractracadapter.impl;
+package com.sap.sailing.mongodb.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -15,7 +15,7 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
-import com.sap.sailing.mongodb.test.AbstractConnectivityParamsLoadAndStoreTest;
+import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;

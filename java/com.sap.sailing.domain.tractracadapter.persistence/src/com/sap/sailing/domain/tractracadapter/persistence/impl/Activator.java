@@ -18,7 +18,6 @@ import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
-import com.sap.sailing.domain.tractracadapter.impl.TracTracConnectivityParamsHandler;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.mongodb.MongoDBService;

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tractracadapter.impl;
+package com.sap.sailing.domain.tractracadapter.persistence.impl;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -12,6 +12,7 @@ import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
