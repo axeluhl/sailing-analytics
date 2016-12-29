@@ -68,6 +68,9 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         assertEquals(startList.getRaceID(), stParamsReadFromDB.getStartList().getRaceID());
         assertEquals(startList.getCompetitors(), stParamsReadFromDB.getStartList().getCompetitors());
         assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
+        // remove again
+        mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
+        assertTrue(Util.isEmpty(domainObjectFactory.loadConnectivityParametersForRacesToRestore()));
     }
     
     @Test
@@ -106,5 +109,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         assertEquals(startList.getRaceID(), stParamsReadFromDB.getStartList().getRaceID());
         assertEquals(startList.getCompetitors(), stParamsReadFromDB.getStartList().getCompetitors());
         assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
+        // remove again
+        mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
+        assertTrue(Util.isEmpty(domainObjectFactory.loadConnectivityParametersForRacesToRestore()));
     }
 }

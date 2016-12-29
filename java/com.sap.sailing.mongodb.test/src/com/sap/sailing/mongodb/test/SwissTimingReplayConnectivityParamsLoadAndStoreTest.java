@@ -49,5 +49,8 @@ public class SwissTimingReplayConnectivityParamsLoadAndStoreTest extends Abstrac
         assertEquals(raceName, stParamsReadFromDB.getRaceName());
         assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
         assertEquals(useInternalMarkPassingAlgorithm, stParams.isUseInternalMarkPassingAlgorithm());
+        // remove again
+        mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
+        assertTrue(Util.isEmpty(domainObjectFactory.loadConnectivityParametersForRacesToRestore()));
     }
 }

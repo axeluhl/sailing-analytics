@@ -69,5 +69,8 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         assertSame(theSeries.getRaceColumnByName("R2"), raceLogParamsReadFromDB.getRaceColumn());
         assertSame(fleet, raceLogParamsReadFromDB.getFleet());
         assertEquals(rlParams.getTrackerID(), raceLogParamsReadFromDB.getTrackerID());
+        // remove again
+        mongoObjectFactory.removeConnectivityParametersForRaceToRestore(rlParams);
+        assertTrue(Util.isEmpty(domainObjectFactory.loadConnectivityParametersForRacesToRestore()));
     }
 }

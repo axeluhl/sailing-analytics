@@ -68,5 +68,8 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
         assertEquals(raceStatus, tracTracParamsReadFromDB.getRaceStatus());
         assertEquals(raceVisibility, tracTracParamsReadFromDB.getRaceVisibility());
         assertEquals(tracTracParams.getTrackerID(), tracTracParamsReadFromDB.getTrackerID());
+        // remove again
+        mongoObjectFactory.removeConnectivityParametersForRaceToRestore(tracTracParams);
+        assertTrue(Util.isEmpty(domainObjectFactory.loadConnectivityParametersForRacesToRestore()));
     }
 }
