@@ -177,17 +177,17 @@ public class DomainFactoryImpl implements DomainFactory {
     }
 
     @Override
-    public RaceDefinition createRaceDefinition(Regatta regatta, String raceID, Iterable<Competitor> competitors,
-            List<ControlPoint> courseDefinition) {
+    public RaceDefinition createRaceDefinition(Regatta regatta, String swissTimingRaceID, Iterable<Competitor> competitors,
+            List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition) {
         List<Waypoint> waypoints = new ArrayList<>();
         for (ControlPoint controlPoint : courseDefinition) {
             Waypoint waypoint = baseDomainFactory.createWaypoint(controlPoint, /* passingInstruction */ PassingInstruction.None);
             waypoints.add(waypoint);
         }
         com.sap.sailing.domain.base.Course domainCourse = new CourseImpl("Course", waypoints);
-        BoatClass boatClass = getRaceTypeFromRaceID(raceID).getBoatClass();
-        logger.info("Creating RaceDefinitionImpl for race "+raceID);
-        RaceDefinition result = new RaceDefinitionImpl(regatta.getId().toString()+"/"+raceID, domainCourse, boatClass, competitors);
+        BoatClass boatClass = getRaceTypeFromRaceID(swissTimingRaceID).getBoatClass();
+        logger.info("Creating RaceDefinitionImpl for race "+swissTimingRaceID);
+        RaceDefinition result = new RaceDefinitionImpl(raceName, domainCourse, boatClass, competitors, raceIdForRaceDefinition);
         regatta.addRace(result);
         return result;
     }

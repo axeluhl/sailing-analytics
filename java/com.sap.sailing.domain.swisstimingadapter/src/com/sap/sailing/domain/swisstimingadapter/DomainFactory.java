@@ -70,6 +70,6 @@ public interface DomainFactory {
 
     ControlPoint getOrCreateControlPoint(Iterable<String> devices, MarkType markType);
 
-    RaceDefinition createRaceDefinition(Regatta regatta, String raceID, Iterable<Competitor> competitors,
-            List<ControlPoint> courseDefinition);
+    RaceDefinition createRaceDefinition(Regatta regatta, String swissTimingRaceID, Iterable<Competitor> competitors,
+            List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition);
 }

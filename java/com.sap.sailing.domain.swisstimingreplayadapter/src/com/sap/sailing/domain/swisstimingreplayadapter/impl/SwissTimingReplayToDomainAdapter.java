@@ -145,28 +145,34 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     
     private final RaceLogResolver raceLogResolver;
 
+    private final String raceName;
+    
+    private final String raceIdForRaceDefinition;
+
     /**
      * @param regatta
      *            the regatta to associate the race(s) received by the listener with, or <code>null</code> to force the
      *            use / creation of a default regatta per race
      * @param useInternalMarkPassingAlgorithm use our own instead of the SwissTiming-provided mark rounding / split times
      */
-    public SwissTimingReplayToDomainAdapter(Regatta regatta, String raceID, BoatClass boatClass,
-            DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry,
-            boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore) {
+    public SwissTimingReplayToDomainAdapter(Regatta regatta, String raceName, String raceIdForRaceDefinition,
+            BoatClass boatClass, DomainFactory domainFactory,
+            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore) {
         this.raceLogResolver = raceLogResolver;
+        this.raceName = raceName;
+        this.raceIdForRaceDefinition = raceIdForRaceDefinition;
         final Regatta effectiveRegatta;
         // Try to find a pre-associated event based on the Race ID
         if (regatta == null) {
-            effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
+            effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceIdForRaceDefinition);
         } else {
             effectiveRegatta = regatta;
         }
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was
         // found; in this case, create a default regatta based on the TracTrac event data
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, regattaLogStore,
-                raceID, boatClass, trackedRegattaRegistry) : effectiveRegatta;
+                raceIdForRaceDefinition, boatClass, trackedRegattaRegistry) : effectiveRegatta;
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         racePerRaceID = new HashMap<>();
         trackedRacePerRaceID = new HashMap<>();
@@ -356,7 +362,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
 
     private void createRace() {
         RaceDefinition race = domainFactory.createRaceDefinition(regatta,
-                currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition);
+                currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition, raceName, raceIdForRaceDefinition);
         synchronized (racePerRaceID) {
             racePerRaceID.put(currentRaceID, race);
             racePerRaceID.notifyAll();

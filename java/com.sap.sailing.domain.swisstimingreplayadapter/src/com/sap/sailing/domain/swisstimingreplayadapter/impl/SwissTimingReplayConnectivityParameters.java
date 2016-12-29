@@ -28,6 +28,7 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
     private final String boatClassName;
     private final RaceLogStore raceLogStore;
     private final RegattaLogStore regattaLogStore;
+    private final String raceName;
     private final String raceID;
     private final String link;
     private final SwissTimingReplayService replayService;
@@ -117,10 +118,11 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
         }
     }
 
-    public SwissTimingReplayConnectivityParameters(RegattaIdentifier regattaToAddTo, String link, String raceID,
-            String regattaName, String boatClassName, boolean useInternalMarkPassingAlgorithm,
-            DomainFactory domainFactory, SwissTimingReplayService replayService, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore) {
+    public SwissTimingReplayConnectivityParameters(RegattaIdentifier regattaToAddTo, String link, String raceName,
+            String raceID, String regattaName, String boatClassName,
+            boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory, SwissTimingReplayService replayService, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore) {
         this.link = link;
+        this.raceName = raceName;
         this.raceID = raceID;
         this.boatClassName = boatClassName;
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
@@ -134,8 +136,8 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, final WindStore windStore,
             RaceLogResolver raceLogResolver) throws Exception {
         SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(/* regatta */ null,
-                raceID, domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
-                domainFactory, trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver, raceLogStore, regattaLogStore);
+                raceName, raceID,
+                domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName), domainFactory, trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver, raceLogStore, regattaLogStore);
         replayService.loadRaceData(link, listener);
         return new SwissTimingReplayRaceTracker(windStore, listener);
     }
@@ -143,10 +145,10 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
             WindStore windStore, RaceLogResolver raceLogResolver) throws Exception {
-        SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(regatta, raceID,
-                domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName), domainFactory,
-                trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver, raceLogStore,
-                regattaLogStore);
+        SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(regatta, raceName,
+                raceID, domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
+                domainFactory, trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver,
+                raceLogStore, regattaLogStore);
         replayService.loadRaceData(link, listener);
         return new SwissTimingReplayRaceTracker(windStore, listener);
     }
