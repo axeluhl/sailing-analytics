@@ -79,6 +79,7 @@ public interface RaceTracker {
     /**
      * Listener interface for race tracker related events
      */
+    @FunctionalInterface
     interface Listener {
         /**
          * Tracker has stopped event, see {@link RaceTracker#stop(boolean)} method
@@ -88,6 +89,7 @@ public interface RaceTracker {
         void onTrackerWillStop(boolean preemptive);
     }
     
+    @FunctionalInterface
     interface RaceCreationListener {
         /**
          * Tracker has received its {@link RaceDefinition}, so that now {@link RaceTracker#getRace} no longer returns

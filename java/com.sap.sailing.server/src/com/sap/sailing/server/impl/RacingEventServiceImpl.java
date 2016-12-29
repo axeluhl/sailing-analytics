@@ -98,7 +98,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Renamable;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -440,7 +439,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final TrackedRegattaListener trackedRegattaListener;
     
-    private transient ConcurrentHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionListenersByLeaderboard;
+    private transient final ConcurrentHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionListenersByLeaderboard;
+
+    private transient final ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> connectivityParametersByRace;
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -569,6 +570,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService, boolean restoreTrackedRaces) {
         logger.info("Created " + this);
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
+        this.connectivityParametersByRace = new ConcurrentHashMap<>();
         this.notificationService = sailingNotificationService;
         final ConstructorParameters constructorParameters = constructorParametersProvider.apply(this);
         this.domainObjectFactory = constructorParameters.getDomainObjectFactory();
@@ -1463,6 +1465,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
                 // TODO bug 2: we need to link the params to the TrackedRace / RaceDefinition such that when the RaceDefinition is removed using removeRace(Regatta, RaceDefinition) then we know which params to remove from the restore store again
                 getMongoObjectFactory().addConnectivityParametersForRaceToRestore(params);
+                tracker.add((RaceTracker t) -> rememberConnectivityParametersForRace(t));
             } else {
                 logger.warning("Race tracker with ID "+trackerID+" already found; not tracking twice to avoid race duplication");
                 WindStore existingTrackersWindStore = tracker.getWindStore();
@@ -1478,6 +1481,26 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         } finally {
             unlockRaceTrackersById(trackerID, raceTrackersByIdLock);
         }
+    }
+
+    /**
+     * Remembers the link between the {@link RaceDefinition} that the {@code tracker} just produced and its
+     * {@link RaceTracker#getConnectivityParams() connectivity parameters}. This is important for later removing those
+     * connectivity parameters from the
+     * {@link MongoObjectFactory#removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters) DB}
+     * when the {@link #removeRace(Regatta, RaceDefinition) race is removed}.
+     * 
+     * @param tracker
+     *            must have produced a {@link RaceDefinition} which can be guaranteed by waiting for the callback on a
+     *            {@link RaceTracker.RaceCreationListener}
+     *            {@link RaceTracker#add(com.sap.sailing.domain.tracking.RaceTracker.RaceCreationListener) registered}
+     *            on that tracker and not calling this method before that listener has fired.
+     */
+    private void rememberConnectivityParametersForRace(RaceTracker tracker) {
+        final RaceDefinition race = tracker.getRace(); // guaranteed to be != null by callback
+        assert race != null;
+        final RaceTrackingConnectivityParameters connectivityParams = tracker.getConnectivityParams();
+        connectivityParametersByRace.put(race, connectivityParams);
     }
 
     /**
@@ -2222,9 +2245,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,
             InterruptedException {
         logger.info("Removing the race " + race + "...");
-        // TODO bug 2, comment #7: this won't work... we need the mapping from TrackedRace or RaceDefinition to RaceTrackingConnectivityParameters
-        getRaceTrackerByRegattaAndRaceIdentifier(new RegattaNameAndRaceName(regatta.getName(), race.getName()),
-                tracker->getMongoObjectFactory().removeConnectivityParametersForRaceToRestore(tracker.getConnectivityParams()));
+        final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.remove(race);
+        if (connectivityParams != null) {
+            getMongoObjectFactory().removeConnectivityParametersForRaceToRestore(connectivityParams);
+        }
         stopAllTrackersForWhichRaceIsLastReachable(regatta, race);
         stopTrackingWind(regatta, race);
         TrackedRace trackedRace = getExistingTrackedRace(regatta, race);
@@ -2880,6 +2904,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         } finally {
             LockUtil.unlockAfterWrite(leaderboardsByNameLock);
         }
+        connectivityParametersByRace.clear();
         eventsById.clear();
         mediaLibrary.clear();
         competitorStore.clear();
