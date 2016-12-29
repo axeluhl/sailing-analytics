@@ -2,6 +2,8 @@ package com.sap.sailing.domain.tracking;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -11,7 +13,8 @@ import com.sap.sailing.domain.base.RaceDefinition;
  */
 public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
     private final RaceTrackerListeners listeners = new RaceTrackerListeners();
-    private final ConcurrentHashMap<RaceTracker.RaceCreationListener, Void> raceCreationListeners = new ConcurrentHashMap<>();
+    private final Set<RaceTracker.RaceCreationListener> raceCreationListeners = Collections
+            .newSetFromMap(new ConcurrentHashMap<RaceTracker.RaceCreationListener, Boolean>());
     
     private final RaceTrackingConnectivityParameters connectivityParams;
 
@@ -55,7 +58,7 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
 
     @Override
     public void add(RaceCreationListener listener) {
-        raceCreationListeners.put(listener, null);
+        raceCreationListeners.add(listener);
         final RaceDefinition race = getRace();
         if (race != null) {
             listener.onRaceCreated(this);
@@ -69,7 +72,7 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
     }
     
     protected void notifyRaceCreationListeners() {
-        raceCreationListeners.keySet().forEach(l->l.onRaceCreated(this));
+        raceCreationListeners.forEach(l->l.onRaceCreated(this));
     }
 
     @Override
