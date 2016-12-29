@@ -19,6 +19,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
@@ -119,10 +120,10 @@ public class Activator implements BundleActivator {
         context.registerService(MongoObjectFactory.class, racingEventService.getMongoObjectFactory(), /* properties */ null);
         context.registerService(DomainObjectFactory.class, racingEventService.getDomainObjectFactory(), /* properties */ null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
-        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name,
-                racingEventService.getId().toString());
+        replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, racingEventService.getId().toString());
         context.registerService(Replicable.class.getName(), racingEventService, replicableServiceProperties);
         context.registerService(RacingEventService.class.getName(), racingEventService, null);
+        context.registerService(RaceLogResolver.class, racingEventService, null);
         context.registerService(ClearStateTestSupport.class.getName(), racingEventService, null);
         Dictionary<String, String> properties = new Hashtable<String, String>();
         final GPSFixMongoHandlerImpl gpsFixMongoHandler = new GPSFixMongoHandlerImpl(

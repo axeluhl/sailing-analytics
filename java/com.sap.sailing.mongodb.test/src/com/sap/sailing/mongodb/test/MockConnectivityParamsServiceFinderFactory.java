@@ -1,6 +1,7 @@
 package com.sap.sailing.mongodb.test;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,8 +13,12 @@ import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongo
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogConnectivityParams;
+import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingAdapterFactoryImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
+import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayConnectivityParameters;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayConnectivityParamsHandler;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
@@ -43,6 +48,7 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
                     throws NoCorrespondingServiceRegisteredException {
                 final MongoObjectFactory mongoObjectFactory = racingEventService.getMongoObjectFactory();
                 final DomainObjectFactory domainObjectFactory = racingEventService.getDomainObjectFactory();
+                final DomainFactory swissTimingDomainFactory = new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory();
                 switch (type) {
                 case RaceTrackingConnectivityParametersImpl.TYPE:
                     return new TracTracConnectivityParamsHandler(
@@ -53,7 +59,13 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
                     return new com.sap.sailing.domain.swisstimingadapter.persistence.impl.SwissTimingConnectivityParamsHandler(
                             MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
                             MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
-                            new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory());
+                            swissTimingDomainFactory);
+                case SwissTimingReplayConnectivityParameters.TYPE:
+                    return new SwissTimingReplayConnectivityParamsHandler(
+                            MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(mongoObjectFactory, domainObjectFactory),
+                            MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory),
+                            swissTimingDomainFactory,
+                            SwissTimingReplayServiceFactory.INSTANCE.createSwissTimingReplayService(swissTimingDomainFactory, racingEventService));
                 case RaceLogConnectivityParams.TYPE:
                     return new com.sap.sailing.domain.racelogtracking.impl.RaceLogConnectivityParamsHandler(racingEventService);
                 default:
@@ -63,14 +75,19 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
 
             @Override
             public Set<RaceTrackingConnectivityParametersHandler> findAllServices() {
-                // TODO Auto-generated method stub
-                return null;
+                final Set<RaceTrackingConnectivityParametersHandler> result = new HashSet<>();
+                        for (final String type : new String[] {
+                                RaceTrackingConnectivityParametersImpl.TYPE,
+                                SwissTimingTrackingConnectivityParameters.TYPE,
+                                SwissTimingReplayConnectivityParameters.TYPE,
+                                RaceLogConnectivityParams.TYPE }) {
+                            result.add(findService(type));
+                        }
+                return result;
             }
 
             @Override
             public void setFallbackService(RaceTrackingConnectivityParametersHandler fallback) {
-                // TODO Auto-generated method stub
-                
             }
         });
         serviceFinders.put(DeviceIdentifierMongoHandler.class, new TypeBasedServiceFinder<DeviceIdentifierMongoHandler>() {

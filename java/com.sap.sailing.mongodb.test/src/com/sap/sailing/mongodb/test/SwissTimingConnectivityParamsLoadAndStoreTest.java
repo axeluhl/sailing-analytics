@@ -107,9 +107,4 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         assertEquals(startList.getCompetitors(), stParamsReadFromDB.getStartList().getCompetitors());
         assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
     }
-    
-    @Test
-    public void testStoreAndLoadSwissTimingReplayParans() {
-        // TODO pending bug 4010
-    }
 }
