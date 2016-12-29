@@ -35,6 +35,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class RaceLogEventSerializerTest {
 
@@ -198,7 +199,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testProtestStartTimeSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = new RaceLogProtestStartTimeEventImpl(null, author, 0, null);
+        RaceLogEvent event = new RaceLogProtestStartTimeEventImpl(null, author, 0, new TimeRangeImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now()));
         serializer.serialize(event);
         verify(protestStartTimeEventSerializer).serialize(event);
     }

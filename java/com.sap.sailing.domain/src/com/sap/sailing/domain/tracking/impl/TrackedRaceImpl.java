@@ -913,22 +913,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             TimePoint newStartTime = null;
             TimePoint newStartTimeWithoutInferenceFromStartMarkPassings = null;
             for (RaceLog raceLog : attachedRaceLogs.values()) {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
-                }
+                logger.finest(()->"Analyzing race log "+raceLog+" for race "+this.getRace().getName());
                 newStartTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
                 if (newStartTime != null) {
                     newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Found start time "+newStartTime+" in race log "+raceLog+" for race "+this.getRace().getName());
-                    }
+                    final TimePoint finalNewStartTime = newStartTime;
+                    logger.finest(()->"Found start time "+finalNewStartTime+" in race log "+raceLog+" for race "+this.getRace().getName());
                     break;
                 }
             }
             if (newStartTime == null) {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("No start time found in race logs for race "+getRace().getName());
-                }
+                logger.finest(()->"No start time found in race logs for race "+getRace().getName());
                 newStartTime = getStartTimeReceived();
                 if (newStartTime != null) {
                     newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
@@ -951,14 +946,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
                                 newStartTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
                                         - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
-                                if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+newStartTime);
-                                }
+                                final TimePoint finalNewStartTime = newStartTime;
+                                logger.finest(()->"Using start mark passings for start time of race "+this.getRace().getName()+": "+finalNewStartTime);
                             } else {
                                 newStartTime = startTimeReceived;
-                                if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest("Using start mark received for race "+this.getRace().getName()+": "+newStartTime);
-                                }
+                                final TimePoint finalNewStartTime = newStartTime;
+                                logger.finest(()->"Using start mark received for race "+this.getRace().getName()+": "+finalNewStartTime);
                             }
                         }
                     } else {
@@ -3455,29 +3448,46 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if (startWaypoint == null) {
             result = null;
         } else {
-            Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */false);
+            Position competitorPosition = getTrack(competitor).getEstimatedPosition(timePoint, /* extrapolate */ false);
             if (competitorPosition == null) {
                 result = null;
             } else {
                 Iterable<Mark> marks = startWaypoint.getControlPoint().getMarks();
                 Iterator<Mark> marksIterator = marks.iterator();
                 Mark first = marksIterator.next();
-                Position firstPosition = getOrCreateTrack(first).getEstimatedPosition(timePoint, /* extrapolate */false);
+                Position firstPosition = getOrCreateTrack(first).getEstimatedPosition(timePoint, /* extrapolate */ false);
                 if (firstPosition == null) {
                     result = null;
                 } else {
                     if (marksIterator.hasNext()) {
                         // it's a line / gate
                         Mark second = marksIterator.next();
-                        Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */
-                                false);
-                        final Bearing bearingGreatCircle = firstPosition.getBearingGreatCircle(secondPosition);
-                        if (bearingGreatCircle == null) {
+                        Position secondPosition = getOrCreateTrack(second).getEstimatedPosition(timePoint, /* extrapolate */ false);
+                        if (secondPosition == null) {
                             result = null;
                         } else {
-                            Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(
-                                    firstPosition, bearingGreatCircle);
-                            result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                            final Bearing lineBearingGreatCircleFromFirstToSecond = firstPosition.getBearingGreatCircle(secondPosition);
+                            // if the competitor is outside of the line when projected orthogonally, compute the distance to
+                            // the nearest of the line's marks (see also bug 1952):
+                            final Bearing bearingFromFirstToCompetitor = firstPosition.getBearingGreatCircle(competitorPosition);
+                            final Bearing angleBetweenFromFirstToCompetitorAndLine = lineBearingGreatCircleFromFirstToSecond.getDifferenceTo(bearingFromFirstToCompetitor);
+                            if (angleBetweenFromFirstToCompetitorAndLine.getDegrees() < -90 || angleBetweenFromFirstToCompetitorAndLine.getDegrees() > 90) {
+                                // competitor's orthogonal projection onto the line's extension is outside of the line's ends on the side
+                                // of the first mark; use distance between competitor and first mark:
+                                result = competitorPosition.getDistance(firstPosition);
+                            } else {
+                                final Bearing bearingFromSecondToCompetitor = secondPosition.getBearingGreatCircle(competitorPosition);
+                                final Bearing angleBetweenFromSecondToCompetitorAndReversedLine = lineBearingGreatCircleFromFirstToSecond.reverse().getDifferenceTo(bearingFromSecondToCompetitor);
+                                if (angleBetweenFromSecondToCompetitorAndReversedLine.getDegrees() < -90 || angleBetweenFromSecondToCompetitorAndReversedLine.getDegrees() > 90) {
+                                    // competitor's orthogonal projection onto the line's extension is outside of the line's ends on the side
+                                    // of the first mark; use distance between competitor and first mark:
+                                    result = competitorPosition.getDistance(secondPosition);
+                                } else {
+                                    Position competitorProjectedOntoStartLine = competitorPosition.projectToLineThrough(
+                                            firstPosition, lineBearingGreatCircleFromFirstToSecond);
+                                    result = competitorPosition.getDistance(competitorProjectedOntoStartLine);
+                                }
+                            }
                         }
                     } else {
                         result = competitorPosition.getDistance(firstPosition);

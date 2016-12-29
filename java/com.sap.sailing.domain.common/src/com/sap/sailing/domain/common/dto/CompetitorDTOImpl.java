@@ -194,22 +194,30 @@ public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serial
         return this;
     }
 
+    @Override
     public Color getColor() {
         return color;
     }
 
+    @Override
     public String getSearchTag() {
         return searchTag;
     }
+    
+    @Override
+    public void addToSearchTag(String searchTag) {
+        if (this.searchTag == null) {
+            this.searchTag = searchTag;
+        } else if (!this.searchTag.contains(searchTag)) {
+            this.searchTag += " "+searchTag;
+        }
+    }
 
+    @Override
     public String getEmail() {
         return email;
     }
     
-    public String email(){
-        return email;
-    }
-
     @Override
     public boolean hasEmail() {
         return email != null && !email.isEmpty();

@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
@@ -67,7 +68,7 @@ public interface DomainFactory {
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm);
 
-    ControlPoint getOrCreateControlPoint(Iterable<String> devices);
+    ControlPoint getOrCreateControlPoint(Iterable<String> devices, MarkType markType);
 
     RaceDefinition createRaceDefinition(Regatta regatta, String raceID, Map<Competitor, Boat> competitorsAndBoats,
             List<ControlPoint> courseDefinition);

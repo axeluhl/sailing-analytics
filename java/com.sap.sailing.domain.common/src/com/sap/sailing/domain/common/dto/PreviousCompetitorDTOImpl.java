@@ -119,6 +119,12 @@ public class PreviousCompetitorDTOImpl implements CompetitorDTO {
     }
 
     @Override
+    public void addToSearchTag(String searchTag) {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
     public String getImageURL() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorDTOImpl.class.getName()+" after deserialization");

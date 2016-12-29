@@ -4,7 +4,8 @@ import com.google.gwt.maps.client.controls.MapTypeStyle;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleElementType;
 import com.google.gwt.maps.client.maptypes.MapTypeStyleFeatureType;
 import com.google.gwt.maps.client.maptypes.MapTypeStyler;
-import com.sap.sse.common.impl.RGBColor;
+import com.sap.sailing.gwt.ui.client.shared.racemap.ColorMapTypeStyler;
+import com.sap.sse.common.Color;
 
 public class GoogleMapStyleHelper {
 
@@ -16,12 +17,23 @@ public class GoogleMapStyleHelper {
         return createElementStyleWithVisibility(featureType, MapTypeStyleElementType.ALL, "simplified");
     }
 
-    public static MapTypeStyle createColorStyle(MapTypeStyleFeatureType featureType, RGBColor color, int saturation, int lightness) {
+    public static MapTypeStyle createColorStyle(MapTypeStyleFeatureType featureType, Color color, int saturation, int lightness) {
         return createElementStyleWithColor(featureType, MapTypeStyleElementType.ALL, color, saturation, lightness);
     }
 
+    public static MapTypeStyle createColorStyle(MapTypeStyleFeatureType featureType, Color color) {
+        MapTypeStyle result = MapTypeStyle.newInstance();
+        result.setFeatureType(featureType);
+        result.setElementType(MapTypeStyleElementType.ALL);
+        
+        MapTypeStyler[] typeStylers = new MapTypeStyler[3];
+        typeStylers[0] = ColorMapTypeStyler.newColorStyler(color.getAsHtml()).cast();
+        result.setStylers(typeStylers);
+        return result;
+    }
+
     public static MapTypeStyle createElementStyleWithColor(MapTypeStyleFeatureType featureType, MapTypeStyleElementType elementType,
-            RGBColor rgbColor, int saturation, int ligthness) {
+            Color rgbColor, int saturation, int ligthness) {
         MapTypeStyle result = MapTypeStyle.newInstance();
         result.setFeatureType(featureType);
         result.setElementType(elementType);

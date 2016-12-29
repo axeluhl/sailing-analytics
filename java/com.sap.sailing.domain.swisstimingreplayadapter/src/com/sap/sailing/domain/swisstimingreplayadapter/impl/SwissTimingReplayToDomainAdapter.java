@@ -272,7 +272,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         if (id2 != null && !id2.trim().isEmpty()) {
             markNames.add(id2.trim());
         }
-        final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(markNames);
+        final ControlPoint controlPoint = domainFactory.getOrCreateControlPoint(markNames, getMarkType(markType));
         if (index == 0) {
             currentCourseDefinition = new ArrayList<>();
         }
@@ -287,6 +287,29 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         } else {
             windAtControlPoint.remove(controlPoint);
         }
+    }
+
+    /**
+     * Produces a domain {@link com.sap.sailing.domain.common.MarkType} from a SwissTiming replay {@link MarkType mark type}.
+     */
+    private com.sap.sailing.domain.common.MarkType getMarkType(MarkType markType) {
+        final com.sap.sailing.domain.common.MarkType result;
+        if (markType == null) {
+            result = null;
+        } else {
+            if (markType.isBoat()) {
+                if (markType.isStart()) {
+                    result = com.sap.sailing.domain.common.MarkType.STARTBOAT;
+                } else if (markType.isFinish()) {
+                    result = com.sap.sailing.domain.common.MarkType.FINISHBOAT;
+                } else {
+                    result = com.sap.sailing.domain.common.MarkType.BUOY;
+                }
+            } else {
+                result = com.sap.sailing.domain.common.MarkType.BUOY;
+            }
+        }
+        return result;
     }
 
     @Override

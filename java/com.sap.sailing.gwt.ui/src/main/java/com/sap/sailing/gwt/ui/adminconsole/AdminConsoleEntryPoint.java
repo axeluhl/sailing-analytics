@@ -35,6 +35,7 @@ import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
+import com.sap.sse.gwt.adminconsole.ReplicationPanel;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -83,7 +84,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     
     private Widget createAdminConsolePanel() {
         AdminConsolePanel panel = new AdminConsolePanel(getUserService(), SailingPermissionsForRoleProvider.INSTANCE, 
-                sailingService, getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this, SecurityStylesheetResources.INSTANCE.css(), false);
+                sailingService, getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this, SecurityStylesheetResources.INSTANCE.css(), getStringMessages());
         panel.addStyleName("adminConsolePanel");
         
         BetterDateTimeBox.initialize();

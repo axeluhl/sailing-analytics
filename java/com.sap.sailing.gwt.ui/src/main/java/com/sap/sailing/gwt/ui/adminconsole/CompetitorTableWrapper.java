@@ -18,7 +18,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.view.client.CellPreviewEvent;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithToolTipDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -347,23 +349,26 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         final CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(final CompetitorDTO competitor) {
-                sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
+                final List<CompetitorDTO> competitors = new ArrayList<>();
+                competitors.add(competitor);
+                sailingService.addOrUpdateCompetitor(competitors, new AsyncCallback<List<CompetitorDTO>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to update competitor: " + caught.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(CompetitorDTO updatedCompetitor) {
+                    public void onSuccess(List<CompetitorDTO> updatedCompetitor) {
+                        assert updatedCompetitor.size() == 1;
                         //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
                         int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
                         getFilterField().remove(originalCompetitor);
                         if (editedCompetitorIndex >= 0){
-                            getFilterField().add(editedCompetitorIndex, updatedCompetitor);
+                            getFilterField().add(editedCompetitorIndex, updatedCompetitor.iterator().next());
                         } else {
                             //in case competitor was not present --> not edit, but create
-                            getFilterField().add(updatedCompetitor);
+                            getFilterField().add(updatedCompetitor.iterator().next());
                         }
                         getDataProvider().refresh();
                     }  
@@ -392,6 +397,27 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
             public void onSuccess(Void result) {
                 Window.alert(stringMessages.successfullyAllowedCompetitorReset(competitors.toString()));
             }
+        });
+    }
+
+    /**
+     * This method makes rows grayed out with a tool tip
+     */
+    public void grayOutCompetitors(final List<CompetitorWithToolTipDTO> competitors) {
+        table.addCellPreviewHandler((CellPreviewEvent<CompetitorDTO> event) -> {
+            for (CompetitorWithToolTipDTO competitor : competitors) {
+                if (competitor.getCompetitor().equals(event.getValue())) {
+                    table.getRowElement(event.getIndex()).setTitle(competitor.getToolTipMessage());
+                }
+            }
+        });
+        table.setRowStyles((CompetitorDTO row, int rowIndex) -> {
+            for (CompetitorWithToolTipDTO competitor : competitors) {
+                if (competitor.getCompetitor().equals(row)) {
+                    return tableRes.cellTableStyle().cellTableDisabledRow();
+                }
+            }
+            return "";
         });
     }
 }

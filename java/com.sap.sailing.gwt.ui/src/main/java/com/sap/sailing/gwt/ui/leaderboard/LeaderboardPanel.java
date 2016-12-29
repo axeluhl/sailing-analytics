@@ -50,7 +50,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.ListDataProvider;
@@ -112,6 +111,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyStateProvider;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.panels.OverlayAssistantScrollPanel;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
@@ -288,7 +288,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
      */
     private final RegattaAndRaceIdentifier preSelectedRace;
 
-    private final VerticalPanel contentPanel;
+    private final FlowPanel contentPanel;
     
     private HorizontalPanel refreshAndSettingsPanel;
     private Label scoreCorrectionLastUpdateTimeLabel;
@@ -366,6 +366,12 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
     private final boolean showCompetitorFilterStatus;
 
     private CompetitorFilterPanel competitorFilterPanel;
+    
+    /**
+     * Whether or not a second scroll bar, synchronized with the invisible native scroll bar, shall appear at
+     * the bottom of the viewport. See {@link OverlayAssistantScrollPanel}.
+     */
+    private final boolean enableSyncedScroller;
 
     protected StringMessages getStringMessages() {
         return stringMessages;
@@ -401,7 +407,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         return isEmbedded;
     }
 
-    public VerticalPanel getContentPanel() {
+    public FlowPanel getContentPanel() {
         return contentPanel;
     }
     
@@ -1752,7 +1758,8 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* optionalRaceTimesInfoProvider */ null,
-                /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true, /*autoApplyTop30Filter*/ false, false);
+                /* autoExpandLastRaceColumn */ false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
+                /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
     }
 
     public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
@@ -1761,7 +1768,8 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
-            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus) {
+            boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
+            boolean showCompetitorFilterStatus, boolean enableSyncScroller) {
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
@@ -1781,6 +1789,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         this.adjustTimerDelay = adjustTimerDelay;
         this.initialCompetitorFilterHasBeenApplied = !autoApplyTopNFilter;
         this.showCompetitorFilterStatus = showCompetitorFilterStatus;
+        this.enableSyncedScroller = enableSyncScroller;
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.isUpdateUponPlayStateChange();
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
@@ -1840,7 +1849,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         });
         leaderboardTable.ensureDebugId("LeaderboardCellTable");
         selectionCheckboxColumn = new LeaderboardSelectionCheckboxColumn(competitorSelectionProvider);
-        getLeaderboardTable().setWidth("100%");
+        leaderboardTable.setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         // remember handler registration so we can temporarily remove it and re-add it to suspend selection events while we're actively changing it
         selectionChangeHandler = new Handler() {
@@ -1865,7 +1874,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
 
         SimplePanel mainPanel = new SimplePanel();
-        contentPanel = new VerticalPanel();
+        contentPanel = new FlowPanel();
         leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
@@ -1888,11 +1897,13 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             });
             this.competitorFilterPanel = competitorSearchTextBox;
         }
-        SortedCellTable<LeaderboardRowDTO> leaderboardTable = getLeaderboardTable();
-        // leaderboardTable.getElement().getStyle().setMarginTop(5, Unit.PX);
         filterControlPanel = new HorizontalPanel();
         filterControlPanel.setStyleName("LeaderboardPanel-FilterControl-Panel");
-        contentPanel.add(leaderboardTable);
+        if (enableSyncedScroller) {
+            contentPanel.add(new OverlayAssistantScrollPanel(leaderboardTable));
+        } else {
+            contentPanel.add(leaderboardTable);
+        }
         if (showCompetitorFilterStatus) {
             contentPanel.add(createFilterDeselectionControl());
         }
@@ -1902,7 +1913,6 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         if (timer.isInitialized()) {
             loadCompleteLeaderboard(/* showProgress */ false);
         }
-
     }
 
     private Widget createToolbarPanel() {
