@@ -155,8 +155,17 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
     
     @Override
+    public Mark getOrCreateMark(String name, MarkType markType) {
+        return getOrCreateMark(name, name, markType);
+    }
+    
+    private Mark getOrCreateMark(Serializable id, String name, MarkType markType) {
+        return getOrCreateMark(id, name, markType, /* color */ null, /* shape */ null, /* pattern */ null);
+    }
+
+    @Override
     public Mark getOrCreateMark(Serializable id, String name) {
-        return getOrCreateMark(id, name, null, null, null, null);
+        return getOrCreateMark(id, name, /* type */ null, /* color */ null, /* shape */ null, /* pattern */ null);
     }
 
     @Override
