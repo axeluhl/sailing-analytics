@@ -312,6 +312,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         trackedRace.addStartTimeChangedListener(startOfTrackingController);
         endOfTrackingController = new EndOfTrackingController(trackedRace, raceLog, raceLogEventAuthor);
         trackedRace.addListener(endOfTrackingController);
+        notifyRaceCreationListeners();
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles
         synchronized (this) {

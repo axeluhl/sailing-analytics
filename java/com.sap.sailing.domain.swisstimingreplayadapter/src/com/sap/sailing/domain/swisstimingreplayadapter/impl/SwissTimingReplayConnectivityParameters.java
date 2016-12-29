@@ -29,11 +29,12 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
     private final String link;
     private final SwissTimingReplayService replayService;
     
-    private class SwissTimingReplayRaceTracker extends AbstractRaceTrackerImpl {
+    class SwissTimingReplayRaceTracker extends AbstractRaceTrackerImpl {
         private final WindStore windStore;
         private SwissTimingReplayToDomainAdapter listener;
 
-        private SwissTimingReplayRaceTracker(WindStore windStore, SwissTimingReplayToDomainAdapter listener, SwissTimingReplayConnectivityParameters connectivityParams) {
+        public SwissTimingReplayRaceTracker(WindStore windStore, SwissTimingReplayToDomainAdapter listener,
+                SwissTimingReplayConnectivityParameters connectivityParams) {
             super(connectivityParams);
             this.windStore = windStore;
             this.listener = listener;
@@ -42,6 +43,11 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
         @Override
         public Regatta getRegatta() {
             return listener.getRegatta();
+        }
+        
+        @Override
+        public void notifyRaceCreationListeners() {
+            super.notifyRaceCreationListeners();
         }
 
         @Override
@@ -129,9 +135,9 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
         SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(/* regatta */ null, raceName,
                 raceID, domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName), domainFactory,
                 trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver, raceLogStore,
-                regattaLogStore);
+                regattaLogStore, l->new SwissTimingReplayRaceTracker(windStore, l, this));
         replayService.loadRaceData(link, listener);
-        return new SwissTimingReplayRaceTracker(windStore, listener, this);
+        return listener.getTracker();
     }
 
     @Override
@@ -140,9 +146,9 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
         SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(regatta, raceName,
                 raceID, domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
                 domainFactory, trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver,
-                raceLogStore, regattaLogStore);
+                raceLogStore, regattaLogStore, l->new SwissTimingReplayRaceTracker(windStore, l, this));
         replayService.loadRaceData(link, listener);
-        return new SwissTimingReplayRaceTracker(windStore, listener, this);
+        return listener.getTracker();
     }
 
     @Override

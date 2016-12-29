@@ -1539,17 +1539,21 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     @Override
     public void addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) {
         final String typeIdentifier = params.getTypeIdentifier();
-        try {
-            final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
-            final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
-            DBObject key = new BasicDBObject();
-            key.putAll(paramsPersistenceService.getKey(params));
-            DBObject dbObject = new BasicDBObject();
-            dbObject.putAll(paramsPersistenceService.mapFrom(params));
-            collection.update(key, dbObject, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
-        } catch (NoCorrespondingServiceRegisteredException e) {
-            logger.log(Level.WARNING, "Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier+
-                    ". Couldn't store race "+params.getTrackerID()+" for restoring.", e);
+        if (raceTrackingConnectivityParamsServiceFinder == null) {
+            logger.warning("No service finder has been configured to find connectivity parameter persistence services. Can't add connectivity parameters to DB for restore.");
+        } else {
+            try {
+                final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
+                final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
+                DBObject key = new BasicDBObject();
+                key.putAll(paramsPersistenceService.getKey(params));
+                DBObject dbObject = new BasicDBObject();
+                dbObject.putAll(paramsPersistenceService.mapFrom(params));
+                collection.update(key, dbObject, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
+            } catch (NoCorrespondingServiceRegisteredException e) {
+                logger.log(Level.WARNING, "Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier+
+                        ". Couldn't store race "+params.getTrackerID()+" for restoring.", e);
+            }
         }
     }
     

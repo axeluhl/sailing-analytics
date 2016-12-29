@@ -87,11 +87,26 @@ public interface RaceTracker {
          */
         void onTrackerWillStop(boolean preemptive);
     }
+    
+    interface RaceCreationListener {
+        /**
+         * Tracker has received its {@link RaceDefinition}, so that now {@link RaceTracker#getRace} no longer returns
+         * {@code null} but a valid {@link RaceDefinition}
+         * 
+         * @param tracker
+         *            this tracker is passed to the listener which can then obtain the {@link RaceTracker#getRace()
+         *            race} and the {@link RaceTracker#getConnectivityParams() connectivity parameters}, etc. If the
+         *            {@link RaceTracker} already has created its race, this method is called immediately upon
+         *            {@link RaceTracker#add(Listener) adding} this listener so that the listener will always receive
+         *            the call for a valid race if the race is created at any point in time, regardless the point in
+         *            time of the listener registration. This helps avoid race conditions.
+         */
+        void onRaceCreated(RaceTracker tracker);
+    }
 
     /**
      * Register a new RaceTracker.Listener for this race tracker.
      * 
-     * @param newListener
      * @return true if listener has been added
      */
     boolean add(RaceTracker.Listener newListener);
@@ -99,10 +114,14 @@ public interface RaceTracker {
     /**
      * Remove listener from race tracker
      * 
-     * @param newListener
+     * @param listener
      * @return the listener registration for listener removal
      */
-    void remove(RaceTracker.Listener newListener);
+    void remove(RaceTracker.Listener listener);
+    
+    void add(RaceTracker.RaceCreationListener listener);
+    
+    void remove(RaceTracker.RaceCreationListener listener);
 
     /**
      * The connectivity parameters used to create this tracker. Can be used, e.g., to add or remove those parameters to

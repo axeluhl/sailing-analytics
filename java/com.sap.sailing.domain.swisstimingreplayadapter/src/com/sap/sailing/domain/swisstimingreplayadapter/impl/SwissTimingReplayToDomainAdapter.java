@@ -44,9 +44,12 @@ import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.CompetitorStatus;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayParser;
+import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingReplayConnectivityParameters.SwissTimingReplayRaceTracker;
+import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
@@ -150,16 +153,37 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     private final String raceIdForRaceDefinition;
 
     /**
+     * Optional callback to which to announce the arrival of the {@link RaceDefinition}
+     */
+    private final DynamicRaceDefinitionSet dynamicRaceDefinitionSet;
+    
+    private final SwissTimingReplayRaceTracker tracker;
+    
+    @FunctionalInterface
+    public static interface TrackerConstructor {
+        SwissTimingReplayRaceTracker createTracker(SwissTimingReplayToDomainAdapter adapter);
+    }
+    
+    /**
      * @param regatta
      *            the regatta to associate the race(s) received by the listener with, or <code>null</code> to force the
      *            use / creation of a default regatta per race
-     * @param useInternalMarkPassingAlgorithm use our own instead of the SwissTiming-provided mark rounding / split times
+     * @param useInternalMarkPassingAlgorithm
+     *            use our own instead of the SwissTiming-provided mark rounding / split times
+     * @param trackerConstructor
+     *            if not {@code null} this object is used to construct the {@link SwissTimingReplayRaceTracker} that can
+     *            be obtained from {@link #getTracker()}. This tracker's {@link RaceTracker.RaceCreationListener}s will
+     *            be {@link SwissTimingReplayRaceTracker#notifyRaceCreationListeners() notified} when this adapter has
+     *            created the race.
      */
     public SwissTimingReplayToDomainAdapter(Regatta regatta, String raceName, String raceIdForRaceDefinition,
             BoatClass boatClass, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore) {
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, TrackerConstructor trackerConstructor) {
+        this.tracker = trackerConstructor == null ? null : trackerConstructor.createTracker(this);
         this.raceLogResolver = raceLogResolver;
+        // when the race is created, notify the tracker's race creation listeners
+        this.dynamicRaceDefinitionSet = trackerConstructor == null ? null : (race, trackedRace)->this.tracker.notifyRaceCreationListeners();
         this.raceName = raceName;
         this.raceIdForRaceDefinition = raceIdForRaceDefinition;
         final Regatta effectiveRegatta;
@@ -186,6 +210,10 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         lastNextMark = new HashMap<>();
         this.domainFactory = domainFactory;
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
+    }
+
+    public RaceTracker getTracker() {
+        return tracker;
     }
 
     public Regatta getRegatta() {
@@ -379,6 +407,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
             trackedRace.setStartTimeReceived(bestStartTimeKnownSoFar);
         }
         trackedRacePerRaceID.put(currentRaceID, trackedRace);
+        if (dynamicRaceDefinitionSet != null) {
+            dynamicRaceDefinitionSet.addRaceDefinition(race, trackedRace);
+        }
     }
 
     public DynamicTrackedRegatta getTrackedRegatta() {

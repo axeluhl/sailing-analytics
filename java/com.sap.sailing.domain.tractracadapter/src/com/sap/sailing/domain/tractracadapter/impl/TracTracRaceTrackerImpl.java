@@ -656,6 +656,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
     public void addRaceDefinition(final RaceDefinition race, final DynamicTrackedRace trackedRace) {
         this.race = race;
         updateStatusOfTrackedRace(trackedRace);
+        notifyRaceCreationListeners();
     }
 
     @Override
