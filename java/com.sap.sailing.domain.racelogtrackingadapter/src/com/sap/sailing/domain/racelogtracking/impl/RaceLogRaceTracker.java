@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -195,13 +194,13 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     }
 
     @Override
-    public Set<RaceDefinition> getRaces() {
-        return trackedRace == null ? null : Collections.singleton(trackedRace.getRace());
+    public RaceDefinition getRace() {
+        return trackedRace == null ? null : trackedRace.getRace();
     }
 
     @Override
-    public Set<RegattaAndRaceIdentifier> getRaceIdentifiers() {
-        return trackedRace == null ? null : Collections.singleton(trackedRace.getRaceIdentifier());
+    public RegattaAndRaceIdentifier getRaceIdentifier() {
+        return trackedRace == null ? null : trackedRace.getRaceIdentifier();
     }
 
     @Override

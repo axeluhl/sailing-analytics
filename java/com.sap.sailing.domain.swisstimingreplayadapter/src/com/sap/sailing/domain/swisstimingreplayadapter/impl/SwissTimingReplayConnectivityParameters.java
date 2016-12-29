@@ -1,8 +1,5 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
-import java.util.Collections;
-import java.util.Set;
-
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -48,17 +45,11 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
         }
 
         @Override
-        public Set<RaceDefinition> getRaces() {
+        public RaceDefinition getRace() {
             RaceDefinition race;
             try {
                 race = listener.getRaceDefinition(raceID, 1 /* very short timeout */);
-                final Set<RaceDefinition> result;
-                if (race == null) {
-                    result = Collections.emptySet();
-                } else {
-                    result = Collections.singleton(race);
-                }
-                return result;
+                return race;
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

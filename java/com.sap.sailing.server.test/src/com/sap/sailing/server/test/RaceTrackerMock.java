@@ -2,11 +2,11 @@ package com.sap.sailing.server.test;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Set;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.tracking.AbstractRaceTrackerBaseImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -16,20 +16,18 @@ public class RaceTrackerMock extends AbstractRaceTrackerBaseImpl {
     
     private Long id;
     private Regatta regatta;
-    private Set<RaceDefinition> raceDefinitions;
+    private RaceDefinition raceDefinition;
     private boolean isTracking;
     
     public RaceTrackerMock() {
         super(null);
     }
     
-    
-    
-    public RaceTrackerMock(Long id, Regatta regatta, Set<RaceDefinition> raceDefinitions, boolean isTracking) {
+    public RaceTrackerMock(Long id, Regatta regatta, RaceDefinition raceDefinition, boolean isTracking) {
         super(null);
         this.id = id;
         this.regatta = regatta;
-        this.raceDefinitions = raceDefinitions;
+        this.raceDefinition = raceDefinition;
         this.isTracking = isTracking;
     }
 
@@ -57,8 +55,8 @@ public class RaceTrackerMock extends AbstractRaceTrackerBaseImpl {
     }
 
     @Override
-    public Set<RaceDefinition> getRaces() {
-        return raceDefinitions;
+    public RaceDefinition getRace() {
+        return raceDefinition;
     }
 
     @Override
@@ -83,8 +81,7 @@ public class RaceTrackerMock extends AbstractRaceTrackerBaseImpl {
     }
 
     @Override
-    public Set<RegattaAndRaceIdentifier> getRaceIdentifiers() {
-        // TODO Auto-generated method stub
-        return null;
+    public RegattaAndRaceIdentifier getRaceIdentifier() {
+        return new RegattaNameAndRaceName(getRegatta().getName(), getRace().getName());
     }
 }

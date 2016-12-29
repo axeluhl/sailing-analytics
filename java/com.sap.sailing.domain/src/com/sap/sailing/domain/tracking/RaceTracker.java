@@ -3,7 +3,6 @@ package com.sap.sailing.domain.tracking;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
-import java.util.Set;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
@@ -13,7 +12,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
  * Centerpiece of a tracking adapter. A tracker is responsible for receiving tracking data for one or more
  * {@link RaceDefinition races} that are {@link Regatta#getAllRaces() part of} a common {@link #getRegatta() Event}. Some
  * tracker architectures may not be able to deliver all data for the {@link RaceDefinition} when created or started.
- * Therefore, {@link #getRaces()} may return <code>null</code> if the race information hasn't been received by the
+ * Therefore, {@link #getRace()} may return <code>null</code> if the race information hasn't been received by the
  * tracker yet. Through the {@link RaceHandle} returned by {@link #getRaceHandle()} it is also possible to perform a
  * {@link RaceHandle#getRace() blocking get} for the race tracked by this tracker.
  * <p>
@@ -56,15 +55,15 @@ public interface RaceTracker {
     com.sap.sailing.domain.base.Regatta getRegatta();
 
     /**
-     * Returns the races being tracked by this tracker. Non-blocking call that returns <code>null</code> or an empty set
+     * Returns the races being tracked by this tracker. Non-blocking call that returns <code>null</code>
      * if the {@link RaceDefinition} hasn't been created yet, e.g., because the course definition
      * hasn't been received yet or the listener for receiving course information hasn't been registered (yet). Also
-     * returns races that have been removed from containing structures which may lead this tracker to no longer update
+     * returns a race that may have been removed from containing structures which may lead this tracker to no longer update
      * their {@link TrackedRace} with new data.
      */
-    Set<RaceDefinition> getRaces();
+    RaceDefinition getRace();
     
-    Set<RegattaAndRaceIdentifier> getRaceIdentifiers();
+    RegattaAndRaceIdentifier getRaceIdentifier();
 
     RaceHandle getRaceHandle();
 

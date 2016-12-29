@@ -96,18 +96,15 @@ public class RaceTrackerStartStopTest {
         Set<RaceDefinition> raceDefinitionSetRace1 = new HashSet<RaceDefinition>();
         raceDefinitionSetRace1.add(raceDef1);
         Set<RaceDefinition> raceDefinitionSetRace2 = new HashSet<RaceDefinition>();
-        raceDefinitionSetRace2.add(raceDef1);
         raceDefinitionSetRace2.add(raceDef2);
         Set<RaceDefinition> raceDefinitionSetRace3 = new HashSet<RaceDefinition>();
-        raceDefinitionSetRace3.add(raceDef1);
-        raceDefinitionSetRace3.add(raceDef2);
         raceDefinitionSetRace3.add(raceDef3);
         Long trackerID1 = new Long(1);
         Long trackerID2 = new Long(2);
         Long trackerID3 = new Long(3);
-        raceTracker1 = new RaceTrackerMock(new Long(1), regatta, raceDefinitionSetRace1, true);
-        raceTracker2 = new RaceTrackerMock(new Long(2), regatta, raceDefinitionSetRace2, true);
-        raceTracker3 = new RaceTrackerMock(new Long(3), regatta, raceDefinitionSetRace3, true);
+        raceTracker1 = new RaceTrackerMock(new Long(1), regatta, raceDef1, true);
+        raceTracker2 = new RaceTrackerMock(new Long(2), regatta, raceDef2, true);
+        raceTracker3 = new RaceTrackerMock(new Long(3), regatta, raceDef3, true);
         raceTrackerSet.add(raceTracker1);
         raceTrackerSet.add(raceTracker2);
         raceTrackerSet.add(raceTracker3);
@@ -194,15 +191,9 @@ public class RaceTrackerStartStopTest {
         assertTrue(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker2));
         assertTrue(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker3));
         // The raceTracker should still exist; it shall still contain raceDef1 and raceDef2 because a tracker keeps tracking what it tracks...
-        assertTrue(raceTracker1.getRaces().contains(raceDef1));
-        assertEquals(1, raceTracker1.getRaces().size());
-        assertTrue(raceTracker2.getRaces().contains(raceDef1));
-        assertTrue(raceTracker2.getRaces().contains(raceDef2));
-        assertEquals(2, raceTracker2.getRaces().size());
-        assertTrue(raceTracker3.getRaces().contains(raceDef1));
-        assertTrue(raceTracker3.getRaces().contains(raceDef2));
-        assertTrue(raceTracker3.getRaces().contains(raceDef3));
-        assertEquals(3, raceTracker3.getRaces().size());
+        assertSame(raceTracker1.getRace(), raceDef1);
+        assertSame(raceTracker2.getRace(), raceDef2);
+        assertSame(raceTracker3.getRace(), raceDef3);
     }
     
     /**
@@ -222,8 +213,7 @@ public class RaceTrackerStartStopTest {
         assertFalse(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker2));
         assertTrue(racingEventService.getRaceTrackersByIDMap().containsValue(raceTracker3));
         // The raceTracker 3 should exist, and it should contain all race definitions still
-        assertTrue(raceTracker3.getRaces().contains(raceDef3));
-        assertEquals(3, raceTracker3.getRaces().size());
+        assertSame(raceTracker3.getRace(), raceDef3);
     }
 
 }

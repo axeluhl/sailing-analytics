@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -176,9 +175,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
 
     @Override
-    public Set<RaceDefinition> getRaces() {
-        final Set<RaceDefinition> emptySet = Collections.emptySet();
-        return race==null?emptySet:Collections.singleton(race);
+    public RaceDefinition getRace() {
+        return race;
     }
 
     @Override

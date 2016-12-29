@@ -94,6 +94,7 @@ import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -1229,8 +1230,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Set<RaceTracker> trackers = raceTrackersByRegatta.get(regattaContext);
         if (trackers != null) {
             for (RaceTracker tracker : trackers) {
-                final Set<RaceDefinition> races = tracker.getRaces();
-                if (races != null && races.contains(r)) {
+                final RaceDefinition race = tracker.getRace();
+                if (race == r) {
                     return true;
                 }
             }
@@ -1999,11 +2000,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         final Set<RaceTracker> trackersForRegatta = raceTrackersByRegatta.get(regatta);
         if (trackersForRegatta != null) {
             for (RaceTracker raceTracker : trackersForRegatta) {
-                final Set<RaceDefinition> races = raceTracker.getRaces();
-                if (races != null) {
-                    for (RaceDefinition race : races) {
-                        stopTrackingWind(regatta, race);
-                    }
+                final RaceDefinition race = raceTracker.getRace();
+                if (race != null) {
+                    stopTrackingWind(regatta, race);
                 }
                 raceTracker.stop(/* preemptive */false);
                 final Object trackerId = raceTracker.getID();
@@ -2066,7 +2065,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         ScheduledFuture<?> task = getScheduler().schedule(new Runnable() {
             @Override
             public void run() {
-                if (tracker.getRaces() == null || tracker.getRaces().isEmpty()) {
+                if (tracker.getRace() == null) {
                     try {
                         Regatta regatta = tracker.getRegatta();
                         logger.log(Level.SEVERE, "RaceDefinition for a race in regatta " + regatta.getName()
@@ -2106,8 +2105,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             Iterator<RaceTracker> trackerIter = trackerSet.iterator();
             while (trackerIter.hasNext()) {
                 RaceTracker raceTracker = trackerIter.next();
-                if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
-                    logger.info("Found tracker to stop for races " + raceTracker.getRaces());
+                if (raceTracker.getRace() == race) {
+                    logger.info("Found tracker to stop for races " + raceTracker.getRace());
                     raceTracker.stop(/* preemptive */false);
                     trackerIter.remove();
                     final Object trackerId = raceTracker.getID();
@@ -2223,6 +2222,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,
             InterruptedException {
         logger.info("Removing the race " + race + "...");
+        // TODO bug 2, comment #7: this won't work... we need the mapping from TrackedRace or RaceDefinition to RaceTrackingConnectivityParameters
         getRaceTrackerByRegattaAndRaceIdentifier(new RegattaNameAndRaceName(regatta.getName(), race.getName()),
                 tracker->getMongoObjectFactory().removeConnectivityParametersForRaceToRestore(tracker.getConnectivityParams()));
         stopAllTrackersForWhichRaceIsLastReachable(regatta, race);
@@ -2294,38 +2294,25 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             Iterator<RaceTracker> trackerIter = raceTrackersByRegatta.get(regatta).iterator();
             while (trackerIter.hasNext()) {
                 RaceTracker raceTracker = trackerIter.next();
-                if (raceTracker.getRaces() != null && raceTracker.getRaces().contains(race)) {
-                    boolean foundReachableRace = false;
-                    for (RaceDefinition raceTrackedByTracker : raceTracker.getRaces()) {
-                        if (raceTrackedByTracker != race && isReachable(regatta, raceTrackedByTracker)) {
-                            foundReachableRace = true;
-                            break;
-                        }
+                if (raceTracker.getRace() == race) {
+                    // firstly stop the tracker
+                    raceTracker.stop(/* preemptive */true);
+                    // remove it from the raceTrackers by Regatta
+                    trackerIter.remove();
+                    final Object trackerId = raceTracker.getID();
+                    final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
+                    try {
+                        raceTrackersByID.remove(trackerId);
+                    } finally {
+                        unlockRaceTrackersById(trackerId, lock);
                     }
-                    if (!foundReachableRace) {
-                        // firstly stop the tracker
-                        raceTracker.stop(/* preemptive */true);
-                        // remove it from the raceTrackers by Regatta
-                        trackerIter.remove();
-                        final Object trackerId = raceTracker.getID();
-                        final NamedReentrantReadWriteLock lock = lockRaceTrackersById(trackerId);
-                        try {
-                            raceTrackersByID.remove(trackerId);
-                        } finally {
-                            unlockRaceTrackersById(trackerId, lock);
-                        }
-                        // if the last tracked race was removed, remove the entire regatta
-                        if (raceTrackersByRegatta.get(regatta).isEmpty()) {
-                            stopTracking(regatta);
-                        }
+                    // if the last tracked race was removed, remove the entire regatta
+                    if (raceTrackersByRegatta.get(regatta).isEmpty()) {
+                        stopTracking(regatta);
                     }
                 }
             }
         }
-    }
-
-    private boolean isReachable(Regatta regatta, RaceDefinition race) {
-        return Util.contains(regatta.getAllRaces(), race);
     }
 
     @Override
@@ -3611,7 +3598,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 Set<RaceTracker> raceTrackersForRegatta = raceTrackersByRegatta.get(regatta);
                 if (raceTrackersForRegatta != null) {
                     for (RaceTracker raceTracker : raceTrackersForRegatta) {
-                        if (raceTracker.getRaceIdentifiers().contains(raceIdentifier)) {
+                        if (Util.equalsWithNull(raceTracker.getRaceIdentifier(), raceIdentifier)) {
                             callback.accept(raceTracker);
                             return;
                         }
@@ -3638,12 +3625,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private void notifyListenersForNewRaceTracker(RaceTracker tracker) {
         LockUtil.lockForRead(raceTrackersByRegattaLock);
         try {
-            tracker.getRaceIdentifiers().forEach((raceIdentifier) -> {
+            final RaceIdentifier raceIdentifier = tracker.getRaceIdentifier();
+            if (raceIdentifier != null) {
                 Set<Consumer<RaceTracker>> callbacks = getRaceTrackerCallbacks().remove(raceIdentifier);
                 if (callbacks != null) {
                     callbacks.forEach((callback) -> callback.accept(tracker));
                 }
-            });
+            };
         } finally {
             LockUtil.unlockAfterRead(raceTrackersByRegattaLock);
         }

@@ -95,7 +95,7 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
     private void startTracking() throws Exception, InterruptedException {
         startTrackingOnMaster();
         waitForTrackRaceReplicationTrigger();
-        raceIdentifier = racesHandle.getRaceTracker().getRaceIdentifiers().iterator().next();
+        raceIdentifier = racesHandle.getRaceTracker().getRaceIdentifier();
         masterTrackedRace = master.getTrackedRace(raceIdentifier);
     }
 
