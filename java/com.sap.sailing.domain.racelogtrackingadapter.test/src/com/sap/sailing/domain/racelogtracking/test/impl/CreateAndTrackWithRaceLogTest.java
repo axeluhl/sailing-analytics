@@ -78,7 +78,7 @@ public class CreateAndTrackWithRaceLogTest {
 
     @Before
     public void setup() {
-        service = new RacingEventServiceImpl(true, new MockSmartphoneImeiServiceFinderFactory());
+        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
         sensorFixStore = service.getSensorFixStore();
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         author = service.getServerAuthor();

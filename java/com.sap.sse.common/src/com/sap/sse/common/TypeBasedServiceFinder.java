@@ -21,6 +21,10 @@ import java.util.Set;
  */
 public interface TypeBasedServiceFinder<ServiceType> {
     public static final String TYPE = "type";
+    
+    public interface Callback<ServiceType> {
+        void withService(ServiceType service);
+    }
 
     /**
      * Find a service that implements the <ServiceType> interface for the specified {@code type} of object (e.g. type of
@@ -32,6 +36,16 @@ public interface TypeBasedServiceFinder<ServiceType> {
      *             Thrown, if no service is registered for this type.
      */
     ServiceType findService(String type) throws NoCorrespondingServiceRegisteredException;
+    
+    /**
+     * Similar to {@link #findService(String)}; when the service for {@code type} is already available,
+     * the {@code callback} is immediately {@link Callback#withService(Object) invoked} with the service
+     * found. If the service is not found, instead of throwing a {@link NoCorrespondingServiceRegisteredException},
+     * the {@code callback} is recorded by this finder; when at a later point in time a service with {@code type}
+     * becomes available, all callbacks recorded this way will be {@link Callback#withService(Object) invoked}
+     * with the service that became available.
+     */
+    void applyServiceWhenAvailable(String type, Callback<ServiceType> callback);
 
     Set<ServiceType> findAllServices();
 

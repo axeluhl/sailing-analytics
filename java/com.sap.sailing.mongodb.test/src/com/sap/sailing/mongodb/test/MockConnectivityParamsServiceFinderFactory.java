@@ -11,6 +11,7 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.racelog.tracking.test.mock.AbstractTypeBasedServiceFinder;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogConnectivityParams;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
@@ -42,7 +43,7 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
     private RacingEventService racingEventService;
 
     public MockConnectivityParamsServiceFinderFactory() {
-        serviceFinders.put(RaceTrackingConnectivityParametersHandler.class, new TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler>() {
+        serviceFinders.put(RaceTrackingConnectivityParametersHandler.class, new AbstractTypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler>() {
             @Override
             public RaceTrackingConnectivityParametersHandler findService(String type)
                     throws NoCorrespondingServiceRegisteredException {
@@ -90,7 +91,7 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
             public void setFallbackService(RaceTrackingConnectivityParametersHandler fallback) {
             }
         });
-        serviceFinders.put(DeviceIdentifierMongoHandler.class, new TypeBasedServiceFinder<DeviceIdentifierMongoHandler>() {
+        serviceFinders.put(DeviceIdentifierMongoHandler.class, new AbstractTypeBasedServiceFinder<DeviceIdentifierMongoHandler>() {
             @Override
             public DeviceIdentifierMongoHandler findService(String type)
                     throws NoCorrespondingServiceRegisteredException {
@@ -104,14 +105,11 @@ public class MockConnectivityParamsServiceFinderFactory implements TypeBasedServ
 
             @Override
             public Set<DeviceIdentifierMongoHandler> findAllServices() {
-                // TODO Auto-generated method stub
                 return null;
             }
 
             @Override
             public void setFallbackService(DeviceIdentifierMongoHandler fallback) {
-                // TODO Auto-generated method stub
-                
             }
         });
     }

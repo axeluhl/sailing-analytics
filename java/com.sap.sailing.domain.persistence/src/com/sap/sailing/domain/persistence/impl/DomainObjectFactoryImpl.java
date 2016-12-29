@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -2284,22 +2285,24 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public Iterable<RaceTrackingConnectivityParameters> loadConnectivityParametersForRacesToRestore() throws MalformedURLException, URISyntaxException {
-        Set<RaceTrackingConnectivityParameters> result = new HashSet<>();
+    public void loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) throws MalformedURLException, URISyntaxException {
         final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
         for (final DBObject o : collection.find()) {
             final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
-            final RaceTrackingConnectivityParametersHandler connectivityParamsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(type);
-            if (connectivityParamsPersistenceService != null) {
+            raceTrackingConnectivityParamsServiceFinder.applyServiceWhenAvailable(type, connectivityParamsPersistenceService -> {
                 final Map<String, Object> map = new HashMap<>();
                 for (final String key : o.keySet()) {
                     if (!key.equals(TypeBasedServiceFinder.TYPE)) {
                         map.put(key, o.get(key));
                     }
                 }
-                result.add(connectivityParamsPersistenceService.mapTo(map));
-            }
+                try {
+                    callback.accept(connectivityParamsPersistenceService.mapTo(map));
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Exception trying to load race restore connectivity parameters "
+                            + o + " with handler " + connectivityParamsPersistenceService, e);
+                }
+            });
         }
-        return result;
     }
 }

@@ -41,6 +41,14 @@ TypeBasedServiceFinder<ServiceType> {
     }
 
     @Override
+    public void applyServiceWhenAvailable(String type, Callback<ServiceType> callback) {
+        final ServiceType service = findService(type);
+        if (service != null) {
+            callback.withService(service);
+        }
+    }
+
+    @Override
     public void setFallbackService(ServiceType fallback) {
         this.fallback = fallback;
     }

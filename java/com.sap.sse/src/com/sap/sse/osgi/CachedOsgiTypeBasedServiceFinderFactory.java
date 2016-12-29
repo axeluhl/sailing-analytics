@@ -38,18 +38,14 @@ public class CachedOsgiTypeBasedServiceFinderFactory implements TypeBasedService
     @Override
     public <ServiceT> TypeBasedServiceFinder<ServiceT> createServiceFinder(Class<ServiceT> clazz) {
         @SuppressWarnings("unchecked")
-        CachedOsgiTypeBasedServiceFinder<ServiceT> finder = (CachedOsgiTypeBasedServiceFinder<ServiceT>) serviceFinders
-                .get(clazz);
-
+        CachedOsgiTypeBasedServiceFinder<ServiceT> finder = (CachedOsgiTypeBasedServiceFinder<ServiceT>) serviceFinders.get(clazz);
         if (finder == null) {
             finder = new CachedOsgiTypeBasedServiceFinder<>(clazz, context);
             ServiceTracker<ServiceT, ServiceT> tracker = new ServiceTracker<ServiceT, ServiceT>(context, clazz, finder);
-
             serviceFinders.put(clazz, finder);
             serviceTrackers.add(tracker);
             tracker.open();
         }
-
         return finder;
     }
 

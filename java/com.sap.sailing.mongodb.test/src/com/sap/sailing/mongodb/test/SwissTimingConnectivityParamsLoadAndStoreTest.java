@@ -7,6 +7,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -52,7 +54,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load
-        final Iterable<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = domainObjectFactory.loadConnectivityParametersForRacesToRestore();
+        final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = new HashSet<>();
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params));
         // compare
         assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
         final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
@@ -70,7 +73,9 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
-        assertTrue(Util.isEmpty(domainObjectFactory.loadConnectivityParametersForRacesToRestore()));
+        final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params));
+        assertTrue(connectivityParametersForRacesToRestore2.isEmpty());
     }
     
     @Test
@@ -93,7 +98,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load
-        final Iterable<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = domainObjectFactory.loadConnectivityParametersForRacesToRestore();
+        final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = new HashSet<>();
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params));
         // compare
         assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
         final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
@@ -111,6 +117,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
-        assertTrue(Util.isEmpty(domainObjectFactory.loadConnectivityParametersForRacesToRestore()));
+        final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params));
+        assertTrue(connectivityParametersForRacesToRestore2.isEmpty());
     }
 }

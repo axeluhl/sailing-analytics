@@ -8,6 +8,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -49,7 +51,8 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(tracTracParams);
         // load
-        final Iterable<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = domainObjectFactory.loadConnectivityParametersForRacesToRestore();
+        final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore = new HashSet<>();
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore.add(params));
         // compare
         assertEquals(1, Util.size(connectivityParametersForRacesToRestore));
         final RaceTrackingConnectivityParameters paramsReadFromDB = connectivityParametersForRacesToRestore.iterator().next();
@@ -70,6 +73,8 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
         assertEquals(tracTracParams.getTrackerID(), tracTracParamsReadFromDB.getTrackerID());
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(tracTracParams);
-        assertTrue(Util.isEmpty(domainObjectFactory.loadConnectivityParametersForRacesToRestore()));
+        final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
+        domainObjectFactory.loadConnectivityParametersForRacesToRestore(params->connectivityParametersForRacesToRestore2.add(params));
+        assertTrue(connectivityParametersForRacesToRestore2.isEmpty());
     }
 }

@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.SocketException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -465,20 +466,21 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * compatibility with prior releases that did not support a persistent competitor collection.
      */
     public RacingEventServiceImpl() {
-        this(true, /* serviceFinderFactory */ null);
+        this(/* clearPersistentCompetitorStore */ true, /* serviceFinderFactory */ null, /* restoreTrackedRaces */ false);
     }
 
     public RacingEventServiceImpl(WindStore windStore, SensorFixStore sensorFixStore,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(true, windStore, sensorFixStore, serviceFinderFactory, /* sailingNotificationService */ null);
+        this(/* clearPersistentCompetitorStore */ true, windStore, sensorFixStore, serviceFinderFactory,
+                /* sailingNotificationService */ null, /* restoreTrackedRaces */ false);
     }
 
     void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
-    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null);
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
+        this(clearPersistentCompetitorStore, serviceFinderFactory, null, /* sailingNotificationService */ null, restoreTrackedRaces);
     }
     
     /**
@@ -494,7 +496,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            notification service is available, e.g., in test set-ups
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
-            TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService) {
+            TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService, boolean restoreTrackedRaces) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
@@ -507,11 +509,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
             };
-        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory ,trackedRegattaListener, sailingNotificationService);
+        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory ,trackedRegattaListener, sailingNotificationService, restoreTrackedRaces);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
-            SensorFixStore sensorFixStore, final TypeBasedServiceFinderFactory serviceFinderFactory, SailingNotificationService sailingNotificationService) {
+            SensorFixStore sensorFixStore, final TypeBasedServiceFinderFactory serviceFinderFactory,
+            SailingNotificationService sailingNotificationService, boolean restoreTrackedRaces) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
@@ -524,11 +527,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
             };
-        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory, null, sailingNotificationService);
+        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory, null, sailingNotificationService, restoreTrackedRaces);
     }
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            MediaDB mediaDB, WindStore windStore, SensorFixStore sensorFixStore) {
+            MediaDB mediaDB, WindStore windStore, SensorFixStore sensorFixStore, boolean restoreTrackedRaces) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
@@ -536,7 +539,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
             };
-        }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null);
+        }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null, restoreTrackedRaces);
     }
 
     /**
@@ -550,10 +553,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * @param sailingNotificationService
      *            a notification service to call upon events worth notifying users about, or {@code null} if no
      *            notification service is available, e.g., in test set-ups
+     * @param restoreTrackedRaces
+     *            if {@code true}, the tracking connectivity parameters for the races last loaded in the server are
+     *            {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>) obtained} from the database,
+     *            and {@link RaceTracker}s are
+     *            {@link #addRace(RegattaIdentifier, RaceTrackingConnectivityParameters, long) created} for those,
+     *            effectively restoring the server state to what it was last according to the database. If {@code false},
+     *            all restore information is
+     *            {@link MongoObjectFactory#removeAllConnectivityParametersForRacesToRestore() cleared} from the
+     *            database, and the server starts out with an empty list of tracked races.
      */
     public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider, MediaDB mediaDb,
             final WindStore windStore, final SensorFixStore sensorFixStore, TypeBasedServiceFinderFactory serviceFinderFactory,
-            TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService) {
+            TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService, boolean restoreTrackedRaces) {
         logger.info("Created " + this);
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
         this.notificationService = sailingNotificationService;
@@ -616,15 +628,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             this.sensorFixStore = sensorFixStore == null ? MongoSensorFixStoreFactory.INSTANCE.getMongoGPSFixStore(
                     mongoObjectFactory, domainObjectFactory, serviceFinderFactory) : sensorFixStore;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Exception trying to obtain MongoDB sensor fix store", e);
             throw new RuntimeException(e);
         }
-
         this.configurationMap = new DeviceConfigurationMapImpl();
         this.serviceFinderFactory = serviceFinderFactory;
-
         this.trackedRegattaListener = trackedRegattaListener == null ? EmptyTrackedRegattaListener.INSTANCE : trackedRegattaListener;
-
         sailingServerConfiguration = domainObjectFactory.loadServerConfiguration();
         final Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = loadStoredEvents();
         loadStoredRegattas();
@@ -634,7 +643,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         loadMediaLibary();
         loadStoredDeviceConfigurations();
         loadAllRemoteSailingServersAndSchedulePeriodicEventCacheRefresh();
-
         // Stores all events which run through a data migration 
         // Remark: must be called after loadLinksFromEventsToLeaderboardGroups(), otherwise would loose the Event -> LeaderboardGroup relation
         for (Pair<Event, Boolean> eventAndRequireStoreFlag : loadedEventsWithRequireStoreFlag) {
@@ -642,7 +650,28 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 mongoObjectFactory.storeEvent(eventAndRequireStoreFlag.getA());
             }
         }
-        // TODO bug 2: decide whether to call getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore() or getDomainObjectFactory().loadConnectivityParametersForRacesToRestore() to restore last set of tracked races
+        if (restoreTrackedRaces) {
+            restoreTrackedRaces();
+        } else {
+            getMongoObjectFactory().removeAllConnectivityParametersForRacesToRestore();
+        }
+    }
+
+    private void restoreTrackedRaces() {
+        final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
+        try {
+            getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
+                backgroundExecutor.execute(()->{
+                    try {
+                        addRace(/* addToRegatta==null means "default regatta" */ null, params, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Exception trying to restore race"+params, e);
+                    }
+                });
+            });
+        } catch (MalformedURLException | URISyntaxException e) {
+            logger.log(Level.SEVERE, "Exception trying to obtain connectivity parameters for restoring tracked races", e);
+        }
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -37,6 +38,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -146,14 +148,25 @@ public interface DomainObjectFactory {
     /**
      * Loads all {@link RaceTrackingConnectivityParameters} objects from the database telling how to re-load those races
      * that were {@link MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
-     * marked as to be restored} before the server got re-started. Callers that would like to use the result to re-connect to
-     * those races should take care not to flood servers with requests. Instead, ideally, callers would monitor the
-     * loading {@link TrackedRace#getStatus() status} or the resulting {@link TrackedRace}s (see
-     * {@link RaceTracker#getRaceHandle()}, {@link RaceHandle#getRace(long)}, {@link RaceHandle#getTrackedRegatta()}
-     * and {@link TrackedRegatta#getTrackedRace(RaceDefinition)}.
+     * marked as to be restored} before the server got re-started. Callers that would like to use the result to
+     * re-connect to those races should take care not to flood servers with requests. Instead, ideally, callers would
+     * monitor the loading {@link TrackedRace#getStatus() status} or the resulting {@link TrackedRace}s (see
+     * {@link RaceTracker#getRaceHandle()}, {@link RaceHandle#getRace(long)}, {@link RaceHandle#getTrackedRegatta()} and
+     * {@link TrackedRegatta#getTrackedRace(RaceDefinition)}.
+     * 
+     * @param callback
+     *            invoked for each connectivity params object successfully resolved; this pattern is preferred over
+     *            a non-{@code void} return type because resolving the connectivity parameters objects itself happens
+     *            through a callback pattern that may be triggered asynchronously by the services for handling the
+     *            respective parameter types becoming available only later. For example, during the OSGi startup
+     *            phase, when the {@code RacingEventService} is launched, not all persistence bundles will have run
+     *            their activators; some may even depend on the {@code RacingEventService} and therefore won't start
+     *            their activators before the activator of {@code RacingEventService} has completed. This would
+     *            either result in a {@link NoCorrespondingServiceRegisteredException} or would have to be handled
+     *            by not treating those connectivity parameter objects which defeats the whole purpose of this method.
      * 
      * @see MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      * @see MongoObjectFactory#removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      */
-    Iterable<RaceTrackingConnectivityParameters> loadConnectivityParametersForRacesToRestore() throws MalformedURLException, URISyntaxException;
+    void loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) throws MalformedURLException, URISyntaxException;
 }

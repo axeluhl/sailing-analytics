@@ -54,6 +54,8 @@ public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
 
     private static final String CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME = "persistentcompetitors.clear";
+    
+    private static final String RESTORE_TRACKED_RACES_PROPERTY_NAME = "restore.tracked.races";
 
     private static ExtenderBundleTracker extenderBundleTracker;
 
@@ -62,6 +64,8 @@ public class Activator implements BundleActivator {
     private RacingEventServiceImpl racingEventService;
 
     private final boolean clearPersistentCompetitors;
+    
+    private final boolean restoreTrackedRaces;
 
     private Set<ServiceRegistration<?>> registrations = new HashSet<>();
 
@@ -82,6 +86,8 @@ public class Activator implements BundleActivator {
     public Activator() {
         clearPersistentCompetitors = Boolean
                 .valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, "" + false));
+        restoreTrackedRaces = Boolean
+                .valueOf(System.getProperty(RESTORE_TRACKED_RACES_PROPERTY_NAME, "" + false));
         logger.log(Level.INFO,
                 "setting " + CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME + " to " + clearPersistentCompetitors);
         // there is exactly one instance of the racingEventService in the whole server
@@ -103,7 +109,7 @@ public class Activator implements BundleActivator {
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
-                trackedRegattaListener, notificationService);
+                trackedRegattaListener, notificationService, restoreTrackedRaces);
         notificationService.setRacingEventService(racingEventService);
 
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(

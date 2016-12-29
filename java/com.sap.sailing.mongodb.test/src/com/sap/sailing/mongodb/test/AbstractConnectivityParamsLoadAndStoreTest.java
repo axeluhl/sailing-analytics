@@ -23,7 +23,7 @@ public abstract class AbstractConnectivityParamsLoadAndStoreTest extends Abstrac
     @Before
     public void setUp() {
         serviceFinderFactory = new MockConnectivityParamsServiceFinderFactory();
-        racingEventService = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, serviceFinderFactory);
+        racingEventService = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, serviceFinderFactory, /* restoreTrackedRaces */ false);
         serviceFinderFactory.setRacingEventService(racingEventService);
         mongoObjectFactory = racingEventService.getMongoObjectFactory();
         domainObjectFactory = racingEventService.getDomainObjectFactory();

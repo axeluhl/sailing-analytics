@@ -153,7 +153,7 @@ public interface MongoObjectFactory {
     
     /**
      * Updates the database such that the next call to
-     * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore()} won't return an object equivalent to
+     * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)} won't return an object equivalent to
      * {@code params} anymore; in other words, the race whose connectivity parameters are described by {@code params}
      * will no longer be considered as to be restored.
      * 
@@ -163,7 +163,7 @@ public interface MongoObjectFactory {
     
     /**
      * Updates the database such that the next call to
-     * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore()} will return an object equivalent to
+     * {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)} will return an object equivalent to
      * {@code params}; in other words, the race whose connectivity parameters are described by {@code params} will be
      * considered as to be restored.
      * 
@@ -174,7 +174,7 @@ public interface MongoObjectFactory {
     /**
      * Removes all {@link RaceTrackingConnectivityParameters} objects from those to restore; short for calling
      * {@link #removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)} for all parameter
-     * objects obtained through {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore()}.
+     * objects obtained through {@link DomainObjectFactory#loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameter>)}.
      */
     void removeAllConnectivityParametersForRacesToRestore();
 }
