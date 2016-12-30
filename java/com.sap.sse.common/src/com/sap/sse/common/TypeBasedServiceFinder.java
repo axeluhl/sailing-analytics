@@ -43,7 +43,8 @@ public interface TypeBasedServiceFinder<ServiceType> {
      * found. If the service is not found, instead of throwing a {@link NoCorrespondingServiceRegisteredException},
      * the {@code callback} is recorded by this finder; when at a later point in time a service with {@code type}
      * becomes available, all callbacks recorded this way will be {@link Callback#withService(Object) invoked}
-     * with the service that became available.
+     * with the service that became available. The method returns immediately after recording the callback in
+     * this case.
      */
     void applyServiceWhenAvailable(String type, Callback<ServiceType> callback);
 

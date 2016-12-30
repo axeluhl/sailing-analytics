@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -439,6 +440,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final TrackedRegattaListener trackedRegattaListener;
     
+    private int numberOfTrackedRacesToRestore;
+    
+    private final AtomicInteger numberOfTrackedRacesRestored;
+    
     private transient final ConcurrentHashMap<Leaderboard, ScoreCorrectionListener> scoreCorrectionListenersByLeaderboard;
 
     private transient final ConcurrentHashMap<RaceDefinition, RaceTrackingConnectivityParameters> connectivityParametersByRace;
@@ -569,6 +574,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final WindStore windStore, final SensorFixStore sensorFixStore, TypeBasedServiceFinderFactory serviceFinderFactory,
             TrackedRegattaListener trackedRegattaListener, SailingNotificationService sailingNotificationService, boolean restoreTrackedRaces) {
         logger.info("Created " + this);
+        this.numberOfTrackedRacesRestored = new AtomicInteger();
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
         this.connectivityParametersByRace = new ConcurrentHashMap<>();
         this.notificationService = sailingNotificationService;
@@ -606,15 +612,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         regattaTrackingCache = new ConcurrentHashMap<>();
         regattaTrackingCacheLock = new NamedReentrantReadWriteLock("regattaTrackingCache for " + this, /* fair */false);
         raceTrackersByRegatta = new ConcurrentHashMap<>();
-        raceTrackersByRegattaLock = new NamedReentrantReadWriteLock("raceTrackersByRegatta for " + this, /* fair */
-        false);
+        raceTrackersByRegattaLock = new NamedReentrantReadWriteLock("raceTrackersByRegatta for " + this, /* fair */false);
         raceTrackersByID = new ConcurrentHashMap<>();
         raceTrackersByIDLocks = new ConcurrentHashMap<>();
         raceTrackerCallbacks = new ConcurrentHashMap<>();
         leaderboardGroupsByName = new ConcurrentHashMap<>();
         leaderboardGroupsByID = new ConcurrentHashMap<>();
-        leaderboardGroupsByNameLock = new NamedReentrantReadWriteLock("leaderboardGroupsByName for " + this, /* fair */
-        false);
+        leaderboardGroupsByNameLock = new NamedReentrantReadWriteLock("leaderboardGroupsByName for " + this, /* fair */false);
         leaderboardsByName = new ConcurrentHashMap<String, Leaderboard>();
         leaderboardsByNameLock = new NamedReentrantReadWriteLock("leaderboardsByName for " + this, /* fair */false);
         operationExecutionListeners = new ConcurrentHashMap<>();
@@ -663,10 +667,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private void restoreTrackedRaces() {
         final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
         try {
-            getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
+            numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
                 backgroundExecutor.execute(()->{
                     try {
                         addRace(/* addToRegatta==null means "default regatta" */ null, params, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        numberOfTrackedRacesRestored.incrementAndGet();
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Exception trying to restore race"+params, e);
                     }
@@ -3675,5 +3680,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             LockUtil.unlockAfterRead(raceTrackersByRegattaLock);
         }
 
+    }
+
+    @Override
+    public int getNumberOfTrackedRacesToRestore() {
+        return numberOfTrackedRacesToRestore;
+    }
+
+    @Override
+    public int getNumberOfTrackedRacesRestored() {
+        return numberOfTrackedRacesRestored.get();
     }
 }

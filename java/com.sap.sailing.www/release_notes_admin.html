@@ -83,7 +83,13 @@
 			     When a tracked race is removed from the server then it will not be restored anymore upon the next
 			     server restart with the restore option enabled. When an entire regatta with a number of tracked
 			     races linked into it is removed then the tracked races are removed as well and will not be
-			     restored upon server re-start.
+			     restored upon server re-start.<p>
+			     The restore progress can be monitored using the JConsole or any other JMX monitoring tool. In the
+			     <tt>com.sap.sailing</tt> category you will find the <tt>RacingEventService</tt> object. Among its
+			     attributes there are now the two new ones: <tt>NumberOfTrackedRacesToRestore</tt> and
+			     <tt>NumberOfTrackedRacesRestored</tt>. See the following two screen shots:<p>
+			     <img width="100%" src="images/JConsoleNumberOfTrackedRacesToRestore.png"><p>
+			     <img width="100%" src="images/JConsoleNumberOfTrackedRacesRestored.png">
 			 </li>
                     </ul>
 

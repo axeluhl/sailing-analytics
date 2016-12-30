@@ -639,4 +639,20 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * yet, the given callback will be informed asynchronously on registration of the RaceTracker in question.
      */
     void getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier, Consumer<RaceTracker> callback);
+
+    /**
+     * When restoring tracked races was requested upon creation of this service and after the corresponding restore records
+     * were read from the persistent store, this method returns the number of races to be restored. Otherwise, it returns 0.
+     * 
+     * @see #getNumberOfTrackedRacesRestored()
+     */
+    int getNumberOfTrackedRacesToRestore();
+
+    /**
+     * When restoring tracked races was requested upon creation of this service, this method tells the number of races
+     * whose loading process has already been triggered. Otherwise, it returns 0.
+     * 
+     * @see #getNumberOfTrackedRacesToRestore()
+     */
+    int getNumberOfTrackedRacesRestored();
 }

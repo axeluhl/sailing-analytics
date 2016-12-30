@@ -2285,9 +2285,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     @Override
-    public void loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) throws MalformedURLException, URISyntaxException {
+    public int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) throws MalformedURLException, URISyntaxException {
         final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
+        int count = 0;
         for (final DBObject o : collection.find()) {
+            count++;
             final String type = (String) o.get(TypeBasedServiceFinder.TYPE);
             raceTrackingConnectivityParamsServiceFinder.applyServiceWhenAvailable(type, connectivityParamsPersistenceService -> {
                 final Map<String, Object> map = new HashMap<>();
@@ -2304,5 +2306,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 }
             });
         }
+        return count;
     }
 }

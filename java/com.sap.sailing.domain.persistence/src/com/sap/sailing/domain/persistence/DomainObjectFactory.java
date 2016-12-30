@@ -155,18 +155,22 @@ public interface DomainObjectFactory {
      * {@link TrackedRegatta#getTrackedRace(RaceDefinition)}.
      * 
      * @param callback
-     *            invoked for each connectivity params object successfully resolved; this pattern is preferred over
-     *            a non-{@code void} return type because resolving the connectivity parameters objects itself happens
+     *            invoked for each connectivity params object successfully resolved; this pattern is preferred over a
+     *            non-{@code void} return type because resolving the connectivity parameters objects itself happens
      *            through a callback pattern that may be triggered asynchronously by the services for handling the
-     *            respective parameter types becoming available only later. For example, during the OSGi startup
-     *            phase, when the {@code RacingEventService} is launched, not all persistence bundles will have run
-     *            their activators; some may even depend on the {@code RacingEventService} and therefore won't start
-     *            their activators before the activator of {@code RacingEventService} has completed. This would
-     *            either result in a {@link NoCorrespondingServiceRegisteredException} or would have to be handled
-     *            by not treating those connectivity parameter objects which defeats the whole purpose of this method.
+     *            respective parameter types becoming available only later. For example, during the OSGi startup phase,
+     *            when the {@code RacingEventService} is launched, not all persistence bundles will have run their
+     *            activators; some may even depend on the {@code RacingEventService} and therefore won't start their
+     *            activators before the activator of {@code RacingEventService} has completed. This would either result
+     *            in a {@link NoCorrespondingServiceRegisteredException} or would have to be handled by not treating
+     *            those connectivity parameter objects which defeats the whole purpose of this method.
+     * @return the number of connectivity parameter objects found in the database; callers may use this to understand
+     *         the progress with the {@code callback} invocations of which eventually there should be this many, at
+     *         least if all handlers have ultimately become available.
      * 
      * @see MongoObjectFactory#addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      * @see MongoObjectFactory#removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters)
      */
-    void loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback) throws MalformedURLException, URISyntaxException;
+    int loadConnectivityParametersForRacesToRestore(Consumer<RaceTrackingConnectivityParameters> callback)
+            throws MalformedURLException, URISyntaxException;
 }
