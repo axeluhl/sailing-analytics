@@ -1151,8 +1151,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final Double buoyZoneRadiusInHullLengths = (Double) dbRegatta.get(FieldNames.REGATTA_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS.name()); 
             final Boolean useStartTimeInference = (Boolean) dbRegatta.get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
             final Boolean controlTrackingFromStartAndFinishTimes = (Boolean) dbRegatta.get(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name());
+            Boolean canBoatsOfCompetitorsChangePerRace = (Boolean) dbRegatta.get(FieldNames.REGATTA_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE.name());
+            // for backward compatibility
+            if(canBoatsOfCompetitorsChangePerRace == null) {
+                canBoatsOfCompetitorsChangePerRace = true;
+            }
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
-            result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass, startDate, endDate, series, /* persistent */true,
+            result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass, canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
                     loadScoringScheme(dbRegatta), id, courseArea, buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS : buoyZoneRadiusInHullLengths, useStartTimeInference == null ? true
                             : useStartTimeInference, controlTrackingFromStartAndFinishTimes == null ? false : controlTrackingFromStartAndFinishTimes,
                                     rankingMetricConstructor);

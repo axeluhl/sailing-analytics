@@ -61,7 +61,8 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
             boolean persistent, ScoringScheme scoringScheme, CourseArea courseArea) {
         List<Series> series = createSeriesForTestRegatta();
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), RegattaImpl.getDefaultName(regattaBaseName,
-                boatClass == null ? null : boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, series, persistent, scoringScheme, "123",
+                boatClass == null ? null : boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, series, persistent, scoringScheme, "123",
                 courseArea, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         return regatta;
     }

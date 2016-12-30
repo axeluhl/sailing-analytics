@@ -60,7 +60,12 @@ public abstract class BaseRegattaLikeImpl implements IsRegattaLike {
     public void removeListener(RegattaLikeListener listener) {
         listeners.remove(listener);
     }
-    
+
+    @Override
+    public boolean canBoatsOfCompetitorsChangePerRace() {
+        return false;
+    }
+
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<>();

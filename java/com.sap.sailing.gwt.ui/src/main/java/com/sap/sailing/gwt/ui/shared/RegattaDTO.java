@@ -36,6 +36,7 @@ public class RegattaDTO extends NamedDTO {
     public DeviceConfigurationDTO.RegattaConfigurationDTO configuration;
     public boolean useStartTimeInference = true;
     public boolean controlTrackingFromStartAndFinishTimes = false;
+    public boolean canBoatsOfCompetitorsChangePerRace = true;
     public RankingMetrics rankingMetricType;
     public Double buoyZoneRadiusInHullLengths;
     
@@ -68,6 +69,7 @@ public class RegattaDTO extends NamedDTO {
         this.configuration = other.configuration;
         this.useStartTimeInference = other.useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
+        this.canBoatsOfCompetitorsChangePerRace = other.canBoatsOfCompetitorsChangePerRace;
         this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;
     }
     

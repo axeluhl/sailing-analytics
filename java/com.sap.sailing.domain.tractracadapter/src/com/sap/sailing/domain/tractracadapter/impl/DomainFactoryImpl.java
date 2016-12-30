@@ -369,7 +369,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 // Then, there is no way but restart the server to get rid of this stale cache entry here.
                 if (result == null) {
                     result = new RegattaImpl(raceLogStore, regattaLogStore, RegattaImpl.getDefaultName(
-                            defaultRegattaNameAndBoatClass.getA(), boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null,
+                            defaultRegattaNameAndBoatClass.getA(), boatClass.getName()), boatClass, 
+                            /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
                             trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
                             getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null);

@@ -103,7 +103,8 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
         // 1. Install some race column on master...
         RegattaCreationParametersDTO regattaCreationParams = new RegattaCreationParametersDTO(seriesCreationParameters);
         AddSpecificRegatta addRegattaOperation = new AddSpecificRegatta(regattaName, boatClassName, 
-                /*startDate*/ null, /*endDate*/ null, /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
+                /* regatta ID */ UUID.randomUUID(), regattaCreationParams, /* persistent */ true,
                 new LowPoint(), /* default course area ID */ UUID.randomUUID(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN);
         return master.apply(addRegattaOperation);

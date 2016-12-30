@@ -159,7 +159,8 @@ public abstract class TrackBasedTest {
             Map<Competitor, Boat> competitorsAndBoats, TimePoint timePointForFixes, boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
         BoatClassImpl boatClass = new BoatClassImpl(boatClassName, /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
+                RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
         TrackedRegatta trackedRegatta = new DynamicTrackedRegattaImpl(regatta);
         List<Waypoint> waypoints = new ArrayList<Waypoint>();
@@ -209,7 +210,8 @@ public abstract class TrackBasedTest {
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
         Series series = new SeriesImpl("series name", isMedal, /* isFleetsCanRunInParallel */ true, regattaFleets, raceColumnNames, trackedRegattaRegistry);
         Iterable<? extends Series> regattaSeries = Collections.singleton(series);
-        return new RegattaImpl(regattaName, boatClass, startDate, endDate, regattaSeries, persistent, scoringScheme, regatteId , courseArea, OneDesignRankingMetric::new);
+        return new RegattaImpl(regattaName, boatClass, /* canBoatsOfCompetitorsChangePerRace */ true, 
+                startDate, endDate, regattaSeries, persistent, scoringScheme, regatteId , courseArea, OneDesignRankingMetric::new);
     }
 
     public static void assignRacesToRegattaLeaderboardColumns(RegattaLeaderboard leaderboard, Collection<RaceIdentifier> raceIdentifiers) {

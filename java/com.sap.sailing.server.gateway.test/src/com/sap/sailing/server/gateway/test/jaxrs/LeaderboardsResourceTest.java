@@ -57,7 +57,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
                 raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
         regatta = racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaBaseName, boatClassName), boatClassName, 
-                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series, /*persistent*/ true,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series, /*persistent*/ true,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                 /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);

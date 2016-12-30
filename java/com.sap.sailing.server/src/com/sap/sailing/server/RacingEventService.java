@@ -313,7 +313,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param series the series must not have any {@link RaceColumn}s yet
      * @param controlTrackingFromStartAndFinishTimes TODO
      */
-    Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
+    Regatta createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
     
@@ -463,7 +463,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         the call
      */
     Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
-            TimePoint startDate, TimePoint endDate, Serializable id, 
+            boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id, 
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);

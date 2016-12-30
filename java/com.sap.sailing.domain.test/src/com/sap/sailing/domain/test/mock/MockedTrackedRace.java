@@ -330,6 +330,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
+                    public boolean canBoatsOfCompetitorsChangePerRace() {
+                        return false;
+                    }
+
+                    @Override
                     public void addRace(RaceDefinition race) {
                     }
 

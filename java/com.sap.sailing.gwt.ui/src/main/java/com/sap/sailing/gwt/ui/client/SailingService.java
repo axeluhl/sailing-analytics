@@ -217,7 +217,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void moveLeaderboardColumnDown(String leaderboardName, String columnName);
     
-    RegattaDTO createRegatta(String regattaName, String boatClassName, Date startDate, Date endDate,
+    RegattaDTO createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType);

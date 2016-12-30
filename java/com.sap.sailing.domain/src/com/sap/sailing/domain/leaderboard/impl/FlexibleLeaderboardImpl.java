@@ -366,4 +366,9 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     protected LeaderboardType getLeaderboardType() {
         return LeaderboardType.FlexibleLeaderboard;
     }
+
+    @Override
+    public boolean canBoatsOfCompetitorsChangePerRace() {
+        return false;
+    }
 }

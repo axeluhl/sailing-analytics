@@ -109,7 +109,8 @@ public class SimpleDomainFactoryTest {
     public void testCourseConfigForMark() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, "TestEvent",
-                /* boatClass */ null, /*startDate*/ null, /*endDate*/ null, new RacingEventServiceImpl(),
+                /* boatClass */ null, /* canBoatsOfCompetitorsChangePerRace */ true, 
+                /*startDate*/ null, /*endDate*/ null, new RacingEventServiceImpl(),
                 com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
         Race race = new RaceImpl("1234", "R1", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();
@@ -135,7 +136,8 @@ public class SimpleDomainFactoryTest {
     public void testCourseConfigForGate() throws PatchFailedException {
         DomainFactory domainFactory = DomainFactory.INSTANCE;
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                "TestEvent", /* boatClass */ null, /*startDate*/ null, /*endDate*/ null, new RacingEventServiceImpl(),
+                "TestEvent", /* boatClass */ null, /* canBoatsOfCompetitorsChangePerRace */ true, 
+                /*startDate*/ null, /*endDate*/ null, new RacingEventServiceImpl(),
                 com.sap.sailing.domain.base.DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null);
         Race race = new RaceImpl("1234", "R1", "Race 1234");
         Iterable<Competitor> competitors = Collections.emptyList();

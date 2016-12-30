@@ -100,7 +100,8 @@ public class StructureImporter {
             final TimePoint endDate = null; // TODO can regatta end time be inferred from XRR document?
             RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
-                    baseDomainFactory.getOrCreateBoatClass(result.getA().getBoatClass()), startDate, endDate, getSeries(buildStructure), false,
+                    baseDomainFactory.getOrCreateBoatClass(result.getA().getBoatClass()), 
+                    /* canBoatsOfCompetitorsChangePerRace */ true, startDate, endDate, getSeries(buildStructure), false,
                     this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null, OneDesignRankingMetric::new);
             addSpecificRegattas.add(regatta);
         }
