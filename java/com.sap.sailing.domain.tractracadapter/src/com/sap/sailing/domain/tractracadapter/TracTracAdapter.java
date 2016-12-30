@@ -80,27 +80,6 @@ public interface TracTracAdapter {
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
-     * Defines the regatta and for each race listed in the JSON document that is not already being tracked by this
-     * service creates a {@link TracTracRaceTracker} that starts tracking the respective race. The
-     * {@link RaceDefinition}s obtained this way are all grouped into the single {@link Regatta} produced for the event
-     * listed in the JSON response. Note that the many race trackers will have their TracTrac <code>Event</code> each,
-     * all with the same name, meaning the same event but being distinct.
-     * 
-     * @param jsonURL
-     *            URL of a JSON response that contains an "event" object telling the event's name and ID, as well as a
-     *            JSON array named "races" which tells ID and replay URL for the race. From those replay URLs the
-     *            paramURL for the Java client can be derived.
-     * @param timeoutInMilliseconds
-     *            if a race definition is not received for a race of this event within this time, the race tracker for
-     *            that race is stopped; use -1 to wait forever
-     */
-    Regatta addRegatta(TrackerManager trackerManager, URL jsonURL, URI liveURI, URI storedURI,
-            URI courseDesignUpdateURI, WindStore windStore, long timeoutInMilliseconds, String tracTracUsername,
-            String tracTracPassword, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
-            throws MalformedURLException, FileNotFoundException, URISyntaxException, IOException, ParseException,
-            org.json.simple.parser.ParseException, Exception;
-
-    /**
      * For the JSON URL of an account / event, lists the paramURLs that can be used for
      * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} calls to individually start tracking races of this
      * event, rather than tracking <em>all</em> races in the event which is hardly ever useful. The returned pair's

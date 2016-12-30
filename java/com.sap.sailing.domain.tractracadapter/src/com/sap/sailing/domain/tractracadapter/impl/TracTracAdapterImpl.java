@@ -8,14 +8,12 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackerManager;
-import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.JSONService;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
@@ -83,21 +81,6 @@ public class TracTracAdapterImpl implements TracTracAdapter {
         JSONService jsonService = getTracTracDomainFactory().parseJSONURLWithRaceRecords(jsonURL, loadClientParams);
         logger.info("OK retrieving TracTrac race records from " + jsonURL);
         return new Util.Pair<String, List<RaceRecord>>(jsonService.getEventName(), jsonService.getRaceRecords());
-    }
-
-    @Override
-    public Regatta addRegatta(TrackerManager trackerManager, URL jsonURL, URI liveURI, URI storedURI,
-            URI courseDesignUpdateURI, WindStore windStore, long timeoutInMilliseconds, String tracTracUsername,
-            String tracTracPassword, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore) throws Exception {
-        JSONService jsonService = getTracTracDomainFactory().parseJSONURLWithRaceRecords(jsonURL, true);
-        Regatta regatta = null;
-        for (RaceRecord rr : jsonService.getRaceRecords()) {
-            URL paramURL = rr.getParamURL();
-            regatta = addTracTracRace(trackerManager, paramURL, liveURI, storedURI, courseDesignUpdateURI,
-                    raceLogStore, regattaLogStore, timeoutInMilliseconds, tracTracUsername, "", "",
-                    tracTracPassword).getRegatta();
-        }
-        return regatta;
     }
 
     @Override
