@@ -1463,9 +1463,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 } else {
                     cacheAndReplicateDefaultRegatta(tracker.getRegatta());
                 }
-                // TODO bug 2: we need to link the params to the TrackedRace / RaceDefinition such that when the RaceDefinition is removed using removeRace(Regatta, RaceDefinition) then we know which params to remove from the restore store again
                 getMongoObjectFactory().addConnectivityParametersForRaceToRestore(params);
+                // ensure that as soon as the RaceDefinition becomes available, the connectivity params are linked to it in connectivityParametersByRace
                 tracker.add((RaceTracker t) -> rememberConnectivityParametersForRace(t));
+                if (params.isTrackWind()) {
+                    // start wind tracking if requested, as soon as the RaceDefinition becomes available
+                    tracker.add((RaceTracker t) -> startTrackingWind(regattaWithName, t.getRace(), params.isCorrectWindDirectionByMagneticDeclination()));
+                }
             } else {
                 logger.warning("Race tracker with ID "+trackerID+" already found; not tracking twice to avoid race duplication");
                 WindStore existingTrackersWindStore = tracker.getWindStore();

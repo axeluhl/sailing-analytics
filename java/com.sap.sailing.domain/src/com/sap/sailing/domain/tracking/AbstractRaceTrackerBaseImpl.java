@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tracking;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,11 +38,6 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
 
     /**
      * Template stop method for subclasses.
-     * 
-     * @param preemptive
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws InterruptedException
      */
     protected void onStop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
     }
@@ -58,21 +54,37 @@ public abstract class AbstractRaceTrackerBaseImpl implements RaceTracker {
 
     @Override
     public void add(RaceCreationListener listener) {
-        raceCreationListeners.add(listener);
-        final RaceDefinition race = getRace();
-        if (race != null) {
+        final RaceDefinition race;
+        synchronized (raceCreationListeners) {
+            race = getRace();
+            if (race == null) {
+                raceCreationListeners.add(listener);
+            }
+        }
+        if (race != null) { // listener hasn't been added above; notify immediately
             listener.onRaceCreated(this);
-            remove(listener);
         }
     }
 
     @Override
     public void remove(RaceCreationListener listener) {
-        raceCreationListeners.remove(listener);
+        synchronized (raceCreationListeners) {
+            raceCreationListeners.remove(listener);
+        }
     }
     
+    /**
+     * Notifies all {@link RaceCreationListener}s registered and removes them. Must be called
+     * after {@link #getRace()} has started returning a valid, non-{@code null} race.
+     */
     protected void notifyRaceCreationListeners() {
-        raceCreationListeners.forEach(l->l.onRaceCreated(this));
+        assert getRace() != null;
+        final Set<RaceCreationListener> listenersToNotify;
+        synchronized (raceCreationListeners) {
+            listenersToNotify = new HashSet<>(raceCreationListeners);
+            raceCreationListeners.clear();
+        }
+        listenersToNotify.forEach(l->l.onRaceCreated(this));
     }
 
     @Override

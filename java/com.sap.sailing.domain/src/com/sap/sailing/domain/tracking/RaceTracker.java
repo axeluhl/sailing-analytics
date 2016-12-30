@@ -121,6 +121,13 @@ public interface RaceTracker {
      */
     void remove(RaceTracker.Listener listener);
     
+    /**
+     * Adds a listener that will be {@link RaceCreationListener#onRaceCreated(RaceTracker) notified} when the
+     * {@link #getRace()} method starts returning a valid, non-{@code null} race. The listener will be notified
+     * immediately if {@link #getRace()} already yields a valid {@link RaceDefinition} when calling this method so
+     * that the listener will be notified at least once. The listener will automatically be removed after it has been
+     * notified. 
+     */
     void add(RaceTracker.RaceCreationListener listener);
     
     void remove(RaceTracker.RaceCreationListener listener);

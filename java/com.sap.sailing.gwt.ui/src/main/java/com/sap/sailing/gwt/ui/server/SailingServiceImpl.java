@@ -283,7 +283,6 @@ import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
-import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -1131,7 +1130,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } else {
                 effectiveStoredURI = storedURI;
             }
-            final RaceHandle raceHandle = getTracTracAdapter().addTracTracRace(getService(), regattaToAddTo,
+            getTracTracAdapter().addTracTracRace(getService(), regattaToAddTo,
                     record.getParamURL(), effectiveLiveURI == null ? null : new URI(effectiveLiveURI),
                     new URI(effectiveStoredURI), new URI(courseDesignUpdateURI),
                     new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
@@ -1140,18 +1139,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, tracTracUsername,
                     tracTracPassword, record.getRaceStatus(), record.getRaceVisibility(), trackWind,
                     correctWindByDeclination);
-            if (trackWind) {
-                new Thread("Wind tracking starter for race " + record.getEventName() + "/" + record.getName()) {
-                    public void run() {
-                        try {
-                            startTrackingWind(raceHandle, correctWindByDeclination,
-                                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }.start();
-            }
         }
     }
 
@@ -1197,25 +1184,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeAndUntrackRaces(Iterable<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
         for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
             getService().apply(new RemoveAndUntrackRace(regattaAndRaceIdentifier));
-        }
-    }
-
-    /**
-     * @param timeoutInMilliseconds
-     *            eventually passed to {@link RaceHandle#getRace(long)}. If the race definition can be obtained within
-     *            this timeout, wind for the race will be tracked; otherwise, the method returns without taking any
-     *            effect.
-     */
-    private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) {
-        Regatta regatta = raceHandle.getRegatta();
-        if (regatta != null) {
-            RaceDefinition race = raceHandle.getRace(timeoutInMilliseconds);
-            if (race != null) {
-                getService().startTrackingWind(regatta, race, correctByDeclination);
-            } else {
-                log("RaceDefinition wasn't received within " + timeoutInMilliseconds + "ms for a race in regatta "
-                        + regatta.getName() + ". Aborting wait; no wind tracking for this race.");
-            }
         }
     }
 
@@ -2817,22 +2785,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             	startList = getSwissTimingAdapter().readStartListForRace(rr.raceId, regattaResults);
             }
             // now read the entry list for the race from the result
-            final RaceHandle raceHandle = getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo,
+            getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo,
                     rr.raceId, rr.getName(), raceDescription, boatClass, hostname, port, startList,
                     getRaceLogStore(), getRegattaLogStore(),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, useInternalMarkPassingAlgorithm, trackWind, correctWindByDeclination);
-            if (trackWind) {
-                new Thread("Wind tracking starter for race " + rr.raceId + "/" + rr.getName()) {
-                    public void run() {
-                        try {
-                            startTrackingWind(raceHandle, correctWindByDeclination,
-                                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }.start();
-            }
         }
     }
     
@@ -5744,19 +5700,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
-        final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination);
-        if (raceHandle != null && trackWind) {
-            new Thread("Wind tracking starter for race " + leaderboardName + "/" + raceColumnName + "/" + fleetName) {
-                public void run() {
-                    try {
-                        startTrackingWind(raceHandle, correctWindByDeclination,
-                                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }.start();
-        }
+        getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination);
     }
     
     @Override
