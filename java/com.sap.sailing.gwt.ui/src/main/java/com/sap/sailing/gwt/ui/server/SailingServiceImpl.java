@@ -419,7 +419,6 @@ import com.sap.sailing.server.operationaltransformation.SetRaceIsKnownToStartUpw
 import com.sap.sailing.server.operationaltransformation.SetSuppressedFlagForCompetitorInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.SetWindSourcesToExclude;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
-import com.sap.sailing.server.operationaltransformation.StopTrackingRegatta;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitor;
 import com.sap.sailing.server.operationaltransformation.UpdateCompetitorDisplayNameInLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
@@ -1160,11 +1159,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 courseDesignUpdateURI, tracTracUsername, tracTracPassword));
     }
 
-    @Override
-    public void stopTrackingEvent(RegattaIdentifier regattaIdentifier) throws Exception {
-        getService().apply(new StopTrackingRegatta(regattaIdentifier));
-    }
-
     private RaceDefinition getRaceByName(Regatta regatta, String raceName) {
         if (regatta != null) {
             return regatta.getRaceByName(raceName);
@@ -1496,12 +1490,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public boolean getPolarResults(RegattaAndRaceIdentifier raceIdentifier) {
         final boolean result;
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        if (trackedRace == null) {
+        final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        final PolarDataService polarData = getService().getPolarDataService();
+        if (trackedRace == null || polarData == null) {
             result = false;
         } else {
             BoatClass boatClass = trackedRace.getRace().getBoatClass();
-            PolarDataService polarData = getService().getPolarDataService();
             PolarDiagram polarDiagram;
             try {
                 polarDiagram = new PolarDiagramGPS(boatClass, polarData);
@@ -1511,7 +1505,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result = polarDiagram != null;
         }
         return result;
-            }
+    }
 
     @Override
     public SimulatorResultsDTO getSimulatorResults(LegIdentifier legIdentifier) {
@@ -2829,7 +2823,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     boatClassName = null;
                 }
                 getSwissTimingReplayService().loadRaceData(regattaIdentifier, replayRaceDTO.link, replayRaceDTO.getName(),
-                        replayRaceDTO.race_id, replayRaceDTO.rsc, boatClassName, getService(), getService(), useInternalMarkPassingAlgorithm, getRaceLogStore(), getRegattaLogStore());
+                        replayRaceDTO.race_id, boatClassName, getService(), getService(), useInternalMarkPassingAlgorithm, getRaceLogStore(), getRegattaLogStore());
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load SwissTimingReplay race " + replayRaceDTO, e);
             }

@@ -1468,7 +1468,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 tracker.add((RaceTracker t) -> rememberConnectivityParametersForRace(t));
                 if (params.isTrackWind()) {
                     // start wind tracking if requested, as soon as the RaceDefinition becomes available
-                    tracker.add((RaceTracker t) -> startTrackingWind(regattaWithName, t.getRace(), params.isCorrectWindDirectionByMagneticDeclination()));
+                    tracker.add((RaceTracker t) ->
+                        new Thread(()->startTrackingWind(regattaWithName, t.getRace(), params.isCorrectWindDirectionByMagneticDeclination()),
+                                   "Starting wind trackers for race "+t.getRace()).start());
                 }
             } else {
                 logger.warning("Race tracker with ID "+trackerID+" already found; not tracking twice to avoid race duplication");
@@ -2149,7 +2151,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logger.warning("Didn't find any trackers for regatta " + regatta);
         }
         stopTrackingWind(regatta, race);
-        // TODO bug 2: update the "restore" handle for race in DB such that when restoring, no wind tracker will be requested for race
+        final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
+        // update the "restore" handle for race in DB such that when restoring, no wind tracker will be requested for race
+        if (connectivityParams != null) {
+            connectivityParams.setTrackWind(false);
+            getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
+        } else {
+            logger.warning("Would have expected to find connectivity params for race "+race+" but didn't");
+        }
         // if the last tracked race was removed, confirm that tracking for the entire regatta has stopped
         if (trackerSet == null || trackerSet.isEmpty()) {
             stopTracking(regatta);
@@ -2360,13 +2369,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
             if (windTracker != null) {
                 windTracker.stop();
-                final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
-                if (connectivityParams != null) {
-                    connectivityParams.setTrackWind(false);
-                    getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
-                } else {
-                    logger.warning("Would have expected to find connectivity params for race "+race+" but didn't");
-                }
             }
         }
     }
@@ -3541,7 +3543,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     Iterable<DynamicTrackedRace> trackedRaces = trackedRegatta.getTrackedRaces();
                     for (TrackedRace trackedRace : trackedRaces) {
                         trackedRace.setPolarDataService(service);
-                        service.insertExistingFixes(trackedRace);
+                        if (service != null) {
+                            service.insertExistingFixes(trackedRace);
+                        }
                     }
                 } catch (Throwable e) {
                     logger.log(Level.SEVERE, "Error reconstructing the polars for tracked races", e);
@@ -3554,9 +3558,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     
     public void unsetPolarDataService(PolarDataService service) {
         if (polarDataService == service) {
-            polarDataService.unregisterDomainFactory(baseDomainFactory);
             polarDataService = null;
-            setPolarDataService(null);
+            setPolarDataServiceOnAllTrackedRaces(null);
         }
     }
 

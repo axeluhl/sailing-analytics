@@ -139,8 +139,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception;
 
-    void stopTrackingEvent(RegattaIdentifier eventIdentifier) throws Exception;
-
     void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking) throws Exception;
     
     void removeAndUntrackRaces(Iterable<RegattaAndRaceIdentifier> regattaNamesAndRaceNames);

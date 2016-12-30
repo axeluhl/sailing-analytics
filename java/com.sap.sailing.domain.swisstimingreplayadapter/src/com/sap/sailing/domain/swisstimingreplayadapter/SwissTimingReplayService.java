@@ -38,9 +38,6 @@ public interface SwissTimingReplayService {
      * @param raceName TODO
      * @param raceID
      *            the SwissTiming ID for the race
-     * @param regattaName
-     *            only required if {@code regattaToAddTo} is {@code null}; used for the retrieval/creation of a default
-     *            regatta
      * @param trackerManager TODO
      * @param useInternalMarkPassingAlgorithm
      *            use our own instead of the SwissTiming-provided mark rounding / split times
@@ -51,8 +48,8 @@ public interface SwissTimingReplayService {
      *            regatta
      */
     void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String raceName, String raceID,
-            String regattaName, String boatClassName, TrackerManager trackerManager,
-            TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
+            String boatClassName, TrackerManager trackerManager, TrackedRegattaRegistry trackedRegattaRegistry,
+            boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**

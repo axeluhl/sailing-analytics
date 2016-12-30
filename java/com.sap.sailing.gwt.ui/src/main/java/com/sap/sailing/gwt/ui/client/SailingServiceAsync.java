@@ -158,8 +158,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword, AsyncCallback<Void> callback);
 
-    void stopTrackingEvent(RegattaIdentifier eventIdentifier, AsyncCallback<Void> callback);
-
     void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking, AsyncCallback<Void> asyncCallback);
 
     /**

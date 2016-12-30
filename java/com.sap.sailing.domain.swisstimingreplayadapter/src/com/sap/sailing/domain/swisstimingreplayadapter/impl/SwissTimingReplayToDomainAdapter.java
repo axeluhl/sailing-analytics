@@ -85,11 +85,11 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     /**
      * Can be waited on; additions are {@link Object#notifyAll() notified}.
      */
-    private final Map<String, RaceDefinition> racePerRaceID;
+    private final Map<String, RaceDefinition> racePerRaceIdForRaceDefinition;
     private final Map<String, DynamicTrackedRace> trackedRacePerRaceID;
 
     /**
-     * The last race ID received from {@link #raceID(String)}. Used as key into {@link #racePerRaceID} and
+     * The last race ID received from {@link #raceID(String)}. Used as key into {@link #racePerRaceIdForRaceDefinition} and
      * {@link #trackedRacePerRaceID} for storing data from subsequent messages.
      */
     private String currentRaceID;
@@ -198,7 +198,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, regattaLogStore,
                 raceIdForRaceDefinition, boatClass, trackedRegattaRegistry) : effectiveRegatta;
         this.trackedRegattaRegistry = trackedRegattaRegistry;
-        racePerRaceID = new HashMap<>();
+        racePerRaceIdForRaceDefinition = new HashMap<>();
         trackedRacePerRaceID = new HashMap<>();
         bestStartTimePerRaceID = new HashMap<>();
         raceTimePerRaceID = new HashMap<>();
@@ -370,7 +370,7 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
 
     @Override
     public void trackersCount(short trackersCount) {
-        RaceDefinition race = racePerRaceID.get(currentRaceID);
+        RaceDefinition race = racePerRaceIdForRaceDefinition.get(raceIdForRaceDefinition);
         if (race == null) {
             createRace();
         } else {
@@ -391,9 +391,9 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     private void createRace() {
         RaceDefinition race = domainFactory.createRaceDefinition(regatta,
                 currentRaceID, competitorsPerRaceID.get(currentRaceID), currentCourseDefinition, raceName, raceIdForRaceDefinition);
-        synchronized (racePerRaceID) {
-            racePerRaceID.put(currentRaceID, race);
-            racePerRaceID.notifyAll();
+        synchronized (racePerRaceIdForRaceDefinition) {
+            racePerRaceIdForRaceDefinition.put(raceIdForRaceDefinition, race);
+            racePerRaceIdForRaceDefinition.notifyAll();
         }
         DynamicTrackedRace trackedRace = getTrackedRegatta().
                 createTrackedRace(race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
@@ -417,34 +417,34 @@ public class SwissTimingReplayToDomainAdapter extends SwissTimingReplayAdapter i
     }
     
     /**
-     * Waits synchronously until a race with ID {@code raceID} was added to {@link #racePerRaceID}.
+     * Waits synchronously until a race with ID {@code raceID} was added to {@link #racePerRaceIdForRaceDefinition}.
      */
     public RaceDefinition getRaceDefinition(String raceID) throws InterruptedException {
         return getRaceDefinition(raceID, 0);
     }
 
     /**
-     * Waits synchronously until a race with ID {@code raceID} was added to {@link #racePerRaceID}
+     * Waits synchronously until a race with ID {@code raceID} was added to {@link #racePerRaceIdForRaceDefinition}
      * 
      * @param timeoutInMillis
-     *            if 0, waits until a race for {@code raceID} was added to {@link #racePerRaceID}; otherwise the call
+     *            if 0, waits until a race for {@code raceID} was added to {@link #racePerRaceIdForRaceDefinition}; otherwise the call
      *            returns after so many milliseconds at the latest, even if no race with that ID was added, in which
      *            case the method returns {@code null}
      */
-    public RaceDefinition getRaceDefinition(String raceID, long timeoutInMillis) throws InterruptedException {
+    public RaceDefinition getRaceDefinition(String raceIdForRaceDefinition, long timeoutInMillis) throws InterruptedException {
         final RaceDefinition result;
         long targetTime = 0;
         if (timeoutInMillis != 0) {
             targetTime = System.currentTimeMillis() + timeoutInMillis;
         }
-        synchronized (racePerRaceID) {
-            while (!racePerRaceID.containsKey(raceID)) {
-                racePerRaceID.wait(timeoutInMillis == 0 ? 0 : Math.max(1, targetTime-System.currentTimeMillis()));
+        synchronized (racePerRaceIdForRaceDefinition) {
+            while (!racePerRaceIdForRaceDefinition.containsKey(raceIdForRaceDefinition)) {
+                racePerRaceIdForRaceDefinition.wait(timeoutInMillis == 0 ? 0 : Math.max(1, targetTime-System.currentTimeMillis()));
                 if (timeoutInMillis != 0 && System.currentTimeMillis() > targetTime) {
                     break; // if a real timeout has been specified, don't wait again
                 }
             }
-            result = racePerRaceID.get(raceID);
+            result = racePerRaceIdForRaceDefinition.get(raceIdForRaceDefinition);
         }
         return result;
     }
