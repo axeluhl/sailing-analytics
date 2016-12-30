@@ -23,7 +23,7 @@ import com.sap.sailing.domain.swisstimingadapter.impl.CrewMemberImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.StartListImpl;
 import com.sap.sailing.domain.swisstimingadapter.impl.SwissTimingTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**
@@ -36,7 +36,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
  * @author Axel Uhl (d043530)
  *
  */
-public class SwissTimingConnectivityParamsHandler implements RaceTrackingConnectivityParametersHandler {
+public class SwissTimingConnectivityParamsHandler extends AbstractRaceTrackingConnectivityParametersHandler {
     private static final String CREW_MEMBER_POSITION = "crewMemberPosition";
     private static final String CREW_MEMBER_NATIONALITY = "crewMemberNationality";
     private static final String CREW_MEMBER_NAME = "crewMemberName";
@@ -78,6 +78,7 @@ public class SwissTimingConnectivityParamsHandler implements RaceTrackingConnect
         result.put(START_LIST, createStartListDBObject(stParams));
         result.put(DELAY_TO_LIVE_IN_MILLIS, stParams.getDelayToLiveInMillis());
         result.put(USE_INTERNAL_MARK_PASSING_ALGORITHM, stParams.isUseInternalMarkPassingAlgorithm());
+        addWindTrackingParameters(stParams, result);
         return result;
     }
 
@@ -174,7 +175,7 @@ public class SwissTimingConnectivityParamsHandler implements RaceTrackingConnect
                 map.get(START_LIST) == null ? null : createStartListFromDBObject((String) map.get(RACE_ID), (BasicDBList) map.get(START_LIST)),
                 ((Number) map.get(DELAY_TO_LIVE_IN_MILLIS)).longValue(),
                 swissTimingFactory, domainFactory, raceLogStore, regattaLogStore,
-                (boolean) map.get(USE_INTERNAL_MARK_PASSING_ALGORITHM));
+                (boolean) map.get(USE_INTERNAL_MARK_PASSING_ALGORITHM), isTrackWind(map), isCorrectWindDirectionByMagneticDeclination(map));
     }
 
     @Override

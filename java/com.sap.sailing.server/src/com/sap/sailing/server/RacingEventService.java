@@ -68,11 +68,13 @@ import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sse.common.TimePoint;
@@ -191,6 +193,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination);
 
+    /**
+     * If a {@link WindTracker} exists for {@code race}, it is stopped and the {@link RaceTrackingConnectivityParameters}
+     * through which the {@code race} was created are updated to not track wind when restoring that race upon a server
+     * restart.
+     */
     void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException;
 
     /**

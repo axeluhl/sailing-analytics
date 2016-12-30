@@ -2356,6 +2356,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             WindTracker windTracker = windTrackerFactory.getExistingWindTracker(race);
             if (windTracker != null) {
                 windTracker.stop();
+                final RaceTrackingConnectivityParameters connectivityParams = connectivityParametersByRace.get(race);
+                if (connectivityParams != null) {
+                    connectivityParams.setTrackWind(false);
+                    getMongoObjectFactory().addConnectivityParametersForRaceToRestore(connectivityParams);
+                } else {
+                    logger.warning("Would have expected to find connectivity params for race "+race+" but didn't");
+                }
             }
         }
     }

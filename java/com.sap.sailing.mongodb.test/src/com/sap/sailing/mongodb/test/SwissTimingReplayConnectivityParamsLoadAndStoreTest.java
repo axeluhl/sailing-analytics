@@ -51,7 +51,7 @@ public class SwissTimingReplayConnectivityParamsLoadAndStoreTest extends Abstrac
         assertEquals(raceID, stParamsReadFromDB.getRaceID());
         assertEquals(raceName, stParamsReadFromDB.getRaceName());
         assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
-        assertEquals(useInternalMarkPassingAlgorithm, stParams.isUseInternalMarkPassingAlgorithm());
+        assertEquals(useInternalMarkPassingAlgorithm, stParamsReadFromDB.isUseInternalMarkPassingAlgorithm());
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();

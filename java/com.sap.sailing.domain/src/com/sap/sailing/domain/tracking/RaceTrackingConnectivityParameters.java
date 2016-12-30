@@ -9,7 +9,12 @@ import com.sap.sailing.domain.base.Series;
  * Different tracking providers require different sets of arguments to start tracking a race.
  * This interface represents the functionality required to start tracking a race, agnostic of the
  * particular parameters and ways of launching the connector. Use {@link #createRaceTracker()} to
- * create the tracker that starts tracking the race identified by these tracking parameters.
+ * create the tracker that starts tracking the race identified by these tracking parameters.<p>
+ * 
+ * The parameters also tell whether wind tracking shall be activated for this race (see {@link #isTrackWind()}).
+ * This property can be {@link #setTrackWind(boolean) updated}, making sense in case tracking a live race
+ * is stopped in a running server, stopping the wind tracker and therefore not requiring wind tracking
+ * to be activated anymore when the race is restored during server restart.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -49,4 +54,10 @@ public interface RaceTrackingConnectivityParameters {
      * parameters in a type-specific way
      */
     public String getTypeIdentifier();
+
+    boolean isTrackWind();
+    
+    void setTrackWind(boolean trackWind);
+    
+    boolean isCorrectWindDirectionByMagneticDeclination();
 }

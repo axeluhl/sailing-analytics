@@ -11,16 +11,16 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
-public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConnectivityParameters {
+public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTrackingConnectivityParameters {
     public static final String TYPE = "TRAC_TRAC";
     
     private final URL paramURL;
@@ -44,8 +44,8 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace,  boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             DomainFactory domainFactory, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility) {
-        super();
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination) {
+        super(trackWind, correctWindDirectionByMagneticDeclination);
         this.paramURL = paramURL;
         this.liveURI = liveURI;
         this.storedURI = storedURI;

@@ -10,7 +10,7 @@ import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
 /**
@@ -23,7 +23,7 @@ import com.sap.sse.common.TypeBasedServiceFinder;
  * @author Axel Uhl (d043530)
  *
  */
-public class SwissTimingReplayConnectivityParamsHandler implements RaceTrackingConnectivityParametersHandler {
+public class SwissTimingReplayConnectivityParamsHandler extends AbstractRaceTrackingConnectivityParametersHandler {
     private static final String BOAT_CLASS_NAME = "boatClassName";
     private static final String RACE_ID = "raceId";
     private static final String RACE_NAME = "raceName";
@@ -54,14 +54,16 @@ public class SwissTimingReplayConnectivityParamsHandler implements RaceTrackingC
         result.put(RACE_NAME, stParams.getRaceName());
         result.put(RACE_ID, stParams.getRaceID());
         result.put(BOAT_CLASS_NAME, stParams.getBoatClassName());
+        addWindTrackingParameters(stParams, result);
         return result;
     }
 
     @Override
     public RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws MalformedURLException, URISyntaxException {
-        return new SwissTimingReplayConnectivityParameters(
-                (String) map.get(LINK), (String) map.get(RACE_NAME), (String) map.get(RACE_ID), (String) map.get(BOAT_CLASS_NAME),
-                (boolean) map.get(USE_INTERNAL_MARK_PASSING_ALGORITHM), domainFactory, replayService, raceLogStore, regattaLogStore);
+        return new SwissTimingReplayConnectivityParameters((String) map.get(LINK), (String) map.get(RACE_NAME),
+                (String) map.get(RACE_ID), (String) map.get(BOAT_CLASS_NAME),
+                (boolean) map.get(USE_INTERNAL_MARK_PASSING_ALGORITHM), domainFactory, replayService, raceLogStore,
+                regattaLogStore);
     }
 
     @Override

@@ -32,6 +32,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
 
     @Test
     public void testStoreAndLoadSwissTimingLiveParamsWithCompetitorsWithIDAndCrew() throws MalformedURLException, URISyntaxException {
+        final boolean trackWind = true;
+        final boolean correctWindDirectionByMagneticDeclination = true;
         final String hostname = "a.b.com";
         final int port = 1234;
         final String raceID = "Race ID 123";
@@ -50,7 +52,7 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         final SwissTimingTrackingConnectivityParameters stParams = new SwissTimingTrackingConnectivityParameters(
                 hostname, port, raceID, raceName, raceDescription, boatClass, startList, delayToLiveInMillis,
                 SwissTimingFactory.INSTANCE, new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory(),
-                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm);
+                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load
@@ -71,6 +73,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         assertEquals(startList.getRaceID(), stParamsReadFromDB.getStartList().getRaceID());
         assertEquals(startList.getCompetitors(), stParamsReadFromDB.getStartList().getCompetitors());
         assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
+        assertEquals(stParams.isTrackWind(), stParamsReadFromDB.isTrackWind());
+        assertEquals(stParams.isCorrectWindDirectionByMagneticDeclination(), stParamsReadFromDB.isCorrectWindDirectionByMagneticDeclination());
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
@@ -80,6 +84,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
     
     @Test
     public void testStoreAndLoadSwissTimingLiveParamsWithCompetitorsWithoutID() throws MalformedURLException, URISyntaxException {
+        final boolean trackWind = false;
+        final boolean correctWindDirectionByMagneticDeclination = false;
         final String hostname = "a.b.com";
         final int port = 1234;
         final String raceID = "Race ID 123";
@@ -94,7 +100,7 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         final SwissTimingTrackingConnectivityParameters stParams = new SwissTimingTrackingConnectivityParameters(
                 hostname, port, raceID, raceName, raceDescription, boatClass, startList, delayToLiveInMillis,
                 SwissTimingFactory.INSTANCE, new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory(),
-                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm);
+                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load
@@ -115,6 +121,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         assertEquals(startList.getRaceID(), stParamsReadFromDB.getStartList().getRaceID());
         assertEquals(startList.getCompetitors(), stParamsReadFromDB.getStartList().getCompetitors());
         assertEquals(stParams.getTrackerID(), stParamsReadFromDB.getTrackerID());
+        assertEquals(stParams.isTrackWind(), stParamsReadFromDB.isTrackWind());
+        assertEquals(stParams.isCorrectWindDirectionByMagneticDeclination(), stParamsReadFromDB.isCorrectWindDirectionByMagneticDeclination());
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(stParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();

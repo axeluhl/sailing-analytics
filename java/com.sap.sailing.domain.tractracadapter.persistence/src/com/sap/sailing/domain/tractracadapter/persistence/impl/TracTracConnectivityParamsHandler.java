@@ -10,7 +10,7 @@ import java.util.Map;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.impl.RaceTrackingConnectivityParametersImpl;
 import com.sap.sse.common.TypeBasedServiceFinder;
@@ -27,7 +27,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * @author Axel Uhl (d043530)
  *
  */
-public class TracTracConnectivityParamsHandler implements RaceTrackingConnectivityParametersHandler {
+public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConnectivityParametersHandler {
     private static final String USE_INTERNAL_MARK_PASSING_ALGORITHM = "useInternalMarkPassingAlgorithm";
     private static final String TRAC_TRAC_USERNAME = "tracTracUsername";
     private static final String TRAC_TRAC_PASSWORD = "tracTracPassword";
@@ -69,6 +69,7 @@ public class TracTracConnectivityParamsHandler implements RaceTrackingConnectivi
         result.put(TRAC_TRAC_PASSWORD, ttParams.getTracTracPassword());
         result.put(TRAC_TRAC_USERNAME, ttParams.getTracTracUsername().toString());
         result.put(USE_INTERNAL_MARK_PASSING_ALGORITHM, ttParams.isUseInternalMarkPassingAlgorithm());
+        addWindTrackingParameters(ttParams, result);
         return result;
     }
 
@@ -88,7 +89,8 @@ public class TracTracConnectivityParamsHandler implements RaceTrackingConnectivi
                 map.get(TRAC_TRAC_USERNAME)==null?null:map.get(TRAC_TRAC_USERNAME).toString(),
                 map.get(TRAC_TRAC_PASSWORD)==null?null:map.get(TRAC_TRAC_PASSWORD).toString(),
                 map.get(RACE_STATUS)==null?null:map.get(RACE_STATUS).toString(),
-                map.get(RACE_VISIBILITY)==null?null:map.get(RACE_VISIBILITY).toString());
+                map.get(RACE_VISIBILITY)==null?null:map.get(RACE_VISIBILITY).toString(), isTrackWind(map),
+                isCorrectWindDirectionByMagneticDeclination(map));
     }
 
     @Override

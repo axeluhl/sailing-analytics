@@ -48,11 +48,13 @@ public interface TracTracAdapter {
      * @param timeoutInMilliseconds
      *            if the race definition is not received for the race within this time, the race tracker for that race
      *            is stopped; use -1 to wait forever
+     * @param trackWind TODO
+     * @param correctWindDirectionByMagneticDeclination TODO
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility) throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination) throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**
      * Same as {@link #addTracTracRace(URL, URI, URI, WindStore, long)}, only that start and end of tracking are
@@ -71,12 +73,14 @@ public interface TracTracAdapter {
      *            described above will be created and used.
      * @param offsetToStartTimeOfSimulatedRace
      *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
+     * @param trackWind TODO
+     * @param correctWindDirectionByMagneticDeclination TODO
      */
     RaceHandle addTracTracRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, URL paramURL,
             URI liveURI, URI storedURI, URI courseDesignUpdateURI, TimePoint trackingStartTime,
             TimePoint trackingEndTime, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutForReceivingRaceDefinitionInMilliseconds, Duration offsetToStartTimeOfSimulatedRace,  boolean useInternalMarkPassingAlgorithm,
-            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility)
+            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception;
 
     /**

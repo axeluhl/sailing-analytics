@@ -10,11 +10,11 @@ import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 
-public class SwissTimingTrackingConnectivityParameters implements RaceTrackingConnectivityParameters {
+public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrackingConnectivityParameters {
     public static final String TYPE = "SWISS_TIMING";
     
     private final String hostname;
@@ -34,8 +34,8 @@ public class SwissTimingTrackingConnectivityParameters implements RaceTrackingCo
     public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName,
             String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm) {
-        super();
+            RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination) {
+        super(trackWind, correctWindDirectionByMagneticDeclination);
         this.hostname = hostname;
         this.port = port;
         this.raceID = raceID;

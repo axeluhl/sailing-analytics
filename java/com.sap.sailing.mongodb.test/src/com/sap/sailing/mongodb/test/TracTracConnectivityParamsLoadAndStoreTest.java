@@ -31,6 +31,8 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
     @Test
     public void testStoreAndLoadSimpleTracTracParams() throws MalformedURLException, URISyntaxException {
         // set up
+        final boolean trackWind = true;
+        final boolean correctWindDirectionByMagneticDeclination = true;
         final URL paramURL = new URL("http://tractrac.com/some/url");
         final URI storedURI = new URI("live://tractrac.com/storedURI");
         final URI courseDesignUpdateURI = new URI("https://skitrac.dk/reverse/update");
@@ -47,7 +49,7 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
                 paramURL, /* live URI */ null, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm,
                 /* raceLogStore */ null, /* regattaLogStore */ null, DomainFactory.INSTANCE, tracTracUsername, tracTracPassword,
-                raceStatus, raceVisibility);
+                raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(tracTracParams);
         // load
@@ -71,6 +73,8 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
         assertEquals(raceStatus, tracTracParamsReadFromDB.getRaceStatus());
         assertEquals(raceVisibility, tracTracParamsReadFromDB.getRaceVisibility());
         assertEquals(tracTracParams.getTrackerID(), tracTracParamsReadFromDB.getTrackerID());
+        assertEquals(tracTracParams.isTrackWind(), tracTracParamsReadFromDB.isTrackWind());
+        assertEquals(tracTracParams.isCorrectWindDirectionByMagneticDeclination(), tracTracParamsReadFromDB.isCorrectWindDirectionByMagneticDeclination());
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(tracTracParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();

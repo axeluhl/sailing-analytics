@@ -377,9 +377,10 @@ public class DomainFactoryImpl implements DomainFactory {
     public RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port,
             String raceID, String raceName, String raceDescription, BoatClass boatClass, StartList startList,
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm) {
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm,
+            boolean trackWind, boolean correctWindDirectionByMagneticDeclination) {
         return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceName, raceDescription,
                 boatClass, startList, delayToLiveInMillis, swissTimingFactory, domainFactory, raceLogStore,
-                regattaLogStore, useInternalMarkPassingAlgorithm);
+                regattaLogStore, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination);
     }
 }

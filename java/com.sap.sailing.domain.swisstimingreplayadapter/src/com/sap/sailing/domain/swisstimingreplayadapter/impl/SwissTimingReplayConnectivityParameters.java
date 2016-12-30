@@ -11,12 +11,12 @@ import com.sap.sailing.domain.tracking.AbstractRaceTrackerImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 import com.sap.sse.common.Util;
 
-public class SwissTimingReplayConnectivityParameters implements RaceTrackingConnectivityParameters {
+public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackingConnectivityParameters {
     public static final String TYPE = "SWISS_TIMING_REPLAY";
     
     private final boolean useInternalMarkPassingAlgorithm;
@@ -115,9 +115,10 @@ public class SwissTimingReplayConnectivityParameters implements RaceTrackingConn
         }
     }
 
-    public SwissTimingReplayConnectivityParameters(String link, String raceName, String raceID,
-            String boatClassName, boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
+    public SwissTimingReplayConnectivityParameters(String link, String raceName, String raceID, String boatClassName,
+            boolean useInternalMarkPassingAlgorithm, DomainFactory domainFactory,
             SwissTimingReplayService replayService, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore) {
+        super(/* trackWind: never track live wind with a SwissTiming Replay race */ false, /* correctWindDirectionByMagneticDeclination */ false);
         this.link = link;
         this.raceName = raceName;
         this.raceID = raceID;

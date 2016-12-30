@@ -42,6 +42,8 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
     public void testStoreAndLoadRaceLogTrackingParams() throws MalformedURLException, URISyntaxException, NotDenotableForRaceLogTrackingException {
         // set up
         final long delayToLiveInMillis = 3000;
+        final boolean trackWind = true;
+        final boolean correctWindDirectionByMagneticDeclination = true;
         final FleetImpl fleet = new FleetImpl("Default");
         final SeriesImpl theSeries = new SeriesImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.<Fleet>asList(fleet), Collections.emptyList(), racingEventService);
@@ -56,7 +58,9 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         final RegattaLeaderboard leaderboard = racingEventService.addRegattaLeaderboard(regatta.getRegattaIdentifier(), /* leaderboardDisplayName */ null, new int[] { 5, 9 });
         RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(domainObjectFactory.getBaseDomainFactory()).denoteAllRacesForRaceLogTracking(racingEventService, leaderboard);
         final RaceLogConnectivityParams rlParams = new RaceLogConnectivityParams(
-                racingEventService, regatta, leaderboard.getRaceColumnByName("R2"), fleet, leaderboard, delayToLiveInMillis, domainObjectFactory.getBaseDomainFactory());
+                racingEventService, regatta, leaderboard.getRaceColumnByName("R2"), fleet, leaderboard,
+                delayToLiveInMillis, domainObjectFactory.getBaseDomainFactory(), trackWind,
+                correctWindDirectionByMagneticDeclination);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(rlParams);
         // load
@@ -72,6 +76,8 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         assertSame(theSeries.getRaceColumnByName("R2"), raceLogParamsReadFromDB.getRaceColumn());
         assertSame(fleet, raceLogParamsReadFromDB.getFleet());
         assertEquals(rlParams.getTrackerID(), raceLogParamsReadFromDB.getTrackerID());
+        assertEquals(rlParams.isTrackWind(), raceLogParamsReadFromDB.isTrackWind());
+        assertEquals(rlParams.isCorrectWindDirectionByMagneticDeclination(), raceLogParamsReadFromDB.isCorrectWindDirectionByMagneticDeclination());
         // remove again
         mongoObjectFactory.removeConnectivityParametersForRaceToRestore(rlParams);
         final Set<RaceTrackingConnectivityParameters> connectivityParametersForRacesToRestore2 = new HashSet<>();
