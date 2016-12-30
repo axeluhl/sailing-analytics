@@ -1524,15 +1524,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     @Override
     public void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) {
-        final String typeIdentifier = params.getTypeIdentifier();
-        final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
-        if (paramsPersistenceService != null) {
-            final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
-            DBObject key = new BasicDBObject();
-            key.putAll(paramsPersistenceService.getKey(params));
-            collection.remove(key, WriteConcern.SAFE);
+        if (raceTrackingConnectivityParamsServiceFinder != null) {
+            final String typeIdentifier = params.getTypeIdentifier();
+            final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
+            if (paramsPersistenceService != null) {
+                final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
+                DBObject key = new BasicDBObject();
+                key.putAll(paramsPersistenceService.getKey(params));
+                collection.remove(key, WriteConcern.SAFE);
+            } else {
+                logger.warning("Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier);
+            }
         } else {
-            logger.warning("Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier);
+            logger.warning("No connectivity parameters service finder set; unable to remove connectivity parameters from persistent store for "
+                    + params + " of type " + params.getTypeIdentifier());
         }
     }
 
