@@ -1199,9 +1199,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     /**
-     * @param timeoutInMilliseconds eventually passed to {@link RaceHandle#getRace(long)}. If the race definition
-     * can be obtained within this timeout, wind for the race will be tracked; otherwise, the method returns without
-     * taking any effect.
+     * @param timeoutInMilliseconds
+     *            eventually passed to {@link RaceHandle#getRace(long)}. If the race definition can be obtained within
+     *            this timeout, wind for the race will be tracked; otherwise, the method returns without taking any
+     *            effect.
      */
     private void startTrackingWind(RaceHandle raceHandle, boolean correctByDeclination, long timeoutInMilliseconds) {
         Regatta regatta = raceHandle.getRegatta();
