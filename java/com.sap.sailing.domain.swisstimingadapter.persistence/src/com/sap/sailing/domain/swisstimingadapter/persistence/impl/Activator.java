@@ -44,7 +44,7 @@ public class Activator implements BundleActivator {
                 properties.put(TypeBasedServiceFinder.TYPE, SwissTimingTrackingConnectivityParameters.TYPE);
                 context.registerService(RaceTrackingConnectivityParametersHandler.class, paramsHandler, properties);
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Exception trying to register TracTrac RaceTrackingConnectivityParametersHandler implementation", e);
+                logger.log(Level.SEVERE, "Exception trying to register SwissTiming RaceTrackingConnectivityParametersHandler implementation", e);
             }
         }, getClass().getName() + " registering connectivity handler").start();
     }
