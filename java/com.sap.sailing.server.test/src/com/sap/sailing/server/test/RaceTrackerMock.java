@@ -31,11 +31,11 @@ public class RaceTrackerMock extends AbstractRaceTrackerBaseImpl {
         this.isTracking = isTracking;
     }
 
-    public void setIsTracking(boolean isTracking){
+    public void setIsTracking(boolean isTracking) {
         this.isTracking = isTracking;
     }
     
-    public boolean getIsTracking(){
+    public boolean getIsTracking() {
         return isTracking;
     }
 
