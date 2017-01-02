@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.thirdparty.guava.common.base.Strings;
 import com.sap.sse.common.util.NaturalComparator;
 
 
