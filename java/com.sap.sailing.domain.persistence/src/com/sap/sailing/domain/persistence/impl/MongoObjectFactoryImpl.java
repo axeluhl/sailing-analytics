@@ -105,6 +105,8 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDevic
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -129,6 +131,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
+    private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
 
     /**
      * Uses <code>null</code> for the device type service finder and hence will be unable to store device identifiers.
@@ -144,8 +147,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
             this.deviceIdentifierServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierMongoHandler());
+            this.raceTrackingConnectivityParamsServiceFinder = serviceFinderFactory.createServiceFinder(RaceTrackingConnectivityParametersHandler.class);
         } else {
             this.deviceIdentifierServiceFinder = null;
+            this.raceTrackingConnectivityParamsServiceFinder = null;
         }
     }
     
@@ -1516,4 +1521,50 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.SAILORS_INFO_LOCALE.name(), locale != null ? locale.toLanguageTag() : null);
         return result;
     }
+
+    @Override
+    public void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) {
+        if (raceTrackingConnectivityParamsServiceFinder != null) {
+            final String typeIdentifier = params.getTypeIdentifier();
+            final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
+            if (paramsPersistenceService != null) {
+                final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
+                DBObject key = new BasicDBObject();
+                key.putAll(paramsPersistenceService.getKey(params));
+                collection.remove(key, WriteConcern.SAFE);
+            } else {
+                logger.warning("Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier);
+            }
+        } else {
+            logger.warning("No connectivity parameters service finder set; unable to remove connectivity parameters from persistent store for "
+                    + params + " of type " + params.getTypeIdentifier());
+        }
+    }
+
+    @Override
+    public void addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) {
+        final String typeIdentifier = params.getTypeIdentifier();
+        if (raceTrackingConnectivityParamsServiceFinder == null) {
+            logger.warning("No service finder has been configured to find connectivity parameter persistence services. Can't add connectivity parameters to DB for restore.");
+        } else {
+            try {
+                final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
+                final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
+                DBObject key = new BasicDBObject();
+                key.putAll(paramsPersistenceService.getKey(params));
+                DBObject dbObject = new BasicDBObject();
+                dbObject.putAll(paramsPersistenceService.mapFrom(params));
+                collection.update(key, dbObject, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
+            } catch (NoCorrespondingServiceRegisteredException e) {
+                logger.log(Level.WARNING, "Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier+
+                        ". Couldn't store race "+params.getTrackerID()+" for restoring.", e);
+            }
+        }
+    }
+    
+    @Override
+    public void removeAllConnectivityParametersForRacesToRestore() {
+        database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name()).drop();
+    }
+
 }

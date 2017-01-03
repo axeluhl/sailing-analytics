@@ -45,7 +45,7 @@ public class GPSFixesResourceTest {
     
     @Before
     public void setup() {
-        service = new RacingEventServiceImpl(true, new MockSmartphoneUuidServiceFinderFactory());
+        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false);
         service.getMongoObjectFactory().getDatabase().dropDatabase();
     }
     

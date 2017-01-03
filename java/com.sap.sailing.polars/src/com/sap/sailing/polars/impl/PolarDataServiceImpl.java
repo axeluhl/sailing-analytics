@@ -379,13 +379,6 @@ public class PolarDataServiceImpl implements ReplicablePolarService {
         consumer.accept(myDomainFactory);
     }
 
-    @Override
-    public void unregisterDomainFactory(DomainFactory domainFactory) {
-        if (this.domainFactory == domainFactory) {
-            this.domainFactory = null;
-        }
-    }
-
     public Map<GroupKey, AngleAndSpeedRegression> getCubicRegressionsPerCourse() {
         return polarDataMiner.getCubicRegressionPerCourseProcessor().getRegressions();
     }

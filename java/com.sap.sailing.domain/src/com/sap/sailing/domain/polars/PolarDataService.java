@@ -170,14 +170,15 @@ public interface PolarDataService {
     
     void unregisterListener(BoatClass boatClass, PolarsChangedListener listener);
 
+    /**
+     * Announces a base {@link DomainFactory} to this polar data service that it now can start using. Calling this
+     * method with a non-{@code null} parameter will unblock all {@link #runWithDomainFactory} calls.
+     */
     void registerDomainFactory(DomainFactory domainFactory);
     
-    void unregisterDomainFactory(DomainFactory domainFactory);
-
     /**
      * When called, the method blocks until a {@link DomainFactory} has been {@link #registerDomainFactory(DomainFactory) registered}
      * with this service, then lets the {@code consumer} accept that domain factory.
-     * @throws InterruptedException 
      */
     void runWithDomainFactory(Consumer<DomainFactory> consumer) throws InterruptedException;
 }

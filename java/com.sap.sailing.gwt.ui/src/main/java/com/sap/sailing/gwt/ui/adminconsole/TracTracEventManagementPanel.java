@@ -455,12 +455,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private String getBoatClassNamesAsString(TracTracRaceRecordDTO object) {
         StringBuilder boatClassNames = new StringBuilder();
-        
         for (String boatClassName : object.boatClassNames) {
             boatClassNames.append(boatClassName);
             boatClassNames.append(", ");
         }
-        
         return boatClassNames.substring(0, boatClassNames.length() - 2);
     }
     

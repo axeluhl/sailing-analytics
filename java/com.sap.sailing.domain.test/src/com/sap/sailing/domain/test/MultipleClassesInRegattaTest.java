@@ -62,7 +62,7 @@ public class MultipleClassesInRegattaTest {
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
-                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));
+                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class), /* connectivityParams */ null);
         kiwotest2 = domainFactory
                 .createRaceTracker(
                         new URL(
@@ -73,7 +73,7 @@ public class MultipleClassesInRegattaTest {
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
-                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));
+                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class), /* connectivityParams */ null);
         kiwotest3 = domainFactory
                 .createRaceTracker(
                         new URL(
@@ -84,7 +84,7 @@ public class MultipleClassesInRegattaTest {
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
-                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));
+                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class), /* connectivityParams */ null);
         weym470may112014_2 = domainFactory
                 .createRaceTracker(
                         new URL(
@@ -95,7 +95,7 @@ public class MultipleClassesInRegattaTest {
                         false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE,
                         tracTracUsername, tracTracPassword,
                         TracTracConnectionConstants.ONLINE_STATUS, TracTracConnectionConstants.ONLINE_VISIBILITY,
-                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));
+                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class), /* connectivityParams */ null);
 
         assertEquals("STG", kiwotest1.getRegatta().getBoatClass().getName());
         assertEquals("5O5", kiwotest2.getRegatta().getBoatClass().getName());
