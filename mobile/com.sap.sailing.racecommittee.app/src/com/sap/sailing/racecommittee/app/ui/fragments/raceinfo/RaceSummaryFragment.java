@@ -43,8 +43,9 @@ public class RaceSummaryFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final AppUtils appUtils = AppUtils.with(inflater.getContext());
         final int resId;
-        if (AppUtils.with(inflater.getContext()).isPhone() && getResources().getConfiguration().fontScale > 1) {
+        if (appUtils.isPhone() && getResources().getConfiguration().fontScale > 1 && !appUtils.isHDPI()) {
             resId = R.layout.race_summary_large_font;
         } else {
             resId = R.layout.race_summary_normal;
