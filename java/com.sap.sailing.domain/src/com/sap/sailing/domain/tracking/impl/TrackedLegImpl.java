@@ -525,7 +525,7 @@ public class TrackedLegImpl implements TrackedLeg {
         BoatClass boatClass = trackedRace.getRace().getBoatClass();
         Duration result;
         if (legType == LegType.REACHING) {
-            Bearing trueWindAngle = wind.getBearing().getDifferenceTo(from.getBearingGreatCircle(to));
+            Bearing trueWindAngle = from.getBearingGreatCircle(to).getDifferenceTo(wind.getBearing().reverse());
             SpeedWithConfidence<Void> reachSpeed = polarDataService.getSpeed(boatClass, wind, trueWindAngle);
             Distance distance = from.getDistance(to);
             result = reachSpeed.getObject().getDuration(distance);
