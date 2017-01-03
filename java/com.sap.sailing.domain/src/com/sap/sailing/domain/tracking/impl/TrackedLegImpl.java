@@ -517,7 +517,7 @@ public class TrackedLegImpl implements TrackedLeg {
             throws NotEnoughDataHasBeenAddedException, NoWindException {
         assert timepoint.equals(markPositionCache.getTimePoint());
         assert getTrackedRace() == markPositionCache.getTrackedRace();
-        Position centralPosition = trackedRace.getCenterOfCourse(timepoint);
+        Position centralPosition = getMiddleOfLeg(timepoint);
         Wind wind = trackedRace.getWind(centralPosition, timepoint, getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         Position from = trackedRace.getApproximatePosition(leg.getFrom(), timepoint);
         Position to = trackedRace.getApproximatePosition(leg.getTo(), timepoint);
