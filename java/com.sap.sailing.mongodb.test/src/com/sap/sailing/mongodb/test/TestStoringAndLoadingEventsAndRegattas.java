@@ -671,6 +671,42 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     }
 
     @Test
+    public void testLoadStoreRegattaWithCompetitorsWhichCanChangeBoats() {
+        final boolean canBoatsOfCompetitorsChangePerRace = true;
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */true);
+        final String regattaName = RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName());
+        Regatta regatta = createRegatta(regattaName, boatClass, canBoatsOfCompetitorsChangePerRace, 
+                null, null, /* persistent */false,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, OneDesignRankingMetric::new);
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        mof.storeRegatta(regatta);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
+        assertEquals(regattaName, loadedRegatta.getName());
+        assertEquals(loadedRegatta.canBoatsOfCompetitorsChangePerRace(), canBoatsOfCompetitorsChangePerRace);
+    }
+
+    @Test
+    public void testLoadStoreRegattaWithCompetitorsWhichCanNotChangeBoats() {
+        final boolean canBoatsOfCompetitorsChangePerRace = false;
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */true);
+        final String regattaName = RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName());
+        Regatta regatta = createRegatta(regattaName, boatClass, canBoatsOfCompetitorsChangePerRace, 
+                null, null, /* persistent */false,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, OneDesignRankingMetric::new);
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        mof.storeRegatta(regatta);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
+        assertEquals(regattaName, loadedRegatta.getName());
+        assertEquals(loadedRegatta.canBoatsOfCompetitorsChangePerRace(), canBoatsOfCompetitorsChangePerRace);
+    }
+
+    @Test
     public void testLoadStoreSimpleRegattaWithHighPointScoringScheme() {
         final int numberOfQualifyingRaces = 5;
         final int numberOfFinalRaces = 7;
