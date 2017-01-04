@@ -3660,10 +3660,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private Map<Locale, URL> convertToLocalesAndUrls(Map<String, String> sailorsInfoWebsiteURLsByLocaleName) {
         Map<Locale, URL> eventURLs = new HashMap<>();
         for (Map.Entry<String, String> entry : sailorsInfoWebsiteURLsByLocaleName.entrySet()) {
-            try {
-                eventURLs.put(toLocale(entry.getKey()), new URL(entry.getValue()));
-            } catch(Exception e) {
-                // broken URLs or Locales are not being stored
+            if (entry.getValue() != null) {
+                try {
+                    eventURLs.put(toLocale(entry.getKey()), new URL(entry.getValue()));
+                } catch(Exception e) {
+                    // broken URLs or Locales are not being stored
+                }
             }
         }
         return eventURLs;
