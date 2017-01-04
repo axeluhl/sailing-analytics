@@ -1,36 +1,31 @@
-package com.sap.sailing.domain.tracking.impl;
-
-import java.util.stream.StreamSupport;
+package com.sap.sailing.domain.common.impl;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.tracking.TargetTimeInfo;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class TargetTimeInfoImpl implements TargetTimeInfo {
     private final Iterable<TargetTimeInfo.LegTargetTimeInfo> legInfos;
-    
-    private final TimePoint expectedStartTimePoint;
     
     public static class LegTargetTimeInfoImpl implements LegTargetTimeInfo {
         private final Distance distance;
         private final Wind wind;
         private final Bearing legBearing;
-        private final Bearing trueWindAngleToLeg;
         private final Duration expectedDuration;
         private final TimePoint expectedStartTimePoint;
         private final LegType legType;
 
-        public LegTargetTimeInfoImpl(Distance distance, Wind wind, Bearing legBearing, Bearing trueWindAngleToLeg,
-                Duration expectedDuration, TimePoint expectedStartTimePoint, LegType legType) {
+        public LegTargetTimeInfoImpl(Distance distance, Wind wind, Bearing legBearing, Duration expectedDuration,
+                TimePoint expectedStartTimePoint, LegType legType) {
             super();
             this.distance = distance;
             this.wind = wind;
             this.legBearing = legBearing;
-            this.trueWindAngleToLeg = trueWindAngleToLeg;
             this.expectedDuration = expectedDuration;
             this.expectedStartTimePoint = expectedStartTimePoint;
             this.legType = legType;
@@ -53,7 +48,7 @@ public class TargetTimeInfoImpl implements TargetTimeInfo {
 
         @Override
         public Bearing getTrueWindAngleToLeg() {
-            return trueWindAngleToLeg;
+            return getLegBearing().getDifferenceTo(getWind().getBearing().reverse());
         }
 
         @Override
@@ -70,22 +65,32 @@ public class TargetTimeInfoImpl implements TargetTimeInfo {
         public LegType getLegType() {
             return legType;
         }
+
+        @Override
+        public String toString() {
+            return "LegTargetTimeInfoImpl [distance=" + distance + ", wind=" + wind + ", legBearing=" + legBearing
+                    + ", expectedDuration=" + expectedDuration + ", expectedStartTimePoint=" + expectedStartTimePoint
+                    + ", legType=" + legType + "]";
+        }
     }
-    
-    public TargetTimeInfoImpl(Iterable<LegTargetTimeInfo> legInfos, TimePoint expectedStartTimePoint) {
+
+    public TargetTimeInfoImpl(Iterable<LegTargetTimeInfo> legInfos) {
         super();
         this.legInfos = legInfos;
-        this.expectedStartTimePoint = expectedStartTimePoint;
     }
 
     @Override
     public TimePoint getExpectedStartTimePoint() {
-        return expectedStartTimePoint;
+        return Util.isEmpty(legInfos) ? null : legInfos.iterator().next().getExpectedStartTimePoint();
     }
 
     @Override
     public Duration getExpectedDuration() {
-        return StreamSupport.stream(legInfos.spliterator(), /* parallel */ false).map(l->l.getExpectedDuration()).reduce(Duration.NULL, Duration::plus);
+        Duration result = Duration.NULL;
+        for (final LegTargetTimeInfo legInfo : legInfos) {
+            result = result.plus(legInfo.getExpectedDuration());
+        }
+        return result;
     }
 
     @Override
@@ -95,8 +100,17 @@ public class TargetTimeInfoImpl implements TargetTimeInfo {
 
     @Override
     public Duration getExpectedDuration(final LegType spentInLegsOfType) {
-        return StreamSupport.stream(legInfos.spliterator(), /* parallel */ false).filter(l->l.getLegType()==spentInLegsOfType).
-                map(l->l.getExpectedDuration()).reduce(Duration.NULL, Duration::plus);
+        Duration result = Duration.NULL;
+        for (final LegTargetTimeInfo legInfo : legInfos) {
+            if (legInfo.getLegType() == spentInLegsOfType) {
+                result = result.plus(legInfo.getExpectedDuration());
+            }
+        }
+        return result;
     }
 
+    @Override
+    public String toString() {
+        return "TargetTimeInfoImpl [legInfos=" + legInfos + "]";
+    }
 }

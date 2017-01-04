@@ -31,10 +31,12 @@ import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.impl.TargetTimeInfoImpl;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -513,21 +515,22 @@ public class TrackedLegImpl implements TrackedLeg {
     }
 
     @Override
-    public Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
+    public TargetTimeInfo.LegTargetTimeInfo getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
             throws NotEnoughDataHasBeenAddedException, NoWindException {
         assert timepoint.equals(markPositionCache.getTimePoint());
         assert getTrackedRace() == markPositionCache.getTrackedRace();
         Position centralPosition = getMiddleOfLeg(timepoint);
-        Wind wind = trackedRace.getWind(centralPosition, timepoint, getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
+        Wind wind = trackedRace.getWind(centralPosition, timepoint);
         Position from = trackedRace.getApproximatePosition(leg.getFrom(), timepoint);
         Position to = trackedRace.getApproximatePosition(leg.getTo(), timepoint);
         LegType legType = getLegType(timepoint);
         BoatClass boatClass = trackedRace.getRace().getBoatClass();
-        Duration result;
+        final Bearing legBearing = from.getBearingGreatCircle(to);
+        Distance distance = from.getDistance(to);
+        Bearing trueWindAngleToLeg = legBearing.getDifferenceTo(wind.getBearing().reverse());
+        final Duration result;
         if (legType == LegType.REACHING) {
-            Bearing trueWindAngle = from.getBearingGreatCircle(to).getDifferenceTo(wind.getBearing().reverse());
-            SpeedWithConfidence<Void> reachSpeed = polarDataService.getSpeed(boatClass, wind, trueWindAngle);
-            Distance distance = from.getDistance(to);
+            SpeedWithConfidence<Void> reachSpeed = polarDataService.getSpeed(boatClass, wind, trueWindAngleToLeg);
             result = reachSpeed.getObject().getDuration(distance);
         } else {
             SpeedWithBearingWithConfidence<Void> portSpeedAndBearing = polarDataService.getAverageSpeedWithBearing(
@@ -536,7 +539,7 @@ public class TrackedLegImpl implements TrackedLeg {
                     boatClass, wind, legType, Tack.STARBOARD);
             result = estimateTargetTimeTacking(from, to, portSpeedAndBearing, starboardSpeedAndBearing, wind);
         }
-        return result;
+        return new TargetTimeInfoImpl.LegTargetTimeInfoImpl(distance, wind, legBearing, result, timepoint, legType);
     }
 
     private Duration estimateTargetTimeTacking(Position from, Position to,
