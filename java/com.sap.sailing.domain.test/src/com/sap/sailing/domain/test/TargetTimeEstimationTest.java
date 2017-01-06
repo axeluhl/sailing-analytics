@@ -97,6 +97,7 @@ public class TargetTimeEstimationTest {
         assertEquals(75494, duration.asMillis(), 100);
     }
     
+    @SuppressWarnings("unchecked") // the problem here is any(Set.class) which cannot infer the type arguments
     @Test
     public void simpleUpwindTargetTimeEstimation() throws NotEnoughDataHasBeenAddedException, NoWindException {
         // Setup mock objects
@@ -112,10 +113,8 @@ public class TargetTimeEstimationTest {
         
         DynamicTrackedRaceImpl trackedRace = mock(DynamicTrackedRaceImpl.class);
         when(trackedRace.getCenterOfCourse(timepoint)).thenReturn(centerOfCourse);
-        WindSource source = mock(WindSource.class);
-        Set<WindSource> sources = Collections.singleton(source);
-        when(trackedRace.getWindSources(WindSourceType.TRACK_BASED_ESTIMATION)).thenReturn(sources);
-        when(trackedRace.getWind(any(Position.class), eq(timepoint), eq(sources))).thenReturn(wind);
+        when(trackedRace.getWind(any(Position.class), eq(timepoint))).thenReturn(wind);
+        when(trackedRace.getWind(any(Position.class), eq(timepoint), any(Set.class))).thenReturn(wind);
         
         RaceDefinition race = mock(RaceDefinition.class);
         when(race.getBoatClass()).thenReturn(mockedBoatClass);
@@ -150,6 +149,7 @@ public class TargetTimeEstimationTest {
         assertEquals(213513, duration.asMillis(), 100);
     }
     
+    @SuppressWarnings("unchecked") // the problem here is any(Set.class) which cannot infer the type arguments
     @Test
     public void simpleDownwindTargetTimeEstimation() throws NotEnoughDataHasBeenAddedException, NoWindException {
         // Setup mock objects
@@ -165,10 +165,8 @@ public class TargetTimeEstimationTest {
         
         DynamicTrackedRaceImpl trackedRace = mock(DynamicTrackedRaceImpl.class);
         when(trackedRace.getCenterOfCourse(timepoint)).thenReturn(centerOfCourse);
-        WindSource source = mock(WindSource.class);
-        Set<WindSource> sources = Collections.singleton(source);
-        when(trackedRace.getWindSources(WindSourceType.TRACK_BASED_ESTIMATION)).thenReturn(sources);
-        when(trackedRace.getWind(any(Position.class), eq(timepoint), eq(sources))).thenReturn(wind);
+        when(trackedRace.getWind(any(Position.class), eq(timepoint))).thenReturn(wind);
+        when(trackedRace.getWind(any(Position.class), eq(timepoint), any(Set.class))).thenReturn(wind);
         
         RaceDefinition race = mock(RaceDefinition.class);
         when(race.getBoatClass()).thenReturn(mockedBoatClass);
