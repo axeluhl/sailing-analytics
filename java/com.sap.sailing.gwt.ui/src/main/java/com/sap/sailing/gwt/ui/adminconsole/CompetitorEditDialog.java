@@ -188,7 +188,7 @@ public class CompetitorEditDialog extends DataEntryDialog<CompetitorDTO> {
                 color = new InvalidColor(iae);
             }
         }
-        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), Distance.NULL);
+        BoatClassDTO boatClass = new BoatClassDTO(boatClassName.getValue(), Distance.NULL, Distance.NULL);
         BoatDTO boat = new BoatDTO(name.getText(), sailId.getText());
         CompetitorDTO result = new CompetitorDTOImpl(name.getText(), color, email.getText(),
                 /* twoLetterIsoCountryCode */ null,
