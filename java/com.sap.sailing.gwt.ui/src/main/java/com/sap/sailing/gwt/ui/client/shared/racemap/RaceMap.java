@@ -1249,28 +1249,29 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private long calculateTimeForPositionTransitionInMillis(final Date newTime, final Date oldTime) {
         final long timeForPositionTransitionMillisSmoothed;
         final long timeForPositionTransitionMillis;
-        if(newTime != null && oldTime != null){
-            timeForPositionTransitionMillis = newTime.getTime()-oldTime.getTime();
-        }else{
+        if (newTime != null && oldTime != null) {
+            timeForPositionTransitionMillis = newTime.getTime() - oldTime.getTime();
+        } else {
             timeForPositionTransitionMillis = -1;
         }
         if (timer.getPlayState() == PlayStates.Playing) {
             // choose 130% of the refresh interval as transition period to make it unlikely that the transition
             // stops before the next update has been received
-            long smoothIntervall = 1300 * timer.getRefreshInterval() / 1000; 
-            if(timeForPositionTransitionMillis > 0 && timeForPositionTransitionMillis < smoothIntervall){
+            long smoothIntervall = 1300 * timer.getRefreshInterval() / 1000;
+            if (timeForPositionTransitionMillis > 0 && timeForPositionTransitionMillis < smoothIntervall) {
                 timeForPositionTransitionMillisSmoothed = smoothIntervall;
-            }else{
-                //either a large transition positive transition happend or any negative one, do not use the smooth value
-                if(timeForPositionTransitionMillis > 0){
-                    timeForPositionTransitionMillisSmoothed = timeForPositionTransitionMillis; 
-                }else{
+            } else {
+                // either a large transition positive transition happend or any negative one, do not use the smooth
+                // value
+                if (timeForPositionTransitionMillis > 0) {
+                    timeForPositionTransitionMillisSmoothed = timeForPositionTransitionMillis;
+                } else {
                     timeForPositionTransitionMillisSmoothed = -1;
                 }
             }
-           
+
         } else {
-            //do not animate in non live modus
+            // do not animate in non live modus
             timeForPositionTransitionMillisSmoothed = -1; // -1 means 'no transition
         }
         return timeForPositionTransitionMillisSmoothed;
@@ -1293,8 +1294,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 competitorDTOsOfUnusedBoatCanvases.addAll(boatOverlays.keySet());
             }
             for (CompetitorDTO competitorDTO : competitorsToShow) {
-                boolean hasTimeJumped = timeForPositionTransitionMillis > 3*timer.getRefreshInterval();
-                if(hasTimeJumped){
+                boolean hasTimeJumped = timeForPositionTransitionMillis > 3 * timer.getRefreshInterval();
+                if (hasTimeJumped) {
                     fixesAndTails.clearTails();
                 }
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
@@ -1890,8 +1891,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      * @param timeForPositionTransitionMillis use -1 to not animate the position transition, e.g., during map zoom or non-play
      */
     private boolean updateBoatCanvasForCompetitor(CompetitorDTO competitorDTO, Date date, long timeForPositionTransitionMillis) {
-        boolean hasTimeJumped = timeForPositionTransitionMillis > 3*timer.getRefreshInterval();
-        if(hasTimeJumped){
+        boolean hasTimeJumped = timeForPositionTransitionMillis > 3 * timer.getRefreshInterval();
+        if (hasTimeJumped) {
             timeForPositionTransitionMillis = -1;
         }
         
