@@ -140,14 +140,6 @@
 		<url-pattern>/windStatus</url-pattern>
 	</servlet-mapping>
 	<servlet>
-		<servlet-name>WindStatusJsonServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.WindStatusJsonServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>WindStatusJsonServlet</servlet-name>
-		<url-pattern>/windStatusJson</url-pattern>
-	</servlet-mapping>
-	<servlet>
 		<servlet-name>TrackFilesExportPostServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.trackfiles.impl.TrackFilesExportPostServlet</servlet-class>
 	</servlet>

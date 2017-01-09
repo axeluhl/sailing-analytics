@@ -3327,7 +3327,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             result = Collections.singleton((WindTrackerFactory) ExpeditionWindTrackerFactory.getInstance());
         } else {
             ServiceTracker<WindTrackerFactory, WindTrackerFactory> tracker = new ServiceTracker<WindTrackerFactory, WindTrackerFactory>(
-                    bundleContext, WindTrackerFactory.class.getName(), null);
+                    bundleContext, WindTrackerFactory.class, null);
             tracker.open();
             result = new HashSet<>();
             for (WindTrackerFactory factory : tracker.getServices(new WindTrackerFactory[0])) {
