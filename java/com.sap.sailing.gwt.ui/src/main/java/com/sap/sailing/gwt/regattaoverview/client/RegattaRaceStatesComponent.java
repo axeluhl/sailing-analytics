@@ -62,8 +62,10 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.client.DateTimeUtil;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
@@ -358,10 +360,11 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
             return;
         }
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
+        final Duration clientTimeZoneOffset = DateTimeUtil.getClientTimezoneOffsetFromUTC();
         sailingService.getRaceStateEntriesForRaceGroup(eventId, Util.asList(settings.getVisibleCourseAreas()),
                 Util.asList(settings.getVisibleRegattas()), settings.isShowOnlyCurrentlyRunningRaces(), settings
                 .isShowOnlyRacesOfSameDay(),
-                new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>(
+                clientTimeZoneOffset, new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>(
                         new AsyncCallback<List<RegattaOverviewEntryDTO>>() {
                             @Override
                             public void onFailure(Throwable cause) {

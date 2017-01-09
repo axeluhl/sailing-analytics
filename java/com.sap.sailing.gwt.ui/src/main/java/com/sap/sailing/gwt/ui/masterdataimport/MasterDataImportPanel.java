@@ -71,7 +71,7 @@ public class MasterDataImportPanel extends VerticalPanel {
         HorizontalPanel serverAddressPanel = new HorizontalPanel();
         serverAddressPanel.add(new Label(stringMessages.importRemoteHost()));
         hostBox = new TextBox();
-        hostBox.setText("http://www.sapsailing.com/");
+        hostBox.setText("https://www.sapsailing.com/");
         hostBox.setWidth("300px");
         serverAddressPanel.add(hostBox);
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());

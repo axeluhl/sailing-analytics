@@ -17,11 +17,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import net.jpountz.lz4.LZ4BlockOutputStream;
 
 import org.junit.Rule;
 import org.junit.rules.Timeout;
@@ -40,6 +40,8 @@ import com.sap.sse.replication.impl.ReplicationMasterDescriptorImpl;
 import com.sap.sse.replication.impl.ReplicationReceiver;
 import com.sap.sse.replication.impl.ReplicationServiceImpl;
 import com.sap.sse.replication.impl.SingletonReplicablesProvider;
+
+import net.jpountz.lz4.LZ4BlockOutputStream;
 
 public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface extends Replicable<?, ?>, ReplicableImpl extends ReplicableInterface> {
     private static final Logger logger = Logger.getLogger(AbstractServerReplicationTestSetUp.class.getName());
@@ -147,12 +149,12 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         }
         ReplicationInstancesManager rim = new ReplicationInstancesManager();
         masterReplicator = new ReplicationServiceImpl(exchangeName, exchangeHost, 0, rim, new SingletonReplicablesProvider(this.master));
-        replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "");
+        replicaDescriptor = new ReplicaDescriptor(InetAddress.getLocalHost(), serverUuid, "", new String[] { this.master.getId().toString() });
         
         // connect to exchange host and local server running as master
         // master server and exchange host can be two different hosts
         ReplicationServiceTestImpl<ReplicableInterface> replicaReplicator = new ReplicationServiceTestImpl<ReplicableInterface>(exchangeName, exchangeHost, rim, replicaDescriptor,
-                this.replica, this.master, masterReplicator, masterDescriptor);
+                this.replica, this.master, masterReplicator);
         masterDescriptor = replicaReplicator.getMasterDescriptor();
         servletPort = masterDescriptor.getServletPort();
         Pair<ReplicationServiceTestImpl<ReplicableInterface>, ReplicationMasterDescriptor> result = new Pair<>(replicaReplicator, masterDescriptor);
@@ -236,15 +238,19 @@ public abstract class AbstractServerReplicationTestSetUp<ReplicableInterface ext
         
         public ReplicationServiceTestImpl(String exchangeName, String exchangeHost, ReplicationInstancesManager replicationInstancesManager,
                 ReplicaDescriptor replicaDescriptor, ReplicableInterface replica,
-                ReplicableInterface master, ReplicationService masterReplicationService, ReplicationMasterDescriptor masterDescriptor)
+                ReplicableInterface master, ReplicationService masterReplicationService)
                 throws IOException {
             super(exchangeName, exchangeHost, 0, replicationInstancesManager, new SingletonReplicablesProvider(replica));
             this.replicaDescriptor = replicaDescriptor;
             this.master = master;
             ss = new ServerSocket(0); // bind to any free port
             this.masterReplicationService = masterReplicationService;
+            final List<Replicable<?, ?>> replicablesToReplicate = new ArrayList<>();
+            for (final String replicableIdAsString : replicaDescriptor.getReplicableIdsAsStrings()) {
+                replicablesToReplicate.add(getReplicablesProvider().getReplicable(replicableIdAsString, /* wait */ false));
+            }
             this.masterDescriptor = new ReplicationMasterDescriptorImpl(exchangeHost, exchangeName, /* messagingPort */ 0,
-                    UUID.randomUUID().toString(), "localhost", ss.getLocalPort());
+                    UUID.randomUUID().toString(), "localhost", ss.getLocalPort(), replicablesToReplicate);
         }
         
         ReplicationMasterDescriptor getMasterDescriptor() {

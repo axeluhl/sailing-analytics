@@ -368,15 +368,11 @@ public class MarkPassingCalculator {
             @Override
             public void run() {
                 try {
-                    if (logger.isLoggable(Level.FINER)) {
-                        logger.finer("Calculating MarkPassings for race "+raceName+", competitor " + c + " (" + Util.size(fixes) + " new fixes)");
-                    }
+                    logger.finer(()->"Calculating MarkPassings for race "+raceName+", competitor " + c + " (" + Util.size(fixes) + " new fixes)");
                     Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
-                    if (logger.isLoggable(Level.FINER)) {
-                        logger.finer("Received " + Util.size(candidateDeltas.getA()) + " new Candidates for race "+raceName+
-                            " and competitor "+c+" and will remove "
-                            + Util.size(candidateDeltas.getB()) + " old Candidates for " + c);
-                    }
+                    logger.finer(()->"Received " + Util.size(candidateDeltas.getA()) + " new Candidates for race "+raceName+
+                        " and competitor "+c+" and will remove "
+                        + Util.size(candidateDeltas.getB()) + " old Candidates for " + c);
                     chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());
                 } catch (Exception e) {
                     // make sure the exception is logged and not only "swallowed" and suppressed by an invokeAll(...) statement

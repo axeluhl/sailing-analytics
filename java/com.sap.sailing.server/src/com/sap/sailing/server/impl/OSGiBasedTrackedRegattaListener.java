@@ -24,9 +24,9 @@ public class OSGiBasedTrackedRegattaListener implements TrackedRegattaListener {
     }
     
     private void forEachListener(Consumer<TrackedRegattaListener> consumer) {
-        for(ServiceReference<TrackedRegattaListener> serviceReference : serviceTracker.getServiceReferences()) {
+        for (ServiceReference<TrackedRegattaListener> serviceReference : serviceTracker.getServiceReferences()) {
             TrackedRegattaListener listener = serviceTracker.getService(serviceReference);
-            if(listener != null) {
+            if (listener != null) {
                 consumer.accept(listener);
             }
         }
