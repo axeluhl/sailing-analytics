@@ -48,7 +48,8 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer {
                         leaderboardSettings, preselectedRace != null, preselectedRace, competitorSelectionModel, timer,
                         leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
                         showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
-                        autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false));
+                        autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
+                        /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false));
         FlowPanel mainPanel = createViewerPanel();
         setWidget(mainPanel);
         final Label overallStandingsLabel = new Label(stringMessages.overallStandings());

@@ -18,7 +18,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 6. JDK 1.7 (Java SE 7), http://jdk7.java.net
 7. JDK 1.8 (Java SE 8), http://jdk8.java.net
 8. Maven 3.1.1 (or higher), http://maven.apache.org
-9. GWT SDK 2.7.0 (http://www.gwtproject.org/download.html)
+9. GWT SDK 2.8.0 (http://www.gwtproject.org/download.html)
 10. Android Studio (https://developer.android.com/tools/studio/index.html) or IntelliJ IDEA (https://www.jetbrains.com/idea/download/)
 
 #### Automatic Eclipse plugin installation
@@ -87,7 +87,7 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * Wait until the target platform has been resolved completely
   * Rebuild all projects
 4. Run the Race Analysis Suite
-  * Start the MongoDB
+  * Start the MongoDB (cd /somePathto MongoDB/mongodb/bin; rm c:/data/SAP/sailing/mongodb/mongod.lock; ./mongod --dbpath c:/data/SAP/sailing/mongodb)
   * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the debug dropdown
   * Run "Security UI sdm" in the debug dropdown
   * Run "SailingGWT" in the debug dropdown

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-09-29T12:16:25Z" original="/usr/sap/ljs/app/Converter_5483050776164983/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="ru">
+	<file datatype="javapropertyresourcebundle" date="2016-12-21T15:27:50Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="ru">
 		<header>
 			<skl>
-				<internal-file crc="2476e2fa472ba5cb7a43d465af58c5c7" form="base64">H4sIAAAAAAAAAIVVTW8aMRC9+1fMpVJyiATptypXAiIIFfkQoEY9mt0BLBYb2SaU/vrO2Muuk0b04p1582zPjO23sx1iKWc8ijjO0cywsKb0fVxahykG3Y6HRQTEjfZBmQLnTj1jRbNPAJwQca+2KHkQE1zNjzuU9AU2xEzpanwj+QP3++0CnfiFykkemJ2wyK/D9ypoa1Slw1FmtugVzprjVtZfMcWVCkHJ+isGdu889hwqmUxgW/StCoNKeS/ZgmiKYYUYZBzFVBUoeaAVtjsMOlgnWzMuEOeKOaqt5IESVyW6hVWu5Mq0Wd3YrdJmisFpfEY3WJMnM5qP+5wjc9xzS86vuPJi9Dgb6t/naMS4Igqtd6fc5pFKJua5CUyDmpdSnaLfV+F/CUOipSkPy7Zt/60U7BJaus9bOnJ2v8ubBxHJKXmUe8aNyWt9URAT8tzibaPti/aQRztP/Tr1TTxpU86CQ7MK67Hpo9rTUwiSYTjhoA2cIqK/DB05UNWWra6c6NU6gNKO3evaXTjEP8jIezlCEyrMoA/yzlJBKuTgRzl06NcZ8knS9tasMuizvKXl4UC5sftFjlQVA19P3FUNdDuEWJdy7Mqf2laUBvgGu5a3e+d0oQzS86ro8T3jrCARGJv0SmoMPIPcAMd34KJDWuHDN+jCgY4yXKb+sZC8bp6P6sKdW4ZGWXphFhQxGmEJlpIiBFRIRtKqpzWJFbt8wEmnDgQlCp/zm4qW1n4ta/W6U2U2vTDUlDXfGMk+7xoRYEgkWXpY3lFX9nSHvUwI36AGa1hzVWxyRvSb6A9Njcqi0W+ij0hSF44D7YrqBa0OQB2JWY/oJfkHN7HeEzfmHSGwDhLYKrflHiS10uWb7W4IwAy4eMfbTuI9v2zzs6Xeb4faaL/Os4swJDwrhw48L4LdfzPvYzggmuYEeqasN3irJLjo1scCV9/rHS/F2NOfqNjQr2nsoTabLNpnHwUxS6iNQNLK9qTd5jU57plofwGIogiCRAcAAA==</internal-file>
+				<internal-file crc="f38aaa3e2ebfcee22c5187ca5b77bc00" form="base64">H4sIAAAAAAAAAIVWS28jKRC+8yu4jJQcRopn9qkVKznJ2vHKeci2Ntoj7i53o7TBApys59dvVdEP7Ew8F7rq4wOKetHLHUCpljQKHldgl1A4W4Zr2DgPaU6OroJcMyBuTYjaFrDy+hUaXN0BskPEg96CokHMoVoddqDwK0kQS22a2a2ij3zYb9fgxb+gvaKB2Aljfjv9oKNxVjcmHlQmi3HhnT1sVfsVC6h0jFq1X3Hj9j7A2INWSZQki2un402jQ1AkSRbFpAGIikex0AUoGnCH7Q6iic6rQeQNeK1Ygd4qGjLmEu9R1CtdZUtkAiWieEVdgl877UvygbHVrdtqYxcQvYFX8Dc1aiqjBbboHJnmAznv/I5VENOn5cT8d46GjM9Iwf3utX95Qucg89wCosmWl0xdQNg38UcGy0RLSx43mQd/dFPpNnKgk6EW9kg5b2Xi5P6ferff5Z6WjOSUfJYcTF7MHXN0eyLkF+EkRluLIXemu4DO7ZzcWz6Y92xsuYwebBXrmb0Gvceai4pg2eHSWNnNiOtNvFI3utmSNFJzU9VRauNJ/dKqaw/wDQj5qqZgYwMZ9JO6d3hFHXPwZzXxEOoM+UXh8c5WGfSrusPt5RvaRupvaqobnvi941YtMLpCxPlk40j9Y1yDZsjQY1/U3d57U6AbsI4brPJXWBbUfjpNsiovrrANhfiHHMk3jH28PKbP7BP4Avc+XYcu+3RKpWQ6t4CzlBeO18E1+wgLbV9Up0jSUsCoRb6LFvdNCtUm9j1zHJdRI6NvmdFJRiS2IhZSF36usQ2TSjmWdjomnLbptO3QqxPariBDx3Fi0F+Ur4p02o8RSZBIvfZx0yViUAmh/O2xnrXSxUvOYL2f/dtgiLJZ1vvZJ8D+HQ83xhfNEa2dkO0MWz3F2g2Pfu5CQC7bzZDEpprA4TlydNnUWE35oadToRNDXnyiY+dcU5eDfa40++3EWBPq3DqGZcKz62Cs80uQ+t7ya4hvALaPwNiW7QHfu5K8GLVhkZ//bE+8FLOAz2vxgu/tLMhW7K0Ymg737syg7BVKbX2ItH85JfOZXfdPQefXu1PSE07RVjSkVDz6T2jzru9njI43EXtcIrA8zN8aDwW96dimbQWq12UCqIBuocKeM5hEXhpMIk0868POGaziThDdy4WBVq3MUWfru+Qg+cPCYktP6yqZP5TVqjY+Ht6v4Lh+PVlAfeEN029I2XH5qm3UFbh9+MuWj5u5saA6nsyTN6dK5HLuGuqXVN10yp1uNlibNXCe0WuVCp0tiDXIGgm0jOQN136Dz9n3bfjwuJXZAvrDxlnnKEWQZIzC1aLiHkrd8M8US9xOxf+VN8i0cAoAAA==</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-05-11T12:28:06Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2016-11-04T21:01:36Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
@@ -83,6 +83,10 @@
 				<source>Team</source>
 				<target state="signed-off">Команда</target>
 			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CompetitorSearchTag" resname="CompetitorSearchTag">
+				<source>Competitor Search Tag</source>
+				<target state="signed-off">Тег поиска участника</target>
+			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LeaderboardSailingDomainRetrieverChain" resname="LeaderboardSailingDomainRetrieverChain">
 				<source>Leaderboards</source>
 				<target state="signed-off">Таблицы лидеров</target>
@@ -111,6 +115,10 @@
 				<source>Races of Competitors</source>
 				<target state="signed-off">Гонки участников</target>
 			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ManeuverSailingDomainRetrieverChain" resname="ManeuverSailingDomainRetrieverChain">
+				<source>Maneuver</source>
+				<target state="signed-off">Маневр</target>
+			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LeaderboardGroup" resname="LeaderboardGroup">
 				<source>Leaderboard Group</source>
 				<target state="signed-off">Группа таблиц лидеров</target>
@@ -134,6 +142,10 @@
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="GpsFix" resname="GpsFix">
 				<source>GPS-Fix</source>
 				<target state="signed-off">Замер GPS</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Maneuver" resname="Maneuver">
+				<source>Maneuver</source>
+				<target state="signed-off">Маневр</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindStrengthInBeaufort" resname="WindStrengthInBeaufort">
 				<source>Wind Strength in Beaufort</source>
@@ -191,24 +203,36 @@
 				<source>Hurricane</source>
 				<target state="signed-off">Ураган</target>
 			</trans-unit>
-			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RelativeScoreInRace" resname="RelativeScoreInRace">
-				<source>Relative score in race (0 best; 1 worst)</source>
-				<target state="signed-off">Относительная оценка в гонке (0 лучшая; 1 худшая)</target>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RelativeScore" resname="RelativeScore">
+				<source>Relative Score (0 best; 1 worst)</source>
+				<target state="signed-off">Относительная оценка (0 лучшая; 1 худшая)</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RelativeScoreInPercent" resname="RelativeScoreInPercent">
+				<source>Relative Score in %</source>
+				<target state="signed-off">Относительная оценка (%)</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RelativeScoreInRaceInPercent" resname="RelativeScoreInRaceInPercent">
+				<source>Relative Score in Race in %</source>
+				<target state="signed-off">Относительная оценка в гонке (%)</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AbsoluteRank" resname="AbsoluteRank">
+				<source>Absolute Rank</source>
+				<target state="signed-off">Абсолютный ранг</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindSpeedInBeaufort" resname="WindSpeedInBeaufort">
-				<source>Wind speed in Bft</source>
+				<source>Wind Speed in Bft</source>
 				<target state="signed-off">Скорость ветра по шкале Бофорта</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="DistanceAtStart" resname="DistanceAtStart">
-				<source>Distance to start at start</source>
+				<source>Distance to Start at Start</source>
 				<target state="signed-off">Дистанция до старта при старте</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedWhenStarting" resname="SpeedWhenStarting">
-				<source>Speed when starting</source>
+				<source>Speed at Start</source>
 				<target state="signed-off">Скорость при старте</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedTenSecondsBeforeStart" resname="SpeedTenSecondsBeforeStart">
-				<source>Speed 10s before start</source>
+				<source>Speed 10s Before Start</source>
 				<target state="signed-off">Скорость за 10 с до старта</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RankAtFirstMark" resname="RankAtFirstMark">
@@ -229,7 +253,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfPenaltyCircles" resname="NumberOfPenaltyCircles">
 				<source>Number of Penalty Circles</source>
-				<target state="translated">Число штрафных кругов</target>
+				<target state="signed-off">Число штрафных кругов</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RankGainsOrLosses" resname="RankGainsOrLosses">
 				<source>Rank Gains or Losses</source>
@@ -262,6 +286,70 @@
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfMarkFixes" resname="NumberOfMarkFixes">
 				<source>Number of Mark Fixes</source>
 				<target state="signed-off">Число замеров отметки</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ManeuverType" resname="ManeuverType">
+				<source>Maneuver Type</source>
+				<target state="signed-off">Тип маневра</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Tack" resname="Tack">
+				<source>Tack</source>
+				<target state="signed-off">Оверштаг</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedBefore" resname="SpeedBefore">
+				<source>Speed Before Maneuver</source>
+				<target state="signed-off">Скорость до маневра</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedAfter" resname="SpeedAfter">
+				<source>Speed After Maneuver</source>
+				<target state="signed-off">Скорость после маневра</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="DirectionChange" resname="DirectionChange">
+				<source>Direction Change in Degrees</source>
+				<target state="signed-off">Изменение направления в градусах</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ManeuverLoss" resname="ManeuverLoss">
+				<source>Maneuver Loss</source>
+				<target state="signed-off">Потеря маневра</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Waypoint" resname="Waypoint">
+				<source>Waypoint</source>
+				<target state="signed-off">Путевая точка</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="PassingSide" resname="PassingSide">
+				<source>Passing Side</source>
+				<target state="signed-off">Сторона прохождения</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="TackAtStart" resname="TackAtStart">
+				<source>Tack at Start</source>
+				<target state="signed-off">Оверштаг при старте</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedTenSecondsAfterStart" resname="SpeedTenSecondsAfterStart">
+				<source>Speed 10s After Start</source>
+				<target state="signed-off">Скорость через 10 с после старта</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RankThirtySecondsAfterStart" resname="RankThirtySecondsAfterStart">
+				<source>Rank 30s After Start</source>
+				<target state="signed-off">Ранг через 30 с после старта</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindwardDistanceToAdvantageousEndOfLine" resname="WindwardDistanceToAdvantageousEndOfLine">
+				<source>Windward Distance to Advantageous End of Line</source>
+				<target state="signed-off">Дистанция по ветру до выгодного конца линии</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RankAfterHalfOfTheFirstLeg" resname="RankAfterHalfOfTheFirstLeg">
+				<source>Rank after the half of the first leg</source>
+				<target state="signed-off">Ранг после половины первого этапа</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AdvantageousEndOfLine" resname="AdvantageousEndOfLine">
+				<source>Advantageous End of Line</source>
+				<target state="signed-off">Выгодный конец линии</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="TimeSpentInSeconds" resname="TimeSpentInSeconds">
+				<source>Time Spent in Seconds</source>
+				<target state="signed-off">Затраченное время в секундах</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="MedalRace" resname="MedalRace">
+				<source>Medal Race</source>
+				<target state="signed-off">Гонка на медали</target>
 			</trans-unit>
 		</body>
 	</file>

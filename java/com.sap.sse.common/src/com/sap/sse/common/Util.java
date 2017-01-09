@@ -339,6 +339,12 @@ public class Util {
         }
         return result;
     }
+    
+    public static boolean equalsWithNull(String s1, String s2, boolean ignoreCase) {
+        final String s1LC = ignoreCase?s1==null?null:s1.toLowerCase():s1;
+        final String s2LC = ignoreCase?s2==null?null:s2.toLowerCase():s2;
+        return equalsWithNull(s1LC, s2LC);
+    }
 
     /**
      * <code>null</code> is permissible for both, <code>o1</code> and <code>o2</code>, where a <code>null</code> value
@@ -442,6 +448,99 @@ public class Util {
             strings[i] = nameds[i].getName();
         }
         return join(separator, strings);
+    }
+    
+    /**
+     * Splits {@code s} along whitespace (blank, tab, line feed, carriage return, form feed) characters that are not
+     * within a <em>phrase</em>. <em>Phrases</em> are enclosed by double quotes ({@code "}). To make a double quote or any other
+     * character part of a {@link String} in the result, a backslash ({@code \}) must precede the double quote as an escape character. With this,
+     * a {@code \} character or a whitespace character can become part of the split result by escaping it with a {@code \} character. If {@code s}'s last character
+     * happens to be the (unescaped) escape character it stands for itself.
+     * 
+     * A double quote {@code "} in the middle of an unquoted phrase marks the beginning of a new quoted phrase. When occurring unescaped in
+     * a quoted phrase, it marks the end of that quoted phrase, and a new unquoted phrase starts.
+     * <p>
+     * 
+     * The following example expressions all evaluate to {@code true}:
+     * 
+     * <pre>
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("a b c")}.equals(Arrays.asList("a", "b", "c"))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("a \"b c\"")}.equals(Arrays.asList("a", "b c"))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("a \"b \\\" c\"")}.equals(Arrays.asList("a", "b \" c"))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("a \"bc\"de")}.equals(Arrays.asList("a", "bc", "de"))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("a\"bc\" de")}.equals(Arrays.asList("a", "bc", "de"))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("\\ ")}.equals(Arrays.asList(" "))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("  \\ \\\\ ")}.equals(Arrays.asList(" \\"))
+     * {@link #isEmpty(Iterable) isEmpty(splitAlongWhitespaceRespectingDoubleQuotedPhrases(" \n\t  "))
+     * </pre>
+     * 
+     * @return if {@code s==null}, then {@code null}, else a non-{@code null} but possibly empty sequence of {@link Strings} whose iteration order corresponds with
+     *         the occurrence of the split results, left to right, in {@code s}
+     */
+    public static Iterable<String> splitAlongWhitespaceRespectingDoubleQuotedPhrases(String s) {
+        final char ESCAPE_CHARACTER = '\\';
+        final List<String> result;
+        if (s == null) {
+            result = null;
+        } else {
+            result = new ArrayList<>();
+            boolean escaped = false;
+            StringBuilder phrase = null;
+            boolean inQuotedPhrase = false;
+            for (final char c : s.toCharArray()) {
+                if (escaped) {
+                    if (phrase == null) {
+                        phrase = new StringBuilder();
+                    }
+                    phrase.append(c);
+                    escaped = false;
+                } else if (c == ESCAPE_CHARACTER) {
+                    escaped = true; // don't append but mark for next character to be appended
+                } else if (c == '"') {
+                    if (inQuotedPhrase) {
+                        result.add(phrase.toString());
+                        inQuotedPhrase = false;
+                        phrase = null;
+                    } else {
+                        inQuotedPhrase = true;
+                        if (phrase != null) { // starts a quoted phrase in the middle of a running phrase
+                            result.add(phrase.toString());
+                        }
+                        phrase = new StringBuilder();
+                    }
+                } else {
+                    if (inQuotedPhrase) {
+                        phrase.append(c);
+                    } else {
+                        if (new String(new char[] {c}).matches("\\s")) { // whitespace
+                            if (phrase != null) {
+                                // phrase is terminated by this whitespace
+                                result.add(phrase.toString());
+                                phrase = null;
+                            } // else skip whitespace outside of phrases
+                        } else {
+                            if (phrase == null) {
+                                phrase = new StringBuilder();
+                            }
+                            phrase.append(c);
+                        }
+                    }
+                }
+            }
+            if (escaped) {
+                // escape character as last character stands for itself
+                if (phrase == null) {
+                    phrase = new StringBuilder();
+                }
+                phrase.append(ESCAPE_CHARACTER);
+            }
+            if (phrase != null) {
+                // a phrase is also terminated by the end of the string, also (lenient mode) if
+                // within an (unterminated) quoted phrase
+                result.add(phrase.toString());
+            }
+        }
+        return result;
     }
     
     /**

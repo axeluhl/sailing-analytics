@@ -446,23 +446,30 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
     private void showProtestTimeDialog(String raceGroupSeriesDisplayName) {
         // Find the race group for which the
+        List<ManagedRace> races = new ArrayList<>();
         for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
             Boolean matchingRaceGroup = raceGroupSeriesDisplayName.equals(
                     new RaceGroupSeries(raceGroupSeriesFleet.getRaceGroup(), raceGroupSeriesFleet.getSeries()).getDisplayName());
             if (matchingRaceGroup) {
-                List<ManagedRace> races = mRacesByGroup.get(raceGroupSeriesFleet);
                 if (!isRaceListDirty(races)) {
-                    ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
+                    // collect all races for a single fragment in case of portrait mode;
+                    // show multiple fragments after one another in case of non-portrait (landscape) mode
                     View view = getActivity().findViewById(R.id.protest_time_fragment);
-                    if (AppUtils.with(getActivity()).isPort() && view != null) {
-                        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                        transaction.replace(R.id.protest_time_fragment, fragment);
-                        transaction.commit();
+                    if (AppUtils.with(getActivity()).isPortrait() && view != null) {
+                        races.addAll(mRacesByGroup.get(raceGroupSeriesFleet));
                     } else {
+                        races = mRacesByGroup.get(raceGroupSeriesFleet);
+                        ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
                         fragment.show(getFragmentManager(), null);
                     }
                 }
             }
+        }
+        if (AppUtils.with(getActivity()).isPortrait() && (getActivity().findViewById(R.id.protest_time_fragment)) != null) {
+            ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.replace(R.id.protest_time_fragment, fragment);
+            transaction.commit();
         }
     }
 

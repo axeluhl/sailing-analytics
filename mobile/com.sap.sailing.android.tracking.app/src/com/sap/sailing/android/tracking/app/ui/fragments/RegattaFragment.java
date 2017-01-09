@@ -37,6 +37,7 @@ import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -56,6 +57,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_regatta, container, false);
 
         Button startTrackingButton = (Button) view.findViewById(R.id.start_tracking);
@@ -333,6 +335,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
     }
 
     private void startTrackingActivity() {
+        prefs.setTrackingTimerStarted(MillisecondsTimePoint.now().asMillis());
         RegattaActivity regattaActivity = (RegattaActivity) getActivity();
         Intent intent = new Intent(getActivity(), TrackingActivity.class);
         String checkinDigest = regattaActivity.event.checkinDigest;
@@ -370,27 +373,13 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         TextView hoursTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_hours_label);
         TextView minutesTextViewLabel = (TextView) getActivity().findViewById(R.id.starts_in_minutes_label);
 
+        daysTextViewLabel.setText(getResources().getQuantityText(R.plurals.day, days));
+        hoursTextViewLabel.setText(getResources().getQuantityText(R.plurals.hour, hours));
+        minutesTextViewLabel.setText(getResources().getQuantityText(R.plurals.minute, minutes));
+
         daysTextView.setText(String.format("%02d", days));
         hoursTextView.setText(String.format("%02d", hours));
         minutesTextView.setText(String.format("%02d", minutes));
-
-        if (days == 1) {
-            daysTextViewLabel.setText(R.string.day);
-        } else {
-            daysTextViewLabel.setText(R.string.days);
-        }
-
-        if (hours == 1) {
-            hoursTextViewLabel.setText(R.string.hour);
-        } else {
-            hoursTextViewLabel.setText(R.string.hours);
-        }
-
-        if (minutes == 1) {
-            minutesTextViewLabel.setText(R.string.minute);
-        } else {
-            minutesTextViewLabel.setText(R.string.minutes);
-        }
     }
 
     public void setFragmentWatcher(FragmentWatcher fWatcher) {

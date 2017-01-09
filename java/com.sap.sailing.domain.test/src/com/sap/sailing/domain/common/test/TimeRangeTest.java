@@ -135,4 +135,47 @@ public class TimeRangeTest {
         assertTrue(TimePoint.EndOfTime.after(TimePoint.BeginningOfTime));
         assertTrue(TimePoint.EndOfTime.after(MillisecondsTimePoint.now()));
     }
+    
+    @Test
+    public void testSubtractionWithMinuendCompletelyWithin() {
+        testSubtraction(5, 10, 7, 8, /* expected */ 5, 6, 9, 10);
+    }
+
+    @Test
+    public void testSubtractionWithMinuendStartingAtFrom() {
+        testSubtraction(5, 10, 5, 8, /* expected */ 9, 10);
+    }
+
+    @Test
+    public void testSubtractionWithMinuendEndingAtTo() {
+        testSubtraction(5, 10, 7, 10, /* expected */ 5, 6);
+    }
+
+    @Test
+    public void testSubtractionWithMinuendContainingAll() {
+        testSubtraction(5, 10, 4, 11 /* expected empty */);
+    }
+
+    @Test
+    public void testSubtractionWithMinuendOverlappingAtFrom() {
+        testSubtraction(5, 10, 4, 7, /* expected */ 8, 10);
+    }
+
+    @Test
+    public void testSubtractionWithMinuendOverlappingAtto() {
+        testSubtraction(5, 10, 7, 12, /* expected */ 5, 6);
+    }
+
+    private void testSubtraction(long allFrom, long allTo, long minuendFrom, long minuendTo, long... expected) {
+        TimeRange all = create(allFrom, allTo);
+        TimeRange minuend = create(minuendFrom, minuendTo);
+        TimeRange[] diff = all.subtract(minuend);
+        assertEquals("Expected to obtain "+expected.length/2+" time ranges but got "+diff.length, expected.length/2, diff.length);
+        for (int i=0; i<expected.length/2; i++) {
+            assertEquals("expected "+i+"-th time range's \"from\" time point with millis "+expected[2*i]+" but got "+diff[i].from().asMillis(),
+                    create(expected[2*i]), diff[i].from());
+            assertEquals("expected "+i+"-th time range's \"to\" time point with millis "+expected[2*i+1]+" but got "+diff[i].to().asMillis(),
+                    create(expected[2*i+1]), diff[i].to());
+        }
+    }
 }

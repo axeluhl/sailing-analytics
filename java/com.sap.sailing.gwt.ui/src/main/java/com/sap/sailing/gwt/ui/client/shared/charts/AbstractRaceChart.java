@@ -35,6 +35,7 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.TimeZoomChangeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
@@ -137,20 +138,16 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     }
 
     protected void showLoading(String message) {
-        if (timer.getPlayMode() != PlayModes.Live) {
-            if (chart.isRendered()) {
-                chart.showLoading(message);
-            } else {
-                add(busyIndicator);
-            }
+        if (chart.isRendered()) {
+            chart.showLoading(message);
+        } else {
+            add(busyIndicator);
         }
         isLoading = true;
     }
 
     protected void hideLoading() {
-        if (timer.getPlayMode() != PlayModes.Live) {
-            chart.hideLoading();
-        }
+        chart.hideLoading();
         isLoading = false;
         remove(busyIndicator);
     }
@@ -260,5 +257,15 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     @Override
     public String getId() {
         return getLocalizedShortName();
+    }
+
+    /**
+     * Determines if a standard loading message is allowed to appear over the chart or not.
+     * 
+     * @return <code>true</code> if the message is allowed, <code>false</code> otherwise.
+     */
+    protected boolean shouldShowLoading(Long timestamp) {
+        return timestamp == null
+                || (timer.getPlayState() != PlayStates.Playing && timer.getPlayMode() != PlayModes.Live);
     }
 }
