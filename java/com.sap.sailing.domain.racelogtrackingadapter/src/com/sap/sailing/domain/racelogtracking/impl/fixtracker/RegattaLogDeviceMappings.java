@@ -271,8 +271,8 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * Calculates <em>and applies</em> the mapping changes by removing listeners no longer needed for the mappings removed,
      * and by loading and adding the fixes for extended or added mappings.
      */
-    private void calculateDiff(Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
-            Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings, ProgressCallback progressCallback) {
+    private void calculateDiff(Map<ItemT, ? extends Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
+            Map<ItemT, ? extends Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings, ProgressCallback progressCallback) {
         Set<ItemT> itemsToProcess = new HashSet<ItemT>(previousMappings.keySet());
         itemsToProcess.addAll(newMappings.keySet());
         int numberOfItemsToProcess = itemsToProcess.size();
@@ -285,18 +285,19 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
             if (!newMappings.containsKey(item)) {
                 previousMappings.get(item).forEach(this::mappingRemovedInternal);
             } else {
-                final List<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings = previousMappings.containsKey(item)
+                final Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings = previousMappings.containsKey(item)
                         ? previousMappings.get(item) : Collections.emptyList();
-                
+                final List<DeviceMappingWithRegattaLogEvent<ItemT>> addedMappings = new ArrayList<>();
                 for (DeviceMappingWithRegattaLogEvent<ItemT> newMapping : newMappings.get(item)) {
-                    DeviceMappingWithRegattaLogEvent<ItemT> oldMapping = findAndRemoveMapping(newMapping,
-                            oldMappings);
+                    DeviceMappingWithRegattaLogEvent<ItemT> oldMapping = findAndRemoveMapping(newMapping, oldMappings);
                     if (oldMapping == null) {
-                        mappingAddedInternal(newMapping);
+                        addedMappings.add(newMapping);
                     } else if (!newMapping.getTimeRange().equals(oldMapping.getTimeRange())) {
                         mappingChangedInternal(oldMapping, newMapping);
                     }
                 }
+                mappingsAddedInternal(addedMappings, item);
+                // oldMappings now still contains those mappings that were not entirely substituted by the new mappings
                 oldMappings.forEach(this::mappingRemovedInternal);
             }
             
@@ -322,21 +323,24 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     /**
      * Called when a {@link DeviceMapping} was added.
      * 
-     * @param mapping the new mapping
+     * @param mappings the new mapping
      */
-    protected abstract void mappingAdded(DeviceMappingWithRegattaLogEvent<ItemT> mapping);
+    protected abstract void mappingsAdded(Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappings, ItemT item);
     
-    private void mappingAddedInternal(DeviceMappingWithRegattaLogEvent<ItemT> mapping) {
+    private void mappingsAddedInternal(Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappings, ItemT item) {
         try {
-            mappingAdded(mapping);
+            mappingsAdded(mappings, item);
         } catch(Exception e) {
-            logger.log(Level.SEVERE, "error while adding mapping " + mapping, e);
+            logger.log(Level.SEVERE, "error while adding mapping " + mappings, e);
         }
     }
 
     /**
      * Called when a {@link DeviceMapping} was changed regarding its mapped time range.
-     * This can occur if an open ended mapping is being closed or a close event gets revoked.
+     * This can occur if an open ended mapping is being closed or a close event gets revoked
+     * or a new mapping is added that may partly overlap with an old mapping such that only
+     * parts of the fixes covered by the new mapping need to be loaded (the ones not already
+     * covered by the old mapping).
      * 
      * @param oldMapping the old mapping
      * @param newMapping the new mapping
@@ -355,9 +359,8 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     
     private DeviceMappingWithRegattaLogEvent<ItemT> findAndRemoveMapping(
             DeviceMappingWithRegattaLogEvent<ItemT> mappingToFind,
-            List<DeviceMappingWithRegattaLogEvent<ItemT>> newItemsToProcess) {
-        for (Iterator<DeviceMappingWithRegattaLogEvent<ItemT>> iterator = newItemsToProcess.iterator(); iterator
-                .hasNext();) {
+            Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> newItemsToProcess) {
+        for (Iterator<DeviceMappingWithRegattaLogEvent<ItemT>> iterator = newItemsToProcess.iterator(); iterator.hasNext();) {
             DeviceMappingWithRegattaLogEvent<ItemT> deviceMapping = iterator.next();
             if(isSame(mappingToFind, deviceMapping)) {
                 iterator.remove();
@@ -367,9 +370,15 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         return null;
     }
     
+    /**
+     * Compares two device mappings based on their device, the item mapped to and the race/regatta log event type
+     * that usually corresponds with the type of item to which the device is mapped. Note that in particular the
+     * mappings' time ranges are ignored for this comparison.
+     */
     private boolean isSame(DeviceMappingWithRegattaLogEvent<ItemT> mapping1,
             DeviceMappingWithRegattaLogEvent<ItemT> mapping2) {
         return mapping1.getDevice().equals(mapping2.getDevice()) && mapping1.getMappedTo().equals(mapping2.getMappedTo())
-                && mapping1.getEventType().equals(mapping2.getEventType());
+                && mapping1.getEventType().equals(mapping2.getEventType())
+                && mapping1.getRegattaLogEvent().getId().equals(mapping2.getRegattaLogEvent().getId());
     }
 }

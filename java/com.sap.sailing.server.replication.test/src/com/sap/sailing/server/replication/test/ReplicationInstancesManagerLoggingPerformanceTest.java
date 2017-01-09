@@ -23,7 +23,7 @@ public class ReplicationInstancesManagerLoggingPerformanceTest {
     @Before
     public void setUp() throws UnknownHostException {
         replicationInstanceManager = new ReplicationInstancesManager();
-        replica = new ReplicaDescriptor(InetAddress.getLocalHost(), UUID.randomUUID(), "");
+        replica = new ReplicaDescriptor(InetAddress.getLocalHost(), UUID.randomUUID(), "", /* replicableIds */ new String[] { "Humba" });
         replicationInstanceManager.registerReplica(replica);
         operation = new CreateLeaderboardGroup("Test Leaderboard Group", "Description of Test Leaderboard Group", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false,

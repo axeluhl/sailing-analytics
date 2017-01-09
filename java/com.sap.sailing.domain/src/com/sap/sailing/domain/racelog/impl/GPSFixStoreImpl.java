@@ -26,11 +26,9 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
 
 /**
- * At the moment, the timerange covered by the fixes for a device, and the number of fixes for a device are stored in a
- * metadata collection. Should be changed, see bug 1982.
- * 
+ * At the moment, the timerange covered by the fixes for a device, and the number of
+ * fixes for a device are stored in a metadata collection. Should be changed, see bug 1982.
  * @author Fredrik Teschke
- *
  */
 public class GPSFixStoreImpl implements GPSFixStore {
     private final SensorFixStore sensorFixStore;
@@ -40,38 +38,37 @@ public class GPSFixStoreImpl implements GPSFixStore {
     }
     
     private <FixT extends GPSFix> void loadTrack(DynamicGPSFixTrack<?, FixT> track, DeviceIdentifier device,
-            TimePoint from, TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException, TransformationException{
+            TimePoint from, TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException,
+            TransformationException {
         loadTrack(track, device, from, to, inclusive, (c)->{} );
     }
 
     private <FixT extends GPSFix> void loadTrack(DynamicGPSFixTrack<?, FixT> track, DeviceIdentifier device,
             TimePoint from, TimePoint to, boolean inclusive, ProgressCallback progress)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
-        sensorFixStore.<FixT> loadFixes(track::add, device, from, to, inclusive, progress);
+        sensorFixStore.<FixT>loadFixes(fix->track.add(fix, /* replace */ true), device, from, to, inclusive, progress);
     }
 
     @Override
-    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RegattaLog log,
-            Competitor competitor) throws NoCorrespondingServiceRegisteredException, TransformationException {
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RegattaLog log, Competitor competitor)
+    throws NoCorrespondingServiceRegisteredException, TransformationException{
         List<DeviceMappingWithRegattaLogEvent<Competitor>> mappings = new RegattaLogDeviceCompetitorMappingFinder(log)
                 .analyze().get(competitor);
         if (mappings != null) {
             for (DeviceMapping<Competitor> mapping : mappings) {
-                loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(),
-                        true /* inclusive */);
+                loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
             }
         }
     }
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark)
-            throws NoCorrespondingServiceRegisteredException, TransformationException {
+    throws NoCorrespondingServiceRegisteredException, TransformationException{
         List<DeviceMappingWithRegattaLogEvent<Mark>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze()
                 .get(mark);
         if (mappings != null) {
             for (DeviceMapping<Mark> mapping : mappings) {
-                loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(),
-                        true /* inclusive */);
+                loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
             }
         }
     }
@@ -128,8 +125,8 @@ public class GPSFixStoreImpl implements GPSFixStore {
     }
 
     @Override
-    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark, TimePoint start,
-            TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark,
+            TimePoint start, TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
         List<DeviceMappingWithRegattaLogEvent<Mark>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze()
                 .get(mark);
         if (mappings != null) {
@@ -154,8 +151,7 @@ public class GPSFixStoreImpl implements GPSFixStore {
     }
 
     @Override
-    public long getNumberOfFixes(DeviceIdentifier device)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
+    public long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException {
         return sensorFixStore.getNumberOfFixes(device);
     }
 

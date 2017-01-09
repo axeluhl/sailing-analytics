@@ -67,4 +67,14 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
      * Intersection of the two ranges, only possible if {@code other} {@link #intersects()} this range.
      */
     TimeRange intersection(TimeRange other);
+    
+    /**
+     * Returns zero, one or two {@link TimeRange}s such that no {@link TimePoint} that is {@link #includes(TimePoint)
+     * contained} in {@code other} is contained in any of the {@link TimeRange}s returned and that all {@link TimePoint}s
+     * that are contained in {@code this} {@link TimeRange} are contained in exactly one of the {@link TimeRange}s
+     * returned, and that the {@link TimeRange}s returned do not {@link #intersects(TimeRange) intersect}. Furthermore,
+     * in case two {@link TimeRange}s are returned, the first one {@link #startsBefore(TimeRange) is before} the second
+     * one.
+     */
+    TimeRange[] subtract(TimeRange other);
 }

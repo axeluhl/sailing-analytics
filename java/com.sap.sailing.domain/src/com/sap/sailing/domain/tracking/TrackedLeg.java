@@ -10,10 +10,10 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
@@ -164,7 +164,7 @@ public interface TrackedLeg extends Serializable {
      * is not available
      * @throws NoWindException no wind available. unable to determine legtypes for given timepoint
      */
-    Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
+    LegTargetTimeInfo getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
             throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     /**
