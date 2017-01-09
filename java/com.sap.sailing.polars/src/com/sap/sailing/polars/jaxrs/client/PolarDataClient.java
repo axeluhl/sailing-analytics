@@ -29,7 +29,7 @@ public class PolarDataClient {
 
     private static final String RESOURCE = "polars/api/polar_data";
 
-    private final ReplicablePolarService polarDataServiceImpl;
+    private final ReplicablePolarService polarDataService;
     private final String polarDataSourceURL;
     
     /**
@@ -40,7 +40,7 @@ public class PolarDataClient {
      *            {@link PolarDataServiceImpl} service to work with
      */
     public PolarDataClient(String polarDataSourceURL, ReplicablePolarService polarDataService) {
-        this.polarDataServiceImpl = polarDataService;
+        this.polarDataService = polarDataService;
         this.polarDataSourceURL = polarDataSourceURL;
     }
 
@@ -52,15 +52,15 @@ public class PolarDataClient {
         try {
             logger.log(Level.INFO, "Loading polar regression data from remote server " + polarDataSourceURL);
             final InputStream inputStream = getContentFromResponse();
-            polarDataServiceImpl.clearReplicaState();
-            polarDataServiceImpl.initiallyFillFrom(inputStream);
+            polarDataService.clearReplicaState();
+            polarDataService.initiallyFillFrom(inputStream);
             logger.log(Level.INFO,
                     "Loading polar regression data from remote server " + polarDataSourceURL + " succeeded");
         } catch (Exception e) {
             // Catching ClientProtocolException to indicate problems with HTTP protocol
             logger.log(Level.WARNING, "Failed to load polar regression data from remote server " + polarDataSourceURL
                     + ", " + e.getMessage()+"; resetting polar data miner");
-            polarDataServiceImpl.resetState();
+            polarDataService.resetState();
         }
     }
 

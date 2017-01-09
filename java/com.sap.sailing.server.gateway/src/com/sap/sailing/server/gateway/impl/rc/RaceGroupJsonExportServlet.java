@@ -23,7 +23,10 @@ import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaConfigurationJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.TargetTimeInfoSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceCellJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceGroupJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceRowJsonSerializer;
@@ -95,7 +98,8 @@ public class RaceGroupJsonExportServlet extends AbstractJsonHttpServlet {
                 RegattaConfigurationJsonSerializer.create(),
                 new SeriesWithRowsOfRaceGroupSerializer(new SeriesWithRowsJsonSerializer(
                         new RaceRowsOfSeriesWithRowsSerializer(new RaceRowJsonSerializer(new FleetJsonSerializer(
-                                new ColorJsonSerializer()), new RaceCellJsonSerializer(createRaceLogSerializer(clientUuid)))))));
+                                new ColorJsonSerializer()), new RaceCellJsonSerializer(createRaceLogSerializer(clientUuid), 
+                                        new TargetTimeInfoSerializer(new WindJsonSerializer(new PositionJsonSerializer()))))))));
 
     }
 

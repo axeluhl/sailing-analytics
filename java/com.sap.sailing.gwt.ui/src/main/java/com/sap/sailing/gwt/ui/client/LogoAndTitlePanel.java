@@ -38,7 +38,7 @@ public class LogoAndTitlePanel extends FlowPanel implements RequiresResize {
         lastIsSmallWidth = windowSizeDetector.isSmallWidth();
         sapLogo = new Anchor(new SafeHtmlBuilder().appendHtmlConstant(
                 "<img class=\"linkNoBorder\" src=\"/gwt/images/sap_66_transparent.png\"/>").toSafeHtml());
-        sapLogo.setHref("http://www.sap.com");
+        sapLogo.setHref("https://www.sap.com/sponsorships");
         sapLogo.addStyleName("sapLogo");
         this.add(sapLogo);
         renderUI();
