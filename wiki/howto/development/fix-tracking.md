@@ -41,12 +41,6 @@ In addition there is a special type of fix called `DoubleVectorFix` that can be 
 
 The further chapters will guide through the process of extending the system for a new fix type or the usage of already existing fix types.
 
-### Fix loading process
-
-TODO
-* Add a graph
-* Visitor pattern
-
 ### Implementing new persistent fix type
 
 Any fix type to be persisted by `SensorFixStore` implementations needs to implement the `Timed` interface.
@@ -101,5 +95,3 @@ Further `DoubleVectorFixImporter` implementations can be registered to the OSGi 
 
 The importer to be used to process the file is defined by the user by choosing the appropriate importer in the admin console upload formular. 
 The list available importer types is retrieved dynamically in the administration console. Therefore, simply registering an importer as a service in the OSGi registry makes it available in the admin ui.
-
-
