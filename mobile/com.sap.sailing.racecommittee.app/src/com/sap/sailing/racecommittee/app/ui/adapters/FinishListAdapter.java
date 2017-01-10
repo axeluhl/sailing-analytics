@@ -159,9 +159,10 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         switch (reaction) {
             case RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM:
                 if (mListener != null) {
-                    mListener.onItemRemoved(mCompetitor.get(position));
-                    mCompetitor.remove(position);
+                    CompetitorResultWithIdImpl competitor = mCompetitor.get(position);
+                    mCompetitor.remove(competitor);
                     notifyItemRemoved(position);
+                    mListener.onItemRemoved(competitor);
                 }
                 break;
 
