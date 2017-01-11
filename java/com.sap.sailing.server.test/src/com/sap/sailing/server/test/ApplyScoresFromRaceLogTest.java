@@ -184,6 +184,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         final CompetitorResults results = new CompetitorResultsImpl();
         // set OCS
         setResultForCompetitor(competitors.get(0), oneBasedRank++, results, MaxPointsReason.OCS, /* explicit score */ null);
+        setResultForCompetitor(competitors.get(1), oneBasedRank++, results, MaxPointsReason.OCS, /* explicit score */ null);
         final RaceLog f1RaceLog = f1Column.getRaceLog(f1Column.getFleets().iterator().next());
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Axel", 0);
         final RaceState f1RaceState = new RaceStateImpl(service, f1RaceLog, author,
@@ -194,12 +195,15 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         f1RaceState.setFinishPositioningConfirmed(now);
         // validate that it arrived in leaderboard
         assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.OCS, 4, /* score is corrected */ false, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, 4, /* score is corrected */ false, later);
         
-        // now clear OCS again:
+        // now clear OCS for first competitor again and leave second competitor OCS:
         final CompetitorResults resultsWithOCSCleared = new CompetitorResultsImpl();
+        setResultForCompetitor(competitors.get(1), oneBasedRank++, resultsWithOCSCleared, MaxPointsReason.OCS, /* explicit score */ null);
         f1RaceState.setFinishPositioningListChanged(later, resultsWithOCSCleared);
         f1RaceState.setFinishPositioningConfirmed(later);
         // validate that it got cleared in leaderboard
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, 4, /* score is corrected */ false, later);
         assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.NONE, 0, /* score is corrected */ false, later);
     }
 
