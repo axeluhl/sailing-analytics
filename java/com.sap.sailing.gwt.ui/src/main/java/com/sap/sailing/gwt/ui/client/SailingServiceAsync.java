@@ -620,7 +620,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getAllIgtimiAccountEmailAddresses(AsyncCallback<Iterable<String>> callback);
 
-    void getIgtimiAuthorizationUrl(AsyncCallback<String> callback);
+    void getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort, AsyncCallback<String> callback);
 
     void authorizeAccessToIgtimiUser(String eMailAddress, String password, AsyncCallback<Boolean> callback);
 

@@ -5087,8 +5087,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public String getIgtimiAuthorizationUrl() {
-        return getIgtimiConnectionFactory().getAuthorizationUrl();
+    public String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) {
+        return getIgtimiConnectionFactory().getAuthorizationUrl(redirectProtocol, redirectHostname, redirectPort);
     }
 
     @Override
