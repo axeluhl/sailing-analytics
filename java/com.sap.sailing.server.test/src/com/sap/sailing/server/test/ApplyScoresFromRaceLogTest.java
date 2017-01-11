@@ -179,12 +179,12 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
     public void testApplyingOCSThenClearingOCS() {
         TimePoint now = MillisecondsTimePoint.now();
         TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
-        setUp(3, now, ScoringSchemeType.LOW_POINT);
-        int oneBasedRank = 1;
+        final int numberOfCompetitors = 2;
+        setUp(numberOfCompetitors, now, ScoringSchemeType.LOW_POINT);
         final CompetitorResults results = new CompetitorResultsImpl();
         // set OCS
-        setResultForCompetitor(competitors.get(0), oneBasedRank++, results, MaxPointsReason.OCS, /* explicit score */ null);
-        setResultForCompetitor(competitors.get(1), oneBasedRank++, results, MaxPointsReason.OCS, /* explicit score */ null);
+        setResultForCompetitor(competitors.get(0), /* one-based rank */ 0, results, MaxPointsReason.OCS, /* explicit score */ null);
+        setResultForCompetitor(competitors.get(1), /* one-based rank */ 0, results, MaxPointsReason.OCS, /* explicit score */ null);
         final RaceLog f1RaceLog = f1Column.getRaceLog(f1Column.getFleets().iterator().next());
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Axel", 0);
         final RaceState f1RaceState = new RaceStateImpl(service, f1RaceLog, author,
@@ -194,17 +194,17 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
         assertEquals(competitors, rankedCompetitorsBeforeApplying); // no effects of preliminary results list yet
         f1RaceState.setFinishPositioningConfirmed(now);
         // validate that it arrived in leaderboard
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.OCS, 4, /* score is corrected */ false, later);
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, 4, /* score is corrected */ false, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);
         
         // now clear OCS for first competitor again and leave second competitor OCS:
         final CompetitorResults resultsWithOCSCleared = new CompetitorResultsImpl();
-        setResultForCompetitor(competitors.get(1), oneBasedRank++, resultsWithOCSCleared, MaxPointsReason.OCS, /* explicit score */ null);
+        setResultForCompetitor(competitors.get(1), /* one-based rank */ 0, resultsWithOCSCleared, MaxPointsReason.OCS, /* explicit score */ null);
         f1RaceState.setFinishPositioningListChanged(later, resultsWithOCSCleared);
         f1RaceState.setFinishPositioningConfirmed(later);
         // validate that it got cleared in leaderboard
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, 4, /* score is corrected */ false, later);
-        assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.NONE, 0, /* score is corrected */ false, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(1), MaxPointsReason.OCS, numberOfCompetitors+1, /* score is corrected */ false, later);
+        assertScoreCorrections(leaderboard, f1Column, competitors.get(0), MaxPointsReason.NONE, 1, /* score is corrected */ false, later); // ranking first, one point in low-point scheme
     }
 
     private void assertScoreCorrections(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
@@ -217,7 +217,7 @@ public class ApplyScoresFromRaceLogTest extends LeaderboardScoringAndRankingTest
 
     private void setResultForCompetitor(final Competitor competitor, int oneBasedRank,
             final CompetitorResults results, MaxPointsReason maxPointsReason, Double explicitScore) {
-        results.add(new CompetitorResultImpl(competitor.getId(), competitor.getName(), oneBasedRank++, maxPointsReason, explicitScore, /* finishingTime */ null, /* comment */ null));
+        results.add(new CompetitorResultImpl(competitor.getId(), competitor.getName(), oneBasedRank, maxPointsReason, explicitScore, /* finishingTime */ null, /* comment */ null));
     }
     
     
