@@ -8,6 +8,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmed
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishPositioningListFinder;
+import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -90,9 +91,12 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
 
     @Override
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
-        if (event instanceof RaceLogFinishPositioningConfirmedEvent) {
-            handleFinishPositioningList(raceColumn, raceLogIdentifier, (RaceLogFinishPositioningConfirmedEvent) event);
-        }
+        event.accept(new BaseRaceLogEventVisitor() {
+            @Override
+            public void visit(RaceLogFinishPositioningConfirmedEvent event) {
+                handleFinishPositioningList(raceColumn, raceLogIdentifier, (RaceLogFinishPositioningConfirmedEvent) event);
+            }
+        });
     }
 
     private void handleFinishPositioningList(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogFinishPositioningConfirmedEvent event) {
