@@ -1,46 +1,88 @@
 package com.sap.sailing.selenium.test.raceboard;
 
+import java.util.Date;
+
+import javax.xml.bind.DatatypeConverter;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-import com.sap.sailing.selenium.pages.adminconsole.advanced.MasterDataImportPO;
+import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO.RaceDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.Status;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
-import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
-import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
+import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class SettingsTest extends AbstractSeleniumTest {
-    private static final String TRAC_LINK = "http://skitrac.traclive.dk/events/event_20150204_ESSSingapo/jsonservice.php";
-    private static final String EVENT_LINK = "gwt/RaceBoard.html?eventId=ed3cf78d-45b4-416c-99a1-3df88608f629&leaderboardName=ESS+2015+Singapore&leaderboardGroupName=Extreme+Sailing+Series+2015&raceName=Race+1&showMapControls=true&viewShowNavigationPanel=true&regattaName=ESS+2015+Singapore&mode=PLAYER";
-    private static final String EVENT_NAME = "Extreme Sailing Series 2015";
+    private static final String BMW_CUP_JSON_URL = "http://kml.skitrac.traclive.dk/events/event_20120803_BMWCup/jsonservice.php"; //$NON-NLS-1$
+    private static final String BMW_CUP_EVENT = "BMW Cup";
+    private static final String BMW_CUP_BOAT_CLASS = "J80";
+    private static final String BMW_CUP_REGATTA = "BMW Cup (J80)"; //$NON-NLS-1$
+    private static final String RACE = "BMW Cup Race %d";
+    private static final String BMW_CUP_EVENTS_DESC = "BMW Cup Description";
+    private static final String BMW_VENUE = "Somewhere";
+    private static final Date BMW_START_EVENT_TIME = DatatypeConverter.parseDateTime("2012-04-08T10:09:00-05:00")
+            .getTime();
+    private static final Date BMW_STOP_EVENT_TIME = DatatypeConverter.parseDateTime("2012-04-08T10:50:00-05:00")
+            .getTime();
+
+    private static final String EVENT_LINK = "/gwt/RaceBoard.html?leaderboardName=BMW+Cup+(J80)&regattaName=BMW+Cup+(J80)&raceName=BMW+Cup+Race+1&canReplayDuringLiveRaces=true";
+
+    private TrackableRaceDescriptor trackableRace;
+
+    private TrackedRaceDescriptor trackedRace;
 
     @Override
     @Before
     public void setUp() {
+        this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(RACE, 1), BMW_CUP_BOAT_CLASS);
+        this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(RACE, 1));
         clearState(getContextRoot());
         super.setUp();
     }
 
     @Test
     public void createRaceAsAdminSetWindSettingToTrue() throws InterruptedException {
-        AdminConsolePage adminpage = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
-        MasterDataImportPO masterDataImportPO = adminpage.goToMasterDateImport();
-        masterDataImportPO.fetchLeaderBoards();
-        masterDataImportPO.importData(EVENT_NAME, true, false);
-        TracTracEventManagementPanelPO tracking = adminpage.goToTracTracEvents();
-        tracking.listTrackableRaces(TRAC_LINK);
-        tracking.setReggataForTracking("ESS 2015 Singapore");
-        tracking.startTrackingForRaces(tracking.getTrackableRaces());
-        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot()+EVENT_LINK);
-        MapSettingsPO mapSettings = raceboard.openMapSettings();
-        mapSettings.setWindChart(true);
-        mapSettings.makeDefault();
+        RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
+
+        AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+        EventConfigurationPanelPO events = adminConsole.goToEvents();
+        events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(BMW_CUP_EVENT, BMW_CUP_EVENTS_DESC,
+                BMW_VENUE, BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME, true, BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS,
+                BMW_START_EVENT_TIME, BMW_STOP_EVENT_TIME);
+
+        TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
+        tracTracEvents.listTrackableRaces(BMW_CUP_JSON_URL);
+        tracTracEvents.setReggataForTracking(bmwCupDescriptor);
+        tracTracEvents.setTrackSettings(true, false, false);
+        tracTracEvents.startTrackingForRace(this.trackableRace);
+        TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
+        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED); // with the TracAPI, REPLAY races
+        // status FINISHED when done loading
+
+        LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
+        LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(BMW_CUP_REGATTA);
+        Assert.assertTrue(details != null);
+        // RaceDescriptor firstRace = details.getRaces().get(0);
+        // Assert.assertTrue(firstRace.getName().equals("R1"));
+        details.linkRace(new RaceDescriptor(trackableRace.raceName, "Default", false, false, 0), trackedRace);
+
+        // RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot() + EVENT_LINK);
+        // MapSettingsPO mapSettings = raceboard.openMapSettings();
+        // mapSettings.setWindChart(true);
+        // mapSettings.makeDefault();
         // reload
-        RaceBoardPage raceboard2 = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot() + EVENT_LINK);
-        MapSettingsPO mapSettings2 = raceboard2.openMapSettings();
-        boolean stillSelected = mapSettings2.isWindChartSelected();
-        Assert.assertTrue(stillSelected);
+        // RaceBoardPage raceboard2 = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot() + EVENT_LINK);
+        // MapSettingsPO mapSettings2 = raceboard2.openMapSettings();
+        // boolean stillSelected = mapSettings2.isWindChartSelected();
+        // Assert.assertTrue(stillSelected);
     }
 }
