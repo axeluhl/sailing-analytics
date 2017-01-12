@@ -31,12 +31,12 @@ public abstract class ValueLinkedHashSetSetting<T> extends AbstractValueCollecti
     }
     
     @Override
-    protected ValueCollectionValue<Set<Value>> createValue() {
+    protected final ValueCollectionValue<Set<Value>> createValue() {
         return new LinkedHashSetValue();
     }
     
     @Override
-    protected Set<T> createDefaultValuesCollection() {
+    protected final Set<T> createDefaultValuesCollection() {
         return new LinkedHashSet<>();
     }
 }
