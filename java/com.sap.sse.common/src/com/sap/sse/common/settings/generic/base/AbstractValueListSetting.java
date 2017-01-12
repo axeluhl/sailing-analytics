@@ -36,12 +36,12 @@ public abstract class AbstractValueListSetting<T> extends AbstractValueCollectio
     }
 
     @Override
-    protected ValueCollectionValue<List<Value>> createValue() {
+    protected final ValueCollectionValue<List<Value>> createValue() {
         return new ValueListValue();
     }
     
     @Override
-    protected List<T> createDefaultValuesCollection() {
+    protected final List<T> createDefaultValuesCollection() {
         return new ArrayList<>();
     }
 }

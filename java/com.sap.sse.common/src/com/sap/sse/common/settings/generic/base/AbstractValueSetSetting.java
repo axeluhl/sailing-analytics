@@ -31,12 +31,12 @@ public abstract class AbstractValueSetSetting<T> extends AbstractValueCollection
     }
     
     @Override
-    protected ValueCollectionValue<Set<Value>> createValue() {
+    protected final ValueCollectionValue<Set<Value>> createValue() {
         return new ValueSetValue();
     }
     
     @Override
-    protected Set<T> createDefaultValuesCollection() {
+    protected final Set<T> createDefaultValuesCollection() {
         return new HashSet<>();
     }
 }
