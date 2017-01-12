@@ -19,6 +19,8 @@ import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.S
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesListPO.TrackedRaceDescriptor;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO.TrackableRaceDescriptor;
+import com.sap.sailing.selenium.pages.raceboard.MapSettingsPO;
+import com.sap.sailing.selenium.pages.raceboard.RaceBoardPage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class SettingsTest extends AbstractSeleniumTest {
@@ -35,6 +37,7 @@ public class SettingsTest extends AbstractSeleniumTest {
             .getTime();
 
     private static final String EVENT_LINK = "/gwt/RaceBoard.html?leaderboardName=BMW+Cup+(J80)&regattaName=BMW+Cup+(J80)&raceName=BMW+Cup+Race+1&canReplayDuringLiveRaces=true";
+    private static final String BMW_CUP_RACE_NAME = "R1";
 
     private TrackableRaceDescriptor trackableRace;
 
@@ -43,6 +46,7 @@ public class SettingsTest extends AbstractSeleniumTest {
     @Override
     @Before
     public void setUp() {
+        // getWebDriver().manage().window().maximize();
         this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(RACE, 1), BMW_CUP_BOAT_CLASS);
         this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(RACE, 1));
         clearState(getContextRoot());
@@ -69,20 +73,20 @@ public class SettingsTest extends AbstractSeleniumTest {
         // status FINISHED when done loading
 
         LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
+        Thread.sleep(1000);
         LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(BMW_CUP_REGATTA);
+        Thread.sleep(1000);
         Assert.assertTrue(details != null);
-        // RaceDescriptor firstRace = details.getRaces().get(0);
-        // Assert.assertTrue(firstRace.getName().equals("R1"));
-        details.linkRace(new RaceDescriptor(trackableRace.raceName, "Default", false, false, 0), trackedRace);
+        details.linkRace(new RaceDescriptor(BMW_CUP_RACE_NAME, "Default", false, false, 0), trackedRace);
 
-        // RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot() + EVENT_LINK);
-        // MapSettingsPO mapSettings = raceboard.openMapSettings();
-        // mapSettings.setWindChart(true);
-        // mapSettings.makeDefault();
+        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot() + EVENT_LINK);
+        MapSettingsPO mapSettings = raceboard.openMapSettings();
+        mapSettings.setWindChart(true);
+        mapSettings.makeDefault();
         // reload
-        // RaceBoardPage raceboard2 = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot() + EVENT_LINK);
-        // MapSettingsPO mapSettings2 = raceboard2.openMapSettings();
-        // boolean stillSelected = mapSettings2.isWindChartSelected();
-        // Assert.assertTrue(stillSelected);
+        RaceBoardPage raceboard2 = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot() + EVENT_LINK);
+        MapSettingsPO mapSettings2 = raceboard2.openMapSettings();
+        boolean stillSelected = mapSettings2.isWindChartSelected();
+        Assert.assertTrue(stillSelected);
     }
 }
