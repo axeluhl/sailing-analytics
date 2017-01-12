@@ -162,7 +162,7 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
                     }
                 }
             }
-        });
+        }, true);
     }
     
     private void continueRetrieveDefaultSettings(
