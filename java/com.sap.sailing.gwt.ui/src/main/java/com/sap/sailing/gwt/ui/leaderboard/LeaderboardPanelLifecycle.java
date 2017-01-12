@@ -9,6 +9,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class LeaderboardPanelLifecycle implements ComponentLifecycle<LeaderboardSettings, LeaderboardSettingsDialogComponent> {
+    protected static final String ID = "LeaderboardPanel";
+    
     private final StringMessages stringMessages;
     private final List<RaceColumnDTO> raceList;
 
@@ -44,7 +46,7 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
 
     @Override
     public String getComponentId() {
-        return "LeaderboardPanel";
+        return ID;
     }
 
     @Override

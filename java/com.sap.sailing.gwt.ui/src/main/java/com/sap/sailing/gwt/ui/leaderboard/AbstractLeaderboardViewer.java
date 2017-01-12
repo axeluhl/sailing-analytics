@@ -10,7 +10,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -20,13 +19,16 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 
 /**
  * A base class for a leaderboard viewer.
  * 
  * @author Frank Mittag (c163874)
  */
-public abstract class AbstractLeaderboardViewer extends SimplePanel {
+public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPerspectiveLifecycle> extends AbstractPerspectiveComposite<PL, LeaderboardPerspectiveOwnSettings> {
     
     protected static final ViewerToolbar RES = GWT.create(ViewerToolbar.class);
     protected final StringMessages stringMessages;
@@ -40,14 +42,19 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
     protected final boolean hideToolbar;
 
 
-    public AbstractLeaderboardViewer(CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
-            Timer timer, StringMessages stringMessages, boolean hideToolbar, LeaderboardPanel leaderboardPanel) {
+    public AbstractLeaderboardViewer(AbstractLeaderboardComponentContext<PL> componentContext,
+            PerspectiveLifecycleWithAllSettings<PL, LeaderboardPerspectiveOwnSettings> perspectiveLifecycleWithAllSettings,
+            CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
+            Timer timer, StringMessages stringMessages, LeaderboardPanel leaderboardPanel) {
+        super(componentContext, perspectiveLifecycleWithAllSettings);
+        addChildComponent(leaderboardPanel);
+        
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.leaderboardPanel = leaderboardPanel;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
         this.timer = timer;
-        this.hideToolbar = hideToolbar;
+        this.hideToolbar = perspectiveLifecycleWithAllSettings.getPerspectiveSettings().isHideToolbar();
         
         RES.css().ensureInjected();
     }
@@ -59,12 +66,13 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
     protected FlowPanel createViewerPanel() {
         FlowPanel mainPanel = new FlowPanel();
         mainPanel.setSize("100%", "100%");
-        getElement().getStyle().setMarginLeft(12, Unit.PX);
-        getElement().getStyle().setMarginRight(12, Unit.PX);
+        mainPanel.getElement().getStyle().setMarginLeft(12, Unit.PX);
+        mainPanel.getElement().getStyle().setMarginRight(12, Unit.PX);
         if (!hideToolbar) {
             componentsNavigationPanel = new FlowPanel();
             componentsNavigationPanel.addStyleName(RES.css().viewerToolbar());
             mainPanel.add(componentsNavigationPanel);
+            addChildComponent(leaderboardPanel);
         }
         return mainPanel;
     }
@@ -117,5 +125,29 @@ public abstract class AbstractLeaderboardViewer extends SimplePanel {
         }
     }
 
+
+    @Override
+    public SettingsDialogComponent<LeaderboardPerspectiveOwnSettings> getPerspectiveOwnSettingsDialogComponent() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean hasPerspectiveOwnSettings() {
+        // TODO Auto-generated method stub
+        return true;
+    }
+
+    @Override
+    public String getId() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
 
