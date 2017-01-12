@@ -51,6 +51,8 @@ public class UserService {
 
     private final Set<UserStatusEventHandler> handlers;
 
+    private boolean userInitiallyLoaded = false;
+    
     private UserDTO currentUser;
 
     private final String id;
@@ -182,6 +184,7 @@ public class UserService {
     
     private void setCurrentUser(UserDTO result, final boolean notifyOtherInstances) {
         currentUser = result;
+        userInitiallyLoaded = true;
         logger.info("User changed to " + (result == null ? "No User" : (result.getName() + " roles: "
                 + result.getRoles())));
         notifyUserStatusEventHandlers();
@@ -191,7 +194,14 @@ public class UserService {
     }
 
     public void addUserStatusEventHandler(UserStatusEventHandler handler) {
+        addUserStatusEventHandler(handler, false);
+    }
+    
+    public void addUserStatusEventHandler(UserStatusEventHandler handler, boolean fireIfUserIsAlreadyAvailable) {
         handlers.add(handler);
+        if(userInitiallyLoaded) {
+            handler.onUserStatusChange(currentUser);
+        }
     }
 
     public void removeUserStatusEventHandler(UserStatusEventHandler handler) {
