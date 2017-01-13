@@ -301,8 +301,10 @@ public class FixesAndTails {
      */
     private void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType> mergeThis, final long timeForPositionTransitionMillis) {
         List<GPSFixDTOWithSpeedWindTackAndLegType> intoThis = fixes.get(competitorDTO);
-        int indexOfFirstShownFix = firstShownFix.get(competitorDTO).get() == null ? -1 : firstShownFix.get(competitorDTO).get();
-        int indexOfLastShownFix = lastShownFix.get(competitorDTO).get() == null ? -1 : lastShownFix.get(competitorDTO).get();
+
+        int indexOfFirstShownFix = (firstShownFix.get(competitorDTO) == null || firstShownFix.get(competitorDTO).get() == null) ? -1
+                : firstShownFix.get(competitorDTO).get();
+        int indexOfLastShownFix = (lastShownFix.get(competitorDTO) == null || lastShownFix.get(competitorDTO).get() == null) ? -1 : lastShownFix.get(competitorDTO).get();
         final Polyline tail = getTail(competitorDTO);
         int intoThisIndex = 0;
         final Comparator<GPSFixDTOWithSpeedWindTackAndLegType> fixByTimePointComparator = new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
