@@ -199,7 +199,7 @@ public class UserService {
     
     public void addUserStatusEventHandler(UserStatusEventHandler handler, boolean fireIfUserIsAlreadyAvailable) {
         handlers.add(handler);
-        if(userInitiallyLoaded) {
+        if (userInitiallyLoaded && fireIfUserIsAlreadyAvailable) {
             handler.onUserStatusChange(currentUser);
         }
     }
