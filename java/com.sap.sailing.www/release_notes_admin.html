@@ -25,6 +25,16 @@
 
                     <h2 class="articleSubheadline">December 2016</h2>
                     <ul class="bulletList">
+                    	<li>Filter boxes now support quoting phrases, such as <tt>"Race 2"</tt> to make them a single search term.
+                    	    Previously, when entering <tt>Race 2</tt> this would match all lines containing <tt>Race</tt> as well
+                    	    as all lines containing the digit <tt>2</tt>, such as it occurs in <tt>2015</tt> or <tt>2016</tt>.
+                    	    Enclosing the phrase with double quotes as in <tt>"Race 2"</tt> will consider the full string in quotes
+                    	    as a search term. In the unlikely case of searching for a double quote you can do that by prefixing
+                    	    the double quote with a backslash character, as in <tt>\"</tt>.
+                    	</li>
+                    </ul>
+                    <h2 class="articleSubheadline">December 2016</h2>
+                    <ul class="bulletList">
 			 <li>Partial replication is now possible. If the system property <tt>replicate.on.start</tt>
 			     that controls automatic replication upon start-up provides only a partial comma-separated
 			     list of replicables, the connection to the master server (configured by the other

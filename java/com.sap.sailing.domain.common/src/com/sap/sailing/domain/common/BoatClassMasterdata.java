@@ -100,6 +100,7 @@ public enum BoatClassMasterdata {
     TORNADO ("Tornado Catamaran", true, 6.10, 3.02, BoatHullType.CATAMARAN, true, "Tornado", "Tornado Cat"),
     TRIAS ("Trias", true, 9.20, 2.12, BoatHullType.MONOHULL, true),
     VIPER_640 ("Viper 640", true, 6.43, 2.49, BoatHullType.MONOHULL, true),
+    VO60 ("VO60", true, 19.5, 5.25, BoatHullType.MONOHULL, true, "Volvo Ocean 60", "VolvoOcean60", "W60", "Whitbread60", "Whitbread 60"),
     VX_ONE ("VX ONE", true, 5.79, 2.19, BoatHullType.MONOHULL, true, "VX-ONE"),
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, true, "X99"),
     

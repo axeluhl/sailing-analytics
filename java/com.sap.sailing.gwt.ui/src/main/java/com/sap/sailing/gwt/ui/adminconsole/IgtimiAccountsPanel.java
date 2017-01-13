@@ -156,7 +156,10 @@ public class IgtimiAccountsPanel extends FlowPanel {
             }
         });
         add(refreshButton);
-        this.sailingService.getIgtimiAuthorizationUrl(new AsyncCallback<String>() {
+        final String protocol = Window.Location.getProtocol();
+        final String hostname = Window.Location.getHostName();
+        final String port = Window.Location.getPort();
+        this.sailingService.getIgtimiAuthorizationUrl(protocol, hostname, port, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(IgtimiAccountsPanel.this.stringMessages.errorGettingIgtimiAuthorizationUrl(caught.getMessage()),

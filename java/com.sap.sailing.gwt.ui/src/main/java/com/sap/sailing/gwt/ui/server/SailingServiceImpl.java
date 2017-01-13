@@ -879,7 +879,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         regattaDTO.endDate = regatta.getEndDate() != null ? regatta.getEndDate().asDate() : null;
         BoatClass boatClass = regatta.getBoatClass();
         if (boatClass != null) {
-            regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength());
+            regattaDTO.boatClass = new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength(), boatClass.getHullBeam());
         }
         if (regatta.getDefaultCourseArea() != null) {
             regattaDTO.defaultCourseAreaUuid = regatta.getDefaultCourseArea().getId();
@@ -3660,10 +3660,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private Map<Locale, URL> convertToLocalesAndUrls(Map<String, String> sailorsInfoWebsiteURLsByLocaleName) {
         Map<Locale, URL> eventURLs = new HashMap<>();
         for (Map.Entry<String, String> entry : sailorsInfoWebsiteURLsByLocaleName.entrySet()) {
-            try {
-                eventURLs.put(toLocale(entry.getKey()), new URL(entry.getValue()));
-            } catch(Exception e) {
-                // broken URLs or Locales are not being stored
+            if (entry.getValue() != null) {
+                try {
+                    eventURLs.put(toLocale(entry.getKey()), new URL(entry.getValue()));
+                } catch(Exception e) {
+                    // broken URLs or Locales are not being stored
+                }
             }
         }
         return eventURLs;
@@ -5085,8 +5087,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public String getIgtimiAuthorizationUrl() {
-        return getIgtimiConnectionFactory().getAuthorizationUrl();
+    public String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort) {
+        return getIgtimiConnectionFactory().getAuthorizationUrl(redirectProtocol, redirectHostname, redirectPort);
     }
 
     @Override

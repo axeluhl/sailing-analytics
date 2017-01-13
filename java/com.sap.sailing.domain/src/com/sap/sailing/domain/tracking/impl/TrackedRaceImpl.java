@@ -82,11 +82,13 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
@@ -101,6 +103,7 @@ import com.sap.sailing.domain.common.impl.CourseChangeImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.TargetTimeInfoImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -3930,18 +3933,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
+    public TargetTimeInfo getEstimatedTimeToComplete(final TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
             NoWindException {
        if (polarDataService == null) {
             throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
         }
         Duration durationOfAllLegs = Duration.NULL;
-        final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, timepoint);
+        TimePoint current = timepoint;
+        final List<LegTargetTimeInfo> legTargetTimes = new ArrayList<>();
         for (TrackedLeg leg : trackedLegs.values()) {
-            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint, markPositionCache);
-            durationOfAllLegs = durationOfAllLegs.plus(durationOfLeg);
+            final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, current);
+            LegTargetTimeInfo legTargetTime = leg.getEstimatedTimeToComplete(polarDataService, current, markPositionCache);
+            legTargetTimes.add(legTargetTime);
+            durationOfAllLegs = durationOfAllLegs.plus(legTargetTime.getExpectedDuration());
+            current = current.plus(legTargetTime.getExpectedDuration()); // simulate the next leg with the wind as of the projected finishing time of the previous leg
         }
-        return durationOfAllLegs;
+        return new TargetTimeInfoImpl(legTargetTimes);
     }
     
     @Override
