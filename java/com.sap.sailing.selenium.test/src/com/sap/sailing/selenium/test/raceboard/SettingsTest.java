@@ -46,7 +46,6 @@ public class SettingsTest extends AbstractSeleniumTest {
     @Override
     @Before
     public void setUp() {
-        // getWebDriver().manage().window().maximize();
         this.trackableRace = new TrackableRaceDescriptor(BMW_CUP_EVENT, String.format(RACE, 1), BMW_CUP_BOAT_CLASS);
         this.trackedRace = new TrackedRaceDescriptor(BMW_CUP_REGATTA, BMW_CUP_BOAT_CLASS, String.format(RACE, 1));
         clearState(getContextRoot());
