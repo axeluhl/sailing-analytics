@@ -11,16 +11,18 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
 
-public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConnectivityParameters {
+public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTrackingConnectivityParameters {
+    public static final String TYPE = "TRAC_TRAC";
+    
     private final URL paramURL;
     private final URI liveURI;
     private final URI storedURI;
@@ -42,8 +44,8 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace,  boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             DomainFactory domainFactory, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility) {
-        super();
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination) {
+        super(trackWind, correctWindDirectionByMagneticDeclination);
         this.paramURL = paramURL;
         this.liveURI = liveURI;
         this.storedURI = storedURI;
@@ -63,13 +65,18 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     }
 
     @Override
+    public String getTypeIdentifier() {
+        return TYPE;
+    }
+
+    @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogResolver raceLogResolver) throws MalformedURLException, FileNotFoundException, URISyntaxException,
             CreateModelException, SubscriberInitializationException {
         RaceTracker tracker = domainFactory.createRaceTracker(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus,
-                raceVisibility, trackedRegattaRegistry, raceLogResolver);
+                raceVisibility, trackedRegattaRegistry, raceLogResolver, this);
         return tracker;
     }
 
@@ -79,7 +86,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, paramURL, liveURI, storedURI,
                 courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm,
                 raceLogStore, regattaLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus,
-                raceVisibility, trackedRegattaRegistry, raceLogResolver);
+                raceVisibility, trackedRegattaRegistry, raceLogResolver, this);
         return tracker;
     }
 
@@ -91,6 +98,54 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     @Override
     public long getDelayToLiveInMillis() {
         return delayToLiveInMillis;
+    }
+
+    public URL getParamURL() {
+        return paramURL;
+    }
+
+    public URI getLiveURI() {
+        return liveURI;
+    }
+
+    public URI getStoredURI() {
+        return storedURI;
+    }
+
+    public URI getCourseDesignUpdateURI() {
+        return courseDesignUpdateURI;
+    }
+
+    public TimePoint getStartOfTracking() {
+        return startOfTracking;
+    }
+
+    public TimePoint getEndOfTracking() {
+        return endOfTracking;
+    }
+
+    public Duration getOffsetToStartTimeOfSimulatedRace() {
+        return offsetToStartTimeOfSimulatedRace;
+    }
+
+    public String getTracTracUsername() {
+        return tracTracUsername;
+    }
+
+    public String getTracTracPassword() {
+        return tracTracPassword;
+    }
+
+    public String getRaceStatus() {
+        return raceStatus;
+    }
+
+    public String getRaceVisibility() {
+        return raceVisibility;
+    }
+
+    public boolean isUseInternalMarkPassingAlgorithm() {
+        return useInternalMarkPassingAlgorithm;
     }
 
 }

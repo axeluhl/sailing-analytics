@@ -184,8 +184,6 @@
     <string name="race_list_filter_show_active">Show active</string>
     <string name="race_reset_time_schedule_race">Schedule race</string>
     <string name="race_reset_time_startmode_starttime">Select start mode and start time</string>
-    <string name="today">Today</string>
-    <string name="tomorrow">Tomorrow</string>
     <string name="start">Set start time</string>
     <string name="nationality">Nationality</string>
     <string name="number">Number</string>
@@ -456,7 +454,6 @@
     <string name="author_type_officer_finish">Race Officer on Finish Vessel</string>
     <string name="author_type_shore_control">Shore Control</string>
     <string name="author_viewer">Viewer</string>
-    <string name="yesterday">Yesterday</string>
     <string name="change_proceed">Proceed</string>
     <string name="change_cancel">Cancel</string>
     <string name="change_message">According to the race rules this data is not changeable in the current\nrace state. You may proceed nevertheless to correct wrong inputs.</string>
@@ -492,7 +489,6 @@
     <string name="longitude_value" translatable="false">%.5f</string>
     <string name="accuracy_value" translatable="false"><![CDATA[~ %.0fm]]></string>
     <string name="accuracy_timestamp">(since %s)</string>
-    <string name="time_ago" translatable="false">%1$dh %2$02d\' %3$02d\"</string>
     <string name="prev_course">Previous Course</string>
     <string name="layout_course">Course Layout</string>
     <string name="wind_degree">°</string>
@@ -507,7 +503,7 @@
     <string name="onboarding_input">Manual Input</string>
     <string name="race_group">Group Racing</string>
     <string name="wind_select_race">Select Race</string>
-    <string name="added_to_result_list">Added \'%1$s\' to result list at position %2$s</string>
+    <string name="added_to_result_list">Added \'%1$s\' to result list at position %2$d</string>
     <string name="get_started">Getting Started</string>
     <string name="position">Position</string>
     <string name="server_deeplink_message">Server successfully changed to %1$s.</string>
@@ -531,7 +527,6 @@
     <string name="preference_heading_with_declination_subtracted_summary_is_disabled">North-based</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Heading</string>
     <string name="finishing_date">Finishing Date</string>
-    <string name="date_short" translatable="false">yyyy-MM-dd</string>
     <string-array name="sort_by_values">
         <item>by Sail Id</item>
         <item>by Name</item>

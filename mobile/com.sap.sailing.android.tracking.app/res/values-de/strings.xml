@@ -22,8 +22,8 @@
     <string name="please_confirm">Bitte bestätigen</string>
     <string name="do_you_really_want_to_stop_tracking">Soll das Tracking wirklich beendet werden?</string>
     <string name="tracking_status_tracking">Tracking läuft</string>
-    <string name="tracking_status_no_gps_signal">Kein GPS Signal!</string>
-    <string name="tracking_mode_offline">Offline</string>
+    <string name="tracking_status_no_gps_signal">Keine GPS Änderungen oder Signal!</string>
+    <string name="tracking_mode_no_attempt">Initialisierung</string>
     <string name="tracking_mode">Modus</string>
     <string name="tracking_mode_live">Live</string>
     <string name="tracking_mode_battery_saving">Energie sparen</string>
@@ -44,12 +44,18 @@
     <string name="error_could_not_complete_operation_on_server_try_again">Konnte Operation nicht durchführen. Bitte versuchen Sie es noch einmal.</string>
     <string name="error_sending_team_image_to_server">Fehler: Konnte Team-Foto nicht an den server senden.</string>
     <string name="regatta_starts_in">Regatta beginnt in:</string>
-    <string name="hours">Stunden</string>
-    <string name="minute">Minute</string>
-    <string name="minutes">Minuten</string>
-    <string name="days">Tage</string>
-    <string name="hour">Stunde</string>
-    <string name="day">Tag</string>
+    <plurals name="hour">
+        <item quantity="one">Stunde</item>
+        <item quantity="other">Stunden</item>
+    </plurals>
+    <plurals name="minute">
+        <item quantity="one">Minute</item>
+        <item quantity="other">Minuten</item>
+    </plurals>
+    <plurals name="day">
+        <item quantity="one">Tag</item>
+        <item quantity="other">Tage</item>
+    </plurals>
     <string name="please_listen_to_announcements">Bitte achten Sie auf die Durchsagen</string>
     <string name="no_qr_code">Sie haben keinen QR-Code?</string>
     <string name="scan_qr">QR-Code scannen</string>

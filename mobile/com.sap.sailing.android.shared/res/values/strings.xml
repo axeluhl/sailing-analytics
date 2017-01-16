@@ -81,4 +81,10 @@
     <string name="footer_text">More information on</string>
     <string name="footer_text_link">https://www.sapsailing.com</string>
 
+    <string name="yesterday">Yesterday</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="time_ago" translatable="false">%1$dh %2$02d\' %3$02d\"</string>
+    <string name="date_short" translatable="false">yyyy-MM-dd</string>
+
 </resources>

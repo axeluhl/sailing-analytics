@@ -56,6 +56,9 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
 
+    /**
+     * Race logs as keys, {@link ReadonlyRaceState} objects wrapping their respective key race log as values
+     */
     private ConcurrentMap<RaceLog, ReadonlyRaceState> raceLogs = new ConcurrentHashMap<>();
 
     private DynamicTrackedRace trackedRace;
