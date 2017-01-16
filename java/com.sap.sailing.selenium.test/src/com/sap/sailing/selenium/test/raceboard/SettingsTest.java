@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.test.raceboard;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
@@ -36,7 +37,6 @@ public class SettingsTest extends AbstractSeleniumTest {
     private static final Date BMW_STOP_EVENT_TIME = DatatypeConverter.parseDateTime("2012-04-08T10:50:00-05:00")
             .getTime();
 
-    private static final String EVENT_LINK = "/gwt/RaceBoard.html?leaderboardName=BMW+Cup+(J80)&regattaName=BMW+Cup+(J80)&raceName=BMW+Cup+Race+1&canReplayDuringLiveRaces=true";
     private static final String BMW_CUP_RACE_NAME = "R1";
 
     private TrackableRaceDescriptor trackableRace;
@@ -53,7 +53,7 @@ public class SettingsTest extends AbstractSeleniumTest {
     }
 
     @Test
-    public void createRaceAsAdminSetWindSettingToTrue() throws InterruptedException {
+    public void createRaceAsAdminSetWindSettingToTrue() throws InterruptedException, UnsupportedEncodingException {
         RegattaDescriptor bmwCupDescriptor = new RegattaDescriptor(BMW_CUP_EVENT, BMW_CUP_BOAT_CLASS);
 
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
@@ -72,18 +72,18 @@ public class SettingsTest extends AbstractSeleniumTest {
         // status FINISHED when done loading
 
         LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
-        Thread.sleep(1000);
         LeaderboardDetailsPanelPO details = leaderboard.getLeaderboardDetails(BMW_CUP_REGATTA);
-        Thread.sleep(1000);
         Assert.assertTrue(details != null);
         details.linkRace(new RaceDescriptor(BMW_CUP_RACE_NAME, "Default", false, false, 0), trackedRace);
 
-        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot() + EVENT_LINK);
+        RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(RACE, 1));
         MapSettingsPO mapSettings = raceboard.openMapSettings();
         mapSettings.setWindChart(true);
         mapSettings.makeDefault();
         // reload
-        RaceBoardPage raceboard2 = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot() + EVENT_LINK);
+        RaceBoardPage raceboard2 = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), BMW_CUP_REGATTA,
+                BMW_CUP_REGATTA, String.format(RACE, 1));
         MapSettingsPO mapSettings2 = raceboard2.openMapSettings();
         boolean stillSelected = mapSettings2.isWindChartSelected();
         Assert.assertTrue(stillSelected);

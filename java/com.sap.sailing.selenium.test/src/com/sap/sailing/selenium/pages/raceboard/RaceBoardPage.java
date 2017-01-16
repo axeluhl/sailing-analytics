@@ -1,5 +1,7 @@
 package com.sap.sailing.selenium.pages.raceboard;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.function.BooleanSupplier;
 
 import org.openqa.selenium.WebDriver;
@@ -21,9 +23,14 @@ public class RaceBoardPage extends HostPageWithAuthentication {
     /**
      * Navigates to the given home URL and provides the corresponding {@link PageObject}.
      * 
-     * @param driver the {@link WebDriver} to use
-     * @param url the desired destination URL
+     * @param driver
+     *            the {@link WebDriver} to use
+     * @param url
+     *            the desired destination URL
      * @return the {@link PageObject} for the home page
+     * 
+     *         Allows to use any url, because else some use cases for the RaceBoard are problematic to reach, for mor
+     *         generic cases, a more specialized goTo Version is recommended, to reduce hardcoded strings
      */
     public static RaceBoardPage goToRaceboardUrl(WebDriver driver, String url) {
         // workaround for hostpage removing query from url, required for evenntid in this case
@@ -44,6 +51,17 @@ public class RaceBoardPage extends HostPageWithAuthentication {
             }
         });
         return new MapSettingsPO(driver, context.findElement(new BySeleniumId("raceMapSettings")));
+    }
+
+    public static RaceBoardPage goToRaceboardUrl(WebDriver webDriver,String context, String leaderboardName, String regattaName,
+            String raceName) throws UnsupportedEncodingException {
+//        private static final String EVENT_LINK = "gwt/RaceBoard.html?leaderboardName=BMW+Cup+(J80)&regattaName=BMW+Cup+(J80)&raceName=BMW+Cup+Race+1&canReplayDuringLiveRaces=true";
+        String escapedLeaderBoardName = URLEncoder.encode(leaderboardName,"UTF-8");
+        String escapedRegattaName = URLEncoder.encode(regattaName, "UTF-8");
+        String escapedRaceName = URLEncoder.encode(raceName, "UTF-8");
+        String url = context + "gwt/RaceBoard.html?leaderboardName=" + escapedLeaderBoardName + "&regattaName="
+                + escapedRegattaName + "&raceName=" + escapedRaceName;
+        return goToRaceboardUrl(webDriver, url);
     }
     
 }
