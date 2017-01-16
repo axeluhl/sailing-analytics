@@ -62,13 +62,16 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesEventFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
@@ -5037,15 +5040,55 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException {
         RaceLog raceLog = getRaceLog(dto.leaderboardName, dto.raceColumnName, dto.fleetName);
         // the tracking start/end time events are not revoked; updates with null as TimePoint may be added instead
+        final LogEventAuthorImpl author = new LogEventAuthorImpl(dto.authorName, dto.authorPriority);
         if (!Util.equalsWithNull(dto.newStartOfTracking, dto.currentStartOfTracking)) {
-            raceLog.add(new RaceLogStartOfTrackingEventImpl(
-                    dto.newStartOfTracking, new LogEventAuthorImpl(dto.authorName, dto.authorPriority),
-                    raceLog.getCurrentPassId()));
+            if (dto.newStartOfTracking != null) {
+                raceLog.add(new RaceLogStartOfTrackingEventImpl(dto.newStartOfTracking.getTimePoint(),
+                        author, raceLog.getCurrentPassId()));
+            } else {
+                final Pair<RaceLogStartOfTrackingEvent, RaceLogEndOfTrackingEvent> trackingTimesEvents = new TrackingTimesEventFinder(raceLog).analyze();
+                // we assume to find a valid "set start of tracking time" event that matches the old start of tracking time;
+                // if the time doesn't match dto.currentStartOfTracking, the revocation is rejected with an exception;
+                // the result of trying to revoke is returned otherwise, and it may not be the result intended in case
+                // the author's priority was lower than that of the author of the event that is to be revoked.
+                if (trackingTimesEvents == null || trackingTimesEvents.getA() == null ||
+                        !Util.equalsWithNull(trackingTimesEvents.getA().getLogicalTimePoint(), dto.currentStartOfTracking==null?null:dto.currentStartOfTracking.getTimePoint())) {
+                    throw new NotFoundException("Old start of tracking time in the race log ("+
+                        (trackingTimesEvents==null||trackingTimesEvents.getA()==null?"unset":trackingTimesEvents.getA().getLogicalTimePoint())+
+                        ") does not match start of tracking time at transaction start ("+dto.currentStartOfTracking==null?null:dto.currentStartOfTracking.getTimePoint()+")");
+                } else {
+                    try {
+                        raceLog.revokeEvent(author, trackingTimesEvents.getA(), "resetting tracking start time");
+                    } catch (NotRevokableException e) {
+                        logger.log(Level.WARNING, "Internal error: event "+trackingTimesEvents.getA()+" was expected to be revokable", e);
+                    }
+                }
+            }
         }
         if (!Util.equalsWithNull(dto.newEndOfTracking, dto.currentEndOfTracking)) {
-            raceLog.add(new RaceLogEndOfTrackingEventImpl(
-                    dto.newEndOfTracking, new LogEventAuthorImpl(dto.authorName, dto.authorPriority),
-                    raceLog.getCurrentPassId()));
+            if (dto.newEndOfTracking != null) {
+                raceLog.add(new RaceLogEndOfTrackingEventImpl(
+                        dto.newEndOfTracking.getTimePoint(), author,
+                        raceLog.getCurrentPassId()));
+            } else {
+                final Pair<RaceLogStartOfTrackingEvent, RaceLogEndOfTrackingEvent> trackingTimesEvents = new TrackingTimesEventFinder(raceLog).analyze();
+                // we assume to find a valid "set start of tracking time" event that matches the old start of tracking time;
+                // if the time doesn't match dto.currentStartOfTracking, the revocation is rejected with an exception;
+                // the result of trying to revoke is returned otherwise, and it may not be the result intended in case
+                // the author's priority was lower than that of the author of the event that is to be revoked.
+                if (trackingTimesEvents == null || trackingTimesEvents.getB() == null ||
+                        !Util.equalsWithNull(trackingTimesEvents.getB().getLogicalTimePoint(), dto.currentEndOfTracking==null?null:dto.currentEndOfTracking.getTimePoint())) {
+                    throw new NotFoundException("Old end of tracking time in the race log ("+
+                        (trackingTimesEvents==null||trackingTimesEvents.getB()==null?"unset":trackingTimesEvents.getB().getLogicalTimePoint())+
+                        ") does not match end of tracking time at transaction start ("+dto.currentEndOfTracking==null?null:dto.currentEndOfTracking.getTimePoint()+")");
+                } else {
+                    try {
+                        raceLog.revokeEvent(author, trackingTimesEvents.getB(), "resetting tracking end time");
+                    } catch (NotRevokableException e) {
+                        logger.log(Level.WARNING, "Internal error: event "+trackingTimesEvents.getB()+" was expected to be revokable", e);
+                    }
+                }
+            }
         }
     }
 
