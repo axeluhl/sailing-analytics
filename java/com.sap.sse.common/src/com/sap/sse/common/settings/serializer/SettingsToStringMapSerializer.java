@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 import com.sap.sse.common.settings.Settings;
@@ -102,10 +104,12 @@ public class SettingsToStringMapSerializer {
     }
     
     public final <T extends SettingsMap> T deserialize(T settingsMap, Map<String, Iterable<String>> values) {
-        Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
-        for (Map.Entry<String, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
-            Settings settings = entry.getValue();
-            Map<String, Iterable<String>> innerValues = mappedInnerValues.get(entry.getKey().toString());
+        final Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
+        final Set<Entry<String, Settings>> childSettings = settingsMap.getSettingsByKey().entrySet();
+        for (Map.Entry<String, Settings> entry : childSettings) {
+            final String key = entry.getKey();
+            final Settings settings = entry.getValue();
+            final Map<String, Iterable<String>> innerValues = mappedInnerValues.get(key.toString());
             if(innerValues != null) {
                 if(settings instanceof SettingsMap) {
                     deserialize((SettingsMap)settings, innerValues);
