@@ -100,7 +100,6 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
 
     @Override
     public Bearing getRotationInDegrees(CoursePositionsDTO coursePositionsDTO) {
-        List<Position> lineMarkPositions = new ArrayList<>();
         MarkDTO firstMark = null;
         MarkDTO secondMark = null;
         for (WaypointDTO currentWaypoint : coursePositionsDTO.course.waypoints) {
@@ -109,28 +108,20 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
                 firstMark = marks.next();
                 if (marks.hasNext()) {
                     secondMark = marks.next();
-                    if (markIdAsString.equals(firstMark.getIdAsString())
-                            || markIdAsString.equals(secondMark.getIdAsString())) {
-                        lineMarkPositions.add(firstMark.position);
-                        lineMarkPositions.add(secondMark.position);
-                        break;
+                    if (markIdAsString.equals(firstMark.getIdAsString())) {
+                        return getLineBearing(firstMark.position, secondMark.position);
+                    } else if (markIdAsString.equals(secondMark.getIdAsString())) {
+                        return getLineBearing(secondMark.position, firstMark.position);
                     }
                 }
             }
         }
-        return getLineBearing(lineMarkPositions);
+        return null;
     }
     
-    private Bearing getLineBearing(List<Position> markPositions) {
-        Bearing result = null;
-        if (markPositions.size() > 1) {
-            Position firstPosition = markPositions.get(0);
-            Position secondPosition = markPositions.get(1);
-            if (firstPosition != null) {
-                result = firstPosition.getBearingGreatCircle(secondPosition);
-            }
-        }
-        return result;
+    private Bearing getLineBearing(Position boatMarkPosition, Position pinEndPosition) {
+        // by default, assume the boat is on the starboard side of the line
+        return boatMarkPosition.getBearingGreatCircle(pinEndPosition);
     }
 
 }
