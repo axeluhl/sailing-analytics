@@ -24,7 +24,7 @@ public interface LineDetails {
 
     Distance getLength();
 
-    Bearing getAbsoluteAngleDifferenceToTrueWind();
+    Bearing getAngleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind();
 
     NauticalSide getAdvantageousSideWhileApproachingLine();
     

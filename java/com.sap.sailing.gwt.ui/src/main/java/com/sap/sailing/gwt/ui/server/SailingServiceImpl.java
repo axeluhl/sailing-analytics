@@ -2050,10 +2050,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getStartLine(dateAsTimePoint);
                 if (markPositionDTOsAndLineAdvantage != null) {
                     result.startLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
-                    Bearing absoluteAngleDifferenceToTrueWind = markPositionDTOsAndLineAdvantage
-                            .getAbsoluteAngleDifferenceToTrueWind();
-                    result.startLineAngleToCombinedWind = absoluteAngleDifferenceToTrueWind == null ? null
-                            : absoluteAngleDifferenceToTrueWind.getDegrees();
+                    Bearing angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind = markPositionDTOsAndLineAdvantage
+                            .getAngleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind();
+                    result.startLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind = angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind == null ? null
+                            : angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind.getDegrees();
                     result.startLineAdvantageousSide = markPositionDTOsAndLineAdvantage
                             .getAdvantageousSideWhileApproachingLine();
                     Distance advantage = markPositionDTOsAndLineAdvantage.getAdvantage();
@@ -2065,10 +2065,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 final LineDetails markPositionDTOsAndLineAdvantage = trackedRace.getFinishLine(dateAsTimePoint);
                 if (markPositionDTOsAndLineAdvantage != null) {
                     result.finishLineLengthInMeters = markPositionDTOsAndLineAdvantage.getLength().getMeters();
-                    Bearing absoluteAngleDifferenceToTrueWind = markPositionDTOsAndLineAdvantage
-                            .getAbsoluteAngleDifferenceToTrueWind();
-                    result.finishLineAngleToCombinedWind = absoluteAngleDifferenceToTrueWind == null ? null
-                            : absoluteAngleDifferenceToTrueWind.getDegrees();
+                    Bearing angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind = markPositionDTOsAndLineAdvantage
+                            .getAngleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind();
+                    result.finishLineAngleFromPortToStarboardWhenApproachingLineToCombinedWind = angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind == null ? null
+                            : angleDifferenceFromPortToStarboardWhenApproachingLineToTrueWind.getDegrees();
                     result.finishLineAdvantageousSide = markPositionDTOsAndLineAdvantage
                             .getAdvantageousSideWhileApproachingLine();
                     Distance advantage = markPositionDTOsAndLineAdvantage.getAdvantage();

@@ -60,8 +60,6 @@ public class TrackedLegImpl implements TrackedLeg {
 
     private final static Logger logger = Logger.getLogger(TrackedLegImpl.class.getName());
     
-    private final static double UPWIND_DOWNWIND_TOLERANCE_IN_DEG = 45; // TracTrac does 22.5, Marcus Baur suggest 40; Nils Schr�der suggests 60
-
     private final Leg leg;
     private final Map<Competitor, TrackedLegOfCompetitor> trackedLegsOfCompetitors;
     private TrackedRaceImpl trackedRace;
@@ -193,11 +191,11 @@ public class TrackedLegImpl implements TrackedLeg {
         Bearing legBearing = getLegBearing(at);
         if (legBearing != null) {
             double deltaDeg = legBearing.getDifferenceTo(wind.getBearing()).getDegrees();
-            if (Math.abs(deltaDeg) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
+            if (Math.abs(deltaDeg) < LegType.UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
                 return LegType.DOWNWIND;
             } else {
                 double deltaDegOpposite = legBearing.getDifferenceTo(wind.getBearing().reverse()).getDegrees();
-                if (Math.abs(deltaDegOpposite) < UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
+                if (Math.abs(deltaDegOpposite) < LegType.UPWIND_DOWNWIND_TOLERANCE_IN_DEG) {
                     return LegType.UPWIND;
                 }
             }
