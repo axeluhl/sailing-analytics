@@ -20,8 +20,8 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
     private final static Distance BOAT_MARK_HEIGHT_IN_METERS = new MeterDistance(6.2);
     private final static Distance BOAT_MARK_WIDTH_IN_METERS = new MeterDistance(3.5);
     private final static double BOAT_MARK_SELECTION_SCALE = 3.5;
-    private final static double BOAT_MARK_SELECTION_TRANSLATE_X = -10;
-    private final static double BOAT_MARK_SELECTION_TRANSLATE_Y = -30;
+    private final static double BOAT_MARK_SELECTION_TRANSLATE_X = 50;
+    private final static double BOAT_MARK_SELECTION_TRANSLATE_Y = -130;
     private final String markIdAsString;
 
     public BoatMarkVectorGraphics(MarkType type, String color, String shape, String pattern, String markIdAsString) {
