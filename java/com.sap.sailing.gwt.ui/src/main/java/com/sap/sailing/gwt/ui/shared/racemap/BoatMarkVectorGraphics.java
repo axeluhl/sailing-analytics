@@ -100,7 +100,7 @@ public class BoatMarkVectorGraphics extends AbstractMarkVectorGraphics {
 
     @Override
     public Bearing getRotationInDegrees(CoursePositionsDTO coursePositionsDTO) {
-        List<Position> lineMarkPositions = new ArrayList<Position>();
+        List<Position> lineMarkPositions = new ArrayList<>();
         MarkDTO firstMark = null;
         MarkDTO secondMark = null;
         for (WaypointDTO currentWaypoint : coursePositionsDTO.course.waypoints) {
