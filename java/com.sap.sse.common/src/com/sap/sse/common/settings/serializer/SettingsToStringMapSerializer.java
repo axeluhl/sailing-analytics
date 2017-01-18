@@ -103,7 +103,7 @@ public class SettingsToStringMapSerializer {
         return result;
     }
     
-    public final <T extends SettingsMap> T deserialize(T settingsMap, Map<String, Iterable<String>> values) {
+    public final <T extends SettingsMap> T deserializeSettingsMap(T settingsMap, Map<String, Iterable<String>> values) {
         final Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
         final Set<Entry<String, Settings>> childSettings = settingsMap.getSettingsByKey().entrySet();
         for (Map.Entry<String, Settings> entry : childSettings) {
@@ -112,7 +112,7 @@ public class SettingsToStringMapSerializer {
             final Map<String, Iterable<String>> innerValues = mappedInnerValues.get(key.toString());
             if(innerValues != null) {
                 if(settings instanceof SettingsMap) {
-                    deserialize((SettingsMap)settings, innerValues);
+                    deserializeSettingsMap((SettingsMap) settings, innerValues);
                 } else if(settings instanceof GenericSerializableSettings) {
                     deserialize((GenericSerializableSettings)settings, innerValues);
                 }

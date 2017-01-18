@@ -23,7 +23,7 @@ public class SettingsToStringMapSerializationTest extends AbstractSettingsSerial
     @Override
     protected SettingsMap deserialize(Map<String, Iterable<String>> serializedObject, SettingsMap settingsMap)
             throws Exception {
-        return serializer.deserialize(settingsMap, serializedObject);
+        return serializer.deserializeSettingsMap(settingsMap, serializedObject);
     }
 
     @Override

@@ -74,7 +74,7 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     }
     
     @Override
-    public boolean isDefaultValue() {
+    public final boolean isDefaultValue() {
         ValueCollectionValue<C> value = getValue();
         return ((emptyIsDefault || (defaultValues == null || defaultValues.isEmpty())) && (value == null || value.isEmpty()))
                 || (value != null && value.size() == defaultValues.size() && defaultValues.containsAll(value.getValues(getValueConverter())));

@@ -26,8 +26,7 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
     }
     
     public PerspectiveCompositeTabbedSettingsDialogComponent<PS> getSettingsDialogComponent(PerspectiveCompositeSettings<PS> settings) {
-        PerspectiveLifecycleWithAllSettings<?, PS> perspectiveLifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(this, settings); 
-        return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(perspectiveLifecycleWithAllSettings);
+        return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(this, settings);
     }
     
     @Override

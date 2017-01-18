@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardCha
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -28,33 +28,39 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
 
     
     public MetaLeaderboardViewer(MetaLeaderboardComponentContext componentContext,
-            PerspectiveLifecycleWithAllSettings<MetaLeaderboardPerspectiveLifecycle, LeaderboardPerspectiveOwnSettings> perspectiveLifecycleWithAllSettings,
+            MetaLeaderboardPerspectiveLifecycle lifecycle,
+            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             Timer timer, String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace,
             String leaderboardGroupName, String metaLeaderboardName, ErrorReporter errorReporter,
             StringMessages stringMessages, UserAgentDetails userAgent, DetailType chartDetailType) {
-        this(componentContext, perspectiveLifecycleWithAllSettings, new CompetitorSelectionModel(/* hasMultiSelection */true), sailingService, asyncActionsExecutor,  timer,
+        this(componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
+                sailingService, asyncActionsExecutor, timer,
                 preselectedLeaderboardName, preselectedRace, leaderboardGroupName, metaLeaderboardName,
                 errorReporter, stringMessages, userAgent, chartDetailType);
     }
     
     private MetaLeaderboardViewer(MetaLeaderboardComponentContext componentContext,
-            PerspectiveLifecycleWithAllSettings<MetaLeaderboardPerspectiveLifecycle, LeaderboardPerspectiveOwnSettings> perspectiveLifecycleWithAllSettings,
+            MetaLeaderboardPerspectiveLifecycle lifecycle,
+            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer,
             String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace, String leaderboardGroupName,
             String metaLeaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, DetailType chartDetailType) {
-        super(componentContext, perspectiveLifecycleWithAllSettings, competitorSelectionModel, asyncActionsExecutor,  timer, stringMessages,
+        super(componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
+                stringMessages,
                 new LeaderboardPanel(sailingService, asyncActionsExecutor,
-                        (LeaderboardSettings) perspectiveLifecycleWithAllSettings.getAllSettings().findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
+                        settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
                         preselectedRace != null, preselectedRace, competitorSelectionModel, timer,
                         leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
-                        perspectiveLifecycleWithAllSettings.getPerspectiveSettings().isShowRaceDetails(), /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
-                        perspectiveLifecycleWithAllSettings.getPerspectiveSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
+                        settings.getPerspectiveOwnSettings().isShowRaceDetails(), /* competitorSearchTextBox */ null,
+                        /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */null,
+                        settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
+                        /* autoApplyTopNFilter */ false,
                         /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false));
         
-        final LeaderboardPerspectiveOwnSettings perspectiveSettings = perspectiveLifecycleWithAllSettings.getPerspectiveSettings();
+        final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
         
         FlowPanel mainPanel = createViewerPanel();

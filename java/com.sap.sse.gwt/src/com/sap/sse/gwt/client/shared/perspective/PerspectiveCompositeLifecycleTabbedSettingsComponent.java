@@ -17,17 +17,20 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends PerspectiveLifecycle<PS>, PS extends Settings>
     extends AbstractComponent<PerspectiveCompositeSettings<PS>> {
     
-    private PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings;
     private final String title;
     private PerspectiveCompositeSettings<PS> perspectiveCompositeSettings;
+    private PL lifecycle;
     
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings) {
-        this(perspectiveLifecycleWithAllSettings, null);
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PL lifecycle,
+            PerspectiveCompositeSettings<PS> settings) {
+        this(lifecycle, settings, null);
     }
 
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings, String title) {
-        this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;
-        this.perspectiveCompositeSettings = perspectiveLifecycleWithAllSettings.getAllSettings(); 
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PL lifecycle, PerspectiveCompositeSettings<PS> settings,
+            String title) {
+        // FIXME settings in perspective
+        this.lifecycle = lifecycle;
+        this.perspectiveCompositeSettings = settings;
         this.title = title;
     }
 
@@ -38,7 +41,7 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
 
     @Override
     public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent() {
-        return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(perspectiveLifecycleWithAllSettings);
+        return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(lifecycle, perspectiveCompositeSettings);
     }
 
     @Override
@@ -56,7 +59,7 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
         if (title != null && !title.isEmpty()) {
             return title;
         }
-        return perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getLocalizedShortName();
+        return lifecycle.getLocalizedShortName();
     }
 
     @Override
@@ -81,6 +84,6 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
 
     @Override
     public String getId() {
-        return "PerspectiveCompositeLifecycleTabbedSettingsComponentFor" + perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getComponentId();
+        return "PerspectiveCompositeLifecycleTabbedSettingsComponentFor" + lifecycle.getComponentId();
     }
 }

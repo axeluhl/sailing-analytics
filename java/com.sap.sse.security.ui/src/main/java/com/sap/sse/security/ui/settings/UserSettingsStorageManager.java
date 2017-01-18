@@ -206,11 +206,12 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
     }
     
     @SuppressWarnings("unchecked")
-    private S deserializeFromCurrentUrl(S defaultSettings) {
+    private final S deserializeFromCurrentUrl(S defaultSettings) {
         if(defaultSettings instanceof GenericSerializableSettings) {
             defaultSettings = (S) urlSerializer.deserializeFromCurrentLocation((GenericSerializableSettings) defaultSettings);
         } else if(defaultSettings instanceof SettingsMap) {
-            defaultSettings = (S) urlSerializer.deserializeFromCurrentLocation((SettingsMap) defaultSettings);
+            defaultSettings = (S) urlSerializer
+                    .deserializeSettingsMapFromCurrentLocation((SettingsMap) defaultSettings);
         }
         return defaultSettings;
     }

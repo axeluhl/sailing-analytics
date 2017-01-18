@@ -30,7 +30,8 @@ public class CompositeSettings extends AbstractSettings implements SettingsMap {
         return Collections.unmodifiableMap(settingsPerComponentId);
     }
     
-    public <C extends ComponentLifecycle<S,?>, S extends Settings> Settings findSettingsByComponentId(String componentId) {
-        return settingsPerComponentId.get(componentId);
+    @SuppressWarnings("unchecked")
+    public <C extends ComponentLifecycle<S, ?>, S extends Settings> S findSettingsByComponentId(String componentId) {
+        return (S) settingsPerComponentId.get(componentId);
     }
 }

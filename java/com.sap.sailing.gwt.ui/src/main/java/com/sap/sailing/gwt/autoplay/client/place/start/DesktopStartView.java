@@ -14,6 +14,7 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
@@ -44,7 +45,6 @@ import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTabbedSettingsDialog;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.security.ui.client.UserService;
 
 public class DesktopStartView extends Composite implements StartView {
@@ -71,8 +71,10 @@ public class DesktopStartView extends Composite implements StartView {
     private final EventBus eventBus;
     private final List<EventDTO> events;
     
-    private PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecyclesAndSettings;
-    private PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings;
+    private LeaderboardWithHeaderPerspectiveLifecycle leaderboardLifecycle;
+    private PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings;
+    private RaceBoardPerspectiveLifecycle raceboardLifecycle;
+    private PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> raceboardSettings;
     
     private final int defaultTimeToRaceStartTimeInSeconds = 180;
     
@@ -118,18 +120,21 @@ public class DesktopStartView extends Composite implements StartView {
     }
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
-        LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifecycle = new LeaderboardWithHeaderPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
-        leaderboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(leaderboardPerspectiveLifecycle, leaderboardPerspectiveLifecycle.createDefaultSettings());
-        RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
-        raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle, raceboardPerspectiveLifecycle.createDefaultSettings());
+        leaderboardLifecycle = new LeaderboardWithHeaderPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
+        leaderboardSettings = leaderboardLifecycle.createDefaultSettings();
+        raceboardLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
+        raceboardSettings = raceboardLifecycle.createDefaultSettings();
     }
 
-    private <PL extends PerspectiveLifecycle<PS>, PS extends Settings> void openPerspectiveSettingsDialog(final PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleAndSettings) {
+    private <PL extends PerspectiveLifecycle<PS>, PS extends Settings> void openPerspectiveSettingsDialog(
+            final PL lifecycle, PerspectiveCompositeSettings<PS> settings) {
         PerspectiveCompositeLifecycleTabbedSettingsDialog<PL,PS> dialog = new PerspectiveCompositeLifecycleTabbedSettingsDialog<>(StringMessages.INSTANCE,
-                perspectiveLifecycleAndSettings, perspectiveLifecycleAndSettings.getPerspectiveLifecycle().getLocalizedShortName(), new DialogCallback<PerspectiveCompositeSettings<PS>>() {
+                lifecycle, settings, lifecycle.getLocalizedShortName(),
+                new DialogCallback<PerspectiveCompositeSettings<PS>>() {
             @Override
             public void ok(PerspectiveCompositeSettings<PS> newSettings) {
-                perspectiveLifecycleAndSettings.setAllSettings(newSettings);
+                        // FIXME is callback required?
+                        Window.alert("callback unused, prior called setAllSettings, determine what to do");
             };
 
             @Override
@@ -174,8 +179,8 @@ public class DesktopStartView extends Composite implements StartView {
             StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
             this.updatePerspectives(selectedLeaderboard);
 
-            createPerspectiveSettingsUI(leaderboardPerspectiveLifecyclesAndSettings, leaderboardPerspectiveSettingsPanel);
-            createPerspectiveSettingsUI(raceboardPerspectiveLifecyclesAndSettings, raceboardPerspectiveSettingsPanel);
+            createPerspectiveSettingsUI(leaderboardLifecycle, leaderboardSettings, leaderboardPerspectiveSettingsPanel);
+            createPerspectiveSettingsUI(raceboardLifecycle, raceboardSettings, raceboardPerspectiveSettingsPanel);
         } else {
             startAutoPlayButton.setEnabled(false);
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
@@ -184,18 +189,18 @@ public class DesktopStartView extends Composite implements StartView {
     }
 
     private <PL extends PerspectiveLifecycle<PS>, PS extends Settings> void createPerspectiveSettingsUI(
-            final PerspectiveLifecycleWithAllSettings<PL,PS> perspectiveLifecycleWithAllSettings,
+            final PL lifecycle, PerspectiveCompositeSettings<PS> settings,
             FlowPanel perspectiveSettingsPanel) { 
         perspectiveSettingsPanel.clear();
 
         Button perspectiveSettingsButton = new Button(StringMessages.INSTANCE.settings());
         perspectiveSettingsButton.getElement().getStyle().setMarginRight(10, Unit.PX);
         perspectiveSettingsPanel.add(perspectiveSettingsButton);
-        perspectiveSettingsButton.setEnabled(perspectiveLifecycleWithAllSettings.getAllSettings().hasSettings());
+        perspectiveSettingsButton.setEnabled(settings.hasSettings());
         perspectiveSettingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openPerspectiveSettingsDialog(perspectiveLifecycleWithAllSettings);
+                openPerspectiveSettingsDialog(lifecycle, settings);
             }
         });
     }
@@ -215,7 +220,7 @@ public class DesktopStartView extends Composite implements StartView {
         if(selectedEvent != null && selectedLeaderboardName != null) {
             navigator.goToPlayer(new AutoPlayerConfiguration(selectedEvent.id.toString(), selectedLeaderboardName,
                     startInFullscreenModeBox.getValue(), timeToRaceStartInSeconds.getValue()), 
-                    leaderboardPerspectiveLifecyclesAndSettings, raceboardPerspectiveLifecyclesAndSettings);
+                    leaderboardLifecycle, leaderboardSettings, raceboardLifecycle, raceboardSettings);
         }
     }
 

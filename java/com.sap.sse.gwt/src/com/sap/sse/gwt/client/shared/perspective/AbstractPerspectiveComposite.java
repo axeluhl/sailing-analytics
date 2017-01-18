@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.ComponentTreeNodeInfo;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -24,7 +23,6 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     private final PL perspectiveLifecycle;
     private PS perspectiveOwnSettings;
-    private final PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings;
 
     private final Map<String, Component<? extends Settings>> childComponents = new HashMap<>();
     
@@ -49,10 +47,10 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
         return perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(perspectiveSettings);
     }
 
-    public AbstractPerspectiveComposite(ComponentContext<PL, PerspectiveCompositeSettings<PS>> componentContext, PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings) {
-        this.perspectiveLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle();
-        this.perspectiveOwnSettings = perspectiveLifecycleWithAllSettings.getPerspectiveSettings();
-        this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;
+    public AbstractPerspectiveComposite(ComponentContext<PL, PerspectiveCompositeSettings<PS>> componentContext,
+            PL lifecycle, PerspectiveCompositeSettings<PS> settings) {
+        this.perspectiveLifecycle = lifecycle;
+        this.perspectiveOwnSettings = settings.getPerspectiveOwnSettings();
         getComponentTreeNodeInfo().setComponentContext(componentContext);
     }
 
@@ -119,13 +117,4 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
         return perspectiveLifecycle;
     }
     
-    public <C extends ComponentLifecycle<S,?>, S extends Settings> S findComponentSettingsByLifecycle(C componentLifecycle) {
-        return perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(componentLifecycle);
-    }
-    
-    @Override
-    public PerspectiveLifecycleWithAllSettings<PL, PS> getPerspectiveLifecycleWithAllSettings() {
-        return perspectiveLifecycleWithAllSettings;
-    }
-
 }

@@ -106,16 +106,16 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
      * {@link #createPerspectiveIdAndDialogComponent(PerspectiveLifecycle, Settings)} method assembles them, together
      * with the perspective's own settings dialog component.
      */
-    public PerspectiveCompositeTabbedSettingsDialogComponent(PerspectiveLifecycleWithAllSettings<?, PS> perspectiveLifecycleWithAllSettings) {
+    public PerspectiveCompositeTabbedSettingsDialogComponent(PerspectiveLifecycle<PS> lifecycle,
+            PerspectiveCompositeSettings<PS> settings) {
         this.componentIdsAndDialogComponents = new ArrayList<>();
-        CompositeSettings componentSettings = perspectiveLifecycleWithAllSettings.getComponentSettings();
-        for (ComponentLifecycle<?,?> componentLifecycle : perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getComponentLifecycles()) {
+        for (ComponentLifecycle<?, ?> componentLifecycle : lifecycle.getComponentLifecycles()) {
             if (componentLifecycle.hasSettings()) {
-                createComponentIdWithSettingsAndDialogComponent(componentSettings, componentLifecycle);
+                createComponentIdWithSettingsAndDialogComponent(settings, componentLifecycle);
             }
         }
-        perspectiveIdsAndSettingsDialog = createPerspectiveIdAndDialogComponent(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(),
-                perspectiveLifecycleWithAllSettings.getAllSettings().getPerspectiveOwnSettings()); 
+        perspectiveIdsAndSettingsDialog = createPerspectiveIdAndDialogComponent(lifecycle,
+                settings.getPerspectiveOwnSettings());
     }
 
     private <S extends Settings, C extends Component<S>> void createComponentIdWithSettingsAndDialogComponent(CompositeSettings componentSettings,

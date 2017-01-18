@@ -21,7 +21,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 /**
  * A base class for a leaderboard viewer.
@@ -43,10 +43,11 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
 
 
     public AbstractLeaderboardViewer(AbstractLeaderboardComponentContext<PL> componentContext,
-            PerspectiveLifecycleWithAllSettings<PL, LeaderboardPerspectiveOwnSettings> perspectiveLifecycleWithAllSettings,
+            PL lifecycle,
+            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
             Timer timer, StringMessages stringMessages, LeaderboardPanel leaderboardPanel) {
-        super(componentContext, perspectiveLifecycleWithAllSettings);
+        super(componentContext, lifecycle, settings);
         addChildComponent(leaderboardPanel);
         
         this.competitorSelectionProvider = competitorSelectionProvider;
@@ -54,7 +55,7 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
         this.timer = timer;
-        this.hideToolbar = perspectiveLifecycleWithAllSettings.getPerspectiveSettings().isHideToolbar();
+        this.hideToolbar = settings.getPerspectiveOwnSettings().isHideToolbar();
         
         RES.css().ensureInjected();
     }

@@ -6,13 +6,10 @@ import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHea
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class PlayerPlace extends AbstractBasePlace {
     private final AutoPlayerConfiguration playerConfiguration;
-    
-    private final PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleWithAllSettings;
-    private final PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleWithAllSettings;
     
     public PlayerPlace(String url) {
         super(url);
@@ -25,20 +22,18 @@ public class PlayerPlace extends AbstractBasePlace {
         this.playerConfiguration = new AutoPlayerConfiguration(eventUuidAsString, leaderboardName, fullscreen, timeToSwitchBeforeRaceStartInSeconds);
         
         //these are currently regenerated in the PlayerActivity, based on the historydata. Once the settings are properly stored, this should be replaced.
-        this.leaderboardPerspectiveLifecycleWithAllSettings = null;
-        this.raceboardPerspectiveLifecycleWithAllSettings = null;
     }
 
     public PlayerPlace(AutoPlayerConfiguration playerConfiguration,
-            PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleWithAllSettings,
-            PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleWithAllSettings) {
+            LeaderboardWithHeaderPerspectiveLifecycle leaderboardLifecycle,
+            PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings,
+            RaceBoardPerspectiveLifecycle raceboardLifecycle,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> raceboardSettings) {
         super(AutoPlayerConfiguration.PARAM_EVENTID, playerConfiguration.getEventUidAsString(),
                 AutoPlayerConfiguration.PARAM_FULLSCREEN, String.valueOf(playerConfiguration.isFullscreenMode()), 
                 AutoPlayerConfiguration.PARAM_LEADEROARD_NAME, playerConfiguration.getLeaderboardName(),
                AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START, String.valueOf(playerConfiguration.getTimeToSwitchBeforeRaceStartInSeconds()));
         this.playerConfiguration = playerConfiguration;
-        this.leaderboardPerspectiveLifecycleWithAllSettings = leaderboardPerspectiveLifecycleWithAllSettings;
-        this.raceboardPerspectiveLifecycleWithAllSettings = raceboardPerspectiveLifecycleWithAllSettings;
     }
 
     public AutoPlayerConfiguration getConfiguration() {
@@ -57,11 +52,4 @@ public class PlayerPlace extends AbstractBasePlace {
         }
     }
 
-    public PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> getLeaderboardPerspectiveLifecycleWithAllSettings() {
-        return leaderboardPerspectiveLifecycleWithAllSettings;
-    }
-
-    public PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> getRaceboardPerspectiveLifecycleWithAllSettings() {
-        return raceboardPerspectiveLifecycleWithAllSettings;
-    }
 }

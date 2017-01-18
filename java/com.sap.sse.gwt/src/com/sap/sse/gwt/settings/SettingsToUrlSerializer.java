@@ -64,10 +64,10 @@ public class SettingsToUrlSerializer {
         return settingsToStringMapSerializer.deserialize(settings, values);
     }
     
-    public final <T extends SettingsMap> T deserializeFromCurrentLocation(T settings) {
+    public final <T extends SettingsMap> T deserializeSettingsMapFromCurrentLocation(T settings) {
         @SuppressWarnings({ "rawtypes", "unchecked" })
         Map<String, Iterable<String>> values = (Map) Window.Location.getParameterMap();
-        return settingsToStringMapSerializer.deserialize(settings, values);
+        return settingsToStringMapSerializer.deserializeSettingsMap(settings, values);
     }
 
 }

@@ -35,7 +35,6 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
@@ -159,8 +158,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             componentContext.initInitialSettings(new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                 @Override
                 public void onSuccess(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
-                    PerspectiveLifecycleWithAllSettings<MetaLeaderboardPerspectiveLifecycle, LeaderboardPerspectiveOwnSettings> lifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(lifecycle, defaultSettings);
-                    MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(componentContext, lifecycleWithAllSettings, sailingService, new AsyncActionsExecutor(),
+                            MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(componentContext,
+                                    lifecycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
                     timer, null, preselectedRace, leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this, getStringMessages(),
                     userAgent, chartDetailType);
                     contentScrollPanel.setWidget(leaderboardViewer);
@@ -179,9 +178,9 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             componentContext.initInitialSettings(new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                 @Override
                 public void onSuccess(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
-                    PerspectiveLifecycleWithAllSettings<LeaderboardPerspectiveLifecycle, LeaderboardPerspectiveOwnSettings> lifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(lifecycle, defaultSettings);
                     LeaderboardViewer leaderboardViewer = new LeaderboardViewer(
-                            componentContext, lifecycleWithAllSettings, sailingService, new AsyncActionsExecutor(),
+                                    componentContext, lifecycle, defaultSettings, sailingService,
+                                    new AsyncActionsExecutor(),
                             timer, preselectedRace, leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this, getStringMessages(),
                             userAgent, chartDetailType);
                     contentScrollPanel.setWidget(leaderboardViewer);

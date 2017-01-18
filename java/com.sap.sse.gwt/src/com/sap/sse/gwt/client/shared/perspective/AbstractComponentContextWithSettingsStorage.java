@@ -1,9 +1,6 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 
 import com.sap.sse.common.settings.Settings;
@@ -134,31 +131,25 @@ public abstract class AbstractComponentContextWithSettingsStorage<L extends Comp
     @SuppressWarnings("unchecked")
     @Override
     public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings) {
-        Perspective<? extends Settings> parentPerspective = component.getComponentTreeNodeInfo().getParentPerspective();
-        
-        final S newRootSettings;
-        if(parentPerspective == null) {
-            if(component instanceof Perspective) {
-                //root perspective is updating its perspective own settings
-                Perspective<? extends Settings> rootPerspective = (Perspective<? extends Settings>) component;
-                setPerspectiveSettingsHelper(rootPerspective, newDefaultSettings);
-                newRootSettings = (S) newDefaultSettings;
-            } else {
-                //root is a single component
-                newRootSettings = (S) newDefaultSettings;
-            }
-        } else {
-            // propagate updated settings to parent and get root settings
-            newRootSettings = (S) propagateSettingsToRootPerspective(parentPerspective, component, newDefaultSettings);
-        }
-        this.currentDefaultSettings = rootLifecycle.cloneSettings(newRootSettings);
-        storeNewDefaultSettings(newRootSettings);
-    }
-    
-    private static<PS extends Settings> void setPerspectiveSettingsHelper(Perspective<PS> perspective, Settings newPerspectiveSettings) {
-        @SuppressWarnings("unchecked")
-        PerspectiveCompositeSettings<PS> newRootSettings = (PerspectiveCompositeSettings<PS>)newPerspectiveSettings;
-        perspective.getPerspectiveLifecycleWithAllSettings().setAllSettings(newRootSettings);
+        // Perspective<? extends Settings> parentPerspective =
+        // component.getComponentTreeNodeInfo().getParentPerspective();
+        //
+        // final S newRootSettings;
+        // if(parentPerspective == null) {
+        // if(component instanceof Perspective) {
+        // //root perspective is updating its perspective own settings
+        // Perspective<? extends Settings> rootPerspective = (Perspective<? extends Settings>) component;
+        // newRootSettings = (S) newDefaultSettings;
+        // } else {
+        // //root is a single component
+        // newRootSettings = (S) newDefaultSettings;
+        // }
+        // } else {
+        // // propagate updated settings to parent and get root settings
+        // newRootSettings = (S) propagateSettingsToRootPerspective(parentPerspective, component, newDefaultSettings);
+        // }
+        // this.currentDefaultSettings = rootLifecycle.cloneSettings(newRootSettings);
+        // storeNewDefaultSettings(newRootSettings);
     }
     
     private void storeNewDefaultSettings(S newRootSettings) {
@@ -192,30 +183,33 @@ public abstract class AbstractComponentContextWithSettingsStorage<L extends Comp
     protected abstract S extractGlobalSettings(
             S newRootSettings);
 
-    private<T extends Settings> PerspectiveCompositeSettings<?> propagateSettingsToRootPerspective(Perspective<T> perspective, Component<? extends Settings> replaceComponent, Settings replaceComponentNewDefaultSettings) {
-        PerspectiveLifecycleWithAllSettings<?,T> perspectiveLifecycleWithAllSettings = perspective.getPerspectiveLifecycleWithAllSettings();
-        Map<String, Settings> originalSettingsPerComponent = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsPerComponentId();
-        Map<String, Settings> newSettingsPerComponent = new HashMap<>();
-        String replaceComponentId = replaceComponent.getId();
-        for (Entry<String, Settings> entry : originalSettingsPerComponent.entrySet()) {
-            String componentId = entry.getKey();
-            if(replaceComponentId.equals(componentId)) {
-                newSettingsPerComponent.put(replaceComponent.getId(), replaceComponentNewDefaultSettings);
-            } else {
-                newSettingsPerComponent.put(componentId, entry.getValue());
-            }
-        }
-        
-        PerspectiveCompositeSettings<T> allSettings = new PerspectiveCompositeSettings<>(perspectiveLifecycleWithAllSettings.getPerspectiveSettings(), newSettingsPerComponent);
-        perspectiveLifecycleWithAllSettings.setAllSettings(allSettings);
-        
-        Perspective<? extends Settings> parentPerspective = perspective.getComponentTreeNodeInfo().getParentPerspective();
-        if(parentPerspective != null) {
-            return propagateSettingsToRootPerspective(parentPerspective, perspective, allSettings);
-        } else {
-            return allSettings;
-        }
-    }
+    // private<T extends Settings> PerspectiveCompositeSettings<?> propagateSettingsToRootPerspective(Perspective<T>
+    // perspective, Component<? extends Settings> replaceComponent, Settings replaceComponentNewDefaultSettings) {
+    // Map<String, Settings> originalSettingsPerComponent =
+    // perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsPerComponentId();
+    // Map<String, Settings> newSettingsPerComponent = new HashMap<>();
+    // String replaceComponentId = replaceComponent.getId();
+    // for (Entry<String, Settings> entry : originalSettingsPerComponent.entrySet()) {
+    // String componentId = entry.getKey();
+    // if(replaceComponentId.equals(componentId)) {
+    // newSettingsPerComponent.put(replaceComponent.getId(), replaceComponentNewDefaultSettings);
+    // } else {
+    // newSettingsPerComponent.put(componentId, entry.getValue());
+    // }
+    // }
+    //
+    // PerspectiveCompositeSettings<T> allSettings = new
+    // PerspectiveCompositeSettings<>(perspectiveLifecycleWithAllSettings.getPerspectiveSettings(),
+    // newSettingsPerComponent);
+    //
+    // Perspective<? extends Settings> parentPerspective =
+    // perspective.getComponentTreeNodeInfo().getParentPerspective();
+    // if(parentPerspective != null) {
+    // return propagateSettingsToRootPerspective(parentPerspective, perspective, allSettings);
+    // } else {
+    // return allSettings;
+    // }
+    // }
     
     /**
      * Gets the last error occurred during settings initialisation.

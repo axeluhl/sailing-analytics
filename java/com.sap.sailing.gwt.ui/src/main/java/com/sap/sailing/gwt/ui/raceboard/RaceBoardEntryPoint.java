@@ -27,7 +27,6 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.shared.perspective.SettingsReceiverCallback;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
@@ -169,11 +168,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
   
         PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveCompositeSettings = context.getDefaultSettings();
-        
-        PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(context.getRootLifecycle(),
-                perspectiveCompositeSettings);
 
-        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(context, raceboardPerspectiveLifecyclesAndSettings,
+        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(context, context.getRootLifecycle(),
+                perspectiveCompositeSettings,
                 sailingService, mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,
                 leaderboardGroupName, eventId, RaceBoardEntryPoint.this, getStringMessages(), userAgent,

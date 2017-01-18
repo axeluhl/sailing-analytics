@@ -19,6 +19,4 @@ public interface Perspective<PS extends Settings> extends Component<PerspectiveC
     SettingsDialogComponent<PS> getPerspectiveOwnSettingsDialogComponent();
     
     boolean hasPerspectiveOwnSettings();
-
-    PerspectiveLifecycleWithAllSettings<? extends PerspectiveLifecycle<PS>, PS> getPerspectiveLifecycleWithAllSettings();
 }

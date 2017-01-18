@@ -93,7 +93,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
@@ -173,14 +173,15 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
      *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that
      *            aligns its right border with that of the chart. Otherwise those components will be hidden.
      */
-    public RaceBoardPanel(RaceBoardComponentContext context, PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleWithAllSettings, 
+    public RaceBoardPanel(RaceBoardComponentContext context, RaceBoardPerspectiveLifecycle lifecycle,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings,
             SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,
             AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider,
             boolean showChartMarkEditMediaButtonsAndVideo) {
-        super(context, perspectiveLifecycleWithAllSettings);
+        super(context, lifecycle, settings);
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -208,11 +209,12 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
                 
         raceMapResources.raceMapStyle().ensureInjected();
-        RaceMapLifecycle raceMapLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getRaceMapLifecycle();
-        RaceMapSettings defaultRaceMapSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(raceMapLifecycle);
+        RaceMapLifecycle raceMapLifecycle = lifecycle.getRaceMapLifecycle();
+        RaceMapSettings defaultRaceMapSettings = settings.findSettingsByComponentId(raceMapLifecycle.getComponentId());
 
-        RaceTimePanelLifecycle raceTimePanelLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getRaceTimePanelLifecycle();
-        RaceTimePanelSettings raceTimePanelSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(raceTimePanelLifecycle);
+        RaceTimePanelLifecycle raceTimePanelLifecycle = lifecycle.getRaceTimePanelLifecycle();
+        RaceTimePanelSettings raceTimePanelSettings = settings
+                .findSettingsByComponentId(raceTimePanelLifecycle.getComponentId());
         final RaceMapSettings raceMapSettings;
         if (GwtHttpRequestUtils.getStringParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, null) != null) {
             final Distance buoyZoneRadiusInMeters = new MeterDistance(GwtHttpRequestUtils.getDoubleParameter(RaceMapSettings.PARAM_BUOY_ZONE_RADIUS_IN_METERS, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS.getMeters() /* default */));
@@ -302,13 +304,15 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
-        leaderboardPanel = createLeaderboardPanel(leaderboardName, leaderboardGroupName, competitorSearchTextBox, isScreenLargeEnoughToInitiallyDisplayLeaderboard);
+        leaderboardPanel = createLeaderboardPanel(lifecycle, settings, leaderboardName, leaderboardGroupName,
+                competitorSearchTextBox, isScreenLargeEnoughToInitiallyDisplayLeaderboard);
         addChildComponent(leaderboardPanel);
 
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
         leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel, isScreenLargeEnoughToInitiallyDisplayLeaderboard,
+        createOneScreenView(lifecycle, settings, leaderboardName, leaderboardGroupName, eventId, mainPanel,
+                isScreenLargeEnoughToInitiallyDisplayLeaderboard,
                 raceMap, userService, showChartMarkEditMediaButtonsAndVideo); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
@@ -355,18 +359,22 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
      *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
      *            the charts are created.
      */
-    private void createOneScreenView(String leaderboardName, String leaderboardGroupName, UUID event,
+    private void createOneScreenView(RaceBoardPerspectiveLifecycle lifecycle,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings, String leaderboardName,
+            String leaderboardGroupName, UUID event,
             FlowPanel mainPanel, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap,
             UserService userService, boolean showChartMarkEditMediaButtonsAndVideo) {
 
         MediaPlayerLifecycle mediaPlayerLifecycle = getPerspectiveLifecycle().getMediaPlayerLifecycle();
-        MediaPlayerSettings mediaPlayerSettings = findComponentSettingsByLifecycle(mediaPlayerLifecycle);
+        MediaPlayerSettings mediaPlayerSettings = settings
+                .findSettingsByComponentId(mediaPlayerLifecycle.getComponentId());
 
         WindChartLifecycle windChartLifecycle = getPerspectiveLifecycle().getWindChartLifecycle();
-        WindChartSettings windChartSettings = findComponentSettingsByLifecycle(windChartLifecycle);
+        WindChartSettings windChartSettings = settings.findSettingsByComponentId(windChartLifecycle.getComponentId());
 
         MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle = getPerspectiveLifecycle().getMultiCompetitorRaceChartLifecycle();
-        MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = findComponentSettingsByLifecycle(multiCompetitorRaceChartLifecycle);
+        MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = settings
+                .findSettingsByComponentId(multiCompetitorRaceChartLifecycle.getComponentId());
 
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
@@ -447,10 +455,13 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         }
     }
     
-    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, String leaderboardGroupName,
+    private LeaderboardPanel createLeaderboardPanel(RaceBoardPerspectiveLifecycle lifecycle,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings, String leaderboardName,
+            String leaderboardGroupName,
             CompetitorFilterPanel competitorSearchTextBox, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard) {
         LeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
-        LeaderboardSettings leaderboardSettings = findComponentSettingsByLifecycle(leaderboardPanelLifecycle);
+        LeaderboardSettings leaderboardSettings = settings
+                .findSettingsByComponentId(leaderboardPanelLifecycle.getComponentId());
         LeaderboardSettings defaultLeaderboardSettingsForCurrentPlayMode = LeaderboardSettingsFactory.getInstance()
                 .createNewSettingsForPlayMode(timer.getPlayMode(),
                         /* nameOfRaceToSort */ selectedRaceIdentifier.getRaceName(),

@@ -3268,7 +3268,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
     }
 
     protected void informLeaderboardUpdateListenersAboutLeaderboardUpdated(LeaderboardDTO leaderboard) {
-        for (LeaderboardUpdateListener listener : this.leaderboardUpdateListener) {
+        for (LeaderboardUpdateListener listener : new ArrayList<LeaderboardUpdateListener>(this.leaderboardUpdateListener)) {
             listener.updatedLeaderboard(leaderboard);
         }
     }
