@@ -47,7 +47,10 @@ public class RaceBoardPage extends HostPageWithAuthentication {
 
             @Override
             public boolean getAsBoolean() {
-                return context.findElement(new BySeleniumId("raceMapSettings")) != null;
+                WebElement settingsDialog = context.findElement(new BySeleniumId("raceMapSettings"));
+                boolean exists = settingsDialog != null;
+                // exists, and was actually rendered (to apply the values)
+                return (exists && settingsDialog.getSize().height > 50);
             }
         });
         return new MapSettingsPO(driver, context.findElement(new BySeleniumId("raceMapSettings")));
