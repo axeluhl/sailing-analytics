@@ -1762,4 +1762,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String searchTagForImportedCompetitorPlaceholder();
     String version(String version);
     String replicables();
+    String set();
 }

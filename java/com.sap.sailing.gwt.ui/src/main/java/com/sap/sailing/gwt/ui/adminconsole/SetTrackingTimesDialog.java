@@ -10,6 +10,7 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -20,11 +21,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLogImpl;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -44,12 +45,28 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
 
     private final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_LONG);
     private Label currentStartLabel;
-    private TimePoint currentStart;
+    private TimePointSpecificationFoundInLog currentStart;
     private Label currentEndLabel;
-    private TimePoint currentEnd;
+    private TimePointSpecificationFoundInLog currentEnd;
 
     private BetterDateTimeBox startTimeBox;
+    /**
+     * Decides whether the start time value shall be set; if checked, even an empty value (translated
+     * to {@code null} will be stored as an event with the author's priority in the log; if unchecked,
+     * no value will be stored to the log, and if a valid start time setting event is in the log, a
+     * revoke will be tried; note that the author's priority may be too low (numerically too high) to
+     * make the revoke succeed.
+     */
+    private CheckBox startTimeSetCheckbox;
     private BetterDateTimeBox endTimeBox;
+    /**
+     * Decides whether the end time value shall be set; if checked, even an empty value (translated
+     * to {@code null} will be stored as an event with the author's priority in the log; if unchecked,
+     * no value will be stored to the log, and if a valid start time setting event is in the log, a
+     * revoke will be tried; note that the author's priority may be too low (numerically too high) to
+     * make the revoke succeed.
+     */
+    private CheckBox endTimeSetCheckbox;
     private TextBox authorNameBox;
     private com.sap.sse.gwt.client.controls.IntegerBox authorPriorityBox;
 
@@ -85,26 +102,28 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
 
                     @Override
                     public void onSuccess(Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> result) {
-                        currentStart = result == null || result.getA() == null ? null : result.getA().getTimePoint();
-                        currentEnd = result == null || result.getB() == null ? null : result.getB().getTimePoint();
-                        updateDateTimeLabelAndTimeBoxFromDate(currentStart, currentStartLabel, startTimeBox);
-                        updateDateTimeLabelAndTimeBoxFromDate(currentEnd, currentEndLabel, endTimeBox);
+                        currentStart = result == null ? null : result.getA();
+                        currentEnd = result == null ? null : result.getB();
+                        updateDateTimeLabelAndTimeBoxFromDate(currentStart, currentStartLabel, startTimeBox, startTimeSetCheckbox);
+                        updateDateTimeLabelAndTimeBoxFromDate(currentEnd, currentEndLabel, endTimeBox, endTimeSetCheckbox);
                     }
                 });
     }
     
-    private void updateDateTimeLabelAndTimeBoxFromDate(final TimePoint timePoint, final Label label, final BetterDateTimeBox dateTimeBox) {
+    private void updateDateTimeLabelAndTimeBoxFromDate(final TimePointSpecificationFoundInLog timePoint, final Label label, final BetterDateTimeBox dateTimeBox, CheckBox setCheckBox) {
         if (timePoint == null) {
             label.setText(stringMessages.notAvailable());
             dateTimeBox.setValue(null);
+            setCheckBox.setValue(false);
         } else {
-            label.setText(dateTimeFormat.format(timePoint.asDate()));
-            dateTimeBox.setValue(timePoint.asDate());
+            label.setText(timePoint.getTimePoint()==null?"null":dateTimeFormat.format(timePoint.getTimePoint().asDate()));
+            dateTimeBox.setValue(timePoint.getTimePoint() == null ? null : timePoint.getTimePoint().asDate());
+            setCheckBox.setValue(true);
         }
     }
 
     private Widget createInputPanel() {
-        Grid content = new Grid(4, 3);
+        Grid content = new Grid(4, 4);
         
         Button startNow = new Button(stringMessages.now());
         startNow.addClickHandler(new ClickHandler() {
@@ -124,16 +143,22 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
         });
 
         startTimeBox = createDateTimeBox(null);
+        startTimeBox.addValueChangeHandler(e->startTimeSetCheckbox.setValue(true)); // when the start time is manipulated, assume the user wants to really set it
         startTimeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         content.setWidget(0, 0, createLabel(stringMessages.startOfTracking()));
         content.setWidget(0, 1, startTimeBox);
-        content.setWidget(0, 2, startNow);
+        startTimeSetCheckbox = createCheckbox(stringMessages.set());
+        content.setWidget(0, 2, startTimeSetCheckbox);
+        content.setWidget(0, 3, startNow);
         
         endTimeBox = createDateTimeBox(null);
+        endTimeBox.addValueChangeHandler(e->endTimeSetCheckbox.setValue(true)); // when the end time is manipulated, assume the user wants to really set it
         endTimeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         content.setWidget(1, 0, createLabel(stringMessages.endOfTracking()));
         content.setWidget(1, 1, endTimeBox);
-        content.setWidget(1, 2, endNow);
+        endTimeSetCheckbox = createCheckbox(stringMessages.set());
+        content.setWidget(1, 2, endTimeSetCheckbox);
+        content.setWidget(1, 3, endNow);
         
         authorNameBox = createTextBox("Shore");
         content.setWidget(2, 0, createLabel(stringMessages.authorName()));
@@ -173,10 +198,8 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
 
     @Override
     protected RaceLogSetTrackingTimesDTO getResult() {
-        return generateRaceLogSetTrackingTimesDTOWith(startTimeBox.getValue(), endTimeBox.getValue());
-    }
-    
-    private RaceLogSetTrackingTimesDTO generateRaceLogSetTrackingTimesDTOWith(Date startTime, Date endTime) {
+        Date startTime = startTimeBox.getValue();
+        Date endTime = endTimeBox.getValue();
         RaceLogSetTrackingTimesDTO dto = new RaceLogSetTrackingTimesDTO();
         dto.leaderboardName = leaderboardName;
         dto.raceColumnName = raceColumnName;
@@ -184,13 +207,19 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
         dto.authorName = authorNameBox.getValue();
         dto.authorPriority = authorPriorityBox.getValue();
         dto.logicalTimePoint = MillisecondsTimePoint.now();
-        dto.newStartOfTracking = startTime == null ? null : new MillisecondsTimePoint(startTime);
-        dto.newEndOfTracking = endTime == null ? null : new MillisecondsTimePoint(endTime);
+        dto.newStartOfTracking = startTimeSetCheckbox.getValue()
+                ? startTime == null ? new TimePointSpecificationFoundInLogImpl(null)
+                        : new TimePointSpecificationFoundInLogImpl(new MillisecondsTimePoint(startTime))
+                : null;
+        dto.newEndOfTracking = endTimeSetCheckbox.getValue()
+                ? endTime == null ? new TimePointSpecificationFoundInLogImpl(null)
+                        : new TimePointSpecificationFoundInLogImpl(new MillisecondsTimePoint(endTime))
+                : null;
         dto.currentStartOfTracking = currentStart;
         dto.currentEndOfTracking = currentEnd;
         return dto;
     }
-
+    
     private static class TrackingTimesValidator implements Validator<RaceLogSetTrackingTimesDTO> {
         private final StringMessages stringMessages;
 
