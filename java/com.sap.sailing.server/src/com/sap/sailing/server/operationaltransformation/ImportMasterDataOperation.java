@@ -125,6 +125,9 @@ public class ImportMasterDataOperation extends
             progress.setOverAllProgressPct(0.5);
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
+            progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_SENSOR_FIXES);
+            progress.setOverAllProgressPct(0.8);
+            progress.setCurrentSubProgressPct(0);
             importRaceLogTrackingGPSFixes(toState);
             if (masterData.getDeviceConfigurations() != null) {
                 importDeviceConfigurations(toState);
@@ -396,7 +399,7 @@ public class ImportMasterDataOperation extends
             }
             i++;
             progress.setCurrentSubProgressPct((double) i / numOfWindTracks);
-            progress.setOverAllProgressPct(0.5 + (0.5) * ((double) i / numOfWindTracks));
+            progress.setOverAllProgressPct(0.5 + (0.3) * ((double) i / numOfWindTracks));
         }
     }
     
@@ -406,6 +409,8 @@ public class ImportMasterDataOperation extends
         Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes = masterData.getRaceLogTrackingFixes();
         if (raceLogTrackingFixes != null) {
             SensorFixStore store = toState.getSensorFixStore();
+            int i = 0;
+            final int numberOfDevices = raceLogTrackingFixes.size();
             for (Entry<DeviceIdentifier, Set<Timed>> entry : raceLogTrackingFixes.entrySet()) {
                 DeviceIdentifier device = entry.getKey();
                 final Collection<Timed> fixesToAddAsBatch = new ArrayList<>(BATCH_SIZE_FOR_IMPORTING_FIXES);
@@ -426,6 +431,8 @@ public class ImportMasterDataOperation extends
                 if (!fixesToAddAsBatch.isEmpty()) {
                     storeFixes(store, device, fixesToAddAsBatch);
                 }
+                i++;
+                progress.setCurrentSubProgressPct(0.8 + (0.2) * ((double) i / numberOfDevices));
             }
         }
     }
