@@ -72,6 +72,8 @@ public class ImportMasterDataOperation extends
     private static final long serialVersionUID = 3131715325307370303L;
 
     private static final Logger logger = Logger.getLogger(ImportMasterDataOperation.class.getName());
+    
+    private static final int BATCH_SIZE_FOR_IMPORTING_FIXES = 5000;
 
     private final TopLevelMasterData masterData;
 
@@ -406,23 +408,35 @@ public class ImportMasterDataOperation extends
             SensorFixStore store = toState.getSensorFixStore();
             for (Entry<DeviceIdentifier, Set<Timed>> entry : raceLogTrackingFixes.entrySet()) {
                 DeviceIdentifier device = entry.getKey();
+                final Collection<Timed> fixesToAddAsBatch = new ArrayList<>(BATCH_SIZE_FOR_IMPORTING_FIXES);
                 for (Timed fixToAdd : entry.getValue()) {
-                    try {
-                        if (fixToAdd instanceof CompactGPSFixMovingImpl) {
-                            CompactGPSFixMovingImpl gpsFix = (CompactGPSFixMovingImpl) fixToAdd;
-                            fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
-                                    ((CompactGPSFixMovingImpl) fixToAdd).getSpeed());
-                        } else if (fixToAdd instanceof CompactGPSFixImpl) {
-                            CompactGPSFixImpl gpsFix = (CompactGPSFixImpl) fixToAdd;
-                            fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());
-                        } 
-                        store.storeFix(device, fixToAdd);
-                    } catch (NoCorrespondingServiceRegisteredException e) {
-                        logger.severe("Failed to store race log tracking fix while importing.");
-                        e.printStackTrace();
+                    if (fixToAdd instanceof CompactGPSFixMovingImpl) {
+                        CompactGPSFixMovingImpl gpsFix = (CompactGPSFixMovingImpl) fixToAdd;
+                        fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
+                                ((CompactGPSFixMovingImpl) fixToAdd).getSpeed());
+                    } else if (fixToAdd instanceof CompactGPSFixImpl) {
+                        CompactGPSFixImpl gpsFix = (CompactGPSFixImpl) fixToAdd;
+                        fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());
+                    } 
+                    fixesToAddAsBatch.add(fixToAdd);
+                    if (fixesToAddAsBatch.size() == BATCH_SIZE_FOR_IMPORTING_FIXES) {
+                        storeFixes(store, device, fixesToAddAsBatch);
                     }
                 }
+                if (!fixesToAddAsBatch.isEmpty()) {
+                    storeFixes(store, device, fixesToAddAsBatch);
+                }
             }
+        }
+    }
+
+    private void storeFixes(SensorFixStore store, DeviceIdentifier device, final Collection<Timed> fixesToAddAsBatch) {
+        try {
+            store.storeFixes(device, fixesToAddAsBatch);
+            fixesToAddAsBatch.clear();
+        } catch (NoCorrespondingServiceRegisteredException e) {
+            logger.severe("Failed to store race log tracking fixes while importing.");
+            e.printStackTrace();
         }
     }
 
