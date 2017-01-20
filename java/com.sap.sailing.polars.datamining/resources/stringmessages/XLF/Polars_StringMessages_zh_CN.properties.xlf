@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-11-23T14:53:44Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sailing.polars.datamining/resources/stringmessages/Polars_StringMessages.properties" source-language="en" target-language="zh-CN">
+	<file datatype="javapropertyresourcebundle" date="2017-01-12T14:33:34Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sailing.polars.datamining/resources/stringmessages/Polars_StringMessages.properties" source-language="en" target-language="zh-CN">
 		<header>
 			<skl>
 				<internal-file crc="99b784fd6920a22f02e85034e5d2ef70" form="base64">H4sIAAAAAAAAAF2PTQrCQAyF93OKXEH32TiiFBSGunAdOrEObTPQaaHHd/6s4Cbv4yW8JMaPNOs3OTmgSRyU2a0jnqgbWCzUVksdaz+uk+AP1Y37RixvGAEylYwzLVRCIWExw3fN1TwubsMoEFU9ndiWpGdMBBmz2QTt5eUsy4I7QR66M4V15ika8TQZMBVVb67b/j74ALSew+fwAAAA</internal-file>

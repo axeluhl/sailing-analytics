@@ -475,7 +475,7 @@
     <string name="onboarding_input">Manuelle Eingabe</string>
     <string name="race_group">Gruppenwettfahrt</string>
     <string name="wind_select_race">Wettfahrt auswählen</string>
-    <string name="added_to_result_list">\'%1$s\' zur Ergebnisliste hinzugefügt an Position %2$s</string>
+    <string name="added_to_result_list">\'%1$s\' zur Ergebnisliste hinzugefügt an Position %2$d</string>
     <string name="get_started">Anmelden</string>
     <string name="position">Position</string>
     <string name="server_deeplink_message">Server erfolgreich geändert auf %1$s.</string>

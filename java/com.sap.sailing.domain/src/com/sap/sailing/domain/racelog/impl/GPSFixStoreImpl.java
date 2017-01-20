@@ -40,7 +40,7 @@ public class GPSFixStoreImpl implements GPSFixStore {
     private <FixT extends GPSFix> void loadTrack(DynamicGPSFixTrack<?, FixT> track, DeviceIdentifier device,
             TimePoint from, TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException,
             TransformationException {
-        sensorFixStore.<FixT>loadFixes(track::add, device, from, to, inclusive);
+        sensorFixStore.<FixT>loadFixes(fix->track.add(fix, /* replace */ true), device, from, to, inclusive);
     }
 
     @Override

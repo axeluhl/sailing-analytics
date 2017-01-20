@@ -23,6 +23,96 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">January 2017</h2>
+                    <ul class="bulletList">
+                    	<li>Filter boxes now support quoting phrases, such as <tt>"Race 2"</tt> to make them a single search term.
+                    	    Previously, when entering <tt>Race 2</tt> this would match all lines containing <tt>Race</tt> as well
+                    	    as all lines containing the digit <tt>2</tt>, such as it occurs in <tt>2015</tt> or <tt>2016</tt>.
+                    	    Enclosing the phrase with double quotes as in <tt>"Race 2"</tt> will consider the full string in quotes
+                    	    as a search term. In the unlikely case of searching for a double quote you can do that by prefixing
+                    	    the double quote with a backslash character, as in <tt>\"</tt>.
+                    	</li>
+                    	<li>When changing the start/end of tracking times in the "Smartphone Tracking" tab, it is now possible
+                    	    to "unset" one or both of these time stamps. Next to the date/time entry field these is now a
+                    	    "Set" checkbox. When the date/time field is modified, the box is automatically checked because
+                    	    it seems reasonable to assume that the user wants this change to be committed. When committing
+                    	    an empty date/time field with the "Set" checkbox ticked, the <tt>null</tt> time stamp which
+                    	    makes this an open tracking interval is committed and will override any inference that may be
+                    	    made based on the race's start and finish time. When unchecking the "Set" checkbox, the previously
+                    	    committed timestamp is revoked (regardless of the contents of the date/time field), allowing for
+                    	    inference to take place if the regatta has been configured for tracking times inference.
+                    	</li>
+                    </ul>
+                    <h2 class="articleSubheadline">December 2016</h2>
+                    <ul class="bulletList">
+			 <li>Partial replication is now possible. If the system property <tt>replicate.on.start</tt>
+			     that controls automatic replication upon start-up provides only a partial comma-separated
+			     list of replicables, the connection to the master server (configured by the other
+			     replication-related system properties such as <tt>replicate.master.servlet.host</tt> etc.)
+			     will be used to replicate only those replicables whose IDs are specified in
+			     <tt>replicate.on.start</tt>. All other replicables will operate locally.
+			     Usually, the <tt>replicate.on.start</tt> system property is controlled
+			     by the environment variable <tt>REPLICATE_ON_START</tt> that is set in the <tt>env.sh</tt>
+			     configuration file used during server startup and influenced by the server environments
+			     from <a href="http://releases.sapsailing.com/environments">http://releases.sapsailing.com/environments</a>
+			     and overridden by the user details provided to the instance through the AWS EC2 machinery.<p>
+			     The Administration Console (<tt>/gwt/AdminConsole.html</tt> entry point) will now
+			     show which replicables a replica replicates, both, on the replica's administration
+			     console's "Replication" panel, as well as on the master's "Replication" panel, there
+			     for each replica.<p>
+			     The master will restrict broadcasting its operations to those replicables for which
+			     at least one replica has subscribed. While the initial load is requested individually
+			     for each replica and can therefore be tailored to the replicas requested, the operation
+			     broadcast channel is not specific to any replica. It therefore contains the operations
+			     of all replicables for which at least one replica has subscribed. Replicas receiving
+			     operations for replicables for which they did not subscribe will simply drop those
+			     operations (note, however, that the replica will still have to read the operations from the
+			     channel before dropping; this way, registering a replica may have bandwidth effects for
+			     other replicas). Similarly, "backward replication" from a replica to a master will only
+			     take place for those replicables for which the replica has requested replication from (and
+			     therefore also "to") the master.<p>
+			     With this it is now possible to replicate only the Security Service, using ID
+			     <tt>com.sap.sse.security.impl.SecurityServiceImpl</tt>, running all other replicables
+			     in "master mode." This will let the instance share user, permission, role and session management
+			     details with the instance from which the Security Service is being replicated while
+			     having its own master objects for all other replicables, such as the sailing application
+			     (RacingEventService),  mail service or the polar data service. Note that with this feature
+			     the server replicating another instance's Security Service will grant the roles and permissions
+			     to subjects authenticated against that replicated Security Service. For example, if a user
+			     has been granted the <tt>admin</tt> role by that service then the user has that role also
+			     in all other server instances replicating that Security Service. Therefore, use this feature
+			     with extreme caution. Keep in mind that in the near future we will extend the permissions and
+			     role concept by the possibility to restrict permissions and roles to "scopes" such as an
+			     event or a regatta or an account. See also
+			     <a href="https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3504">https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3504</a>.
+			 </li>
+			 <li>The server can now optionally restore all races it had tracked the last time. This is
+			     similar to a web browser's capability to restore the tabs the user had open when the browser
+			     was terminated or crashed. To enable this feature, use the system property
+			     <tt>restore.tracked.races</tt>, using the command line option <tt>-Drestore.tracked.races=true</tt>.
+			     So far, the default for this system property is <tt>false</tt>, so by default, when the property
+			     is not provided at all on the command line then the tracked races loaded last won't be restored,
+			     and the server will start out with an empty set of tracked races.<p>
+			     Note that the wind tracking properties, as set when initially tracking the race, are also restored
+			     to their last state. If a live race has last been tracked with live wind tracking, with wind directions
+			     being corrected by the local magnetic declination, then upon server restore the same live tracking will
+			     be started again, including live wind tracking with the same declination correction settings.<p>
+			     When the "Stop Tracking" feature is used, implicitly tracking wind will be stopped in case live wind
+			     tracking had previously been requested for that race. This change is also considered during the restore
+			     process where such a race will no longer receive live wind tracking upon restoring it.<p>
+			     When a tracked race is removed from the server then it will not be restored anymore upon the next
+			     server restart with the restore option enabled. When an entire regatta with a number of tracked
+			     races linked into it is removed then the tracked races are removed as well and will not be
+			     restored upon server re-start.<p>
+			     The restore progress can be monitored using the JConsole or any other JMX monitoring tool. In the
+			     <tt>com.sap.sailing</tt> category you will find the <tt>RacingEventService</tt> object. Among its
+			     attributes there are now the two new ones: <tt>NumberOfTrackedRacesToRestore</tt> and
+			     <tt>NumberOfTrackedRacesRestored</tt>. See the following two screen shots:<p>
+			     <img width="100%" src="images/JConsoleNumberOfTrackedRacesToRestore.png"><p>
+			     <img width="100%" src="images/JConsoleNumberOfTrackedRacesRestored.png">
+			 </li>
+                    </ul>
+
                     <h2 class="articleSubheadline">November 2016</h2>
                     <ul class="bulletList">
 			 <li>When launching a server, a system property <tt>polardata.source.url</tt> can

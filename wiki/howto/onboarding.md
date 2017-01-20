@@ -87,7 +87,7 @@ Beside the installation script for Eclipse Mars, there is also one for the new E
   * Wait until the target platform has been resolved completely
   * Rebuild all projects
 4. Run the Race Analysis Suite
-  * Start the MongoDB
+  * Start the MongoDB (cd /somePathto MongoDB/mongodb/bin; rm c:/data/SAP/sailing/mongodb/mongod.lock; ./mongod --dbpath c:/data/SAP/sailing/mongodb)
   * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the debug dropdown
   * Run "Security UI sdm" in the debug dropdown
   * Run "SailingGWT" in the debug dropdown

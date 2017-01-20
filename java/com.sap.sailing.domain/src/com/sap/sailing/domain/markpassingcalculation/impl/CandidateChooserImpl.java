@@ -13,7 +13,6 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -370,9 +369,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                         // The most likely edge taking us to currentMostLikelyEdge.getEnd() is found. Remember it.
                         candidateWithParentAndHighestTotalProbability.put(currentMostLikelyEdge.getEnd(), new Util.Pair<Candidate, Double>(
                                 currentMostLikelyEdge.getStart(), currentHighestProbability));
-                        if (logger.isLoggable(Level.FINEST)) {
-                            logger.finest("Added "+ currentMostLikelyEdge + " as most likely edge for " + c);
-                        }
+                        logger.finest(()->"Added "+ currentMostLikelyEdge + " as most likely edge for " + c);
                         endFound = currentMostLikelyEdge.getEnd() == endOfFixedInterval;
                         if (!endFound) {
                             // the end of the segment was not yet found; add edges leading away from
@@ -426,9 +423,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                     newMarkPassings.add(newMarkPassing);
                 }
             }
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Updating MarkPasses for " + c + " in case "+race.getRace().getName());
-            }
+            logger.fine(()->"Updating MarkPasses for " + c + " in case "+race.getRace().getName());
             race.updateMarkPassings(c, newMarkPassings);
         }
     }
@@ -542,9 +537,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     private void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
         for (Candidate can : wrongCandidates) {
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Removing all edges containing " + can + "of "+ c);
-            }
+            logger.finest(()->"Removing all edges containing " + can + "of "+ c);
             candidates.get(c).remove(can);
             Map<Candidate, Set<Edge>> edges = allEdges.get(c);
             edges.remove(can);
