@@ -176,6 +176,11 @@ public class TimeRangeImpl extends Util.Pair<TimePoint, TimePoint> implements Ti
         }
         return result.toArray(new TimeRange[result.size()]);
     }
+    
+    @Override
+    public Duration getDuration() {
+        return from().until(to());
+    }
 
     @Override
     public String toString() {

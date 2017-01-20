@@ -1,18 +1,19 @@
 package com.sap.sailing.grib.impl;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.TimePoint;
 
 import ucar.nc2.ft.FeatureDataset;
 
 public class SpeedAndDirectionWindField extends AbstractGribWindFieldImpl {
 
     public SpeedAndDirectionWindField(FeatureDataset dataSet) {
-        super(dataSet);
+        super(dataSet, /* baseConfidence */ 0.5);
     }
 
     @Override
-    public Wind getWind(Position position) {
+    public WindWithConfidence<TimePoint> getWind(TimePoint timePoint, Position position) {
         // TODO Auto-generated method stub
         return null;
     }

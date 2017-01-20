@@ -77,4 +77,10 @@ public interface TimeRange extends Comparable<TimeRange>, Serializable {
      * one.
      */
     TimeRange[] subtract(TimeRange other);
+
+    /**
+     * The duration between the {@link #from() start} and the {@link #to() end} of this time range.
+     * Short for {@link #from()}.{@link TimePoint#until(TimePoint) until}({@link #to()}).
+     */
+    Duration getDuration();
 }

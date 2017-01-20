@@ -3,8 +3,11 @@ package com.sap.sailing.grib.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Formatter;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.junit.Test;
 
@@ -12,6 +15,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.grib.GribWindField;
 import com.sap.sailing.grib.GribWindFieldFactory;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import ucar.ma2.ArrayFloat.D2;
 import ucar.nc2.VariableSimpleIF;
@@ -62,7 +66,25 @@ public class SimpleGridFileReadingTest {
         final Formatter errorLog = new Formatter(System.err);
         FeatureDataset dataSet = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/wind-Atlantic.24hr.grb.bz2", /* task */ null, errorLog);
         GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindField(dataSet);
-        System.out.println(windField);
+        final Position middle = windField.getBounds().getSouthWest().translateGreatCircle(
+                windField.getBounds().getSouthWest().getBearingGreatCircle(windField.getBounds().getNorthEast()),
+                windField.getBounds().getSouthWest().getDistance(windField.getBounds().getNorthEast()).scale(0.5));
+        Calendar cal = new GregorianCalendar(2016, 11, 12, 13, 00, 00);
+        cal.setTimeZone(TimeZone.getTimeZone("CET"));
+        System.out.println(windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), middle));
+    }
+    
+    @Test
+    public void testUsingFtAPI2() throws IOException {
+        final Formatter errorLog = new Formatter(System.err);
+        FeatureDataset dataSet = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/Drake.wind.grb", /* task */ null, errorLog);
+        GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindField(dataSet);
+        final Position middle = windField.getBounds().getSouthWest().translateGreatCircle(
+                windField.getBounds().getSouthWest().getBearingGreatCircle(windField.getBounds().getNorthEast()),
+                windField.getBounds().getSouthWest().getDistance(windField.getBounds().getNorthEast()).scale(0.5));
+        Calendar cal = new GregorianCalendar(2016, 11, 12, 13, 00, 00);
+        cal.setTimeZone(TimeZone.getTimeZone("CET"));
+        System.out.println(windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), middle));
     }
     
     @Test
