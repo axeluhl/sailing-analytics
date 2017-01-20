@@ -21,6 +21,7 @@ import ucar.ma2.Array;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.VariableSimpleIF;
+import ucar.nc2.dataset.VariableDS;
 import ucar.nc2.dt.GridCoordSystem;
 import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GridDataset;
@@ -192,6 +193,17 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
         final Array arrayForTimePointBefore = grid.readDataSlice(timeIndex, /* z_index */ 0, xy[1], xy[0]);
         final Position responsePosition = toPosition(coordinateSystem.getLatLon(xy[0], xy[1]));
         return new Triple<Double, TimePoint, Position>((double) arrayForTimePointBefore.getFloat(0), responseTimePoint, responsePosition);
+    }
+
+    protected Optional<String> getUnit(VariableDS variable) {
+        final Optional<String> result;
+        final ucar.nc2.Attribute attribute = variable.findAttribute("units");
+        if (attribute != null) {
+            result = Optional.of(attribute.getStringValue());
+        } else {
+            result = Optional.empty();
+        }
+        return result;
     }
 
 }

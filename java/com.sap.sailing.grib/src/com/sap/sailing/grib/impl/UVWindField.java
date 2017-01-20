@@ -1,7 +1,6 @@
 package com.sap.sailing.grib.impl;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
@@ -13,7 +12,6 @@ import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 
-import ucar.nc2.dataset.VariableDS;
 import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GridDataset;
 import ucar.nc2.ft.FeatureDataset;
@@ -58,17 +56,6 @@ public class UVWindField extends AbstractGribWindFieldImpl {
             confidence = 0;
         }
         return new WindWithConfidenceImpl<TimePoint>(wind, confidence*getBaseConfidence(), timePoint, /* useSpeed */ true);
-    }
-
-    private Optional<String> getUnit(VariableDS variable) {
-        final Optional<String> result;
-        final ucar.nc2.Attribute attribute = variable.findAttribute("units");
-        if (attribute != null) {
-            result = Optional.of(attribute.getStringValue());
-        } else {
-            result = Optional.empty();
-        }
-        return result;
     }
 
     /**
