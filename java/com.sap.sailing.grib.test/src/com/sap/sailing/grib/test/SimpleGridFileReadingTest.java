@@ -3,20 +3,25 @@ package com.sap.sailing.grib.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Formatter;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.grib.GribWindField;
+import com.sap.sailing.grib.GribWindFieldFactory;
 
 import ucar.ma2.ArrayFloat.D2;
 import ucar.nc2.VariableSimpleIF;
+import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dt.GridCoordSystem;
 import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GeoGrid;
 import ucar.nc2.dt.grid.GridDataset;
+import ucar.nc2.ft.FeatureDataset;
+import ucar.nc2.ft.FeatureDatasetFactoryManager;
 import ucar.nc2.time.CalendarDate;
 import ucar.nc2.time.CalendarDateRange;
 import ucar.unidata.geoloc.LatLonRect;
@@ -50,6 +55,14 @@ public class SimpleGridFileReadingTest {
         final float dataAtMiddle = volumeDataAtTime0.get(coordinateIndices[0], coordinateIndices[1]);
         System.out.println(dataVariables);
         System.out.println(dataAtMiddle);
+    }
+    
+    @Test
+    public void testUsingFtAPI() throws IOException {
+        final Formatter errorLog = new Formatter(System.err);
+        FeatureDataset dataSet = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/wind-Atlantic.24hr.grb.bz2", /* task */ null, errorLog);
+        GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindField(dataSet);
+        System.out.println(windField);
     }
     
     @Test

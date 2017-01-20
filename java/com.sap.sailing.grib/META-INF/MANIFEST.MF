@@ -103,3 +103,4 @@ Export-Package: ucar.atd.dorade,
  ucar.nc2.wmo,
  ucar.nc2.write,
  ucar.netcdf
+Require-Bundle: com.sap.sailing.domain.common
