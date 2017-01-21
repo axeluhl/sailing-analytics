@@ -60,6 +60,6 @@ public class Bzip2GridFileReadingTest {
         final CalendarDateRange dateRange = dataSet.getCalendarDateRange();
         final CalendarDate start = dateRange.getStart();
         final CalendarDate end = dateRange.getEnd();
-        assertTrue(end.isAfter(start));
+        assertTrue(!end.isBefore(start));
     }
 }
