@@ -6,7 +6,8 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 
 public class GPSFixWithContext implements HasGPSFixContext {
-    
+    private static final long serialVersionUID = -4537126043228674949L;
+
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitorContext;
     
     private final GPSFixMoving gpsFix;
@@ -26,14 +27,14 @@ public class GPSFixWithContext implements HasGPSFixContext {
     public GPSFixMoving getGPSFix() {
         return gpsFix;
     }
-    
+
     @Override
-    public Wind getWind() {
-        if (wind == null) {
-            wind = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace()
-                    .getWind(gpsFix.getPosition(), gpsFix.getTimePoint());
-        }
+    public Wind getWindInternal() {
         return wind;
     }
-    
+
+    @Override
+    public void setWindInternal(Wind wind) {
+        this.wind = wind;
+    }
 }

@@ -6,7 +6,10 @@ import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
@@ -15,6 +18,7 @@ import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompetitorContext {
+    private static final long serialVersionUID = 5944904146286262768L;
 
     private final HasTrackedLegContext trackedLegContext;
     
@@ -25,6 +29,7 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     private boolean isRankAtStartInitialized;
     private Double rankAtFinish;
     private boolean isRankAtFinishInitialized;
+    private Wind wind;
 
     public TrackedLegOfCompetitorWithContext(HasTrackedLegContext trackedLegContext, TrackedLegOfCompetitor trackedLegOfCompetitor) {
         this.trackedLegContext = trackedLegContext;
@@ -119,6 +124,53 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         }
         
         return (finishTime.asMillis() - startTime.asMillis()) / 1000;
+    }
+
+    @Override
+    public Wind getWindInternal() {
+        return wind;
+    }
+
+    @Override
+    public void setWindInternal(Wind wind) {
+        this.wind = wind;
+    }
+
+    @Override
+    public Position getPosition() {
+        final TrackedLeg trackedLeg = getTrackedLegContext().getTrackedLeg();
+        final TrackedRace trackedRace = trackedLeg.getTrackedRace();
+        final TimePoint timepoint = getTimePointBetweenLegStartAndLegFinish(trackedRace);
+        final Position result;
+        if (timepoint == null) {
+            result = null;
+        } else {
+            result = trackedLeg.getMiddleOfLeg(timepoint);
+        }
+        return result;
+    }
+
+    private TimePoint getTimePointBetweenLegStartAndLegFinish(final TrackedRace trackedRace) {
+        final TimePoint competitorLegStartTime = getTrackedLegOfCompetitor().getStartTime();
+        final TimePoint competitorLegEndTime =  getTrackedLegOfCompetitor().getFinishTime();
+        final TimePoint startTime = competitorLegStartTime != null ? competitorLegStartTime :
+            trackedRace.getStartOfRace() != null ? trackedRace.getStartOfRace() : trackedRace.getStartOfTracking();
+        final TimePoint endTime = competitorLegEndTime != null ? competitorLegEndTime :
+            trackedRace.getEndOfRace() != null ? trackedRace.getEndOfRace() : trackedRace.getEndOfTracking();
+        final TimePoint timepoint = endTime == null ? startTime : startTime == null ? null : startTime.plus(startTime.until(endTime).divide(2));
+        return timepoint;
+    }
+
+    @Override
+    public TimePoint getTimePoint() {
+        final TrackedLeg trackedLeg = getTrackedLegContext().getTrackedLeg();
+        final TrackedRace trackedRace = trackedLeg.getTrackedRace();
+        return getTimePointBetweenLegStartAndLegFinish(trackedRace);
+    }
+
+    @Override
+    public HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext() {
+        return this;
     }
     
 }

@@ -5,18 +5,14 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
-public interface HasManeuverContext extends HasWind {
-    
+public interface HasManeuverContext extends HasWind, HasManeuver, HasTrackedLegOfCompetitor {
     @Connector(scanForStatistics=false)
     HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext();
-    
-    Maneuver getManeuver();
-    
+
     //TODO Clean-Up:
     // Move Dimensions and Statistics to Maneuver and connect to it
     @Dimension(messageKey="ManeuverType", ordinal=12)
