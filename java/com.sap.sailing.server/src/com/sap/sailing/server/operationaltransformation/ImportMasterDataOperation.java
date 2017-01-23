@@ -432,7 +432,7 @@ public class ImportMasterDataOperation extends
                     storeFixes(store, device, fixesToAddAsBatch);
                 }
                 i++;
-                progress.setCurrentSubProgressPct(0.8 + (0.2) * ((double) i / numberOfDevices));
+                progress.setCurrentSubProgressPct((double) i / numberOfDevices);
             }
         }
     }
