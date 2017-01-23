@@ -169,7 +169,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         Object result = functionsIterator.next().tryToInvoke(instance, parameterProvider);
         while (functionsIterator.hasNext()) {
             Function<?> function = functionsIterator.next();
-            result = function.tryToInvoke(result);
+            result = function.tryToInvoke(result, parameterProvider);
             if (result == null) {
                 return null;
             }
