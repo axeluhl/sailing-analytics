@@ -87,6 +87,16 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         return getFirstFunction().getParameters();
     }
     
+    @Override
+    public boolean needsLocalizationParameters() {
+        for (final Function<?> function : getFunctions()) {
+            if (function.needsLocalizationParameters()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return the return type of the last function.
      */
