@@ -2,6 +2,7 @@ package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.tracking.Maneuver;
@@ -31,6 +32,12 @@ public interface HasManeuverContext {
     
     @Statistic(messageKey="DirectionChange", resultDecimals=2, ordinal=2)
     Double getDirectionChangeInDegrees();
+
+    @Statistic(messageKey="AbsoluteDirectionChange", resultDecimals=2, ordinal=2)
+    Double getAbsoluteDirectionChangeInDegrees();
+    
+    @Dimension(messageKey="ToSide")
+    NauticalSide getToSide();
     
     @Statistic(messageKey="ManeuverLoss", resultDecimals=0, ordinal=3)
     Distance getManeuverLoss();
