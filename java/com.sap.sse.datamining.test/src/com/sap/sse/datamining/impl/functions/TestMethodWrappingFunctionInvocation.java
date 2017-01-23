@@ -42,7 +42,7 @@ public class TestMethodWrappingFunctionInvocation {
         DataTypeWithContext dataEntry = new DataTypeWithContextImpl("Regatta Name", "Race Name", 7);
         // the one parameter is ignored; see bug 4034; in case of concatenated functions, excess parameters are ignored
         // and would only be used for those methods that need it; therefore, we receive a valid result here
-        assertThat(getRegattaName.tryToInvoke(dataEntry, () -> {return new Object[0];} ), is(nullValue()));
+        assertThat(getRegattaName.tryToInvoke(dataEntry, () -> {return new Object[0];} ), is("Regatta Name"));
         SimpleClassWithMarkedMethods instance = new SimpleClassWithMarkedMethods();
         // invoking a method that expects an int parameter with no ParameterProvider is expected to return null ("error")
         assertThat(increment.tryToInvoke(instance), is(nullValue()));
