@@ -17,6 +17,7 @@ import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.data.HasWindFixContext;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBoolSumAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceAverageAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMaxAggregationProcessor;
@@ -81,6 +82,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasTrackedLegContext.class);
         internalClasses.add(HasTrackedLegOfCompetitorContext.class);
         internalClasses.add(HasGPSFixContext.class);
+        internalClasses.add(HasWindFixContext.class);
         internalClasses.add(HasManeuverContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         internalClasses.add(HasRaceOfCompetitorContext.class);
@@ -133,7 +135,6 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         if (INSTANCE == null) {
             INSTANCE = new Activator(); // probably non-OSGi case, as in test execution
         }
-        
         return INSTANCE;
     }
 

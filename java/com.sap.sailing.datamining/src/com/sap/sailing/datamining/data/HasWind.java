@@ -11,23 +11,13 @@ import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
-public interface HasWind extends HasTrackedLegOfCompetitor, Positioned, Timed {
+public interface HasWind extends Positioned, Timed {
+    Wind getWind();
+    
     @Dimension(messageKey="WindStrengthInBeaufort", ordinal=11)
     default ClusterDTO getWindStrengthAsBeaufortCluster(Locale locale, ResourceBundleStringMessages stringMessages) {
         Wind wind = getWind();
         Cluster<?> cluster = Activator.getClusterGroups().getWindStrengthInBeaufortClusterGroup().getClusterFor(wind);
         return new ClusterDTO(cluster.asLocalizedString(locale, stringMessages));
     }
-    
-    default Wind getWind() {
-        if (getWindInternal() == null) {
-            setWindInternal(getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace()
-                    .getWind(getPosition(), getTimePoint()));
-        }
-        return getWindInternal();
-    }
-    
-    Wind getWindInternal();
-    
-    void setWindInternal(Wind wind);
 }

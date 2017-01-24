@@ -5,7 +5,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.annotations.Connector;
 
-public interface HasGPSFixContext extends HasWind {
+public interface HasGPSFixContext extends HasWindOnTrackedLeg {
     @Connector(scanForStatistics=false)
     public HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext();
     
