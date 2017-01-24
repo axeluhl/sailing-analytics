@@ -3,6 +3,7 @@ package com.sap.sse.datamining.impl.functions;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.logging.Level;
 
@@ -80,13 +81,37 @@ public class MethodWrappingFunction<ReturnType> extends AbstractFunction<ReturnT
     }
 
     @Override
+    public boolean needsLocalizationParameters() {
+        Iterator<Class<?>> parameterTypesIterator = getParameters().iterator();
+        int parameterCount = 0;
+        while (parameterTypesIterator.hasNext()) {
+            parameterCount++;
+            parameterTypesIterator.next();
+        }
+        if (parameterCount != 2) {
+            return false;
+        }
+        parameterTypesIterator = getParameters().iterator();
+        Class<?> firstParameter = parameterTypesIterator.next();
+        Class<?> secondParameter = parameterTypesIterator.next();
+        return firstParameter.isAssignableFrom(Locale.class) && secondParameter.isAssignableFrom(ResourceBundleStringMessages.class);
+    }
+
+    @Override
     public ReturnType tryToInvoke(Object instance) {
         return tryToInvoke(instance, new Object[0]);
     }
 
     @Override
     public ReturnType tryToInvoke(Object instance, ParameterProvider parameterProvider) {
-        return tryToInvoke(instance, parameterProvider.getParameters());
+        if (method.getParameterCount() == 0) {
+            return tryToInvoke(instance);
+        } else {
+            // copy only as many parameters as the function requires (see also bug 4034)
+            final Object[] paramValues = new Object[method.getParameterCount()];
+            System.arraycopy(parameterProvider.getParameters(), 0, paramValues, 0, paramValues.length);
+            return tryToInvoke(instance, paramValues);
+        }
     }
 
     @SuppressWarnings("unchecked")

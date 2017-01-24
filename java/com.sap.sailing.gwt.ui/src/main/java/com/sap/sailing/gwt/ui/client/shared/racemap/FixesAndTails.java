@@ -103,7 +103,8 @@ public class FixesAndTails {
     }
 
     public int getFirstShownFix(CompetitorDTO competitor) {
-        return firstShownFix.get(competitor).get();
+        final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitor);
+        return firstShownFixForCompetitor==null?null:firstShownFixForCompetitor.get();
     }
     
     /**
@@ -301,8 +302,11 @@ public class FixesAndTails {
      */
     private void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType> mergeThis, final long timeForPositionTransitionMillis) {
         List<GPSFixDTOWithSpeedWindTackAndLegType> intoThis = fixes.get(competitorDTO);
-        int indexOfFirstShownFix = firstShownFix.get(competitorDTO).get() == null ? -1 : firstShownFix.get(competitorDTO).get();
-        int indexOfLastShownFix = lastShownFix.get(competitorDTO).get() == null ? -1 : lastShownFix.get(competitorDTO).get();
+        final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
+        int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1
+                : firstShownFixForCompetitor.get();
+        final Trigger<Integer> lastShownFixForCompetitor = lastShownFix.get(competitorDTO);
+        int indexOfLastShownFix = (lastShownFixForCompetitor == null || lastShownFixForCompetitor.get() == null) ? -1 : lastShownFixForCompetitor.get();
         final Polyline tail = getTail(competitorDTO);
         int intoThisIndex = 0;
         final Comparator<GPSFixDTOWithSpeedWindTackAndLegType> fixByTimePointComparator = new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
@@ -435,7 +439,8 @@ public class FixesAndTails {
                 final Polyline tail = getTail(competitorDTO);
                 int vertexCount = tail.getPath().getLength();
                 final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
-                int indexOfFirstShownFix = firstShownFix.get(competitorDTO).get() == null ? -1 : firstShownFix.get(competitorDTO).get();
+                final Trigger<Integer> firstShownFixForCompetitor = firstShownFix.get(competitorDTO);
+                int indexOfFirstShownFix = (firstShownFixForCompetitor == null || firstShownFixForCompetitor.get() == null) ? -1 : firstShownFixForCompetitor.get();
                 // remove fixes before what is now to be the beginning of the polyline:
                 while (indexOfFirstShownFix != -1 && vertexCount > 0
                         && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
@@ -454,7 +459,8 @@ public class FixesAndTails {
                     vertexCount++;
                 }
                 // now adjust the polyline's tail: remove excess vertices that are after "to"
-                int indexOfLastShownFix = lastShownFix.get(competitorDTO).get() == null ? -1 : lastShownFix.get(competitorDTO).get();
+                final Trigger<Integer> lastShownFixForCompetitor = lastShownFix.get(competitorDTO);
+                int indexOfLastShownFix = (lastShownFixForCompetitor == null || lastShownFixForCompetitor.get() == null) ? -1 : lastShownFixForCompetitor.get();
                 while (indexOfLastShownFix != -1 && vertexCount > 0
                         && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
                     if (vertexCount-1 == 0 || (indexOfLastShownFix-1 >= 0 && !fixesForCompetitor.get(indexOfLastShownFix-1).timepoint.after(to))) {

@@ -23,7 +23,7 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
-                    <h2 class="articleSubheadline">December 2016</h2>
+                    <h2 class="articleSubheadline">January 2017</h2>
                     <ul class="bulletList">
                     	<li>Filter boxes now support quoting phrases, such as <tt>"Race 2"</tt> to make them a single search term.
                     	    Previously, when entering <tt>Race 2</tt> this would match all lines containing <tt>Race</tt> as well
@@ -31,6 +31,19 @@
                     	    Enclosing the phrase with double quotes as in <tt>"Race 2"</tt> will consider the full string in quotes
                     	    as a search term. In the unlikely case of searching for a double quote you can do that by prefixing
                     	    the double quote with a backslash character, as in <tt>\"</tt>.
+                    	</li>
+                    	<li>When changing the start/end of tracking times in the "Smartphone Tracking" tab, it is now possible
+                    	    to "unset" one or both of these time stamps. Next to the date/time entry field these is now a
+                    	    "Set" checkbox. When the date/time field is modified, the box is automatically checked because
+                    	    it seems reasonable to assume that the user wants this change to be committed. When committing
+                    	    an empty date/time field with the "Set" checkbox ticked, the <tt>null</tt> time stamp which
+                    	    makes this an open tracking interval is committed and will override any inference that may be
+                    	    made based on the race's start and finish time. When unchecking the "Set" checkbox, the previously
+                    	    committed timestamp is revoked (regardless of the contents of the date/time field), allowing for
+                    	    inference to take place if the regatta has been configured for tracking times inference.
+                    	</li>
+                    	<li>There is a new permission, <tt>DATA_MINING</tt>, which is now required in order to use the
+                    	    <tt>/gwt/DataMining.html</tt> entry point and the related back-end service.
                     	</li>
                     </ul>
                     <h2 class="articleSubheadline">December 2016</h2>
