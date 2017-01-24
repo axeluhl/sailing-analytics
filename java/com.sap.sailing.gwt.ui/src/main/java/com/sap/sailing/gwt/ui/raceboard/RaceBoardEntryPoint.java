@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.SettingsReceiverCallback;
 
@@ -132,7 +133,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     
                     @Override
                     public void receiveSettings(PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> initialSettings) {
-                        final RaceBoardPanel raceBoardPanel = createPerspectivePage(context, raceboardData, showChartMarkEditMediaButtonsAndVideo);
+                                final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, context,
+                                        raceboardData, showChartMarkEditMediaButtonsAndVideo);
                         if (finalMode != null) {
                             finalMode.applyTo(raceBoardPanel);
                         }
@@ -158,7 +160,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         vp.add(new Label(message));
     }
 
-    private RaceBoardPanel createPerspectivePage(RaceBoardComponentContext context, RaceboardDataDTO raceboardData,
+    private RaceBoardPanel createPerspectivePage(Component<?> parent, RaceBoardComponentContext context,
+            RaceboardDataDTO raceboardData,
             boolean showChartMarkEditMediaButtonsAndVideo) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
@@ -169,7 +172,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
   
         PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveCompositeSettings = context.getDefaultSettings();
 
-        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(context, context.getRootLifecycle(),
+        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(parent, context, context.getRootLifecycle(),
                 perspectiveCompositeSettings,
                 sailingService, mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,

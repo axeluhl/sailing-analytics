@@ -49,6 +49,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
@@ -85,10 +86,12 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     private PlayerChangeListener playerChangeListener;
 
-    public MediaPlayerManagerComponent(MediaPlayerLifecycle mediaPlayerLifecycle, RegattaAndRaceIdentifier selectedRaceIdentifier,
+    public MediaPlayerManagerComponent(Component<?> parent, MediaPlayerLifecycle mediaPlayerLifecycle,
+            RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings) {
+        super(parent);
         this.mediaPlayerLifecycle = mediaPlayerLifecycle;
         this.userService = userService;
         this.raceIdentifier = selectedRaceIdentifier;

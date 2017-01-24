@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class MultiResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
@@ -32,7 +33,8 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
 
     private List<Descriptor<Object>> availableDescriptors;
     
-    public MultiResultsPresenter(StringMessages stringMessages) {
+    public MultiResultsPresenter(Component<?> parent, StringMessages stringMessages) {
+        super(parent);
         this.stringMessages = stringMessages;
         availableDescriptors = new ArrayList<>();
         availableDescriptors.add(new ColumnChartDescriptor());
@@ -167,7 +169,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
         private final AbstractResultsPresenter<?> presenter;
         
         public PlainDescriptor() {
-            presenter = new PlainResultsPresenter(stringMessages);
+            presenter = new PlainResultsPresenter(MultiResultsPresenter.this, stringMessages);
         }
 
         @Override
@@ -187,7 +189,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
         private final ResultsChart presenter;
 
         public ColumnChartDescriptor() {
-            presenter = new ResultsChart(stringMessages);
+            presenter = new ResultsChart(MultiResultsPresenter.this, stringMessages);
         }
 
         @Override

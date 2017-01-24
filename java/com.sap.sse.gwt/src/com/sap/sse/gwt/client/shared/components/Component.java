@@ -1,10 +1,14 @@
 package com.sap.sse.gwt.client.shared.components;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
 
 public interface Component<SettingsType extends Settings> {
+    ArrayList<String> getPath();
+
     /**
      * Each component instance has an ID that has to be unique in the context in which the component is used
      * and has its siblings. In particular, multiple components of the same type but with distinct IDs may
@@ -62,8 +66,7 @@ public interface Component<SettingsType extends Settings> {
     String getDependentCssClassName();
 
     /**
-     * Gets the {@link ComponentTreeNodeInfo} instance corresponding to this component.
-     * @see ComponentTreeNodeInfo
+     * returns the parentComponent or null
      */
-    ComponentTreeNodeInfo getComponentTreeNodeInfo();
+    Component<?> getParentComponent();
 }

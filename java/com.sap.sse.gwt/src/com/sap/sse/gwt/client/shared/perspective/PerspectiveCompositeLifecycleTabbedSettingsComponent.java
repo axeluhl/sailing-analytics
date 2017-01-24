@@ -3,6 +3,7 @@ package com.sap.sse.gwt.client.shared.perspective;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -21,14 +22,15 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
     private PerspectiveCompositeSettings<PS> perspectiveCompositeSettings;
     private PL lifecycle;
     
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PL lifecycle,
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(Component<?> parent, PL lifecycle,
             PerspectiveCompositeSettings<PS> settings) {
-        this(lifecycle, settings, null);
+        this(parent, lifecycle, settings, null);
     }
 
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PL lifecycle, PerspectiveCompositeSettings<PS> settings,
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(Component<?> parent, PL lifecycle,
+            PerspectiveCompositeSettings<PS> settings,
             String title) {
-        // FIXME settings in perspective
+        super(parent);
         this.lifecycle = lifecycle;
         this.perspectiveCompositeSettings = settings;
         this.title = title;

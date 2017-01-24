@@ -27,7 +27,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
                 .getParameterMap());
         final RegattaAndRaceIdentifier preselectedRace = EventParamUtils
                 .getPreselectedRace(Window.Location.getParameterMap());
-        LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createOverallLeaderboardPanel(
+        LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createOverallLeaderboardPanel(null,
                 leaderboardSettings,
                 preselectedRace,
                 "leaderboardGroupName",

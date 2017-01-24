@@ -56,6 +56,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -89,10 +90,12 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
      *            constructor must ensure to trigger {@link RaceSelectionChangeListener#onRaceSelectionChange(List)} at
      *            least once to ensure that this chart sets its {@link AbstractRaceChart#selectedRaceIdentifier} field.
      */
-    public WindChart(WindChartLifecycle windChartLifecycle, SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
+    public WindChart(Component<?> parent, WindChartLifecycle windChartLifecycle, SailingServiceAsync sailingService,
+            RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
             TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
-        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(parent, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
+                asyncActionsExecutor, errorReporter);
         this.windChartLifecycle = windChartLifecycle;
         this.settings = settings;
         windSourceDirectionSeries = new HashMap<WindSource, Series>();

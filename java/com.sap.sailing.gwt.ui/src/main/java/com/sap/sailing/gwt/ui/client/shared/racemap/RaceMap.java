@@ -414,10 +414,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
     
-    public RaceMap(RaceMapLifecycle raceMapLifecycle, RaceMapSettings raceMapSettings, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public RaceMap(Component<?> parent, RaceMapLifecycle raceMapLifecycle, RaceMapSettings raceMapSettings,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, 
             boolean showHeaderPanel) {
+        super(parent);
         this.raceMapLifecycle = raceMapLifecycle;
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;

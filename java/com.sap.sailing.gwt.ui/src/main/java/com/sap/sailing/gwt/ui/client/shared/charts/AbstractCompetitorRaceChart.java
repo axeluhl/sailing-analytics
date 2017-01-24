@@ -101,13 +101,15 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private final TimingHolder primary = new TimingHolder();
     private final TimingHolder secondary = new TimingHolder();
 
-    AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    AbstractCompetitorRaceChart(Component<?> parent, SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType firstDetailType, DetailType secondDetailType, boolean compactChart,
             boolean allowTimeAdjust,
             String leaderboardGroupName, String leaderboardName) {
-        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(parent, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
+                asyncActionsExecutor, errorReporter);
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;

@@ -34,6 +34,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -97,8 +98,10 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
      *            charts such as the competitor chart or the wind chart shown above it, otherwise the padding depends
      *            on the flag set by {@link #setLiveGenerallyPossible(boolean)}
      */
-    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+    public TimePanel(Component<?> parent, Timer timer, TimeRangeWithZoomProvider timeRangeProvider,
+            StringMessages stringMessages,
             boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts) {
+        super(parent);
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;

@@ -11,16 +11,4 @@ public class LeaderboardWithHeaderComponentContext extends AbstractComponentCont
         super(rootPerspectiveLifecycle, new UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>>(userService, entryPointId, "global"));
     }
 
-    @Override
-    protected PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> extractContextSpecificSettings(
-            PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> newRootPerspectiveSettings) {
-        return null;
-    }
-
-    @Override
-    protected PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> extractGlobalSettings(
-            PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> newRootPerspectiveSettings) {
-        return newRootPerspectiveSettings;
-    }
-
 }

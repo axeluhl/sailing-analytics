@@ -15,6 +15,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
@@ -27,20 +28,20 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
     private LeaderboardPanel overallLeaderboardPanel;
     
-    public LeaderboardViewer(LeaderboardComponentContext componentContext,
+    public LeaderboardViewer(Component<?> parent, LeaderboardComponentContext componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
             final Timer timer, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final UserAgentDetails userAgent, DetailType chartDetailType) {
-        this(componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
+        this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingService, asyncActionsExecutor, timer,
                 preselectedRace, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, userAgent, chartDetailType);
     }
 
-    private LeaderboardViewer(LeaderboardComponentContext componentContext,
+    private LeaderboardViewer(Component<?> parent, LeaderboardComponentContext componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel,
@@ -48,22 +49,25 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
             final Timer timer, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, final UserAgentDetails userAgent, DetailType chartDetailType) {
-        super(componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
-                stringMessages,
-                new LeaderboardPanel(
-                sailingService, asyncActionsExecutor, settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
-                preselectedRace != null, preselectedRace,
-                competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, userAgent, settings.getPerspectiveOwnSettings().isShowRaceDetails(), /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
-                /* raceTimesInfoProvider */ null, settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
-                /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false));
-        
+        super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
+                stringMessages);
+        // FIXME: Cleanup with java8 using supplier
+        init(new LeaderboardPanel(this, sailingService, asyncActionsExecutor,
+                settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), preselectedRace != null,
+                preselectedRace, competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
+                stringMessages, userAgent, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
+                /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null,
+                settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
+                /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
+                /* enableSyncScroller */ false));
+
         final LeaderboardPerspectiveOwnSettings perspectiveSettings = settings.getPerspectiveOwnSettings();
         final boolean showCharts = perspectiveSettings.isShowCharts();
         
         final FlowPanel mainPanel = createViewerPanel();
         initWidget(mainPanel);
-        multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, leaderboardName, chartDetailType,
+        multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, sailingService, asyncActionsExecutor,
+                leaderboardName, chartDetailType,
                 competitorSelectionProvider, timer, stringMessages, errorReporter);
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
@@ -87,7 +91,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
                         public void onSuccess(List<String> result) {
                             if(result.size() == 1) {
                                 String overallLeaderboardName = result.get(0);
-                                overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
+                                overallLeaderboardPanel = new LeaderboardPanel(LeaderboardViewer.this, sailingService,
+                                        asyncActionsExecutor,
                                         settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
                                         preselectedRace != null, preselectedRace, competitorSelectionProvider, timer,
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,

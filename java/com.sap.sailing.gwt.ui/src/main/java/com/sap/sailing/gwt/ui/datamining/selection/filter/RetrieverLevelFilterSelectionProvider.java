@@ -22,6 +22,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<AbstractSettings> {
@@ -38,9 +39,11 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
     private final HorizontalPanel mainPanel;
     private final Collection<DimensionFilterSelectionProvider> dimensionSelectionProviders;
 
-    public RetrieverLevelFilterSelectionProvider(DataMiningSession session, DataMiningServiceAsync dataMiningService,
+    public RetrieverLevelFilterSelectionProvider(Component<?> parent, DataMiningSession session,
+            DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,
             DataRetrieverLevelDTO retrieverLevel) {
+        super(parent);
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         

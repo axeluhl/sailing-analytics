@@ -29,7 +29,8 @@ public class AnchorDataMiningSettingsControl extends AbstractComponent<Composite
     private final Collection<Component<?>> components;
     private final Anchor anchor;
     
-    public AnchorDataMiningSettingsControl(final StringMessages stringMessages) {
+    public AnchorDataMiningSettingsControl(Component<?> parent, final StringMessages stringMessages) {
+        super(parent);
         this.stringMessages = stringMessages;
         components = new LinkedHashSet<>();
         

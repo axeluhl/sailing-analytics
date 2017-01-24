@@ -34,6 +34,7 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
     public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
+        super(parent);
         this.markDataProvider = markDataProvider;
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
         markTable.setStyleName("EditMarkPositionMarkTable");

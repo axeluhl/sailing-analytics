@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class PlainResultsPresenter extends AbstractResultsPresenterWithDataProviders<Settings> {
@@ -20,8 +21,8 @@ public class PlainResultsPresenter extends AbstractResultsPresenterWithDataProvi
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
 
-    public PlainResultsPresenter(StringMessages stringMessages) {
-        super(stringMessages);
+    public PlainResultsPresenter(Component<?> parent, StringMessages stringMessages) {
+        super(parent, stringMessages);
         
         resultsLabel = new HTML();
         scrollPanel = new ScrollPanel(resultsLabel);

@@ -58,11 +58,13 @@ public class EventSeriesAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createOverallLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
+    public LeaderboardPanel createOverallLeaderboardPanel(Component<?> parent,
+            final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if(overallLeaderboardPanel == null) {
-            overallLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
+            overallLeaderboardPanel = new LeaderboardPanel(parent, sailingService, asyncActionsExecutor,
+                    leaderboardSettings, true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
                     /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
@@ -71,20 +73,24 @@ public class EventSeriesAnalyticsDataManager {
         return overallLeaderboardPanel;
     }
 
-    public MultiCompetitorLeaderboardChart createMultiCompetitorChart(String leaderboardName, DetailType chartDetailType) {
+    public MultiCompetitorLeaderboardChart createMultiCompetitorChart(Component<?> parent, String leaderboardName,
+            DetailType chartDetailType) {
         if(multiCompetitorChart == null) {
-            multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, leaderboardName, chartDetailType,
+            multiCompetitorChart = new MultiCompetitorLeaderboardChart(parent, sailingService, asyncActionsExecutor,
+                    leaderboardName, chartDetailType,
                     competitorSelectionProvider, timer, StringMessages.INSTANCE, errorReporter);
             multiCompetitorChart.setVisible(false); 
         }
         return multiCompetitorChart;
     }
 
-    public MultiLeaderboardPanel createMultiLeaderboardPanel(LeaderboardSettings leaderboardSettings,
+    public MultiLeaderboardPanel createMultiLeaderboardPanel(Component<?> parent,
+            LeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
         if(multiLeaderboardPanel == null) {
-            multiLeaderboardPanel = new MultiLeaderboardPanel(sailingService, metaLeaderboardName, asyncActionsExecutor, timer, true /*isEmbedded*/,
+            multiLeaderboardPanel = new MultiLeaderboardPanel(parent, sailingService, metaLeaderboardName,
+                    asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, preselectedRace, errorReporter, StringMessages.INSTANCE,
                     userAgent, showRaceDetails, autoExpandLastRaceColumn);
         }

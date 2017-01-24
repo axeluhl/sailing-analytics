@@ -19,7 +19,8 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
     public LeaderboardPanelMock(SailingServiceAsync sailingService,
             String leaderboardName, ErrorReporter errorReporter,
             StringMessages stringMessages) {
-        super(sailingService, new AsyncActionsExecutor(), new LeaderboardSettings(), new CompetitorSelectionModel(
+        super(null, sailingService, new AsyncActionsExecutor(), new LeaderboardSettings(),
+                new CompetitorSelectionModel(
                 /* hasMultiSelection */true), leaderboardName, errorReporter, stringMessages, new UserAgentDetails("gecko1_8"), /* showRaceDetails */ true);
     }
 

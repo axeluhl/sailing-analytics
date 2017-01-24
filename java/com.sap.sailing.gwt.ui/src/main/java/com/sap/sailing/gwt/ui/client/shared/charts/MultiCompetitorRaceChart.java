@@ -34,12 +34,14 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private final MultiCompetitorRaceChartLifecycle lifeycycle;
     
-    public MultiCompetitorRaceChart(MultiCompetitorRaceChartLifecycle lifeycycle, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public MultiCompetitorRaceChart(Component<?> parent, MultiCompetitorRaceChartLifecycle lifeycycle,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
             final String leaderboardGroupName, String leaderboardName) {
-        super(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
+        super(parent, sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer,
+                timeRangeWithZoomProvider, stringMessages, errorReporter,
                 /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
                 allowTimeAdjust, leaderboardGroupName, leaderboardName);
         this.lifeycycle = lifeycycle;

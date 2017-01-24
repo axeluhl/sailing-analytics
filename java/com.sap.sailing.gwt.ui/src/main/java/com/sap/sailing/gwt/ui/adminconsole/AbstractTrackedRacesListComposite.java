@@ -54,6 +54,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.panels.CustomizableFilterablePanel;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> implements
@@ -95,9 +96,10 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         }
     }
 
-    public AbstractTrackedRacesListComposite(final SailingServiceAsync sailingService,
+    public AbstractTrackedRacesListComposite(Component<?> parent, final SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
             final StringMessages stringMessages, boolean hasMultiSelection) {
+        super(parent);
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;

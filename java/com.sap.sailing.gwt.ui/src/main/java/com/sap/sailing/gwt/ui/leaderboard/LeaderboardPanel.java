@@ -118,6 +118,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
@@ -1725,20 +1726,25 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         }
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public LeaderboardPanel(Component<?> parent, SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
-        this(sailingService, asyncActionsExecutor, settings, false, /* preSelectedRace */null, competitorSelectionProvider,
+        this(parent, sailingService, asyncActionsExecutor, settings, false, /* preSelectedRace */null,
+                competitorSelectionProvider,
                 null, leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails);
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public LeaderboardPanel(Component<?> parent, SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
-        this(sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace, competitorSelectionProvider, new Timer(
+        this(parent, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
+                competitorSelectionProvider,
+                new Timer(
                 // perform the first request as "live" but don't by default auto-play
                 PlayModes.Live, PlayStates.Paused, /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS), leaderboardGroupName,
                 leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
@@ -1747,7 +1753,8 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                 /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
     }
 
-    public LeaderboardPanel(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public LeaderboardPanel(Component<?> parent, SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
@@ -1755,6 +1762,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
             boolean showCompetitorFilterStatus, boolean enableSyncScroller) {
+        super(parent);
         this.currentSettings = settings;
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;

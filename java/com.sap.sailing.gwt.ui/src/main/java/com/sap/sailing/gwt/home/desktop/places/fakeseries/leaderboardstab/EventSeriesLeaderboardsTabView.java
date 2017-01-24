@@ -68,7 +68,8 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
             final LeaderboardSettings leaderboardSettings = EventParamUtils.createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
             final RaceIdentifier preselectedRace = EventParamUtils.getPreselectedRace(Window.Location.getParameterMap());
 
-            MultiLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(leaderboardSettings,
+            MultiLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(null,
+                    leaderboardSettings,
                     null, // TODO: preselectedLeaderboardName
                     preselectedRace,
                     "leaderboardGroupName",

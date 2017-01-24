@@ -71,6 +71,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 
@@ -137,9 +138,11 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
      *            Whenever this component makes a service call and receives an update on the current server time, the
      *            timer passed for this argument will be synchronized.
      */
-    public RegattaRaceStatesComponent(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public RegattaRaceStatesComponent(Component<?> parent, final SailingServiceAsync sailingService,
+            ErrorReporter errorReporter,
             final StringMessages stringMessages, final UUID eventId, RegattaRaceStatesSettings settings,
             Timer timerToSynchronize, boolean ignoreLocalSettings) {
+        super(parent);
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.eventId = eventId;

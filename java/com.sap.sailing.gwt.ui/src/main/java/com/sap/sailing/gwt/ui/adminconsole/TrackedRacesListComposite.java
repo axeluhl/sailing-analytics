@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
 /**
@@ -36,9 +37,10 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private ExportPopup exportPopup;
     private boolean actionButtonsEnabled;
 
-    public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+    public TrackedRacesListComposite(Component<?> parent, final SailingServiceAsync sailingService,
+            final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
+        super(parent, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();

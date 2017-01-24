@@ -4,6 +4,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 
 public abstract class RetrieverLevelSettingsComponent extends AbstractComponent<SerializableSettings> {
 
@@ -11,7 +12,8 @@ public abstract class RetrieverLevelSettingsComponent extends AbstractComponent<
     private final String localizedName;
     private final String componentId;
 
-    public RetrieverLevelSettingsComponent(DataRetrieverLevelDTO retrieverLevel, String componentId, String localizedName) {
+    public RetrieverLevelSettingsComponent(Component<?> parent,DataRetrieverLevelDTO retrieverLevel, String componentId, String localizedName) {
+        super(parent);
         this.retrieverLevel = retrieverLevel;
         this.localizedName = localizedName;
         this.componentId = componentId;

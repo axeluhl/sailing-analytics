@@ -100,6 +100,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -131,11 +132,12 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     
     private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
 
-    public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel,
+    public EditMarkPositionPanel(Component<?> parent, final RaceMap raceMap, final LeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
-        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(parent, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
+                asyncActionsExecutor, errorReporter);
         this.markPositionService = new MarkPositionServiceForSailingService(sailingService);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.raceMap = raceMap;
@@ -221,10 +223,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         }
         
         private native int getX() /*-{
-            return this.x;
+			return this.x;
         }-*/;
         private native int getY() /*-{
-            return this.y;
+			return this.y;
         }-*/;
     }
     

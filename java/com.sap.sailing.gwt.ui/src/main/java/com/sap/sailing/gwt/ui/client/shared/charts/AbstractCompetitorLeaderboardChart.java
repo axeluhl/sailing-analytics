@@ -73,9 +73,11 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
     protected final String leaderboardName;
     protected final StringMessages stringMessages;
     
-    public AbstractCompetitorLeaderboardChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, String leaderboardName, 
+    public AbstractCompetitorLeaderboardChart(Component<?> parent, SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor, String leaderboardName,
             DetailType detailType, CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             final StringMessages stringMessages, ErrorReporter errorReporter) {
+        super(parent);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.competitorSelectionProvider = competitorSelectionProvider;

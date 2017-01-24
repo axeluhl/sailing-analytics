@@ -49,7 +49,8 @@ public class RegattaAnalyticsDataManager {
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if (leaderboardPanel == null) {
-            leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, leaderboardSettings, true, preselectedRace,
+            leaderboardPanel = new LeaderboardPanel(null, sailingService, asyncActionsExecutor, leaderboardSettings,
+                    true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null, autoExpandLastRaceColumn,
                     /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true);
@@ -59,7 +60,8 @@ public class RegattaAnalyticsDataManager {
 
     public MultiCompetitorLeaderboardChart createMultiCompetitorChart(String leaderboardName, DetailType chartDetailType) {
         if(multiCompetitorChart == null) {
-            multiCompetitorChart = new MultiCompetitorLeaderboardChart(sailingService, asyncActionsExecutor, leaderboardName, chartDetailType,
+            multiCompetitorChart = new MultiCompetitorLeaderboardChart(null, sailingService, asyncActionsExecutor,
+                    leaderboardName, chartDetailType,
                     competitorSelectionProvider, timer, StringMessages.INSTANCE, errorReporter);
             multiCompetitorChart.setVisible(false); 
         }

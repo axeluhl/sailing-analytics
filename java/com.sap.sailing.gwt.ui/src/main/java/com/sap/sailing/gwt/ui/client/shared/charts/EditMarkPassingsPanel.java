@@ -46,6 +46,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSettings> implements CompetitorSelectionChangeListener {
@@ -86,9 +87,11 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     private final Button removeSuppressedPassingButton;
     private Label selectCompetitorLabel = new Label();
 
-    public EditMarkPassingsPanel(final SailingServiceAsync sailingService, final RegattaAndRaceIdentifier raceIdentifier,
+    public EditMarkPassingsPanel(Component<?> parent, final SailingServiceAsync sailingService,
+            final RegattaAndRaceIdentifier raceIdentifier,
             final StringMessages stringMessages, final CompetitorSelectionProvider competitorSelectionModel,
             final ErrorReporter errorReporter, final Timer timer) {
+        super(parent);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;

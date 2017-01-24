@@ -18,6 +18,7 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -72,10 +73,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     
     private final Duration initialTimeAfterRaceStartInReplayMode;
     
-    public RaceTimePanel(RaceTimePanelLifecycle componentLifecycle, UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+    public RaceTimePanel(Component<?> parent, RaceTimePanelLifecycle componentLifecycle, UserService userService,
+            Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
-        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, forcePaddingRightToAlignToCharts);
+        super(parent, timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible,
+                forcePaddingRightToAlignToCharts);
         this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;

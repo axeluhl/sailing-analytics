@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.developer.QueryDefinitionParser.TypeToCodeStrategy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 
 public class QueryDefinitionViewer extends ComponentWithoutSettings implements QueryDefinitionChangedListener {
@@ -35,7 +36,8 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     
     private StatisticQueryDefinitionDTO currentDefinition;
 
-    public QueryDefinitionViewer(StringMessages stringMessages) {
+    public QueryDefinitionViewer(Component<?> parent, StringMessages stringMessages) {
+        super(parent);
         this.stringMessages = stringMessages;
         queryDefinitionParser = new QueryDefinitionParser();
         
@@ -97,7 +99,7 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     }
     
     public static native void copyToClipboard(String text) /*-{
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+		window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
     }-*/;
     
     @Override

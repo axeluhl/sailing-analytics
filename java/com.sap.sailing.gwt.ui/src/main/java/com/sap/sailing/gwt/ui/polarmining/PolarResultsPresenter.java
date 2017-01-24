@@ -43,6 +43,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -75,8 +76,8 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     private final Map<Series, Series> histogramSeriesForPolarSeries= new HashMap<>();
     private final Map<Series, Map<Long, Series>> perAngleHistogramSeriesForAngle = new HashMap<>();
 
-    public PolarResultsPresenter(StringMessages stringMessages) {
-        super(stringMessages);
+    public PolarResultsPresenter(Component<?> parent, StringMessages stringMessages) {
+        super(parent, stringMessages);
         
         polarChart = createPolarChart();
         polarChartWrapperPanel = new SimpleLayoutPanel() {

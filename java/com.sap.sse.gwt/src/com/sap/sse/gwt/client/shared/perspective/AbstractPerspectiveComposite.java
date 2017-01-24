@@ -34,8 +34,6 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
      */
     protected void addChildComponent(Component<? extends Settings> childComponent) {
         childComponents.put(childComponent.getId(), childComponent);
-        childComponent.getComponentTreeNodeInfo().setParentPerspective(this);
-        childComponent.getComponentTreeNodeInfo().setComponentContext(getComponentTreeNodeInfo().getComponentContext());
     }
     
     @Override
@@ -47,11 +45,12 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
         return perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(perspectiveSettings);
     }
 
-    public AbstractPerspectiveComposite(ComponentContext<PL, PerspectiveCompositeSettings<PS>> componentContext,
+    public AbstractPerspectiveComposite(Component<?> parent,
+            ComponentContext<PL, PerspectiveCompositeSettings<PS>> componentContext,
             PL lifecycle, PerspectiveCompositeSettings<PS> settings) {
+        super(parent);
         this.perspectiveLifecycle = lifecycle;
         this.perspectiveOwnSettings = settings.getPerspectiveOwnSettings();
-        getComponentTreeNodeInfo().setComponentContext(componentContext);
     }
 
     @Override

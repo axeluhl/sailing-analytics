@@ -158,7 +158,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             componentContext.initInitialSettings(new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                 @Override
                 public void onSuccess(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
-                            MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(componentContext,
+                            MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(null, componentContext,
                                     lifecycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
                     timer, null, preselectedRace, leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this, getStringMessages(),
                     userAgent, chartDetailType);
@@ -178,7 +178,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             componentContext.initInitialSettings(new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                 @Override
                 public void onSuccess(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
-                    LeaderboardViewer leaderboardViewer = new LeaderboardViewer(
+                            LeaderboardViewer leaderboardViewer = new LeaderboardViewer(null,
                                     componentContext, lifecycle, defaultSettings, sailingService,
                                     new AsyncActionsExecutor(),
                             timer, preselectedRace, leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this, getStringMessages(),

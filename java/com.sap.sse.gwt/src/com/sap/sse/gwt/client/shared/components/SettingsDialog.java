@@ -1,5 +1,8 @@
 package com.sap.sse.gwt.client.shared.components;
 
+import java.util.ArrayList;
+
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -10,29 +13,31 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class SettingsDialog<SettingsType extends Settings> extends DataEntryDialog<SettingsType> {
     private final SettingsDialogComponent<SettingsType> settingsDialogComponent;
-    
+
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages) {
         this(component, stringMessages, /* animationEnabled */ true);
     }
 
-    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages, boolean animationEnabled) {
+    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages,
+            boolean animationEnabled) {
         this(component, component.getSettingsDialogComponent(), stringMessages, animationEnabled, null);
     }
 
-    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages, DialogCallback<SettingsType> callback) {
+    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages,
+            DialogCallback<SettingsType> callback) {
         this(component, component.getSettingsDialogComponent(), stringMessages, /* animationEnabled */ true, callback);
     }
 
     /**
      * Creates a settings button for <code>component</code> that, when clicked, opens a settings dialog for that
-     * component and when confirmed, updates that component's settings. The button has no CSS style attached to
-     * give callers full flexibility as to how to style the button.
+     * component and when confirmed, updates that component's settings. The button has no CSS style attached to give
+     * callers full flexibility as to how to style the button.
      */
-    public static <T extends Settings> Button createSettingsButton(final Component<T> component, final StringMessages stringMessages) {
+    public static <T extends Settings> Button createSettingsButton(final Component<T> component,
+            final StringMessages stringMessages) {
         Button settingsButton = new Button();
         settingsButton.setTitle(stringMessages.settings());
         settingsButton.addClickHandler(new ClickHandler() {
@@ -43,7 +48,6 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
         });
         return settingsButton;
     }
-    
 
     /**
      * This auxiliary constructor is required to avoid duplicate calls to {@link Component#getSettingsDialogComponent()}
@@ -56,30 +60,25 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
             boolean animationEnabled, final DialogCallback<SettingsType> callback) {
         super(stringMessages.settingsForComponent(component.getLocalizedShortName()), null, stringMessages.ok(),
                 stringMessages.cancel(), dialogComponent.getValidator(), animationEnabled,
-                    new DialogCallback<SettingsType>() {
-                        @Override
-                        public void cancel() {
-                            if (callback != null) {
-                                callback.cancel();
-                            }
+                new DialogCallback<SettingsType>() {
+                    @Override
+                    public void cancel() {
+                        if (callback != null) {
+                            callback.cancel();
                         }
-    
-                        @Override
-                        public void ok(SettingsType newSettings) {
-                            component.updateSettings(newSettings);
-                            if (callback != null) {
-                                callback.ok(newSettings);
-                            }
+                    }
+
+                    @Override
+                    public void ok(SettingsType newSettings) {
+                        component.updateSettings(newSettings);
+                        if (callback != null) {
+                            callback.ok(newSettings);
                         }
-                    });
+                    }
+                });
         this.settingsDialogComponent = dialogComponent;
-        
-        //TODO make all Components to have some ComponentContext
-        ComponentTreeNodeInfo componentTreeNodeInfo = component.getComponentTreeNodeInfo();
-        ComponentContext<?, ?> componentContext = componentTreeNodeInfo.getComponentContext();
-        if(componentContext != null && componentContext.hasMakeCustomDefaultSettingsSupport(component)) {
-            initMakeDefaultButtons(component, stringMessages);
-        }
+
+        initMakeDefaultButtons(component, stringMessages);
     }
 
     @Override
@@ -96,7 +95,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
     protected FocusWidget getInitialFocusWidget() {
         return settingsDialogComponent.getFocusWidget();
     }
-    
+
     private void initMakeDefaultButtons(final Component<SettingsType> component, StringMessages stringMessages) {
         Button makeDefaultButton = new Button(stringMessages.save());
         makeDefaultButton.getElement().getStyle().setMargin(3, Unit.PX);
@@ -104,9 +103,11 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
         getLeftButtonPannel().add(makeDefaultButton);
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                component.getComponentTreeNodeInfo().getComponentContext().makeSettingsDefault(component, getResult());
-                //TODO i18n + use nice styled dialog
-                Window.alert("Settings have been successfully saved");
+                ArrayList<String> settingsPath = component.getPath();
+                GWT.log("Path to settings: " + settingsPath);
+                // TODO i18n + use nice styled dialog
+                // FIXME apply new result to new backend result and send to server for saving
+                Window.alert("Settings have been successfully saved " + settingsPath + " " + getResult());
             }
         });
     }

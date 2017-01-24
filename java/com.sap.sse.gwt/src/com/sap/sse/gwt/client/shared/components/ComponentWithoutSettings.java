@@ -9,6 +9,10 @@ import com.sap.sse.common.settings.AbstractSettings;
  */
 public abstract class ComponentWithoutSettings extends AbstractComponent<AbstractSettings> {
 
+    public ComponentWithoutSettings(Component<?> parent) {
+        super(parent);
+    }
+
     @Override
     public boolean hasSettings() {
         return false;

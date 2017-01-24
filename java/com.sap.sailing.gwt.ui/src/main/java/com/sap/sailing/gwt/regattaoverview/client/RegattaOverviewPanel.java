@@ -103,7 +103,8 @@ public class RegattaOverviewPanel extends SimplePanel {
         mainPanel.setWidth("100%");
         mainPanel.addStyleName(style.contentWrapper());
         
-        regattaRaceStatesComponent = new RegattaRaceStatesComponent(sailingService, errorReporter, stringMessages, eventId, settings, uiUpdateTimer, ignoreLocalSettings);
+        regattaRaceStatesComponent = new RegattaRaceStatesComponent(null, sailingService, errorReporter, stringMessages,
+                eventId, settings, uiUpdateTimer, ignoreLocalSettings);
         this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
         regattaRaceStatesComponent.setWidth("100%");
         
@@ -244,7 +245,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                             public void onSuccess(List<StrippedLeaderboardDTO> result) {
                                 leaderboardsTabPanel.clear();
                                 for (StrippedLeaderboardDTO leaderboard : result) {
-                                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, 
+                                    LeaderboardPanel leaderboardPanel = new LeaderboardPanel(null, sailingService,
                                             new AsyncActionsExecutor(), leaderboardSettings, false, 
                                             /*preSelectedRace*/null, 
                                             competitorSelectionProvider, 

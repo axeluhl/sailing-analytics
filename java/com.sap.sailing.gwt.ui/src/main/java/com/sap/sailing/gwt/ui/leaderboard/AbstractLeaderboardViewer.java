@@ -32,7 +32,7 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
     
     protected static final ViewerToolbar RES = GWT.create(ViewerToolbar.class);
     protected final StringMessages stringMessages;
-    private final LeaderboardPanel leaderboardPanel;
+    private LeaderboardPanel leaderboardPanel;
     protected final CompetitorSelectionModel competitorSelectionProvider;
     protected final AsyncActionsExecutor asyncActionsExecutor;
 
@@ -42,16 +42,15 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
     protected final boolean hideToolbar;
 
 
-    public AbstractLeaderboardViewer(AbstractLeaderboardComponentContext<PL> componentContext,
+    public AbstractLeaderboardViewer(Component<?> parent, AbstractLeaderboardComponentContext<PL> componentContext,
             PL lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,
-            Timer timer, StringMessages stringMessages, LeaderboardPanel leaderboardPanel) {
-        super(componentContext, lifecycle, settings);
-        addChildComponent(leaderboardPanel);
+            Timer timer, StringMessages stringMessages) {
+        super(parent, componentContext, lifecycle, settings);
         
+
         this.competitorSelectionProvider = competitorSelectionProvider;
-        this.leaderboardPanel = leaderboardPanel;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
         this.timer = timer;
@@ -60,6 +59,11 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
         RES.css().ensureInjected();
     }
     
+    protected void init(LeaderboardPanel leaderboardPanel) {
+        addChildComponent(leaderboardPanel);
+        this.leaderboardPanel = leaderboardPanel;
+    }
+
     public LeaderboardPanel getLeaderboardPanel() {
         return leaderboardPanel;
     }

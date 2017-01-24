@@ -54,8 +54,10 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
 
     private final List<Component<?>> retrieverLevelSettingsComponents;
     
-    public SimpleDataRetrieverChainDefinitionProvider(final StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
+    public SimpleDataRetrieverChainDefinitionProvider(Component<?> parent, final StringMessages stringMessages,
+            DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataMiningSettingsControl settingsControl) {
+        super(parent);
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
@@ -226,7 +228,8 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
             final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
             final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
             DataMiningSettingsInfo settingsInfo = settingsManager.getSettingsInfo(settingsType);
-            settingsComponents.add(new RetrieverLevelSettingsComponent(retrieverLevel, settingsInfo.getId(), settingsInfo.getLocalizedName(stringMessages)) {
+            settingsComponents.add(new RetrieverLevelSettingsComponent(SimpleDataRetrieverChainDefinitionProvider.this,
+                    retrieverLevel, settingsInfo.getId(), settingsInfo.getLocalizedName(stringMessages)) {
                 @Override
                 public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
                     return settingsManager.getSettingsInfo(settingsType).createSettingsDialogComponent(settingsMap.get(retrieverChain).get(retrieverLevel));
@@ -267,7 +270,9 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
             final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
             final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
             DataMiningSettingsInfo settingsInfo = settingsManager.getSettingsInfo(settingsType);
-            RetrieverLevelSettingsComponent c = new RetrieverLevelSettingsComponent(retrieverLevel, settingsInfo.getId(), settingsInfo.getLocalizedName(stringMessages)) {
+            RetrieverLevelSettingsComponent c = new RetrieverLevelSettingsComponent(
+                    SimpleDataRetrieverChainDefinitionProvider.this, retrieverLevel, settingsInfo.getId(),
+                    settingsInfo.getLocalizedName(stringMessages)) {
                 @Override
                 public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent() {
                     return null;

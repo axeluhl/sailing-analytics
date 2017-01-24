@@ -30,6 +30,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.AbstractLazyComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
@@ -65,10 +66,12 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private final Set<LeaderboardUpdateListener> leaderboardUpdateListeners;
     private final Set<SelectedLeaderboardChangeListener> selectedLeaderboardChangeListeners;
 
-    public MultiLeaderboardPanel(SailingServiceAsync sailingService, String metaLeaderboardName, AsyncActionsExecutor asyncActionsExecutor,
+    public MultiLeaderboardPanel(Component<?> parent, SailingServiceAsync sailingService, String metaLeaderboardName,
+            AsyncActionsExecutor asyncActionsExecutor,
             Timer timer, boolean isEmbedded, String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
             ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
+        super(parent);
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.sailingService = sailingService;
@@ -224,7 +227,8 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             
             selectedLeaderboardFlowPanel = (FlowPanel) leaderboardsTabPanel.getWidget(newTabIndex);
             LeaderboardSettings newLeaderboardSettings = getOrCreateLeaderboardSettings(newSelectedLeaderboardName, leaderboardNamesAndSettings.get(selectedLeaderboardName));
-            LeaderboardPanel newSelectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, newLeaderboardSettings, isEmbedded,
+            LeaderboardPanel newSelectedLeaderboardPanel = new LeaderboardPanel(this, sailingService,
+                    asyncActionsExecutor, newLeaderboardSettings, isEmbedded,
                     /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     null, newSelectedLeaderboardName, errorReporter, stringMessages, userAgent,
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 

@@ -47,6 +47,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings> implements WithControls {
@@ -80,10 +81,11 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;
 
-    public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages,
+    public BufferingQueryDefinitionProviderWithControls(Component<?> parent, DataMiningSession session,
+            StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
             ResultsPresenter<?> resultsPresenter) {
-        super(stringMessages, dataMiningService, errorReporter);
+        super(parent, stringMessages, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
         queryDefinitionReleaseTimer = new Timer() {
             @Override
@@ -107,9 +109,10 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
                 filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !queryDefinitionViewerToggleButton.getValue());
             }
         });
-        queryDefinitionViewer = new QueryDefinitionViewer(getStringMessages());
+        queryDefinitionViewer = new QueryDefinitionViewer(this, getStringMessages());
         addQueryDefinitionChangedListener(queryDefinitionViewer);
-        predefinedQueryRunner = new PredefinedQueryRunner(session, getStringMessages(), dataMiningService, errorReporter, resultsPresenter);
+        predefinedQueryRunner = new PredefinedQueryRunner(this, session, getStringMessages(), dataMiningService,
+                errorReporter, resultsPresenter);
         
         Button clearSelectionButton = new Button(this.getStringMessages().clearSelection());
         clearSelectionButton.addClickHandler(new ClickHandler() {
@@ -134,7 +137,8 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
             addControl(predefinedQueryRunner.getEntryWidget());
         }
 
-        retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), settingsControl);
+        retrieverChainProvider = new SimpleDataRetrieverChainDefinitionProvider(this, getStringMessages(),
+                getDataMiningService(), getErrorReporter(), settingsControl);
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(providerListener);
         
         SplitLayoutPanel headerPanel = new SplitLayoutPanel(15);
@@ -142,10 +146,12 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         headerPanel.add(controlsPanel);
         
         // Creating the footer panel, that contains the statistic provider and the grouping provider
-        statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), retrieverChainProvider);
+        statisticProvider = new SimpleStatisticProvider(this, getStringMessages(), getDataMiningService(),
+                getErrorReporter(), retrieverChainProvider);
         statisticProvider.addStatisticChangedListener(providerListener);
 
-        groupingProvider = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
+        groupingProvider = new MultiDimensionalGroupingProvider(this, getStringMessages(), getDataMiningService(),
+                getErrorReporter(), statisticProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
         
         SplitLayoutPanel footerPanel = new SplitLayoutPanel(15);
@@ -157,7 +163,8 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         filterSplitPanel.addSouth(footerPanel, footerPanelHeight);
         filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), 600);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
-        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(session, stringMessages, dataMiningService, errorReporter, retrieverChainProvider);
+        filterSelectionProvider = new ListRetrieverChainFilterSelectionProvider(this, session, stringMessages,
+                dataMiningService, errorReporter, retrieverChainProvider);
         filterSelectionProvider.addSelectionChangedListener(providerListener);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
         

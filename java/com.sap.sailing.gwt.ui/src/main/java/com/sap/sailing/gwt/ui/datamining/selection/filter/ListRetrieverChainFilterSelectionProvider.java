@@ -38,6 +38,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent<SerializableSettings> implements FilterSelectionProvider {
@@ -62,9 +63,10 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     private final FilterSelectionPresenter selectionPresenter;
     private final ScrollPanel selectionPresenterScrollPanel;
 
-    public ListRetrieverChainFilterSelectionProvider(DataMiningSession session, StringMessages stringMessages,
+    public ListRetrieverChainFilterSelectionProvider(Component<?> parent,DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             DataRetrieverChainDefinitionProvider retrieverChainProvider) {
+        super(parent);
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
@@ -90,7 +92,7 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
         selectionPanel = new ScrollPanel();
         selectionDockLayoutPanel.add(selectionPanel);
         
-        selectionPresenter = new PlainFilterSelectionPresenter(stringMessages, retrieverChainProvider, this);
+        selectionPresenter = new PlainFilterSelectionPresenter(this, stringMessages, retrieverChainProvider, this);
         selectionPresenterScrollPanel = new ScrollPanel(selectionPresenter.getEntryWidget());
         
         mainPanel = new DockLayoutPanel(Unit.PX);
@@ -148,7 +150,7 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
                     if (!dimensionsEntry.getValue().isEmpty()) {
                         DataRetrieverLevelDTO retrieverLevel = dimensionsEntry.getKey();
                         RetrieverLevelFilterSelectionProvider selectionProvider =
-                                new RetrieverLevelFilterSelectionProvider(session, dataMiningService, errorReporter,
+                                new RetrieverLevelFilterSelectionProvider(ListRetrieverChainFilterSelectionProvider.this,session, dataMiningService, errorReporter,
                                                                           ListRetrieverChainFilterSelectionProvider.this,
                                                                           retrieverChain,retrieverLevel);
                         selectionProvider.setAvailableDimensions(dimensionsEntry.getValue());

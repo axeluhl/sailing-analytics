@@ -583,7 +583,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     public EditableLeaderboardPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             String leaderboardName, String leaderboardGroupName, final ErrorReporter errorReporter,
             final StringMessages stringMessages, UserAgentDetails userAgent) {
-        super(sailingService, asyncActionsExecutor, new LeaderboardSettings(),
+        super(null, sailingService, asyncActionsExecutor, new LeaderboardSettings(),
                 new CompetitorSelectionModel(/* hasMultiSelection */true),
                 leaderboardName, errorReporter, stringMessages, userAgent, /* showRaceDetails */ true);
         suppressedCompetitorsShown = new ListDataProvider<CompetitorDTO>(new ArrayList<CompetitorDTO>());

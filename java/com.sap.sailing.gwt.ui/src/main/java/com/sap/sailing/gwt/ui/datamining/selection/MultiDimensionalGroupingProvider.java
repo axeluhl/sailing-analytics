@@ -28,6 +28,7 @@ import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class MultiDimensionalGroupingProvider extends AbstractComponent<SerializableSettings> implements GroupingProvider {
@@ -46,8 +47,10 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
     private FunctionDTO currentStatisticToCalculate;
     private final List<FunctionDTO> availableDimensions;
 
-    public MultiDimensionalGroupingProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+    public MultiDimensionalGroupingProvider(Component<?> parent, StringMessages stringMessages,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                             StatisticProvider statisticProvider) {
+        super(parent);
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
