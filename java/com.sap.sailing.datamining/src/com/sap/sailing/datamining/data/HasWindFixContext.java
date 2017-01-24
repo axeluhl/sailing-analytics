@@ -11,6 +11,7 @@ public interface HasWindFixContext extends HasWind {
     @Connector(scanForStatistics=false)
     public HasTrackedRaceContext getTrackedRaceContext();
     
+    @Statistic(messageKey="")
     public Wind getWind();
     
     @Statistic(messageKey="windFrom", resultDecimals=1)

@@ -16,6 +16,7 @@ public interface HasRaceOfCompetitorContext {
     public HasTrackedRaceContext getTrackedRaceContext();
     
     @Connector(messageKey="Competitor")
+    @Statistic(messageKey="")
     public Competitor getCompetitor();
     
     @Dimension(messageKey="CompetitorSearchTag", ordinal=11) // TODO Clean me: Move Dimension to Competitor when possible
