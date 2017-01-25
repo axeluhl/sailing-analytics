@@ -43,6 +43,7 @@ import com.sap.sse.util.ThreadPoolUtil;
  * signals that the race is over (after {@link #stop()} is called.
  * 
  * @author Nicolas Klose
+ * @author Axel Uhl (d043530)
  * 
  */
 public class MarkPassingCalculator {
@@ -72,12 +73,17 @@ public class MarkPassingCalculator {
     
     /**
      * If the constructor is called with the {@code listen} parameter set to {@code true}, this field will hold a thread
-     * when the constructor has terminated normally. The thread may not yet have been started because, depending on the
+     * when objects were added to the {@link #queue} and are being processed. When the thread has completed processing
+     * all updates from the {@link #queue} it will terminate and set this field to {@code null}. The decision to create
+     * and stop the thread goes hand in hand with setting or, respectively, clearing this field while holding this object's
+     * monitor ({@code synchronized}).<p>
+     * 
+     * The thread may not yet have been started because, depending on the
      * constructor's {@code waitForInitialMarkPassingCalculation} argument, start-up may be asynchronous, but eventually
      * it will be started at some point. The {@link #waitUntilStopped} method can be used to wait until the thread has
      * started and then terminated again.
      */
-    private final Thread listenerThread;
+    private Thread listenerThread;
 
     private final Listen listen;
     
@@ -98,10 +104,8 @@ public class MarkPassingCalculator {
         finder = new CandidateFinderImpl(race, executor);
         chooser = new CandidateChooserImpl(race);
         if (listener != null) {
-            listen = new Listen(race.getRace().getName());
-            listenerThread = createListenerThread(race.getRace().getName());
+            listen = new Listen();
         } else {
-            listenerThread = null;
             listen = null;
         }
         Thread t = new Thread(() -> {
@@ -119,10 +123,14 @@ public class MarkPassingCalculator {
                 logger.log(Level.SEVERE, "Error trying to compute initial set of mark passings for race "+race.getRace().getName(), e);
             }
             if (listener != null) {
-                listenerThread.start();
-                synchronized (listenerThread) {
-                    listenerThreadStarted = true;
-                    listenerThread.notifyAll();
+                synchronized (MarkPassingCalculator.this) {
+                    if (listenerThread == null) {
+                        listenerThread = createAndStartListenerThread();
+                        synchronized (listenerThread) {
+                            listenerThreadStarted = true;
+                            listenerThread.notifyAll();
+                        }
+                    }
                 }
             }
         }, "MarkPassingCalculator for race "+race.getRace().getName()+" initialization");
@@ -133,9 +141,10 @@ public class MarkPassingCalculator {
         }
     }
 
-    private Thread createListenerThread(String raceName) {
-        final Thread result = new Thread(listen, "MarkPassingCalculator for race " + raceName);
+    private Thread createAndStartListenerThread() {
+        final Thread result = new Thread(listen, "MarkPassingCalculator for race " + race.getRace().getName());
         result.setDaemon(true);
+        result.start();
         return result;
     }
     
@@ -202,8 +211,8 @@ public class MarkPassingCalculator {
          */
         private final NamedReentrantReadWriteLock lock;
         
-        public Listen(String raceName) {
-            this.raceName = raceName;
+        public Listen() {
+            this.raceName = race.getRace().getName();
             lock = new NamedReentrantReadWriteLock("lock for calculation thread (" + Listen.class.getSimpleName() + ")", /* fair */ false);
         }
         
@@ -232,27 +241,40 @@ public class MarkPassingCalculator {
                 while (!finished) {
                     try {
                         logger.finer("MPC for "+raceName+" is checking the queue");
-                        List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
-                        try {
-                            allNewFixInsertions.add(queue.take());
-                        } catch (InterruptedException e) {
-                            logger.log(Level.SEVERE, "MarkPassingCalculator for "+raceName+" threw exception " + e.getMessage()
-                                    + " while waiting for new GPSFixes");
-                        }
-                        LockUtil.lockForWrite(lock);
-                        queue.drainTo(allNewFixInsertions);
-                        logger.fine("MPC for "+raceName+" received "+ allNewFixInsertions.size()+" new updates.");
-                        for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
-                            if (isEndMarker(fixInsertion)) {
-                                logger.info("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
+                        synchronized (MarkPassingCalculator.this) {
+                            // check if queue is empty while owning the MarkPassingCalculator's monitor;
+                            // if the queue is empty, set listenerThread to null while under the monitor
+                            // and decide to finish the thread; otherwise, take the next object
+                            if (queue.isEmpty()) {
                                 finished = true;
-                                break;
-                            } else {
-                                fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
-                                        smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
-                                        suppressedMarkPassings, unsuppressedMarkPassings, finder, chooser);
+                                listenerThread = null;
                             }
                         }
+                        LockUtil.lockForWrite(lock);
+                        if (!finished) {
+                            List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
+                            try {
+                                allNewFixInsertions.add(queue.take());
+                            } catch (InterruptedException e) {
+                                logger.log(Level.SEVERE, "MarkPassingCalculator for "+raceName+" threw exception " + e.getMessage()
+                                        + " while waiting for new GPSFixes");
+                            }
+                            queue.drainTo(allNewFixInsertions);
+                            logger.fine("MPC for "+raceName+" received "+ allNewFixInsertions.size()+" new updates.");
+                            for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
+                                if (isEndMarker(fixInsertion)) {
+                                    logger.info("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
+                                    finished = true;
+                                    break;
+                                } else {
+                                    fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
+                                            smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
+                                            suppressedMarkPassings, unsuppressedMarkPassings, finder, chooser);
+                                }
+                            }
+                        }
+                        // in suspended mode we've stored the update contents in competitorFixes, markFixes, etc. but
+                        // haven't processed them yet with the CandidateFinder or CandidateChooser.
                         if (!finished && !suspended) {
                             if (smallestChangedWaypointIndex.value != -1) {
                                 final Course course = race.getRace().getCourse();
@@ -440,7 +462,13 @@ public class MarkPassingCalculator {
 
     void enqueueUpdate(StorePositionUpdateStrategy update) {
         // TODO bug 3908: manage listener thread here; if this is the first update to enter an empty queue, launch the thread; the thread will terminate after picking the last update from the queue
-        queue.add(update);
+        synchronized (this) {
+            final boolean wasQueueEmpty = queue.isEmpty();
+            queue.add(update);
+            if (wasQueueEmpty && listenerThread == null) {
+                listenerThread = createAndStartListenerThread();
+            }
+        }
     }
 
     public void stop() {
