@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,7 +52,7 @@ public class MarkPassingCalculator {
     private static final Logger logger = Logger.getLogger(MarkPassingCalculator.class.getName());
     private final MarkPassingUpdateListener listener;
     private final static ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
-
+    private final LinkedBlockingQueue<StorePositionUpdateStrategy> queue;
     private boolean suspended = false;
     
     /**
@@ -72,9 +73,11 @@ public class MarkPassingCalculator {
 
     public MarkPassingCalculator(DynamicTrackedRace race, boolean doListen, boolean waitForInitialMarkPassingCalculation) {
         if (doListen) {
-            listener = new MarkPassingUpdateListener(race);
+            queue = new LinkedBlockingQueue<>();
+            listener = new MarkPassingUpdateListener(race, this);
         } else {
             listener = null;
+            queue = null; // no queue is needed if no change listener is in use
         }
         this.race = race;
         finder = new CandidateFinderImpl(race, executor);
@@ -211,13 +214,13 @@ public class MarkPassingCalculator {
                         logger.finer("MPC for "+raceName+" is checking the queue");
                         List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
                         try {
-                            allNewFixInsertions.add(listener.getQueue().take());
+                            allNewFixInsertions.add(queue.take());
                         } catch (InterruptedException e) {
                             logger.log(Level.SEVERE, "MarkPassingCalculator for "+raceName+" threw exception " + e.getMessage()
                                     + " while waiting for new GPSFixes");
                         }
                         LockUtil.lockForWrite(lock);
-                        listener.getQueue().drainTo(allNewFixInsertions);
+                        queue.drainTo(allNewFixInsertions);
                         logger.fine("MPC for "+raceName+" received "+ allNewFixInsertions.size()+" new updates.");
                         for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
                             if (listener.isEndMarker(fixInsertion)) {
@@ -399,7 +402,7 @@ public class MarkPassingCalculator {
     public void resume() {
         logger.finest("Resumed MarkPassingCalculator");
         suspended = false;
-        listener.getQueue().add(new StorePositionUpdateStrategy() {
+        queue.add(new StorePositionUpdateStrategy() {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
@@ -409,6 +412,11 @@ public class MarkPassingCalculator {
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
             }
         });
+    }
+    
+    void enqueueUpdate(StorePositionUpdateStrategy update) {
+        // TODO bug 3908: manage listener thread here; if this is the first update to enter an empty queue, launch the thread; the thread will terminate after picking the last update from the queue
+        queue.add(update);
     }
 
     public void stop() {
