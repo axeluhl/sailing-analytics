@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
@@ -28,19 +27,7 @@ import com.sap.sse.common.util.IntHolder;
  * 
  */
 public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
-    private static final Logger logger = Logger.getLogger(MarkPassingUpdateListener.class.getName());
-    private final String raceName;
     private final MarkPassingCalculator markPassingCalculator;
-
-    private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
-        @Override
-        public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
-                Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                IntHolder smallestChangedWaypointIndex, List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
-                List<Pair<Competitor, Integer>> removedMarkPassings,
-                List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
-        }
-    };
 
     /**
      * Adds itself automatically as a Listener on the <code>race</code> and its course.
@@ -50,7 +37,6 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
      */
     public MarkPassingUpdateListener(DynamicTrackedRace race, MarkPassingCalculator markPassingCalculator) {
         this.markPassingCalculator = markPassingCalculator;
-        raceName = race.getRace().getName();
         race.addListener(this);
     }
 
@@ -92,15 +78,6 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
                 list.add(fix);
             }
         });
-    }
-
-    public boolean isEndMarker(StorePositionUpdateStrategy endMarkerCandidate) {
-        return endMarkerCandidate == endMarker;
-    }
-
-    public void stop() {
-        logger.info("Stopping " + this + " for race " + raceName);
-        markPassingCalculator.enqueueUpdate(endMarker);
     }
 
     @Override

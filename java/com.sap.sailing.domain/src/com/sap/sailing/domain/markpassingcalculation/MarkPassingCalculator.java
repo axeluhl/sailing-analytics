@@ -53,6 +53,21 @@ public class MarkPassingCalculator {
     private final MarkPassingUpdateListener listener;
     private final static ExecutorService executor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
     private final LinkedBlockingQueue<StorePositionUpdateStrategy> queue;
+    
+    /**
+     * An "end marker" that can be {@link #enqueueUpdate(StorePositionUpdateStrategy) enqueued} in order to tell the {@link Listen}
+     * thread to stop.
+     */
+    private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
+        @Override
+        public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
+                Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
+                IntHolder smallestChangedWaypointIndex, List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+                List<Pair<Competitor, Integer>> removedMarkPassings,
+                List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
+        }
+    };
+
     private boolean suspended = false;
     
     /**
@@ -223,7 +238,7 @@ public class MarkPassingCalculator {
                         queue.drainTo(allNewFixInsertions);
                         logger.fine("MPC for "+raceName+" received "+ allNewFixInsertions.size()+" new updates.");
                         for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
-                            if (listener.isEndMarker(fixInsertion)) {
+                            if (isEndMarker(fixInsertion)) {
                                 logger.info("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
                                 finished = true;
                                 break;
@@ -414,13 +429,18 @@ public class MarkPassingCalculator {
         });
     }
     
+    private boolean isEndMarker(StorePositionUpdateStrategy endMarkerCandidate) {
+        return endMarkerCandidate == endMarker;
+    }
+
     void enqueueUpdate(StorePositionUpdateStrategy update) {
         // TODO bug 3908: manage listener thread here; if this is the first update to enter an empty queue, launch the thread; the thread will terminate after picking the last update from the queue
         queue.add(update);
     }
 
     public void stop() {
-        listener.stop();
+        logger.info("Stopping " + this + " for race " + race.getRace().getName());
+        enqueueUpdate(endMarker);
     }
 
     public void recalculateEverything() {
