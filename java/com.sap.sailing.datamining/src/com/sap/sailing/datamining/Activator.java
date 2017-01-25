@@ -18,6 +18,7 @@ import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.data.HasWindFixContext;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingAverageDegreesAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBoolSumAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceAverageAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMaxAggregationProcessor;
@@ -114,6 +115,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         aggregators.add(ParallelDistanceMaxAggregationProcessor.getDefinition());
         aggregators.add(ParallelDistanceMinAggregationProcessor.getDefinition());
         aggregators.add(ParallelDistanceMedianAggregationProcessor.getDefinition());
+        aggregators.add(ParallelBearingAverageDegreesAggregationProcessor.getDefinition());
         return aggregators;
     }
     

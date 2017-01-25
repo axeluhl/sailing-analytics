@@ -6,7 +6,7 @@ import com.sap.sse.datamining.annotations.Statistic;
 
 
 public interface SpeedWithBearing extends Speed {
-    @Statistic(messageKey="", resultDecimals=1)
+    @Statistic(messageKey="bearing", resultDecimals=1)
     Bearing getBearing();
 
     /**
