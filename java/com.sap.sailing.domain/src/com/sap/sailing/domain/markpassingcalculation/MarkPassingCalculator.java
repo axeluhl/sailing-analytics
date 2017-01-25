@@ -97,10 +97,9 @@ public class MarkPassingCalculator {
         this.race = race;
         finder = new CandidateFinderImpl(race, executor);
         chooser = new CandidateChooserImpl(race);
-        if (doListen) {
+        if (listener != null) {
             listen = new Listen(race.getRace().getName());
-            listenerThread = new Thread(listen, "MarkPassingCalculator for race " + race.getRace().getName());
-            listenerThread.setDaemon(true);
+            listenerThread = createListenerThread(race.getRace().getName());
         } else {
             listenerThread = null;
             listen = null;
@@ -119,7 +118,7 @@ public class MarkPassingCalculator {
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to compute initial set of mark passings for race "+race.getRace().getName(), e);
             }
-            if (doListen) {
+            if (listener != null) {
                 listenerThread.start();
                 synchronized (listenerThread) {
                     listenerThreadStarted = true;
@@ -132,6 +131,12 @@ public class MarkPassingCalculator {
         } else {
             t.start();
         }
+    }
+
+    private Thread createListenerThread(String raceName) {
+        final Thread result = new Thread(listen, "MarkPassingCalculator for race " + raceName);
+        result.setDaemon(true);
+        return result;
     }
     
     /**
