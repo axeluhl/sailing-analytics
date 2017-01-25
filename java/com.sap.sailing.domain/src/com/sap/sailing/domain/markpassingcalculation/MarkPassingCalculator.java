@@ -100,6 +100,7 @@ public class MarkPassingCalculator {
         if (doListen) {
             listen = new Listen(race.getRace().getName());
             listenerThread = new Thread(listen, "MarkPassingCalculator for race " + race.getRace().getName());
+            listenerThread.setDaemon(true);
         } else {
             listenerThread = null;
             listen = null;
@@ -119,7 +120,6 @@ public class MarkPassingCalculator {
                 logger.log(Level.SEVERE, "Error trying to compute initial set of mark passings for race "+race.getRace().getName(), e);
             }
             if (doListen) {
-                listenerThread.setDaemon(true);
                 listenerThread.start();
                 synchronized (listenerThread) {
                     listenerThreadStarted = true;
