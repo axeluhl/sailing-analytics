@@ -49,7 +49,7 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
                 paramURL, /* live URI */ null, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm,
                 /* raceLogStore */ null, /* regattaLogStore */ null, DomainFactory.INSTANCE, tracTracUsername, tracTracPassword,
-                raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination);
+                raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination, /* preferReplayIfAvailable */ false);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(tracTracParams);
         // load

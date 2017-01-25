@@ -90,7 +90,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 map.get(TRAC_TRAC_PASSWORD)==null?null:map.get(TRAC_TRAC_PASSWORD).toString(),
                 map.get(RACE_STATUS)==null?null:map.get(RACE_STATUS).toString(),
                 map.get(RACE_VISIBILITY)==null?null:map.get(RACE_VISIBILITY).toString(), isTrackWind(map),
-                isCorrectWindDirectionByMagneticDeclination(map));
+                isCorrectWindDirectionByMagneticDeclination(map), /* preferReplayIfAvailable */ true);
     }
 
     @Override

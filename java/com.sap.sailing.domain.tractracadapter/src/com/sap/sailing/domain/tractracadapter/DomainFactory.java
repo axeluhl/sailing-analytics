@@ -124,13 +124,14 @@ public interface DomainFactory {
      * respond with the {@link RaceDefinition} when its {@link DomainFactory#getRaceID(IRace)} is called with the
      * TracTrac {@link IEvent} as argument that is used for its tracking.
      * <p>
+     * 
      * @param startOfTracking
      *            if <code>null</code>, all stored data from the "beginning of time" will be loaded that the event has
      *            to provide, particularly for the mark positions which are stored per event, not per race; otherwise,
      *            particularly the mark position loading will be constrained to this start time.
      * @param endOfTracking
-     *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has
-     *            to provide, particularly for the mark positions which are stored per event, not per race; otherwise,
+     *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has to
+     *            provide, particularly for the mark positions which are stored per event, not per race; otherwise,
      *            particularly the mark position loading will be constrained to this end time.
      * @param offsetToStartTimeOfSimulatedRace
      *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
@@ -138,27 +139,40 @@ public interface DomainFactory {
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
-     * @param connectivityParams TODO
+     * @param preferReplayIfAvailable
+     *            when a non-{@code null} {@code storedURI} and/or {@code liveURI} are provided and the {@link IRace}
+     *            specifies something different and claims to be in replay mode ({@link IRace#getConnectionType} is
+     *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
+     *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
+     *            races if since the last connection the race was migrated to a replay file format.
      */
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, String tracTracUsername, String tracTracPassword,
-            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams)
+            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            RaceTrackingConnectivityParametersImpl connectivityParams, boolean preferReplayIfAvailable)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException;
 
     /**
      * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)},
      * only that a predefined {@link Regatta} is used to hold the resulting races.
+     * 
      * @param offsetToStartTimeOfSimulatedRace
      *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
-     * @param connectivityParams TODO
+     * @param preferReplayIfAvailable
+     *            when a non-{@code null} {@code storedURI} and/or {@code liveURI} are provided and the {@link IRace}
+     *            specifies something different and claims to be in replay mode ({@link IRace#getConnectionType} is
+     *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
+     *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
+     *            races if since the last connection the race was migrated to a replay file format.
      */
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, String tracTracUsername, String tracTracPassword,
-            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams)
+            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            RaceTrackingConnectivityParametersImpl connectivityParams, boolean preferReplayIfAvailable)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
             SubscriberInitializationException;
 
@@ -266,13 +280,18 @@ public interface DomainFactory {
     /**
      * @param offsetToStartTimeOfSimulatedRace
      *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
-     * @param trackWind TODO
-     * @param correctWindDirectionByMagneticDeclination TODO
+     * @param preferReplayIfAvailable
+     *            when a non-{@code null} {@code storedURI} and/or {@code liveURI} are provided and the {@link IRace}
+     *            specifies something different and claims to be in replay mode ({@link IRace#getConnectionType} is
+     *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
+     *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
+     *            races if since the last connection the race was migrated to a replay file format.
      */
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
-            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination);
+            String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
+            boolean preferReplayIfAvailable);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
      * {@link com.sap.sailing.domain.base.Regatta} and, if a {@link TrackedRace} for the corresponding

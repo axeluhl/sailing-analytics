@@ -23,8 +23,8 @@ public interface RaceTrackingConnectivityParameters {
     /**
      * Starts a {@link RaceTracker} using the connectivity parameters provided by this object. As no specific
      * {@link Regatta} is provided, this will first look up a regatta for the race from
-     * {@link TrackedRegattaRegistry#getRememberedRegattaForRace(java.io.Serializable)} and if not found
-     * will look up or create a default regatta based on race data such as an event name and the boat class.
+     * {@link TrackedRegattaRegistry#getRememberedRegattaForRace(java.io.Serializable)} and if not found will look up or
+     * create a default regatta based on race data such as an event name and the boat class.
      */
     RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogResolver raceLogResolver) throws Exception;

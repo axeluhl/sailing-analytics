@@ -252,76 +252,122 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      *            available but loses track of the wind, e.g., during server restarts.
      * @param trackedRegattaRegistry
      *            used to create the {@link TrackedRegatta} for the domain event
+     * @param preferReplayIfAvailable
+     *            when a non-{@code null} {@code storedURI} and/or {@code liveURI} are provided and the {@link IRace}
+     *            specifies something different and claims to be in replay mode ({@link IRace#getConnectionType} is
+     *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
+     *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
+     *            races if since the last connection the race was migrated to a replay file format.
      */
     protected TracTracRaceTrackerImpl(DomainFactory domainFactory, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, String tracTracUsername, String tracTracPassword,
-            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams)
+            String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams,
+            boolean preferReplayIfAvailable)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, CreateModelException,
             SubscriberInitializationException {
         this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), domainFactory, paramURL, liveURI,
                 storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                 offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore,
                 windStore, tracTracUsername,
-                tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver, connectivityParams);
+                tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver, connectivityParams, preferReplayIfAvailable);
     }
     
+    /**
+     * @param preferReplayIfAvailable
+     *            when a non-{@code null} {@code storedURI} and/or {@code liveURI} are provided and the {@link IRace}
+     *            specifies something different and claims to be in replay mode ({@link IRace#getConnectionType} is
+     *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
+     *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
+     *            races if since the last connection the race was migrated to a replay file format.
+     */
     private TracTracRaceTrackerImpl(IRace tractracRace, DomainFactory domainFactory, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams) throws URISyntaxException, MalformedURLException,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams,
+            boolean preferReplayIfAvailable) throws URISyntaxException, MalformedURLException,
             FileNotFoundException, SubscriberInitializationException {
         this(tractracRace, /* regatta */ null, domainFactory, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
                 endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
                 tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry,
-                raceLogResolver, connectivityParams);
+                raceLogResolver, connectivityParams, preferReplayIfAvailable);
     }
     
     /**
      * Use this constructor if the {@link Regatta} in which to arrange the {@link RaceDefinition}s created by this
-     * tracker is already known up-front, particularly if it has a specific configuration to use. Other constructors
-     * may create a default {@link Regatta} with only a single default {@link Series} and {@link Fleet} which may not
-     * always be what you want.
+     * tracker is already known up-front, particularly if it has a specific configuration to use. Other constructors may
+     * create a default {@link Regatta} with only a single default {@link Series} and {@link Fleet} which may not always
+     * be what you want.
+     * 
+     * @param preferReplayIfAvailable
+     *            when a non-{@code null} {@code storedURI} and/or {@code liveURI} are provided and the {@link IRace}
+     *            specifies something different and claims to be in replay mode ({@link IRace#getConnectionType} is
+     *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
+     *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
+     *            races if since the last connection the race was migrated to a replay file format.
      */
     protected TracTracRaceTrackerImpl(Regatta regatta, DomainFactory domainFactory, URL paramURL, URI liveURI,
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean ignoreTracTracMarkPassings, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams) throws URISyntaxException,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams,
+            boolean preferReplayIfAvailable) throws URISyntaxException,
             MalformedURLException, FileNotFoundException, CreateModelException, SubscriberInitializationException {
         this(ModelLocator.getEventFactory().createRace(new URI(paramURL.toString())), regatta, domainFactory, paramURL,
                 liveURI, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                 offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassings, raceLogStore, regattaLogStore, windStore,
                 tracTracUsername,
-                tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver, connectivityParams);
+                tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry, raceLogResolver, connectivityParams, preferReplayIfAvailable);
+    }
+    
+    private boolean isReplayRace(IRace tractracRace) {
+        // TODO bug 4037: change into tractracRace.getConnectionType() == File once TracAPI 3.3.2 is available
+        return tractracRace.getStoredURI() != null && tractracRace.getStoredURI().toString().toLowerCase().endsWith(".mtb");
     }
     
     /**
-     * 
      * @param regatta
      *            if <code>null</code>, then <code>domainFactory.getOrCreateRegatta(tractracEvent)</code> will be used
      *            to obtain a default regatta
      * @param offsetToStartTimeOfSimulatedRace
-     *            if not <code>null</code>, the connector will adjust the time stamps of all events received such that the
-     *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
-     *            events received such that they seem to be sent in "real-time" + <code>offsetToStartTimeOfSimulatedRace</code> So, more or less the time points
-     *            attached to the events sent to the receivers will again approximate the wall time.
+     *            if not <code>null</code>, the connector will adjust the time stamps of all events received such that
+     *            the first mark passing for the first waypoint will be set to "now." It will delay the forwarding of
+     *            all events received such that they seem to be sent in "real-time" +
+     *            <code>offsetToStartTimeOfSimulatedRace</code> So, more or less the time points attached to the events
+     *            sent to the receivers will again approximate the wall time.
+     * @param preferReplayIfAvailable
+     *            when a non-{@code null} {@code storedURI} and/or {@code liveURI} are provided and the {@link IRace}
+     *            specifies something different and claims to be in replay mode ({@link IRace#getConnectionType} is
+     *            {@code File}) then if this parameter is {@code true} the race will be loaded from the replay file
+     *            instead of the {@code storedURI}/{@code liveURI} specified. This is particularly useful for restoring
+     *            races if since the last connection the race was migrated to a replay file format.
      */
     private TracTracRaceTrackerImpl(IRace tractracRace, final Regatta regatta, DomainFactory domainFactory,
             URL paramURL, URI liveURI, URI storedURI, URI tracTracUpdateURI, TimePoint startOfTracking,
             TimePoint endOfTracking, long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, 
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams) throws URISyntaxException, MalformedURLException,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams,
+            boolean preferReplayIfAvailable) throws URISyntaxException, MalformedURLException,
             FileNotFoundException, SubscriberInitializationException {
         super(connectivityParams);
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.tractracRace = tractracRace;
         this.tractracEvent = tractracRace.getEvent();
+        if (preferReplayIfAvailable && isReplayRace(tractracRace)) {
+            if (!Util.equalsWithNull(liveURI, tractracRace.getLiveURI())
+                    || !Util.equalsWithNull(storedURI, tractracRace.getStoredURI())) {
+                logger.info("Replay format available and preferred for race " + tractracRace.getName()
+                        + "; using storedURI " + tractracRace.getStoredURI() + " instead of " + storedURI
+                        + " and liveURI " + tractracRace.getLiveURI() + " instead of " + liveURI);
+                liveURI = tractracRace.getLiveURI();
+                storedURI = tractracRace.getStoredURI();
+            }
+        }
         this.id = createID(paramURL, liveURI, storedURI);
         isLiveTracking = liveURI != null;
         this.race = null; // no race received yet
