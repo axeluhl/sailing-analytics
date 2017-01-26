@@ -39,7 +39,7 @@ public abstract class KeywordMatcher<T> {
     private boolean containsText(T obj, Iterable<String> keywords) {
         boolean failed = false;
         for (String word : keywords) {
-            String textAsUppercase = word.toUpperCase().trim();
+            String textAsUppercase = word.toUpperCase();
             failed = true;
             for (String s : getStrings(obj)) {
                 if (s != null && s.toUpperCase().contains(textAsUppercase)) {
