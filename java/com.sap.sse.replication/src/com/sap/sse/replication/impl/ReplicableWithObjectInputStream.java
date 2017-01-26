@@ -226,6 +226,10 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
 
     void addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper<S, ?> operationWithResultWithIdWrapper);
 
+    /**
+     * @return the descriptor of the master from which this replica is replicating this {@link Replicable}, or
+     *         {@code null} if this {@link Replicable} is currently running as a master.
+     */
     ReplicationMasterDescriptor getMasterDescriptor();
 
     /**

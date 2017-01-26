@@ -1062,15 +1062,13 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
             FixType last;
             lockForRead();
             try {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("GPS fix "+fix+" for "+getTrackedItem()+", isValid="+isValid(getInternalRawFixes(), fix)+
-                            ", time/distance/speed from last: "+
-                            ((last=getInternalRawFixes().lower(fix))==null
-                            ? "null"
-                                    : (fix.getTimePoint().asMillis()-last.getTimePoint().asMillis()+"ms/"+
-                                            fix.getPosition().getDistance(last.getPosition())) + "/"+
-                                            fix.getPosition().getDistance(last.getPosition()).inTime(fix.getTimePoint().asMillis()-last.getTimePoint().asMillis())));
-                }
+                logger.finest("GPS fix "+fix+" for "+getTrackedItem()+", isValid="+isValid(getInternalRawFixes(), fix)+
+                        ", time/distance/speed from last: "+
+                        ((last=getInternalRawFixes().lower(fix))==null
+                        ? "null"
+                                : (fix.getTimePoint().asMillis()-last.getTimePoint().asMillis()+"ms/"+
+                                        fix.getPosition().getDistance(last.getPosition())) + "/"+
+                                        fix.getPosition().getDistance(last.getPosition()).inTime(fix.getTimePoint().asMillis()-last.getTimePoint().asMillis())));
             } finally {
                 unlockAfterRead();
             }

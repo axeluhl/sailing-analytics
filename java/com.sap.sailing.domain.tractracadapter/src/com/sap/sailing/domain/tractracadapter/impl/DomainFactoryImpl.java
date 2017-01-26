@@ -654,15 +654,16 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, WindStore windStore, String tracTracUsername,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm,
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver) throws MalformedURLException, FileNotFoundException,
-            URISyntaxException, CreateModelException, SubscriberInitializationException {
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            RaceTrackingConnectivityParametersImpl connectivityParams, boolean preferReplayIfAvailable) throws MalformedURLException,
+            FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException {
         return new TracTracRaceTrackerImpl(this, paramURL, liveURI, storedURI, courseDesignUpdateURI, startOfTracking,
-                endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, windStore,
-                tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackedRegattaRegistry,
-                raceLogResolver);
+                endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm,
+                raceLogStore, regattaLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus,
+                raceVisibility, trackedRegattaRegistry, raceLogResolver, connectivityParams, preferReplayIfAvailable);
     }
 
     @Override
@@ -671,13 +672,14 @@ public class DomainFactoryImpl implements DomainFactory {
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams,
+            boolean preferReplayIfAvailable)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
             SubscriberInitializationException {
         return new TracTracRaceTrackerImpl(regatta, this, paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, windStore, tracTracUsername, tracTracPassword, raceStatus,
-                raceVisibility, trackedRegattaRegistry, raceLogResolver);
+                raceVisibility, trackedRegattaRegistry, raceLogResolver, connectivityParams, preferReplayIfAvailable);
     }
 
     @Override
@@ -695,14 +697,16 @@ public class DomainFactoryImpl implements DomainFactory {
             URI storedURI, URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking,
             long delayToLiveInMillis, Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility) {
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, boolean preferReplayIfAvailable) {
         return new RaceTrackingConnectivityParametersImpl(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                 startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
-                regattaLogStore, this, tracTracUsername, tracTracPassword, raceStatus, raceVisibility);
+                regattaLogStore, this, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination,
+                preferReplayIfAvailable);
     }
 
     @Override
-    public JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams) throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
+    public JSONService parseJSONURLForOneRaceRecord(URL jsonURL, String raceId, boolean loadClientParams)
+            throws IOException, ParseException, org.json.simple.parser.ParseException, URISyntaxException {
         return new JSONServiceImpl(jsonURL, raceId, loadClientParams);
     }
 

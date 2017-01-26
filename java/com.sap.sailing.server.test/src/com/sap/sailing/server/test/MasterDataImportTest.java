@@ -296,6 +296,11 @@ public class MasterDataImportTest {
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90)));
         sourceService.getSensorFixStore().storeFix(deviceIdentifier, gpsFix);
         
+        // test to check that batch-import of fixes works as intended
+        DeviceIdentifier deviceBatch1 = addDeviceMappingWithFixes(sourceService, regatta, competitor, logTimePoint, logTimePoint3, logTimePoint4, "x", 4999);
+        DeviceIdentifier deviceBatch2 = addDeviceMappingWithFixes(sourceService, regatta, competitor, logTimePoint, logTimePoint3, logTimePoint4, "y", 5000);
+        DeviceIdentifier deviceBatch3 = addDeviceMappingWithFixes(sourceService, regatta, competitor, logTimePoint, logTimePoint3, logTimePoint4, "z", 5001);
+        
         // Add sensor fix
         DeviceIdentifier deviceIdentifier2 = new SmartphoneImeiIdentifier("b");
         RegattaLogDeviceMappingEvent<Competitor> bravoMappingEvent = new RegattaLogDeviceCompetitorBravoMappingEventImpl(
@@ -449,6 +454,11 @@ public class MasterDataImportTest {
         Assert.assertEquals(1, sensorFixStore.getNumberOfFixes(deviceIdentifier));
         verifyFix(gpsFix, sensorFixStore, logTimePoint, logTimePoint3, deviceIdentifier);
         
+        // Check that fix counts around the batch size are imported
+        verifyFixCount(sensorFixStore, deviceBatch1, 4999);
+        verifyFixCount(sensorFixStore, deviceBatch2, 5000);
+        verifyFixCount(sensorFixStore, deviceBatch3, 5001);
+        
         // Check for import of sensor fix
         Assert.assertEquals(1, sensorFixStore.getNumberOfFixes(deviceIdentifier2));
         verifyFix(doubleVectorFix, sensorFixStore, logTimePoint, logTimePoint3, deviceIdentifier2);
@@ -470,6 +480,22 @@ public class MasterDataImportTest {
         Assert.assertNotNull(registerEventOnTarget2);
         Assert.assertEquals(registerEvent.getId(), registerEventOnTarget2.getId());
     }
+
+    private DeviceIdentifier addDeviceMappingWithFixes(RacingEventService sourceService, Regatta regatta, CompetitorImpl competitor,
+            TimePoint logTimePoint, TimePoint logTimePoint3, TimePoint logTimePoint4, String imei, int numFixes) {
+        DeviceIdentifier deviceIdentifier = new SmartphoneImeiIdentifier(imei);
+        RegattaLogDeviceCompetitorMappingEvent mappingEvent = new RegattaLogDeviceCompetitorMappingEventImpl(
+                logTimePoint4, logTimePoint4, author, UUID.randomUUID(), competitor, deviceIdentifier, logTimePoint,
+                logTimePoint3);
+        regatta.getRegattaLog().add(mappingEvent);
+        List<GPSFix> fixesToSave = new ArrayList<>(numFixes);
+        for(int i = 1; i <= numFixes; i++) {
+            fixesToSave.add(new GPSFixMovingImpl(new DegreePosition(54.333, 10.133), logTimePoint.plus(i),
+                    new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90))));
+        }
+        sourceService.getSensorFixStore().storeFixes(deviceIdentifier, fixesToSave);
+        return deviceIdentifier;
+    }
     
     private void verifyFix(Timed expectedFix, SensorFixStore store, TimePoint start, TimePoint endInclusive, DeviceIdentifier deviceIdentifier) {
         List<Timed> fixes = new ArrayList<>(1);
@@ -477,6 +503,14 @@ public class MasterDataImportTest {
             store.loadFixes(fixes::add, deviceIdentifier, start, endInclusive, /* toIsInclusive */ true);
             assertEquals(1, fixes.size());
             assertEquals(expectedFix, fixes.get(0));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private void verifyFixCount(SensorFixStore store, DeviceIdentifier deviceIdentifier, int numFixes) {
+        try {
+            assertEquals(numFixes, store.getNumberOfFixes(deviceIdentifier));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -808,7 +842,7 @@ public class MasterDataImportTest {
         RacingEventService sourceService = new RacingEventServiceImpl(
                 PersistenceFactory.INSTANCE.getDomainObjectFactory(MongoDBService.INSTANCE, sourceDomainFactory),
                 PersistenceFactory.INSTANCE.getMongoObjectFactory(MongoDBService.INSTANCE),
-                MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE);
+                MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false);
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
                 "testVenue", false, eventUUID);
         UUID courseAreaUUID = UUID.randomUUID();

@@ -82,11 +82,13 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
@@ -101,6 +103,7 @@ import com.sap.sailing.domain.common.impl.CourseChangeImpl;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.TargetTimeInfoImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -913,22 +916,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             TimePoint newStartTime = null;
             TimePoint newStartTimeWithoutInferenceFromStartMarkPassings = null;
             for (RaceLog raceLog : attachedRaceLogs.values()) {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
-                }
+                logger.finest(()->"Analyzing race log "+raceLog+" for race "+this.getRace().getName());
                 newStartTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
                 if (newStartTime != null) {
                     newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
-                    if (logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Found start time "+newStartTime+" in race log "+raceLog+" for race "+this.getRace().getName());
-                    }
+                    final TimePoint finalNewStartTime = newStartTime;
+                    logger.finest(()->"Found start time "+finalNewStartTime+" in race log "+raceLog+" for race "+this.getRace().getName());
                     break;
                 }
             }
             if (newStartTime == null) {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("No start time found in race logs for race "+getRace().getName());
-                }
+                logger.finest(()->"No start time found in race logs for race "+getRace().getName());
                 newStartTime = getStartTimeReceived();
                 if (newStartTime != null) {
                     newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
@@ -951,14 +949,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
                                 newStartTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
                                         - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
-                                if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+newStartTime);
-                                }
+                                final TimePoint finalNewStartTime = newStartTime;
+                                logger.finest(()->"Using start mark passings for start time of race "+this.getRace().getName()+": "+finalNewStartTime);
                             } else {
                                 newStartTime = startTimeReceived;
-                                if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest("Using start mark received for race "+this.getRace().getName()+": "+newStartTime);
-                                }
+                                final TimePoint finalNewStartTime = newStartTime;
+                                logger.finest(()->"Using start mark received for race "+this.getRace().getName()+": "+finalNewStartTime);
                             }
                         }
                     } else {
@@ -3937,18 +3933,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
+    public TargetTimeInfo getEstimatedTimeToComplete(final TimePoint timepoint) throws NotEnoughDataHasBeenAddedException,
             NoWindException {
        if (polarDataService == null) {
             throw new NotEnoughDataHasBeenAddedException("Target time estimation failed. No polar service available.");
         }
         Duration durationOfAllLegs = Duration.NULL;
-        final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, timepoint);
+        TimePoint current = timepoint;
+        final List<LegTargetTimeInfo> legTargetTimes = new ArrayList<>();
         for (TrackedLeg leg : trackedLegs.values()) {
-            Duration durationOfLeg = leg.getEstimatedTimeToComplete(polarDataService, timepoint, markPositionCache);
-            durationOfAllLegs = durationOfAllLegs.plus(durationOfLeg);
+            final MarkPositionAtTimePointCache markPositionCache = new MarkPositionAtTimePointCacheImpl(this, current);
+            LegTargetTimeInfo legTargetTime = leg.getEstimatedTimeToComplete(polarDataService, current, markPositionCache);
+            legTargetTimes.add(legTargetTime);
+            durationOfAllLegs = durationOfAllLegs.plus(legTargetTime.getExpectedDuration());
+            current = current.plus(legTargetTime.getExpectedDuration()); // simulate the next leg with the wind as of the projected finishing time of the previous leg
         }
-        return durationOfAllLegs;
+        return new TargetTimeInfoImpl(legTargetTimes);
     }
     
     @Override

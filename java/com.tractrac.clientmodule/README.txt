@@ -17,18 +17,44 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.3.1 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds some new features.
+These features add methods to the API, but they keep the backward compatibility.
+This version provides a new JavaDoc version.
+
+Release date: 17/01/2017
+Build number: 13262
+
+1) Features
+
+ - When a race is in live, the library starts to download stored data from the time when the library connects
+  allowing to the user show data as fast as the first data stream arrives. Then, the library starts to download
+  the rest of the old data. (Requested by Jakob Odum, 25/09/2016)
+ - Adding the method IEventFactory.deleteCache that removes all the previous cached objects (Requested by Andre
+  Borud, 14/12/2016)
+ - Changing the synchronization of the UtilLocator.createParamerSet method. It was synchronized at method level
+  but it is only necessary to synchronize the initialization of the factory and not the usage (Requested by Axel Uhl,
+  17/01/2017)
+
+2) Bugs
+
+ - The ICompetitorClass implementation can contain duplicate entries of different implementations. (Reported by
+ Juan Salvador Pérez, 16/01/2017)
+
+********************************************
 ************* TracAPI 3.3.0 ****************
 ********************************************
 This is a final version. It fixes bugs in the implementation and it adds some new features.
 These features add methods to the API breaking the backward compatibility. These changes are:
 
 Release date: 21/09/2016
-Build number: 12933
+Build number: 12935
 
 1) Features
 
- - Adding the method IRaceCompetitor.updateRaceCompetitor that is thrown when a race
- competitor is updated
+ - Adding the method IRaceCompetitorListener.updateRaceCompetitor that is thrown when a race
+ competitor is updated (Requested by Jerome Soussens, 21/09/2016)
 
 ********************************************
 ************* TracAPI 3.2.2 ****************

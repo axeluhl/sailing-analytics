@@ -80,7 +80,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaLogDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
-import com.sap.sailing.gwt.ui.shared.ReplicationStateDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
@@ -109,12 +108,13 @@ import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.gwt.client.replication.RemoteReplicationService;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
  * the time-dependent service methods, an empty (non-<code>null</code>) result is returned.
  */
-public interface SailingService extends RemoteService, FileStorageManagementGwtService {
+public interface SailingService extends RemoteService, FileStorageManagementGwtService, RemoteReplicationService {
     List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception;
     
     List<RegattaDTO> getRegattas();
@@ -138,8 +138,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm);
 
     void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception;
-
-    void stopTrackingEvent(RegattaIdentifier eventIdentifier) throws Exception;
 
     void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> racesToStopTracking) throws Exception;
     
@@ -310,10 +308,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     void setWindSourcesToExclude(RegattaAndRaceIdentifier raceIdentifier, Iterable<WindSource> windSourcesToExclude);
     
-    ReplicationStateDTO getReplicaInfo();
-
-    void startReplicatingFromMaster(String messagingHost, String masterHost, String exchangeName, int servletPort, int messagingPort) throws Exception;
-
     void updateRaceDelayToLive(RegattaAndRaceIdentifier regattaAndRaceIdentifier, long delayToLiveInMs);
 
     void updateRacesDelayToLive(List<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers, long delayToLiveInMs);
@@ -423,12 +417,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             boolean showOnlyCurrentlyRunningRaces, boolean showOnlyRacesOfSameDay, Duration clientTimeZoneOffset,
             List<String> visibleRegattas) throws Exception;
 
-    void stopReplicatingFromMaster();
-
-    void stopAllReplicas();
-
-    void stopSingleReplicaInstance(String identifier);
-
     void reloadRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
 
     RaceLogDTO getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet);
@@ -465,7 +453,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     Iterable<String> getAllIgtimiAccountEmailAddresses();
 
-    String getIgtimiAuthorizationUrl();
+    String getIgtimiAuthorizationUrl(String redirectProtocol, String redirectHostname, String redirectPort);
 
     boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception;
 

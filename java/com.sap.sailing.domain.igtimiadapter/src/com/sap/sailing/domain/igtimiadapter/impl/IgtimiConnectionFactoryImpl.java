@@ -112,7 +112,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
     
     private String getOauthAuthorizeUrl() throws UnsupportedEncodingException {
-        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+URLEncoder.encode(getClient().getRedirectUri(), "UTF-8");
+        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+URLEncoder.encode(getClient().getDefaultRedirectUri(), "UTF-8");
     }
     
     /**
@@ -320,8 +320,9 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
     }
 
     @Override
-    public String getAuthorizationUrl() {
-        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+"&redirect_uri="+client.getRedirectUri();
+    public String getAuthorizationUrl(String redirectProtocol, String redirectHost, String redirectPort) {
+        return getBaseUrl()+"/oauth/authorize?response_type=code&client_id="+getClient().getId()+
+                "&redirect_uri="+client.getRedirectUri(redirectProtocol, redirectHost, redirectPort);
     }
 
     private Client getClient() {
@@ -344,7 +345,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
         urlParameters.add(new BasicNameValuePair("client_id", getClient().getId()));
         urlParameters.add(new BasicNameValuePair("client_secret", getClient().getSecret()));
         urlParameters.add(new BasicNameValuePair("code", code));
-        urlParameters.add(new BasicNameValuePair("redirect_uri", getClient().getRedirectUri()));
+        urlParameters.add(new BasicNameValuePair("redirect_uri", getClient().getDefaultRedirectUri()));
         post.setEntity(new UrlEncodedFormEntity(urlParameters));
         HttpResponse response = client.execute(post);
         JSONObject accessTokenJson = ConnectivityUtils.getJsonFromResponse(response);

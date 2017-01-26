@@ -22,6 +22,7 @@ import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.RacingEventService;
@@ -97,7 +98,14 @@ public class Activator implements BundleActivator {
                 regattaLogSensorDataTrackerTrackedRegattaListener, null));
         registrations.add(context.registerService(Replicable.class,
                 regattaLogSensorDataTrackerTrackedRegattaListener, null));
-        
+        new Thread(()->{
+            try {
+                registrations.add(context.registerService(RaceTrackingConnectivityParametersHandler.class,
+                    new RaceLogConnectivityParamsHandler(racingEventServiceTracker.waitForService(0)), getDict(RaceLogConnectivityParams.TYPE)));
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception trying to register race log tracking connectivity params persistence handler", e);
+            }
+        }, "RaceLog tracking activator registering connectivity params persistence handler").start();
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
     }
 

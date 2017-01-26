@@ -70,9 +70,9 @@ public class UnicodeCharactersInCompetitorNamesTest {
                         /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings*/
 			false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                         EmptyWindStore.INSTANCE, "tracTest", "tracTest", "", "",
-                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));
+                        new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class), /* connectivityParams */ null, /* preferReplayIfAvailable */ false);
 
-        Iterable<Competitor> competitors = fourtyninerYellow_2.getRacesHandle().getRace().getCompetitors();
+        Iterable<Competitor> competitors = fourtyninerYellow_2.getRaceHandle().getRace().getCompetitors();
         for (Competitor competitor : competitors) {
             System.out.println(competitor.getName());
         }

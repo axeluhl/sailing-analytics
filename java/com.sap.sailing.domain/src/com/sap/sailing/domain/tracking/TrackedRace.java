@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.TimingConstants;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
@@ -923,13 +924,13 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      *            Used for positions of marks and wind information; note that sometimes the marks are not in place yet
      *            when the race starts and that a windward mark may be collected already before the race finishes.
      * 
-     * @return estimated time it takes to complete the race
+     * @return estimated time it takes to complete the race, plus more useful information about how this result came about
      * 
      * @throws NotEnoughDataHasBeenAddedException
      *             thrown if not enough polar data has been added or polar data service is not available
      * @throws NoWindException
      */
-    Duration getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
+    TargetTimeInfo getEstimatedTimeToComplete(TimePoint timepoint) throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     void setPolarDataService(PolarDataService polarDataService);
 

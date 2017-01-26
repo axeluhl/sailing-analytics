@@ -15,9 +15,8 @@ import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.DoubleVectorFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
-import com.sap.sse.common.TypeBasedServiceFinder;
 
-public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<FixMongoHandler<?>> {
+public class MockGPSFixMongoServiceFinder extends AbstractTypeBasedServiceFinder<FixMongoHandler<?>> {
     private final MongoObjectFactoryImpl mof = new MongoObjectFactoryImpl(null);
     private final DomainObjectFactoryImpl dof = new DomainObjectFactoryImpl(null, null);
     private final FixMongoHandler<?> movingHandler = new GPSFixMovingMongoHandlerImpl(mof, dof);
