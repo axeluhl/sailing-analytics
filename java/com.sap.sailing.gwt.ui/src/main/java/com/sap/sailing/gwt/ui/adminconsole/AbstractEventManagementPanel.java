@@ -38,7 +38,7 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
         this.availableRegattasListBox.ensureDebugId("AvailableRegattasListBox");
         
         // TrackedEventsComposite should exist in every *ManagementPanel. 
-        trackedRacesListComposite = new TrackedRacesListComposite(null, sailingService, errorReporter,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
                 regattaRefresher,
                 stringMessages, /* multiselection */ true, actionButtonsEnabled);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");

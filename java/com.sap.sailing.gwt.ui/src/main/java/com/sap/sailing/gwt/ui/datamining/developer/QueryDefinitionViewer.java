@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.ui.datamining.developer.QueryDefinitionParser.TypeToC
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class QueryDefinitionViewer extends ComponentWithoutSettings implements QueryDefinitionChangedListener {
     
@@ -36,8 +37,8 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     
     private StatisticQueryDefinitionDTO currentDefinition;
 
-    public QueryDefinitionViewer(Component<?> parent, StringMessages stringMessages) {
-        super(parent);
+    public QueryDefinitionViewer(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         queryDefinitionParser = new QueryDefinitionParser();
         

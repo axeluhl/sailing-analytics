@@ -36,7 +36,7 @@ public class SettingsToStringMapSerializer {
     }
     
     private void serialize(String prefix, SettingsMap settingsMap, Map<String, Iterable<String>> serialized) {
-        for (Map.Entry<String, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
+        for (Map.Entry<String, Settings> entry : settingsMap.getSettingsPerComponentId().entrySet()) {
             String childPrefix = prefix + entry.getKey() + GenericSerializableSettings.PATH_SEPARATOR;
             Settings settings = entry.getValue();
             if(settings instanceof SettingsMap) {
@@ -105,7 +105,7 @@ public class SettingsToStringMapSerializer {
     
     public final <T extends SettingsMap> T deserializeSettingsMap(T settingsMap, Map<String, Iterable<String>> values) {
         final Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
-        final Set<Entry<String, Settings>> childSettings = settingsMap.getSettingsByKey().entrySet();
+        final Set<Entry<String, Settings>> childSettings = settingsMap.getSettingsPerComponentId().entrySet();
         for (Map.Entry<String, Settings> entry : childSettings) {
             final String key = entry.getKey();
             final Settings settings = entry.getValue();

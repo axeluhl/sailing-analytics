@@ -16,7 +16,7 @@ import com.sap.sse.common.settings.serializer.AbstractSettingsToJsonSerializer;
  */
 public class SettingsToJsonSerializer extends AbstractSettingsToJsonSerializer<JSONObject, JSONArray> {
     @Override
-    protected String jsonObjectToString(JSONObject jsonObject) {
+    public String jsonObjectToString(JSONObject jsonObject) {
         return jsonObject.toJSONString();
     }
     

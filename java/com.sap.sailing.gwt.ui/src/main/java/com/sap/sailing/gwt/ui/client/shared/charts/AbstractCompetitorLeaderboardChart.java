@@ -50,6 +50,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.AbstractLazyComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 /**
  * A base class for a leaderboard chart showing competitor data for all race columns of a leaderboard.
@@ -73,11 +74,12 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ab
     protected final String leaderboardName;
     protected final StringMessages stringMessages;
     
-    public AbstractCompetitorLeaderboardChart(Component<?> parent, SailingServiceAsync sailingService,
+    public AbstractCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?, ?> context,
+            SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, String leaderboardName,
             DetailType detailType, CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             final StringMessages stringMessages, ErrorReporter errorReporter) {
-        super(parent);
+        super(parent, context);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.competitorSelectionProvider = competitorSelectionProvider;

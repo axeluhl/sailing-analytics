@@ -145,6 +145,7 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, RequiresDataInitialization, RequiresResize, QuickRankProvider {
@@ -414,12 +415,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
     
-    public RaceMap(Component<?> parent, RaceMapLifecycle raceMapLifecycle, RaceMapSettings raceMapSettings,
+    public RaceMap(Component<?> parent, ComponentContext<?, ?> context, RaceMapLifecycle raceMapLifecycle,
+            RaceMapSettings raceMapSettings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
             RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, 
             boolean showHeaderPanel) {
-        super(parent);
+        super(parent, context);
         this.raceMapLifecycle = raceMapLifecycle;
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;

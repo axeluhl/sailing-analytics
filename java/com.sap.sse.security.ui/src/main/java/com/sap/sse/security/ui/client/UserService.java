@@ -64,7 +64,7 @@ public class UserService {
         registerStorageEventHandler();
         updateUser(/* notifyOtherInstances */ false);
     }
-    
+
     private void registerStorageEventHandler() {
         Storage.addStorageEventHandler(new Handler() {
             @Override
@@ -79,7 +79,7 @@ public class UserService {
             }
         });
     }
-    
+
     /**
      * Used to synchronize changes in the user status between all {@link UserService} instances across all browser
      * tabs/windows.
@@ -115,7 +115,7 @@ public class UserService {
             }
         }));
     }
-    
+
     /**
      * Signs in a user with username and password. If successful, the {@link #getCurrentUser() current user} will be
      * updated with the user data. Otherwise, it will remain unchanged. This means in particular that any previously
@@ -138,7 +138,7 @@ public class UserService {
             }
         }));
     }
-    
+
     public void verifySocialUser(final AsyncCallback<UserDTO> callback) throws Exception {
         final String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
         logger.info("Verifying " + authProviderName + " user ...");
@@ -181,7 +181,7 @@ public class UserService {
     public UserDTO getCurrentUser() {
         return currentUser;
     }
-    
+
     private void setCurrentUser(UserDTO result, final boolean notifyOtherInstances) {
         currentUser = result;
         userInitiallyLoaded = true;
@@ -213,7 +213,7 @@ public class UserService {
             handler.onUserStatusChange(getCurrentUser());
         }
     }
-    
+
     public UserManagementServiceAsync getUserManagementService() {
         return userManagementService;
     }

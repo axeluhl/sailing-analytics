@@ -42,4 +42,14 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings, Rac
     public boolean hasSettings() {
         return true;
     }
+
+    @Override
+    public RaceMapSettings extractGlobalSettings(RaceMapSettings settings) {
+        return createDefaultSettings();
+    }
+
+    @Override
+    public RaceMapSettings extractContextSettings(RaceMapSettings settings) {
+        return settings;
+    }
 }

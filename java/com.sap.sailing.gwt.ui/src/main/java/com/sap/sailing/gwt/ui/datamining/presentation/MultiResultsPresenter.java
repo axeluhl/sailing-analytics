@@ -21,6 +21,7 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class MultiResultsPresenter extends AbstractComponent<Settings> implements ResultsPresenter<Settings> {
     
@@ -33,8 +34,8 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
 
     private List<Descriptor<Object>> availableDescriptors;
     
-    public MultiResultsPresenter(Component<?> parent, StringMessages stringMessages) {
-        super(parent);
+    public MultiResultsPresenter(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         availableDescriptors = new ArrayList<>();
         availableDescriptors.add(new ColumnChartDescriptor());
@@ -169,7 +170,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
         private final AbstractResultsPresenter<?> presenter;
         
         public PlainDescriptor() {
-            presenter = new PlainResultsPresenter(MultiResultsPresenter.this, stringMessages);
+            presenter = new PlainResultsPresenter(MultiResultsPresenter.this, getComponentContext(), stringMessages);
         }
 
         @Override
@@ -189,7 +190,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
         private final ResultsChart presenter;
 
         public ColumnChartDescriptor() {
-            presenter = new ResultsChart(MultiResultsPresenter.this, stringMessages);
+            presenter = new ResultsChart(MultiResultsPresenter.this, getComponentContext(), stringMessages);
         }
 
         @Override

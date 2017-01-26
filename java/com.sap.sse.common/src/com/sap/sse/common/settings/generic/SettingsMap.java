@@ -16,5 +16,5 @@ public interface SettingsMap extends Settings {
     /**
      * @return the settings to be processes by serializer implementations.
      */
-    Map<String, Settings> getSettingsByKey();
+    Map<String, Settings> getSettingsPerComponentId();
 }

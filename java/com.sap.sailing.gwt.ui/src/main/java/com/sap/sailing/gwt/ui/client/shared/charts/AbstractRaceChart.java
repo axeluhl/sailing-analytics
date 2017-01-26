@@ -40,6 +40,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public abstract class AbstractRaceChart<SettingsType extends Settings> extends AbstractCompositeComponent<SettingsType> implements TimeListener, TimeZoomChangeListener, TimeRangeChangeListener {
     /**
@@ -90,11 +91,11 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     
     private final Button settingsButton;
     
-    protected AbstractRaceChart(Component<?> parent, SailingServiceAsync sailingService,
+    protected AbstractRaceChart(Component<?> parent, ComponentContext<?, ?> context, SailingServiceAsync sailingService,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
             TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
-        super(parent);
+        super(parent, context);
         this.sailingService = sailingService;
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.timer = timer;

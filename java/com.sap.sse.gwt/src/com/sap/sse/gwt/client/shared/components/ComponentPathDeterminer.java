@@ -16,10 +16,12 @@ public class ComponentPathDeterminer {
     static ArrayList<String> determinePath(Component<?> start) {
         ArrayList<String> path = new ArrayList<>();
         Component<?> cur = start;
-        while (cur != null) {
+        while (true) {
+            if (cur == null || cur.getParentComponent() == null) {
+                return path;
+            }
             path.add(cur.getId());
             cur = cur.getParentComponent();
         }
-        return path;
     }
 }

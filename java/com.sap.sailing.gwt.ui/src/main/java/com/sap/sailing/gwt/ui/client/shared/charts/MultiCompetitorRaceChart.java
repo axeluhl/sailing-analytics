@@ -15,6 +15,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 /**
  * MultiCompetitorRaceChart is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
@@ -34,13 +35,14 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private final MultiCompetitorRaceChartLifecycle lifeycycle;
     
-    public MultiCompetitorRaceChart(Component<?> parent, MultiCompetitorRaceChartLifecycle lifeycycle,
+    public MultiCompetitorRaceChart(Component<?> parent,ComponentContext<?, ?> context, MultiCompetitorRaceChartLifecycle lifeycycle,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
             final String leaderboardGroupName, String leaderboardName) {
-        super(parent, sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer,
+        super(parent, context, sailingService, asyncActionsExecutor, competitorSelectionProvider,
+                selectedRaceIdentifier, timer,
                 timeRangeWithZoomProvider, stringMessages, errorReporter,
                 /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
                 allowTimeAdjust, leaderboardGroupName, leaderboardName);

@@ -123,6 +123,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -1726,23 +1727,23 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         }
     }
 
-    public LeaderboardPanel(Component<?> parent, SailingServiceAsync sailingService,
+    public LeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
-        this(parent, sailingService, asyncActionsExecutor, settings, false, /* preSelectedRace */null,
+        this(parent, context, sailingService, asyncActionsExecutor, settings, false, /* preSelectedRace */null,
                 competitorSelectionProvider,
                 null, leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails);
     }
 
-    public LeaderboardPanel(Component<?> parent, SailingServiceAsync sailingService,
+    public LeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent, boolean showRaceDetails) {
-        this(parent, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
+        this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
                 competitorSelectionProvider,
                 new Timer(
                 // perform the first request as "live" but don't by default auto-play
@@ -1753,7 +1754,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                 /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
     }
 
-    public LeaderboardPanel(Component<?> parent, SailingServiceAsync sailingService,
+    public LeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor,
             LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
@@ -1762,7 +1763,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
             boolean showCompetitorFilterStatus, boolean enableSyncScroller) {
-        super(parent);
+        super(parent, context);
         this.currentSettings = settings;
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;

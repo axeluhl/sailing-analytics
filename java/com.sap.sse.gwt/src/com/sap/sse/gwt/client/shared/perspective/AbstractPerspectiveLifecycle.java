@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
@@ -18,7 +19,6 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  *
  */
 public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implements PerspectiveLifecycle<PS> {
-
     protected final List<ComponentLifecycle<?,?>> componentLifecycles;
     
     public AbstractPerspectiveLifecycle() {
@@ -60,10 +60,56 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
         return componentLifecycles;
     }
     
+    @SuppressWarnings("unchecked")
+    @Override
+    public <SS extends Settings> ComponentLifecycle<SS, ?> getLiveCycleForId(String id) {
+        for (ComponentLifecycle<?, ?> componentLifecycle : componentLifecycles) {
+            if (id.equals(componentLifecycle.getComponentId())) {
+                return (ComponentLifecycle<SS, ?>) componentLifecycle;
+            }
+        }
+        throw new IllegalStateException("No componentlivecycle for id " + id + " found");
+    }
+
     private static<S extends Settings> S cloneChildComponentSettings(ComponentLifecycle<S, ?> childComponentLifecycle, PerspectiveCompositeSettings<?> settings) {
         @SuppressWarnings("unchecked")
         S childSettings = (S) settings.findSettingsByComponentId(childComponentLifecycle.getComponentId());
         return childComponentLifecycle.cloneSettings(childSettings);
     }
 
+    @Override
+    public final PerspectiveCompositeSettings<PS> extractContextSettings(PerspectiveCompositeSettings<PS> settings) {
+        HashMap<String, Settings> settingsPerComponent = new HashMap<>();
+        for (Entry<String, Settings> childSet : settings.getSettingsPerComponentId().entrySet()) {
+            String childId = childSet.getKey();
+            Settings childNewSettings = childSet.getValue();
+            ComponentLifecycle<Settings, ?> childLiveCycle = getLiveCycleForId(childId);
+            Settings extracted = childLiveCycle.extractContextSettings(childNewSettings);
+            settingsPerComponent.put(childId, extracted);
+        }
+
+        PS ownGlobalSettings = extractOwnContextSettings(
+                hasSettings() ? settings.getPerspectiveOwnSettings() : createPerspectiveOwnDefaultSettings());
+        return new PerspectiveCompositeSettings<PS>(ownGlobalSettings, settingsPerComponent);
+    }
+
+    @Override
+    public final PerspectiveCompositeSettings<PS> extractGlobalSettings(PerspectiveCompositeSettings<PS> settings) {
+        HashMap<String, Settings> settingsPerComponent = new HashMap<>();
+        for (Entry<String, Settings> childSet : settings.getSettingsPerComponentId().entrySet()) {
+            String childId = childSet.getKey();
+            Settings childNewSettings = childSet.getValue();
+            ComponentLifecycle<Settings, ?> childLiveCycle = getLiveCycleForId(childId);
+            Settings extracted = childLiveCycle.extractGlobalSettings(childNewSettings);
+            settingsPerComponent.put(childId, extracted);
+        }
+
+        PS ownGlobalSettings = extractOwnGlobalSettings(
+                hasSettings() ? settings.getPerspectiveOwnSettings() : createPerspectiveOwnDefaultSettings());
+        return new PerspectiveCompositeSettings<PS>(ownGlobalSettings, settingsPerComponent);
+    }
+
+    protected abstract PS extractOwnGlobalSettings(PS settings);
+
+    protected abstract PS extractOwnContextSettings(PS settings);
 }

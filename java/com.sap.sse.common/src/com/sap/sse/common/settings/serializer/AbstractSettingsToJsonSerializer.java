@@ -40,7 +40,7 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     
     protected abstract OBJECT parseStringToJsonObject(String jsonString) throws Exception;
     
-    protected abstract String jsonObjectToString(OBJECT jsonObject);
+    public abstract String jsonObjectToString(OBJECT jsonObject);
     
     protected OBJECT parseStringToJsonObjectWithExceptionHandling(String jsonString) {
         try {
@@ -80,7 +80,7 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     
     public OBJECT serialize(SettingsMap settingsMap) {
         final OBJECT jsonObject = newOBJECT();
-        for (Map.Entry<String, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
+        for (Map.Entry<String, Settings> entry : settingsMap.getSettingsPerComponentId().entrySet()) {
             Settings settings = entry.getValue();
             final Object serializedObject;
             if(settings instanceof SettingsMap) {
@@ -145,7 +145,7 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     
     public <T extends SettingsMap> T deserialize(T settingsMap, OBJECT json) {
         if (json != null) {
-            for (Map.Entry<String, Settings> entry : settingsMap.getSettingsByKey().entrySet()) {
+            for (Map.Entry<String, Settings> entry : settingsMap.getSettingsPerComponentId().entrySet()) {
                 String key = entry.getKey().toString();
                 if(hasProperty(json, key)) {
                     Settings settings = entry.getValue();

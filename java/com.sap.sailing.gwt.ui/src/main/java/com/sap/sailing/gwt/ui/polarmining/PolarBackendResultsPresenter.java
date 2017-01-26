@@ -31,6 +31,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 /**
  * Is able to present {@link PolarBackendData}.</br> Has one polar chart showing the perAngle regression data and two
@@ -53,8 +54,9 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
     private final Chart angleChart;
     private final DockLayoutPanel speedAndAngleChart;
     
-    public PolarBackendResultsPresenter(Component<?> parent, StringMessages stringMessages) {
-        super(parent, stringMessages);
+    public PolarBackendResultsPresenter(Component<?> parent, ComponentContext<?, ?> context,
+            StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         
         polarChart = createPolarChart();
         polarChartWrapperPanel = new SimpleLayoutPanel() {

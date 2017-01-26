@@ -26,4 +26,6 @@ public interface PerspectiveLifecycle<PS extends Settings> extends
     Map<String, Settings> cloneComponentIdsAndSettings(PerspectiveCompositeSettings<PS> settings);
 
     Map<String, Settings> createDefaultComponentIdsAndSettings();
+
+    <SS extends Settings> ComponentLifecycle<SS, ?> getLiveCycleForId(String id);
 }

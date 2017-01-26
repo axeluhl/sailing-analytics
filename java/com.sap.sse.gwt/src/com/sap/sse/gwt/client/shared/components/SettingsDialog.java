@@ -2,7 +2,6 @@ package com.sap.sse.gwt.client.shared.components;
 
 import java.util.ArrayList;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -104,7 +103,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
         makeDefaultButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 ArrayList<String> settingsPath = component.getPath();
-                GWT.log("Path to settings: " + settingsPath);
+                component.getComponentContext().makeSettingsDefault(component, getResult());
                 // TODO i18n + use nice styled dialog
                 // FIXME apply new result to new backend result and send to server for saving
                 Window.alert("Settings have been successfully saved " + settingsPath + " " + getResult());

@@ -13,7 +13,6 @@ import com.sap.sse.common.settings.Settings;
  * @author Frank Mittag
  */
 public interface ComponentLifecycle<S extends Settings, SDC extends SettingsDialogComponent<S>> {
-
     SDC getSettingsDialogComponent(S settings);
 
     S createDefaultSettings();
@@ -34,5 +33,9 @@ public interface ComponentLifecycle<S extends Settings, SDC extends SettingsDial
      * @return true if the component has settings that a user may change. 
      */
     boolean hasSettings();
+
+    S extractGlobalSettings(S settings);
+
+    S extractContextSettings(S settings);
 
 }

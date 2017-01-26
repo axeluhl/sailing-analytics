@@ -8,9 +8,10 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class LeaderboardPanelLifecycle implements ComponentLifecycle<LeaderboardSettings, LeaderboardSettingsDialogComponent> {
+public class LeaderboardPanelLifecycle
+        implements ComponentLifecycle<LeaderboardSettings, LeaderboardSettingsDialogComponent> {
     protected static final String ID = "LeaderboardPanel";
-    
+
     private final StringMessages stringMessages;
     private final List<RaceColumnDTO> raceList;
 
@@ -30,12 +31,21 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
         for (RaceColumnDTO raceColumn : raceList) {
             namesOfRaceColumnsToShow.add(raceColumn.getName());
         }
-        return LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomDefaults(new LeaderboardSettings(namesOfRaceColumnsToShow, 1000L));
+        return LeaderboardSettingsFactory.getInstance()
+                .createNewSettingsWithCustomDefaults(new LeaderboardSettings(namesOfRaceColumnsToShow, 1000L));
     }
 
     @Override
     public LeaderboardSettings cloneSettings(LeaderboardSettings settings) {
-        LeaderboardSettings clonedSettings = new LeaderboardSettings(settings.getManeuverDetailsToShow(), settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(), settings.getNamesOfRaceColumnsToShow(), settings.getNamesOfRacesToShow(), settings.getNumberOfLastRacesToShow(), settings.isAutoExpandPreSelectedRace(), settings.getDelayBetweenAutoAdvancesInMilliseconds(), settings.getNameOfRaceToSort(), settings.isSortAscending(), settings.isUpdateUponPlayStateChange(), settings.getActiveRaceColumnSelectionStrategy(), settings.isShowAddedScores(), settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), settings.isShowCompetitorSailIdColumn(), settings.isShowCompetitorFullNameColumn());
+        LeaderboardSettings clonedSettings = new LeaderboardSettings(settings.getManeuverDetailsToShow(),
+                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(),
+                settings.getNamesOfRaceColumnsToShow(), settings.getNamesOfRacesToShow(),
+                settings.getNumberOfLastRacesToShow(), settings.isAutoExpandPreSelectedRace(),
+                settings.getDelayBetweenAutoAdvancesInMilliseconds(), settings.getNameOfRaceToSort(),
+                settings.isSortAscending(), settings.isUpdateUponPlayStateChange(),
+                settings.getActiveRaceColumnSelectionStrategy(), settings.isShowAddedScores(),
+                settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
+                settings.isShowCompetitorSailIdColumn(), settings.isShowCompetitorFullNameColumn());
         return LeaderboardSettingsFactory.getInstance().keepDefaults(settings, clonedSettings);
     }
 
@@ -53,4 +63,50 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
     public boolean hasSettings() {
         return true;
     }
+
+    @Override
+    public LeaderboardSettings extractGlobalSettings(LeaderboardSettings currentLeaderboardSettings) {
+        LeaderboardSettings defaultLeaderboardSettings = currentLeaderboardSettings.getDefaultSettings();
+        LeaderboardSettings globalLeaderboardSettings = new LeaderboardSettings(
+                currentLeaderboardSettings.getManeuverDetailsToShow(), currentLeaderboardSettings.getLegDetailsToShow(),
+                currentLeaderboardSettings.getRaceDetailsToShow(), currentLeaderboardSettings.getOverallDetailsToShow(),
+                defaultLeaderboardSettings.getNamesOfRaceColumnsToShow(),
+                defaultLeaderboardSettings.getNamesOfRacesToShow(),
+                currentLeaderboardSettings.getNumberOfLastRacesToShow(),
+                defaultLeaderboardSettings.isAutoExpandPreSelectedRace(),
+                currentLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
+                defaultLeaderboardSettings.getNameOfRaceToSort(), defaultLeaderboardSettings.isSortAscending(),
+                currentLeaderboardSettings.isUpdateUponPlayStateChange(),
+                currentLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
+                currentLeaderboardSettings.isShowAddedScores(),
+                currentLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
+                currentLeaderboardSettings.isShowCompetitorSailIdColumn(),
+                currentLeaderboardSettings.isShowCompetitorFullNameColumn());
+        globalLeaderboardSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(currentLeaderboardSettings,
+                globalLeaderboardSettings);
+        return globalLeaderboardSettings;
+    }
+
+    @Override
+    public LeaderboardSettings extractContextSettings(LeaderboardSettings leaderboardSettings) {
+        LeaderboardSettings defaultLeaderboardSettings = leaderboardSettings.getDefaultSettings();
+        LeaderboardSettings contextSpecificLeaderboardSettings = new LeaderboardSettings(
+                defaultLeaderboardSettings.getManeuverDetailsToShow(), defaultLeaderboardSettings.getLegDetailsToShow(),
+                defaultLeaderboardSettings.getRaceDetailsToShow(), defaultLeaderboardSettings.getOverallDetailsToShow(),
+                leaderboardSettings.getNamesOfRaceColumnsToShow(), leaderboardSettings.getNamesOfRacesToShow(),
+                defaultLeaderboardSettings.getNumberOfLastRacesToShow(),
+                defaultLeaderboardSettings.isAutoExpandPreSelectedRace(),
+                defaultLeaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
+                leaderboardSettings.getNameOfRaceToSort(), leaderboardSettings.isSortAscending(),
+                defaultLeaderboardSettings.isUpdateUponPlayStateChange(),
+                defaultLeaderboardSettings.getActiveRaceColumnSelectionStrategy(),
+                defaultLeaderboardSettings.isShowAddedScores(),
+                defaultLeaderboardSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
+                defaultLeaderboardSettings.isShowCompetitorSailIdColumn(),
+                defaultLeaderboardSettings.isShowCompetitorFullNameColumn());
+        contextSpecificLeaderboardSettings = LeaderboardSettingsFactory.getInstance().keepDefaults(leaderboardSettings,
+                contextSpecificLeaderboardSettings);
+        return contextSpecificLeaderboardSettings;
+    }
+
 }

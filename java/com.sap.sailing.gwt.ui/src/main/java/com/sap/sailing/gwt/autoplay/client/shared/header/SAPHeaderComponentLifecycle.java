@@ -41,5 +41,15 @@ public class SAPHeaderComponentLifecycle implements ComponentLifecycle<SAPHeader
     public String getComponentId() {
         return "SAPHeaderComponent";
     }
+
+    @Override
+    public SAPHeaderComponentSettings extractGlobalSettings(SAPHeaderComponentSettings settings) {
+        return createDefaultSettings();
+    }
+
+    @Override
+    public SAPHeaderComponentSettings extractContextSettings(SAPHeaderComponentSettings settings) {
+        return createDefaultSettings();
+    }
 }
 

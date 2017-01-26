@@ -45,6 +45,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 /**
  * Allows presentation of {@link PolarAggregation} data.
@@ -76,8 +77,8 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     private final Map<Series, Series> histogramSeriesForPolarSeries= new HashMap<>();
     private final Map<Series, Map<Long, Series>> perAngleHistogramSeriesForAngle = new HashMap<>();
 
-    public PolarResultsPresenter(Component<?> parent, StringMessages stringMessages) {
-        super(parent, stringMessages);
+    public PolarResultsPresenter(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         
         polarChart = createPolarChart();
         polarChartWrapperPanel = new SimpleLayoutPanel() {

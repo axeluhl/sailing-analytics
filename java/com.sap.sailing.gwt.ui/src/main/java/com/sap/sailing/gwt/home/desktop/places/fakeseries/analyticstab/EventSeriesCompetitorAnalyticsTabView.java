@@ -68,7 +68,7 @@ public class EventSeriesCompetitorAnalyticsTabView extends SharedLeaderboardEven
 
             DetailType initialDetailType = DetailType.OVERALL_RANK;
             if (eventSeriesAnalyticsManager.getMultiCompetitorChart() == null) {
-                eventSeriesAnalyticsManager.createMultiCompetitorChart(null, leaderboardName, initialDetailType);
+                eventSeriesAnalyticsManager.createMultiCompetitorChart(null, null, leaderboardName, initialDetailType);
             }
             competitorCharts.setChart(eventSeriesAnalyticsManager.getMultiCompetitorChart(), getAvailableDetailsTypes(), initialDetailType);
             eventSeriesAnalyticsManager.showCompetitorChart(competitorCharts.getSelectedChartDetailType());

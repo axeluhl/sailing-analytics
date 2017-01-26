@@ -103,6 +103,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> implements RequiresResize, SelectionChangeEvent.Handler {
     protected static final int FIX_OVERLAY_Z_ORDER = 230;
@@ -132,11 +133,12 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
     
     private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
 
-    public EditMarkPositionPanel(Component<?> parent, final RaceMap raceMap, final LeaderboardPanel leaderboardPanel,
+    public EditMarkPositionPanel(Component<?> parent, ComponentContext<?, ?> context, final RaceMap raceMap,
+            final LeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
-        super(parent, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
+        super(parent, context, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages,
                 asyncActionsExecutor, errorReporter);
         this.markPositionService = new MarkPositionServiceForSailingService(sailingService);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
@@ -144,7 +146,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> i
         this.leaderboardPanel = leaderboardPanel;
         this.polylines = new HashMap<>();
         this.markDataProvider = new ListDataProvider<>();
-        this.marksPanel = new MarksPanel(this, markDataProvider, stringMessages);
+        this.marksPanel = new MarksPanel(this, context, markDataProvider, stringMessages);
         this.noMarkSelectedLabel = new Label(stringMessages.pleaseSelectAMark());
         this.noMarkSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         this.courseMarkClickHandlers = new ArrayList<>();

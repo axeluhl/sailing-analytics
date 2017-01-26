@@ -16,12 +16,15 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 public interface ComponentContext<L extends ComponentLifecycle<S, ?>, S extends Settings> {
 
     /**
-     * Stores the {@link Settings} of the passed {@link Component} in the default component settings tree.
-     * Make sure to call this method only when {@link #hasMakeCustomDefaultSettingsSupport(Component)}
-     * method returns {@code true} for the passed {@link Component}.
+     * Stores the {@link Settings} of the passed {@link Component} in the default component settings tree. Make sure to
+     * call this method only when {@link #hasMakeCustomDefaultSettingsSupport(Component)} method returns {@code true}
+     * for the passed {@link Component}.
      * 
-     * @param component The component which the passed {@link Settings} correspond to
-     * @param newDefaultSettings The {@link Settings} to be stored
+     * @param component
+     *            The component which the passed {@link Settings} correspond to
+     * @param newDefaultSettings
+     *            The {@link Settings} to be stored
+     * @param settingsPath
      */
     void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings);
 

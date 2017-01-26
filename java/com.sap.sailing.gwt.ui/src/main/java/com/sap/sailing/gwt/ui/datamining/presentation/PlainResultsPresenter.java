@@ -15,14 +15,15 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class PlainResultsPresenter extends AbstractResultsPresenterWithDataProviders<Settings> {
     
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
 
-    public PlainResultsPresenter(Component<?> parent, StringMessages stringMessages) {
-        super(parent, stringMessages);
+    public PlainResultsPresenter(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         
         resultsLabel = new HTML();
         scrollPanel = new ScrollPanel(resultsLabel);

@@ -22,15 +22,17 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
     private PerspectiveCompositeSettings<PS> perspectiveCompositeSettings;
     private PL lifecycle;
     
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(Component<?> parent, PL lifecycle,
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(Component<?> parent, ComponentContext<?, ?> context,
+            PL lifecycle,
             PerspectiveCompositeSettings<PS> settings) {
-        this(parent, lifecycle, settings, null);
+        this(parent, context, lifecycle, settings, null);
     }
 
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(Component<?> parent, PL lifecycle,
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(Component<?> parent, ComponentContext<?, ?> context,
+            PL lifecycle,
             PerspectiveCompositeSettings<PS> settings,
             String title) {
-        super(parent);
+        super(parent, context);
         this.lifecycle = lifecycle;
         this.perspectiveCompositeSettings = settings;
         this.title = title;

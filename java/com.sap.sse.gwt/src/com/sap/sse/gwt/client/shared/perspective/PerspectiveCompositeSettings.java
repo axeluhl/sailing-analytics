@@ -54,12 +54,12 @@ public class PerspectiveCompositeSettings<PS extends Settings> extends Composite
      * @see com.sap.sse.gwt.client.shared.components.CompositeSettings#getSettingsByKey()
      */
     @Override
-    public Map<String, Settings> getSettingsByKey() {
+    public Map<String, Settings> getSettingsPerComponentId() {
         Map<String, Settings> allSettings;
         if(perspectiveOwnSettings == null) {
-            allSettings = super.getSettingsByKey();
+            allSettings = super.getSettingsPerComponentId();
         } else {
-            allSettings = new HashMap<>(super.getSettingsByKey());
+            allSettings = new HashMap<>(super.getSettingsPerComponentId());
             allSettings.put(OWN_SETTINGS_KEY, perspectiveOwnSettings);
         }
         return allSettings;

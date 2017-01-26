@@ -10,14 +10,15 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboardChart<MultiCompetitorLeaderboardChartSettings>  {
     private MultiCompetitorLeaderboardChartSettings settings;
 
-    public MultiCompetitorLeaderboardChart(Component<?> parent,SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
+    public MultiCompetitorLeaderboardChart(Component<?> parent,ComponentContext<?, ?> context,SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             String leaderboardName, DetailType detailType, CompetitorSelectionProvider competitorSelectionProvider,
             Timer timer, StringMessages stringMessages, ErrorReporter errorReporter) {
-        super(parent, sailingService, asyncActionsExecutor, leaderboardName, detailType, competitorSelectionProvider,
+        super(parent, context,sailingService, asyncActionsExecutor, leaderboardName, detailType, competitorSelectionProvider,
                 timer, stringMessages, errorReporter);
         settings = new MultiCompetitorLeaderboardChartSettings(detailType);
     }

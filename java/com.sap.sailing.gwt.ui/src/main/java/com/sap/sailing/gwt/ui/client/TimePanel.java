@@ -37,6 +37,7 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeComponent<T> implements TimeListener, TimeZoomChangeListener,
     TimeRangeChangeListener, PlayStateListener, RequiresResize {
@@ -98,10 +99,11 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
      *            charts such as the competitor chart or the wind chart shown above it, otherwise the padding depends
      *            on the flag set by {@link #setLiveGenerallyPossible(boolean)}
      */
-    public TimePanel(Component<?> parent, Timer timer, TimeRangeWithZoomProvider timeRangeProvider,
+    public TimePanel(Component<?> parent, ComponentContext<?, ?> context, Timer timer,
+            TimeRangeWithZoomProvider timeRangeProvider,
             StringMessages stringMessages,
             boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts) {
-        super(parent);
+        super(parent, context);
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;

@@ -18,18 +18,22 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 public class PerspectiveCompositeLifecycleTabbedSettingsDialog<PL extends PerspectiveLifecycle<PS>, PS extends Settings>
     extends SettingsDialog<PerspectiveCompositeSettings<PS>> {
 
-    public PerspectiveCompositeLifecycleTabbedSettingsDialog(Component<?> parent, StringMessages stringConstants,
+    public PerspectiveCompositeLifecycleTabbedSettingsDialog(Component<?> parent, ComponentContext<?, ?> context,
+            StringMessages stringConstants,
             PL lifecycle,
             PerspectiveCompositeSettings<PS> settings, String title) {
-        super(new PerspectiveCompositeLifecycleTabbedSettingsComponent<PL, PS>(parent, lifecycle, settings, title),
+        super(new PerspectiveCompositeLifecycleTabbedSettingsComponent<PL, PS>(parent, context, lifecycle, settings,
+                title),
                 stringConstants);
     }
 
-    public PerspectiveCompositeLifecycleTabbedSettingsDialog(Component<?> parent, StringMessages stringConstants,
+    public PerspectiveCompositeLifecycleTabbedSettingsDialog(Component<?> parent, ComponentContext<?, ?> context,
+            StringMessages stringConstants,
             PL lifecycle,
             PerspectiveCompositeSettings<PS> settings,
             String title, DialogCallback<PerspectiveCompositeSettings<PS>> callback) {
-        super(new PerspectiveCompositeLifecycleTabbedSettingsComponent<PL, PS>(parent, lifecycle, settings, title),
+        super(new PerspectiveCompositeLifecycleTabbedSettingsComponent<PL, PS>(parent, context, lifecycle, settings,
+                title),
                 stringConstants, callback);
     }
 }

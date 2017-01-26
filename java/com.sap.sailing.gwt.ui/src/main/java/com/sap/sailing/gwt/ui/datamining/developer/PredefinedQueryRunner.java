@@ -27,6 +27,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class PredefinedQueryRunner extends ComponentWithoutSettings {
 
@@ -42,10 +43,11 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
     private final ValueListBox<PredefinedQueryIdentifier> selectionListBox;
     private final Button runButton;
 
-    public PredefinedQueryRunner(Component<?> parent, DataMiningSession session, StringMessages stringMessages,
+    public PredefinedQueryRunner(Component<?> parent, ComponentContext<?, ?> context, DataMiningSession session,
+            StringMessages stringMessages,
                                  DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                  ResultsPresenter<?> resultsPresenter) {
-        super(parent);
+        super(parent, context);
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;

@@ -32,6 +32,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class SimpleStatisticProvider extends AbstractComponent<SerializableSettings> implements StatisticProvider {
     
@@ -51,9 +52,10 @@ public class SimpleStatisticProvider extends AbstractComponent<SerializableSetti
     private final ValueListBox<FunctionDTO> extractionFunctionListBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
 
-    public SimpleStatisticProvider(Component<?> parent,StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+    public SimpleStatisticProvider(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages,
+            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                    DataRetrieverChainDefinitionProvider retrieverChainProvider) {
-        super(parent);
+        super(parent, context);
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;

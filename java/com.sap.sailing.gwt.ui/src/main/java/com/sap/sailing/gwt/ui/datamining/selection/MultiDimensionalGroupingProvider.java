@@ -30,6 +30,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class MultiDimensionalGroupingProvider extends AbstractComponent<SerializableSettings> implements GroupingProvider {
     
@@ -47,10 +48,11 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
     private FunctionDTO currentStatisticToCalculate;
     private final List<FunctionDTO> availableDimensions;
 
-    public MultiDimensionalGroupingProvider(Component<?> parent, StringMessages stringMessages,
+    public MultiDimensionalGroupingProvider(Component<?> parent, ComponentContext<?, ?> context,
+            StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                             StatisticProvider statisticProvider) {
-        super(parent);
+        super(parent, context);
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;

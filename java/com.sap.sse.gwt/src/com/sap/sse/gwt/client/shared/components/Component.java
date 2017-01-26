@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
 
 public interface Component<SettingsType extends Settings> {
@@ -69,4 +70,6 @@ public interface Component<SettingsType extends Settings> {
      * returns the parentComponent or null
      */
     Component<?> getParentComponent();
+
+    ComponentContext<?, ?> getComponentContext();
 }

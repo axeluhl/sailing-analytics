@@ -41,4 +41,14 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     public boolean hasSettings() {
         return true;
     }
+
+    @Override
+    public MultiCompetitorRaceChartSettings extractGlobalSettings(MultiCompetitorRaceChartSettings settings) {
+        return settings;
+    }
+
+    @Override
+    public MultiCompetitorRaceChartSettings extractContextSettings(MultiCompetitorRaceChartSettings settings) {
+        return createDefaultSettings();
+    }
 }

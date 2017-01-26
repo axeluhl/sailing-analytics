@@ -40,6 +40,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent<SerializableSettings> implements FilterSelectionProvider {
 
@@ -63,10 +64,11 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     private final FilterSelectionPresenter selectionPresenter;
     private final ScrollPanel selectionPresenterScrollPanel;
 
-    public ListRetrieverChainFilterSelectionProvider(Component<?> parent,DataMiningSession session, StringMessages stringMessages,
+    public ListRetrieverChainFilterSelectionProvider(Component<?> parent, ComponentContext<?, ?> context,
+            DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             DataRetrieverChainDefinitionProvider retrieverChainProvider) {
-        super(parent);
+        super(parent, context);
         this.session = session;
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
@@ -92,7 +94,8 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
         selectionPanel = new ScrollPanel();
         selectionDockLayoutPanel.add(selectionPanel);
         
-        selectionPresenter = new PlainFilterSelectionPresenter(this, stringMessages, retrieverChainProvider, this);
+        selectionPresenter = new PlainFilterSelectionPresenter(this, context, stringMessages, retrieverChainProvider,
+                this);
         selectionPresenterScrollPanel = new ScrollPanel(selectionPresenter.getEntryWidget());
         
         mainPanel = new DockLayoutPanel(Unit.PX);
@@ -150,7 +153,9 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
                     if (!dimensionsEntry.getValue().isEmpty()) {
                         DataRetrieverLevelDTO retrieverLevel = dimensionsEntry.getKey();
                         RetrieverLevelFilterSelectionProvider selectionProvider =
-                                new RetrieverLevelFilterSelectionProvider(ListRetrieverChainFilterSelectionProvider.this,session, dataMiningService, errorReporter,
+                                        new RetrieverLevelFilterSelectionProvider(
+                                                ListRetrieverChainFilterSelectionProvider.this, getComponentContext(),
+                                                session, dataMiningService, errorReporter,
                                                                           ListRetrieverChainFilterSelectionProvider.this,
                                                                           retrieverChain,retrieverLevel);
                         selectionProvider.setAvailableDimensions(dimensionsEntry.getValue());

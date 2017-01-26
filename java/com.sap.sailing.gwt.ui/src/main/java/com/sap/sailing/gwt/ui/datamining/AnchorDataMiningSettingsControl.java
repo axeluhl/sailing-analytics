@@ -21,6 +21,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class AnchorDataMiningSettingsControl extends AbstractComponent<CompositeSettings> implements DataMiningSettingsControl {
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
@@ -29,8 +30,9 @@ public class AnchorDataMiningSettingsControl extends AbstractComponent<Composite
     private final Collection<Component<?>> components;
     private final Anchor anchor;
     
-    public AnchorDataMiningSettingsControl(Component<?> parent, final StringMessages stringMessages) {
-        super(parent);
+    public AnchorDataMiningSettingsControl(Component<?> parent, ComponentContext<?, ?> context,
+            final StringMessages stringMessages) {
+        super(parent, context);
         this.stringMessages = stringMessages;
         components = new LinkedHashSet<>();
         

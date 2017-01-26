@@ -5,7 +5,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings, WindChartSettingsDialogComponent> {
     private final StringMessages stringMessages;
-    
+
     public WindChartLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
     }
@@ -40,5 +40,21 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings,
     @Override
     public String getComponentId() {
         return "WindChart";
+    }
+
+    @Override
+    public WindChartSettings extractGlobalSettings(WindChartSettings settings) {
+        WindChartSettings def = createDefaultSettings();
+        return new WindChartSettings(settings.isShowWindSpeedSeries(), def.getWindSpeedSourcesToDisplay(),
+                settings.isShowWindDirectionsSeries(), def.getWindDirectionSourcesToDisplay(),
+                settings.getResolutionInMilliseconds());
+    }
+
+    @Override
+    public WindChartSettings extractContextSettings(WindChartSettings settings) {
+        WindChartSettings def = createDefaultSettings();
+        return new WindChartSettings(def.isShowWindSpeedSeries(), settings.getWindSpeedSourcesToDisplay(),
+                def.isShowWindDirectionsSeries(), settings.getWindDirectionSourcesToDisplay(),
+                def.getResolutionInMilliseconds());
     }
 }

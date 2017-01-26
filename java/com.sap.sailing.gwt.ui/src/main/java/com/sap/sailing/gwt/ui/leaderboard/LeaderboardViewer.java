@@ -52,7 +52,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
         // FIXME: Cleanup with java8 using supplier
-        init(new LeaderboardPanel(this, sailingService, asyncActionsExecutor,
+        init(new LeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), preselectedRace != null,
                 preselectedRace, competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
                 stringMessages, userAgent, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
@@ -66,7 +66,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
         
         final FlowPanel mainPanel = createViewerPanel();
         initWidget(mainPanel);
-        multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, sailingService, asyncActionsExecutor,
+        multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, getComponentContext(), sailingService,
+                asyncActionsExecutor,
                 leaderboardName, chartDetailType,
                 competitorSelectionProvider, timer, stringMessages, errorReporter);
         multiCompetitorChart.setVisible(showCharts); 
@@ -91,7 +92,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
                         public void onSuccess(List<String> result) {
                             if(result.size() == 1) {
                                 String overallLeaderboardName = result.get(0);
-                                overallLeaderboardPanel = new LeaderboardPanel(LeaderboardViewer.this, sailingService,
+                                overallLeaderboardPanel = new LeaderboardPanel(LeaderboardViewer.this,
+                                        getComponentContext(), sailingService,
                                         asyncActionsExecutor,
                                         settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
                                         preselectedRace != null, preselectedRace, competitorSelectionProvider, timer,

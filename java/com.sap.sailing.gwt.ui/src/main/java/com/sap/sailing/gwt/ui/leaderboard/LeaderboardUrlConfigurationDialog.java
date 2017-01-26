@@ -19,15 +19,16 @@ import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class LeaderboardUrlConfigurationDialog extends SettingsDialog<LeaderboardUrlSettings> {
     public LeaderboardUrlConfigurationDialog(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
-        super(new ProxyLeaderboardUrlComponent(null, stringMessages, leaderboard), stringMessages,
+        super(new ProxyLeaderboardUrlComponent(null, null, stringMessages, leaderboard), stringMessages,
                 /* animationEnabled */ false);
     }
 
     public LeaderboardUrlConfigurationDialog(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard, DialogCallback<LeaderboardUrlSettings> callback) {
-        super(new ProxyLeaderboardUrlComponent(null, stringMessages, leaderboard), stringMessages, callback);
+        super(new ProxyLeaderboardUrlComponent(null, null, stringMessages, leaderboard), stringMessages, callback);
     }
     
     private static class ProxyLeaderboardUrlComponent extends AbstractComponent<LeaderboardUrlSettings> {
@@ -35,9 +36,10 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         private final LeaderboardUrlConfigurationDialogComponent settingsDialogComponent;
         private LeaderboardUrlSettings settings;
         
-        public ProxyLeaderboardUrlComponent(Component<?> parent, StringMessages stringMessages,
+        public ProxyLeaderboardUrlComponent(Component<?> parent, ComponentContext<?, ?> context,
+                StringMessages stringMessages,
                 AbstractLeaderboardDTO leaderboard) {
-            super(parent);
+            super(parent, context);
             this.stringMessages = stringMessages;
             this.settingsDialogComponent = new LeaderboardUrlConfigurationDialogComponent(leaderboard, stringMessages);
         }

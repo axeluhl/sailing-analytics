@@ -170,7 +170,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         final TimeRangeWithZoomProvider timeRangeWithZoomProvider = new TimeRangeWithZoomModel();
         // Use a TimePanel to manage wind chart zoom, although the TimePanel itself is not being displayed;
         // let the time panel always return to "live" mode.
-        final TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(null,
+        final TimePanel<TimePanelSettings> timePanel = new TimePanel<TimePanelSettings>(null, null,
                 timer, timeRangeWithZoomProvider, getStringMessages(), /* canReplayWhileLive */ false,
                 /* isScreenLargeEnoughToOfferChartSupport set to true iff wind chart will be displayed */ raceboardPerspectiveSettings.isShowWindChart()) {
             protected boolean isLiveModeToBeMadePossible() {
@@ -197,7 +197,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         } else {
             competitorSelection = createEmptyFilterCompetitorModel(colorProvider); // show no competitors
         }
-        final RaceMap raceMap = new RaceMap(null, new RaceMapLifecycle(getStringMessages()), raceMapSettings,
+        final RaceMap raceMap = new RaceMap(null, null, new RaceMapLifecycle(getStringMessages()), raceMapSettings,
                 sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
                 competitorSelection, getStringMessages(), selectedRaceIdentifier, raceMapResources,
                 /* showHeaderPanel */ false) {
@@ -209,7 +209,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         };
         final WindChart windChart;
         if (raceboardPerspectiveSettings.isShowWindChart()) {
-            windChart = new WindChart(null, new WindChartLifecycle(getStringMessages()), sailingService,
+            windChart = new WindChart(null, null, new WindChartLifecycle(getStringMessages()), sailingService,
                     selectedRaceIdentifier, timer,
                     timeRangeWithZoomProvider, new WindChartSettings(), getStringMessages(),
                     asyncActionsExecutor, /* errorReporter */

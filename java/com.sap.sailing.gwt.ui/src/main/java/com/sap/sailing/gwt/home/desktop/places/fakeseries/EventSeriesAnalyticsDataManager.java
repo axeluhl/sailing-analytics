@@ -25,6 +25,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -58,12 +59,12 @@ public class EventSeriesAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createOverallLeaderboardPanel(Component<?> parent,
+    public LeaderboardPanel createOverallLeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context,
             final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if(overallLeaderboardPanel == null) {
-            overallLeaderboardPanel = new LeaderboardPanel(parent, sailingService, asyncActionsExecutor,
+            overallLeaderboardPanel = new LeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
                     StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
@@ -73,10 +74,12 @@ public class EventSeriesAnalyticsDataManager {
         return overallLeaderboardPanel;
     }
 
-    public MultiCompetitorLeaderboardChart createMultiCompetitorChart(Component<?> parent, String leaderboardName,
+    public MultiCompetitorLeaderboardChart createMultiCompetitorChart(Component<?> parent,
+            ComponentContext<?, ?> context, String leaderboardName,
             DetailType chartDetailType) {
         if(multiCompetitorChart == null) {
-            multiCompetitorChart = new MultiCompetitorLeaderboardChart(parent, sailingService, asyncActionsExecutor,
+            multiCompetitorChart = new MultiCompetitorLeaderboardChart(parent, context, sailingService,
+                    asyncActionsExecutor,
                     leaderboardName, chartDetailType,
                     competitorSelectionProvider, timer, StringMessages.INSTANCE, errorReporter);
             multiCompetitorChart.setVisible(false); 
@@ -84,12 +87,12 @@ public class EventSeriesAnalyticsDataManager {
         return multiCompetitorChart;
     }
 
-    public MultiLeaderboardPanel createMultiLeaderboardPanel(Component<?> parent,
+    public MultiLeaderboardPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context,
             LeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
         if(multiLeaderboardPanel == null) {
-            multiLeaderboardPanel = new MultiLeaderboardPanel(parent, sailingService, metaLeaderboardName,
+            multiLeaderboardPanel = new MultiLeaderboardPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, preselectedRace, errorReporter, StringMessages.INSTANCE,
                     userAgent, showRaceDetails, autoExpandLastRaceColumn);

@@ -51,18 +51,19 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             @Override
             public Widget get() {
-                DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null,
+                DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null,
                         getStringMessages());
-                ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(null, getStringMessages());
+                ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(null, null, getStringMessages());
                 
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
                 BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls =
-                        new BufferingQueryDefinitionProviderWithControls(null, session, getStringMessages(),
+                        new BufferingQueryDefinitionProviderWithControls(null, null, session, getStringMessages(),
                                 dataMiningService, DataMiningEntryPoint.this, settingsControl, resultsPresenter);
                 queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
                 selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
                 
-                QueryRunner queryRunner = new SimpleQueryRunner(null, session, getStringMessages(), dataMiningService,
+                QueryRunner queryRunner = new SimpleQueryRunner(null, null, session, getStringMessages(),
+                        dataMiningService,
                         DataMiningEntryPoint.this, queryDefinitionProviderWithControls, resultsPresenter);
                 queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
                 settingsControl.addSettingsComponent(queryRunner);

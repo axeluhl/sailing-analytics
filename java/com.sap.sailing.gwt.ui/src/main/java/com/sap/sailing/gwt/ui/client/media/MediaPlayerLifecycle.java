@@ -40,4 +40,14 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerSetti
     public boolean hasSettings() {
         return true;
     }
+
+    @Override
+    public MediaPlayerSettings extractGlobalSettings(MediaPlayerSettings settings) {
+        return createDefaultSettings();
+    }
+
+    @Override
+    public MediaPlayerSettings extractContextSettings(MediaPlayerSettings settings) {
+        return createDefaultSettings();
+    }
 }

@@ -22,10 +22,6 @@ public class CompositeSettings extends AbstractSettings implements SettingsMap {
     }
     
     @Override
-    public Map<String, Settings> getSettingsByKey() {
-        return getSettingsPerComponentId();
-    }
-
     public Map<String, Settings> getSettingsPerComponentId() {
         return Collections.unmodifiableMap(settingsPerComponentId);
     }

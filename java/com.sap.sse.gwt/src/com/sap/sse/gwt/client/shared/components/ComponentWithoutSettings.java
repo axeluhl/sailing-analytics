@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.client.shared.components;
 
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 /**
  * An abstract implementation of the component interfaces indented to use for components without the need of having settings.
@@ -9,8 +10,8 @@ import com.sap.sse.common.settings.AbstractSettings;
  */
 public abstract class ComponentWithoutSettings extends AbstractComponent<AbstractSettings> {
 
-    public ComponentWithoutSettings(Component<?> parent) {
-        super(parent);
+    public ComponentWithoutSettings(Component<?> parent, ComponentContext<?, ?> context) {
+        super(parent, context);
     }
 
     @Override

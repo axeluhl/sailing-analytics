@@ -48,7 +48,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     public AbstractPerspectiveComposite(Component<?> parent,
             ComponentContext<PL, PerspectiveCompositeSettings<PS>> componentContext,
             PL lifecycle, PerspectiveCompositeSettings<PS> settings) {
-        super(parent);
+        super(parent, componentContext);
         this.perspectiveLifecycle = lifecycle;
         this.perspectiveOwnSettings = settings.getPerspectiveOwnSettings();
     }

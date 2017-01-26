@@ -16,6 +16,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public abstract class AbstractResultsPresenterWithDataProviders<SettingsType extends Settings> extends AbstractResultsPresenter<Settings> {
     
@@ -23,8 +24,9 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
     private final Map<String, AbstractResultDataProvider<? extends Object>> dataProviders;
     private AbstractResultDataProvider<? extends Object> currentDataProvider;
 
-    public AbstractResultsPresenterWithDataProviders(Component<?> parent, StringMessages stringMessages) {
-        super(parent, stringMessages);
+    public AbstractResultsPresenterWithDataProviders(Component<?> parent, ComponentContext<?, ?> context,
+            StringMessages stringMessages) {
+        super(parent, context, stringMessages);
         numberDataProvider = new NumberDataProvider();
         dataProviders = new HashMap<>();
         AbstractResultDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();

@@ -29,6 +29,7 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSettings> implements FilterSelectionPresenter, FilterSelectionChangedListener,
                                                       DataRetrieverChainDefinitionChangedListener {
@@ -39,10 +40,11 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
     private final HorizontalPanel mainPanel;
     private final VerticalPanel presentationPanel;
     
-    public PlainFilterSelectionPresenter(Component<?> parent, StringMessages stringMessages,
+    public PlainFilterSelectionPresenter(Component<?> parent, ComponentContext<?, ?> context,
+            StringMessages stringMessages,
             DataRetrieverChainDefinitionProvider retrieverChainProvider,
             FilterSelectionProvider filterSelectionProvider) {
-        super(parent);
+        super(parent, context);
         this.filterSelectionProvider = filterSelectionProvider;
         this.filterSelectionProvider.addSelectionChangedListener(this);
         retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);

@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.security.ui.client.UserService;
 
 public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComponentSettings> {
@@ -17,10 +18,11 @@ public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComp
     
     private final SAPSailingHeaderWithAuthentication sapHeader;
     
-    public SAPHeaderComponent(Component<?> parent, SAPHeaderComponentLifecycle componentLifecycle,
+    public SAPHeaderComponent(Component<?> parent, ComponentContext<?, ?> context,
+            SAPHeaderComponentLifecycle componentLifecycle,
             UserService userService, SAPHeaderComponentSettings settings,
             StringMessages stringMessages, boolean startInAutoScreenMode) {
-        super(parent);
+        super(parent, context);
         this.componentLifecycle = componentLifecycle;
         this.settings = settings;
         this.sapHeader = new SAPSailingHeaderWithAuthentication(settings.getTitle());

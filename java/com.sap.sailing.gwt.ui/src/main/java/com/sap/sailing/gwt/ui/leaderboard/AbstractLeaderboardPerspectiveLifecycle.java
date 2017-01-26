@@ -24,32 +24,27 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
 
     @Override
     public LeaderboardPerspectiveOwnSettings clonePerspectiveOwnSettings(LeaderboardPerspectiveOwnSettings settings) {
-        // TODO Auto-generated method stub
         return settings;
     }
 
     @Override
     public SettingsDialogComponent<LeaderboardPerspectiveOwnSettings> getPerspectiveOwnSettingsDialogComponent(
             LeaderboardPerspectiveOwnSettings settings) {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getLocalizedShortName() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getComponentId() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean hasSettings() {
-        // TODO Auto-generated method stub
         return false;
     }
 

@@ -1,5 +1,8 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 
@@ -36,7 +39,7 @@ public interface SettingsStorageManager<S extends Settings> {
      * @see AbstractComponentContextWithSettingsStorage
      * @see GenericSerializableSettings
      */
-    void storeGlobalSettings(S globalSettings);
+    void storeGlobalSettings(JSONObject patchedGlobal);
 
     /**
      * Stores provided context specific settings. Only the delta between default settings and provided settings
@@ -46,7 +49,7 @@ public interface SettingsStorageManager<S extends Settings> {
      * @see AbstractComponentContextWithSettingsStorage
      * @see GenericSerializableSettings
      */
-    void storeContextSpecificSettings(S contextSpecificSettings);
+    void storeContextSpecificSettings(JSONObject contextSpecificSettings);
 
     /**
      * Gets the last error occurred during settings initialisation.
@@ -54,5 +57,13 @@ public interface SettingsStorageManager<S extends Settings> {
      * @return The last error as {@link Throwable}, if an error occurred, otherwise {@code null}
      */
     Throwable getLastError();
-    
+
+    JSONValue settingsToJSON(Settings newSettings);
+
+    String retrieveContextSpecificSettingsJsonFromLocalStorage();
+
+    void retrieveGlobalSettingsJson(AsyncCallback<JSONObject> asyncCallback);
+
+    void retrieveContextSpecificSettingsJson(AsyncCallback<JSONObject> asyncCallback);
+
 }

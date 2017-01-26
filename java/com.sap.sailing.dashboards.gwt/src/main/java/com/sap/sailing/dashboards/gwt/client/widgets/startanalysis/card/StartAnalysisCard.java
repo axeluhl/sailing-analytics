@@ -170,7 +170,8 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        raceMap = new RaceMap(null, new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings, sailingServiceAsync,
+        raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings,
+                sailingServiceAsync,
                 asyncActionsExecutor, null, timer, competitorSelectionModel, 
                 StringMessages.INSTANCE, startAnalysisDTO.regattaAndRaceIdentifier,
                 raceMapResources, /* showHeaderPanel */ true);

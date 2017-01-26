@@ -54,7 +54,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         /**
          * Cleanup one java8 suppliers can be used
          */
-        init(new LeaderboardPanel(this, sailingService, asyncActionsExecutor,
+        init(new LeaderboardPanel(this, componentContext, sailingService, asyncActionsExecutor,
                         settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
                         preselectedRace != null, preselectedRace, competitorSelectionModel, timer,
                         leaderboardGroupName, metaLeaderboardName, errorReporter, stringMessages, userAgent,
@@ -70,13 +70,15 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         initWidget(mainPanel);
         final Label overallStandingsLabel = new Label(stringMessages.overallStandings());
         overallStandingsLabel.setStyleName("leaderboardHeading");
-        multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, sailingService, asyncActionsExecutor,
+        multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, componentContext, sailingService,
+                asyncActionsExecutor,
                 metaLeaderboardName,
                 chartDetailType, competitorSelectionProvider, timer, stringMessages, errorReporter);
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);
-        multiLeaderboardPanel = new MultiLeaderboardPanel(this, sailingService, metaLeaderboardName,
+        multiLeaderboardPanel = new MultiLeaderboardPanel(this, componentContext, sailingService,
+                metaLeaderboardName,
                 asyncActionsExecutor, timer, false /* isEmbedded */,
                 preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
                 userAgent, perspectiveSettings.isShowRaceDetails(), perspectiveSettings.isAutoExpandLastRaceColumn());

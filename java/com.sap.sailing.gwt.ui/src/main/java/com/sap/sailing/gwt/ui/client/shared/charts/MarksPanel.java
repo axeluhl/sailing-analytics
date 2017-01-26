@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
     private static final LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
@@ -33,8 +34,9 @@ public class MarksPanel extends AbstractCompositeComponent<AbstractSettings> {
     private final ListDataProvider<MarkDTO> markDataProvider;    
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
-    public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
-        super(parent);
+    public MarksPanel(final EditMarkPositionPanel parent, ComponentContext<?, ?> context,
+            final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
+        super(parent, context);
         this.markDataProvider = markDataProvider;
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
         markTable.setStyleName("EditMarkPositionMarkTable");

@@ -20,12 +20,12 @@ import com.sap.sse.common.settings.serializer.AbstractSettingsToJsonSerializer;
 public class SettingsToJsonSerializerGWT extends AbstractSettingsToJsonSerializer<JSONObject, JSONArray> {
     
     @Override
-    protected String jsonObjectToString(JSONObject jsonObject) {
+    public String jsonObjectToString(JSONObject jsonObject) {
         return jsonObject.toString();
     }
     
     @Override
-    protected JSONObject parseStringToJsonObject(String jsonString) {
+    public JSONObject parseStringToJsonObject(String jsonString) {
         JSONValue jsonValue = JSONParser.parseStrict(jsonString);
         if (jsonValue != null) {
             JSONObject jsonObject = jsonValue.isObject();
