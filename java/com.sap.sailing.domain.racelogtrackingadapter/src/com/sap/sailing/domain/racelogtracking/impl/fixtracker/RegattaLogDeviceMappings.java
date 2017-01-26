@@ -126,7 +126,7 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         LockUtil.executeWithWriteLock(knownRegattaLogsLock, () -> {
             knownRegattaLogs.forEach((log) -> log.removeListener(regattaLogEventVisitor));
         });
-        }
+    }
     
     protected void updateMappings() {
         try {
