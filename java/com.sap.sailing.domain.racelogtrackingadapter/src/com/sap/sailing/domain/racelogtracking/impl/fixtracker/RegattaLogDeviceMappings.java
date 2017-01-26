@@ -283,7 +283,9 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
                         mappingChangedInternal(oldMapping, newMapping);
                     }
                 }
-                mappingsAddedInternal(addedMappings, item);
+                if (!addedMappings.isEmpty()) {
+                    mappingsAddedInternal(addedMappings, item);
+                }
                 // oldMappings now still contains those mappings that were not entirely substituted by the new mappings
                 oldMappings.forEach(this::mappingRemovedInternal);
             }
