@@ -263,7 +263,7 @@ public class MarkPassingCalculator {
                             logger.fine("MPC for "+raceName+" received "+ allNewFixInsertions.size()+" new updates.");
                             for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
                                 if (isEndMarker(fixInsertion)) {
-                                    logger.info("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
+                                    logger.fine("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
                                     finished = true;
                                     break;
                                 } else {
@@ -321,7 +321,7 @@ public class MarkPassingCalculator {
                     }
                 }
             } finally {
-                logger.info("MarkPassingCalculator Listen thread terminating for race "+raceName);
+                logger.fine("MarkPassingCalculator Listen thread terminating for race "+raceName);
             }
         }
 
