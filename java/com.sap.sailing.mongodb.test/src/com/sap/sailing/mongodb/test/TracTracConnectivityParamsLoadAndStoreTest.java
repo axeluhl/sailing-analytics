@@ -3,9 +3,7 @@ package com.sap.sailing.mongodb.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashSet;
@@ -29,7 +27,7 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
     }
 
     @Test
-    public void testStoreAndLoadSimpleTracTracParams() throws MalformedURLException, URISyntaxException {
+    public void testStoreAndLoadSimpleTracTracParams() throws Exception {
         // set up
         final boolean trackWind = true;
         final boolean correctWindDirectionByMagneticDeclination = true;

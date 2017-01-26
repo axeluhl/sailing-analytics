@@ -1432,7 +1432,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
                 LockUtil.lockForWrite(raceTrackersByRegattaLock);
                 try {
-                    raceTrackersByID.put(trackerID, tracker);
+                    raceTrackersByID.put(tracker.getID(), tracker);
                     Set<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
                     if (trackers == null) {
                         trackers = Collections.newSetFromMap(new ConcurrentHashMap<RaceTracker, Boolean>());
