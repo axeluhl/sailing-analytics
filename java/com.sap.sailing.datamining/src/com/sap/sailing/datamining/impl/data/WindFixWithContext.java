@@ -3,18 +3,17 @@ package com.sap.sailing.datamining.impl.data;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.data.HasWindFixContext;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.WindSourceType;
 
 public class WindFixWithContext implements HasWindFixContext {
     private static final long serialVersionUID = -4537126043228674949L;
 
     private final HasTrackedRaceContext trackedRaceContext;
     
-    private final WindSourceType windSourceType;
+    private final String windSourceType;
     
     private final Wind wind;
 
-    public WindFixWithContext(HasTrackedRaceContext trackedRaceContext, Wind wind, WindSourceType windSourceType) {
+    public WindFixWithContext(HasTrackedRaceContext trackedRaceContext, Wind wind, String windSourceType) {
         this.trackedRaceContext = trackedRaceContext;
         this.wind = wind;
         this.windSourceType = windSourceType;
@@ -42,7 +41,7 @@ public class WindFixWithContext implements HasWindFixContext {
 
     @Override
     public String getWindSourceType() {
-        return windSourceType.name();
+        return windSourceType;
     }
 
     @Override

@@ -13,6 +13,7 @@ import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.data.HasWindFixContext;
+import com.sap.sailing.datamining.data.HasWindTrackContext;
 import com.sap.sailing.datamining.impl.components.CompetitorOfRaceInLeaderboardRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.GPSFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.LeaderboardGroupRetrievalProcessor;
@@ -24,6 +25,7 @@ import com.sap.sailing.datamining.impl.components.TrackedLegOfCompetitorRetrieva
 import com.sap.sailing.datamining.impl.components.TrackedLegRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.TrackedRaceRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.WindFixRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.WindTrackRetrievalProcessor;
 import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
@@ -73,7 +75,8 @@ public class SailingDataRetrievalChainDefinitions {
 
         final DataRetrieverChainDefinition<RacingEventService, HasWindFixContext> windFixRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 trackedRaceRetrieverChainDefinition, HasWindFixContext.class, "WindFixSailingDomainRetrieverChain");
-        windFixRetrieverChainDefinition.endWith(TrackedRaceRetrievalProcessor.class, WindFixRetrievalProcessor.class,
+        windFixRetrieverChainDefinition.addAfter(TrackedRaceRetrievalProcessor.class, WindTrackRetrievalProcessor.class, HasWindTrackContext.class, "WindTrack");
+        windFixRetrieverChainDefinition.endWith(WindTrackRetrievalProcessor.class, WindFixRetrievalProcessor.class,
                 HasWindFixContext.class, "WindFix");
         dataRetrieverChainDefinitions.add(windFixRetrieverChainDefinition);
 

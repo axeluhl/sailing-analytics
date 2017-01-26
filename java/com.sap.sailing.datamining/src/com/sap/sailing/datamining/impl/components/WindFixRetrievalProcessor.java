@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.data.HasWindFixContext;
+import com.sap.sailing.datamining.data.HasWindTrackContext;
 import com.sap.sailing.datamining.impl.data.WindFixWithContext;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.datamining.components.Processor;
@@ -21,28 +20,23 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
  * @author Axel Uhl (d043530)
  *
  */
-public class WindFixRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedRaceContext, HasWindFixContext> {
+public class WindFixRetrievalProcessor extends AbstractRetrievalProcessor<HasWindTrackContext, HasWindFixContext> {
 
     public WindFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasWindFixContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasTrackedRaceContext.class, HasWindFixContext.class, executor, resultReceivers, retrievalLevel);
+        super(HasWindTrackContext.class, HasWindFixContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override
-    protected Iterable<HasWindFixContext> retrieveData(HasTrackedRaceContext element) {
+    protected Iterable<HasWindFixContext> retrieveData(HasWindTrackContext element) {
         Collection<HasWindFixContext> windFixesWithContext = new ArrayList<>();
-        final TrackedRace trackedRace = element.getTrackedRace();
-        for (final WindSource windSource : trackedRace.getWindSources()) {
-            if (!trackedRace.getWindSourcesToExclude().contains(windSource)) {
-                final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
-                windTrack.lockForRead();
-                try {
-                    for (final Wind wind : windTrack.getFixes()) {
-                        windFixesWithContext.add(new WindFixWithContext(element, wind, windSource.getType()));
-                    }
-                } finally {
-                    windTrack.unlockAfterRead();
-                }
+        final WindTrack windTrack = element.getWindTrack();
+        windTrack.lockForRead();
+        try {
+            for (final Wind wind : windTrack.getFixes()) {
+                windFixesWithContext.add(new WindFixWithContext(element.getTrackedRaceContext(), wind, element.getWindSourceType()));
             }
+        } finally {
+            windTrack.unlockAfterRead();
         }
         return windFixesWithContext;
     }
