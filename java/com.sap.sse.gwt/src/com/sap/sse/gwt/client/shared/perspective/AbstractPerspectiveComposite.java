@@ -33,7 +33,10 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
      * @param childComponent The component to be added as a child to this perspective
      */
     protected void addChildComponent(Component<? extends Settings> childComponent) {
-        childComponents.put(childComponent.getId(), childComponent);
+        Component<? extends Settings> old = childComponents.put(childComponent.getId(), childComponent);
+        if (old != null) {
+            throw new IllegalStateException("Child with same id is allready added");
+        }
     }
     
     @Override

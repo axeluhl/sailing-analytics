@@ -76,6 +76,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
 
         mainPanel.add(getLeaderboardPanel());
         mainPanel.add(multiCompetitorChart);
+        addChildComponent(multiCompetitorChart);
 
         addComponentToNavigationMenu(getLeaderboardPanel(), false, null, /* hasSettingsWhenComponentIsInvisible*/ true);
         addComponentToNavigationMenu(multiCompetitorChart, true, null,  /* hasSettingsWhenComponentIsInvisible*/ true);

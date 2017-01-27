@@ -179,7 +179,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             final LeaderboardPerspectiveLifecycle lifecycle = new LeaderboardPerspectiveLifecycle(getStringMessages());
             final LeaderboardComponentContext componentContext = new LeaderboardComponentContext(lifecycle,
                     new UserSettingsStorageManager<>(getUserService(),
-                            UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint", "Meta"),
+                            UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint", "Single"),
                             leaderboardContextSettings.getRegattaName()));
             componentContext.initInitialSettings(new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                 @Override
