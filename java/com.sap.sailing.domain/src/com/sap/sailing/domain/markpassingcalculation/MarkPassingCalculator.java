@@ -227,7 +227,7 @@ public class MarkPassingCalculator {
         @Override
         public void run() {
             try {
-                logger.info("MarkPassingCalculator is listening on race "+raceName);
+                logger.fine("MarkPassingCalculator is listening on race "+raceName);
                 boolean finished = false;
                 final Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
                 final Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
