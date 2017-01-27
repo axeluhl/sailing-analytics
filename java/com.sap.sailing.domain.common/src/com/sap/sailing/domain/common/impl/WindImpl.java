@@ -32,13 +32,16 @@ public class WindImpl extends KnotSpeedWithBearingImpl implements Wind {
         return getBearing().reverse();
     }
     
+    public static int hashCode(double latDeg, double lngDeg, long timePointAsMillis) {
+        return (int) (31.*timePointAsMillis*latDeg*lngDeg);
+        
+    }
+    /**
+     * Wind hash is determined based on time point and position only to speed this up a little.
+     */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((position == null) ? 0 : position.hashCode());
-        result = prime * result + ((timepoint == null) ? 0 : timepoint.hashCode());
-        return result;
+        return hashCode(position.getLatDeg(), position.getLngDeg(), timepoint==null?0:timepoint.asMillis());
     }
 
     @Override
@@ -47,18 +50,18 @@ public class WindImpl extends KnotSpeedWithBearingImpl implements Wind {
             return true;
         if (!super.equals(obj))
             return false;
-        if (getClass() != obj.getClass())
+        if (!(obj instanceof Wind))
             return false;
-        WindImpl other = (WindImpl) obj;
+        Wind other = (Wind) obj;
         if (position == null) {
-            if (other.position != null)
+            if (other.getPosition() != null)
                 return false;
-        } else if (!position.equals(other.position))
+        } else if (!position.equals(other.getPosition()))
             return false;
         if (timepoint == null) {
-            if (other.timepoint != null)
+            if (other.getTimePoint() != null)
                 return false;
-        } else if (!timepoint.equals(other.timepoint))
+        } else if (!timepoint.equals(other.getTimePoint()))
             return false;
         return true;
     }
