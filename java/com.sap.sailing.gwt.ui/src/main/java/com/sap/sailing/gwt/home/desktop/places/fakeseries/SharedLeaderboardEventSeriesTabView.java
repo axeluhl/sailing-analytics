@@ -5,9 +5,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.desktop.utils.EventParamUtils;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
+import com.sap.sse.gwt.client.shared.perspective.SimpleComponentContext;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
@@ -27,7 +30,10 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
                 .getParameterMap());
         final RegattaAndRaceIdentifier preselectedRace = EventParamUtils
                 .getPreselectedRace(Window.Location.getParameterMap());
-        LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createOverallLeaderboardPanel(null, null,
+
+        LeaderboardPanelLifecycle lifeCycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
+        LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createOverallLeaderboardPanel(null,
+                new SimpleComponentContext<>(lifeCycle),
                 leaderboardSettings,
                 preselectedRace,
                 "leaderboardGroupName",

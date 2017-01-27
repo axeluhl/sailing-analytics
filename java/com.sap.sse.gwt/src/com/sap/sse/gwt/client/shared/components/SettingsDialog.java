@@ -77,7 +77,10 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
                 });
         this.settingsDialogComponent = dialogComponent;
 
-        initMakeDefaultButtons(component, stringMessages);
+        if (component.getComponentContext() != null
+                && component.getComponentContext().hasMakeCustomDefaultSettingsSupport(component)) {
+            initMakeDefaultButtons(component, stringMessages);
+        }
     }
 
     @Override

@@ -154,7 +154,10 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         
         if (leaderboardType.isMetaLeaderboard()) {
             final MetaLeaderboardPerspectiveLifecycle lifecycle = new MetaLeaderboardPerspectiveLifecycle(getStringMessages());
-            final MetaLeaderboardComponentContext componentContext = new MetaLeaderboardComponentContext(lifecycle, new UserSettingsStorageManager<>(getUserService(), "TODO1", "TODO2"));
+            final MetaLeaderboardComponentContext componentContext = new MetaLeaderboardComponentContext(lifecycle,
+                    new UserSettingsStorageManager<>(getUserService(),
+                            UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint", "Meta"),
+                            leaderboardContextSettings.getRegattaName()));
             componentContext.initInitialSettings(new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                 @Override
                 public void onSuccess(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
@@ -174,7 +177,10 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             });
         } else {
             final LeaderboardPerspectiveLifecycle lifecycle = new LeaderboardPerspectiveLifecycle(getStringMessages());
-            final LeaderboardComponentContext componentContext = new LeaderboardComponentContext(lifecycle, new UserSettingsStorageManager<>(getUserService(), "TODO3", "TODO4"));
+            final LeaderboardComponentContext componentContext = new LeaderboardComponentContext(lifecycle,
+                    new UserSettingsStorageManager<>(getUserService(),
+                            UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint", "Meta"),
+                            leaderboardContextSettings.getRegattaName()));
             componentContext.initInitialSettings(new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                 @Override
                 public void onSuccess(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {

@@ -20,7 +20,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  *            The {@link Settings} type of the settings of the root component/perspective containing all the settings
  *            for itself and its subcomponents
  */
-public abstract class AbstractComponentContext<L extends ComponentLifecycle<S, ?>, S extends Settings>
+public class SimpleComponentContext<L extends ComponentLifecycle<S, ?>, S extends Settings>
         implements ComponentContext<L, S> {
 
     protected final L rootLifecycle;
@@ -30,7 +30,7 @@ public abstract class AbstractComponentContext<L extends ComponentLifecycle<S, ?
      * @param rootLifecycle
      *            The {@link ComponentLifecycle} of the root component/perspective
      */
-    public AbstractComponentContext(L rootLifecycle) {
+    public SimpleComponentContext(L rootLifecycle) {
         this.rootLifecycle = rootLifecycle;
     }
 

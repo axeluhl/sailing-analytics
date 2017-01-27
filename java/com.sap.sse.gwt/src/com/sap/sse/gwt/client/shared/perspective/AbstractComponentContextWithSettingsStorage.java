@@ -41,7 +41,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  *            for itself and its subcomponents
  */
 public abstract class AbstractComponentContextWithSettingsStorage<L extends ComponentLifecycle<S, ?>, S extends Settings>
-        extends AbstractComponentContext<L, S> {
+        extends SimpleComponentContext<L, S> {
 
     /**
      * Manages the persistence layer of settings.
