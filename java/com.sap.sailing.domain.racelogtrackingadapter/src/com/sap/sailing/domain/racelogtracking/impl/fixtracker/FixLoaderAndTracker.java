@@ -390,6 +390,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         }
                         updateCallback.run();
                     }
+                } catch(Throwable t) {
+                    logger.log(Level.SEVERE, "Error while updating device mappings and loading fixes for race: " + trackedRace.getRaceIdentifier(), t);
                 } finally {
                     try {
                         synchronized (FixLoaderAndTracker.this) {

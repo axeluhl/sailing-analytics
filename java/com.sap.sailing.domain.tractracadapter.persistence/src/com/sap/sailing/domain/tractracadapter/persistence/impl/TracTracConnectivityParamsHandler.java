@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.persistence.impl;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +72,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
     }
 
     @Override
-    public RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws MalformedURLException, URISyntaxException {
+    public RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws Exception {
         return new RaceTrackingConnectivityParametersImpl(
                 new URL(map.get(PARAM_URL).toString()),
                 map.get(LIVE_URI) == null ? null : new URI(map.get(LIVE_URI).toString()),
