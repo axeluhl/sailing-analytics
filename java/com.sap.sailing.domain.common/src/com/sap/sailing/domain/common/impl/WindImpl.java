@@ -33,6 +33,37 @@ public class WindImpl extends KnotSpeedWithBearingImpl implements Wind {
     }
     
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((position == null) ? 0 : position.hashCode());
+        result = prime * result + ((timepoint == null) ? 0 : timepoint.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        WindImpl other = (WindImpl) obj;
+        if (position == null) {
+            if (other.position != null)
+                return false;
+        } else if (!position.equals(other.position))
+            return false;
+        if (timepoint == null) {
+            if (other.timepoint != null)
+                return false;
+        } else if (!timepoint.equals(other.timepoint))
+            return false;
+        return true;
+    }
+
+    @Override
     public String toString() {
         return ""+getTimePoint()+"@"+getPosition()+": "+getKnots()+"kn from "+getFrom();
     }
