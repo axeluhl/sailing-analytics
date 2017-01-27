@@ -97,6 +97,7 @@
         <module>com.sap.sailing.competitorimport</module>
         <module>com.sap.sailing.domain</module>
         <module>com.sap.sailing.geocoding</module>
+        <module>com.sap.sailing.datamining.provider</module>
         <module>com.sap.sailing.datamining</module>
         <module>com.sap.sailing.datamining.shared</module>
         <module>com.sap.sailing.domain.persistence</module>
