@@ -25,18 +25,20 @@ public interface RaceTrackingConnectivityParameters {
      * {@link Regatta} is provided, this will first look up a regatta for the race from
      * {@link TrackedRegattaRegistry#getRememberedRegattaForRace(java.io.Serializable)} and if not found will look up or
      * create a default regatta based on race data such as an event name and the boat class.
+     * @param timeoutInMilliseconds TODO
      */
     RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver) throws Exception;
+            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws Exception;
     
     /**
      * Starts a {@link RaceTracker}, associating the resulting races with the {@link Regatta} passed as argument
      * instead of using the tracker's domain factory to obtain a default {@link Regatta} object for the tracking
      * parameters. This is particularly useful if a predefined regatta with {@link Series} and {@link Fleet}s
      * is to be used.
+     * @param timeoutInMilliseconds TODO
      */
     RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver) throws Exception;
+            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws Exception;
     
     /**
      * Deliver an ID object equal to that of the {@link RaceTracker#getID()} delivered by the {@link RaceTracker}

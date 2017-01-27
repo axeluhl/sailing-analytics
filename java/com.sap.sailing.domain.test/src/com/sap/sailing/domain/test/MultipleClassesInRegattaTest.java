@@ -17,6 +17,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -55,25 +56,25 @@ public class MultipleClassesInRegattaTest {
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
                         mock(RaceLogResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
-                                tracTracUsername, tracTracPassword, "cce678c8-97e6-11e0-9aed-406186cbf87c"));
+                                tracTracUsername, tracTracPassword, "cce678c8-97e6-11e0-9aed-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         kiwotest2 = domainFactory
                 .createRaceTracker(
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
                         mock(RaceLogResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
-                                tracTracUsername, tracTracPassword, "11290bd6-97e7-11e0-9aed-406186cbf87c"));
+                                tracTracUsername, tracTracPassword, "11290bd6-97e7-11e0-9aed-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         kiwotest3 = domainFactory
                 .createRaceTracker(
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
                         mock(RaceLogResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
-                                tracTracUsername, tracTracPassword, "39635b24-97e7-11e0-9aed-406186cbf87c"));
+                                tracTracUsername, tracTracPassword, "39635b24-97e7-11e0-9aed-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
         weym470may112014_2 = domainFactory
                 .createRaceTracker(
                         EmptyRaceLogStore.INSTANCE,
                         EmptyRegattaLogStore.INSTANCE, EmptyWindStore.INSTANCE, new DummyTrackedRegattaRegistry(),
                         mock(RaceLogResolver.class), createConnectivityParams(httpAndHost, liveURI, storedURI, courseDesignUpdateURI,
-                                tracTracUsername, tracTracPassword, "04498426-7dfd-11e0-8236-406186cbf87c"));
+                                tracTracUsername, tracTracPassword, "04498426-7dfd-11e0-8236-406186cbf87c"), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
 
         assertEquals("STG", kiwotest1.getRegatta().getBoatClass().getName());
         assertEquals("5O5", kiwotest2.getRegatta().getBoatClass().getName());

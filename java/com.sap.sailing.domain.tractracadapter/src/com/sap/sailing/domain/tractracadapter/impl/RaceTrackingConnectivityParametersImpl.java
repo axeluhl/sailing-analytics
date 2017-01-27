@@ -108,17 +108,17 @@ public class RaceTrackingConnectivityParametersImpl extends AbstractRaceTracking
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver) throws MalformedURLException, FileNotFoundException, URISyntaxException,
+            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws MalformedURLException, FileNotFoundException, URISyntaxException,
             CreateModelException, SubscriberInitializationException {
-        RaceTracker tracker = domainFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry, raceLogResolver, this);
+        RaceTracker tracker = domainFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry, raceLogResolver, this, timeoutInMilliseconds);
         return tracker;
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, RaceLogResolver raceLogResolver) throws Exception {
+            WindStore windStore, RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws Exception {
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, raceLogStore, regattaLogStore, windStore,
-                trackedRegattaRegistry, raceLogResolver, this);
+                trackedRegattaRegistry, raceLogResolver, this, timeoutInMilliseconds);
         return tracker;
     }
 
