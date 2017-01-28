@@ -42,7 +42,7 @@ public class ParallelGroupedDataCountDistinctAggregationProcessor
     
     public ParallelGroupedDataCountDistinctAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Number>, ?>> resultReceivers) {
-        super(executor, resultReceivers, "Count");
+        super(executor, resultReceivers, "CountDistinct");
         countMap = new ConcurrentHashMap<>();
     }
     
