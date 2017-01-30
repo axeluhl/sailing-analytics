@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.racelog.impl;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
@@ -20,9 +19,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.WithID;
 
 /**
  * At the moment, the timerange covered by the fixes for a device, and the number of
@@ -116,29 +113,4 @@ public class GPSFixStoreImpl implements GPSFixStore {
             }
         }
     }
-
-    @Override
-    public void loadTrack(DynamicGPSFixTrack<WithID, ?> track, DeviceMapping<WithID> mapping)
-            throws NoCorrespondingServiceRegisteredException, TransformationException {
-        loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), false /* toIsInlusive */);
-    }
-    
-    @Override
-    public TimeRange getTimeRangeCoveredByFixes(DeviceIdentifier device)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        return sensorFixStore.getTimeRangeCoveredByFixes(device);
-    }
-    
-    @Override
-    public long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException {
-        return sensorFixStore.getNumberOfFixes(device);
-    }
-    
-    @Override
-    public <FixT extends GPSFix> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier,
-            TimePoint start, TimePoint end, boolean endIsInclusive)
-            throws NoCorrespondingServiceRegisteredException, TransformationException {
-        sensorFixStore.loadFixes(consumer, deviceIdentifier, start, end, endIsInclusive);
-    }
-
 }
