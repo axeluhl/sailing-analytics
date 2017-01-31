@@ -146,6 +146,19 @@ public class Util {
         }
     }
     
+    /**
+     * To be replaced with java.util.function.Supplier when we can consistently use Java 8.
+     */
+    public interface Provider<T> {
+        T get();
+    }
+    
+    /**
+     * To be replaced with java.util.function.Function when we can consistently use Java 8.
+     */
+    public interface Function<I, O> {
+        O get(I in);
+    }
 
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
@@ -657,5 +670,31 @@ public class Util {
             }
         });
         return sortedCollection;
+    }
+    
+    /**
+     * Groups the given values by a key. The key is being extracted from the values by using the given {@link Function}. Inner
+     * Collections of the resulting Map are created using the given {@link Provider} instance.
+     * <br>
+     * Can be replaced with Java 8 Stream API in the future.
+     * 
+     * @param values
+     * @param mappingFunction
+     * @param newCollectionProvider
+     * @return
+     */
+    public static <K, V> Map<K, Iterable<V>> group(Iterable<V> values, Function<V, K> mappingFunction,
+            Provider<? extends Collection<V>> newCollectionProvider) {
+        final Map<K, Iterable<V>> result = new HashMap<>();
+        for (V value : values) {
+            final K key = mappingFunction.get(value);
+            Collection<V> groupValues = (Collection<V>) result.get(key);
+            if (groupValues == null) {
+                groupValues = newCollectionProvider.get();
+                result.put(key, groupValues);
+            }
+            groupValues.add(value);
+        }
+        return result;
     }
 }
