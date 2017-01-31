@@ -5,13 +5,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+
+import org.eclipse.jetty.util.ConcurrentHashSet;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
+import com.sap.sse.datamining.impl.components.ProcessorInstructionPriority;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
 import com.sap.sse.datamining.shared.GroupKey;
 
@@ -33,18 +38,38 @@ public class ParallelGroupedDataCountDistinctAggregationProcessor
         return DEFINITION;
     }
 
-    private Map<GroupKey, Set<Object>> countMap;
+    private ConcurrentHashMap<GroupKey, Set<Object>> countMap;
     
     public ParallelGroupedDataCountDistinctAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Number>, ?>> resultReceivers) {
-        super(executor, resultReceivers, "Count");
-        countMap = new HashMap<>();
+        super(executor, resultReceivers, "CountDistinct");
+        countMap = new ConcurrentHashMap<>();
     }
     
+    /**
+     * We don't need synchronization here because we're using a {@link ConcurrentHashSet} and a {@link ConcurrentHashMap} to
+     * aggregate the results.
+     */
+    @Override
+    protected AbstractProcessorInstruction<Map<GroupKey, Number>> createInstruction(GroupedDataEntry<Object> element) {
+        return new AbstractProcessorInstruction<Map<GroupKey, Number>>(this, ProcessorInstructionPriority.Aggregation) {
+            @Override
+            public Map<GroupKey, Number> computeResult() {
+                handleElement(element);
+                return createInvalidResult();
+            }
+        };
+    }
+
     @Override
     protected void handleElement(GroupedDataEntry<Object> element) {
         GroupKey key = element.getKey();
-        Util.addToValueSet(countMap, key, element.getDataEntry());
+        Util.addToValueSet(countMap, key, element.getDataEntry(), new Util.ValueSetConstructor<Object>() {
+            @Override
+            public Set<Object> createSet() {
+                return new ConcurrentHashSet<Object>();
+            }
+        });
     }
     
     @Override

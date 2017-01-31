@@ -19,6 +19,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
@@ -67,7 +68,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                                                 /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l,
                                                 /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings*/
                                                 false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, domainFactory,
-                                                "tracTest", "tracTest", "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ true, /* preferReplayIfAvailable */ false));
+                                                "tracTest", "tracTest", "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ true, /* preferReplayIfAvailable */ false), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
 
         Iterable<Competitor> competitors = fourtyninerYellow_2.getRaceHandle().getRace().getCompetitors();
         for (Competitor competitor : competitors) {

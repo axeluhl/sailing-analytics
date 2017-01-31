@@ -36,6 +36,7 @@ import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -242,13 +243,17 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      *            available but loses track of the wind, e.g., during server restarts.
      * @param trackedRegattaRegistry
      *            used to create the {@link TrackedRegatta} for the domain event
+     * @param timeoutInMilliseconds
+     *            use -1 to wait for the race and all its data forever; otherwise specify the milliseconds after which
+     *            you expect things to have loaded; see also
+     *            {@link RaceTracker#TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS}.
      */
     TracTracRaceTrackerImpl(DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams)
+            RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
         this(/* regatta */ null, domainFactory, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
-                raceLogResolver, connectivityParams);
+                raceLogResolver, connectivityParams, timeoutInMilliseconds);
     }
     
     /**
@@ -260,10 +265,14 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
      * @param regatta
      *            if <code>null</code>, then <code>domainFactory.getOrCreateRegatta(tractracEvent)</code> will be used
      *            to obtain a default regatta
+     * @param timeoutInMilliseconds
+     *            use -1 to wait for the race and all its data forever; otherwise specify the milliseconds after which
+     *            you expect things to have loaded; see also
+     *            {@link RaceTracker#TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS}.
      */
     TracTracRaceTrackerImpl(final Regatta regatta, DomainFactory domainFactory, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams)
+            RaceLogResolver raceLogResolver, RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
             throws URISyntaxException, MalformedURLException, FileNotFoundException, SubscriberInitializationException {
         super(connectivityParams);
         final URL paramURL = connectivityParams.getParamURL();
@@ -372,7 +381,8 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
         receivers = new HashSet<Receiver>();
         for (Receiver receiver : domainFactory.getUpdateReceivers(getTrackedRegatta(), delayToLiveInMillis,
                 simulator, windStore, this, trackedRegattaRegistry, raceLogResolver, tractracRace,
-                tracTracUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber, useInternalMarkPassingAlgorithm)) {
+                tracTracUpdateURI, tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
+                useInternalMarkPassingAlgorithm, timeoutInMilliseconds)) {
             receivers.add(receiver);
         }
         addListenersForStoredDataAndStartController(receivers);

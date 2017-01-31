@@ -37,6 +37,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactWindImpl;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -111,6 +113,23 @@ public class WindTest {
         } finally {
             track.unlockAfterRead();
         }
+    }
+    
+    @Test
+    public void testWindEquality() {
+        Position p1 = new DegreePosition(1, 2);
+        Position p2 = new DegreePosition(4, 5);
+        TimePoint t1 = MillisecondsTimePoint.now();
+        TimePoint t2 = t1.plus(5);
+        SpeedWithBearing s1 = new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(3));
+        SpeedWithBearing s2 = new KnotSpeedWithBearingImpl(22, new DegreeBearingImpl(123));
+        Wind w1 = new WindImpl(p1, t1, s1);
+        Wind w2 = new CompactWindImpl(w1);
+        assertEquals(w1, w2);
+        assertEquals(w1.hashCode(), w2.hashCode());
+        Wind w3 = new WindImpl(p2, t2, s2);
+        assertFalse(w1.equals(w3));
+        assertFalse(w2.equals(w3));
     }
     
     @Test
