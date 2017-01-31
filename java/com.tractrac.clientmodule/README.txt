@@ -17,6 +17,33 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.4.0 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds some new features.
+These features add methods to the API breaking the backward compatibility. These changes are:
+
+ - The IRacesListener interface implements a new method dataSourceChanged. If
+ your app implements this interface, you have to implement this extra method.
+
+This version provides a new JavaDoc version.
+
+Release date: 31/01/2017
+Build number: 13339
+
+1) Features
+
+ - Adding the method IRace.getDataSource that returns the datasource used by the race
+ to load data (Requested by Axel Ulh, 25/01/2017)
+ - Adding the method IRacesListener.dataSourceChanged that sends a notification
+ every time that the datasource of a race changes (Requested by Axel Ulh, 25/01/2017)
+
+2) Bugs
+
+ - Call IRaceSubscriber.unsubscribePositions() after IRaceSubscriber.start() generates a NullPointerException
+ (Reported by Jerome Soussens, 24/01/2017)
+
+
+********************************************
 ************* TracAPI 3.3.1 ****************
 ********************************************
 This is a final version. It fixes bugs in the implementation and it adds some new features.
