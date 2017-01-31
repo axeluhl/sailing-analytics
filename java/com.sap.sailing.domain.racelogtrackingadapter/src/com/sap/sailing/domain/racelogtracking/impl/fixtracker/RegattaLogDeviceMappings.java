@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
@@ -27,9 +27,13 @@ import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.tracking.DynamicTrack;
+import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.WithID;
+import com.sap.sse.common.impl.MultiTimeRangeImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
@@ -208,6 +212,36 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         }
     }
     
+    public void forEachItemAndCoveredTimeRanges(final BiConsumer<ItemT, Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange>> consumer) {
+        HashMap<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> allMappings = LockUtil.executeWithReadLockAndResult(mappingsLock, () -> new HashMap<>(mappings));
+        allMappings.forEach((item, mappings) -> {
+            final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> coveredTimeRanges = calculateCoveredTimeRanges(mappings);
+            consumer.accept(item, coveredTimeRanges);
+        });
+    }
+    
+    public Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> getCoveredTimeRangesForItem(ItemT item) {
+        final List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForItem = LockUtil.executeWithReadLockAndResult(mappingsLock, () -> mappings.get(item));
+        final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> coveredTimeRanges = calculateCoveredTimeRanges(mappingsForItem);
+        return coveredTimeRanges;
+    }
+
+    private Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> calculateCoveredTimeRanges(
+            final List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForItem) {
+        final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> coveredTimeRanges = new HashMap<>();
+        if(mappingsForItem != null) {
+            Map<Pair<DeviceIdentifier, Class<?>>, Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> groupedMappings = groupMappingsByDeviceIdAndMappingType(mappingsForItem);
+            groupedMappings.entrySet().forEach(entry -> {
+                Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForDeviceIdAndMappingType = entry.getValue();
+                final MultiTimeRange coveredTimeRange = getCoveredTimeRange(mappingsForDeviceIdAndMappingType);
+                if(!coveredTimeRange.isEmpty()) {
+                    coveredTimeRanges.put(Util.get(mappingsForDeviceIdAndMappingType, 0).getRegattaLogEvent(), coveredTimeRange);
+                }
+            });
+        }
+        return coveredTimeRanges;
+    }
+    
     /**
      * To be implemented by subclasses to calculate the current {@link DeviceMapping}s.
      * 
@@ -236,11 +270,15 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * @throws DoesNotHaveRegattaLogException
      */
     private final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappingsInternal() {
-        final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings = calculateMappings();
+        final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings;
         final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> oldMappings = new HashMap<>();
+        final Set<DeviceIdentifier> oldDeviceIds = new HashSet<>();
+        final Set<DeviceIdentifier> newDeviceIds = new HashSet<>();
         LockUtil.lockForWrite(mappingsLock);
         try {
+            newMappings = calculateMappings();
             oldMappings.putAll(mappings);
+            oldDeviceIds.addAll(mappingsByDevice.keySet());
             mappings.clear();
             mappings.putAll(newMappings);
             mappingsByDevice.clear();
@@ -254,10 +292,11 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
                     list.add(mapping);
                 }
             }
+            newDeviceIds.addAll(mappingsByDevice.keySet());
         } finally {
             LockUtil.unlockAfterWrite(mappingsLock);
         }
-        calculateDiff(oldMappings, newMappings);
+        calculateDiff(oldMappings, newMappings, oldDeviceIds, newDeviceIds);
     }
     
     /**
@@ -265,107 +304,116 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
      * and by loading and adding the fixes for extended or added mappings.
      */
     private void calculateDiff(Map<ItemT, ? extends Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> previousMappings,
-            Map<ItemT, ? extends Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings) {
-        Set<ItemT> itemsToProcess = new HashSet<ItemT>(previousMappings.keySet());
-        itemsToProcess.addAll(newMappings.keySet());
-        for (ItemT item : itemsToProcess) {
-            if (!newMappings.containsKey(item)) {
-                previousMappings.get(item).forEach(this::mappingRemovedInternal);
-            } else {
-                final Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings = previousMappings.containsKey(item)
-                        ? previousMappings.get(item) : Collections.emptyList();
-                final List<DeviceMappingWithRegattaLogEvent<ItemT>> addedMappings = new ArrayList<>();
-                for (DeviceMappingWithRegattaLogEvent<ItemT> newMapping : newMappings.get(item)) {
-                    DeviceMappingWithRegattaLogEvent<ItemT> oldMapping = findAndRemoveMapping(newMapping, oldMappings);
-                    if (oldMapping == null) {
-                        addedMappings.add(newMapping);
-                    } else if (!newMapping.getTimeRange().equals(oldMapping.getTimeRange())) {
-                        mappingChangedInternal(oldMapping, newMapping);
-                    }
-                }
-                if (!addedMappings.isEmpty()) {
-                    mappingsAddedInternal(addedMappings, item);
-                }
-                // oldMappings now still contains those mappings that were not entirely substituted by the new mappings
-                oldMappings.forEach(this::mappingRemovedInternal);
+            Map<ItemT, ? extends Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings,
+            Set<DeviceIdentifier> oldDeviceIds, Set<DeviceIdentifier> newDeviceIds) {
+        final Set<DeviceIdentifier> removedDeviceIds = new HashSet<>(oldDeviceIds);
+        removedDeviceIds.removeAll(newDeviceIds);
+        removedDeviceIds.forEach(this::deviceIdRemovedInternal);
+
+        final Set<DeviceIdentifier> addedDeviceIds = new HashSet<>(newDeviceIds);
+        addedDeviceIds.removeAll(oldDeviceIds);
+        addedDeviceIds.forEach(this::deviceIdAddedInternal);
+
+        // Only deviceIdentifier and mappingTypes are covered that are contained in newMappings.
+        // Those that are only found in oldMappings won't lead to new covered TimeRanges.
+        // DeviceIdentifiers, that aren't needed at all are already handled above.
+        newMappings.forEach((item, mappingsForItem) -> {
+            final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> newlyCoveredTimeRanges = new HashMap<>();
+            this.processNewAndChangedMappingsByDeviceIdAndEventType(previousMappings.get(item), mappingsForItem,
+                    (deviceIdentifier, mappingType, oldMappingsForDeviceIdAndMappingType, newMappingsForDeviceIdAndMappingType) -> {
+                                assert (newMappingsForDeviceIdAndMappingType != null);
+                                assert (!Util.isEmpty(newMappingsForDeviceIdAndMappingType));
+                                
+                                final MultiTimeRange newCoveredTimeRanges = getCoveredTimeRange(newMappingsForDeviceIdAndMappingType)
+                                        .subtract(getCoveredTimeRange(oldMappingsForDeviceIdAndMappingType));
+                                if (!newCoveredTimeRanges.isEmpty()) {
+                                    RegattaLogDeviceMappingEvent<ItemT> event = Util.get(newMappingsForDeviceIdAndMappingType, 0).getRegattaLogEvent();
+                                    newlyCoveredTimeRanges.put(event, newCoveredTimeRanges);
+                                }
+                            });
+            if (!newlyCoveredTimeRanges.isEmpty()) {
+                newTimeRangesCoveredInternal(item, newlyCoveredTimeRanges);
             }
-        }
+        });
     }
-        
-    /**
-     * Called when a {@link DeviceMapping} was removed.
-     * 
-     * @param mapping the removed mapping
-     */
-    protected abstract void mappingRemoved(DeviceMappingWithRegattaLogEvent<ItemT> mapping);
+
+    private void processNewAndChangedMappingsByDeviceIdAndEventType(
+            Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings,
+            Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> newMappings,
+            GroupedOldAndNewMappingsCallback<ItemT> callback) {
+
+        final Map<Pair<DeviceIdentifier, Class<?>>, Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> groupedOldMappings = groupMappingsByDeviceIdAndMappingType(
+                oldMappings != null ? oldMappings : Collections.emptySet());
+        final Map<Pair<DeviceIdentifier, Class<?>>, Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> groupedNewMappings = groupMappingsByDeviceIdAndMappingType(
+                newMappings);
+
+        groupedNewMappings.forEach((key, newMappingsForDeviceIdAndMappingType) -> {
+            Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappingsForDeviceIdAndMappingType = groupedOldMappings
+                    .get(key);
+            callback.process(
+                    key.getA(), key.getB(), oldMappingsForDeviceIdAndMappingType != null
+                            ? oldMappingsForDeviceIdAndMappingType : Collections.emptySet(),
+                    newMappingsForDeviceIdAndMappingType);
+        });
+    }
     
-    private void mappingRemovedInternal(DeviceMappingWithRegattaLogEvent<ItemT> mapping) {
+    private Map<Pair<DeviceIdentifier, Class<?>>, Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> groupMappingsByDeviceIdAndMappingType(
+            Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappings) {
+        return Util.group(mappings, value -> new Pair<>(value.getDevice(), value.getEventType()), HashSet::new);
+    }
+    
+    private MultiTimeRange getCoveredTimeRange(Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappings) {
+        MultiTimeRange result = new MultiTimeRangeImpl();
+        for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : mappings) {
+            result = result.union(mapping.getTimeRange());
+        }
+        return result;
+    }
+
+    private interface GroupedOldAndNewMappingsCallback<ItemT extends WithID> {
+        void process(DeviceIdentifier deviceIdentifier, Class<?> mappingType,
+                Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings,
+                Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> newMappings);
+    }
+
+    /**
+     * Called when at least one mapping for a previously not available {@link DeviceIdentifier} was added.
+     */
+    protected abstract void deviceIdAdded(DeviceIdentifier deviceIdentifier);
+
+    private void deviceIdAddedInternal(DeviceIdentifier deviceIdentifier) {
         try {
-            mappingRemoved(mapping);
-        } catch(Exception e) {
-            logger.log(Level.SEVERE, "error while removing mapping " + mapping, e);
+            deviceIdAdded(deviceIdentifier);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "error while adding deviceIdentifier " + deviceIdentifier, e);
         }
     }
 
     /**
-     * Called when a {@link DeviceMapping} was added.
-     * 
-     * @param mappings the new mapping
+     * Called when the last available mapping for a {@link DeviceIdentifier} was removed.
      */
-    protected abstract void mappingsAdded(Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappings, ItemT item);
-    
-    private void mappingsAddedInternal(Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappings, ItemT item) {
+    protected abstract void deviceIdRemoved(DeviceIdentifier deviceIdentifier);
+
+    private void deviceIdRemovedInternal(DeviceIdentifier deviceIdentifier) {
         try {
-            mappingsAdded(mappings, item);
-        } catch(Exception e) {
-            logger.log(Level.SEVERE, "error while adding mapping " + mappings, e);
+            deviceIdRemoved(deviceIdentifier);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "error while removing deviceIdentifier " + deviceIdentifier, e);
         }
     }
 
     /**
-     * Called when a {@link DeviceMapping} was changed regarding its mapped time range.
-     * This can occur if an open ended mapping is being closed or a close event gets revoked
-     * or a new mapping is added that may partly overlap with an old mapping such that only
-     * parts of the fixes covered by the new mapping need to be loaded (the ones not already
-     * covered by the old mapping).
-     * 
-     * @param oldMapping the old mapping
-     * @param newMapping the new mapping
+     * Called when a new MultiTimeRange could be identified that is now covered by the mappings for a item,
+     * DeviceIdentifier and mappingType.
      */
-    protected abstract void mappingChanged(DeviceMappingWithRegattaLogEvent<ItemT> oldMapping,
-            DeviceMappingWithRegattaLogEvent<ItemT> newMapping);
-    
-    private void mappingChangedInternal(DeviceMappingWithRegattaLogEvent<ItemT> oldMapping,
-            DeviceMappingWithRegattaLogEvent<ItemT> newMapping) {
+    protected abstract void newTimeRangesCovered(ItemT item, Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> newlyCoveredTimeRanges);
+
+    private void newTimeRangesCoveredInternal(ItemT item, Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> newlyCoveredTimeRanges) {
         try {
-            mappingChanged(oldMapping, newMapping);
-        } catch(Exception e) {
-            logger.log(Level.SEVERE, "error while changing mapping old: " + oldMapping + "; new: " + newMapping, e);
+            newTimeRangesCovered(item, newlyCoveredTimeRanges);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE,
+                    "error while calling newTimeRangeCovered for item " + item, e);
         }
-    }
-    
-    private DeviceMappingWithRegattaLogEvent<ItemT> findAndRemoveMapping(
-            DeviceMappingWithRegattaLogEvent<ItemT> mappingToFind,
-            Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> newItemsToProcess) {
-        for (Iterator<DeviceMappingWithRegattaLogEvent<ItemT>> iterator = newItemsToProcess.iterator(); iterator.hasNext();) {
-            DeviceMappingWithRegattaLogEvent<ItemT> deviceMapping = iterator.next();
-            if (isSame(mappingToFind, deviceMapping)) {
-                iterator.remove();
-                return deviceMapping;
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Compares two device mappings based on their device, the item mapped to and the race/regatta log event type
-     * that usually corresponds with the type of item to which the device is mapped. Note that in particular the
-     * mappings' time ranges are ignored for this comparison.
-     */
-    private boolean isSame(DeviceMappingWithRegattaLogEvent<ItemT> mapping1,
-            DeviceMappingWithRegattaLogEvent<ItemT> mapping2) {
-        return mapping1.getDevice().equals(mapping2.getDevice()) && mapping1.getMappedTo().equals(mapping2.getMappedTo())
-                && mapping1.getEventType().equals(mapping2.getEventType())
-                && mapping1.getRegattaLogEvent().getId().equals(mapping2.getRegattaLogEvent().getId());
     }
 }
