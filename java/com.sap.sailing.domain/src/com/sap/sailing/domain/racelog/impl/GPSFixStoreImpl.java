@@ -10,7 +10,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -67,37 +66,6 @@ public class GPSFixStoreImpl implements GPSFixStore {
     @Override
     public void storeFix(DeviceIdentifier device, GPSFix fix) {
         sensorFixStore.storeFix(device, fix);
-    }
-
-    @Override
-    public synchronized void addListener(FixReceivedListener<GPSFix> listener, DeviceIdentifier device) {
-        sensorFixStore.addListener(listener, device);
-    }
-
-    @Override
-    public synchronized void removeListener(FixReceivedListener<GPSFix> listener) {
-        sensorFixStore.removeListener(listener);
-    }
-
-    @Override
-    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end)
-            throws TransformationException, NoCorrespondingServiceRegisteredException {
-        // loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true
-        // /*inclusive*/);
-        final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
-        final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
-        loadTrack(track, mapping.getDevice(), from, to, false /* toIsInclusive */);
-    }
-
-
-    @Override
-    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping, TimePoint start,
-            TimePoint end)
-    throws TransformationException, NoCorrespondingServiceRegisteredException {
-        final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
-        final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
-        loadTrack(track, mapping.getDevice(), from, to, false /* toIsInclusive */);
     }
     
     @Override
