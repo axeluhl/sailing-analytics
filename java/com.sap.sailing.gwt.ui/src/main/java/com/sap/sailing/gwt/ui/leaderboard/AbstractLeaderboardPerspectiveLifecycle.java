@@ -6,11 +6,10 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 
 public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardPerspectiveOwnSettings> {
 
-    private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
-
     public AbstractLeaderboardPerspectiveLifecycle(StringMessages stringMessages) {
-        leaderboardPanelLifecycle = new LeaderboardPanelLifecycle(null, stringMessages);
-        componentLifecycles.add(leaderboardPanelLifecycle);
+        componentLifecycles.add(new LeaderboardPanelLifecycle(null, stringMessages));
+        componentLifecycles.add(new MultiLeaderboardPanelLifecycle(null, stringMessages));
+        componentLifecycles.add(new OverallLeaderboardPanelLifecycle(null, stringMessages));
     }
     
     @Override
@@ -18,10 +17,6 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
         return new LeaderboardPerspectiveOwnSettings();
     }
     
-    public LeaderboardPanelLifecycle getLeaderboardPanelLifecycle() {
-        return leaderboardPanelLifecycle;
-    }
-
     @Override
     public LeaderboardPerspectiveOwnSettings clonePerspectiveOwnSettings(LeaderboardPerspectiveOwnSettings settings) {
         return settings;

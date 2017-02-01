@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class LeaderboardPerspectiveLifecycle extends AbstractLeaderboardPerspectiveLifecycle {
+    public static final String ID = "LeaderboardPerspectiveLifecycle";
 
     public LeaderboardPerspectiveLifecycle(StringMessages stringMessages) {
         super(stringMessages);
@@ -17,5 +18,4 @@ public class LeaderboardPerspectiveLifecycle extends AbstractLeaderboardPerspect
     protected LeaderboardPerspectiveOwnSettings extractOwnContextSettings(LeaderboardPerspectiveOwnSettings settings) {
         throw new IllegalStateException("Not supported");
     }
-
 }

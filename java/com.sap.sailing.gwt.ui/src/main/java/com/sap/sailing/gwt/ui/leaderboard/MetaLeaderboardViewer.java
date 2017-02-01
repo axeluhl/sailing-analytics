@@ -23,13 +23,13 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Frank Mittag (c163874)
  * @author Axel Uhl (d043530)
  */
-public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderboardPerspectiveLifecycle> {
-    private final MultiLeaderboardPanel multiLeaderboardPanel;
+public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPerspectiveLifecycle> {
+    private final MultiLeaderboardProxyPanel multiLeaderboardPanel;
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
 
     
-    public MetaLeaderboardViewer(Component<?> parent, MetaLeaderboardComponentContext componentContext,
-            MetaLeaderboardPerspectiveLifecycle lifecycle,
+    public MetaLeaderboardViewer(Component<?> parent, LeaderboardComponentContext componentContext,
+            LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             Timer timer, String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace,
@@ -41,8 +41,8 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
                 errorReporter, stringMessages, userAgent, chartDetailType);
     }
     
-    private MetaLeaderboardViewer(Component<?> parent, MetaLeaderboardComponentContext componentContext,
-            MetaLeaderboardPerspectiveLifecycle lifecycle,
+    private MetaLeaderboardViewer(Component<?> parent, LeaderboardComponentContext componentContext,
+            LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer,
@@ -51,6 +51,8 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
             UserAgentDetails userAgent, DetailType chartDetailType) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
+
+
         /**
          * Cleanup one java8 suppliers can be used
          */
@@ -77,11 +79,13 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);
-        multiLeaderboardPanel = new MultiLeaderboardPanel(this, componentContext, sailingService,
+
+        multiLeaderboardPanel = new MultiLeaderboardProxyPanel(this, componentContext, sailingService,
                 metaLeaderboardName,
                 asyncActionsExecutor, timer, false /* isEmbedded */,
                 preselectedLeaderboardName, preselectedRace, errorReporter, stringMessages,
-                userAgent, perspectiveSettings.isShowRaceDetails(), perspectiveSettings.isAutoExpandLastRaceColumn());
+                userAgent, perspectiveSettings.isShowRaceDetails(), perspectiveSettings.isAutoExpandLastRaceColumn(),
+                settings);
         multiLeaderboardPanel.setVisible(perspectiveSettings.isShowSeriesLeaderboards());
         mainPanel.add(getLeaderboardPanel());
         mainPanel.add(multiCompetitorChart);
@@ -89,6 +93,14 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         addComponentToNavigationMenu(getLeaderboardPanel(), false, stringMessages.seriesLeaderboard(),  /* hasSettingsWhenComponentIsInvisible*/ true);
         addComponentToNavigationMenu(multiCompetitorChart, true, null,  /* hasSettingsWhenComponentIsInvisible*/ true);
         addComponentToNavigationMenu(multiLeaderboardPanel, true , stringMessages.regattaLeaderboards(),  /* hasSettingsWhenComponentIsInvisible*/ false);
+
+        addChildComponent(multiLeaderboardPanel);
+        addChildComponent(multiCompetitorChart);
+    }
+
+    @Override
+    public String getId() {
+        return LeaderboardPerspectiveLifecycle.ID;
     }
 
 }

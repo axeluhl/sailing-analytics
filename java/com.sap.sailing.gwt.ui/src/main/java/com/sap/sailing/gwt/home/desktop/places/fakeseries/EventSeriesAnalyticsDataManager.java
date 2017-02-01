@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardCha
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -38,7 +38,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 public class EventSeriesAnalyticsDataManager {
     private LeaderboardPanel overallLeaderboardPanel;
     private MultiCompetitorLeaderboardChart multiCompetitorChart;
-    private MultiLeaderboardPanel multiLeaderboardPanel;
+    private MultiLeaderboardProxyPanel multiLeaderboardPanel;
 
     private final CompetitorSelectionModel competitorSelectionProvider;
     private final AsyncActionsExecutor asyncActionsExecutor;
@@ -87,20 +87,20 @@ public class EventSeriesAnalyticsDataManager {
         return multiCompetitorChart;
     }
 
-    public MultiLeaderboardPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context,
+    public MultiLeaderboardProxyPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context,
             LeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {
         if(multiLeaderboardPanel == null) {
-            multiLeaderboardPanel = new MultiLeaderboardPanel(parent, context, sailingService, metaLeaderboardName,
+            multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, preselectedRace, errorReporter, StringMessages.INSTANCE,
-                    userAgent, showRaceDetails, autoExpandLastRaceColumn);
+                    userAgent, showRaceDetails, autoExpandLastRaceColumn, null);
         }
         return multiLeaderboardPanel;
     }
 
-    public MultiLeaderboardPanel getMultiLeaderboardPanel() {
+    public MultiLeaderboardProxyPanel getMultiLeaderboardPanel() {
         return multiLeaderboardPanel;
     }
 

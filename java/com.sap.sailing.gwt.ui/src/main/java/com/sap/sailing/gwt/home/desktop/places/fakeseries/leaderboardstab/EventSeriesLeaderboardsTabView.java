@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.home.desktop.utils.EventParamUtils;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
-import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.MultiLeaderboardProxyPanel;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class EventSeriesLeaderboardsTabView extends Composite implements SeriesTabView<EventSeriesLeaderboardsPlace>,
@@ -68,7 +68,7 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
             final LeaderboardSettings leaderboardSettings = EventParamUtils.createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
             final RaceIdentifier preselectedRace = EventParamUtils.getPreselectedRace(Window.Location.getParameterMap());
 
-            MultiLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(null, null,
+            MultiLeaderboardProxyPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(null, null,
                     leaderboardSettings,
                     null, // TODO: preselectedLeaderboardName
                     preselectedRace,

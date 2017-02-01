@@ -182,11 +182,31 @@ public abstract class AbstractComponentContextWithSettingsStorage<L extends Comp
     }
 
     @SuppressWarnings("unchecked")
+    public S extractGlobalSettings(Component<? extends Settings> component, Settings newDefaultSettings) {
+        L targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
+        return extractGlobalSettings((S) newDefaultSettings, targetLifeCycle);
+    }
+
+    @SuppressWarnings("unchecked")
+    public S extractContextSettings(Component<? extends Settings> component, Settings newDefaultSettings) {
+        L targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
+        return extractContextSettings((S) newDefaultSettings, targetLifeCycle);
+    }
+
+    private S extractGlobalSettings(S newDefaultSettings, L targetLifeCycle) {
+        return targetLifeCycle.extractGlobalSettings((S) newDefaultSettings);
+    }
+
+    private S extractContextSettings(S newDefaultSettings, L targetLifeCycle) {
+        return targetLifeCycle.extractContextSettings((S) newDefaultSettings);
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings) {
         L targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
-        Settings globalSettings = targetLifeCycle.extractGlobalSettings((S) newDefaultSettings);
-        Settings contextSettings = targetLifeCycle.extractContextSettings((S) newDefaultSettings);
+        S globalSettings = extractGlobalSettings((S) newDefaultSettings, targetLifeCycle);
+        S contextSettings = extractContextSettings((S) newDefaultSettings, targetLifeCycle);
         updateSettings(component.getPath(), globalSettings, contextSettings);
     }
 

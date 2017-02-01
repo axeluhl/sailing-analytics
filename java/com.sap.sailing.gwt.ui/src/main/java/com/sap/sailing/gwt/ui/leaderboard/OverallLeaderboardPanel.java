@@ -12,12 +12,8 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
-/**
- * Represents a single Leaderboard in the Context of a MultiLeaderboard
- * 
- */
-public class MultiLeaderboardPanel extends LeaderboardPanel {
-    public MultiLeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context,
+public class OverallLeaderboardPanel extends LeaderboardPanel {
+    public OverallLeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
             boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
@@ -33,5 +29,9 @@ public class MultiLeaderboardPanel extends LeaderboardPanel {
                 showCompetitorFilterStatus, enableSyncScroller);
     }
 
+    @Override
+    public String getId() {
+        return OverallLeaderboardPanelLifecycle.ID;
+    }
 
 }

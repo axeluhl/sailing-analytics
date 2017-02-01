@@ -77,7 +77,6 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
             componentsNavigationPanel = new FlowPanel();
             componentsNavigationPanel.addStyleName(RES.css().viewerToolbar());
             mainPanel.add(componentsNavigationPanel);
-            addChildComponent(leaderboardPanel);
         }
         return mainPanel;
     }
@@ -133,25 +132,21 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
 
     @Override
     public SettingsDialogComponent<LeaderboardPerspectiveOwnSettings> getPerspectiveOwnSettingsDialogComponent() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public boolean hasPerspectiveOwnSettings() {
-        // TODO Auto-generated method stub
         return true;
     }
 
     @Override
     public String getId() {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public String getDependentCssClassName() {
-        // TODO Auto-generated method stub
         return null;
     }
 }

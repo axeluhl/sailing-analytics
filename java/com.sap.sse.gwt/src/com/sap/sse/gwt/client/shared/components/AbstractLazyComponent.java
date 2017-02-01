@@ -34,7 +34,7 @@ public abstract class AbstractLazyComponent<SettingsType extends Settings> exten
 
     @Override
     public ArrayList<String> getPath() {
-        return ComponentPathDeterminer.determinePath(parent);
+        return ComponentPathDeterminer.determinePath(this);
     }
 
     @Override

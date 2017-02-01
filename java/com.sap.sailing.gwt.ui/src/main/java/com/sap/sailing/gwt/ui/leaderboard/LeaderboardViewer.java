@@ -93,7 +93,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
                         public void onSuccess(List<String> result) {
                             if(result.size() == 1) {
                                 String overallLeaderboardName = result.get(0);
-                                overallLeaderboardPanel = new LeaderboardPanel(LeaderboardViewer.this,
+                                overallLeaderboardPanel = new OverallLeaderboardPanel(LeaderboardViewer.this,
                                         getComponentContext(), sailingService,
                                         asyncActionsExecutor,
                                         settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
@@ -103,6 +103,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
                                         false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                                         /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
                                 mainPanel.add(overallLeaderboardPanel);
+                                addChildComponent(overallLeaderboardPanel);
                                 addComponentToNavigationMenu(overallLeaderboardPanel, true, stringMessages.seriesLeaderboard(),
                                         /* hasSettingsWhenComponentIsInvisible*/ true);
                             }
