@@ -289,9 +289,39 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         });
     }
     
-    /** 
-     * Test for changes of bug 4009 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4009 <br>
-     */
+    /** Test for changes of bug 4009 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4009 */
+    @Test
+    public void testThatOnlyTheBestFixesAreLoadedForMarksIfMultipleMappingsAreAvailable()
+            throws InterruptedException {
+        final long bestFixBeforeStartOfTrackingOffset = 140;
+        final long bestFixAfterEndOfTrackingOffset = 360;
+        final long startOfTracking = 200;
+        final long endOfTracking = 300;
+        testFixes(/* start of tracking */ startOfTracking, /* end of tracking */ endOfTracking, /* mappings and fixes */ () -> {
+            map(mark, device, 0, 80);
+            store.storeFix(device, createFix(50, 10, 20, 30, 40));
+            store.storeFix(device, createFix(70, 10, 20, 30, 40));
+            map(mark, device, 100, 150);
+            store.storeFix(device, createFix(120, 10, 20, 30, 40));
+            store.storeFix(device, createFix(bestFixBeforeStartOfTrackingOffset, 10, 20, 30, 40));
+            
+            map(mark, device, 400, 500);
+            store.storeFix(device, createFix(420, 10, 20, 30, 40));
+            store.storeFix(device, createFix(450, 10, 20, 30, 40));
+            store.storeFix(device, createFix(480, 10, 20, 30, 40));
+            map(mark, device, 350, 390);
+            store.storeFix(device, createFix(bestFixAfterEndOfTrackingOffset, 10, 20, 30, 40));
+            store.storeFix(device, createFix(380, 10, 20, 30, 40));
+        }, /* tests and expectations */ trackedRace -> {
+            testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 2);
+            assertEquals(bestFixBeforeStartOfTrackingOffset, trackedRace.getOrCreateTrack(mark)
+                    .getLastFixBefore(new MillisecondsTimePoint(startOfTracking)).getTimePoint().asMillis());
+            assertEquals(bestFixAfterEndOfTrackingOffset, trackedRace.getOrCreateTrack(mark)
+                    .getFirstFixAfter(new MillisecondsTimePoint(endOfTracking)).getTimePoint().asMillis());
+        });
+    }
+    
+    /** Test for changes of bug 4009 - https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4009 */
     @Test
     public void testYoungestFixIsAccurateOnSeveralAdditionsOfFixes() 
             throws TransformationException, NoCorrespondingServiceRegisteredException, InterruptedException {
