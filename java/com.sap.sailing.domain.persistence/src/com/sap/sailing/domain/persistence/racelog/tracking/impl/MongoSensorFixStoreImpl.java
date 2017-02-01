@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -87,10 +88,25 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         DBObject fixObject = (DBObject) object.get(FieldNames.GPSFIX.name());
         return this.<T> findService(type).transformBack(fixObject);
     }
-
+    
+    @Override
+    public <FixT extends Timed> boolean loadOldestFix(Consumer<FixT> consumer, DeviceIdentifier device, TimeRange timeRangeToLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, cursor -> cursor.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), /* ascending */ 1)).limit(1));
+    }
+    
+    @Override
+    public <FixT extends Timed> boolean loadYoungestFix(Consumer<FixT> consumer, DeviceIdentifier device, TimeRange timeRangeToLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, cursor -> cursor.sort(new BasicDBObject(FieldNames.TIME_AS_MILLIS.name(), /* descending */ -1)).limit(1));
+    }
+    
     @Override
     public <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
             TimePoint to, boolean inclusive) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        loadFixes(consumer, device, from, to, inclusive, UnaryOperator.identity());
+    }
+
+    private <FixT extends Timed> boolean loadFixes(Consumer<FixT> consumer, DeviceIdentifier device, TimePoint from,
+            TimePoint to, boolean inclusive, UnaryOperator<DBCursor> dbCursorCallback) throws NoCorrespondingServiceRegisteredException, TransformationException {
         final TimePoint loadFixesFrom = from == null ? TimePoint.BeginningOfTime : from;
         final TimePoint loadFixesTo = to == null ? TimePoint.EndOfTime : to;
         
@@ -104,12 +120,14 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             queryBuilder.greaterThanEquals(loadFixesFrom.asMillis()).and(FieldNames.TIME_AS_MILLIS.name()).lessThan(loadFixesTo.asMillis());
         }
         DBObject query = queryBuilder.get();
-        DBCursor result = fixesCollection.find(query);
+        DBCursor result = dbCursorCallback.apply(fixesCollection.find(query));
+        boolean fixLoaded = false;
         for (DBObject fixObject : result) {
             try {
                 @SuppressWarnings("unchecked")
                 FixT fix = (FixT) loadFix(fixObject);
                 consumer.accept(fix);
+                fixLoaded = true;
             } catch (TransformationException e) {
                 logger.log(Level.WARNING, "Could not read fix from MongoDB: " + fixObject);
             } catch (ClassCastException e) {
@@ -118,6 +136,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                         "Unexpected fix type (" + type + ") encountered when trying to load track for " + device);
             }
         }
+        return fixLoaded;
     }
 
     /**

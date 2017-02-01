@@ -80,4 +80,22 @@ public interface SensorFixStore {
     long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException;
     
     <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) throws TransformationException, NoCorrespondingServiceRegisteredException;
+
+    /**
+     * Loads the youngest fix for the given device in the specified {@link TimeRange}.
+     * 
+     * @return true if a fix was loaded, false otherwise
+     */
+    <FixT extends Timed> boolean loadOldestFix(Consumer<FixT> consumer, DeviceIdentifier device,
+            TimeRange timeRangetoLoad)
+            throws NoCorrespondingServiceRegisteredException, TransformationException;
+
+    /**
+     * Loads the oldest fix for the given device in the specified {@link TimeRange}.
+     * 
+     * @return true if a fix was loaded, false otherwise
+     */
+    <FixT extends Timed> boolean loadYoungestFix(Consumer<FixT> consumer, DeviceIdentifier device,
+            TimeRange timeRangetoLoad)
+            throws NoCorrespondingServiceRegisteredException, TransformationException;
 }
