@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -8,7 +10,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.MappingEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
@@ -32,7 +33,6 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
@@ -56,6 +56,10 @@ import com.sap.sse.util.ThreadPoolUtil;
  * <li>{@link FixReceivedListener}</li>
  * </ul>
  * 
+ */
+/**
+ * @author sschaefe
+ *
  */
 public class FixLoaderAndTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(FixLoaderAndTracker.class.getName());
@@ -206,8 +210,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * Loading fixes for {@link Mark}s needs special handling compared with {@link Competitor}s. If there are no fixes
      * available in the tracking interval, it is necessary to load other available fixes before/after the tracking
      * interval. this is due to the buoy pinger app can be used in the morning to ping some marks. The resulting fixes
-     * need to also be available for races later on the day. This method ensures that if available, fixes are initially
-     * loaded when starting tracking. In contrast to that, mappings for {@link Competitor}s have no special handling.
+     * need to also be available for races later on the day. This method ensures that if available, the best available
+     * fixes are initially loaded when starting tracking. In contrast to that, mappings for {@link Competitor}s have no
+     * special handling.
      */
     private void loadFixesForNewlyCoveredTimeRanges(WithID item,
             Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges) {
@@ -219,11 +224,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             // load all mapped fixes if there was no fix in the tracking TimeRange
             GPSFix firstFixAfterStartOfTracking = track.getFirstFixAfter(trackingTimeRange.from());
             if(firstFixAfterStartOfTracking == null || firstFixAfterStartOfTracking.getTimePoint().after(trackingTimeRange.to())) {
-                // either got an empty track of there is no mapping for the TimeRange of the race at all.
-                // try again without constraining the mapping interval by start/end of tracking to at
-                // least attempt to get fixes at all in case there were any within the device mapping interval specified
-                deviceMappings.getCoveredTimeRangesForItem(item).forEach((event, timeRange) -> {
-                    loadFixesForMultiTimeRange(timeRange, event);
+                // There is no fix in the tracking interval -> looking for better fixes before start of tracking and after end of tracking
+                newlyCoveredTimeRanges.forEach((event, timeRange) -> {
+                    loadBetterFixesIfAvailable(trackingTimeRange, timeRange, event);
                 });
             }
         }
@@ -308,6 +311,73 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                             timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false);
                 } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                     logger.log(Level.WARNING, "Could not load mark track " + event.getMappedTo());
+                }
+            }
+        });
+    }
+
+    /**
+     * Loads better fallback fixes if there is no fix in the tracking interval found.
+     */
+    private void loadBetterFixesIfAvailable(TimeRange trackingTimeRange, MultiTimeRange coveredTimeRanges,
+            RegattaLogDeviceMappingEvent<? extends WithID> mappingEvent) {
+        if (preemptiveStopRequested.get()) {
+            return;
+        }
+        mappingEvent.accept(new MappingEventVisitor() {
+            @Override
+            public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void visit(RegattaLogDeviceMarkMappingEvent event) {
+                DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());
+
+                final GPSFix lastFixAtOrBeforeStartOfTracking = track.getLastFixAtOrBefore(trackingTimeRange.from());
+                // A better fix before start of tracking must be after the current best fix
+                final MultiTimeRange beforeRange = coveredTimeRanges
+                        .intersection(new TimeRangeImpl(
+                                lastFixAtOrBeforeStartOfTracking != null
+                                        ? lastFixAtOrBeforeStartOfTracking.getTimePoint() : TimePoint.BeginningOfTime,
+                                trackingTimeRange.from()));
+                // starting to load newer ranges to make the first found fix the best available fix
+                Collection<TimeRange> inverseTimeRanges = Util.addAll(beforeRange,
+                        new TreeSet<>((timeRange1, timeRange2) -> -timeRange1.from().compareTo(timeRange2.from())));
+                for (TimeRange timeRange : inverseTimeRanges) {
+                    try {
+                        if (sensorFixStore.loadYoungestFix((GPSFixMoving fix) -> track.add(fix, true),
+                                event.getDevice(), timeRange)) {
+                            // new best fix before start of tracking found
+                            break;
+                        }
+                    } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                        logger.log(Level.WARNING, "Could not load better fix for mark track " + event.getMappedTo());
+                    }
+
+                }
+
+                final GPSFix firstFixAtOrAfterEndOfTracking = track.getFirstFixAtOrAfter(trackingTimeRange.to());
+                // A better fix after end of tracking must be before the current best fix
+                MultiTimeRange afterRange = coveredTimeRanges.intersection(new TimeRangeImpl(trackingTimeRange.to(), 
+                        firstFixAtOrAfterEndOfTracking != null ? firstFixAtOrAfterEndOfTracking.getTimePoint()
+                                : TimePoint.EndOfTime));
+                for (TimeRange timeRange : afterRange) {
+                    try {
+                        if (sensorFixStore.loadOldestFix((GPSFixMoving fix) -> track.add(fix, true), event.getDevice(),
+                                timeRange)) {
+                            // new best fix after end of tracking found
+                            break;
+                        }
+                    } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                        logger.log(Level.WARNING, "Could not load better fix for mark track " + event.getMappedTo());
+                    }
+
                 }
             }
         });
