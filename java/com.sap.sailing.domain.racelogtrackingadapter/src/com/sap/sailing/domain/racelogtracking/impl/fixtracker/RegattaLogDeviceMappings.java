@@ -29,6 +29,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -174,6 +175,9 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         });
     }
 
+    /**
+     * Calculates an association of mapping events to the covered {@link MultiTimeRange}.
+     */
     private Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> calculateCoveredTimeRanges(
             final List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForItem) {
         final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> coveredTimeRanges = new HashMap<>();
@@ -267,24 +271,39 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         // DeviceIdentifiers, that aren't needed at all are already handled above.
         newMappings.forEach((item, mappingsForItem) -> {
             final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> newlyCoveredTimeRanges = new HashMap<>();
+
+            // The mappings are processes grouped by DeviceIdentifier and mapping type
+            // to build a consistent overall mapping update without the risk of fixes
+            // to get loaded multiple times
             this.processNewAndChangedMappingsByDeviceIdAndEventType(previousMappings.get(item), mappingsForItem,
-                    (deviceIdentifier, mappingType, oldMappingsForDeviceIdAndMappingType, newMappingsForDeviceIdAndMappingType) -> {
-                                assert (newMappingsForDeviceIdAndMappingType != null);
-                                assert (!Util.isEmpty(newMappingsForDeviceIdAndMappingType));
-                                
-                                final MultiTimeRange newCoveredTimeRanges = getCoveredTimeRange(newMappingsForDeviceIdAndMappingType)
+                    (deviceIdentifier, mappingType, oldMappingsForDeviceIdAndMappingType,
+                            newMappingsForDeviceIdAndMappingType) -> {
+                        assert (newMappingsForDeviceIdAndMappingType != null);
+                        assert (!Util.isEmpty(newMappingsForDeviceIdAndMappingType));
+
+                        final MultiTimeRange newCoveredTimeRanges = getCoveredTimeRange(
+                                newMappingsForDeviceIdAndMappingType)
                                         .subtract(getCoveredTimeRange(oldMappingsForDeviceIdAndMappingType));
-                                if (!newCoveredTimeRanges.isEmpty()) {
-                                    RegattaLogDeviceMappingEvent<ItemT> event = Util.get(newMappingsForDeviceIdAndMappingType, 0).getRegattaLogEvent();
-                                    newlyCoveredTimeRanges.put(event, newCoveredTimeRanges);
-                                }
-                            });
+                        if (!newCoveredTimeRanges.isEmpty()) {
+                            newlyCoveredTimeRanges.put(
+                                    Util.get(newMappingsForDeviceIdAndMappingType, 0).getRegattaLogEvent(),
+                                    newCoveredTimeRanges);
+                        }
+                    });
             if (!newlyCoveredTimeRanges.isEmpty()) {
+                // all updates for one item are handled at once
                 newTimeRangesCoveredInternal(item, newlyCoveredTimeRanges);
             }
         });
     }
 
+    /**
+     * Processes the old and new mappings for mapping update by {@link DeviceIdentifier} and mapping type (class of the
+     * mapping event). the old and new mappings are first grouped by the already mentioned criteria. For each group in
+     * the new mappings, the associated group in the old mappings is identified. For these pairs, the given callback is
+     * called. Groups only found in the old mappings are explicitly not handled because these can't lead to new covered
+     * time ranges.
+     */
     private void processNewAndChangedMappingsByDeviceIdAndEventType(
             Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings,
             Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> newMappings,
@@ -305,11 +324,18 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         });
     }
     
+    /**
+     * Groups the given {@link DeviceMapping}s by pairs of {@link DeviceIdentifier} and mapping type (class of the
+     * mapping event).
+     */
     private Map<Pair<DeviceIdentifier, Class<?>>, Iterable<DeviceMappingWithRegattaLogEvent<ItemT>>> groupMappingsByDeviceIdAndMappingType(
             Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappings) {
         return Util.group(mappings, value -> new Pair<>(value.getDevice(), value.getEventType()), HashSet::new);
     }
     
+    /**
+     * Calculates the {@link MultiTimeRange} as union of the {@link TimeRange}s of the given mappings.
+     */
     private MultiTimeRange getCoveredTimeRange(Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> mappings) {
         MultiTimeRange result = new MultiTimeRangeImpl();
         for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : mappings) {
@@ -318,6 +344,9 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         return result;
     }
 
+    /**
+     * Internal callback interface for {@link #processNewAndChangedMappingsByDeviceIdAndEventType}.
+     */
     private interface GroupedOldAndNewMappingsCallback<ItemT extends WithID> {
         void process(DeviceIdentifier deviceIdentifier, Class<?> mappingType,
                 Iterable<DeviceMappingWithRegattaLogEvent<ItemT>> oldMappings,

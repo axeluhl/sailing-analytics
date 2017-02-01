@@ -223,8 +223,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
             // load all mapped fixes if there was no fix in the tracking TimeRange
             GPSFix firstFixAfterStartOfTracking = track.getFirstFixAfter(trackingTimeRange.from());
-            if(firstFixAfterStartOfTracking == null || firstFixAfterStartOfTracking.getTimePoint().after(trackingTimeRange.to())) {
-                // There is no fix in the tracking interval -> looking for better fixes before start of tracking and after end of tracking
+            if (firstFixAfterStartOfTracking == null
+                    || firstFixAfterStartOfTracking.getTimePoint().after(trackingTimeRange.to())) {
+                // There is no fix in the tracking interval -> looking for better fixes before start of tracking and
+                // after end of tracking
                 newlyCoveredTimeRanges.forEach((event, timeRange) -> {
                     loadBetterFixesIfAvailable(trackingTimeRange, timeRange, event);
                 });
@@ -232,14 +234,23 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    private void loadFixesInTrackingTimeRange(Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges,
+    /**
+     * Loads fixes defined by the given mapping and {@link MultiTimeRange}. Only those fixes that are in the mapping
+     * time range are being loaded.
+     */
+    private void loadFixesInTrackingTimeRange(
+            Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges,
             TimeRange trackingTimeRange) {
         newlyCoveredTimeRanges.forEach((event, timeRange) -> {
             loadFixesForMultiTimeRange(timeRange.intersection(trackingTimeRange), event);
         });
     }
 
-    private void loadFixesForMultiTimeRange(MultiTimeRange effectiveRangeToLoad, RegattaLogDeviceMappingEvent<WithID> event) {
+    /**
+     * Loads fixes for the parts of the given {@link MultiTimeRange} using the given mapping event.
+     */
+    private void loadFixesForMultiTimeRange(MultiTimeRange effectiveRangeToLoad,
+            RegattaLogDeviceMappingEvent<WithID> event) {
         if (!effectiveRangeToLoad.isEmpty()) {
             effectiveRangeToLoad.forEach(timeRange -> loadFixes(timeRange, event));
         }
@@ -259,6 +270,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         return false;
     }
     
+    /**
+     * Loads the fixes in the specified {@link TimeRange} using a visitor of the given mapping event.
+     */
     private void loadFixes(TimeRange timeRangeToLoad, RegattaLogDeviceMappingEvent<? extends WithID> mappingEvent) {
         if (timeRangeToLoad == null) {
             return;
