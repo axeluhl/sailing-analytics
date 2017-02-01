@@ -217,8 +217,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             Mark mark = (Mark) item;
             DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mark);
             // load all mapped fixes if there was no fix in the tracking TimeRange
-            final boolean loadAllMappedFixes = (track.getFirstRawFix() == null);
-            if (loadAllMappedFixes) {
+            GPSFix firstFixAfterStartOfTracking = track.getFirstFixAfter(trackingTimeRange.from());
+            if(firstFixAfterStartOfTracking == null || firstFixAfterStartOfTracking.getTimePoint().after(trackingTimeRange.to())) {
                 // either got an empty track of there is no mapping for the TimeRange of the race at all.
                 // try again without constraining the mapping interval by start/end of tracking to at
                 // least attempt to get fixes at all in case there were any within the device mapping interval specified
