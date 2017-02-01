@@ -39,7 +39,7 @@
 	<inherits name='com.google.gwt.maps.Maps' />
 
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
-
+    <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
 	<inherits name="com.sap.sailing.gwt.ui.NoUI" />
 
 	<!-- Specify the app entry point class. -->
@@ -56,8 +56,6 @@
 	<set-configuration-property name="CssResource.enableGss" value="true" />
 	<set-configuration-property name="CssResource.conversionMode" value="strict" />
 
-	<extend-property name="locale" values="de" />
-	
 	<define-linker name="manifest" class="com.sap.sailing.dashboards.gwt.client.linker.DashboardManifestLinker"/>
 	<add-linker name="manifest"/>
 	
