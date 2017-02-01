@@ -141,40 +141,6 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
     }
     
     /**
-     * Calls the given callback for every known mapping that's currently known.
-     * 
-     * @param callback the callback to call for every known mapping
-     */
-    public void forEachMapping(Consumer<DeviceMappingWithRegattaLogEvent<ItemT>> callback) {
-        forEachMapping((item, mapping) -> callback.accept(mapping));
-    }
-    
-    /**
-     * Calls the given callback for every device mapped by at least one of the known mappings.
-     * 
-     * @param callback the callback to call for every mapped device
-     */
-    public void forEachDevice(Consumer<DeviceIdentifier> callback) {
-        LockUtil.executeWithReadLock(mappingsLock, () -> mappingsByDevice.keySet().forEach(callback::accept));
-    }
-    
-    /**
-     * Calls the given callback for every known mapping that's currently known.
-     * 
-     * @param callback the callback to call for every known mapping
-     */
-    public void forEachMapping(BiConsumer<ItemT, DeviceMappingWithRegattaLogEvent<ItemT>> callback) {
-        LockUtil.executeWithReadLock(mappingsLock, () -> {
-            for (Map.Entry<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> entry : mappings.entrySet()) {
-            ItemT item = entry.getKey();
-            for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : entry.getValue()) {
-                callback.accept(item, mapping);
-            }
-        }
-        });
-    }
-    
-    /**
      * Calls the given callback for every DeviceMapping that is known for the given {@link DeviceIdentifier} that
      * includes the given {@link TimePoint}.
      * 
@@ -200,30 +166,12 @@ public abstract class RegattaLogDeviceMappings<ItemT extends WithID> {
         });
     }
     
-    /**
-     * @return true if there is at least one mapping for the given {@link DeviceIdentifier}, false otherwise
-     */
-    public boolean hasMappingForDevice(DeviceIdentifier device) {
-        LockUtil.lockForRead(mappingsLock);
-        try {
-            return mappingsByDevice.containsKey(device);
-        } finally {
-            LockUtil.unlockAfterRead(mappingsLock);
-        }
-    }
-    
     public void forEachItemAndCoveredTimeRanges(final BiConsumer<ItemT, Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange>> consumer) {
         HashMap<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> allMappings = LockUtil.executeWithReadLockAndResult(mappingsLock, () -> new HashMap<>(mappings));
         allMappings.forEach((item, mappings) -> {
             final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> coveredTimeRanges = calculateCoveredTimeRanges(mappings);
             consumer.accept(item, coveredTimeRanges);
         });
-    }
-    
-    public Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> getCoveredTimeRangesForItem(ItemT item) {
-        final List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForItem = LockUtil.executeWithReadLockAndResult(mappingsLock, () -> mappings.get(item));
-        final Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> coveredTimeRanges = calculateCoveredTimeRanges(mappingsForItem);
-        return coveredTimeRanges;
     }
 
     private Map<RegattaLogDeviceMappingEvent<ItemT>, MultiTimeRange> calculateCoveredTimeRanges(
