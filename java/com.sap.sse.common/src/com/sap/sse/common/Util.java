@@ -696,10 +696,10 @@ public class Util {
      * <br>
      * Can be replaced with Java 8 Stream API in the future.
      * 
-     * @param values
-     * @param mappingFunction
-     * @param newCollectionProvider
-     * @return
+     * @param values the values to group
+     * @param mappingFunction function that extracts the group key from a value
+     * @param newCollectionProvider factory to create new instances of the inner collections
+     * @return a map containing all given values in inner collections grouped by a specific criteria
      */
     public static <K, V> Map<K, Iterable<V>> group(Iterable<V> values, Function<V, K> mappingFunction,
             Provider<? extends Collection<V>> newCollectionProvider) {
