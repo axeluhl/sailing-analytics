@@ -23,7 +23,6 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
@@ -398,8 +397,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
 
     private TimeRange getTrackingTimeRange() {
-        return new TimeRangeImpl(getStartOfTracking() == null ? TimePoint.BeginningOfTime : getStartOfTracking(),
-                getEndOfTracking() == null ? TimePoint.EndOfTime : getEndOfTracking());
+        final TimePoint startOfTracking = trackedRace.getStartOfTracking();
+        final TimePoint endOfTracking = trackedRace.getEndOfTracking();
+        return new TimeRangeImpl(startOfTracking == null ? TimePoint.BeginningOfTime : startOfTracking,
+                endOfTracking == null ? TimePoint.EndOfTime : endOfTracking);
     }
 
     public void stop(boolean preemptive) {
@@ -418,7 +419,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    protected void startTracking() {
+    private void startTracking() {
         trackedRace.addListener(raceChangeListener);
         this.deviceMappings = new FixLoaderDeviceMappings(trackedRace.getAttachedRegattaLogs(),
                 trackedRace.getRace().getName());
@@ -434,15 +435,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     }
 
-    protected TimePoint getStartOfTracking() {
-        return trackedRace.getStartOfTracking();
-    }
-
-    protected TimePoint getEndOfTracking() {
-        return trackedRace.getEndOfTracking();
-    }
-
-    protected void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
+    private void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
         final TimeRangeImpl extendedTimeRange = new TimeRangeImpl(loadFixesFrom, loadFixesTo);
         deviceMappings.forEachItemAndCoveredTimeRanges((item, mappingsAndCoveredTimeRanges) -> loadFixesInTrackingTimeRange(mappingsAndCoveredTimeRanges, extendedTimeRange));
     }
@@ -490,14 +483,6 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                 }
             }
         });
-    }
-
-    /**
-     * Tells if currently the race is loading GPS fixes from the {@link GPSFixStore}. Clients may {@link Object#wait()}
-     * on <code>this</code> object and will be notified whenever a change of this flag's value occurs.
-     */
-    public boolean isLoadingFromGPSFixStore() {
-        return activeLoaders.get() > 0;
     }
 
     private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
