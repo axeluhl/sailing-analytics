@@ -128,12 +128,6 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
                 StringMessages.INSTANCE);
 
-        settingsManager = new UserSettingsStorageManager<>(getUserService(),
-                UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint"),
-                leaderboardContextSettings.getRegattaName());
-
-        context = new LeaderboardComponentContext(rootComponentLifeCycle, settingsManager);
-
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
         if (!leaderboardContextSettings.getEmbedded()) {
@@ -146,6 +140,13 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
             mainPanel.addNorth(header, 75);
         }
+
+        settingsManager = new UserSettingsStorageManager<>(getUserService(),
+                UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint"),
+                leaderboardName);
+
+        context = new LeaderboardComponentContext(rootComponentLifeCycle, settingsManager);
+
         ScrollPanel contentScrollPanel = new ScrollPanel();
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);

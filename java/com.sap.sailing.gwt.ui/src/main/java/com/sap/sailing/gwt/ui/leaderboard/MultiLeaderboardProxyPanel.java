@@ -50,7 +50,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     private final SailingServiceAsync sailingService;
 
     private String selectedLeaderboardName;
-    
+
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final UserAgentDetails userAgent;
     private final boolean showRaceDetails;
