@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.grib.GribWindField;
 import com.sap.sailing.grib.GribWindFieldFactory;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import ucar.ma2.ArrayFloat.D2;
@@ -59,6 +60,18 @@ public class SimpleGridFileReadingTest {
         final float dataAtMiddle = volumeDataAtTime0.get(coordinateIndices[0], coordinateIndices[1]);
         System.out.println(dataVariables);
         System.out.println(dataAtMiddle);
+    }
+    
+    @Test
+    public void testUsingFtAPIForMeteoConsultContent() throws IOException {
+        final Formatter errorLog = new Formatter(System.err);
+        FeatureDataset dataSet = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/TuTMsTuMxoSYmtRzKDl0e75I4HAjqDApvb_.grb", /* task */ null, errorLog);
+        GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindField(dataSet);
+        final Position middle = windField.getBounds().getSouthWest().translateGreatCircle(
+                windField.getBounds().getSouthWest().getBearingGreatCircle(windField.getBounds().getNorthEast()),
+                windField.getBounds().getSouthWest().getDistance(windField.getBounds().getNorthEast()).scale(0.5));
+        final TimePoint midTime = windField.getTimeRange().from().plus(windField.getTimeRange().getDuration().divide(2));
+        System.out.println(windField.getWind(midTime, middle));
     }
     
     @Test

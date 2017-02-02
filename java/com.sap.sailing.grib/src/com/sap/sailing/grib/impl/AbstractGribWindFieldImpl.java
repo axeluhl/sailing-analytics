@@ -95,7 +95,8 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
         return toBounds(getDataSet().getBoundingBox());
     }
     
-    protected TimeRange getTimeRange() {
+    @Override
+    public TimeRange getTimeRange() {
         return new TimeRangeImpl(getStartTime(), getEndTime());
     }
 

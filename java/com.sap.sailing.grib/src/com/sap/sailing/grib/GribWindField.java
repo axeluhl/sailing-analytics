@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 
 public interface GribWindField {
     /**
@@ -27,4 +28,6 @@ public interface GribWindField {
      *         further into the future than the source knows, confidence is reduced.
      */
     WindWithConfidence<TimePoint> getWind(TimePoint timePoint, Position position) throws IOException;
+
+    TimeRange getTimeRange();
 }

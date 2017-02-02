@@ -35,10 +35,10 @@ public class UVWindField extends AbstractGribWindFieldImpl {
             for (final GridDatatype grid : ((GridDataset) dataSet).getGrids()) {
                 final Integer variableId = getVariableId(grid.getVariable()).orElse(-1);
                 if (variableId == U_COMPONENT_OF_WIND_PARAMETER_ID) {
-                    assert getUnit(grid.getVariable()).get().equals("m/s");
+                    assert isMetersPerSecond(getUnit(grid.getVariable()).get());
                     uComponentInMetersPerSecond = getValue(grid, timePoint, position);
                 } else if (variableId == V_COMPONENT_OF_WIND_PARAMETER_ID) {
-                    assert getUnit(grid.getVariable()).get().equals("m/s");
+                    assert isMetersPerSecond(getUnit(grid.getVariable()).get());
                     vComponentInMetersPerSecond = getValue(grid, timePoint, position);
                 }
                 if (uComponentInMetersPerSecond != null && vComponentInMetersPerSecond != null) {
@@ -50,12 +50,17 @@ public class UVWindField extends AbstractGribWindFieldImpl {
             wind = new WindImpl(uComponentInMetersPerSecond.getC(), uComponentInMetersPerSecond.getB(),
                     new MeterPerSecondSpeedWithDegreeBearingImpl(Math.sqrt(uComponentInMetersPerSecond.getA()*uComponentInMetersPerSecond.getA()+
                             vComponentInMetersPerSecond.getA()*vComponentInMetersPerSecond.getA()),
-                            new RadianBearingImpl(atan2>0 ? atan2 : 2*Math.PI+atan2).reverse()));
+                            new RadianBearingImpl(atan2>0 ? atan2 : 2*Math.PI+atan2)));
         } else {
             wind = null;
             confidence = 0;
         }
         return new WindWithConfidenceImpl<TimePoint>(wind, confidence*getBaseConfidence(), timePoint, /* useSpeed */ true);
+    }
+
+    private boolean isMetersPerSecond(String unit) {
+        final String spacelessUnit = unit.replaceAll(" ", "");
+        return spacelessUnit.equals("m/s") || spacelessUnit.equals("ms^-1");
     }
 
     /**
