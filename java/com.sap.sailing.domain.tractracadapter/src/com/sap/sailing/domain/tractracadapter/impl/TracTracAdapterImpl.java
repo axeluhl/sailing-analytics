@@ -56,7 +56,8 @@ public class TracTracAdapterImpl implements TracTracAdapter {
                         courseDesignUpdateURI,
                         /* startOfTracking */null,
                         /* endOfTracking */null, delayToLiveInMillis, /* offsetToStartTimeOfSimulatedRace */null, /* ignoreTracTracMarkPassings */ false,
-                        raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination),
+                        raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination,
+                        /* preferReplayIfAvailable */ false),
                 timeoutInMilliseconds);
     }
 
@@ -72,7 +73,7 @@ public class TracTracAdapterImpl implements TracTracAdapter {
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword,
-                        raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination), timeoutInMilliseconds);
+                        raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination, /* preferReplayIfAvailable */ false), timeoutInMilliseconds);
     }
 
     @Override

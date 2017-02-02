@@ -12,6 +12,7 @@ public interface CommonStringMessages {
     String importWait();
     String importLeaderboardGroups();
     String importWindTracks();
+    String importSensorFixes();
     String updateEventLeaderboardGroupLinks();
 
 }

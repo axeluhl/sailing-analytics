@@ -1814,7 +1814,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             if (startOfRace != null && trackedLeg.hasStartedLeg(timePoint)) {
                 // not using trackedLeg.getManeuvers(...) because it may not catch the mark passing maneuver starting this leg
                 // because that may have been detected as slightly before the mark passing time, hence associated with the previous leg
-                List<Maneuver> maneuvers = trackedLeg.getTrackedLeg().getTrackedRace()
+                Iterable<Maneuver> maneuvers = trackedLeg.getTrackedLeg().getTrackedRace()
                         .getManeuvers(trackedLeg.getCompetitor(), startOfRace, timePoint, waitForLatestAnalyses);
                 if (maneuvers != null) {
                     result.numberOfManeuvers = new HashMap<ManeuverType, Integer>();

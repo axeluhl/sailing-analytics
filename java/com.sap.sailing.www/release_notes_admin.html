@@ -42,6 +42,14 @@
                     	    committed timestamp is revoked (regardless of the contents of the date/time field), allowing for
                     	    inference to take place if the regatta has been configured for tracking times inference.
                     	</li>
+                    	<li>There is a new permission, <tt>DATA_MINING</tt>, which is now required in order to use the
+                    	    <tt>/gwt/DataMining.html</tt> entry point and the related back-end service.
+                    	</li>
+                    	<li>Quoted filtering keywords may now contain leading and/or trailing space characters that are
+                    	    considered when applying the filter. For example, if you have regatta names "Regatta I - 2017" and
+                    	    "Regatta II - 2017" and you would like to filter for "Regatta I" then you now may enter the
+                    	    search term "Regatta I " (with a trailing blank) which then will no longer match "Regatta II - 2017".
+                    	</li> 
                     </ul>
                     <h2 class="articleSubheadline">December 2016</h2>
                     <ul class="bulletList">

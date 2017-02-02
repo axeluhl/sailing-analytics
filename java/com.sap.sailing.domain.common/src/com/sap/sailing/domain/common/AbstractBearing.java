@@ -57,7 +57,11 @@ public abstract class AbstractBearing implements Bearing {
     
     @Override
     public boolean equals(Object object) {
-        return object != null && object instanceof Bearing && getDegrees() == ((Bearing) object).getDegrees();
+        if (this == object) {
+            return true;
+        } else {
+            return object != null && object instanceof Bearing && getDegrees() == ((Bearing) object).getDegrees();
+        }
     }
 
     @Override

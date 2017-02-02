@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.jaxrs.api;
+package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.NavigableSet;
@@ -11,11 +11,12 @@ import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.server.gateway.serialization.JsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 
-public class MarkPassingsJsonSerializer implements JsonSerializer<TrackedRace> {
+public class MarkPassingsJsonSerializer extends AbstractTrackedRaceDataJsonSerializer {
+    public static final String ZERO_BASED_WAYPOINT_INDEX = "zeroBasedWaypointIndex";
+    public static final String WAYPOINT_NAME = "waypointName";
+    public static final String BYWAYPOINT = "bywaypoint";
+    public static final String MARKPASSINGS = "markpassings";
     private static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     @Override
@@ -24,14 +25,14 @@ public class MarkPassingsJsonSerializer implements JsonSerializer<TrackedRace> {
         JSONObject result = new JSONObject();
         CompetitorJsonSerializer competitorSerializer = new CompetitorJsonSerializer(null, BoatJsonSerializer.create());
         JSONArray byCompetitorJson = new JSONArray();
-        result.put("bycompetitor", byCompetitorJson);
+        result.put(BYCOMPETITOR, byCompetitorJson);
         for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
             JSONObject forCompetitorJson = new JSONObject();
             byCompetitorJson.add(forCompetitorJson);
-            forCompetitorJson.put("competitor", competitorSerializer.serialize(competitor));
+            forCompetitorJson.put(COMPETITOR, competitorSerializer.serialize(competitor));
             final NavigableSet<MarkPassing> markPassingsForCompetitor = trackedRace.getMarkPassings(competitor);
             JSONArray markPassingsForCompetitorJson = new JSONArray();
-            forCompetitorJson.put("markpassings", markPassingsForCompetitorJson);
+            forCompetitorJson.put(MARKPASSINGS, markPassingsForCompetitorJson);
             trackedRace.lockForRead(markPassingsForCompetitor);
             try {
                 for (MarkPassing markPassing : markPassingsForCompetitor) {
@@ -45,7 +46,7 @@ public class MarkPassingsJsonSerializer implements JsonSerializer<TrackedRace> {
             }
         }
         JSONArray byWaypointJson = new JSONArray();
-        result.put("bywaypoint", byWaypointJson);
+        result.put(BYWAYPOINT, byWaypointJson);
         for (Waypoint waypoint : course.getWaypoints()) {
             JSONObject jsonForWaypoint = new JSONObject();
             byWaypointJson.add(jsonForWaypoint);
@@ -54,11 +55,11 @@ public class MarkPassingsJsonSerializer implements JsonSerializer<TrackedRace> {
             trackedRace.lockForRead(markPassingsForWaypoint);
             try {
                 JSONArray markPassingsForWaypointJson = new JSONArray();
-                jsonForWaypoint.put("markpassings", markPassingsForWaypointJson);
+                jsonForWaypoint.put(MARKPASSINGS, markPassingsForWaypointJson);
                 for (MarkPassing markPassing : markPassingsForWaypoint) {
                     JSONObject markPassingJson = new JSONObject();
                     markPassingsForWaypointJson.add(markPassingJson);
-                    markPassingJson.put("competitor", competitorSerializer.serialize(markPassing.getCompetitor()));
+                    markPassingJson.put(COMPETITOR, competitorSerializer.serialize(markPassing.getCompetitor()));
                     addMarkPassingTime(markPassing, markPassingJson);
                 }
             } finally {
@@ -69,12 +70,12 @@ public class MarkPassingsJsonSerializer implements JsonSerializer<TrackedRace> {
     }
 
     private void addMarkPassingTime(MarkPassing markPassing, JSONObject markPassingJson) {
-        markPassingJson.put("timeasmillis", markPassing.getTimePoint().asMillis());
-        markPassingJson.put("timeasiso", TIMEPOINT_FORMATTER.format(markPassing.getTimePoint().asDate()));
+        markPassingJson.put(TIMEASMILLIS, markPassing.getTimePoint().asMillis());
+        markPassingJson.put(TIMEASISO, TIMEPOINT_FORMATTER.format(markPassing.getTimePoint().asDate()));
     }
 
     private void addWaypoint(final Course course, Waypoint waypoint, JSONObject jsonToAddTo) {
-        jsonToAddTo.put("waypointName", waypoint.getName());
-        jsonToAddTo.put("zeroBasedWaypointIndex", course.getIndexOfWaypoint(waypoint));
+        jsonToAddTo.put(WAYPOINT_NAME, waypoint.getName());
+        jsonToAddTo.put(ZERO_BASED_WAYPOINT_INDEX, course.getIndexOfWaypoint(waypoint));
     }
 }

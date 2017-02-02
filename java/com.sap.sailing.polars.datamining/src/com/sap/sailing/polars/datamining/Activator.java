@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 
-import com.sap.sailing.datamining.RacingEventServiceProvider;
+import com.sap.sailing.datamining.provider.RacingEventServiceProvider;
 import com.sap.sailing.polars.datamining.components.aggregators.PolarBackendDataAggregationProcessor;
 import com.sap.sailing.polars.datamining.components.aggregators.PolarDataAggregationProcessor;
 import com.sap.sailing.polars.datamining.data.HasBackendPolarBoatClassContext;

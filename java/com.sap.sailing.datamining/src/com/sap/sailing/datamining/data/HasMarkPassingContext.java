@@ -4,18 +4,14 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
-public interface HasMarkPassingContext {
-    
+public interface HasMarkPassingContext extends HasWindOnTrackedLeg, HasManeuver, HasTrackedLegOfCompetitor {
     @Connector(scanForStatistics=false)
     HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext();
-    
-    MarkPassingManeuver getManeuver();
-    
+
     //TODO Clean-Up:
     // Move Dimensions and Statistics to Maneuver/MarkPassingManeuver and connect to it
     // Find a way to implement HasManeuverContext and HasMarkPassingManeuver with a base class

@@ -12,7 +12,6 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +26,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -68,9 +68,10 @@ public class ManeuverAnalysisQingdao2014Test extends AbstractManeuverDetectionTe
         Date toDate = dateFormat.parse("05/01/2014-09:10:00");
         assertNotNull(fromDate);
         assertNotNull(toDate);
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
+        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
-        maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
+        maneuversInvalid = new ArrayList<Maneuver>();
+        Util.addAll(maneuvers, maneuversInvalid);
 
         assertManeuver(maneuvers, ManeuverType.JIBE, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:08:15")), 5000);
         assertManeuver(maneuvers, ManeuverType.TACK, new MillisecondsTimePoint(dateFormat.parse("05/01/2014-09:08:51")), 5000);
