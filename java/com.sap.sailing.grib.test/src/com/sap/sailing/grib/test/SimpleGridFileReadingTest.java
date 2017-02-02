@@ -1,5 +1,6 @@
 package com.sap.sailing.grib.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.grib.GribWindField;
 import com.sap.sailing.grib.GribWindFieldFactory;
 import com.sap.sse.common.TimePoint;
@@ -85,6 +87,75 @@ public class SimpleGridFileReadingTest {
         Calendar cal = new GregorianCalendar(2016, 11, 12, 13, 00, 00);
         cal.setTimeZone(TimeZone.getTimeZone("CET"));
         System.out.println(windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), middle));
+    }
+    
+    @Test
+    public void testGlobalMarineNetCroatia() throws IOException {
+        final Formatter errorLog = new Formatter(System.err);
+        FeatureDataset dataSet = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/globalMarineNetCroatia.grb.bz2", /* task */ null, errorLog);
+        GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindField(dataSet);
+        final Position croatia = new DegreePosition(42.819522, 16.478226);
+        Calendar cal = new GregorianCalendar(2017, 01, 03, 3, 00, 00);
+        cal.setTimeZone(TimeZone.getTimeZone("CET"));
+        final WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), croatia);
+        assertEquals(3, wind.getObject().getBeaufort(), 2.2);
+        assertEquals(150, wind.getObject().getFrom().getDegrees(), 20);
+    }
+
+    @Test
+    public void testGlobalMarineNet54hCroatia() throws IOException {
+        final Formatter errorLog = new Formatter(System.err);
+        FeatureDataset dataSet = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/globalMarineNetCroatia.grb.bz2", /* task */ null, errorLog);
+        GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindField(dataSet);
+        final Position croatia = new DegreePosition(42.819522, 16.478226);
+        Calendar cal = new GregorianCalendar(2017, 01, 04, 19, 00, 00);
+        cal.setTimeZone(TimeZone.getTimeZone("CET"));
+        final WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), croatia);
+        assertEquals(5, wind.getObject().getBeaufort(), 1);
+        assertEquals(300, wind.getObject().getFrom().getDegrees(), 20);
+    }
+
+    @Test
+    public void testHavana() throws IOException {
+        //        Mon Dec 12 13:00:00 CET 2016
+        //        ll: 10.0N 100.0W+ ur: 48.0N 40.00W
+        //
+        //       Havana, Cuba (23.099242, -82.360187)
+        //       5:55 AM 19.0 °C -       18.0 °C 94%     1018 hPa        9.0 km  NE      7.4 km/h / 2.1 m/s      -       N/A             Unknown
+        //
+        //       NE is approx. from 45
+        //       2.1m/s is approx. 4.2kts
+        final Formatter errorLog = new Formatter(System.err);
+        FeatureDataset dataSet = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/wind-Atlantic.24hr.grb.bz2", /* task */ null, errorLog);
+        GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindField(dataSet);
+        final Position havanaPosition = new DegreePosition(23.099242, -82.360187);
+        Calendar cal = new GregorianCalendar(2016, 11, 12, 13, 00, 00);
+        cal.setTimeZone(TimeZone.getTimeZone("CET"));
+        WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), havanaPosition);
+        assertEquals(4.2, wind.getObject().getKnots(), 3);
+        assertEquals(90, wind.getObject().getFrom().getDegrees(), 45); // historic data says NE but we get 130° which matches the SE
+        // direction from https://www.wunderground.com/history/airport/MUHA/2016/12/12/DailyHistory.html?req_city=Havana&req_state=03&req_statename=Cuba&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=78224&MR=1
+        // for 10:55 CST. So we should probably accept that.
+    }
+    
+    @Test
+    public void testNassau() throws IOException {
+        //        Mon Dec 12 13:00:00 CET 2016
+        //
+        //       Nassau, Bahamas (25.052497, -77.366815)
+        //       8:00 AM        25.0 °C -       23.0 °C 89%     1020.2 hPa      10.0 km ESE     9.3 km/h / 2.6 m/s      -       N/A             Mostly Cloudy
+        //
+        //       NE is approx. from 45
+        //       2.1m/s is approx. 4.2kts
+        final Formatter errorLog = new Formatter(System.err);
+        FeatureDataset dataSet = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/wind-Atlantic.24hr.grb.bz2", /* task */ null, errorLog);
+        GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindField(dataSet);
+        final Position nassauPosition = new DegreePosition(25.052497, -77.366815);
+        Calendar cal = new GregorianCalendar(2016, 11, 12, 13, 00, 00);
+        cal.setTimeZone(TimeZone.getTimeZone("CET"));
+        WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), nassauPosition);
+        assertEquals(5.2, wind.getObject().getKnots(), 12); // the forecast had it at 16.7kts... what can we do...
+        assertEquals(112.5, wind.getObject().getFrom().getDegrees(), 30); // historic data says ESE which is approximately 112.5
     }
     
     @Test
