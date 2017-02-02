@@ -105,14 +105,14 @@ public class SimpleGridFileReadingTest {
     @Test
     public void testGlobalMarineNet54hCroatia() throws IOException {
         final Formatter errorLog = new Formatter(System.err);
-        FeatureDataset dataSet = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/globalMarineNetCroatia.grb.bz2", /* task */ null, errorLog);
+        FeatureDataset dataSet = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/globalMarineNetCroatia54h.grb.bz2", /* task */ null, errorLog);
         GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindField(dataSet);
         final Position croatia = new DegreePosition(42.819522, 16.478226);
         Calendar cal = new GregorianCalendar(2017, 01, 04, 19, 00, 00);
         cal.setTimeZone(TimeZone.getTimeZone("CET"));
         final WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), croatia);
-        assertEquals(5, wind.getObject().getBeaufort(), 1);
-        assertEquals(300, wind.getObject().getFrom().getDegrees(), 20);
+        assertEquals(5, wind.getObject().getBeaufort(), 1.5);
+        assertEquals(200, wind.getObject().getFrom().getDegrees(), 20);
     }
 
     @Test
