@@ -8,6 +8,12 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 
+/**
+ * A wind field that is based on some GRIB data and can be queried using a {@link TimePoint} and a {@link Position}.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public interface GribWindField {
     /**
      * @return the geographical bounds within which there is wind data in this field
@@ -29,5 +35,8 @@ public interface GribWindField {
      */
     WindWithConfidence<TimePoint> getWind(TimePoint timePoint, Position position) throws IOException;
 
+    /**
+     * The time range covered by the underlying GRIB data.
+     */
     TimeRange getTimeRange();
 }
