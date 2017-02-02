@@ -290,7 +290,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     // for the trackedRace because the competitors may not compete in it; in this case, the
                     // competitor retrieved from the mapping event does not have a track in trackedRace
                     try {
-                        sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), event.getDevice(),
+                        sensorFixStore.<DoubleVectorFix> loadFixes(fix -> mapper.addFix(track, fix), event.getDevice(),
                                 timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false);
                     } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
                         logger.log(Level.WARNING, "Could not load track for competitor: " + event.getMappedTo()
@@ -307,7 +307,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     // for the trackedRace because the competitors may not compete in it; in this case, the
                     // competitor retrieved from the mapping event does not have a track in trackedRace
                     try {
-                        sensorFixStore.loadFixes((GPSFixMoving fix) -> track.add(fix, true), event.getDevice(),
+                        sensorFixStore.<GPSFixMoving> loadFixes(fix -> track.add(fix, true), event.getDevice(),
                                 timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false);
                     } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                         logger.log(Level.WARNING, "Could not load competitor track " + event.getMappedTo() + "; device "
@@ -320,7 +320,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             public void visit(RegattaLogDeviceMarkMappingEvent event) {
                 DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());
                 try {
-                    sensorFixStore.loadFixes((GPSFixMoving fix) -> track.add(fix, true), event.getDevice(),
+                    sensorFixStore.<GPSFix> loadFixes(fix -> track.add(fix, true), event.getDevice(),
                             timeRangeToLoad.from(), timeRangeToLoad.to(), /* toIsInclusive */ false);
                 } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                     logger.log(Level.WARNING, "Could not load mark track " + event.getMappedTo());
@@ -364,7 +364,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         new TreeSet<>((timeRange1, timeRange2) -> -timeRange1.from().compareTo(timeRange2.from())));
                 for (TimeRange timeRange : inverseTimeRanges) {
                     try {
-                        if (sensorFixStore.loadYoungestFix((GPSFixMoving fix) -> track.add(fix, true),
+                        if (sensorFixStore.<GPSFix> loadYoungestFix(fix -> track.add(fix, true),
                                 event.getDevice(), timeRange)) {
                             // new best fix before start of tracking found
                             break;
@@ -382,7 +382,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                 : TimePoint.EndOfTime));
                 for (TimeRange timeRange : afterRange) {
                     try {
-                        if (sensorFixStore.loadOldestFix((GPSFixMoving fix) -> track.add(fix, true), event.getDevice(),
+                        if (sensorFixStore.<GPSFix> loadOldestFix(fix -> track.add(fix, true), event.getDevice(),
                                 timeRange)) {
                             // new best fix after end of tracking found
                             break;
