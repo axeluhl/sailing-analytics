@@ -3185,7 +3185,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Map<CompetitorDTO, List<ManeuverDTO>> getManeuvers(RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to) throws NoWindException {
-        Map<CompetitorDTO, List<ManeuverDTO>> result = new HashMap<CompetitorDTO, List<ManeuverDTO>>();
+        Map<CompetitorDTO, List<ManeuverDTO>> result = new HashMap<>();
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             Map<CompetitorDTO, Future<List<ManeuverDTO>>> futures = new HashMap<CompetitorDTO, Future<List<ManeuverDTO>>>();
@@ -3198,8 +3198,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             new Callable<List<ManeuverDTO>>() {
                                 @Override
                                 public List<ManeuverDTO> call() {
-                                    List<Maneuver> maneuversForCompetitor;
-                                    maneuversForCompetitor = trackedRace.getManeuvers(competitor, timePointFrom,
+                                    final Iterable<Maneuver> maneuversForCompetitor = trackedRace.getManeuvers(competitor, timePointFrom,
                                             timePointTo, /* waitForLatest */ true);
                                     return createManeuverDTOsForCompetitor(maneuversForCompetitor, trackedRace, competitor);
                                 }
@@ -3221,7 +3220,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private List<ManeuverDTO> createManeuverDTOsForCompetitor(List<Maneuver> maneuvers, TrackedRace trackedRace, Competitor competitor) {
+    private List<ManeuverDTO> createManeuverDTOsForCompetitor(Iterable<Maneuver> maneuvers, TrackedRace trackedRace, Competitor competitor) {
         List<ManeuverDTO> result = new ArrayList<ManeuverDTO>();
         for (Maneuver maneuver : maneuvers) {
             final ManeuverDTO maneuverDTO;

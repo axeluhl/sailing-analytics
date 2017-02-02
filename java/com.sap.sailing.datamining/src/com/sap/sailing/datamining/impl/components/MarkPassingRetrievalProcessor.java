@@ -2,7 +2,6 @@ package com.sap.sailing.datamining.impl.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
@@ -29,7 +28,7 @@ public class MarkPassingRetrievalProcessor extends AbstractRetrievalProcessor<Ha
         TimePoint finishTime = element.getTrackedLegOfCompetitor().getFinishTime();
         if (finishTime != null) {
             try {
-                List<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
+                Iterable<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
                 for (Maneuver maneuver : maneuvers) {
                     if (maneuver.getType() == ManeuverType.MARK_PASSING) {
                         maneuversWithContext.add(new MarkPassingWithContext(element, (MarkPassingManeuver) maneuver));

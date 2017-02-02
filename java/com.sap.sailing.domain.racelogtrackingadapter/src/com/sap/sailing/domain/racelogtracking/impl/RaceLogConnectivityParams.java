@@ -64,13 +64,13 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver) {
-        return createRaceTracker(regatta, trackedRegattaRegistry, windStore, raceLogResolver);
+            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) {
+        return createRaceTracker(regatta, trackedRegattaRegistry, windStore, raceLogResolver, timeoutInMilliseconds);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, RaceLogResolver raceLogResolver) {
+            WindStore windStore, RaceLogResolver raceLogResolver, long timeoutInMilliseconds) {
         if (regatta == null) {
             BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getBoatClass();
             regatta = service.getOrCreateDefaultRegatta(

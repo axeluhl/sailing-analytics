@@ -227,7 +227,7 @@ public class MarkPassingCalculator {
         @Override
         public void run() {
             try {
-                logger.info("MarkPassingCalculator is listening on race "+raceName);
+                logger.fine("MarkPassingCalculator is listening on race "+raceName);
                 boolean finished = false;
                 final Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
                 final Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
@@ -263,7 +263,7 @@ public class MarkPassingCalculator {
                             logger.fine("MPC for "+raceName+" received "+ allNewFixInsertions.size()+" new updates.");
                             for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
                                 if (isEndMarker(fixInsertion)) {
-                                    logger.info("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
+                                    logger.fine("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
                                     finished = true;
                                     break;
                                 } else {
@@ -321,7 +321,7 @@ public class MarkPassingCalculator {
                     }
                 }
             } finally {
-                logger.info("MarkPassingCalculator Listen thread terminating for race "+raceName);
+                logger.fine("MarkPassingCalculator Listen thread terminating for race "+raceName);
             }
         }
 

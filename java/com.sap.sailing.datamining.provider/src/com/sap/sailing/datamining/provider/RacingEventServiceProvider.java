@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining;
+package com.sap.sailing.datamining.provider;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;

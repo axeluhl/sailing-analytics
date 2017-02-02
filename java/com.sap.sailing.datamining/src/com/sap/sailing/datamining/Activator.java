@@ -26,6 +26,7 @@ import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMa
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMedianAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMinAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceSumAggregationProcessor;
+import com.sap.sailing.datamining.provider.RacingEventServiceProvider;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;

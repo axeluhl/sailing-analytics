@@ -132,7 +132,7 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, final WindStore windStore,
-            RaceLogResolver raceLogResolver) throws Exception {
+            RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws Exception {
         SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(/* regatta */ null, raceName,
                 raceID, domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName), domainFactory,
                 trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver, raceLogStore,
@@ -143,7 +143,7 @@ public class SwissTimingReplayConnectivityParameters extends AbstractRaceTrackin
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, RaceLogResolver raceLogResolver) throws Exception {
+            WindStore windStore, RaceLogResolver raceLogResolver, long timeoutInMilliseconds) throws Exception {
         SwissTimingReplayToDomainAdapter listener = new SwissTimingReplayToDomainAdapter(regatta, raceName,
                 raceID, domainFactory.getBaseDomainFactory().getOrCreateBoatClass(boatClassName),
                 domainFactory, trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver,
