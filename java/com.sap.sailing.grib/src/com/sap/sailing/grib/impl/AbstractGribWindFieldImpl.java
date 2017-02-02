@@ -13,6 +13,7 @@ import com.sap.sailing.grib.GribWindField;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -191,9 +192,55 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
             timeIndex = -1; // time index doesn't matter if no time dimension exists for the grid
             responseTimePoint = getStartTime();
         }
-        final Array arrayForTimePointBefore = grid.readDataSlice(timeIndex, /* z_index */ 0, xy[1], xy[0]);
-        final Position responsePosition = toPosition(coordinateSystem.getLatLon(xy[0], xy[1]));
-        return new Triple<Double, TimePoint, Position>((double) arrayForTimePointBefore.getFloat(0), responseTimePoint, responsePosition);
+        Pair<Double, Position> nearestNonNaNValueWithPosition = getNearestNonNaNValueWithPosition(
+                coordinateSystem, grid, timeIndex, /* zIndex */ 0, xy[1], xy[0], /* distance */ 0);
+        return new Triple<Double, TimePoint, Position>(nearestNonNaNValueWithPosition.getA(), responseTimePoint, nearestNonNaNValueWithPosition.getB());
+    }
+    
+    /**
+     * Tries to find a non-{@code NaN} value starting at a given "distance" from a grid point. "Distance" here means the
+     * following: a grid point (x, y) has distance d from a grid point (a, b) if and only if {@code Math.abs(a-x)==d &&
+     * Math.abs(b-y)<=d || Math.abs(a-x)<=d && Math.abs(b-y)==d}. These points are intersected with the bounds as
+     * defined by the dimensions and then probed until a non-{@code NaN} value is found. The position for the grid point
+     * where such a value was found is then returned. If no such point is found with the exact distance, the next higher
+     * distance is probed recursively. If no such point exists within the bounds of the grid,
+     * {@code new Pair<>(NaN, null)} will be returned.
+     */
+    private Pair<Double, Position> getNearestNonNaNValueWithPosition(GridCoordSystem coordinateSystem,
+            GridDatatype grid, int timeIndex, int zIndex, int yIndex, int xIndex, int distance) throws IOException {
+        final int minX = Math.max(0, xIndex-distance);
+        final int maxX = Math.min(grid.getXDimension().getLength()-1, xIndex+distance);
+        final int minY = Math.max(0, yIndex-distance);
+        final int maxY = Math.min(grid.getYDimension().getLength()-1, yIndex+distance);
+        if (minX>maxX || minY>maxY) { // empty range
+            return new Pair<>(Double.NaN, null);
+        }
+        for (int x=minX; x<=maxX; x++) {
+            for (int y = minY; y <= maxY; y += Math.max(1, maxY - minY)) { // scan upper and lower row; increment even if single-element range to trigger condition
+                final double valueAsFloat = getValue(grid, timeIndex, zIndex, x, y);
+                if (!Double.isNaN(valueAsFloat)) {
+                    final Position responsePosition = toPosition(coordinateSystem.getLatLon(x, y));
+                    return new Pair<>(valueAsFloat, responsePosition);
+                }
+            }
+        }
+        for (int y=minY+1; y<maxY; y++) {
+            for (int x = minX; x <= maxX; x += Math.max(1, maxX - minX)) { // scan left and right border without top/bottom elements
+                final double valueAsFloat = getValue(grid, timeIndex, zIndex, x, y);
+                if (!Double.isNaN(valueAsFloat)) {
+                    final Position responsePosition = toPosition(coordinateSystem.getLatLon(x, y));
+                    return new Pair<>(valueAsFloat, responsePosition);
+                }
+            }
+        }
+        // nothing found so far; tail-recurse for next greater distance
+        return getNearestNonNaNValueWithPosition(coordinateSystem, grid, timeIndex, zIndex, yIndex, xIndex, distance+1);
+    }
+
+    private double getValue(GridDatatype grid, int timeIndex, int zIndex, final int x, final int y) throws IOException {
+        final Array arrayForTimePointBefore = grid.readDataSlice(timeIndex, zIndex, y, x);
+        final double valueAsFloat = (double) arrayForTimePointBefore.getFloat(0);
+        return valueAsFloat;
     }
 
     protected Optional<String> getUnit(VariableDS variable) {
