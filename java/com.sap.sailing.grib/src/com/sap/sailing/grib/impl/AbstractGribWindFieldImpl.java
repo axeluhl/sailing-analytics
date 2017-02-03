@@ -111,7 +111,7 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
         final TimeRange timeRange = getTimeRange();
         if (timeRange.includes(timePoint)) {
             result = 1.0;
-        } else if (timeRange.startsAfter(timePoint)) {
+        } else if (timeRange.startsAtOrAfter(timePoint)) {
             result = timeConfidenceWeigher.getConfidence(timeRange.from(), timePoint);
         } else {
             assert timeRange.endsBefore(timePoint);
