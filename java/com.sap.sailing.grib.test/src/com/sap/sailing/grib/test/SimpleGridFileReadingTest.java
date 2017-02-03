@@ -129,6 +129,8 @@ public class SimpleGridFileReadingTest {
     @Test
     public void testNOAADownload() throws IOException {
         // downloaded from http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.oceanic/VP.001-003/
+        // alternatively for the 4-6 day forecast: http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.oceanic/VP.004-007/
+        // validate graphically at http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.oceanic/VP.004-007/
         final Formatter errorLog = new Formatter(System.err);
         Files.copy(new URL("http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.oceanic/VP.001-003/ds.wdir.bin").openStream(),
                 new File("resources/ds.wdir.bin").toPath(), StandardCopyOption.REPLACE_EXISTING);
