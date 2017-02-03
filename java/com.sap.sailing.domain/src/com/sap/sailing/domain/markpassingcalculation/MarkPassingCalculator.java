@@ -444,7 +444,7 @@ public class MarkPassingCalculator {
     public void resume() {
         logger.finest("Resumed MarkPassingCalculator");
         suspended = false;
-        queue.add(new StorePositionUpdateStrategy() {
+        enqueueUpdate(new StorePositionUpdateStrategy() {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
