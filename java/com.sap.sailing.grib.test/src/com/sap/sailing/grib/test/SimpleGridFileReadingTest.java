@@ -1,9 +1,14 @@
 package com.sap.sailing.grib.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Calendar;
 import java.util.Formatter;
 import java.util.GregorianCalendar;
@@ -12,6 +17,7 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
@@ -86,9 +92,11 @@ public class SimpleGridFileReadingTest {
     }
 
     private Position getMiddle(GribWindField windField) {
-        return windField.getBounds().getSouthWest().translateGreatCircle(
-                windField.getBounds().getSouthWest().getBearingGreatCircle(windField.getBounds().getNorthEast()),
-                windField.getBounds().getSouthWest().getDistance(windField.getBounds().getNorthEast()).scale(0.5));
+        final Bounds bounds = windField.getBounds();
+        final double newLatDeg = (bounds.getSouthWest().getLatDeg() + bounds.getNorthEast().getLatDeg())/2.0;
+        final double newLngDeg = bounds.isCrossesDateLine() ? (bounds.getSouthWest().getLngDeg() + bounds.getNorthEast().getLngDeg() + 360.)/2.0
+                : (bounds.getSouthWest().getLngDeg() + bounds.getNorthEast().getLngDeg())/2.0;
+        return new DegreePosition(newLatDeg, newLngDeg>180?newLngDeg-360:newLngDeg);
     }
     
     @Test
@@ -116,6 +124,25 @@ public class SimpleGridFileReadingTest {
         final WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), middle);
         assertEquals(2.5, wind.getObject().getBeaufort(), 0.5);
         assertEquals(110, wind.getObject().getFrom().getDegrees(), 10);
+    }
+    
+    @Test
+    public void testNOAADownload() throws IOException {
+        // downloaded from http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.oceanic/VP.001-003/
+        final Formatter errorLog = new Formatter(System.err);
+        Files.copy(new URL("http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.oceanic/VP.001-003/ds.wdir.bin").openStream(),
+                new File("resources/ds.wdir.bin").toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(new URL("http://tgftp.nws.noaa.gov/SL.us008001/ST.expr/DF.gr2/DC.ndfd/AR.oceanic/VP.001-003/ds.wspd.bin").openStream(),
+                new File("resources/ds.wspd.bin").toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        FeatureDataset dataSetDirection = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/ds.wdir.bin", /* task */ null, errorLog);
+        FeatureDataset dataSetSpeed = FeatureDatasetFactoryManager.open(FeatureType.ANY, "resources/ds.wspd.bin", /* task */ null, errorLog);
+        GribWindField windField = GribWindFieldFactory.INSTANCE.createGribWindField(dataSetDirection, dataSetSpeed);
+        final Position middle = getMiddle(windField);
+        Calendar cal = new GregorianCalendar(2017, 01, 04, 06, 00, 00);
+        cal.setTimeZone(TimeZone.getTimeZone("CET"));
+        final WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), middle);
+        assertNotNull(wind.getObject());
     }
 
     @Test
