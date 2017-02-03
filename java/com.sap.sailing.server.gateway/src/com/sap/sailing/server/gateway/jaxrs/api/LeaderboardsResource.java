@@ -484,8 +484,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
         String markId = (String) requestObject.get(DeviceMappingConstants.JSON_MARK_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
-        TimePoint closingTimePoint = new MillisecondsTimePoint(toMillis);
-        if (toMillis == null || deviceUuid == null || closingTimePoint == null ||
+        TimePoint closingTimePointInclusive = new MillisecondsTimePoint(toMillis);
+        if (toMillis == null || deviceUuid == null || closingTimePointInclusive == null ||
                 (competitorId == null && markId == null)) {
             logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
@@ -521,7 +521,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
         RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(now,
-                author, deviceMappingEventId, closingTimePoint);
+                author, deviceMappingEventId, closingTimePointInclusive);
         isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully checked out "+((markId!=null)?"mark ":"competitor ") + mappedTo.getName());
         return Response.status(Status.OK).build();
