@@ -18,37 +18,55 @@ import ucar.nc2.ft.FeatureDataset;
 
 public class SpeedAndDirectionWindField extends AbstractGribWindFieldImpl {
     private static final int WIND_DIRECTION_PARAMETER_ID = 31;
-    private static final int WIND_SPEED_PARAMETER_ID = 32;
+    private static final int WIND_DIRECTION_GRIB2_DISCIPLINE = 0;
+    private static final int WIND_DIRECTION_GRIB2_PARAMETER_CATEGORY = 2;
+    private static final int WIND_DIRECTION_GRIB2_PARAMETER_NUMBER = 0;
 
-    public SpeedAndDirectionWindField(FeatureDataset dataSet) {
-        super(dataSet, /* baseConfidence */ 0.5);
+    private static final int WIND_SPEED_PARAMETER_ID = 32;
+    private static final int WIND_SPEED_GRIB2_DISCIPLINE = 0;
+    private static final int WIND_SPEED_GRIB2_PARAMETER_CATEGORY = 2;
+    private static final int WIND_SPEED_GRIB2_PARAMETER_NUMBER = 1;
+    
+    private static final VariableSpecification windDirectionVariableSpecification =
+            new CompositeVariableSpecification(new Grib1VariableSpecification(WIND_DIRECTION_PARAMETER_ID),
+                                               new Grib2VariableSpecification(new int[] { WIND_DIRECTION_GRIB2_DISCIPLINE, WIND_DIRECTION_GRIB2_PARAMETER_CATEGORY, WIND_DIRECTION_GRIB2_PARAMETER_NUMBER }));
+
+    private static final VariableSpecification windSpeedVariableSpecification =
+            new CompositeVariableSpecification(new Grib1VariableSpecification(WIND_SPEED_PARAMETER_ID),
+                                               new Grib2VariableSpecification(new int[] { WIND_SPEED_GRIB2_DISCIPLINE, WIND_SPEED_GRIB2_PARAMETER_CATEGORY, WIND_SPEED_GRIB2_PARAMETER_NUMBER }));
+
+    public SpeedAndDirectionWindField(FeatureDataset... dataSets) {
+        super(/* baseConfidence */ 0.5, dataSets);
     }
 
     @Override
     public WindWithConfidence<TimePoint> getWind(TimePoint timePoint, Position position) throws IOException {
-        FeatureDataset dataSet = getDataSet();
-        final Wind wind;
-        final double confidence;
-        if (dataSet instanceof GridDataset) {
-            Triple<Double, TimePoint, Position> directionComponentInDegreesTrue = null;
-            Triple<Double, TimePoint, Position> speedComponentInMetersPerSecond = null;
-            for (final GridDatatype grid : ((GridDataset) dataSet).getGrids()) {
-                final Integer variableId = getVariableId(grid.getVariable()).orElse(-1);
-                if (variableId == WIND_DIRECTION_PARAMETER_ID) {
-                    assert getUnit(grid.getVariable()).get().equals("m/s");
-                    directionComponentInDegreesTrue = getValue(grid, timePoint, position);
-                } else if (variableId == WIND_SPEED_PARAMETER_ID) {
-                    assert getUnit(grid.getVariable()).get().equals("m/s");
-                    speedComponentInMetersPerSecond = getValue(grid, timePoint, position);
-                }
-                if (directionComponentInDegreesTrue != null && speedComponentInMetersPerSecond != null) {
-                    break;
+        Triple<Double, TimePoint, Position> directionComponentInDegreesTrue = null;
+        Triple<Double, TimePoint, Position> speedComponentInMetersPerSecond = null;
+        for (final FeatureDataset dataSet : getDataSets()) {
+            if (dataSet instanceof GridDataset) {
+                for (final GridDatatype grid : ((GridDataset) dataSet).getGrids()) {
+                    if (windDirectionVariableSpecification.matches(grid.getVariable())) {
+                        assert isDegreesTrue(getUnit(grid.getVariable()).get());
+                        directionComponentInDegreesTrue = getValue(grid, timePoint, position);
+                    } else if (windSpeedVariableSpecification.matches(grid.getVariable())) {
+                        assert isMetersPerSecond(getUnit(grid.getVariable()).get());
+                        speedComponentInMetersPerSecond = getValue(grid, timePoint, position);
+                    }
+                    if (directionComponentInDegreesTrue != null && speedComponentInMetersPerSecond != null) {
+                        break;
+                    }
                 }
             }
+        }
+        final Wind wind;
+        final double confidence;
+        if (directionComponentInDegreesTrue != null && speedComponentInMetersPerSecond != null) {
             confidence = getTimeConfidence(timePoint, directionComponentInDegreesTrue.getB());
             wind = new WindImpl(directionComponentInDegreesTrue.getC(), directionComponentInDegreesTrue.getB(),
                     new MeterPerSecondSpeedWithDegreeBearingImpl(speedComponentInMetersPerSecond.getA(),
-                            new DegreeBearingImpl(directionComponentInDegreesTrue.getA())));
+                            // we're getting the "from" direction from the GRIB file and need to convert to "to" here
+                            new DegreeBearingImpl(directionComponentInDegreesTrue.getA()).reverse()));
         } else {
             wind = null;
             confidence = 0;
@@ -60,8 +78,8 @@ public class SpeedAndDirectionWindField extends AbstractGribWindFieldImpl {
      * Checks whether the data set has a wind speed variable (GRIB parameter #32) and a wind direction variable
      * (GRIB parameter #31).
      */
-    public static boolean handles(FeatureDataset dataSet) {
-        return hasVariable(dataSet, WIND_DIRECTION_PARAMETER_ID) && hasVariable(dataSet, WIND_SPEED_PARAMETER_ID);
+    public static boolean handles(FeatureDataset... dataSets) {
+        return hasVariable(windDirectionVariableSpecification, dataSets) && hasVariable(windSpeedVariableSpecification, dataSets);
     }
 
 }

@@ -1,7 +1,10 @@
 package com.sap.sailing.grib.impl;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
@@ -19,9 +22,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 import ucar.ma2.Array;
-import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.VariableSimpleIF;
 import ucar.nc2.dataset.VariableDS;
 import ucar.nc2.dt.GridCoordSystem;
 import ucar.nc2.dt.GridDatatype;
@@ -41,59 +42,48 @@ import ucar.unidata.geoloc.LatLonRect;
  *
  */
 public abstract class AbstractGribWindFieldImpl implements GribWindField {
-    private final FeatureDataset dataSet;
+    private final FeatureDataset[] dataSets;
     
     private final Weigher<TimePoint> timeConfidenceWeigher;
     
     /**
-     * The base confidence of the wind data coming from the underlying {@link #dataSet}, between 0 (not confident at
+     * The base confidence of the wind data coming from the underlying {@link #dataSets}, between 0 (not confident at
      * all) and 1 (really confident observation at this point in time)
      */
     private final double baseConfidence;
 
-    public AbstractGribWindFieldImpl(FeatureDataset dataSet, double baseConfidence) {
-        this.dataSet = dataSet;
+    public AbstractGribWindFieldImpl(double baseConfidence, FeatureDataset... dataSets) {
+        this.dataSets = dataSets;
         this.baseConfidence = baseConfidence;
         timeConfidenceWeigher = ConfidenceFactory.INSTANCE.createExponentialTimeDifferenceWeigher(
                 // use a minimum confidence to avoid the bearing to flip to 270deg in case all is zero
                 Duration.ONE_SECOND.times(30).asMillis(), /* minimum confidence */0.0000000001);
     }
     
-    protected static boolean hasVariable(FeatureDataset dataSet, int variableId) {
-        for (VariableSimpleIF variable : dataSet.getDataVariables()) {
-            Optional<Integer> id = getVariableId(variable);
-            if (id.isPresent() && id.get() == variableId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Obtains the {@code Grib1_Parameter} value which gives the ID of the variable, such as 33 for the
-     * "u-component of wind" variable
-     * 
-     * @return an optional {@link Integer} that, if present, represents the {@code Grib1_Parameter} value for the
-     *         variable
-     */
-    protected static Optional<Integer> getVariableId(VariableSimpleIF variable) {
-        final Optional<Integer> result;
-        final Attribute idVariable = variable.findAttributeIgnoreCase("Grib1_Parameter");
-        if (idVariable != null) {
-            result = Optional.of(idVariable.getNumericValue().intValue());
-        } else {
-            result = Optional.empty();
-        }
-        return result;
+    protected static boolean hasVariable(VariableSpecification variableSpecification, FeatureDataset... dataSets) {
+        return variableSpecification.appearsInAnyOf(dataSets);
     }
     
+    protected boolean hasVariable(VariableSpecification variableSpecification) {
+        return variableSpecification.appearsInAnyOf(dataSets);
+    }
+
     protected double getBaseConfidence() {
         return baseConfidence;
     }
 
     @Override
     public Bounds getBounds() {
-        return toBounds(getDataSet().getBoundingBox());
+        Bounds result = null;
+        for (final FeatureDataset dataSet : getDataSets()) {
+            final Bounds dataSetBounds = toBounds(dataSet.getBoundingBox());
+            if (result == null) {
+                result = dataSetBounds;
+            } else {
+                result = result.extend(dataSetBounds);
+            }
+        }
+        return result;
     }
     
     @Override
@@ -129,11 +119,11 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
     }
 
     protected TimePoint getStartTime() {
-        return toTimePoint(getDataSet().getCalendarDateStart());
+        return StreamSupport.stream(Arrays.asList(getDataSets()).spliterator(), /* parallel */ false).map(dataSet->toTimePoint(dataSet.getCalendarDateEnd())).min(Comparator.naturalOrder()).get();
     }
 
     private TimePoint getEndTime() {
-        return toTimePoint(getDataSet().getCalendarDateEnd());
+        return StreamSupport.stream(Arrays.asList(getDataSets()).spliterator(), /* parallel */ false).map(dataSet->toTimePoint(dataSet.getCalendarDateEnd())).max(Comparator.naturalOrder()).get();
     }
 
     private Bounds toBounds(LatLonRect boundingBox) {
@@ -144,8 +134,8 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
         return new DegreePosition(point.getLatitude(), point.getLongitude());
     }
 
-    protected FeatureDataset getDataSet() {
-        return dataSet;
+    protected FeatureDataset[] getDataSets() {
+        return dataSets;
     }
     
     /**
@@ -254,4 +244,17 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
         return result;
     }
 
+    protected boolean isMetersPerSecond(String unit) {
+        final String spacelessUnit = removeSpacesAndToLowercase(unit);
+        return spacelessUnit.equals("m/s") || spacelessUnit.equals("ms^-1");
+    }
+
+    protected boolean isDegreesTrue(String unit) {
+        final String spacelessUnit = removeSpacesAndToLowercase(unit).replaceAll("_", "");
+        return spacelessUnit.equals("degreetrue") || spacelessUnit.equals("degtrue");
+    }
+
+    private String removeSpacesAndToLowercase(String unit) {
+        return unit.replaceAll(" ", "").toLowerCase();
+    }
 }
