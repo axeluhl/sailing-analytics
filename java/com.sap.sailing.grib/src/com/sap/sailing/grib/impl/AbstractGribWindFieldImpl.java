@@ -119,7 +119,7 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
     }
 
     protected TimePoint getStartTime() {
-        return StreamSupport.stream(Arrays.asList(getDataSets()).spliterator(), /* parallel */ false).map(dataSet->toTimePoint(dataSet.getCalendarDateEnd())).min(Comparator.naturalOrder()).get();
+        return StreamSupport.stream(Arrays.asList(getDataSets()).spliterator(), /* parallel */ false).map(dataSet->toTimePoint(dataSet.getCalendarDateStart())).min(Comparator.naturalOrder()).get();
     }
 
     private TimePoint getEndTime() {
