@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.jaxrs;
+package com.sap.sse.common.util;
 
 
 public class RoundingUtil {

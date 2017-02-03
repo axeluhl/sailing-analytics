@@ -54,6 +54,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
+import com.tractrac.model.lib.api.event.DataSource;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
@@ -344,6 +345,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
             @Override public void deleteRace(UUID raceId) {}
             @Override public void reloadRace(UUID raceId) {}
             @Override public void startTracking(UUID raceId) {}
+            @Override public void dataSourceChanged(IRace race, DataSource oldDataSource, URI oldLiveURI, URI oldStoredURI) {}
             @Override
             public void updateRace(IRace race) {
                 if (Util.equalsWithNull(race, TracTracRaceTrackerImpl.this.tractracRace)) {
