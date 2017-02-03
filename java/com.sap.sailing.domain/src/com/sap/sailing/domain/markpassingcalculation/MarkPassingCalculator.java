@@ -238,6 +238,7 @@ public class MarkPassingCalculator {
                 final List<Pair<Competitor, Integer>> removedFixedMarkPassings = new ArrayList<>();
                 final List<Pair<Competitor, Integer>> suppressedMarkPassings = new ArrayList<>();
                 final List<Competitor> unsuppressedMarkPassings = new ArrayList<>();
+                boolean hasUnprocessedUpdates = false;
                 while (!finished) {
                     try {
                         logger.finer("MPC for "+raceName+" is checking the queue");
@@ -245,7 +246,7 @@ public class MarkPassingCalculator {
                             // check if queue is empty while owning the MarkPassingCalculator's monitor;
                             // if the queue is empty, set listenerThread to null while under the monitor
                             // and decide to finish the thread; otherwise, take the next object
-                            if (queue.isEmpty()) {
+                            if (!hasUnprocessedUpdates && queue.isEmpty()) {
                                 finished = true;
                                 listenerThread = null;
                             }
@@ -270,6 +271,7 @@ public class MarkPassingCalculator {
                                     fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
                                             smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
                                             suppressedMarkPassings, unsuppressedMarkPassings, finder, chooser);
+                                    hasUnprocessedUpdates = true;
                                 }
                             }
                         }
@@ -313,6 +315,7 @@ public class MarkPassingCalculator {
                             removedFixedMarkPassings.clear();
                             suppressedMarkPassings.clear();
                             unsuppressedMarkPassings.clear();
+                            hasUnprocessedUpdates = false;
                         }
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+": " + e.getMessage(), e);
