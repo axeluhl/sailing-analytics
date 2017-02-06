@@ -44,6 +44,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private final Simulator simulator;
     private final Thread thread;
     private final Map<Util.Triple<A, B, C>, Set<LoadingQueueDoneCallBack>> loadingQueueDoneCallBacks;
+    private final long timeoutInMilliseconds;
 
     /**
      * used by {@link #stopAfterNotReceivingEventsForSomeTime(long)} and {@link #run()} to check if an event was received
@@ -52,7 +53,8 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
     private boolean receivedEventDuringTimeout;
     
     public AbstractReceiverWithQueue(DomainFactory domainFactory, IEvent tractracEvent,
-            DynamicTrackedRegatta trackedRegatta, Simulator simulator, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+            DynamicTrackedRegatta trackedRegatta, Simulator simulator, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber,
+            long timeoutInMilliseconds) {
         super();
         this.eventSubscriber = eventSubscriber;
         this.raceSubscriber = raceSubscriber;
@@ -63,6 +65,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
         this.queue = new LinkedBlockingDeque<Util.Triple<A, B, C>>();
         this.thread = new Thread(this, getClass().getName());
         this.loadingQueueDoneCallBacks = new HashMap<>();
+        this.timeoutInMilliseconds = timeoutInMilliseconds;
     }
     
     protected IEventSubscriber getEventSubscriber() {
@@ -200,8 +203,7 @@ public abstract class AbstractReceiverWithQueue<A, B, C> implements Runnable, Re
      */
     protected DynamicTrackedRace getTrackedRace(IRace race) {
         DynamicTrackedRace result = null;
-        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race.getId(),
-                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+        RaceDefinition raceDefinition = getDomainFactory().getAndWaitForRaceDefinition(race.getId(), timeoutInMilliseconds);
         if (raceDefinition != null) {
             com.sap.sailing.domain.base.Regatta domainRegatta = trackedRegatta.getRegatta();
             if (domainRegatta.getRaceByName(raceDefinition.getName()) != null) {

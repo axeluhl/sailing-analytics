@@ -22,6 +22,7 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.EventRaceStatesSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.Duration;

@@ -670,7 +670,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
                 backgroundExecutor.execute(()->{
                     try {
-                        addRace(/* addToRegatta==null means "default regatta" */ null, params, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
+                        addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1);
                         numberOfTrackedRacesRestored.incrementAndGet();
                     } catch (Exception e) {
                         logger.log(Level.SEVERE, "Exception trying to restore race"+params, e);
@@ -1424,15 +1424,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
                 if (regatta == null) {
                     // create tracker and use an existing or create a default regatta
-                    tracker = params.createRaceTracker(this, windStore, /* raceLogResolver */ this);
+                    tracker = params.createRaceTracker(this, windStore, /* raceLogResolver */ this, timeoutInMilliseconds);
                 } else {
                     // use the regatta selected by the RaceIdentifier regattaToAddTo
-                    tracker = params.createRaceTracker(regatta, this, windStore, /* raceLogResolver */ this);
+                    tracker = params.createRaceTracker(regatta, this, windStore, /* raceLogResolver */ this, timeoutInMilliseconds);
                     assert tracker.getRegatta() == regatta;
                 }
                 LockUtil.lockForWrite(raceTrackersByRegattaLock);
                 try {
-                    raceTrackersByID.put(trackerID, tracker);
+                    raceTrackersByID.put(tracker.getID(), tracker);
                     Set<RaceTracker> trackers = raceTrackersByRegatta.get(tracker.getRegatta());
                     if (trackers == null) {
                         trackers = Collections.newSetFromMap(new ConcurrentHashMap<RaceTracker, Boolean>());

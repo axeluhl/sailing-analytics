@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# You need an installation of the Neon release of "Eclipse IDE for Eclipse Committers" matching you OS and JDK (32 vs 64 Bit):
-# http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neonr
+# You need an installation of the Neon SR2 release of "Eclipse IDE for Eclipse Committers" matching you OS and JDK (32 vs 64 Bit):
+# http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neon2
 
 if [[ $1 == "" ]]; then
     echo "You need to specify the Eclipse installation directory"
@@ -33,9 +33,8 @@ installPlugins https://dl-ssl.google.com/android/eclipse com.android.ide.eclipse
 echo "Installing GWT SDM debug bridge..."
 installPlugins http://p2.sapsailing.com/p2/sdbg com.github.sdbg.feature.feature.group
 
-# EasyShell is currently not Neon compatible, but 2.0 is coming: https://github.com/anb0s/EasyShell/issues/29
-# echo "Installing EasyShell..."
-# installPlugins http://anb0s.github.io/EasyShell com.tetrade.eclipse.plugins.easyshell.feature.feature.group
+echo "Installing EasyShell..."
+installPlugins http://anb0s.github.io/EasyShell de.anbos.eclipse.easyshell.feature.feature.group
 
 echo "Installing BIRT charts (requirement for MAT)..."
 installPlugins http://download.eclipse.org/birt/update-site/4.6 org.eclipse.birt.chart.feature.group

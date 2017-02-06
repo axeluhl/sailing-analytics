@@ -34,6 +34,7 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
@@ -123,7 +124,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
         for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracRace(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null, createRaceDefinitionSet(),
                 /* trackedRegattaRegistry */null,
                 mock(RaceLogResolver.class), /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
-                null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, receiverTypes)) {
+                null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, receiverTypes)) {
             receivers.add(r);
         }
         getRaceSubscriber().subscribeConnectionStatus(new IConnectionStatusListener() {

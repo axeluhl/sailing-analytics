@@ -8,8 +8,7 @@ import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
-public interface HasTrackedLegOfCompetitorContext {
-    
+public interface HasTrackedLegOfCompetitorContext extends HasWindOnTrackedLeg {
     @Connector(scanForStatistics=false)
     public HasTrackedLegContext getTrackedLegContext();
     

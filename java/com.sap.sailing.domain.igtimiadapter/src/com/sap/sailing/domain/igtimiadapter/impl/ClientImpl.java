@@ -37,7 +37,7 @@ public class ClientImpl implements Client {
 
     @Override
     public String getRedirectUri(String redirectProtocol, String redirectHost, String redirectPort) {
-        return redirectProtocol+"://"+redirectHost+(redirectPort==null?"":(":"+redirectPort))+
+        return redirectProtocol+"://"+redirectHost+(redirectPort==null||redirectPort.isEmpty()?"":(":"+redirectPort))+
                 (redirectUriPath.startsWith("/")?redirectUriPath:"/"+redirectUriPath);
     }
 }

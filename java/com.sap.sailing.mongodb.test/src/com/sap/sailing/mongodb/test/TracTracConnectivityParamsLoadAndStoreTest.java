@@ -3,9 +3,7 @@ package com.sap.sailing.mongodb.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashSet;
@@ -29,11 +27,11 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
     }
 
     @Test
-    public void testStoreAndLoadSimpleTracTracParams() throws MalformedURLException, URISyntaxException {
+    public void testStoreAndLoadSimpleTracTracParams() throws Exception {
         // set up
         final boolean trackWind = true;
         final boolean correctWindDirectionByMagneticDeclination = true;
-        final URL paramURL = new URL("http://tractrac.com/some/url");
+        final URL paramURL = new URL("http://event.tractrac.com/events/event_20160604_JuniorenSe/clientparams.php?event=event_20160604_JuniorenSe&race=4b9f0190-0b0d-0134-5b24-60a44ce903c3");
         final URI storedURI = new URI("live://tractrac.com/storedURI");
         final URI courseDesignUpdateURI = new URI("https://skitrac.dk/reverse/update");
         final TimePoint startOfTracking = MillisecondsTimePoint.now();
@@ -49,7 +47,7 @@ public class TracTracConnectivityParamsLoadAndStoreTest extends AbstractConnecti
                 paramURL, /* live URI */ null, storedURI, courseDesignUpdateURI, startOfTracking, endOfTracking,
                 delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm,
                 /* raceLogStore */ null, /* regattaLogStore */ null, DomainFactory.INSTANCE, tracTracUsername, tracTracPassword,
-                raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination);
+                raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination, /* preferReplayIfAvailable */ false);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(tracTracParams);
         // load

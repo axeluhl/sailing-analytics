@@ -975,8 +975,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (event.getFrom() != null) {
             storeTimePoint(event.getFrom(), result, fromField);
         }
-        if (event.getTo() != null) {
-            storeTimePoint(event.getTo(), result, toField);
+        if (event.getToInclusive() != null) {
+            storeTimePoint(event.getToInclusive(), result, toField);
         }
     }
 
@@ -1445,7 +1445,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
-        storeTimePoint(event.getClosingTimePoint(), result, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
+        storeTimePoint(event.getClosingTimePointInclusive(), result, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
         storeRegattaLogEvent(regattaLikeId, result);
     }
 

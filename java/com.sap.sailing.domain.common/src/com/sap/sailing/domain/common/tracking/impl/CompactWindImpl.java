@@ -6,7 +6,9 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.AbstractSpeedWithAbstractBearingImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.AbstractTimePoint;
 
 public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implements Wind {
@@ -32,6 +34,11 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
         public double getLngDeg() {
             return lngDeg;
         }
+        
+        @Override
+        public boolean equals(Object o) {
+            return this==o || o instanceof Position && getLatDeg() == ((Position) o).getLatDeg() && getLngDeg() == ((Position) o).getLngDeg();
+        }
     }
 
     private class CompactBearing extends AbstractBearing {
@@ -45,6 +52,11 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
         @Override
         public double getRadians() {
             return degBearing / 180. * Math.PI;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            return this==object || object instanceof Bearing && getDegrees() == ((Bearing) object).getDegrees();
         }
     }
 
@@ -123,6 +135,23 @@ public class CompactWindImpl extends AbstractSpeedWithAbstractBearingImpl implem
         } else {
             return getBearing().reverse();
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return WindImpl.hashCode(latDeg, lngDeg, timePointIsNull?0:timePointAsMillis);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof Wind))
+            return false;
+        Wind other = (Wind) obj;
+        return Util.equalsWithNull(getPosition(), other.getPosition()) && Util.equalsWithNull(getTimePoint(), other.getTimePoint());
     }
 
     @Override

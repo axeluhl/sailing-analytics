@@ -156,7 +156,9 @@ public class IgtimiAccountsPanel extends FlowPanel {
             }
         });
         add(refreshButton);
-        final String protocol = Window.Location.getProtocol();
+        final String protocol = Window.Location.getProtocol().endsWith(":") ?
+                    Window.Location.getProtocol().substring(0, Window.Location.getProtocol().length()-1) :
+                    Window.Location.getProtocol();
         final String hostname = Window.Location.getHostName();
         final String port = Window.Location.getPort();
         this.sailingService.getIgtimiAuthorizationUrl(protocol, hostname, port, new AsyncCallback<String>() {

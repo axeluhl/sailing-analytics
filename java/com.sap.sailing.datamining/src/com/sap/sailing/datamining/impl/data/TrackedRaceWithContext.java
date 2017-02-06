@@ -85,12 +85,15 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     private Integer calculateYear() {
         TimePoint startOfRace = getTrackedRace().getStartOfRace();
         TimePoint time = startOfRace != null ? startOfRace : getTrackedRace().getStartOfTracking();
+        final Integer result;
         if (time == null) {
-            year = 0;
+            result = 0;
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(time.asDate());
+            result = calendar.get(Calendar.YEAR);
         }
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(time.asDate());
-        return calendar.get(Calendar.YEAR);
+        return result;
     }
     
     @Override

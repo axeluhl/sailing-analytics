@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.tractracadapter.persistence.impl;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +72,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
     }
 
     @Override
-    public RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws MalformedURLException, URISyntaxException {
+    public RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws Exception {
         return new RaceTrackingConnectivityParametersImpl(
                 new URL(map.get(PARAM_URL).toString()),
                 map.get(LIVE_URI) == null ? null : new URI(map.get(LIVE_URI).toString()),
@@ -90,7 +88,7 @@ public class TracTracConnectivityParamsHandler extends AbstractRaceTrackingConne
                 map.get(TRAC_TRAC_PASSWORD)==null?null:map.get(TRAC_TRAC_PASSWORD).toString(),
                 map.get(RACE_STATUS)==null?null:map.get(RACE_STATUS).toString(),
                 map.get(RACE_VISIBILITY)==null?null:map.get(RACE_VISIBILITY).toString(), isTrackWind(map),
-                isCorrectWindDirectionByMagneticDeclination(map));
+                isCorrectWindDirectionByMagneticDeclination(map), /* preferReplayIfAvailable */ true);
     }
 
     @Override

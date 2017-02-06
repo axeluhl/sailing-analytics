@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.tracking;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,7 +35,7 @@ public interface RaceTrackingConnectivityParametersHandler {
      * produced {@code map} by passing it to this service's {@link #mapFrom(RaceTrackingConnectivityParameters)}
      * method.
      */
-    RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws MalformedURLException, URISyntaxException;
+    RaceTrackingConnectivityParameters mapTo(Map<String, Object> map) throws Exception;
 
     /**
      * @return a map that contains the {@link TypeBasedServiceFinder#TYPE} identifier as taken from

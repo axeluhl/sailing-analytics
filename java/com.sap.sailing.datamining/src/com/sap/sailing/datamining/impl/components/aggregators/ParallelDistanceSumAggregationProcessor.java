@@ -44,5 +44,4 @@ public class ParallelDistanceSumAggregationProcessor extends
     protected Map<GroupKey, Distance> getResult() {
         return results;
     }
-
 }
