@@ -11,13 +11,13 @@ public interface HasWindFixContext extends HasWind {
     @Connector(scanForStatistics=false)
     public HasTrackedRaceContext getTrackedRaceContext();
     
-    @Statistic(messageKey="")
+    @Statistic(messageKey="", ordinal=0)
     public Wind getWind();
     
-    @Statistic(messageKey="windFrom", resultDecimals=1)
+    @Statistic(messageKey="windFrom", resultDecimals=1, ordinal=1)
     double getWindFromDegrees();
     
-    @Statistic(messageKey="windSpeedKnots", resultDecimals=1)
+    @Statistic(messageKey="windSpeedKnots", resultDecimals=1, ordinal=2)
     double getWindSpeedInKnots();
 
     @Override
