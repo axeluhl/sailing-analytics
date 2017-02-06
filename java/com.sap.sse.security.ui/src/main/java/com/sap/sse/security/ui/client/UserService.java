@@ -231,17 +231,7 @@ public class UserService {
     public void getPreference(String key,
             final AsyncCallback<String> callback) {
         String username = getCurrentUser().getName(); // TODO: Can username be determined via session on server-side
-        getUserManagementService().getPreference(username, key, new AsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                callback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(String result) {
-                callback.onSuccess(result);
-            }
-        });
+        getUserManagementService().getPreference(username, key, callback);
     }
     
     /**
