@@ -12,6 +12,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
+import com.sap.sse.security.AccessControlListStore;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
@@ -61,14 +62,14 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         context = bundleContext;
         if (testUserStore != null) {
-            createAndRegisterSecurityService(bundleContext, testUserStore);
+            createAndRegisterSecurityService(bundleContext, testUserStore, null /* TODO what do I do here with the ACLStore?*/);
         } else {
             waitForUserStoreService(bundleContext);
         }
     }
 
-    private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore store) {
-        securityService = new SecurityServiceImpl(ServiceTrackerFactory.createAndOpen(context, MailService.class), store, /* setAsActivatorSecurityService */ true);
+    private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore store, AccessControlListStore aclStore) {
+        securityService = new SecurityServiceImpl(ServiceTrackerFactory.createAndOpen(context, MailService.class), store, aclStore, /* setAsActivatorSecurityService */ true);
         registration = context.registerService(SecurityService.class.getName(),
                 securityService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
@@ -81,7 +82,9 @@ public class Activator implements BundleActivator {
     private void waitForUserStoreService(BundleContext bundleContext) {
         context = bundleContext;
         final ServiceTracker<UserStore, UserStore> tracker = new ServiceTracker<>(bundleContext, UserStore.class, /* customizer */ null);
+        final ServiceTracker<AccessControlListStore, AccessControlListStore> aclStoreTracker = new ServiceTracker<>(bundleContext, AccessControlListStore.class, /* customizer */ null);
         tracker.open();
+        aclStoreTracker.open();
         new Thread("ServiceTracker waiting for UserStore service") {
             @Override
             public void run() {
@@ -89,8 +92,9 @@ public class Activator implements BundleActivator {
                     Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); // ensure that classpath:... Shiro ini files are resolved properly
                     logger.info("Waiting for UserStore service...");
                     final UserStore userStore = tracker.waitForService(0);
+                    final AccessControlListStore aclStore = aclStoreTracker.waitForService(0);
                     logger.info("Obtained UserStore service "+userStore);
-                    createAndRegisterSecurityService(bundleContext, userStore);
+                    createAndRegisterSecurityService(bundleContext, userStore, aclStore);
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
                 }

@@ -25,15 +25,17 @@ public class AccessControlListStoreImpl implements AccessControlListStore {
     private final transient MongoObjectFactory mongoObjectFactory;
     private final transient DomainObjectFactory domainObjectFactory;
     
-    public AccessControlListStoreImpl() {
-        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
+    public AccessControlListStoreImpl(final UserStore userStore) {
+        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
     }
     
-    public AccessControlListStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
+    public AccessControlListStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory, final UserStore userStore) {
         accessControlLists = new ConcurrentHashMap<>();
         
         this.mongoObjectFactory = mongoObjectFactory;        
         this.domainObjectFactory = domainObjectFactory;
+        
+        this.userStore = userStore;
     }
     
     /**
@@ -105,9 +107,5 @@ public class AccessControlListStoreImpl implements AccessControlListStore {
                 }
             }
         }
-    }
-    
-    public void setStore(UserStore userStore) {
-        this.userStore = userStore;
     }
 }

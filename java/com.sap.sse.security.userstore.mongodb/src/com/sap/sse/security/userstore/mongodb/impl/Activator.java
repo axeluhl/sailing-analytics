@@ -31,9 +31,8 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
-        AccessControlListStoreImpl aclStore = new AccessControlListStoreImpl();
-        UserStoreImpl userStore = new UserStoreImpl(aclStore);
-        aclStore.setStore(userStore);
+        UserStoreImpl userStore = new UserStoreImpl();
+        AccessControlListStoreImpl aclStore = new AccessControlListStoreImpl(userStore);
         aclStore.loadRemainingACLs();
         aclStoreRegistration = context.registerService(AccessControlListStore.class.getName(),
                 aclStore, null);

@@ -14,16 +14,14 @@ public class UserGroupImpl implements UserGroup {
      */
     private final String name;
     
-    private AccessControlList acl;
     private Set<String> usernames;
         
-    public UserGroupImpl(String name, AccessControlList acl) {
-        this(name, new HashSet<>(), acl);
+    public UserGroupImpl(String name) {
+        this(name, new HashSet<>());
     }
     
-    public UserGroupImpl(String name, Set<String> usernames, AccessControlList acl) {
+    public UserGroupImpl(String name, Set<String> usernames) {
         this.name = name;
-        this.acl = acl;
         this.usernames = usernames;
     }
     
@@ -35,11 +33,6 @@ public class UserGroupImpl implements UserGroup {
     @Override
     public Serializable getId() {
         return getName();
-    }
-
-    @Override
-    public AccessControlList getAccessControlList() {
-        return acl;
     }
     
     @Override

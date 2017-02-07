@@ -16,7 +16,7 @@ public interface DomainObjectFactory {
 
     Collection<String> loadAllTenantnames();
     
-    Iterable<UserGroup> loadAllUserGroups(AccessControlListStore aclStore);
+    Iterable<UserGroup> loadAllUserGroups();
     
     Iterable<User> loadAllUsers();
     

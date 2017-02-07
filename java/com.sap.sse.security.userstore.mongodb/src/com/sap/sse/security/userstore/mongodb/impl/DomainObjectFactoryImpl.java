@@ -86,12 +86,12 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     @Override
-    public Iterable<UserGroup> loadAllUserGroups(AccessControlListStore aclStore) {
+    public Iterable<UserGroup> loadAllUserGroups() {
         ArrayList<UserGroup> result = new ArrayList<>();
         DBCollection userGroupCollection = db.getCollection(CollectionNames.USER_GROUPS.name());
         try {
             for (DBObject o : userGroupCollection.find()) {
-                result.add(loadUserGroup(o, aclStore));
+                result.add(loadUserGroup(o));
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load user groups.");
@@ -100,7 +100,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
     
-    private UserGroup loadUserGroup(DBObject groupDBObject, AccessControlListStore aclStore) {
+    private UserGroup loadUserGroup(DBObject groupDBObject) {
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
         Set<String> users = new HashSet<String>();
         BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERS.name());
@@ -109,7 +109,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 users.add((String) o);
             }
         }
-        UserGroup result = new UserGroupImpl(name, users, aclStore.getAccessControlListByName(name));
+        UserGroup result = new UserGroupImpl(name, users);
         return result;
     }
 

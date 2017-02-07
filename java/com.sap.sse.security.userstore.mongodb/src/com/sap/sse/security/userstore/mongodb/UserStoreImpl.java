@@ -53,8 +53,6 @@ public class UserStoreImpl implements UserStore {
 
     private String name = "MongoDB user store";
     
-    private final AccessControlListStore aclStore;
-    
     private final ConcurrentSkipListSet<String> tenants;
     private final ConcurrentHashMap<String, UserGroup> userGroups;
     
@@ -98,12 +96,11 @@ public class UserStoreImpl implements UserStore {
      */
     private final transient MongoObjectFactory mongoObjectFactory;
 
-    public UserStoreImpl(final AccessControlListStore aclStore) {
-        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), aclStore);
+    public UserStoreImpl() {
+        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
     }
     
-    public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory, final AccessControlListStore aclStore) {
-        this.aclStore = aclStore;
+    public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
         tenants = new ConcurrentSkipListSet<>();
         userGroups = new ConcurrentHashMap<>();
         users = new ConcurrentHashMap<>();
@@ -136,7 +133,7 @@ public class UserStoreImpl implements UserStore {
                 mongoObjectFactory.storeSettings(settings);
             }
             tenants.addAll(domainObjectFactory.loadAllTenantnames());
-            for (UserGroup group : domainObjectFactory.loadAllUserGroups(aclStore)) {
+            for (UserGroup group : domainObjectFactory.loadAllUserGroups()) {
                 userGroups.put(group.getName(), group);
             }
             for (User u : domainObjectFactory.loadAllUsers()) {
@@ -318,12 +315,13 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public UserGroup createUserGroup(String name, String owner) throws UserGroupManagementException {
+    public UserGroup createUserGroup(String name, String owner, AccessControlListStore aclStore) throws UserGroupManagementException {
         if (userGroups.contains(name)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
         logger.info("Creating user group: " + name + " with owner " + owner);
-        UserGroup group = new UserGroupImpl(name, aclStore.createAccessControlList(name, owner));
+        UserGroup group = new UserGroupImpl(name);
+        aclStore.createAccessControlList(name, owner);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
@@ -370,11 +368,11 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Tenant createTenant(String name, String owner) throws TenantManagementException, UserGroupManagementException {
+    public Tenant createTenant(String name, String owner, AccessControlListStore aclStore) throws TenantManagementException, UserGroupManagementException {
         if (tenants.contains(name)) {
             throw new TenantManagementException(TenantManagementException.TENANT_ALREADY_EXISTS);
         }
-        UserGroup group = createUserGroup(name, owner);
+        UserGroup group = createUserGroup(name, owner, aclStore);
         logger.info("Creating tenant: " + name + " with owner " + owner);
         Tenant tenant = new Tenant(group);
         if (mongoObjectFactory != null) {

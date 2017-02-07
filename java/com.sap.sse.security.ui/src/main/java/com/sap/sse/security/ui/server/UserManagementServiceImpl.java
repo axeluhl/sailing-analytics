@@ -32,6 +32,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.security.AccessControlList;
+import com.sap.sse.security.AccessControlListStore;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
@@ -68,6 +69,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     private final BundleContext context;
     private final FutureTask<SecurityService> securityService;
     private final UserStore userStore;
+    private final AccessControlListStore aclStore;
 
     public UserManagementServiceImpl() {
         context = Activator.getContext();
@@ -96,11 +98,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
         }.start();
         userStore = context.getService(context.getServiceReference(UserStore.class));
+        aclStore = context.getService(context.getServiceReference(AccessControlListStore.class));
     }
     
     private UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup) {
-        return new TenantDTO(userGroup.getName(), 
-                createAclDTOFromAcl(userGroup.getAccessControlList()), userGroup.getUsernames());
+        return new UserGroupDTO(userGroup.getName(), 
+                createAclDTOFromAcl(aclStore.getAccessControlListByName(userGroup.getName())), userGroup.getUsernames());
     }
     
     private TenantDTO createTenantDTOFromTenant(Tenant tenant) {
@@ -108,7 +111,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return null;
         } else {
             return new TenantDTO(tenant.getName(),
-                    createAclDTOFromAcl(tenant.getAccessControlList()), tenant.getUsernames());
+                    createAclDTOFromAcl(aclStore.getAccessControlListByName(tenant.getName())), tenant.getUsernames());
         }
     }
     

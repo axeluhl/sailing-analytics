@@ -6,14 +6,14 @@ public class Tenant extends UserGroupImpl {
     private static final long serialVersionUID = -8831840409264252279L;
 
     public Tenant(UserGroup group) {
-        super(group.getName(), group.getUsernames(), group.getAccessControlList());
+        super(group.getName(), group.getUsernames());
     }
     
-    public Tenant(String name, AccessControlList acl) {
-        super(name, acl);
+    public Tenant(String name) {
+        super(name);
     }
     
-    public Tenant(String name, Set<String> usernames, AccessControlList acl) {
-        super(name, usernames, acl);
+    public Tenant(String name, Set<String> usernames) {
+        super(name, usernames);
     }
 }
