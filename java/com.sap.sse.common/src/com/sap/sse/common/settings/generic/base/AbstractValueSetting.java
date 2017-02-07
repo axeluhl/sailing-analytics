@@ -50,7 +50,7 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     }
     
     @Override
-    public void setDefaultValue(T defaultValue) {
+    public final void setDefaultValue(T defaultValue) {
         boolean wasDefault = isDefaultValue();
         this.defaultValue = defaultValue;
         if(wasDefault) {
