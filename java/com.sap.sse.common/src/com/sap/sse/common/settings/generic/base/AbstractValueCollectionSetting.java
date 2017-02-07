@@ -12,12 +12,19 @@ import com.sap.sse.common.settings.value.ValueCollectionValue;
 
 public abstract class AbstractValueCollectionSetting<T, C extends Collection<Value>, D extends Collection<T>> extends AbstractHasValueSetting<T> implements ValueCollectionSetting<T> {
 
-    private final D defaultValues = createDefaultValuesCollection();
+    private D defaultValues;
     private final boolean emptyIsDefault;
     
     public AbstractValueCollectionSetting(String name, AbstractGenericSerializableSettings settings, ValueConverter<T> valueConverter, boolean emptyIsDefault) {
         super(name, settings, valueConverter);
         this.emptyIsDefault = emptyIsDefault;
+    }
+    
+    private D getDefaultValuesCollectionInternal() {
+        if(defaultValues == null) {
+            defaultValues = createDefaultValuesCollection();
+        }
+        return defaultValues;
     }
     
     @SuppressWarnings("unchecked")
@@ -42,7 +49,7 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     public Iterable<T> getValues() {
         ValueCollectionValue<C> value = getValue();
         if(emptyIsDefault && (value == null || value.isEmpty())) {
-            return Collections.unmodifiableCollection(defaultValues);
+            return Collections.unmodifiableCollection(getDefaultValuesCollectionInternal());
         }
         if(value == null) {
             return Collections.emptyList();
@@ -70,22 +77,24 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     }
     @Override
     public void resetToDefault() {
-        setValues(defaultValues);
+        setValues(getDefaultValuesCollectionInternal());
     }
     
     @Override
     public final boolean isDefaultValue() {
-        ValueCollectionValue<C> value = getValue();
-        return ((emptyIsDefault || (defaultValues == null || defaultValues.isEmpty())) && (value == null || value.isEmpty()))
-                || (value != null && value.size() == defaultValues.size() && defaultValues.containsAll(value.getValues(getValueConverter())));
+        final ValueCollectionValue<C> value = getValue();
+        final D defaultVal = getDefaultValuesCollectionInternal();
+        return ((emptyIsDefault || defaultVal.isEmpty()) && (value == null || value.isEmpty()))
+                || (value != null && value.size() == defaultVal.size() && defaultVal.containsAll(value.getValues(getValueConverter())));
     }
     
     @Override
     public final void setDefaultValues(Iterable<T> defaultValues) {
-        boolean wasDefault = isDefaultValue();
-        this.defaultValues.clear();
+        final boolean wasDefault = isDefaultValue();
+        final D defaultVal = getDefaultValuesCollectionInternal();
+        defaultVal.clear();
         if(defaultValues != null) {
-            Util.addAll(defaultValues, this.defaultValues);
+            Util.addAll(defaultValues, defaultVal);
         }
         if(wasDefault) {
             resetToDefault();
@@ -94,7 +103,7 @@ public abstract class AbstractValueCollectionSetting<T, C extends Collection<Val
     
     @Override
     public Iterable<T> getDefaultValues() {
-        return Collections.unmodifiableCollection(this.defaultValues);
+        return Collections.unmodifiableCollection(getDefaultValuesCollectionInternal());
     }
 
     @Override
