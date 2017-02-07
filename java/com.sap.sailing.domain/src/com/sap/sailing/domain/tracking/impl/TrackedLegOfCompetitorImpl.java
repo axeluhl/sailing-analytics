@@ -237,7 +237,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     /**
-     * If the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
+     * If the current {@link #getLeg() leg} is +/- {@link LegType#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees collinear with the
      * wind's bearing, the competitor's position is projected onto the line crossing <code>mark</code> in the wind's
      * bearing, and the distance from the projection to the <code>mark</code> is returned. Otherwise, it is assumed that
      * the leg is neither an upwind nor a downwind leg, and hence the true distance to <code>mark</code> is returned. A
@@ -369,7 +369,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Integer getNumberOfTacks(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
+            Iterable<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.TACK) {
@@ -381,14 +381,14 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
-    public List<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
+    public Iterable<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         MarkPassing legEnd = getMarkPassingForLegEnd();
         TimePoint end = timePoint;
         if (legEnd != null && timePoint.compareTo(legEnd.getTimePoint()) > 0) {
             // timePoint is after leg finish; take leg end and end time point
             end = legEnd.getTimePoint();
         }
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(),
+        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(getCompetitor(),
                 getMarkPassingForLegStart().getTimePoint(), end, waitForLatest);
         return maneuvers;
     }
@@ -397,7 +397,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Integer getNumberOfJibes(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
+            Iterable<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.JIBE) {
@@ -412,7 +412,7 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Integer getNumberOfPenaltyCircles(TimePoint timePoint, boolean waitForLatest) throws NoWindException {
         Integer result = null;
         if (hasStartedLeg(timePoint)) {
-            List<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
+            Iterable<Maneuver> maneuvers = getManeuvers(timePoint, waitForLatest);
             result = 0;
             for (Maneuver maneuver : maneuvers) {
                 if (maneuver.getType() == ManeuverType.PENALTY_CIRCLE) {

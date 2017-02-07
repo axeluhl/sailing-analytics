@@ -2,6 +2,7 @@ package com.sap.sailing.domain.persistence.impl;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -104,6 +105,8 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.PlaceHolderDevic
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParametersHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -118,6 +121,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -127,6 +131,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     private final DB database;
     private final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceIdentifierServiceFinder;
+    private final TypeBasedServiceFinder<RaceTrackingConnectivityParametersHandler> raceTrackingConnectivityParamsServiceFinder;
 
     /**
      * Uses <code>null</code> for the device type service finder and hence will be unable to store device identifiers.
@@ -142,8 +147,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (serviceFinderFactory != null) {
             this.deviceIdentifierServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
             this.deviceIdentifierServiceFinder.setFallbackService(new PlaceHolderDeviceIdentifierMongoHandler());
+            this.raceTrackingConnectivityParamsServiceFinder = serviceFinderFactory.createServiceFinder(RaceTrackingConnectivityParametersHandler.class);
         } else {
             this.deviceIdentifierServiceFinder = null;
+            this.raceTrackingConnectivityParamsServiceFinder = null;
         }
     }
     
@@ -968,8 +975,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         if (event.getFrom() != null) {
             storeTimePoint(event.getFrom(), result, fromField);
         }
-        if (event.getTo() != null) {
-            storeTimePoint(event.getTo(), result, toField);
+        if (event.getToInclusive() != null) {
+            storeTimePoint(event.getToInclusive(), result, toField);
         }
     }
 
@@ -1246,6 +1253,20 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
+    public void storeCompetitors(Iterable<Competitor> competitors) {
+        if (competitors != null && !Util.isEmpty(competitors)) {
+            DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
+            List<DBObject> competitorsDB = new ArrayList<>();
+            for (Competitor competitor : competitors) {
+                JSONObject json = competitorSerializer.serialize(competitor);
+                DBObject entry = (DBObject) JSON.parse(json.toString());
+                competitorsDB.add(entry);
+            }
+            collection.insert(competitorsDB);
+        }
+    }
+
+    @Override
     public void removeAllCompetitors() {
         logger.info("Removing all persistent competitor info");
         DBCollection collection = database.getCollection(CollectionNames.COMPETITORS.name());
@@ -1424,7 +1445,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName());
         result.put(FieldNames.REGATTA_LOG_DEVICE_MAPPING_EVENT_ID.name(), event.getDeviceMappingEventId());
-        storeTimePoint(event.getClosingTimePoint(), result, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
+        storeTimePoint(event.getClosingTimePointInclusive(), result, FieldNames.REGATTA_LOG_CLOSING_TIMEPOINT);
         storeRegattaLogEvent(regattaLikeId, result);
     }
 
@@ -1500,4 +1521,50 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.SAILORS_INFO_LOCALE.name(), locale != null ? locale.toLanguageTag() : null);
         return result;
     }
+
+    @Override
+    public void removeConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) {
+        if (raceTrackingConnectivityParamsServiceFinder != null) {
+            final String typeIdentifier = params.getTypeIdentifier();
+            final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
+            if (paramsPersistenceService != null) {
+                final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
+                DBObject key = new BasicDBObject();
+                key.putAll(paramsPersistenceService.getKey(params));
+                collection.remove(key, WriteConcern.SAFE);
+            } else {
+                logger.warning("Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier);
+            }
+        } else {
+            logger.warning("No connectivity parameters service finder set; unable to remove connectivity parameters from persistent store for "
+                    + params + " of type " + params.getTypeIdentifier());
+        }
+    }
+
+    @Override
+    public void addConnectivityParametersForRaceToRestore(RaceTrackingConnectivityParameters params) {
+        final String typeIdentifier = params.getTypeIdentifier();
+        if (raceTrackingConnectivityParamsServiceFinder == null) {
+            logger.warning("No service finder has been configured to find connectivity parameter persistence services. Can't add connectivity parameters to DB for restore.");
+        } else {
+            try {
+                final RaceTrackingConnectivityParametersHandler paramsPersistenceService = raceTrackingConnectivityParamsServiceFinder.findService(typeIdentifier);
+                final DBCollection collection = database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name());
+                DBObject key = new BasicDBObject();
+                key.putAll(paramsPersistenceService.getKey(params));
+                DBObject dbObject = new BasicDBObject();
+                dbObject.putAll(paramsPersistenceService.mapFrom(params));
+                collection.update(key, dbObject, /* upsert */ true, /* multi */ false, WriteConcern.SAFE);
+            } catch (NoCorrespondingServiceRegisteredException e) {
+                logger.log(Level.WARNING, "Couldn't find a persistence service for connectivity parameters of type "+typeIdentifier+
+                        ". Couldn't store race "+params.getTrackerID()+" for restoring.", e);
+            }
+        }
+    }
+    
+    @Override
+    public void removeAllConnectivityParametersForRacesToRestore() {
+        database.getCollection(CollectionNames.CONNECTIVITY_PARAMS_FOR_RACES_TO_BE_RESTORED.name()).drop();
+    }
+
 }

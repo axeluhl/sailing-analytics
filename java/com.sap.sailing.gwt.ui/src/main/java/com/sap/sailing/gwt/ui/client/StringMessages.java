@@ -334,7 +334,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
-    String replicatingFromMaster(String hostname, int jmsPort, int servletPort, String messagingHostname, String exchangeName);
+    String replicatingFromMaster(String hostname, int jmsPort, int servletPort, String messagingHostname, String exchangeName, String replicableIdsAsString);
     String showWindSpeedSeries();
     String showWindDirectionSeries();
     String fleet();
@@ -1576,6 +1576,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String mapControls();
     String manage2SailEvent();
     String noEventsYet();
+    String selectCompetitorImportProvider();
     String selectResultImportProvider();
     String buildVersion();
     String serverInformation();
@@ -1749,6 +1750,18 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String externalLinks();
     String buoyZoneRadiusInHullLengths();
     String incorrectValueForRegattaBuoyZoneRadiusInHullLengths();
+    String importCompetitors();
+    String chooseWhichCompetitorsShouldBeImported();
+    String existingCompetitors();
+    String importedCompetitors();
+    String hasMatches();
+    String filterImportedCompetitorsByNameSailRaceFleet();
+    String errorLoadingCompetitorImportProviders(String message);
+    String errorLoadingCompetitorImportDescriptors(String message);
+    String couldNotSaveCompetitorRegistrations(String message);
+    String searchTagForImportedCompetitorPlaceholder();
+    String version(String version);
+    String replicables();
     String eventRegattaRacesLegendWind();
     String eventRegattaRacesLegendVideo();
     String eventRegattaRacesLegendAudio();
@@ -1760,4 +1773,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String eventRegattaHeaderLegendVideoNo();
     String eventRegattaHeaderLegendAudio();
     String eventRegattaHeaderLegendAudioNo();
+    String set();
 }

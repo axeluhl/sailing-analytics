@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -88,20 +87,7 @@ public class QueryFactory {
     }
     
     private boolean functionNeedsLocalizationParameters(Function<?> function) {
-        Iterator<Class<?>> parameterTypesIterator = function.getParameters().iterator();
-        int parameterCount = 0;
-        while (parameterTypesIterator.hasNext()) {
-            parameterCount++;
-            parameterTypesIterator.next();
-        }
-        if (parameterCount != 2) {
-            return false;
-        }
-        
-        parameterTypesIterator = function.getParameters().iterator();
-        Class<?> firstParameter = parameterTypesIterator.next();
-        Class<?> secondParameter = parameterTypesIterator.next();
-        return firstParameter.isAssignableFrom(Locale.class) && secondParameter.isAssignableFrom(ResourceBundleStringMessages.class);
+        return function.needsLocalizationParameters();
     }
 
     @SuppressWarnings("unchecked")

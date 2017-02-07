@@ -67,7 +67,7 @@ public interface Speed extends Comparable<Speed>, Serializable {
         }
     };
     
-    @Statistic(messageKey="", resultDecimals=2)
+    @Statistic(messageKey="speedInKnots", resultDecimals=2)
     double getKnots();
 
     double getMetersPerSecond();

@@ -17,12 +17,16 @@ import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
+import com.sap.sailing.datamining.data.HasWindFixContext;
+import com.sap.sailing.datamining.data.HasWindTrackContext;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingAverageDegreesAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBoolSumAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceAverageAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMaxAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMedianAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMinAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceSumAggregationProcessor;
+import com.sap.sailing.datamining.provider.RacingEventServiceProvider;
 import com.sap.sse.datamining.DataSourceProvider;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
@@ -81,6 +85,8 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasTrackedLegContext.class);
         internalClasses.add(HasTrackedLegOfCompetitorContext.class);
         internalClasses.add(HasGPSFixContext.class);
+        internalClasses.add(HasWindTrackContext.class);
+        internalClasses.add(HasWindFixContext.class);
         internalClasses.add(HasManeuverContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         internalClasses.add(HasRaceOfCompetitorContext.class);
@@ -112,6 +118,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         aggregators.add(ParallelDistanceMaxAggregationProcessor.getDefinition());
         aggregators.add(ParallelDistanceMinAggregationProcessor.getDefinition());
         aggregators.add(ParallelDistanceMedianAggregationProcessor.getDefinition());
+        aggregators.add(ParallelBearingAverageDegreesAggregationProcessor.getDefinition());
         return aggregators;
     }
     
@@ -133,7 +140,6 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         if (INSTANCE == null) {
             INSTANCE = new Activator(); // probably non-OSGi case, as in test execution
         }
-        
         return INSTANCE;
     }
 
