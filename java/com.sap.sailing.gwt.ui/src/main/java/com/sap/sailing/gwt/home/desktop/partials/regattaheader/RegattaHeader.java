@@ -52,29 +52,43 @@ public class RegattaHeader extends Composite {
     }
 
     private void addLegendBubble(final RaceDataInfo raceDataInfo) {
-        DOM.sinkEvents(dataIndicatorsUi, Event.ONCLICK);
+        DOM.sinkEvents(dataIndicatorsUi, Event.ONCLICK | Event.ONMOUSEOVER | Event.ONMOUSEOUT);
         Event.setEventListener(dataIndicatorsUi, new EventListener() {
+            private RegattaHeaderLegendPopup popup = null;
+
             @Override
             public void onBrowserEvent(Event event) {
-                final RegattaHeaderLegendPopup pop = new RegattaHeaderLegendPopup(raceDataInfo);
-                pop.setVisible(false);
-                pop.show();
-                // Pausing until the event loop is clear appears to give the browser
-                // sufficient time to apply CSS styling. We use the popup's offset
-                // width and height to calculate the display position, but those
-                // dimensions are not accurate until styling has been applied.
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        // the arrow is ~16 pixels long
-                        pop.setPopupPosition(dataIndicatorsUi.getAbsoluteLeft() - pop.getOffsetWidth() - 16,
-                                RegattaHeader.this.getAbsoluteTop() + RegattaHeader.this.getOffsetHeight() / 2
-                                        - pop.getOffsetHeight() / 2);
-                        pop.setVisible(true);
-                    }
-                });
-                event.preventDefault();
-                event.stopPropagation();
+                if ((event.getTypeInt() == Event.ONCLICK || event.getTypeInt() == Event.ONMOUSEOVER)
+                        && (popup == null || !popup.isAttached())) {
+                    popup = new RegattaHeaderLegendPopup(raceDataInfo);
+                    popup.setVisible(false);
+                    popup.show();
+                    // Pausing until the event loop is clear appears to give the browser
+                    // sufficient time to apply CSS styling. We use the popup's offset
+                    // width and height to calculate the display position, but those
+                    // dimensions are not accurate until styling has been applied.
+                    Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                        @Override
+                        public void execute() {
+                            if (popup != null) {
+                                // the arrow is ~16 pixels long
+                                popup.setPopupPosition(dataIndicatorsUi.getAbsoluteLeft() - popup.getOffsetWidth() - 16,
+                                        RegattaHeader.this.getAbsoluteTop() + RegattaHeader.this.getOffsetHeight() / 2
+                                                - popup.getOffsetHeight() / 2);
+                                popup.setVisible(true);
+
+                            }
+                        }
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                if (event.getTypeInt() == Event.ONMOUSEOUT && popup != null) {
+                    popup.hide();
+                    popup = null;
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
             }
         });
 

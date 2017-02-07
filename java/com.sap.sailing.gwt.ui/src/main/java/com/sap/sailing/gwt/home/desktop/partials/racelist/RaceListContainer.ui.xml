@@ -5,7 +5,7 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources" />
-    <ui:style>
+    <ui:style gss="true">
         .iconGPS, .iconWind, .iconVideo, .iconAudio{
             position: relative;
             display: none;
