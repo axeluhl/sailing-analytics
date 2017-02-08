@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,15 +54,7 @@ public class GribWindFieldFactoryImpl implements GribWindFieldFactory {
                     while (!finished) {
                         try {
                             final Reference<? extends GribWindField> ref = referenceQueue.remove();
-                            final File dir;
-                            synchronized (GribWindFieldFactoryImpl.this) {
-                                dir = filesToCleanWhenGribWindFieldNoLongerUsed.remove(ref);
-                                finished = filesToCleanWhenGribWindFieldNoLongerUsed.isEmpty();
-                                if (finished) {
-                                    fileSystemCleaner = null;
-                                }
-                            }
-                            rm_rf(dir);
+                            finished = cleanup(ref);
                         } catch (InterruptedException e) {
                             logger.log(Level.WARNING, "Interrupted while waiting for weak reference, giving up", e);
                             finished = true;
@@ -73,7 +66,30 @@ public class GribWindFieldFactoryImpl implements GribWindFieldFactory {
             }
         }
     }
+
+    private boolean cleanup(final Reference<? extends GribWindField> ref) {
+        boolean finished;
+        final File dir;
+        synchronized (GribWindFieldFactoryImpl.this) {
+            dir = filesToCleanWhenGribWindFieldNoLongerUsed.remove(ref);
+            finished = filesToCleanWhenGribWindFieldNoLongerUsed.isEmpty();
+            if (finished) {
+                fileSystemCleaner = null;
+            }
+        }
+        rm_rf(dir);
+        return finished;
+    }
     
+    @Override
+    public synchronized void shutdown() {
+        for (Iterator<WeakReference<GribWindField>> i=filesToCleanWhenGribWindFieldNoLongerUsed.keySet().iterator(); i.hasNext(); ) {
+            final WeakReference<GribWindField> ref = i.next();
+            cleanup(ref);
+            i.remove();
+        }
+    }
+
     /**
      * Removes directory and all its contents
      */
@@ -86,6 +102,7 @@ public class GribWindFieldFactoryImpl implements GribWindFieldFactory {
                 f.delete();
             }
         }
+        dir.delete();
     }
 
     @Override

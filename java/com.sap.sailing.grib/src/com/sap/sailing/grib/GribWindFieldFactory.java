@@ -72,5 +72,11 @@ public interface GribWindFieldFactory {
      * Use this method to create formatters for the {@code createGribWindField...} methods that require one.
      */
     Formatter createLogFormatter(Logger logger, Level level);
+    
+    /**
+     * To be called when the bundle shuts down; all resources can be released now, and all persistent file
+     * caches can be cleaned.
+     */
+    void shutdown();
 
 }

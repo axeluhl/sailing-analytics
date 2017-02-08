@@ -188,7 +188,6 @@ public abstract class AbstractWindImportServlet extends SailingServerHttpServlet
                     }
                 }
             }
-
             // Use text/html to prevent browsers from wrapping the response body,
             // see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50
         } catch (Exception e) {
