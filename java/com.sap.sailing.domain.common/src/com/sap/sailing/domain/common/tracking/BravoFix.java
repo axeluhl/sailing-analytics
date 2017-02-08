@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common.tracking;
 
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.datamining.annotations.Dimension;
 import com.sap.sse.datamining.annotations.Statistic;
 
 /**
@@ -9,6 +11,7 @@ import com.sap.sse.datamining.annotations.Statistic;
  * <p><b>NOTE:</b> This fix type is currently used to track ESS foiling data, only.</p>
  */
 public interface BravoFix extends SensorFix {
+    static final Distance MIN_FOILING_HEIGHT_THRESHOLD = new MeterDistance(0.2);
 
     /**
      * Gets the ride height (foiling) for this fix.
@@ -23,6 +26,9 @@ public interface BravoFix extends SensorFix {
 
     @Statistic(messageKey="rideHeightStarboard", resultDecimals=1)
     Distance getRideHeightStarboardHull();
+    
+    @Dimension(messageKey="IsFoiling")
+    boolean isFoiling();
 
     @Statistic(messageKey="pitch", resultDecimals=1)
     double getPitch();

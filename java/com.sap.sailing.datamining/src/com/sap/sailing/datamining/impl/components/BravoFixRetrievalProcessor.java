@@ -24,17 +24,19 @@ public class BravoFixRetrievalProcessor extends AbstractRetrievalProcessor<HasTr
     protected Iterable<HasBravoFixContext> retrieveData(HasTrackedLegOfCompetitorContext element) {
         Collection<HasBravoFixContext> bravoFixesWithContext = new ArrayList<>();
         BravoFixTrack<Competitor> bravoFixTrack = element.getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getSensorTrack(element.getCompetitor(), BravoFixTrack.TRACK_NAME);
-        bravoFixTrack.lockForRead();
-        try {
-            TrackedLegOfCompetitor trackedLegOfCompetitor = element.getTrackedLegOfCompetitor();
-            if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null) {
-                for (BravoFix bravoFix : bravoFixTrack.getFixes(trackedLegOfCompetitor.getStartTime(), true, trackedLegOfCompetitor.getFinishTime(), true)) {
-                    BravoFixWithContext gpsFixWithContext = new BravoFixWithContext(element, bravoFix);
-                    bravoFixesWithContext.add(gpsFixWithContext);
+        if (bravoFixTrack != null) {
+            bravoFixTrack.lockForRead();
+            try {
+                TrackedLegOfCompetitor trackedLegOfCompetitor = element.getTrackedLegOfCompetitor();
+                if (trackedLegOfCompetitor.getStartTime() != null && trackedLegOfCompetitor.getFinishTime() != null) {
+                    for (BravoFix bravoFix : bravoFixTrack.getFixes(trackedLegOfCompetitor.getStartTime(), true, trackedLegOfCompetitor.getFinishTime(), true)) {
+                        BravoFixWithContext gpsFixWithContext = new BravoFixWithContext(element, bravoFix);
+                        bravoFixesWithContext.add(gpsFixWithContext);
+                    }
                 }
+            } finally {
+                bravoFixTrack.unlockAfterRead();
             }
-        } finally {
-            bravoFixTrack.unlockAfterRead();
         }
         return bravoFixesWithContext;
     }

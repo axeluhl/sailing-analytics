@@ -73,10 +73,29 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         }
         return result;
     }
+    
+    private boolean isFoiling(BravoFix fix) {
+        return fix.isFoiling();
+    }
 
     @Override
     public Duration getTimeSpentFoiling(TimePoint from, TimePoint to) {
-        // TODO Auto-generated method stub
-        return null;
+        Duration result = Duration.NULL;
+        lockForRead();
+        try {
+            TimePoint last = from;
+            boolean isFoiling = false;
+            for (final BravoFix fix : getFixes(from, true, to, true)) {
+                final boolean fixFoils = isFoiling(fix);
+                if (isFoiling && fixFoils) {
+                    result = result.plus(last.until(fix.getTimePoint()));
+                }
+                last = fix.getTimePoint();
+                isFoiling = fixFoils;
+            }
+        } finally {
+            unlockAfterRead();
+        }
+        return result;
     }
 }

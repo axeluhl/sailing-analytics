@@ -15,7 +15,7 @@ public class ParallelDistanceMaxAggregationProcessor extends
         AbstractParallelSingleGroupedValueAggregationProcessor<Distance> {
     
     private static final AggregationProcessorDefinition<Distance, Distance> DEFINITION =
-            new SimpleAggregationProcessorDefinition<>(Distance.class, Distance.class, "Minimum", ParallelDistanceMaxAggregationProcessor.class);
+            new SimpleAggregationProcessorDefinition<>(Distance.class, Distance.class, "Maximum", ParallelDistanceMaxAggregationProcessor.class);
     
     public static AggregationProcessorDefinition<Distance, Distance> getDefinition() {
         return DEFINITION;
@@ -24,7 +24,7 @@ public class ParallelDistanceMaxAggregationProcessor extends
     
     public ParallelDistanceMaxAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Distance>, ?>> resultReceivers) {
-        super(executor, resultReceivers, "Minimum");
+        super(executor, resultReceivers, "Maximum");
     }
 
     @Override

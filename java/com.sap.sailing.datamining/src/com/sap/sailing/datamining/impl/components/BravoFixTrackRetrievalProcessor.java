@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sailing.datamining.data.HasBravoTrackContext;
+import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.BravoTrackWithContext;
 import com.sap.sailing.domain.base.Competitor;
@@ -20,15 +20,15 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
  * @author Axel Uhl (d043530)
  *
  */
-public class BravoTrackRetrievalProcessor extends AbstractRetrievalProcessor<HasRaceOfCompetitorContext, HasBravoTrackContext> {
+public class BravoFixTrackRetrievalProcessor extends AbstractRetrievalProcessor<HasRaceOfCompetitorContext, HasBravoFixTrackContext> {
 
-    public BravoTrackRetrievalProcessor(ExecutorService executor, Collection<Processor<HasBravoTrackContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasRaceOfCompetitorContext.class, HasBravoTrackContext.class, executor, resultReceivers, retrievalLevel);
+    public BravoFixTrackRetrievalProcessor(ExecutorService executor, Collection<Processor<HasBravoFixTrackContext, ?>> resultReceivers, int retrievalLevel) {
+        super(HasRaceOfCompetitorContext.class, HasBravoFixTrackContext.class, executor, resultReceivers, retrievalLevel);
     }
 
     @Override
-    protected Iterable<HasBravoTrackContext> retrieveData(HasRaceOfCompetitorContext element) {
-        Collection<HasBravoTrackContext> bravoTracksWithContext = new ArrayList<>();
+    protected Iterable<HasBravoFixTrackContext> retrieveData(HasRaceOfCompetitorContext element) {
+        Collection<HasBravoFixTrackContext> bravoTracksWithContext = new ArrayList<>();
         final TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
         final BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(element.getCompetitor(), BravoFixTrack.TRACK_NAME);
         if (bravoFixTrack != null) {
