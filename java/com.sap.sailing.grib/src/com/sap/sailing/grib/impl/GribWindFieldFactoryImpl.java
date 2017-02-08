@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -83,10 +82,10 @@ public class GribWindFieldFactoryImpl implements GribWindFieldFactory {
     
     @Override
     public synchronized void shutdown() {
-        for (Iterator<WeakReference<GribWindField>> i=filesToCleanWhenGribWindFieldNoLongerUsed.keySet().iterator(); i.hasNext(); ) {
-            final WeakReference<GribWindField> ref = i.next();
+        // clone key set because cleanup will remove the reference from filesToCleanWhenGribWindFieldNoLongerUsed
+        // which would lead to a ConcurrentModificationException otherwise.
+        for (final WeakReference<GribWindField> ref : new ArrayList<>(filesToCleanWhenGribWindFieldNoLongerUsed.keySet())) {
             cleanup(ref);
-            i.remove();
         }
     }
 
