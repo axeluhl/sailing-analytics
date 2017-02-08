@@ -202,7 +202,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
 
 
         public RaceListFinishedRaces(EventView.Presenter presenter) {
-            super(presenter, new RaceListColumnSet(1, 1));
+            super(presenter, new RaceListColumnSet(1, 1), true);
         }
         
         @Override
