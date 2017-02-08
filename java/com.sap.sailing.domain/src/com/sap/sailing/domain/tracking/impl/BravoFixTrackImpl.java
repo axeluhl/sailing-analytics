@@ -8,6 +8,7 @@ import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
@@ -71,5 +72,11 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
             unlockAfterRead();
         }
         return result;
+    }
+
+    @Override
+    public Duration getTimeSpentFoiling(TimePoint from, TimePoint to) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

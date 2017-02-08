@@ -4,8 +4,10 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.tracking.BravoFix;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
+import com.sap.sse.datamining.annotations.Statistic;
 
 /**
  * Specific {@link SensorFixTrack} for {@link BravoFix}es.
@@ -25,6 +27,8 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
      */
     Distance getRideHeight(TimePoint timePoint);
     
+    // TODO add getRideHeightPortHull and getRideHeightStarboardHull; consider changing semantics of getRideHeight() to min(port, starboard)
+    
     /**
      * Calculates the average ride height for the given time range.
      * 
@@ -36,4 +40,10 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
      *         time range.
      */
     Distance getAverageRideHeight(TimePoint from, TimePoint to);
+    
+    /**
+     * The time spent foiling during the time range provided
+     */
+    @Statistic(messageKey="timeSpentFoiling", resultDecimals=1)
+    Duration getTimeSpentFoiling(TimePoint from, TimePoint to);
 }
