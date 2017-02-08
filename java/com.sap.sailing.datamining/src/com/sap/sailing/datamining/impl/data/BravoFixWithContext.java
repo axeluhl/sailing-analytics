@@ -30,11 +30,6 @@ public class BravoFixWithContext implements HasBravoFixContext {
     }
     
     @Override
-    public boolean isFoiling() {
-        return getBravoFix().isFoiling();
-    }
-    
-    @Override
     public Wind getWindInternal() {
         return wind;
     }
