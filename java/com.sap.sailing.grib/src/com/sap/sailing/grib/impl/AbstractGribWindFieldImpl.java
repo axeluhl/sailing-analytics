@@ -24,6 +24,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.nc2.Dimension;
 import ucar.nc2.dataset.VariableDS;
 import ucar.nc2.dt.GridCoordSystem;
@@ -235,23 +236,38 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
         return valueAsFloat;
     }
     
-    @FunctionalInterface
-    static interface ValueForCoordinateProvider<T> {
-        T getValue(int timeIndex, int x, int y, TimePoint timePoint, Position position);
+    /**
+     * Instead of using {@link GridDatatype#readDataSlice(int, int, int, int)} which really reads from the file(s),
+     * use an already read {@link Array} of mass data here.
+     */
+    protected double getValue(Array gridData, int timeIndex, int zIndex, final int x, final int y) throws IOException {
+        final double valueAsFloat;
+        if (gridData.getRank() == 3) { // includes z dimension
+            valueAsFloat = gridData.getDouble(Index.factory(new int[] { zIndex, y, x }));
+        } else {
+            valueAsFloat = gridData.getDouble(Index.factory(new int[] { y, x }));
+        }
+        return valueAsFloat;
     }
     
-    protected <T> Iterable<T> foreach(GridDatatype grid, ValueForCoordinateProvider<T> provider) {
+    @FunctionalInterface
+    static interface ValueForCoordinateProvider<T> {
+        T getValue(Array gridData, int timeIndex, int x, int y, TimePoint timePoint, Position position);
+    }
+    
+    protected <T> Iterable<T> foreach(GridDatatype grid, ValueForCoordinateProvider<T> provider) throws IOException {
         final List<T> result = new ArrayList<>();
         final GridCoordSystem coordinateSystem = grid.getCoordinateSystem();
         final int timeDimLength = grid.getTimeDimension().getLength();
         final int xDimLength = grid.getXDimension().getLength();
         final int yDimLength = grid.getYDimension().getLength();
         for (int t=0; t<timeDimLength; t++) {
+            final Array gridData = grid.readVolumeData(t);
             final TimePoint timePoint = toTimePoint(coordinateSystem.getTimeAxis1D().getCalendarDate(t));
             for (int x=0; x<xDimLength; x++) {
                 for (int y=0; y<yDimLength; y++) {
                     final Position position = toPosition(coordinateSystem.getLatLon(x, y));
-                    result.add(provider.getValue(t, x, y, timePoint, position));
+                    result.add(provider.getValue(gridData, t, x, y, timePoint, position));
                 }
             }
         }

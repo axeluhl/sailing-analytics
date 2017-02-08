@@ -86,6 +86,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private static final String EXPEDITON_IMPORT_PARAMETER_BOAT_ID = "boatId";
 
     private static final String URL_SAILINGSERVER_EXPEDITION_IMPORT = "/../../sailingserver/expedition-import";
+    private static final String URL_SAILINGSERVER_GRIB_IMPORT = "/../../sailingserver/grib-wind-import";
 
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
@@ -253,6 +254,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         windFixesDisplayPanel.add(rawWindFixesTable);
 
         mainPanel.add(createExpeditionWindImportPanel());
+        mainPanel.add(createGribWindImportPanel());
         mainPanel.add(createIgtimiWindImportPanel(mainPanel));
 
     }
@@ -308,30 +310,53 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         contentPanel.add(resultReport);
         return igtimiWindImportRootPanel;
     }
-
-    private CaptionPanel createExpeditionWindImportPanel() {
+    
+    private static class WindImportFileUploadForm {
+        private final FormPanel formPanel;
+        private final VerticalPanel formContentPanel;
+        private final FileUpload fileUpload;
+        private final Button submitButton;
+        public WindImportFileUploadForm(FormPanel formPanel, VerticalPanel formContentPanel, FileUpload fileUpload, Button submitButton) {
+            super();
+            this.formPanel = formPanel;
+            this.formContentPanel = formContentPanel;
+            this.fileUpload = fileUpload;
+            this.submitButton = submitButton;
+        }
+        public FormPanel getFormPanel() {
+            return formPanel;
+        }
+        public FileUpload getFileUpload() {
+            return fileUpload;
+        }
+        public Button getSubmitButton() {
+            return submitButton;
+        }
+        public VerticalPanel getFormContentPanel() {
+            return formContentPanel;
+        }
+    }
+    /**
+     * Creates a file upload form that works with {@code AbstractWindImportServlet} on the server side. In particular,
+     * the race selection is managed in a hidden field named {@link #EXPEDITON_IMPORT_PARAMETER_RACES}, and the
+     * {@code upload} element is the MIME multipart file upload form element. The form uses {@code POST} as its method.
+     * 
+     * The submit button is initially disabled. Callers can implement their own logic based, e.g., on event handlers they
+     * add to the form panel or other elements that enable it.
+     */
+    private WindImportFileUploadForm createWindImportFileUploadForm(String relativeUploadUrl, boolean multi) {
         /*
          * To style the "browse" button of the file upload widget
          * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
          */
-        CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.windImport_Title());
-        VerticalPanel windImportContentPanel = new VerticalPanel();
-        windImportRootPanel.add(windImportContentPanel);
         final FormPanel form = new FormPanel();
-        windImportContentPanel.add(form);
         VerticalPanel formContentPanel = new VerticalPanel();
         form.add(formContentPanel);
-        HorizontalPanel inputPanel = new HorizontalPanel();
-        formContentPanel.add(inputPanel);
         final Panel importResultPanel = new VerticalPanel();
-        windImportContentPanel.add(importResultPanel);
-
+        formContentPanel.add(importResultPanel);
         form.setMethod(FormPanel.METHOD_POST);
         form.setEncoding(FormPanel.ENCODING_MULTIPART);
-        form.setAction(GWT.getHostPageBaseURL() + URL_SAILINGSERVER_EXPEDITION_IMPORT);
-
-        final TextBox boatIdTextBox = new TextBox();
-        boatIdTextBox.setName(EXPEDITON_IMPORT_PARAMETER_BOAT_ID);
+        form.setAction(GWT.getHostPageBaseURL() + relativeUploadUrl);
         final Button submitButton = new Button(stringMessages.windImport_Upload(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -340,45 +365,15 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
             }
         });
         submitButton.setEnabled(false);
-
         final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("upload");
-        fileUpload.getElement().setAttribute("multiple", "multiple");
-        fileUpload.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                importResultPanel.clear();
-                String fileName = fileUpload.getFilename();
-                boolean isValidFileName = (fileName != null) && (fileUpload.getFilename().trim().length() > 0);
-                submitButton.setEnabled(isValidFileName);
-                String boatId = "";
-                if (isValidFileName) {
-                    RegExp EXPEDITION_EXPORT_FILE_PATTERN = RegExp.compile("^.*_([0-9]+)\\.csv"); //matches typical expedition log file names like "2013Jun26_0.csv" where 0 as group[1] indicates the boat id. 
-                    MatchResult match = EXPEDITION_EXPORT_FILE_PATTERN.exec(fileName);
-                    if (match != null && match.getGroupCount() > 0) {
-                        boatId = match.getGroup(1);
-                    }
-                }
-                boatIdTextBox.setText(boatId);
-            }
-        });
-
-        inputPanel.add(fileUpload);
-
-        Label boatIdLabel = new Label(stringMessages.windImport_BoatId());
-        inputPanel.add(boatIdLabel);
-        inputPanel.add(boatIdTextBox);
-        boatIdLabel.setWordWrap(false);
-        inputPanel.setSpacing(5);
-        inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
-        inputPanel.setCellVerticalAlignment(boatIdLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        inputPanel.setCellVerticalAlignment(boatIdTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
-
+        if (multi) {
+            fileUpload.getElement().setAttribute("multiple", "multiple");
+        }
         final Hidden hiddenRacesField = new Hidden(EXPEDITON_IMPORT_PARAMETER_RACES);
-        inputPanel.add(hiddenRacesField);
-
+        formContentPanel.add(hiddenRacesField);
+        formContentPanel.add(fileUpload);
         formContentPanel.add(submitButton);
-
         form.addSubmitHandler(new FormPanel.SubmitHandler() {
             public void onSubmit(SubmitEvent event) {
                 if ((fileUpload.getFilename() != null) && (fileUpload.getFilename().trim().length() > 0)) {
@@ -429,8 +424,83 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
                 }
             }
         });
+        return new WindImportFileUploadForm(form, formContentPanel, fileUpload, submitButton);
+    }
+
+    private CaptionPanel createExpeditionWindImportPanel() {
+        /*
+         * To style the "browse" button of the file upload widget
+         * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
+         */
+        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(URL_SAILINGSERVER_EXPEDITION_IMPORT, /* multi */ true);
+        CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.windImport_Title());
+        VerticalPanel windImportContentPanel = new VerticalPanel();
+        windImportRootPanel.add(windImportContentPanel);
+        final FormPanel form = formAndFileUploadAndSubmitButton.getFormPanel();
+        windImportContentPanel.add(form);
+        VerticalPanel formContentPanel = formAndFileUploadAndSubmitButton.getFormContentPanel();
+        HorizontalPanel inputPanel = new HorizontalPanel();
+        formContentPanel.add(inputPanel);
+        final Panel importResultPanel = new VerticalPanel();
+        windImportContentPanel.add(importResultPanel);
+
+        final TextBox boatIdTextBox = new TextBox();
+        boatIdTextBox.setName(EXPEDITON_IMPORT_PARAMETER_BOAT_ID);
+        final Button submitButton = formAndFileUploadAndSubmitButton.getSubmitButton();
+
+        final FileUpload fileUpload = formAndFileUploadAndSubmitButton.getFileUpload();
+        fileUpload.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                importResultPanel.clear();
+                String fileName = fileUpload.getFilename();
+                boolean isValidFileName = (fileName != null) && (fileUpload.getFilename().trim().length() > 0);
+                submitButton.setEnabled(isValidFileName);
+                String boatId = "";
+                if (isValidFileName) {
+                    RegExp EXPEDITION_EXPORT_FILE_PATTERN = RegExp.compile("^.*_([0-9]+)\\.csv"); //matches typical expedition log file names like "2013Jun26_0.csv" where 0 as group[1] indicates the boat id. 
+                    MatchResult match = EXPEDITION_EXPORT_FILE_PATTERN.exec(fileName);
+                    if (match != null && match.getGroupCount() > 0) {
+                        boatId = match.getGroup(1);
+                    }
+                }
+                boatIdTextBox.setText(boatId);
+            }
+        });
+        Label boatIdLabel = new Label(stringMessages.windImport_BoatId());
+        inputPanel.add(boatIdLabel);
+        inputPanel.add(boatIdTextBox);
+        boatIdLabel.setWordWrap(false);
+        inputPanel.setSpacing(5);
+        inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
+        inputPanel.setCellVerticalAlignment(boatIdLabel, HasVerticalAlignment.ALIGN_MIDDLE);
+        inputPanel.setCellVerticalAlignment(boatIdTextBox, HasVerticalAlignment.ALIGN_MIDDLE);
         return windImportRootPanel;
     }
+
+    private CaptionPanel createGribWindImportPanel() {
+        /*
+         * To style the "browse" button of the file upload widget
+         * see http://www.shauninman.com/archive/2007/09/10/styling_file_inputs_with_css_and_the_dom  
+         */
+        final WindImportFileUploadForm formAndFileUploadAndSubmitButton = createWindImportFileUploadForm(URL_SAILINGSERVER_GRIB_IMPORT, /* multi */ true);
+        CaptionPanel windImportRootPanel = new CaptionPanel(stringMessages.gribWindImport_Title());
+        VerticalPanel windImportContentPanel = new VerticalPanel();
+        windImportRootPanel.add(windImportContentPanel);
+        final FormPanel form = formAndFileUploadAndSubmitButton.getFormPanel();
+        windImportContentPanel.add(form);
+        VerticalPanel formContentPanel = formAndFileUploadAndSubmitButton.getFormContentPanel();
+        HorizontalPanel inputPanel = new HorizontalPanel();
+        formContentPanel.add(inputPanel);
+        final Panel importResultPanel = new VerticalPanel();
+        windImportContentPanel.add(importResultPanel);
+        formAndFileUploadAndSubmitButton.getSubmitButton().setEnabled(true);
+        final FileUpload fileUpload = formAndFileUploadAndSubmitButton.getFileUpload();
+        inputPanel.setSpacing(5);
+        inputPanel.setCellVerticalAlignment(fileUpload, HasVerticalAlignment.ALIGN_MIDDLE);
+        return windImportRootPanel;
+    }
+
 
     private void showWindSettingDialog(RaceDTO race, CoursePositionsDTO course) {
         AddWindFixDialog windSettingDialog = new AddWindFixDialog(race, course, stringMessages, new DialogCallback<WindDTO>() {

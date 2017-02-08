@@ -41,5 +41,5 @@ public interface GribWindField {
      */
     TimeRange getTimeRange();
 
-    Iterable<Wind> getAllWindFixes();
+    Iterable<Wind> getAllWindFixes() throws IOException;
 }

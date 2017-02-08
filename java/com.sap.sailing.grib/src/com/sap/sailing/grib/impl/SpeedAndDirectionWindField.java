@@ -2,8 +2,10 @@ package com.sap.sailing.grib.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +19,7 @@ import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 
+import ucar.ma2.Array;
 import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GridDataset;
 import ucar.nc2.ft.FeatureDataset;
@@ -96,11 +99,11 @@ public class SpeedAndDirectionWindField extends AbstractGribWindFieldImpl {
     }
 
     @Override
-    public Iterable<Wind> getAllWindFixes() {
+    public Iterable<Wind> getAllWindFixes() throws IOException {
         final List<Wind> result = new ArrayList<>();
+        GridDatatype directionGrid = null;
+        GridDatatype speedGrid = null;
         for (final FeatureDataset dataSet : getDataSets()) {
-            GridDatatype directionGrid = null;
-            GridDatatype speedGrid = null;
             for (Iterator<GridDatatype> i=((GridDataset) dataSet).getGrids().iterator(); i.hasNext() && (directionGrid==null || speedGrid==null); ) {
                 final GridDatatype grid = i.next();
                 if (windDirectionVariableSpecification.matches(grid.getVariable())) {
@@ -111,30 +114,35 @@ public class SpeedAndDirectionWindField extends AbstractGribWindFieldImpl {
                     speedGrid = grid;
                 }
             }
-            if (directionGrid != null && speedGrid != null) {
-                final GridDatatype finalDirectionGrid = directionGrid;
-                final GridDatatype finalSpeedGrid = speedGrid;
-                for (final Wind wind : foreach(directionGrid, (int timeIndex, int x, int y, TimePoint timePoint, Position position)->{
-                    try {
-                        final Wind wind;
-                        double speedInMetersPerSecond = getValue(finalSpeedGrid, timeIndex, /* zIndex */ 0, x, y);
-                        double trueDirectionFromInDeg = getValue(finalDirectionGrid, timeIndex, /* zIndex */ 0, x, y);
-                        if (!Double.isNaN(speedInMetersPerSecond) && !Double.isNaN(trueDirectionFromInDeg)) {
-                            wind = createWindFixFromDirectionAndSpeed(position, timePoint, speedInMetersPerSecond, trueDirectionFromInDeg);
-                        } else {
-                            wind = null;
-                        }
-                        return wind;
-                    } catch (Exception e) {
-                        logger.log(Level.INFO, "Exception trying to compute wind from speed and direction", e);
-                        return null;
+        }
+        if (directionGrid != null && speedGrid != null) {
+            final GridDatatype finalSpeedGrid = speedGrid;
+            final Map<Integer, Array> speedGridDataCache = new HashMap<>();
+            for (final Wind wind : foreach(directionGrid, (Array directionGridData, int timeIndex, int x, int y, TimePoint timePoint, Position position)->{
+                try {
+                    final Wind wind;
+                    Array speedGridData = speedGridDataCache.get(timeIndex);
+                    if (speedGridData == null) {
+                        speedGridData = finalSpeedGrid.readVolumeData(timeIndex);
+                        speedGridDataCache.put(timeIndex, speedGridData);
                     }
-                })) {
-                    if (wind != null) {
-                        result.add(wind);
+                    double speedInMetersPerSecond = getValue(speedGridData, timeIndex, /* zIndex */ 0, x, y);
+                    double trueDirectionFromInDeg = getValue(directionGridData, timeIndex, /* zIndex */ 0, x, y);
+                    if (!Double.isNaN(speedInMetersPerSecond) && !Double.isNaN(trueDirectionFromInDeg)) {
+                        wind = createWindFixFromDirectionAndSpeed(position, timePoint, speedInMetersPerSecond, trueDirectionFromInDeg);
+                    } else {
+                        wind = null;
                     }
-                };
-            }
+                    return wind;
+                } catch (Exception e) {
+                    logger.log(Level.INFO, "Exception trying to compute wind from speed and direction", e);
+                    return null;
+                }
+            })) {
+                if (wind != null) {
+                    result.add(wind);
+                }
+            };
         }
         return result;
     }

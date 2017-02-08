@@ -53,13 +53,15 @@ public class GribWindFieldFactoryImpl implements GribWindFieldFactory {
                     while (!finished) {
                         try {
                             final Reference<? extends GribWindField> ref = referenceQueue.remove();
+                            final File dir;
                             synchronized (GribWindFieldFactoryImpl.this) {
-                                filesToCleanWhenGribWindFieldNoLongerUsed.remove(ref);
+                                dir = filesToCleanWhenGribWindFieldNoLongerUsed.remove(ref);
                                 finished = filesToCleanWhenGribWindFieldNoLongerUsed.isEmpty();
                                 if (finished) {
                                     fileSystemCleaner = null;
                                 }
                             }
+                            rm_rf(dir);
                         } catch (InterruptedException e) {
                             logger.log(Level.WARNING, "Interrupted while waiting for weak reference, giving up", e);
                             finished = true;
@@ -67,10 +69,25 @@ public class GribWindFieldFactoryImpl implements GribWindFieldFactory {
                     }
                 }, "GRIB directory cleaner");
                 fileSystemCleaner.setDaemon(true);
+                fileSystemCleaner.start();
             }
         }
     }
     
+    /**
+     * Removes directory and all its contents
+     */
+    private void rm_rf(File dir) {
+        assert dir.isDirectory();
+        for (final File f : dir.listFiles(f->true)) {
+            if (f.isDirectory()) {
+                rm_rf(f);
+            } else {
+                f.delete();
+            }
+        }
+    }
+
     @Override
     public GribWindField createGribWindField(FeatureDataset... dataSets) {
         final GribWindField result;
