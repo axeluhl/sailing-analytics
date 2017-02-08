@@ -49,6 +49,15 @@ public class SettingsToUrlSerializer {
 
     public final void serializeToUrlBuilder(GenericSerializableSettings settings, UrlBuilder urlBuilder) {
         Map<String, Iterable<String>> serializedValues = settingsToStringMapSerializer.serialize(settings);
+        writeParameterMapToUrlBuilder(urlBuilder, serializedValues);
+    }
+    
+    public final void serializeSettingsMapToUrlBuilder(SettingsMap settings, UrlBuilder urlBuilder) {
+        Map<String, Iterable<String>> serializedValues = settingsToStringMapSerializer.serialize(settings);
+        writeParameterMapToUrlBuilder(urlBuilder, serializedValues);
+    }
+
+    private void writeParameterMapToUrlBuilder(UrlBuilder urlBuilder, Map<String, Iterable<String>> serializedValues) {
         for(Map.Entry<String, Iterable<String>> entry : serializedValues.entrySet()) {
             Iterable<String> parameterValues = entry.getValue();
             String[] parameterValuesAsArray = Util.toArray(parameterValues, new String[Util.size(parameterValues)]);
