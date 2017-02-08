@@ -37,5 +37,29 @@ public class BravoFixImpl implements BravoFix {
     public Distance getRideHeight() {
         return new MeterDistance(fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightColumn));
     }
-
+    
+    @Override
+    public Distance getRideHeightPortHull() {
+        return new MeterDistance(fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn));
+    }
+    
+    @Override
+    public Distance getRideHeightStarboardHull() {
+        return new MeterDistance(fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn));
+    }
+    
+    @Override
+    public double getPitch() {
+        return fix.get(BravoSensorDataMetadata.INSTANCE.pitchColumn);
+    }
+    
+    @Override
+    public double getYaw() {
+        return fix.get(BravoSensorDataMetadata.INSTANCE.yawColumn);
+    }
+    
+    @Override
+    public double getRoll() {
+        return fix.get(BravoSensorDataMetadata.INSTANCE.rollColumn);
+    }
 }

@@ -15,4 +15,14 @@ public interface BravoFix extends SensorFix {
      * @return the ride height
      */
     Distance getRideHeight();
+
+    Distance getRideHeightPortHull();
+
+    Distance getRideHeightStarboardHull();
+
+    double getPitch();
+
+    double getYaw();
+
+    double getRoll();
 }
