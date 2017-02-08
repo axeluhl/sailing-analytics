@@ -196,6 +196,10 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         private final SortableRaceListColumn<RaceListRaceDTO, ?> videoCountColumn = RaceListColumnFactory.getVideoCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> audioCountColumn = RaceListColumnFactory.getAudioCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
+        private boolean hasWind;
+        private boolean hasVideos;
+        private boolean hasAudios;
+
 
         public RaceListFinishedRaces(EventView.Presenter presenter) {
             super(presenter, new RaceListColumnSet(1, 1));
@@ -212,12 +216,15 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             // TODO: this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
             this.startTimeColumn.setShowTimeOnly(false);
             this.durationColumn.setShowDetails(RaceListDataUtil.hasDurations(data));
-            boolean hasWind = RaceListDataUtil.hasWind(data);
+            this.hasWind = RaceListDataUtil.hasWind(data);
+            this.hasVideos = RaceListDataUtil.hasVideos(data);
+            this.hasAudios = RaceListDataUtil.hasAudios(data);
+
             this.windSpeedColumn.setShowDetails(hasWind);
             this.windDirectionColumn.setShowDetails(hasWind);
             this.windSourcesCountColumn.setShowDetails(RaceListDataUtil.hasWindSources(data));
-            this.videoCountColumn.setShowDetails(RaceListDataUtil.hasVideos(data));
-            this.audioCountColumn.setShowDetails(RaceListDataUtil.hasAudios(data));
+            this.videoCountColumn.setShowDetails(hasVideos);
+            this.audioCountColumn.setShowDetails(hasAudios);
             this.winnerColumn.setShowDetails(RaceListDataUtil.hasWinner(data));
             super.setTableData(data);
         }
@@ -244,6 +251,21 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             columnSet.addColumn(videoCountColumn);
             columnSet.addColumn(audioCountColumn);
             columnSet.addColumn(fleetNameColumn);
+        }
+
+        @Override
+        public boolean hasWind() {
+            return hasWind;
+        }
+
+        @Override
+        public boolean hasVideos() {
+            return hasVideos;
+        }
+
+        @Override
+        public boolean hasAudios() {
+            return hasAudios;
         }
         
     }

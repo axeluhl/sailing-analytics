@@ -133,5 +133,10 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
         }
         return filterableValues;
     }
-    
+
+    public abstract boolean hasWind();
+
+    public abstract boolean hasVideos();
+
+    public abstract boolean hasAudios();
 }
