@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -39,4 +40,6 @@ public interface GribWindField {
      * The time range covered by the underlying GRIB data.
      */
     TimeRange getTimeRange();
+
+    Iterable<Wind> getAllWindFixes();
 }

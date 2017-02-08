@@ -1,8 +1,10 @@
 package com.sap.sailing.grib.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
@@ -227,12 +229,35 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
         return getNearestNonNaNValueWithPosition(coordinateSystem, grid, timeIndex, zIndex, yIndex, xIndex, distance+1);
     }
 
-    private double getValue(GridDatatype grid, int timeIndex, int zIndex, final int x, final int y) throws IOException {
+    protected double getValue(GridDatatype grid, int timeIndex, int zIndex, final int x, final int y) throws IOException {
         final Array arrayForTimePointBefore = grid.readDataSlice(timeIndex, zIndex, y, x);
         final double valueAsFloat = (double) arrayForTimePointBefore.getFloat(0);
         return valueAsFloat;
     }
-
+    
+    @FunctionalInterface
+    static interface ValueForCoordinateProvider<T> {
+        T getValue(int timeIndex, int x, int y, TimePoint timePoint, Position position);
+    }
+    
+    protected <T> Iterable<T> foreach(GridDatatype grid, ValueForCoordinateProvider<T> provider) {
+        final List<T> result = new ArrayList<>();
+        final GridCoordSystem coordinateSystem = grid.getCoordinateSystem();
+        final int timeDimLength = grid.getTimeDimension().getLength();
+        final int xDimLength = grid.getXDimension().getLength();
+        final int yDimLength = grid.getYDimension().getLength();
+        for (int t=0; t<timeDimLength; t++) {
+            final TimePoint timePoint = toTimePoint(coordinateSystem.getTimeAxis1D().getCalendarDate(t));
+            for (int x=0; x<xDimLength; x++) {
+                for (int y=0; y<yDimLength; y++) {
+                    final Position position = toPosition(coordinateSystem.getLatLon(x, y));
+                    result.add(provider.getValue(t, x, y, timePoint, position));
+                }
+            }
+        }
+        return result;
+    }
+    
     protected Optional<String> getUnit(VariableDS variable) {
         final Optional<String> result;
         final ucar.nc2.Attribute attribute = variable.findAttribute("units");

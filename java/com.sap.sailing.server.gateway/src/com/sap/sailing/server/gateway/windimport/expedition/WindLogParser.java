@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.expeditionimport;
+package com.sap.sailing.server.gateway.windimport.expedition;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -160,7 +160,7 @@ public class WindLogParser {
 	 * @return
 	 * @throws IOException
 	 */
-	public static List<Wind> importWind(InputStream windStream) throws IOException {
+	public static Iterable<Wind> importWind(InputStream windStream) throws IOException {
 		BufferedReader csvReader = new BufferedReader(new InputStreamReader(windStream));
 		String headerLine = csvReader.readLine();
 		ColumnNumbers columnNumbers = new ColumnNumbers(headerLine);

@@ -343,6 +343,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
         final FileUpload fileUpload = new FileUpload();
         fileUpload.setName("upload");
+        fileUpload.getElement().setAttribute("multiple", "multiple");
         fileUpload.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
