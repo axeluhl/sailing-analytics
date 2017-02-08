@@ -2,6 +2,7 @@ package com.sap.sailing.grib.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GridDataset;
 import ucar.nc2.ft.FeatureDataset;
@@ -108,7 +110,8 @@ public class UVWindField extends AbstractGribWindFieldImpl {
             if (uGrid != null && vGrid != null) {
                 final GridDatatype finalVGrid = vGrid;
                 final Map<Integer, Array> vGridDataCache = new HashMap<>();
-                for (final Wind wind : foreach(uGrid, (Array uGridData, int timeIndex, int x, int y, TimePoint timePoint, Position position)->{
+                for (final Wind wind : foreach(uGrid, (Array uGridData, int timeIndex, Index index, TimePoint timePoint, Position position)->{
+                    assert Arrays.equals(index.getShape(), uGridData.getShape());
                     try {
                         final Wind wind;
                         Array vGridData = vGridDataCache.get(timeIndex);
@@ -116,8 +119,8 @@ public class UVWindField extends AbstractGribWindFieldImpl {
                             vGridData = finalVGrid.readVolumeData(timeIndex);
                             vGridDataCache.put(timeIndex, vGridData);
                         }
-                        double uComponentInMetersPerSecond = getValue(uGridData, timeIndex, /* zIndex */ 0, x, y);
-                        double vComponentInMetersPerSecond = getValue(vGridData, timeIndex, /* zIndex */ 0, x, y);
+                        double uComponentInMetersPerSecond = uGridData.getDouble(index);
+                        double vComponentInMetersPerSecond = vGridData.getDouble(index);
                         if (!Double.isNaN(uComponentInMetersPerSecond) && !Double.isNaN(vComponentInMetersPerSecond)) {
                             wind = createWindFixFromUAndV(position, timePoint, uComponentInMetersPerSecond, vComponentInMetersPerSecond);
                         } else {

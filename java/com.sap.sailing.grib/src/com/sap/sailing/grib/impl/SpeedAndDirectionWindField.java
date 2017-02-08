@@ -20,6 +20,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
 
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GridDataset;
 import ucar.nc2.ft.FeatureDataset;
@@ -118,7 +119,7 @@ public class SpeedAndDirectionWindField extends AbstractGribWindFieldImpl {
         if (directionGrid != null && speedGrid != null) {
             final GridDatatype finalSpeedGrid = speedGrid;
             final Map<Integer, Array> speedGridDataCache = new HashMap<>();
-            for (final Wind wind : foreach(directionGrid, (Array directionGridData, int timeIndex, int x, int y, TimePoint timePoint, Position position)->{
+            for (final Wind wind : foreach(directionGrid, (Array directionGridData, int timeIndex, Index index, TimePoint timePoint, Position position)->{
                 try {
                     final Wind wind;
                     Array speedGridData = speedGridDataCache.get(timeIndex);
@@ -126,8 +127,8 @@ public class SpeedAndDirectionWindField extends AbstractGribWindFieldImpl {
                         speedGridData = finalSpeedGrid.readVolumeData(timeIndex);
                         speedGridDataCache.put(timeIndex, speedGridData);
                     }
-                    double speedInMetersPerSecond = getValue(speedGridData, timeIndex, /* zIndex */ 0, x, y);
-                    double trueDirectionFromInDeg = getValue(directionGridData, timeIndex, /* zIndex */ 0, x, y);
+                    double speedInMetersPerSecond = speedGridData.getDouble(index);
+                    double trueDirectionFromInDeg = directionGridData.getDouble(index);
                     if (!Double.isNaN(speedInMetersPerSecond) && !Double.isNaN(trueDirectionFromInDeg)) {
                         wind = createWindFixFromDirectionAndSpeed(position, timePoint, speedInMetersPerSecond, trueDirectionFromInDeg);
                     } else {
