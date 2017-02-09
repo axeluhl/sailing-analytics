@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.datamining.Activator;
+import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasRaceResultOfCompetitorContext;
 import com.sap.sailing.domain.base.BoatClass;
@@ -31,6 +33,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.datamining.data.Cluster;
+import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompetitorContext {
     private final static Logger logger = Logger.getLogger(RaceResultOfCompetitorWithContext.class.getName());
@@ -77,6 +81,18 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     @Override
     public String getCompetitorSearchTag() {
         return getCompetitor().getSearchTag();
+    }
+    
+    @Override
+    public ClusterDTO getPercentageClusterForRelativeScore() {
+        Double relativeScore = getRelativeRank();
+        if (relativeScore == null) {
+            return null;
+        }
+        
+        SailingClusterGroups clusterGroups = Activator.getClusterGroups();
+        Cluster<Double> cluster = clusterGroups.getPercentageClusterGroup().getClusterFor(relativeScore);
+        return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
     }
 
     @Override

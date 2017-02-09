@@ -26,8 +26,8 @@ public interface DataMiningService extends RemoteService {
     HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition, String localeInfoName);
 
     HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName);
-    
-    HashSet<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName);
+
+    HashSet<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
     HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getDimensionsMappedByLevelFor(
             DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName);
     HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>> getReducedDimensionsMappedByLevelFor(

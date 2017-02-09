@@ -145,7 +145,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         statisticProvider = new SimpleStatisticProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), retrieverChainProvider);
         statisticProvider.addStatisticChangedListener(providerListener);
 
-        groupingProvider = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), statisticProvider);
+        groupingProvider = new MultiDimensionalGroupingProvider(getStringMessages(), getDataMiningService(), getErrorReporter(), retrieverChainProvider);
         groupingProvider.addGroupingChangedListener(providerListener);
         
         SplitLayoutPanel footerPanel = new SplitLayoutPanel(15);
@@ -305,10 +305,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
 
         @Override
         public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregationProcessorDefinitionDTO newAggregatorDefinition) {
-            if (isAwatingReload()) {
-                groupingProvider.statisticChanged(statisticProvider.getStatisticToCalculate(), statisticProvider.getAggregatorDefinition());
-                groupingProvider.reloadComponents();
-            } else {
+            if (!isAwatingReload()) {
                 scheduleQueryDefinitionChanged();
             }
         }
@@ -323,11 +320,16 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         @Override
         public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
             if (isAwatingReload()) {
-                statisticProvider.dataRetrieverChainDefinitionChanged(retrieverChainProvider.getDataRetrieverChainDefinition());
-                statisticProvider.reloadComponents();
+                DataRetrieverChainDefinitionDTO retrieverChainDefinition = retrieverChainProvider.getDataRetrieverChainDefinition();
                 
-                filterSelectionProvider.dataRetrieverChainDefinitionChanged(retrieverChainProvider.getDataRetrieverChainDefinition());
+                groupingProvider.dataRetrieverChainDefinitionChanged(retrieverChainDefinition);
+                groupingProvider.reloadComponents();
+                
+                filterSelectionProvider.dataRetrieverChainDefinitionChanged(retrieverChainDefinition);
                 filterSelectionProvider.reloadComponents();
+
+                statisticProvider.dataRetrieverChainDefinitionChanged(retrieverChainDefinition);
+                statisticProvider.reloadComponents();
             } else {
                 scheduleQueryDefinitionChanged();
             }

@@ -117,16 +117,11 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
-    public HashSet<FunctionDTO> getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName) {
-        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, statisticToCalculate.getFunctionName()));
-        Class<?> baseDataType = getBaseDataType(statisticToCalculate);
-        Iterable<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(baseDataType);
+    public HashSet<FunctionDTO> getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, dataRetrieverChainDefinitionDTO.getName()));
+        Class<?> retrievedType = getDataMiningServer().getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO).getRetrievedDataType();
+        Iterable<Function<?>> dimensions = getDataMiningServer().getDimensionsFor(retrievedType);
         return functionsAsDTOs(dimensions, localeInfoName);
-    }
-
-    private Class<?> getBaseDataType(FunctionDTO statisticToCalculate) {
-        Function<?> function = getDataMiningServer().getFunctionForDTO(statisticToCalculate);
-        return function.getDeclaringType();
     }
     
     @Override
@@ -185,6 +180,11 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         @SuppressWarnings("unchecked")
         Iterable<DataRetrieverChainDefinition<?, ?>> dataRetrieverChainDefinitions = (Iterable<DataRetrieverChainDefinition<?, ?>>)(Iterable<?>)  getDataMiningServer().getDataRetrieverChainDefinitionsByDataType(baseDataType);
         return dataRetrieverChainDefinitionsAsDTOs(dataRetrieverChainDefinitions, localeInfoName);
+    }
+
+    private Class<?> getBaseDataType(FunctionDTO statisticToCalculate) {
+        Function<?> function = getDataMiningServer().getFunctionForDTO(statisticToCalculate);
+        return function.getDeclaringType();
     }
     
     private ArrayList<DataRetrieverChainDefinitionDTO> dataRetrieverChainDefinitionsAsDTOs(
