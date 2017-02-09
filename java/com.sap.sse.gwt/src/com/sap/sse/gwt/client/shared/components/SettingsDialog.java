@@ -57,8 +57,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
     private SettingsDialog(final Component<SettingsType> component,
             SettingsDialogComponent<SettingsType> dialogComponent, StringMessages stringMessages,
             boolean animationEnabled, final DialogCallback<SettingsType> callback) {
-        super(stringMessages.settingsForComponent(component.getLocalizedShortName()), null, stringMessages.ok(),
-                stringMessages.cancel(), dialogComponent.getValidator(), animationEnabled,
+        this(component.getLocalizedShortName(), dialogComponent, stringMessages, animationEnabled,
                 new DialogCallback<SettingsType>() {
                     @Override
                     public void cancel() {
@@ -75,12 +74,24 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
                         }
                     }
                 });
-        this.settingsDialogComponent = dialogComponent;
 
         if (component.getComponentContext() != null
                 && component.getComponentContext().hasMakeCustomDefaultSettingsSupport(component)) {
             initMakeDefaultButtons(component, stringMessages);
         }
+    }
+
+    public SettingsDialog(final ComponentLifecycle<SettingsType, ?> componentLifecycle, SettingsType settings,
+            StringMessages stringMessages, boolean animationEnabled, final DialogCallback<SettingsType> callback) {
+        this(componentLifecycle.getLocalizedShortName(), componentLifecycle.getSettingsDialogComponent(settings),
+                stringMessages, animationEnabled, callback);
+    }
+    
+    private SettingsDialog(final String shortName, SettingsDialogComponent<SettingsType> dialogComponent,
+            StringMessages stringMessages, boolean animationEnabled, final DialogCallback<SettingsType> callback) {
+        super(stringMessages.settingsForComponent(shortName), null, stringMessages.ok(), stringMessages.cancel(),
+                dialogComponent.getValidator(), animationEnabled, callback);
+        this.settingsDialogComponent = dialogComponent;
     }
 
     @Override
