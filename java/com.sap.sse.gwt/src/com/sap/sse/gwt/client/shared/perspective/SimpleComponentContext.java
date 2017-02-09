@@ -27,6 +27,8 @@ import com.sap.sse.gwt.settings.UrlBuilderUtil;
  */
 public class SimpleComponentContext<L extends ComponentLifecycle<S, ?>, S extends Settings>
         implements ComponentContext<L, S> {
+    
+    private final SettingsToUrlSerializer settingsToUrlSerializer = new SettingsToUrlSerializer();
 
     protected final L rootLifecycle;
 
