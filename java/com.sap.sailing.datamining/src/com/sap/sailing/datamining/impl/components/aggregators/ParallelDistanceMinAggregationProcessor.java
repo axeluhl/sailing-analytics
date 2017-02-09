@@ -8,11 +8,11 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.SimpleAggregationProcessorDefinition;
-import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelSingleGroupedValueAggregationProcessor;
+import com.sap.sse.datamining.impl.components.aggregators.AbstractParallelComparableMaxAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
 
 public class ParallelDistanceMinAggregationProcessor extends
-        AbstractParallelSingleGroupedValueAggregationProcessor<Distance> {
+    AbstractParallelComparableMaxAggregationProcessor<Distance> {
     
     private static final AggregationProcessorDefinition<Distance, Distance> DEFINITION =
             new SimpleAggregationProcessorDefinition<>(Distance.class, Distance.class, "Minimum", ParallelDistanceMinAggregationProcessor.class);
@@ -24,12 +24,6 @@ public class ParallelDistanceMinAggregationProcessor extends
     
     public ParallelDistanceMinAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Distance>, ?>> resultReceivers) {
-        super(executor, resultReceivers, "Minimum");
+        super(executor, resultReceivers);
     }
-
-    @Override
-    protected Distance compareValuesAndReturnNewResult(Distance currentResult, Distance newValue) {
-        return currentResult.getMeters() <= newValue.getMeters() ? currentResult : newValue;
-    }
-
 }

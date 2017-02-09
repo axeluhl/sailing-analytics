@@ -34,11 +34,14 @@ public interface HasFoilingSegmentContext {
     @Statistic(messageKey="LandingSpeedInKnots")
     Double getLandingSpeedInKnots();
     
-    @Statistic(messageKey="TrueWindAngleAtTakeoffInDegrees")
-    Bearing getTrueWindAngleAtTakeoffInDegrees() throws NoWindException;
+    @Statistic(messageKey="AbsoluteTrueWindAngleAtTakeoff")
+    Bearing getAbsoluteTrueWindAngleAtTakeoffInDegrees() throws NoWindException;
     
-    @Statistic(messageKey="TrueWindAngleAtLandingInDegrees")
-    Bearing getTrueWindAngleAtLandingInDegrees() throws NoWindException;
+    @Statistic(messageKey="AbsoluteTrueWindAngleAtLanding")
+    Bearing getAbsoluteTrueWindAngleAtLandingInDegrees() throws NoWindException;
+
+    @Statistic(messageKey="AverageAbsoluteTrueWindAngle")
+    Bearing getAverageAbsoluteTrueWindAngle() throws NoWindException;
     
     @Dimension(messageKey="WindStrengthInBeaufortAtTakeoff")
     ClusterDTO getWindStrengthAsBeaufortClusterAtTakeoff(Locale locale, ResourceBundleStringMessages stringMessages);

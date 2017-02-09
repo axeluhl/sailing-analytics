@@ -7,11 +7,14 @@ import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
 import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.BearingCluster;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
@@ -84,13 +87,33 @@ public class FoilingSegmentWithContext implements HasFoilingSegmentContext {
     }
 
     @Override
-    public Bearing getTrueWindAngleAtTakeoffInDegrees() throws NoWindException {
-        return getTrackedRace().getTrackedLeg(getCompetitor(), getStartOfFoilingSegment()).getBeatAngle(getStartOfFoilingSegment());
+    public Bearing getAbsoluteTrueWindAngleAtTakeoffInDegrees() throws NoWindException {
+        return getAbsoluteTrueWindAngle(getStartOfFoilingSegment());
     }
 
     @Override
-    public Bearing getTrueWindAngleAtLandingInDegrees() throws NoWindException {
-        return getTrackedRace().getTrackedLeg(getCompetitor(), getEndOfFoilingSegment()).getBeatAngle(getEndOfFoilingSegment());
+    public Bearing getAbsoluteTrueWindAngleAtLandingInDegrees() throws NoWindException {
+        final TimePoint timePoint = getEndOfFoilingSegment();
+        return getAbsoluteTrueWindAngle(timePoint);
+    }
+
+    private Bearing getAbsoluteTrueWindAngle(final TimePoint timePoint) throws NoWindException {
+        return getTrackedRace().getTrackedLeg(getCompetitor(), timePoint).getBeatAngle(timePoint).abs();
+    }
+
+    @Override
+    public Bearing getAverageAbsoluteTrueWindAngle() throws NoWindException {
+        final BearingCluster bearingCluster = new BearingCluster();
+        final BravoFixTrack<Competitor> bravoFixTrack = getBravoFixTrackContext().getBravoFixTrack();
+        bravoFixTrack.lockForRead();
+        try {
+            for (final BravoFix bravoFix : bravoFixTrack.getFixes(getStartOfFoilingSegment(), /* fromInclusive */ true, getEndOfFoilingSegment(), /* toInclusive */ false)) {
+                bearingCluster.add(getAbsoluteTrueWindAngle(bravoFix.getTimePoint()));
+            }
+        } finally {
+            bravoFixTrack.unlockAfterRead();
+        }
+        return bearingCluster.getAverage();
     }
 
     @Override
