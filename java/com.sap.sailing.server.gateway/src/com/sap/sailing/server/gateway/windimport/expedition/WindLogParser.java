@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.expeditionimport;
+package com.sap.sailing.server.gateway.windimport.expedition;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -107,7 +107,6 @@ public class WindLogParser {
     private static final String COL_NAME_LONG = "Lon";
     
     private static class ColumnNumbers {
-        
         Integer gpsTime;
         Integer trueWindSpeed;
         Integer trueWindDirection;
@@ -142,56 +141,51 @@ public class WindLogParser {
                 }
 
             }
-
             if (gpsTime == null || trueWindSpeed == null || trueWindDirection == null || lat == null || lon == null) {
                 throw new RuntimeException("Unexpected csv header for Expedition wind import: " + headerLine);
             } else {
                 max = Collections.max(Arrays.asList(gpsTime, trueWindSpeed, trueWindDirection, lat, lon));
             }
-            
         }
     }
 
-	private static final Pattern LINE_PATTERN = Pattern.compile(",");
+    private static final Pattern LINE_PATTERN = Pattern.compile(",");
 
-	/**
-	 * See ExpeditionMessage, UDPExpeditionReceiver
-	 * @param windStream
-	 * @return
-	 * @throws IOException
-	 */
-	public static List<Wind> importWind(InputStream windStream) throws IOException {
-		BufferedReader csvReader = new BufferedReader(new InputStreamReader(windStream));
-		String headerLine = csvReader.readLine();
-		ColumnNumbers columnNumbers = new ColumnNumbers(headerLine);
+    /**
+     * See ExpeditionMessage, UDPExpeditionReceiver
+     * 
+     * @param windStream
+     * @return
+     * @throws IOException
+     */
+    public static Iterable<Wind> importWind(InputStream windStream) throws IOException {
+        BufferedReader csvReader = new BufferedReader(new InputStreamReader(windStream));
+        String headerLine = csvReader.readLine();
+        ColumnNumbers columnNumbers = new ColumnNumbers(headerLine);
+        List<Wind> result = new ArrayList<Wind>();
+        String dataLine;
+        WindBuffer windBuffer = new WindBuffer();
+        while ((dataLine = csvReader.readLine()) != null) {
+            String[] data = parseDataLine(dataLine, columnNumbers.max);
+            if (data != null) {
+                windBuffer.updateTime(data[columnNumbers.gpsTime]);
+                windBuffer.updateWindData(data[columnNumbers.trueWindSpeed], data[columnNumbers.trueWindDirection]);
+                windBuffer.updatePosition(data[columnNumbers.lat], data[columnNumbers.lon]);
+                Wind wind = windBuffer.createWindIfReady();
+                if (wind != null) {
+                    result.add(wind);
+                }
+            }
+        }
+        return result;
+    }
 
-		List<Wind> result = new ArrayList<Wind>();
-		String dataLine;
-		WindBuffer windBuffer = new WindBuffer();
-		while ((dataLine = csvReader.readLine()) != null) {
-			String[] data = parseDataLine(dataLine, columnNumbers.max);
-
-			if (data != null) {
-				windBuffer.updateTime(data[columnNumbers.gpsTime]);
-				windBuffer.updateWindData(data[columnNumbers.trueWindSpeed], data[columnNumbers.trueWindDirection]);
-				windBuffer.updatePosition(data[columnNumbers.lat], data[columnNumbers.lon]);
-
-				Wind wind = windBuffer.createWindIfReady();
-				if (wind != null) {
-					result.add(wind);
-				}
-			}
-		}
-
-		return result;
-	}
-
-	private static String[] parseDataLine(String dataLine, int minLength) {
-		String[] data = LINE_PATTERN.split(dataLine);
-		if (data.length >= minLength) {
-			return data;
-		}
-		//else
-		return null;
-	}
+    private static String[] parseDataLine(String dataLine, int minLength) {
+        String[] data = LINE_PATTERN.split(dataLine);
+        if (data.length >= minLength) {
+            return data;
+        }
+        // else
+        return null;
+    }
 }

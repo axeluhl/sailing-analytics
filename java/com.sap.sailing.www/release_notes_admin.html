@@ -23,6 +23,22 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 
+                    <h2 class="articleSubheadline">Febrbuary 2017</h2>
+                    <ul class="bulletList">
+                    	<li>Wind data in GRIB format can now be imported in the "Wind" sub-tab of the "Tracked Races" tab
+                    	    in the <tt>AdminConsole</tt>. When one or more races are being tracked, with a tracking time
+                    	    interval that includes the time point(s) for which the GRIB data is valid, the wind data at
+                    	    the resolution of the GRIB file is added as separate wind fixes with type "WEB" to the race(s)
+                    	    selected, or to all races if no race is selected.<p>
+                    	    Multiple GRIB files can be specified; this is even necessary if GRIB sources are being used where
+                    	    the so-called "U" and "V" or "speed" and "direction" components, respectively, are provided in
+                    	    separate files. The importer will merge the GRIB sources to produce wind readings with true
+                    	    wind direction and true wind speed.
+                    	    Note that large GRIB files can result in many wind fixes being added to the WEB source. Make sure
+                    	    the GRIB files you use are adequate in resolution and region as well as adequate in time. Obtaining
+                    	    a forecast 72h in the future makes little sense for an in-shore race starting in 30min.
+                    	</li>
+                    </ul>
                     <h2 class="articleSubheadline">January 2017</h2>
                     <ul class="bulletList">
                     	<li>Filter boxes now support quoting phrases, such as <tt>"Race 2"</tt> to make them a single search term.

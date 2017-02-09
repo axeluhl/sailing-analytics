@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,6 +28,11 @@ public class Bzip2GridFileReadingTest {
     @Before
     public void setUp() throws IOException {
         dataSet = GridDataset.open("resources/EWAM_DD_10M_2017011912_050.grib2.bz2");
+    }
+    
+    @After
+    public void tearDown() throws IOException {
+        dataSet.close();
     }
     
     @Test
