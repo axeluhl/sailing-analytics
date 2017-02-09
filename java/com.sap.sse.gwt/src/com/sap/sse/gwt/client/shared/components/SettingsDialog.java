@@ -7,14 +7,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FocusWidget;
-import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SettingsDialog<SettingsType extends Settings> extends DataEntryDialog<SettingsType> {
-    private final SettingsDialogComponent<SettingsType> settingsDialogComponent;
+public class SettingsDialog<SettingsType extends Settings> extends AbstractSettingsDialog<SettingsType> {
 
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages) {
         this(component, stringMessages, /* animationEnabled */ true);
@@ -57,7 +53,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
     private SettingsDialog(final Component<SettingsType> component,
             SettingsDialogComponent<SettingsType> dialogComponent, StringMessages stringMessages,
             boolean animationEnabled, final DialogCallback<SettingsType> callback) {
-        this(component.getLocalizedShortName(), dialogComponent, stringMessages, animationEnabled,
+        super(component.getLocalizedShortName(), dialogComponent, stringMessages, animationEnabled,
                 new DialogCallback<SettingsType>() {
                     @Override
                     public void cancel() {
@@ -79,34 +75,6 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
                 && component.getComponentContext().hasMakeCustomDefaultSettingsSupport(component)) {
             initMakeDefaultButtons(component, stringMessages);
         }
-    }
-
-    public SettingsDialog(final ComponentLifecycle<SettingsType, ?> componentLifecycle, SettingsType settings,
-            StringMessages stringMessages, boolean animationEnabled, final DialogCallback<SettingsType> callback) {
-        this(componentLifecycle.getLocalizedShortName(), componentLifecycle.getSettingsDialogComponent(settings),
-                stringMessages, animationEnabled, callback);
-    }
-    
-    private SettingsDialog(final String shortName, SettingsDialogComponent<SettingsType> dialogComponent,
-            StringMessages stringMessages, boolean animationEnabled, final DialogCallback<SettingsType> callback) {
-        super(stringMessages.settingsForComponent(shortName), null, stringMessages.ok(), stringMessages.cancel(),
-                dialogComponent.getValidator(), animationEnabled, callback);
-        this.settingsDialogComponent = dialogComponent;
-    }
-
-    @Override
-    protected Widget getAdditionalWidget() {
-        return settingsDialogComponent.getAdditionalWidget(this);
-    }
-
-    @Override
-    protected SettingsType getResult() {
-        return settingsDialogComponent.getResult();
-    }
-
-    @Override
-    protected FocusWidget getInitialFocusWidget() {
-        return settingsDialogComponent.getFocusWidget();
     }
 
     private void initMakeDefaultButtons(final Component<SettingsType> component, StringMessages stringMessages) {
