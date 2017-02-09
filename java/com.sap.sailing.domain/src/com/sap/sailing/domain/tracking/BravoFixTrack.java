@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.tracking.BravoFix;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
@@ -36,4 +37,9 @@ public interface BravoFixTrack<ItemType extends WithID & Serializable> extends S
      *         time range.
      */
     Distance getAverageRideHeight(TimePoint from, TimePoint to);
+    
+    /**
+     * The time spent foiling during the time range provided
+     */
+    Duration getTimeSpentFoiling(TimePoint from, TimePoint to);
 }

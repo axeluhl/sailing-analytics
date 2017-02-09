@@ -112,7 +112,8 @@ public class FunctionManager implements FunctionRegistry, FunctionProvider {
             boolean functionHasBeenRegistered = false;
             if (isValidDimension.matches(method) || (scanForStatistics && isValidStatistic.matches(method) )) {
                 functionHasBeenRegistered = registerFunction(previousFunctions, method);
-            } else if (isValidConnector.matches(method)) {
+            }
+            if (isValidConnector.matches(method)) {
                 functionHasBeenRegistered = handleConnectorMethod(method, previousFunctions, scanForStatistics);
             }
             functionsHaveBeenRegistered = functionsHaveBeenRegistered ? true : functionHasBeenRegistered;
