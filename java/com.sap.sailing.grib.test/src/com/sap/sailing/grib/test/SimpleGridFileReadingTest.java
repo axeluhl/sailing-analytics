@@ -47,6 +47,7 @@ public class SimpleGridFileReadingTest {
         dataSet = GridDataset.open("resources/Drake.wind.grb");
         final LatLonRect boundingBox = dataSet.getBoundingBox();
         System.out.println(boundingBox);
+        dataSet.close();
     }
 
     @Test
@@ -68,6 +69,7 @@ public class SimpleGridFileReadingTest {
         final float dataAtMiddle = volumeDataAtTime0.get(coordinateIndices[0], coordinateIndices[1]);
         System.out.println(dataVariables);
         System.out.println(dataAtMiddle);
+        dataSet.close();
     }
     
     @Test
@@ -78,6 +80,7 @@ public class SimpleGridFileReadingTest {
         final Position middle = getMiddle(windField);
         final TimePoint midTime = windField.getTimeRange().from().plus(windField.getTimeRange().getDuration().divide(2));
         System.out.println(windField.getWind(midTime, middle));
+        dataSet.close();
     }
     
     @Test
@@ -89,6 +92,7 @@ public class SimpleGridFileReadingTest {
         Calendar cal = new GregorianCalendar(2016, 11, 12, 13, 00, 00);
         cal.setTimeZone(TimeZone.getTimeZone("CET"));
         System.out.println(windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), middle));
+        dataSet.close();
     }
 
     private Position getMiddle(GribWindField windField) {
@@ -110,6 +114,7 @@ public class SimpleGridFileReadingTest {
         final WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), croatia);
         assertEquals(3, wind.getObject().getBeaufort(), 2.2);
         assertEquals(150, wind.getObject().getFrom().getDegrees(), 20);
+        dataSet.close();
     }
 
     @Test
@@ -124,6 +129,8 @@ public class SimpleGridFileReadingTest {
         final WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), middle);
         assertEquals(2.5, wind.getObject().getBeaufort(), 0.5);
         assertEquals(110, wind.getObject().getFrom().getDegrees(), 10);
+        dataSetU.close();
+        dataSetV.close();
     }
     
     @Test
@@ -145,6 +152,8 @@ public class SimpleGridFileReadingTest {
         cal.setTimeZone(TimeZone.getTimeZone("CET"));
         final WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), middle);
         assertNotNull(wind.getObject());
+        dataSetDirection.close();
+        dataSetSpeed.close();
     }
 
     @Test
@@ -158,6 +167,7 @@ public class SimpleGridFileReadingTest {
         final WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), croatia);
         assertEquals(5, wind.getObject().getBeaufort(), 1.5);
         assertEquals(200, wind.getObject().getFrom().getDegrees(), 20);
+        dataSet.close();
     }
 
     @Test
@@ -181,6 +191,7 @@ public class SimpleGridFileReadingTest {
         assertEquals(90, wind.getObject().getFrom().getDegrees(), 45); // historic data says NE but we get 130° which matches the SE
         // direction from https://www.wunderground.com/history/airport/MUHA/2016/12/12/DailyHistory.html?req_city=Havana&req_state=03&req_statename=Cuba&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=78224&MR=1
         // for 10:55 CST. So we should probably accept that.
+        dataSet.close();
     }
     
     @Test
@@ -201,6 +212,7 @@ public class SimpleGridFileReadingTest {
         WindWithConfidence<TimePoint> wind = windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), nassauPosition);
         assertEquals(5.2, wind.getObject().getKnots(), 12); // the forecast had it at 16.7kts... what can we do...
         assertEquals(112.5, wind.getObject().getFrom().getDegrees(), 30); // historic data says ESE which is approximately 112.5
+        dataSet.close();
     }
     
     @Test
@@ -212,6 +224,7 @@ public class SimpleGridFileReadingTest {
         Calendar cal = new GregorianCalendar(2016, 11, 12, 13, 00, 00);
         cal.setTimeZone(TimeZone.getTimeZone("CET"));
         System.out.println(windField.getWind(new MillisecondsTimePoint(cal.getTimeInMillis()), middle));
+        dataSet.close();
     }
     
     @Test
@@ -233,6 +246,7 @@ public class SimpleGridFileReadingTest {
         final float dataAtMiddle = volumeDataAtTime0.get(coordinateIndices[0], coordinateIndices[1]);
         System.out.println(dataVariables);
         System.out.println(dataAtMiddle);
+        dataSet.close();
     }
     
     @Test
@@ -242,5 +256,7 @@ public class SimpleGridFileReadingTest {
         final CalendarDate start = dateRange.getStart();
         final CalendarDate end = dateRange.getEnd();
         assertTrue(end.isAfter(start));
+        dataSet.close();
+        dataSet.release();
     }
 }

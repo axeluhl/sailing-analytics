@@ -724,4 +724,14 @@ public class Util {
         }
         return result;
     }
+    
+    @SafeVarargs
+    public static <T extends Comparable<T>> T min(T... elements) {
+        return Collections.min(Arrays.asList(elements));
+    }
+
+    @SafeVarargs
+    public static <T extends Comparable<T>> T max(T... elements) {
+        return Collections.max(Arrays.asList(elements));
+    }
 }

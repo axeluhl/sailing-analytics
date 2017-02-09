@@ -1,9 +1,12 @@
-package com.sap.sailing.server.gateway.expeditionimport;
+package com.sap.sailing.server.gateway.windimport;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,25 +28,22 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
-import com.sap.sailing.server.gateway.expeditionimport.WindImportServlet.WindImportResult.RaceEntry;
+import com.sap.sailing.server.gateway.windimport.AbstractWindImportServlet.WindImportResult.RaceEntry;
+import com.sap.sse.common.Util;
 
-public class WindImportServlet extends SailingServerHttpServlet {
+public abstract class AbstractWindImportServlet extends SailingServerHttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    static class UploadRequest {
+    public static class UploadRequest {
         public String boatId;
         public final List<FileItem> files = new ArrayList<FileItem>();
         public List<RegattaAndRaceIdentifier> races = new ArrayList<RegattaAndRaceIdentifier>();;
     }
 
     static class WindImportResult {
-
         private Date first;
         private Date last;
         public String error;
@@ -75,7 +75,6 @@ public class WindImportServlet extends SailingServerHttpServlet {
         }
 
         static class RaceEntry {
-
             public final String regattaName;
             public final String raceName;
             private int count;
@@ -127,7 +126,6 @@ public class WindImportServlet extends SailingServerHttpServlet {
 
         public JSONObject json() {
             JSONObject result = new JSONObject();
-
             if (getFirst() != null) {
                 result.put("first", getFirst().getTime());
             }
@@ -135,7 +133,6 @@ public class WindImportServlet extends SailingServerHttpServlet {
                 result.put("last", getLast().getTime());
             }
             result.put("error", error);
-
             JSONArray raceEntriesJson = new JSONArray();
             for (RaceEntry raceEntry : raceEntries) {
                 if (raceEntry.count > 0) {
@@ -143,11 +140,8 @@ public class WindImportServlet extends SailingServerHttpServlet {
                 }
             }
             result.put("raceEntries", raceEntriesJson);
-
             return result;
-
         }
-
     }
 
     @Override
@@ -157,19 +151,10 @@ public class WindImportServlet extends SailingServerHttpServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-
         WindImportResult windImportResult = new WindImportResult();
-
         try {
-
             UploadRequest uploadRequest = readRequest(request);
-            WindSource windSource;
-            if (uploadRequest.boatId == null) {
-                windSource = new WindSourceImpl(WindSourceType.EXPEDITION);
-            } else {
-                windSource = new WindSourceWithAdditionalID(WindSourceType.EXPEDITION, uploadRequest.boatId);
-            }
-
+            WindSource windSource = getWindSource(uploadRequest);
             List<DynamicTrackedRace> trackedRaces = new ArrayList<DynamicTrackedRace>();
             if (uploadRequest.races.size() > 0) {
                 for (RegattaAndRaceIdentifier raceEntry : uploadRequest.races) {
@@ -185,25 +170,24 @@ public class WindImportServlet extends SailingServerHttpServlet {
                     }
                 }
             }
-
+            final Map<InputStream, String> streamsWithFilenames = new HashMap<>(); 
             for (FileItem file : uploadRequest.files) {
-                List<Wind> windFixes = WindLogParser.importWind(file.getInputStream());
-                if (windFixes.size() > 0) {
-                    windImportResult.update(windFixes.get(0));
-                    windImportResult.update(windFixes.get(windFixes.size() - 1));
-                    for (DynamicTrackedRace trackedRace : trackedRaces) {
-                        RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
-                        RaceEntry raceEntry = windImportResult.addRaceEntry(raceIdentifier.getRegattaName(),
-                                raceIdentifier.getRaceName());
-                        for (Wind wind : windFixes) {
-                            if (trackedRace.recordWind(wind, windSource)) {
-                                raceEntry.update(wind);
-                            }
+                streamsWithFilenames.put(file.getInputStream(), file.getName());
+            }
+            Iterable<Wind> windFixes = importWind(streamsWithFilenames);
+            if (!Util.isEmpty(windFixes)) {
+                for (DynamicTrackedRace trackedRace : trackedRaces) {
+                    RegattaAndRaceIdentifier raceIdentifier = trackedRace.getRaceIdentifier();
+                    RaceEntry raceEntry = windImportResult.addRaceEntry(raceIdentifier.getRegattaName(),
+                            raceIdentifier.getRaceName());
+                    for (Wind wind : windFixes) {
+                        windImportResult.update(wind);
+                        if (trackedRace.recordWind(wind, windSource)) {
+                            raceEntry.update(wind);
                         }
                     }
                 }
             }
-
             // Use text/html to prevent browsers from wrapping the response body,
             // see "Handling File Upload Responses in GWT" at http://www.artofsolving.com/node/50
         } catch (Exception e) {
@@ -212,6 +196,10 @@ public class WindImportServlet extends SailingServerHttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         response.getWriter().append(windImportResult.json().toJSONString());
     }
+
+    protected abstract Iterable<Wind> importWind(Map<InputStream, String> streamsWithFilenames) throws IOException;
+
+    protected abstract WindSource getWindSource(UploadRequest uploadRequest);
 
     private UploadRequest readRequest(HttpServletRequest req) throws FileUploadException, ParseException {
         UploadRequest result = new UploadRequest();
