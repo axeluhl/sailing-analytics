@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import com.sap.sailing.datamining.data.HasBravoFixContext;
 import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
+import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasManeuverContext;
@@ -19,6 +20,7 @@ import com.sap.sailing.datamining.data.HasWindTrackContext;
 import com.sap.sailing.datamining.impl.components.BravoFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.BravoFixTrackRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.CompetitorOfRaceInLeaderboardRetrievalProcessor;
+import com.sap.sailing.datamining.impl.components.FoilingSegmentRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.GPSFixRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.LeaderboardGroupRetrievalProcessor;
 import com.sap.sailing.datamining.impl.components.LeaderboardRetrievalProcessor;
@@ -69,6 +71,12 @@ public class SailingDataRetrievalChainDefinitions {
         bravoFixTrackRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class, BravoFixTrackRetrievalProcessor.class,
                 HasBravoFixTrackContext.class, "BravoFixTrack");
         dataRetrieverChainDefinitions.add(bravoFixTrackRetrieverChainDefinition);
+
+        final DataRetrieverChainDefinition<RacingEventService, HasFoilingSegmentContext> foilingSegmentsRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
+                raceOfCompetitorRetrieverChainDefinition, HasFoilingSegmentContext.class, "FoilingSegmentsSailingDomainRetrieverChain");
+        foilingSegmentsRetrieverChainDefinition.endWith(RaceOfCompetitorRetrievalProcessor.class, FoilingSegmentRetrievalProcessor.class,
+                HasFoilingSegmentContext.class, "FoilingSegments");
+        dataRetrieverChainDefinitions.add(foilingSegmentsRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasTrackedLegOfCompetitorContext> legOfCompetitorRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 trackedRaceRetrieverChainDefinition, HasTrackedLegOfCompetitorContext.class, "LegSailingDomainRetrieverChain");

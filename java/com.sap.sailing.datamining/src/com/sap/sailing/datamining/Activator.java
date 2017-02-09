@@ -9,6 +9,7 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.datamining.data.HasBravoFixContext;
 import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
+import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
@@ -95,6 +96,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasWindFixContext.class);
         internalClasses.add(HasBravoFixContext.class);
         internalClasses.add(HasBravoFixTrackContext.class);
+        internalClasses.add(HasFoilingSegmentContext.class);
         internalClasses.add(HasManeuverContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         internalClasses.add(HasRaceOfCompetitorContext.class);

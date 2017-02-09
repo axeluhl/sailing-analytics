@@ -8,13 +8,13 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class BravoTrackWithContext implements HasBravoFixTrackContext {
+public class BravoFixTrackWithContext implements HasBravoFixTrackContext {
 
     private final HasRaceOfCompetitorContext raceOfCompetitorContext;
     
     private final BravoFixTrack<Competitor> bravoFixTrack;
     
-    public BravoTrackWithContext(HasRaceOfCompetitorContext raceOfCompetitorContext, BravoFixTrack<Competitor> bravoFixTrack) {
+    public BravoFixTrackWithContext(HasRaceOfCompetitorContext raceOfCompetitorContext, BravoFixTrack<Competitor> bravoFixTrack) {
         this.raceOfCompetitorContext = raceOfCompetitorContext;
         this.bravoFixTrack = bravoFixTrack;
     }

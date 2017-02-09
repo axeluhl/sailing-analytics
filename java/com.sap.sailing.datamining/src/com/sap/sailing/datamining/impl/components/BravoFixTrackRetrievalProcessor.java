@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
 import com.sap.sailing.datamining.data.HasRaceOfCompetitorContext;
-import com.sap.sailing.datamining.impl.data.BravoTrackWithContext;
+import com.sap.sailing.datamining.impl.data.BravoFixTrackWithContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -32,7 +32,7 @@ public class BravoFixTrackRetrievalProcessor extends AbstractRetrievalProcessor<
         final TrackedRace trackedRace = element.getTrackedRaceContext().getTrackedRace();
         final BravoFixTrack<Competitor> bravoFixTrack = trackedRace.getSensorTrack(element.getCompetitor(), BravoFixTrack.TRACK_NAME);
         if (bravoFixTrack != null) {
-            bravoTracksWithContext.add(new BravoTrackWithContext(element, bravoFixTrack));
+            bravoTracksWithContext.add(new BravoFixTrackWithContext(element, bravoFixTrack));
         }
         return bravoTracksWithContext;
     }
