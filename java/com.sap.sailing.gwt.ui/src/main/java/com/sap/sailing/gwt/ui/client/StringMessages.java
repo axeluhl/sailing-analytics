@@ -1762,5 +1762,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String searchTagForImportedCompetitorPlaceholder();
     String version(String version);
     String replicables();
+    String eventRegattaRacesLegendWind();
+    String eventRegattaRacesLegendVideo();
+    String eventRegattaRacesLegendAudio();
+    String eventRegattaHeaderLegendGps();
+    String eventRegattaHeaderLegendGpsNo();
+    String eventRegattaHeaderLegendWind();
+    String eventRegattaHeaderLegendWindNo();
+    String eventRegattaHeaderLegendVideo();
+    String eventRegattaHeaderLegendVideoNo();
+    String eventRegattaHeaderLegendAudio();
+    String eventRegattaHeaderLegendAudioNo();
     String set();
 }
