@@ -11,7 +11,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -49,20 +48,10 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings> implements WithControls {
-
-    /**
-     * The delay before a changed query definition is submitted to the listeners.
-     * This prevents unnecessary queries caused by a change of the used data type, that then causes
-     * a change of the dimension to group by and the data retriever chain.
-     * Or caused by quick changes of the filter selection.
-     */
-    private static final int queryBufferTimeInMillis = 200;
+public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings> implements WithControls {
 
     private static final double headerPanelHeight = 45;
     private static final double footerPanelHeight = 50;
-    
-    private final Timer queryDefinitionReleaseTimer;
     
     private final DockLayoutPanel mainPanel;
     private final FlowPanel controlsPanel;
@@ -80,17 +69,11 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
     private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;
 
-    public BufferingQueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages,
+    public QueryDefinitionProviderWithControls(DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
             ResultsPresenter<?> resultsPresenter) {
         super(stringMessages, dataMiningService, errorReporter);
         providerListener = new ProviderListener();
-        queryDefinitionReleaseTimer = new Timer() {
-            @Override
-            public void run() {
-                notifyQueryDefinitionChanged();
-            }
-        };
         
         // Creating the header panel, that contains the retriever chain provider and the controls
         controlsPanel = new FlowPanel();
@@ -171,10 +154,9 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         providers.add(statisticProvider);
         providers.add(groupingProvider);
         providers.add(filterSelectionProvider);
-    }
-
-    private void scheduleQueryDefinitionChanged() {
-        queryDefinitionReleaseTimer.schedule(queryBufferTimeInMillis);
+        
+        // Set await reload flag to initialize the components, when the retriever chains have been loaded
+        providers.forEach(provider -> provider.awaitReloadComponents());
     }
     
     @Override
@@ -230,7 +212,7 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         filterSelectionProvider.applySelection(queryDefinition);
         setBlockChangeNotification(false);
         
-        scheduleQueryDefinitionChanged();
+        notifyQueryDefinitionChanged();
     }
 
     @Override
@@ -306,14 +288,14 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
         @Override
         public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregationProcessorDefinitionDTO newAggregatorDefinition) {
             if (!isAwatingReload()) {
-                scheduleQueryDefinitionChanged();
+                notifyQueryDefinitionChanged();
             }
         }
 
         @Override
         public void groupingChanged() {
             if (!isAwatingReload()) {
-                scheduleQueryDefinitionChanged();
+                notifyQueryDefinitionChanged();
             }
         }
 
@@ -331,14 +313,14 @@ public class BufferingQueryDefinitionProviderWithControls extends AbstractQueryD
                 statisticProvider.dataRetrieverChainDefinitionChanged(retrieverChainDefinition);
                 statisticProvider.reloadComponents();
             } else {
-                scheduleQueryDefinitionChanged();
+                notifyQueryDefinitionChanged();
             }
         }
 
         @Override
         public void selectionChanged() {
             if (!isAwatingReload()) {
-                scheduleQueryDefinitionChanged();
+                notifyQueryDefinitionChanged();
             }
         }
         
