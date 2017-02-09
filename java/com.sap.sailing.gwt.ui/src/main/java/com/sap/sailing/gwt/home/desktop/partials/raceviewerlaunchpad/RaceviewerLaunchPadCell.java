@@ -45,9 +45,11 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
 
     private final EventView.Presenter presenter;
     private final PopupPanel panel = new PopupPanel(true, false);
+    private final boolean showNotTracked;
 
-    public RaceviewerLaunchPadCell(Presenter presenter) {
+    public RaceviewerLaunchPadCell(Presenter presenter, boolean showNotTracked) {
         super(BrowserEvents.CLICK);
+        this.showNotTracked = showNotTracked;
         local_res.css().ensureInjected();
         this.presenter = presenter;
     }
@@ -84,8 +86,10 @@ public class RaceviewerLaunchPadCell<T extends RaceMetadataDTO<?>> extends Abstr
                 String styleNames = data.isFinished() ? analyzeStyleNames : liveStyleNames;
                 sb.append(TEMPLATE.raceviewerLaunchPad(styleNames, iconStyleNames, I18N.raceDetailsToShow()));
             }
-        } else {
+        } else if (showNotTracked) {
             sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, I18N.eventRegattaRaceNotTracked()));
+        } else {
+            sb.append(TEMPLATE.raceNotTracked(notTrackedStyleNames, ""));
         }
     }
     

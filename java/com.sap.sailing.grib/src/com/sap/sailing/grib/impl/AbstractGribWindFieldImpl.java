@@ -1,8 +1,10 @@
 package com.sap.sailing.grib.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
@@ -22,6 +24,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 import ucar.ma2.Array;
+import ucar.ma2.Index;
 import ucar.nc2.Dimension;
 import ucar.nc2.dataset.VariableDS;
 import ucar.nc2.dt.GridCoordSystem;
@@ -227,12 +230,50 @@ public abstract class AbstractGribWindFieldImpl implements GribWindField {
         return getNearestNonNaNValueWithPosition(coordinateSystem, grid, timeIndex, zIndex, yIndex, xIndex, distance+1);
     }
 
-    private double getValue(GridDatatype grid, int timeIndex, int zIndex, final int x, final int y) throws IOException {
+    protected double getValue(GridDatatype grid, int timeIndex, int zIndex, final int x, final int y) throws IOException {
         final Array arrayForTimePointBefore = grid.readDataSlice(timeIndex, zIndex, y, x);
         final double valueAsFloat = (double) arrayForTimePointBefore.getFloat(0);
         return valueAsFloat;
     }
-
+    
+    /**
+     * Instead of using {@link GridDatatype#readDataSlice(int, int, int, int)} which really reads from the file(s),
+     * use an already read {@link Array} of mass data here.
+     */
+    protected double getValue(Array gridData, int zIndex, final int x, final int y) throws IOException {
+        final double valueAsFloat;
+        if (gridData.getRank() == 3) { // includes z dimension
+            valueAsFloat = gridData.getDouble(Index.factory(new int[] { zIndex, y, x }));
+        } else {
+            valueAsFloat = gridData.getDouble(Index.factory(new int[] { y, x }));
+        }
+        return valueAsFloat;
+    }
+    
+    @FunctionalInterface
+    static interface ValueForCoordinateProvider<T> {
+        T getValue(Array gridData, int timeIndex, Index index, TimePoint timePoint, Position position);
+    }
+    
+    protected <T> Iterable<T> foreach(GridDatatype grid, ValueForCoordinateProvider<T> provider) throws IOException {
+        final List<T> result = new ArrayList<>();
+        final GridCoordSystem coordinateSystem = grid.getCoordinateSystem();
+        final int timeDimLength = grid.getTimeDimension().getLength();
+        for (int t=0; t<timeDimLength; t++) {
+            final TimePoint timePoint = toTimePoint(coordinateSystem.getTimeAxis1D().getCalendarDate(t));
+            final Array gridData = grid.readVolumeData(t);
+            final long arraySize = gridData.getSize();
+            final Index index = gridData.getIndex();
+            for (long i=0; i<arraySize; i++) {
+                final Position position = toPosition(coordinateSystem.getLatLon(/* x */ index.getCurrentCounter()[index.getCurrentCounter().length-1],
+                                                                                /* y */ index.getCurrentCounter()[index.getCurrentCounter().length-2]));
+                result.add(provider.getValue(gridData, t, index, timePoint, position));
+                index.incr();
+            }
+        }
+        return result;
+    }
+    
     protected Optional<String> getUnit(VariableDS variable) {
         final Optional<String> result;
         final ucar.nc2.Attribute attribute = variable.findAttribute("units");
