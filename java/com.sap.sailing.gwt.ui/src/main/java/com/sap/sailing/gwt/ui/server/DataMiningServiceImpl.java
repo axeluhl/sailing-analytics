@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -242,7 +243,7 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
             result = new QueryResultImpl<HashSet<Object>>(QueryResultState.NORMAL, clazz, new HashMap<GroupKey, HashSet<Object>>());
         }
         for (final Entry<Function<?>, List<?>> e : boolOrEnumResultDimensionsWithValues.entrySet()) {
-            result.addResult(new GenericGroupKey<>(dtoFactory.createFunctionDTO(e.getKey(), getDataMiningServer().getStringMessages(), locale)), new HashSet<>(e.getValue()));
+            result.addResult(new GenericGroupKey<>(dtoFactory.createFunctionDTO(e.getKey(), getDataMiningServer().getStringMessages(), locale)), new LinkedHashSet<>(e.getValue()));
         }
         return dtoFactory.createResultDTO(result);
     }
