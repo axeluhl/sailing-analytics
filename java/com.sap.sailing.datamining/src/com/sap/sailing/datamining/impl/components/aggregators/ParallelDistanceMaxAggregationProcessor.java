@@ -20,7 +20,6 @@ public class ParallelDistanceMaxAggregationProcessor extends
     public static AggregationProcessorDefinition<Distance, Distance> getDefinition() {
         return DEFINITION;
     }
-
     
     public ParallelDistanceMaxAggregationProcessor(ExecutorService executor,
             Collection<Processor<Map<GroupKey, Distance>, ?>> resultReceivers) {
