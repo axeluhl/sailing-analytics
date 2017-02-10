@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.BearingCluster;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
@@ -144,7 +145,20 @@ public class FoilingSegmentWithContext implements HasFoilingSegmentContext {
 
     private ClusterDTO getWindStrengthAsBeaufortCluster(Locale locale, ResourceBundleStringMessages stringMessages, Wind wind) {
         Cluster<?> cluster = Activator.getClusterGroups().getWindStrengthInBeaufortClusterGroup().getClusterFor(wind);
-        return new ClusterDTO(cluster.asLocalizedString(locale, stringMessages));
+        return new ClusterDTO(()->cluster.asLocalizedString(locale, stringMessages));
     }
 
+    @Override
+    public LegType getStartsOnLegType() throws NoWindException {
+        return getLegType(getStartOfFoilingSegment());
+    }
+
+    private LegType getLegType(final TimePoint timePoint) throws NoWindException {
+        return getTrackedRace().getTrackedLeg(getCompetitor(), timePoint).getTrackedLeg().getLegType(timePoint);
+    }
+
+    @Override
+    public LegType getEndsOnLegType() throws NoWindException {
+        return getLegType(getEndOfFoilingSegment());
+    }
 }

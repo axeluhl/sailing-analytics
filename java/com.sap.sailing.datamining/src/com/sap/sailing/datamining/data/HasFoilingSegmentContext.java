@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.Duration;
@@ -28,19 +29,19 @@ public interface HasFoilingSegmentContext {
     @Statistic(messageKey="FoilingDistance")
     Distance getDistance();
     
-    @Statistic(messageKey="TakeoffSpeedInKnotsInKnots")
+    @Statistic(messageKey="TakeoffSpeedInKnotsInKnots", resultDecimals=1)
     Double getTakeoffSpeedInKnots();
 
-    @Statistic(messageKey="LandingSpeedInKnots")
+    @Statistic(messageKey="LandingSpeedInKnots", resultDecimals=1)
     Double getLandingSpeedInKnots();
     
-    @Statistic(messageKey="AbsoluteTrueWindAngleAtTakeoff")
+    @Statistic(messageKey="AbsoluteTrueWindAngleAtTakeoff", resultDecimals=1)
     Bearing getAbsoluteTrueWindAngleAtTakeoffInDegrees() throws NoWindException;
     
-    @Statistic(messageKey="AbsoluteTrueWindAngleAtLanding")
+    @Statistic(messageKey="AbsoluteTrueWindAngleAtLanding", resultDecimals=1)
     Bearing getAbsoluteTrueWindAngleAtLandingInDegrees() throws NoWindException;
 
-    @Statistic(messageKey="AverageAbsoluteTrueWindAngle")
+    @Statistic(messageKey="AverageAbsoluteTrueWindAngle", resultDecimals=1)
     Bearing getAverageAbsoluteTrueWindAngle() throws NoWindException;
     
     @Dimension(messageKey="WindStrengthInBeaufortAtTakeoff")
@@ -54,4 +55,10 @@ public interface HasFoilingSegmentContext {
 
     @Connector(messageKey="WindAtLanding")
     Wind getWindAtLanding();
+    
+    @Dimension(messageKey="StartsOnLegType")
+    LegType getStartsOnLegType() throws NoWindException;
+
+    @Dimension(messageKey="EndsOnLegType")
+    LegType getEndsOnLegType() throws NoWindException;
 }
