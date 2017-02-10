@@ -2,10 +2,12 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,13 +28,18 @@ import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.data.ExtensibleQueryResult;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
+import com.sap.sse.datamining.impl.data.QueryResultImpl;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.SerializationDummy;
+import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -209,11 +216,34 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         DataRetrieverChainDefinition<RacingEventService, ?> retrieverChainDefinition = dataMiningServer.getDataRetrieverChainDefinitionForDTO(dataRetrieverChainDefinitionDTO);
         DataRetrieverLevel<?, ?> retrieverLevel = retrieverChainDefinition.getDataRetrieverLevel(retrieverLevelDTO.getLevel());
         Iterable<Function<?>> dimensions = functionDTOsAsFunctions(dimensionDTOs);
-        Map<DataRetrieverLevel<?, ?>, SerializableSettings> retrieverSettings = retrieverSettingsDTOAsRetrieverSettings(retrieverSettingsDTO, retrieverChainDefinition);
-        Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO, retrieverChainDefinition);
-        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
-        Query<HashSet<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, dimensions, retrieverSettings, filterSelection, locale);
-        QueryResult<HashSet<Object>> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
+        // split up between boolean/enum dimensions and others; for the bool/enums we'll
+        // simply enumerate all values instead of retrieving all objects
+        List<Function<?>> nonBoolNonEnumResultDimensions = new ArrayList<>();
+        LinkedHashMap<Function<?>, List<?>> boolOrEnumResultDimensionsWithValues = new LinkedHashMap<>();
+        for (final Function<?> dimensionFunction : dimensions) {
+            if (dimensionFunction.getReturnType() == boolean.class || dimensionFunction.getReturnType() == Boolean.class) {
+                boolOrEnumResultDimensionsWithValues.put(dimensionFunction, Arrays.asList(true, false));
+            } else if (dimensionFunction.getReturnType().isEnum()) {
+                boolOrEnumResultDimensionsWithValues.put(dimensionFunction, Arrays.asList(dimensionFunction.getReturnType().getEnumConstants()));
+            } else {
+                nonBoolNonEnumResultDimensions.add(dimensionFunction);
+            }
+        }
+        final ExtensibleQueryResult<HashSet<Object>> result;
+        final Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        if (!nonBoolNonEnumResultDimensions.isEmpty()) {
+            Map<DataRetrieverLevel<?, ?>, SerializableSettings> retrieverSettings = retrieverSettingsDTOAsRetrieverSettings(retrieverSettingsDTO, retrieverChainDefinition);
+            Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection = filterSelectionDTOAsFilterSelection(filterSelectionDTO, retrieverChainDefinition);
+            Query<HashSet<Object>> dimensionValuesQuery = dataMiningServer.createDimensionValuesQuery(retrieverChainDefinition, retrieverLevel, nonBoolNonEnumResultDimensions, retrieverSettings, filterSelection, locale);
+            result = (ExtensibleQueryResult<HashSet<Object>>) dataMiningServer.runNewQueryAndAbortPreviousQueries(session, dimensionValuesQuery);
+        } else {
+            @SuppressWarnings("unchecked")
+            final Class<HashSet<Object>> clazz = (Class<HashSet<Object>>) new HashSet<Object>().getClass();
+            result = new QueryResultImpl<HashSet<Object>>(QueryResultState.NORMAL, clazz, new HashMap<GroupKey, HashSet<Object>>());
+        }
+        for (final Entry<Function<?>, List<?>> e : boolOrEnumResultDimensionsWithValues.entrySet()) {
+            result.addResult(new GenericGroupKey<>(dtoFactory.createFunctionDTO(e.getKey(), getDataMiningServer().getStringMessages(), locale)), new HashSet<>(e.getValue()));
+        }
         return dtoFactory.createResultDTO(result);
     }
 
