@@ -515,6 +515,9 @@ public class SensorFixStoreAndLoadTest {
     private DoubleVectorFix createBravoDoubleVectorFixWithRideHeight(long timestamp, double rideHeight) {
         double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.columnCount];
         fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeight;
+        // fill the port/starboard columns as well because their minimum defines the true ride height
+        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn] = rideHeight;
+        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn] = rideHeight;
         return new DoubleVectorFixImpl(new MillisecondsTimePoint(timestamp), fixData);
     }
     
