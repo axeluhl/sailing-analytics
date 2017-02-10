@@ -6,6 +6,8 @@ public class ClusterDTO implements Serializable {
     private static final long serialVersionUID = -2962035066215989018L;
     
     private String signifier;
+    
+    private SignifierProvider signifierProvider;
 
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -17,7 +19,22 @@ public class ClusterDTO implements Serializable {
         this.signifier = signifier;
     }
     
+    public static interface SignifierProvider extends Serializable {
+        String getSignifier();
+    }
+    
+    /**
+     * A possibility to initialize the {@link #getSignifier() signifier} lazily so that the providing function is
+     * called only when the signifier is really asked for.
+     */
+    public ClusterDTO(SignifierProvider signifierProvider) {
+        this.signifierProvider = signifierProvider;
+    }
+    
     public String getSignifier() {
+        if (signifier == null && signifierProvider != null) {
+            signifier = signifierProvider.getSignifier();
+        }
         return signifier;
     }
     

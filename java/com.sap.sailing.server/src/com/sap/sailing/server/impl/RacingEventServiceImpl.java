@@ -666,9 +666,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private void restoreTrackedRaces() {
         final ScheduledExecutorService backgroundExecutor = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
-        try {
-            numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
-                backgroundExecutor.execute(()->{
+        // restore the races by calling addRace one by one, but in a background thread, therefore concurrent to any remaining
+        // server startup activities happening
+        backgroundExecutor.execute(()->{
+            try {
+                numberOfTrackedRacesToRestore = getDomainObjectFactory().loadConnectivityParametersForRacesToRestore(params -> {
                     try {
                         addRace(/* addToRegatta==null means "default regatta" */ null, params, /* no timeout during mass loading */ -1);
                         numberOfTrackedRacesRestored.incrementAndGet();
@@ -676,10 +678,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         logger.log(Level.SEVERE, "Exception trying to restore race"+params, e);
                     }
                 });
-            });
-        } catch (MalformedURLException | URISyntaxException e) {
-            logger.log(Level.SEVERE, "Exception trying to obtain connectivity parameters for restoring tracked races", e);
-        }
+            } catch (MalformedURLException | URISyntaxException e) {
+                logger.log(Level.SEVERE, "Exception trying to obtain connectivity parameters for restoring tracked races", e);
+            }
+        });
     }
 
     @Override
