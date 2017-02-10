@@ -104,10 +104,6 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
 
     /**
      * Parses the CSV line and reads the double data values in the order defined by the col enums.
-     * 
-     * @param line
-     * @param colIndices
-     * @return
      */
     private DoubleVectorFixImpl parseLine(long lineNr, String filename, String line, Map<String, Integer> colIndices) {
         try {
@@ -119,7 +115,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
                 long epoch = Long.parseLong(epochColValue);
                 fixTp = new MillisecondsTimePoint(epoch);
             } else {
-                String jjLDATE = contentTokens[0].substring(0, 9);
+                String jjLDATE = contentTokens[0].substring(0, contentTokens[0].indexOf("."));
                 StringBuilder dtb = new StringBuilder(jjLDATE);
                 String jjlTIME = contentTokens[1];
                 int offset = 6 - jjlTIME.indexOf(".");
