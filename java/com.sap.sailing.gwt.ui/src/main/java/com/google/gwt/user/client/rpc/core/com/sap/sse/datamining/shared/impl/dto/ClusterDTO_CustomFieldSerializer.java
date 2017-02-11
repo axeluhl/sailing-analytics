@@ -6,6 +6,14 @@ import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
+/**
+ * Ensures that the {@link ClusterDTO#getLocalizedName() localizedName} field is serialized by
+ * really evaluating it eagerly now; this way, an optional lazy evaluation function does not need
+ * to be serialized.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class ClusterDTO_CustomFieldSerializer extends CustomFieldSerializer<ClusterDTO> {
 
     @Override
@@ -17,6 +25,7 @@ public class ClusterDTO_CustomFieldSerializer extends CustomFieldSerializer<Clus
     public static void serialize(SerializationStreamWriter streamWriter, ClusterDTO instance)
             throws SerializationException {
         streamWriter.writeString(instance.getSignifier());
+        streamWriter.writeString(instance.getLocalizedName());
     }
 
     @Override
@@ -32,7 +41,7 @@ public class ClusterDTO_CustomFieldSerializer extends CustomFieldSerializer<Clus
 
     public static ClusterDTO instantiate(SerializationStreamReader streamReader)
             throws SerializationException {
-        return new ClusterDTO(streamReader.readString());
+        return new ClusterDTO(streamReader.readString(), streamReader.readString());
     }
 
     @Override

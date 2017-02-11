@@ -18,13 +18,6 @@ public interface HasWind extends Positioned, Timed {
     default ClusterDTO getWindStrengthAsBeaufortCluster(Locale locale, ResourceBundleStringMessages stringMessages) {
         Wind wind = getWind();
         final Cluster<?> cluster = Activator.getClusterGroups().getWindStrengthInBeaufortClusterGroup().getClusterFor(wind);
-        return new ClusterDTO(new ClusterDTO.SignifierProvider() {
-            private static final long serialVersionUID = 1123412341234L;
-
-            @Override
-            public String getSignifier() {
-                return cluster.asLocalizedString(locale, stringMessages);
-            }
-        });
+        return new ClusterDTO(cluster.toString(), ()->cluster.asLocalizedString(locale, stringMessages));
     }
 }
