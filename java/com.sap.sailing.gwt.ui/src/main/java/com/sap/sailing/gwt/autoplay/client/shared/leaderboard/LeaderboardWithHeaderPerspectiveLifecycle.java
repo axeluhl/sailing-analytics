@@ -20,8 +20,8 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
                 (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName()),
                         stringMessages);
         
-        this.componentLifecycles.add(leaderboardPanelLifecycle);
-        this.componentLifecycles.add(sapHeaderLifecycle);
+        addLifeCycle(leaderboardPanelLifecycle);
+        addLifeCycle(sapHeaderLifecycle);
     }
     
     @Override

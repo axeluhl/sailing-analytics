@@ -20,7 +20,11 @@ public class PerspectiveCompositeValidator<PS extends Settings> implements Valid
     private final Validator<PS> perspectiveValidator;
 
     public PerspectiveCompositeValidator(PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveAndDialogComponent, Iterable<ComponentIdWithSettingsAndDialogComponent<?>> componentsAndDialogComponents) {
-        this.perspectiveValidator = perspectiveAndDialogComponent.getSettingsDialog().getValidator();
+        if (perspectiveAndDialogComponent.getSettingsDialogComponent() != null) {
+            this.perspectiveValidator = perspectiveAndDialogComponent.getSettingsDialogComponent().getValidator();
+        } else {
+            perspectiveValidator = null;
+        }
         validatorsMappedByComponent = new HashMap<>();
         for (ComponentIdWithSettingsAndDialogComponent<?> componentsAndSettingsDialog : componentsAndDialogComponents) {
             validatorsMappedByComponent.put(componentsAndSettingsDialog.getComponentId(), componentsAndSettingsDialog.getSettingsDialog().getValidator());

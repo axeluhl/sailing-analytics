@@ -12,9 +12,9 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
     }
     
     public AbstractLeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
-        componentLifecycles.add(new LeaderboardPanelLifecycle(leaderboard, stringMessages));
-        componentLifecycles.add(new MultiLeaderboardPanelLifecycle(null, stringMessages));
-        componentLifecycles.add(new OverallLeaderboardPanelLifecycle(null, stringMessages));
+        addLifeCycle(new LeaderboardPanelLifecycle(leaderboard, stringMessages));
+        addLifeCycle(new MultiLeaderboardPanelLifecycle(null, stringMessages));
+        addLifeCycle(new OverallLeaderboardPanelLifecycle(null, stringMessages));
     }
     
     @Override

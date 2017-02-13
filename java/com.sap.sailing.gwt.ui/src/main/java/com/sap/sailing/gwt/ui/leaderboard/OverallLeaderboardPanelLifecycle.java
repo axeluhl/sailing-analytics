@@ -11,7 +11,8 @@ public class OverallLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle 
         super(leaderboard, stringMessages);
     }
 
-    public static String getId() {
+    @Override
+    public String getComponentId() {
         return ID;
     }
 

@@ -19,12 +19,21 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  *
  */
 public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implements PerspectiveLifecycle<PS> {
-    protected final List<ComponentLifecycle<?,?>> componentLifecycles;
+    final List<ComponentLifecycle<?, ?>> componentLifecycles;
     
     public AbstractPerspectiveLifecycle() {
         componentLifecycles = new ArrayList<>();
     }
     
+    protected void addLifeCycle(ComponentLifecycle<?, ?> cycle) {
+        for (ComponentLifecycle<?, ?> old : componentLifecycles) {
+            if (old.getComponentId().equals(cycle.getComponentId())) {
+                throw new IllegalStateException("LifeCycle with duplicate ID " + cycle.getComponentId());
+            }
+        }
+        componentLifecycles.add(cycle);
+    }
+
     public PerspectiveCompositeTabbedSettingsDialogComponent<PS> getSettingsDialogComponent(PerspectiveCompositeSettings<PS> settings) {
         return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(this, settings);
     }

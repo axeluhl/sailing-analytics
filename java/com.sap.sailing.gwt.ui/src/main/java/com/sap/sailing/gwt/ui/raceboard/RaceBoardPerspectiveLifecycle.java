@@ -36,12 +36,12 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages);
         
-        componentLifecycles.add(raceMapLifecycle);
-        componentLifecycles.add(windChartLifecycle);
-        componentLifecycles.add(leaderboardPanelLifecycle);
-        componentLifecycles.add(multiCompetitorRaceChartLifecycle);
-        componentLifecycles.add(mediaPlayerLifecycle);
-        componentLifecycles.add(raceTimePanelLifecycle);
+        addLifeCycle(raceMapLifecycle);
+        addLifeCycle(windChartLifecycle);
+        addLifeCycle(leaderboardPanelLifecycle);
+        addLifeCycle(multiCompetitorRaceChartLifecycle);
+        addLifeCycle(mediaPlayerLifecycle);
+        addLifeCycle(raceTimePanelLifecycle);
     }
 
     @Override

@@ -77,7 +77,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
             return perspectiveOwnSettings;
         }
 
-        public SettingsDialogComponent<PS> getSettingsDialog() {
+        public SettingsDialogComponent<PS> getSettingsDialogComponent() {
             return settingsDialog;
         }
 
@@ -92,6 +92,12 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     public PerspectiveCompositeTabbedSettingsDialogComponent(Perspective<PS> perspective) {
         this.componentIdsAndDialogComponents = new ArrayList<>();
         for (Component<?> component : perspective.getComponents()) {
+            for (ComponentIdWithSettingsAndDialogComponent<?> c : componentIdsAndDialogComponents) {
+                if (c.getComponentId().equals(component.getId())) {
+                    throw new IllegalStateException(
+                            "Creating a SettingsDialog with duplicate componentids internally " + component.getId());
+                }
+            }
             componentIdsAndDialogComponents.add(createComponentAndDialogComponent(component));
         }
         perspectiveIdsAndSettingsDialog = createPerspectiveAndDialogComponent(perspective);
@@ -122,6 +128,12 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
             ComponentLifecycle<S, ?> componentLifecycle) {
         @SuppressWarnings("unchecked")
         S settingsOfComponent = (S) componentSettings.findSettingsByComponentId(componentLifecycle.getComponentId());
+        for (ComponentIdWithSettingsAndDialogComponent<?> c : componentIdsAndDialogComponents) {
+            if (c.getComponentId().equals(componentLifecycle.getComponentId())) {
+                throw new IllegalStateException("Creating a SettingsDialog with duplicate componentids internally "
+                        + componentLifecycle.getComponentId());
+            }
+        }
         this.componentIdsAndDialogComponents.add(new ComponentIdWithSettingsAndDialogComponent<S>(componentLifecycle.getLocalizedShortName(), componentLifecycle.getComponentId(), settingsOfComponent,
                 componentLifecycle.getSettingsDialogComponent(settingsOfComponent)));
     }
@@ -151,15 +163,22 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     }
     
     private PS getPerspectiveOwnSettings(PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveAndDialog) {
-        return perspectiveAndDialog.getSettingsDialog().getResult();
+        SettingsDialogComponent<PS> settingsDialogComponent = perspectiveAndDialog.getSettingsDialogComponent();
+        if (settingsDialogComponent != null) {
+            return settingsDialogComponent.getResult();
+        }
+        return null;
     }
 
     @Override
     public Widget getAdditionalWidget(final DataEntryDialog<?> dialog) {
         TabPanel result = new TabPanel();
         if(perspectiveIdsAndSettingsDialog != null) {
-            Widget w = perspectiveIdsAndSettingsDialog.getSettingsDialog().getAdditionalWidget((DataEntryDialog<?>) dialog);
-            result.add(w, perspectiveIdsAndSettingsDialog.getPerspectiveName());
+            SettingsDialogComponent<PS> additional = perspectiveIdsAndSettingsDialog.getSettingsDialogComponent();
+            if (additional != null) {
+                Widget w = additional.getAdditionalWidget((DataEntryDialog<?>) dialog);
+                result.add(w, perspectiveIdsAndSettingsDialog.getPerspectiveName());
+            }
         }
         for (ComponentIdWithSettingsAndDialogComponent<?> componentAndSettingsDialog : componentIdsAndDialogComponents) {
             Widget w = componentAndSettingsDialog.getSettingsDialog().getAdditionalWidget((DataEntryDialog<?>) dialog);
@@ -180,6 +199,9 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
         PS perspectiveOwnSettings = perspectiveIdsAndSettingsDialog != null ? getPerspectiveOwnSettings(perspectiveIdsAndSettingsDialog) : null;
         Map<String, Settings> settings = new HashMap<>();
         for (ComponentIdWithSettingsAndDialogComponent<?> componentAndDialog : componentIdsAndDialogComponents) {
+            if (settings.containsKey(componentAndDialog.getComponentId())) {
+                throw new IllegalStateException("Duplicate Componentid " + componentAndDialog.getComponentId());
+            }
             settings.put(componentAndDialog.getComponentId(), componentAndDialog.getSettingsDialog().getResult());
         }
         return new PerspectiveCompositeSettings<PS>(perspectiveOwnSettings, settings);
