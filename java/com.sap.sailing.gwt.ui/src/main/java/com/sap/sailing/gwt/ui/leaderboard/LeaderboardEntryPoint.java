@@ -349,7 +349,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     public static void openUrlConfigurationDialog(final AbstractLeaderboardDTO leaderboard) {
         final LeaderboardPerspectiveLifecycle lifeCycle = new LeaderboardPerspectiveLifecycle(
                 StringMessages.INSTANCE, leaderboard);
-        final LeaderboardContextSettings leaderboardContextSettings = new LeaderboardContextSettings();
+        final LeaderboardContextSettings leaderboardContextSettings = new LeaderboardContextSettings(leaderboard.name,
+                leaderboard.getDisplayName());
         final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
                 "/gwt/Leaderboard.html", leaderboardContextSettings);
         new SettingsDialogForLinkSharing<>(linkWithSettingsGenerator, lifeCycle, StringMessages.INSTANCE)

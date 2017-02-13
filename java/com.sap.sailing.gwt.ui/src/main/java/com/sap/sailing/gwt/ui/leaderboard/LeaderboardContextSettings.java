@@ -18,6 +18,15 @@ public class LeaderboardContextSettings extends AbstractGenericSerializableSetti
     private transient StringSetting zoomTo;
     private transient StringSetting raceName;
     private transient StringSetting regattaName;
+
+    public LeaderboardContextSettings() {
+    }
+
+    public LeaderboardContextSettings(String leaderboardName, String displayName) {
+        this.leaderboardName.setValue(leaderboardName);
+        this.displayName.setValue(displayName);
+    }
+
     @Override
     protected void addChildSettings() {
         embedded = new BooleanSetting(LeaderboardUrlSettings.PARAM_EMBEDDED, this, false);

@@ -50,7 +50,7 @@ public class WaypointCreationDialog extends DataEntryDialog<WaypointDTO> {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 updatePassingInstructions();
-                validate();
+                validateAndUpdate();
             }
         });
     }

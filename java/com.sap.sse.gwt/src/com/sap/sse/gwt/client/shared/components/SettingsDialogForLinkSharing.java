@@ -1,14 +1,14 @@
 package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Anchor;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
 
 public class SettingsDialogForLinkSharing<SettingsType extends Settings> extends AbstractSettingsDialog<SettingsType> {
+
+    private LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator;
+    private Anchor shareAnchor;
 
     public SettingsDialogForLinkSharing(LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator,
             ComponentLifecycle<SettingsType, ?> componentLifecycle, StringMessages stringMessages) {
@@ -16,20 +16,24 @@ public class SettingsDialogForLinkSharing<SettingsType extends Settings> extends
                 true, null);
     }
 
-    private SettingsDialogForLinkSharing(final LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator,
+    private SettingsDialogForLinkSharing(LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator,
             ComponentLifecycle<SettingsType, ?> componentLifecycle, SettingsType settings,
             StringMessages stringMessages, boolean animationEnabled, DialogCallback<SettingsType> callback) {
         super(componentLifecycle.getLocalizedShortName(), componentLifecycle.getSettingsDialogComponent(settings),
                 stringMessages, animationEnabled, callback);
-        
-        Button shareButton = new Button(/* stringMessages.save() */ "TODO share");
-        shareButton.getElement().getStyle().setMargin(3, Unit.PX);
-        shareButton.ensureDebugId("ShareButton");
-        getLeftButtonPannel().add(shareButton);
-        shareButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                Window.alert(linkWithSettingsGenerator.createUrl(getResult()));
-            }
-        });
+        this.linkWithSettingsGenerator = linkWithSettingsGenerator;
+        shareAnchor = new Anchor(stringMessages.sharedSettingsLink());
+        shareAnchor.getElement().getStyle().setMargin(3, Unit.PX);
+        shareAnchor.ensureDebugId("ShareAnchor");
+        shareAnchor.setTarget("_blank");
+        getLeftButtonPannel().add(shareAnchor);
+        // // initial link
+        // onChange(settings);
+    }
+
+    @Override
+    protected void onChange(SettingsType result) {
+        String link = linkWithSettingsGenerator.createUrl(getResult());
+        shareAnchor.setHref(link);
     }
 }

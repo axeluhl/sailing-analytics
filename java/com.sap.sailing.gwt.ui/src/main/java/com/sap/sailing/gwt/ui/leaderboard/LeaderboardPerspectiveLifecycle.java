@@ -16,11 +16,19 @@ public class LeaderboardPerspectiveLifecycle extends AbstractLeaderboardPerspect
 
     @Override
     protected LeaderboardPerspectiveOwnSettings extractOwnGlobalSettings(LeaderboardPerspectiveOwnSettings settings) {
-        throw new IllegalStateException("Not supported");
+        return new LeaderboardPerspectiveOwnSettings(settings.isShowRaceDetails(), settings.isHideToolbar(),
+                settings.isAutoExpandLastRaceColumn(), settings.isShowCharts(), settings.isShowOverallLeaderboard(),
+                settings.isShowSeriesLeaderboards());
     }
 
     @Override
     protected LeaderboardPerspectiveOwnSettings extractOwnContextSettings(LeaderboardPerspectiveOwnSettings settings) {
-        throw new IllegalStateException("Not supported");
+        LeaderboardPerspectiveOwnSettings defaultSet = createPerspectiveOwnDefaultSettings();
+        return defaultSet;
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return true;
     }
 }

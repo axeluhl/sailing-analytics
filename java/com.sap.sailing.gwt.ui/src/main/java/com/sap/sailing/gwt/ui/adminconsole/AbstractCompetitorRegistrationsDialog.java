@@ -205,7 +205,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     private void moveSelected(CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> from,
             CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> to) {
         move(from, to, from.getSelectionModel().getSelectedSet());
-        validate();
+        validateAndUpdate();
     }
 
     protected boolean showOnlyCompetitorsOfLog(){
@@ -240,7 +240,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         registerBtn.setTitle(tooltip);
         unregisterBtn.setTitle(tooltip);
         addCompetitorButton.setTitle(tooltip);
-        validate();
+        validateAndUpdate();
     }
     
     public void activateRegistrationButtons(){
@@ -250,7 +250,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         registerBtn.setTitle("");
         unregisterBtn.setTitle("");
         addCompetitorButton.setTitle("");
-        validate();
+        validateAndUpdate();
     }
 
     @Override

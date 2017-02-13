@@ -13,6 +13,20 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     private transient BooleanSetting showOverallLeaderboard;
     private transient BooleanSetting showSeriesLeaderboards;
     
+    LeaderboardPerspectiveOwnSettings() {
+
+    }
+
+    LeaderboardPerspectiveOwnSettings(boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn,
+            boolean showCharts, boolean showOverallLeaderboard, boolean showSeriesLeaderboards) {
+        this.showRaceDetails.setValue(showRaceDetails);
+        this.hideToolbar.setValue(hideToolbar);
+        this.autoExpandLastRaceColumn.setValue(autoExpandLastRaceColumn);
+        this.showCharts.setValue(showCharts);
+        this.showOverallLeaderboard.setValue(showOverallLeaderboard);
+        this.showSeriesLeaderboards.setValue(showSeriesLeaderboards);
+    }
+
     @Override
     protected void addChildSettings() {
         showRaceDetails = new BooleanSetting(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, this, false);
