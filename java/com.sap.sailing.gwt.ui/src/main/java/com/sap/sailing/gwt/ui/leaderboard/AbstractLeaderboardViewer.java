@@ -21,6 +21,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 /**
@@ -42,7 +43,8 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
     protected final boolean hideToolbar;
 
 
-    public AbstractLeaderboardViewer(Component<?> parent, AbstractLeaderboardComponentContext<PL> componentContext,
+    public AbstractLeaderboardViewer(Component<?> parent,
+            ComponentContext<PL, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             PL lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,

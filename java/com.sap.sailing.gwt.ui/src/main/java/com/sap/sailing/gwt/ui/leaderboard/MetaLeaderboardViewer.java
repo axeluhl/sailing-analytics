@@ -13,6 +13,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
@@ -23,13 +24,14 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Frank Mittag (c163874)
  * @author Axel Uhl (d043530)
  */
-public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPerspectiveLifecycle> {
+public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderboardPerspectiveLifecycle> {
     private final MultiLeaderboardProxyPanel multiLeaderboardPanel;
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
 
     
-    public MetaLeaderboardViewer(Component<?> parent, LeaderboardComponentContext componentContext,
-            LeaderboardPerspectiveLifecycle lifecycle,
+    public MetaLeaderboardViewer(Component<?> parent,
+            ComponentContext<MetaLeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
+            MetaLeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             Timer timer, String preselectedLeaderboardName, RegattaAndRaceIdentifier preselectedRace,
@@ -41,8 +43,9 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<Leaderboard
                 errorReporter, stringMessages, userAgent, chartDetailType);
     }
     
-    private MetaLeaderboardViewer(Component<?> parent, LeaderboardComponentContext componentContext,
-            LeaderboardPerspectiveLifecycle lifecycle,
+    private MetaLeaderboardViewer(Component<?> parent,
+            ComponentContext<MetaLeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
+            MetaLeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, Timer timer,
@@ -100,7 +103,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<Leaderboard
 
     @Override
     public String getId() {
-        return LeaderboardPerspectiveLifecycle.ID;
+        return null;
     }
 
 }

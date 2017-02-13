@@ -16,4 +16,9 @@ public class OverallLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle 
         return ID;
     }
 
+    @Override
+    public String getLocalizedShortName() {
+        return StringMessages.INSTANCE.overallLeaderboard();
+    }
+
 }

@@ -19,4 +19,9 @@ public class MultiLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
     public LeaderboardSettings extractContextSettings(LeaderboardSettings leaderboardSettings) {
         return createDefaultSettings();
     }
+
+    @Override
+    public String getLocalizedShortName() {
+        return StringMessages.INSTANCE.regattaLeaderboards();
+    }
 }

@@ -7,14 +7,9 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 
 public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardPerspectiveOwnSettings> {
 
-    public AbstractLeaderboardPerspectiveLifecycle(StringMessages stringMessages) {
-        this(stringMessages, null);
-    }
-    
-    public AbstractLeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
+    protected AbstractLeaderboardPerspectiveLifecycle(StringMessages stringMessages,
+            AbstractLeaderboardDTO leaderboard) {
         addLifeCycle(new LeaderboardPanelLifecycle(leaderboard, stringMessages));
-        addLifeCycle(new MultiLeaderboardPanelLifecycle(null, stringMessages));
-        addLifeCycle(new OverallLeaderboardPanelLifecycle(null, stringMessages));
     }
     
     @Override
@@ -36,8 +31,21 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
     }
 
     @Override
+    protected LeaderboardPerspectiveOwnSettings extractOwnGlobalSettings(LeaderboardPerspectiveOwnSettings settings) {
+        return new LeaderboardPerspectiveOwnSettings(settings.isShowRaceDetails(), settings.isHideToolbar(),
+                settings.isAutoExpandLastRaceColumn(), settings.isShowCharts(), settings.isShowOverallLeaderboard(),
+                settings.isShowSeriesLeaderboards());
+    }
+
+    @Override
+    protected LeaderboardPerspectiveOwnSettings extractOwnContextSettings(LeaderboardPerspectiveOwnSettings settings) {
+        LeaderboardPerspectiveOwnSettings defaultSet = createPerspectiveOwnDefaultSettings();
+        return defaultSet;
+    }
+
+    @Override
     public String getLocalizedShortName() {
-        return null;
+        return StringMessages.INSTANCE.leaderboardPage();
     }
 
     @Override

@@ -4,7 +4,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 
 public class LeaderboardComponentContext
-        extends AbstractLeaderboardComponentContext<LeaderboardPerspectiveLifecycle> {
+        extends AbstractLeaderboardComponentContext<AbstractLeaderboardPerspectiveLifecycle> {
 
     public LeaderboardComponentContext(LeaderboardPerspectiveLifecycle rootLifecycle,
             SettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsStorageManager) {

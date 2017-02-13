@@ -16,6 +16,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
@@ -28,7 +29,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
     private final MultiCompetitorLeaderboardChart multiCompetitorChart;
     private LeaderboardPanel overallLeaderboardPanel;
     
-    public LeaderboardViewer(Component<?> parent, LeaderboardComponentContext componentContext,
+    public LeaderboardViewer(Component<?> parent,
+            ComponentContext<LeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
@@ -41,7 +43,8 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
                 stringMessages, userAgent, chartDetailType);
     }
 
-    private LeaderboardViewer(Component<?> parent, LeaderboardComponentContext componentContext,
+    private LeaderboardViewer(Component<?> parent,
+            ComponentContext<LeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel,

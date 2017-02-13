@@ -1775,4 +1775,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String eventRegattaHeaderLegendAudioNo();
     String set();
     String gribWindImport_Title();
+
+    String leaderboardPage();
 }

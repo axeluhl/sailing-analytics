@@ -25,7 +25,7 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
         componentLifecycles = new ArrayList<>();
     }
     
-    protected void addLifeCycle(ComponentLifecycle<?, ?> cycle) {
+    protected final void addLifeCycle(ComponentLifecycle<?, ?> cycle) {
         for (ComponentLifecycle<?, ?> old : componentLifecycles) {
             if (old.getComponentId().equals(cycle.getComponentId())) {
                 throw new IllegalStateException("LifeCycle with duplicate ID " + cycle.getComponentId());

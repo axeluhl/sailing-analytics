@@ -34,6 +34,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
+import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -52,7 +53,6 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     private LeaderboardType leaderboardType;
     private EventDTO event;
 
-    private LeaderboardComponentContext context;
     private UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsManager;
 
     @Override
@@ -126,8 +126,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void createUI(LeaderboardContextSettings leaderboardContextSettings, EventDTO event) {
-        LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
-                StringMessages.INSTANCE);
+
 
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
@@ -145,7 +144,6 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         settingsManager = new UserSettingsStorageManager<>(getUserService(),
                 UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint"), leaderboardName);
 
-        context = new LeaderboardComponentContext(rootComponentLifeCycle, settingsManager);
 
         ScrollPanel contentScrollPanel = new ScrollPanel();
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
@@ -171,7 +169,13 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         // make a single live request as the default but don't continue to play by default
 
         if (leaderboardType.isMetaLeaderboard()) {
+            // overall
 
+            MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
+                    StringMessages.INSTANCE);
+            AbstractComponentContextWithSettingsStorage<MetaLeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new AbstractComponentContextWithSettingsStorage<>(
+                    rootComponentLifeCycle,
+                    settingsManager);
             context.initInitialSettings(
                     new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                         @Override
@@ -192,6 +196,12 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                         }
                     });
         } else {
+
+            LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
+                    StringMessages.INSTANCE);
+            AbstractComponentContextWithSettingsStorage<LeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new AbstractComponentContextWithSettingsStorage<>(
+                    rootComponentLifeCycle,
+                    settingsManager);
             context.initInitialSettings(
                     new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                         @Override
@@ -347,8 +357,12 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
      * @see LeaderboardEntryPoint#getUrl(String, LeaderboardSettings, boolean)
      */
     public static void openUrlConfigurationDialog(final AbstractLeaderboardDTO leaderboard) {
-        final LeaderboardPerspectiveLifecycle lifeCycle = new LeaderboardPerspectiveLifecycle(
-                StringMessages.INSTANCE, leaderboard);
+        final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
+        if (leaderboard.type.isMetaLeaderboard()) {
+            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(StringMessages.INSTANCE, leaderboard);
+        } else {
+            lifeCycle = new LeaderboardPerspectiveLifecycle(StringMessages.INSTANCE, leaderboard);
+        }
         final LeaderboardContextSettings leaderboardContextSettings = new LeaderboardContextSettings(leaderboard.name,
                 leaderboard.getDisplayName());
         final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
