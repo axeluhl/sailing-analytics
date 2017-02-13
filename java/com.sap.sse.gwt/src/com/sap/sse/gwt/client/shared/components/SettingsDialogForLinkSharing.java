@@ -7,18 +7,16 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.StringMessages;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class SettingsDialogForLinkSharing<SettingsType extends Settings> extends AbstractSettingsDialog<SettingsType> {
 
-    private SettingsDialogForLinkSharing(ComponentContext<?, SettingsType> componentContext,
-            ComponentLifecycle<SettingsType, ?> componentLifecycle, StringMessages stringMessages,
-            boolean animationEnabled) {
-        this(componentContext, componentLifecycle, componentLifecycle.createDefaultSettings(), stringMessages,
-                animationEnabled, null);
+    public SettingsDialogForLinkSharing(LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator,
+            ComponentLifecycle<SettingsType, ?> componentLifecycle, StringMessages stringMessages) {
+        this(linkWithSettingsGenerator, componentLifecycle, componentLifecycle.createDefaultSettings(), stringMessages,
+                true, null);
     }
 
-    private SettingsDialogForLinkSharing(final ComponentContext<?, SettingsType> componentContext,
+    private SettingsDialogForLinkSharing(final LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator,
             ComponentLifecycle<SettingsType, ?> componentLifecycle, SettingsType settings,
             StringMessages stringMessages, boolean animationEnabled, DialogCallback<SettingsType> callback) {
         super(componentLifecycle.getLocalizedShortName(), componentLifecycle.getSettingsDialogComponent(settings),
@@ -30,8 +28,7 @@ public class SettingsDialogForLinkSharing<SettingsType extends Settings> extends
         getLeftButtonPannel().add(shareButton);
         shareButton.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                Window.alert(componentContext.createUrlForSharingFromCurrentLocation(getResult(), /* TODO */ null)
-                        .buildString());
+                Window.alert(linkWithSettingsGenerator.createUrl(getResult()));
             }
         });
     }

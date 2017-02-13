@@ -1,8 +1,6 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import com.google.gwt.http.client.UrlBuilder;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
@@ -58,9 +56,4 @@ public interface ComponentContext<L extends ComponentLifecycle<S, ?>, S extends 
      * storage support
      */
     boolean hasMakeCustomDefaultSettingsSupport(Component<?> component);
-
-    UrlBuilder createUrlForSharingFromCurrentLocation(S settings, GenericSerializableSettings contextDefinition);
-
-    UrlBuilder createUrlForSharing(String path, S settings, GenericSerializableSettings contextDefinition);
-
 }

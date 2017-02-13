@@ -1,13 +1,8 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import com.google.gwt.http.client.UrlBuilder;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.common.settings.generic.GenericSerializableSettings;
-import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
-import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
-import com.sap.sse.gwt.settings.UrlBuilderUtil;
 
 /**
  * Manages all default settings of perspectives and components. This abstract implementation has no support for settings
@@ -27,8 +22,6 @@ import com.sap.sse.gwt.settings.UrlBuilderUtil;
  */
 public class SimpleComponentContext<L extends ComponentLifecycle<S, ?>, S extends Settings>
         implements ComponentContext<L, S> {
-    
-    private final SettingsToUrlSerializer settingsToUrlSerializer = new SettingsToUrlSerializer();
 
     protected final L rootLifecycle;
 
@@ -73,30 +66,5 @@ public class SimpleComponentContext<L extends ComponentLifecycle<S, ?>, S extend
     @Override
     public boolean hasMakeCustomDefaultSettingsSupport(Component<?> component) {
         return false;
-    }
-    
-    @Override
-    public UrlBuilder createUrlForSharingFromCurrentLocation(S settings, GenericSerializableSettings contextDefinition) {
-        final UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
-        serializeSettingsToUrlBuilder(urlBuilder, settings, contextDefinition);
-        return urlBuilder;
-    }
-    
-    @Override
-    public UrlBuilder createUrlForSharing(String path, S settings, GenericSerializableSettings contextDefinition) {
-        final UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParametersAndPath(path);
-        serializeSettingsToUrlBuilder(urlBuilder, settings, contextDefinition);
-        return urlBuilder;
-    }
-    
-    private void serializeSettingsToUrlBuilder(UrlBuilder urlBuilder, S settings, GenericSerializableSettings contextDefinition) {
-        if(contextDefinition != null) {
-            settingsToUrlSerializer.serializeToUrlBuilder(contextDefinition, urlBuilder);
-        }
-        if(settings instanceof SettingsMap) {
-            settingsToUrlSerializer.serializeSettingsMapToUrlBuilder((SettingsMap) settings, urlBuilder);
-        } else if(settings instanceof GenericSerializableSettings) {
-            settingsToUrlSerializer.serializeToUrlBuilder((GenericSerializableSettings) settings, urlBuilder);
-        }
     }
 }
