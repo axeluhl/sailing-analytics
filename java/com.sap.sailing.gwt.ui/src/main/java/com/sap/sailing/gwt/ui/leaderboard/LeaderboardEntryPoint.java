@@ -29,10 +29,11 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -136,76 +137,80 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
                 leaderboardDisplayName = leaderboardName;
             }
-            SAPSailingHeaderWithAuthentication header  = new SAPSailingHeaderWithAuthentication(leaderboardDisplayName);
+            SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(leaderboardDisplayName);
             new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
             mainPanel.addNorth(header, 75);
         }
 
         settingsManager = new UserSettingsStorageManager<>(getUserService(),
-                UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint"),
-                leaderboardName);
+                UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint"), leaderboardName);
 
         context = new LeaderboardComponentContext(rootComponentLifeCycle, settingsManager);
 
         ScrollPanel contentScrollPanel = new ScrollPanel();
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
-        final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
+        final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(
+                Window.Location.getParameterMap());
         if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-            timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, goes "live" and "playing" if an auto-refresh
+            timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, goes "live" and "playing"
+                                               // if an auto-refresh
         } // interval has been specified
-        String chartDetailParam = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_CHART_DETAIL, null);
+        String chartDetailParam = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_CHART_DETAIL,
+                null);
         final DetailType chartDetailType;
-        if (chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam) || DetailType.OVERALL_RANK.name().equals(chartDetailParam) || 
-                DetailType.REGATTA_NET_POINTS_SUM.name().equals(chartDetailParam))) {
+        if (chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam)
+                || DetailType.OVERALL_RANK.name().equals(chartDetailParam)
+                || DetailType.REGATTA_NET_POINTS_SUM.name().equals(chartDetailParam))) {
             chartDetailType = DetailType.valueOf(chartDetailParam);
         } else {
-            chartDetailType = leaderboardType.isMetaLeaderboard() ?  DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
+            chartDetailType = leaderboardType.isMetaLeaderboard() ? DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
         }
 
         final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
-        
 
         if (leaderboardType.isMetaLeaderboard()) {
-            
-            context.initInitialSettings(new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
-                @Override
-                public void onSuccess(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
+
+            context.initInitialSettings(
+                    new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
+                        @Override
+                        public void onSuccess(
+                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
                             MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(null, context,
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
-            timer, null, preselectedRace, leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this, getStringMessages(),
-            userAgent, chartDetailType);
-            contentScrollPanel.setWidget(leaderboardViewer);
-                }
-                
-                @Override
-                public void onError(Throwable caught,
-                        PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> fallbackDefaultSettings) {
-                    // TODO
-                    onSuccess(fallbackDefaultSettings);
-                }
-            });
+                                    timer, null, preselectedRace, leaderboardGroupName, leaderboardName,
+                                    LeaderboardEntryPoint.this, getStringMessages(), userAgent, chartDetailType);
+                            contentScrollPanel.setWidget(leaderboardViewer);
+                        }
+
+                        @Override
+                        public void onError(Throwable caught,
+                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> fallbackDefaultSettings) {
+                            // TODO
+                            onSuccess(fallbackDefaultSettings);
+                        }
+                    });
         } else {
             context.initInitialSettings(
                     new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
-                @Override
-                public void onSuccess(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
-                            LeaderboardViewer leaderboardViewer = new LeaderboardViewer(null,
-                                    context, rootComponentLifeCycle, defaultSettings, sailingService,
-                                    new AsyncActionsExecutor(),
-                            timer, preselectedRace, leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this, getStringMessages(),
-                            userAgent, chartDetailType);
-                    contentScrollPanel.setWidget(leaderboardViewer);
-                }
-                
-                @Override
-                public void onError(Throwable caught,
-                        PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> fallbackDefaultSettings) {
-                    // TODO
-                    onSuccess(fallbackDefaultSettings);
-                }
-            });
+                        @Override
+                        public void onSuccess(
+                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
+                            LeaderboardViewer leaderboardViewer = new LeaderboardViewer(null, context,
+                                    rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
+                                    timer, preselectedRace, leaderboardGroupName, leaderboardName,
+                                    LeaderboardEntryPoint.this, getStringMessages(), userAgent, chartDetailType);
+                            contentScrollPanel.setWidget(leaderboardViewer);
+                        }
+
+                        @Override
+                        public void onError(Throwable caught,
+                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> fallbackDefaultSettings) {
+                            // TODO
+                            onSuccess(fallbackDefaultSettings);
+                        }
+                    });
         }
         mainPanel.add(contentScrollPanel);
     }
@@ -250,7 +255,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                 || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_LEG_DETAIL)
                 || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_MANEUVER_DETAIL)
                 || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_OVERALL_DETAIL)
-                || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES) || parameterMap
+                || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES)
+                || parameterMap
                         .containsKey(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED)
                 || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS)) {
             List<DetailType> maneuverDetails = getDetailTypeListFromParamValue(
@@ -340,9 +346,13 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
      * 
      * @see LeaderboardEntryPoint#getUrl(String, LeaderboardSettings, boolean)
      */
-    public static DataEntryDialog<LeaderboardUrlSettings> getUrlConfigurationDialog(
-            final AbstractLeaderboardDTO leaderboard, final StringMessages stringMessages) {
-        return new LeaderboardUrlConfigurationDialog(stringMessages, leaderboard);
+    public static void openUrlConfigurationDialog(final AbstractLeaderboardDTO leaderboard) {
+        final LeaderboardPerspectiveLifecycle lifeCycle = new LeaderboardPerspectiveLifecycle(
+                StringMessages.INSTANCE, leaderboard);
+        final LeaderboardContextSettings leaderboardContextSettings = new LeaderboardContextSettings();
+        final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
+                "/gwt/Leaderboard.html", leaderboardContextSettings);
+        new SettingsDialogForLinkSharing<>(linkWithSettingsGenerator, lifeCycle, StringMessages.INSTANCE)
+                .show();
     }
-
 }

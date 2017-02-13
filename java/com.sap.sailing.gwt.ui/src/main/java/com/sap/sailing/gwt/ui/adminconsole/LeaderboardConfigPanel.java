@@ -330,7 +330,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                     editCompetitorsDialog.show();
 
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
-                    openLeaderboardUrlConfigDialog(leaderboardDTO, stringMessages);
+                    openLeaderboardUrlConfigDialog(leaderboardDTO);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
                     Window.open(UriUtils.fromString("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name).asString(), "", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD.equals(value)) {
@@ -505,8 +505,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
      * the link can be clicked, bookmarked or copied to the clipboard at any time. The OK / Cancel actions for the dialog shown
      * are no-ops.
      */
-    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
-        LeaderboardEntryPoint.getUrlConfigurationDialog(leaderboard, stringMessages).show();
+    private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard) {
+        LeaderboardEntryPoint.openUrlConfigurationDialog(leaderboard);
     }
 
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {

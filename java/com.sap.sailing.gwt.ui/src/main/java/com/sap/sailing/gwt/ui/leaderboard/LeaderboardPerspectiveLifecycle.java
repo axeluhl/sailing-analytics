@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class LeaderboardPerspectiveLifecycle extends AbstractLeaderboardPerspectiveLifecycle {
@@ -7,6 +8,10 @@ public class LeaderboardPerspectiveLifecycle extends AbstractLeaderboardPerspect
 
     public LeaderboardPerspectiveLifecycle(StringMessages stringMessages) {
         super(stringMessages);
+    }
+    
+    public LeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
+        super(stringMessages, leaderboard);
     }
 
     @Override
