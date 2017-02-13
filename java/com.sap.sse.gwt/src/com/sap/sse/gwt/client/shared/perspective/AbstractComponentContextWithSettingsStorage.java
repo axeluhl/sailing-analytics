@@ -236,7 +236,6 @@ public class AbstractComponentContextWithSettingsStorage<L extends ComponentLife
 
     private void updateSettings(final ArrayList<String> path, final Settings globalSettings,
             final Settings contextSettings) {
-        Window.alert("Save for " + path + "  Global " + globalSettings + " Context " + contextSettings);
         settingsStorageManager.retrieveGlobalSettingsJson(new AsyncCallback<JSONObject>() {
             @Override
             public void onSuccess(final JSONObject globalServerside) {
