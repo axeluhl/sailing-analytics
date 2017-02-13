@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.execution.SimpleQueryRunner;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedResultsPresenter;
-import com.sap.sailing.gwt.ui.datamining.selection.BufferingQueryDefinitionProviderWithControls;
+import com.sap.sailing.gwt.ui.datamining.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -58,8 +58,8 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 ResultsPresenter<?> resultsPresenter = new TabbedResultsPresenter(null, null, getStringMessages());
                 
                 DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
-                BufferingQueryDefinitionProviderWithControls queryDefinitionProviderWithControls =
-                        new BufferingQueryDefinitionProviderWithControls(null, null, session, getStringMessages(),
+                QueryDefinitionProviderWithControls queryDefinitionProviderWithControls =
+                        new QueryDefinitionProviderWithControls(null, null, session, getStringMessages(),
                                 dataMiningService, DataMiningEntryPoint.this, settingsControl, resultsPresenter);
                 queryDefinitionProviderWithControls.getEntryWidget().addStyleName("dataMiningPanel");
                 selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
@@ -68,7 +68,11 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                         dataMiningService,
                         DataMiningEntryPoint.this, queryDefinitionProviderWithControls, resultsPresenter);
                 queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
-                settingsControl.addSettingsComponent(queryRunner);
+                /* Running queries automatically when they've been changed is currently unnecessary, if not even counterproductive.
+                 * This removes the query runner settings to prevent that the user can enable the automatic execution of queries.
+                 * Re-enable this, when this functionality is desired again.
+                 */
+//                settingsControl.addSettingsComponent(queryRunner);
                 
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(15);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);

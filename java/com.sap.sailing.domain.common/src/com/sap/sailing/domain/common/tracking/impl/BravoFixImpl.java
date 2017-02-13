@@ -36,7 +36,7 @@ public class BravoFixImpl implements BravoFix {
 
     @Override
     public Distance getRideHeight() {
-        return new MeterDistance(fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightColumn));
+        return Util.min(getRideHeightPortHull(), getRideHeightStarboardHull());
     }
     
     @Override
@@ -51,7 +51,7 @@ public class BravoFixImpl implements BravoFix {
     
     @Override
     public boolean isFoiling() {
-        return Util.min(getRideHeightPortHull(), getRideHeightStarboardHull()).compareTo(MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
+        return getRideHeight().compareTo(MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
     }
 
     @Override

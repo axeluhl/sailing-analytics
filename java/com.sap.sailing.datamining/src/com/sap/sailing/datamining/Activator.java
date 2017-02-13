@@ -9,6 +9,7 @@ import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.datamining.data.HasBravoFixContext;
 import com.sap.sailing.datamining.data.HasBravoFixTrackContext;
+import com.sap.sailing.datamining.data.HasFoilingSegmentContext;
 import com.sap.sailing.datamining.data.HasGPSFixContext;
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
@@ -22,6 +23,8 @@ import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.data.HasWindFixContext;
 import com.sap.sailing.datamining.data.HasWindTrackContext;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingAverageDegreesAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingMaxAggregationProcessor;
+import com.sap.sailing.datamining.impl.components.aggregators.ParallelBearingMinAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelBoolSumAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceAverageAggregationProcessor;
 import com.sap.sailing.datamining.impl.components.aggregators.ParallelDistanceMaxAggregationProcessor;
@@ -95,6 +98,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         internalClasses.add(HasWindFixContext.class);
         internalClasses.add(HasBravoFixContext.class);
         internalClasses.add(HasBravoFixTrackContext.class);
+        internalClasses.add(HasFoilingSegmentContext.class);
         internalClasses.add(HasManeuverContext.class);
         internalClasses.add(HasMarkPassingContext.class);
         internalClasses.add(HasRaceOfCompetitorContext.class);
@@ -131,6 +135,8 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
         aggregators.add(ParallelDurationMaxAggregationProcessor.getDefinition());
         aggregators.add(ParallelDurationMinAggregationProcessor.getDefinition());
         aggregators.add(ParallelBearingAverageDegreesAggregationProcessor.getDefinition());
+        aggregators.add(ParallelBearingMaxAggregationProcessor.getDefinition());
+        aggregators.add(ParallelBearingMinAggregationProcessor.getDefinition());
         return aggregators;
     }
     

@@ -2,9 +2,16 @@ package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasBravoFixContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.BravoFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class BravoFixWithContext implements HasBravoFixContext {
     private static final long serialVersionUID = -4537126043228674949L;
@@ -40,9 +47,34 @@ public class BravoFixWithContext implements HasBravoFixContext {
     }
 
     @Override
+    public SpeedWithBearing getSpeed() {
+        return getGpsFixTrack().getEstimatedSpeed(getTimePoint());
+    }
+
+    @Override
+    public Wind getWind() {
+        return getTrackedRace().getWind(getGpsFixTrack().getEstimatedPosition(getTimePoint(), /* extrapolate */ true), getTimePoint());
+    }
+
+    @Override
+    public Bearing getAbsoluteTrueWindAngle() throws NoWindException {
+        return getTrackedRace().getTrackedLeg(getCompetitor(), getTimePoint()).getBeatAngle(getTimePoint()).abs();
+    }
+
+    private Competitor getCompetitor() {
+        return getTrackedLegOfCompetitorContext().getCompetitor();
+    }
+
+    @Override
     public Position getPosition() {
-        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getTrackedLeg().getTrackedRace()
-                .getTrack(getTrackedLegOfCompetitorContext().getCompetitor())
-                .getEstimatedPosition(getTimePoint(), /* extrapolate */ true);
+        return getGpsFixTrack().getEstimatedPosition(getTimePoint(), /* extrapolate */ true);
+    }
+
+    private GPSFixTrack<Competitor, GPSFixMoving> getGpsFixTrack() {
+        return getTrackedRace().getTrack(getTrackedLegOfCompetitorContext().getCompetitor());
+    }
+
+    private TrackedRace getTrackedRace() {
+        return getTrackedLegOfCompetitorContext().getTrackedLegOfCompetitor().getTrackedLeg().getTrackedRace();
     }
 }

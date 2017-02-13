@@ -17,7 +17,7 @@ public interface HasWind extends Positioned, Timed {
     @Dimension(messageKey="WindStrengthInBeaufort", ordinal=11)
     default ClusterDTO getWindStrengthAsBeaufortCluster(Locale locale, ResourceBundleStringMessages stringMessages) {
         Wind wind = getWind();
-        Cluster<?> cluster = Activator.getClusterGroups().getWindStrengthInBeaufortClusterGroup().getClusterFor(wind);
-        return new ClusterDTO(cluster.asLocalizedString(locale, stringMessages));
+        final Cluster<?> cluster = Activator.getClusterGroups().getWindStrengthInBeaufortClusterGroup().getClusterFor(wind);
+        return new ClusterDTO(cluster.toString(), ()->cluster.asLocalizedString(locale, stringMessages));
     }
 }

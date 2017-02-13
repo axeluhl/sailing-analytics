@@ -121,14 +121,11 @@ public class QueryFactory {
             @Override
             protected Processor<DataSourceType, ?> createChainAndReturnFirstProcessor(Processor<Map<GroupKey, HashSet<Object>>, Void> resultReceiver) {
                 ProcessorFactory processorFactory = new ProcessorFactory(executor);
-                
                 Processor<GroupedDataEntry<Object>, Map<GroupKey, HashSet<Object>>> valueCollector = processorFactory.createGroupedDataCollectingAsSetProcessor(/*query*/ this);
-
                 Map<DataRetrieverLevel<?, ?>, FilterCriterion<?>> criteriaMappedByRetrieverLevel = createFilterCriteria(filterSelection);
                 DataRetrieverChainBuilder<DataSourceType> chainBuilder = dataRetrieverChainDefinition.startBuilding(executor);
                 while (!chainBuilder.hasBeenInitialized() || chainBuilder.getCurrentRetrieverLevel().getLevel() < retrieverLevel.getLevel()) {
                     chainBuilder.stepFurther();
-
                     DataRetrieverLevel<?, ?> currentLevel = chainBuilder.getCurrentRetrieverLevel();
                     if (settings.containsKey(currentLevel)) {
                         chainBuilder.setSettings(settings.get(currentLevel));
@@ -141,7 +138,6 @@ public class QueryFactory {
                         chainBuilder.getCurrentRetrievedDataType(), valueCollector, getParameterProvidersFor(dimensions, stringMessages, locale), stringMessages, locale)) {
                     chainBuilder.addResultReceiver(groupingExtractor);
                 }
-                
                 return chainBuilder.build();
             }
         };
