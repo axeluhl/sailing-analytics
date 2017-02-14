@@ -46,17 +46,21 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardContextSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer,
 TrackedRaceChangedListener, LeaderboardsDisplayer {
@@ -137,16 +141,14 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         Column<StrippedLeaderboardDTO, SafeHtml> linkColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO object) {
-                Map<String, String> leaderboardUrlParams = new HashMap<>();
-                leaderboardUrlParams.put("name", object.name);
-                if (showRaceDetails) {
-                    leaderboardUrlParams.put(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, "true");
-                }
-                if (object.displayName != null) {
-                    leaderboardUrlParams.put("displayName", object.displayName);
-                }
-                String link = EntryPointLinkFactory.createLeaderboardLink(leaderboardUrlParams);
-                return ANCHORTEMPLATE.cell(link, object.name);
+                final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
+                        EntryPointLinkFactory.LEADERBOARD_PATH,
+                        new LeaderboardContextSettings(object.name, object.displayName));
+                LeaderboardPerspectiveOwnSettings perspectiveOwnSettings = new LeaderboardPerspectiveOwnSettings(
+                        showRaceDetails);
+                final PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>(
+                        perspectiveOwnSettings, Collections.emptyMap());
+                return ANCHORTEMPLATE.cell(linkWithSettingsGenerator.createUrl(settings), object.name);
             }
 
         };
