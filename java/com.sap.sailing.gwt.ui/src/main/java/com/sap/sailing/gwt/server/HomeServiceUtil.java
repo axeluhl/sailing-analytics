@@ -30,6 +30,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -385,6 +386,20 @@ public final class HomeServiceUtil {
         return dto;
     }
     
+    public static EventLinkAndMetadataDTO convertToEventLinkAndMetadataDTO(EventBase event, URL baseURL,
+            boolean onRemoteServer, RacingEventService service) {
+        EventLinkAndMetadataDTO linkAndMetadataDTO = new EventLinkAndMetadataDTO();
+        mapToLinkAndMetadataDTO(event, linkAndMetadataDTO, baseURL, onRemoteServer, service);
+        return linkAndMetadataDTO;
+    }
+
+    private static void mapToLinkAndMetadataDTO(EventBase event, EventLinkAndMetadataDTO dto, URL baseURL,
+            boolean onRemoteServer, RacingEventService service) {
+        mapToMetadataDTO(event, dto, service);
+        dto.setBaseURL(baseURL.toString());
+        dto.setOnRemoteServer(onRemoteServer);
+    }
+
     public static void mapToMetadataDTO(EventBase event, EventMetadataDTO dto, RacingEventService service) {
         dto.setId((UUID) event.getId());
         dto.setDisplayName(getEventDisplayName(event, service));
