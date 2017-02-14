@@ -24,6 +24,7 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
 
     private TextBox zoomTo;
     private CheckBox embedded;
+    private CheckBox livePlay;
 
     public LeaderboardPerspectiveOwnSettingsDialogComponent(LeaderboardPerspectiveOwnSettings settings) {
         this.initialSettings = settings;
@@ -63,6 +64,10 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
         embedded.setValue(initialSettings.isEmbedded());
         vp.add(embedded);
 
+        livePlay = dialog.createCheckbox(stringMessages.live());
+        livePlay.setValue(initialSettings.isLifePlay());
+        vp.add(livePlay);
+
         Label zoomDescription = new Label(stringMessages.zoom());
         vp.add(zoomDescription);
 
@@ -76,7 +81,7 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
     public LeaderboardPerspectiveOwnSettings getResult() {
         return new LeaderboardPerspectiveOwnSettings(showRaceDetails.getValue(), hideToolbar.getValue(),
                 autoExpandLastRaceColumn.getValue(), showCharts.getValue(), showOverallLeaderboard.getValue(),
-                showSeriesLeaderboards.getValue(), zoomTo.getValue(), embedded.getValue());
+                showSeriesLeaderboards.getValue(), zoomTo.getValue(), embedded.getValue(), livePlay.getValue());
     }
 
     @Override

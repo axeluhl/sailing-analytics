@@ -15,6 +15,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     private transient BooleanSetting showSeriesLeaderboards;
     private transient StringSetting zoomTo;
     private transient BooleanSetting embedded;
+    private transient BooleanSetting livePlay;
     
     LeaderboardPerspectiveOwnSettings() {
 
@@ -26,7 +27,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
 
     LeaderboardPerspectiveOwnSettings(boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn,
             boolean showCharts, boolean showOverallLeaderboard, boolean showSeriesLeaderboards, String zoomTo,
-            boolean embedded) {
+            boolean embedded, boolean lifeplay) {
         this(showRaceDetails);
         this.hideToolbar.setValue(hideToolbar);
         this.autoExpandLastRaceColumn.setValue(autoExpandLastRaceColumn);
@@ -35,6 +36,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
         this.showSeriesLeaderboards.setValue(showSeriesLeaderboards);
         this.zoomTo.setValue(zoomTo);
         this.embedded.setValue(embedded);
+        this.livePlay.setValue(lifeplay);
     }
 
     @Override
@@ -47,7 +49,13 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
         showSeriesLeaderboards = new BooleanSetting("showSeriesLeaderboards", this, false);
         zoomTo = new StringSetting("zoomTo", this, "1");
         embedded = new BooleanSetting("embedded", this, false);
+        livePlay = new BooleanSetting("livePlay", this, false);
     }
+
+    public boolean isLifePlay() {
+        return livePlay.getValue();
+    }
+
     public boolean isShowRaceDetails() {
         return showRaceDetails.getValue();
     }

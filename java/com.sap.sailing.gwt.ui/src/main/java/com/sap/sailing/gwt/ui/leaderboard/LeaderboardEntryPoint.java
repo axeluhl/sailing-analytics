@@ -223,8 +223,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                             + ");-webkit-transform-origin: 0 0;");
         }
         
-        LeaderboardSettings leaderboardSettings = settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID);
-        if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
+        if (perspectiveOwnSettings.isLifePlay()) {
             timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, goes "live" and "playing"
                                                // if an auto-refresh
         }
