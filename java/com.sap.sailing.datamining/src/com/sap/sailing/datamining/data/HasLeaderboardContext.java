@@ -9,6 +9,6 @@ public interface HasLeaderboardContext {
 
     PolarDataService getPolarDataService();
 
-    @Dimension(messageKey="Leaderboard")
+    @Dimension(messageKey="Leaderboard", ordinal=1)
     String getName();
 }

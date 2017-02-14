@@ -25,7 +25,8 @@
 	<!-- Specify the app entry point class.                         -->
 	<entry-point class='com.sap.sailing.gwt.ui.spectator.SpectatorEntryPoint'/>
 
-        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
+    <!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
 
 	<source path='spectator'/>
 	

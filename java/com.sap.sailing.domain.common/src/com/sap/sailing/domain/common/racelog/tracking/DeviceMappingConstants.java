@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.racelog.tracking;
 
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.util.UrlHelper;
 
 /**
@@ -35,6 +36,12 @@ public class DeviceMappingConstants {
     public static final String JSON_DEVICE_TYPE = "deviceType";
     public static final String JSON_PUSH_DEVICE_ID = "pushDeviceId";
     public static final String JSON_FROM_MILLIS = "fromMillis";
+    
+    /**
+     * The parameter to specify the end of the mapping interval, inclusively. Note that when asking a {@link TimeRange} describing
+     * the interval, the {@link TimeRange#to()} method has to return a value "infinitesimally" later than the time point provided here
+     * because {@link TimeRange}s have an <em>exclusive</em> end.
+     */
     public static final String JSON_TO_MILLIS = "toMillis";
     public static final String JSON_TEAM_IMAGE_URI = "teamImageUri";
 

@@ -154,7 +154,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                     if (!invalidationInterval.includes(maxFixTimePoint)) {
                         final TimePoint cacheEntryTo = toAndResult.getA();
                         final TimeRange croppedCacheEntryTimeRangeContainingMaxFix;
-                        if (invalidationInterval.startsAfter(maxFixTimePoint)) {
+                        if (invalidationInterval.startsAtOrAfter(maxFixTimePoint)) {
                             croppedCacheEntryTimeRangeContainingMaxFix = new TimeRangeImpl(cacheEntryFrom, invalidationInterval.from());
                         } else { // invalidation interval must end before the maxFixTimePoint
                             assert invalidationInterval.endsBefore(maxFixTimePoint);

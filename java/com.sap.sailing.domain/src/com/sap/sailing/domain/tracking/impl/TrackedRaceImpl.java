@@ -4004,7 +4004,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         LockUtil.lockForWrite(sensorTracksLock);
         try {
             TrackT result = getTrackInternal(key);
-            if (result == null) {
+            if (result == null && tracks.containsKey(competitor)) {
+                // A track is only added if the given Competitor is known to participate in this race
                 result = newTrackFactory.get();
                 addSensorTrackInternal(key, result);
             }

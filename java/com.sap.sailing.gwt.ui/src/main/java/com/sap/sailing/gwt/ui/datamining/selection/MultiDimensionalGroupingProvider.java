@@ -19,12 +19,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
+import com.sap.sailing.gwt.ui.datamining.DataRetrieverChainDefinitionProvider;
 import com.sap.sailing.gwt.ui.datamining.GroupingChangedListener;
 import com.sap.sailing.gwt.ui.datamining.GroupingProvider;
-import com.sap.sailing.gwt.ui.datamining.StatisticProvider;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
-import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -42,16 +42,16 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
     private final List<ValueListBox<FunctionDTO>> dimensionToGroupByBoxes;
 
     private boolean isAwaitingReload;
-    private FunctionDTO currentStatisticToCalculate;
+    private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
     private final List<FunctionDTO> availableDimensions;
 
     public MultiDimensionalGroupingProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
-                                            StatisticProvider statisticProvider) {
+                                            DataRetrieverChainDefinitionProvider retrieverChainProvider) {
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         listeners = new HashSet<GroupingChangedListener>();
-        currentStatisticToCalculate = null;
+        currentRetrieverChainDefinition = null;
         availableDimensions = new ArrayList<>();
         isAwaitingReload = false;
         dimensionToGroupByBoxes = new ArrayList<ValueListBox<FunctionDTO>>();
@@ -63,7 +63,7 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
 
         ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
         addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
-        statisticProvider.addStatisticChangedListener(this);
+        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
     }
     
     @Override
@@ -82,10 +82,11 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
         updateAvailableDimensions();
     }
     
+    
     @Override
-    public void statisticChanged(FunctionDTO newStatisticToCalculate, AggregationProcessorDefinitionDTO newAggregatorDefinition) {
-        if (!Objects.equals(currentStatisticToCalculate, newStatisticToCalculate)) {
-            currentStatisticToCalculate = newStatisticToCalculate;
+    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newRetrieverChainDefinition) {
+        if (!Objects.equals(currentRetrieverChainDefinition, newRetrieverChainDefinition)) {
+            currentRetrieverChainDefinition = newRetrieverChainDefinition;
             if (!isAwaitingReload) {
                 updateAvailableDimensions();
             }
@@ -93,8 +94,8 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
     }
 
     private void updateAvailableDimensions() {
-        if (currentStatisticToCalculate != null) {
-            dataMiningService.getDimensionsFor(currentStatisticToCalculate, LocaleInfo.getCurrentLocale()
+        if (currentRetrieverChainDefinition != null) {
+            dataMiningService.getDimensionsFor(currentRetrieverChainDefinition, LocaleInfo.getCurrentLocale()
                     .getLocaleName(), new AsyncCallback<HashSet<FunctionDTO>>() {
                 @Override
                 public void onSuccess(HashSet<FunctionDTO> dimensions) {

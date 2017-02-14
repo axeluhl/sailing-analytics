@@ -36,13 +36,15 @@ public class ParallelGroupedNumberDataAverageAggregationProcessor
 
     @Override
     protected void storeElement(GroupedDataEntry<Number> element) {
-        incrementElementAmount(element);
-        DoubleHolder aggregate = sumPerKey.get(element.getKey());
-        if (aggregate == null) {
-            aggregate = new DoubleHolder(element.getDataEntry().doubleValue());
-            sumPerKey.put(element.getKey(), aggregate);
-        } else {
-            aggregate.value += element.getDataEntry().doubleValue();
+        if (element.getDataEntry() != null) {
+            incrementElementAmount(element);
+            DoubleHolder aggregate = sumPerKey.get(element.getKey());
+            if (aggregate == null) {
+                aggregate = new DoubleHolder(element.getDataEntry().doubleValue());
+                sumPerKey.put(element.getKey(), aggregate);
+            } else {
+                aggregate.value += element.getDataEntry().doubleValue();
+            }
         }
     }
 
