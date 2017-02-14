@@ -182,7 +182,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     private DetailType getActualChartDetailType(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings) {
         // FIXME use constant from lifecycle when it is implemented
         MultiCompetitorLeaderboardChartSettings chartSettings = settings.findSettingsByComponentId("MultiCompetitorLeaderboardChart");
-        DetailType chartDetailType = chartSettings.getDetailType();
+        DetailType chartDetailType = chartSettings == null ? null : chartSettings.getDetailType();
         
         if (chartDetailType == DetailType.REGATTA_RANK
                 || chartDetailType == DetailType.OVERALL_RANK
