@@ -33,7 +33,6 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -75,10 +74,10 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
             Timer timer, boolean isEmbedded, String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
             ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn,
-            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings) {
+            LeaderboardSettings settings) {
         super(parent, context);
 
-        loadedSettings = settings.findSettingsByComponentId(MultiLeaderboardPanelLifecycle.MID);
+        loadedSettings = settings;
         if (loadedSettings == null) {
             loadedSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomDefaults(null);
         }

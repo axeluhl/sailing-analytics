@@ -99,7 +99,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
                                 overallLeaderboardPanel = new OverallLeaderboardPanel(LeaderboardViewer.this,
                                         getComponentContext(), sailingService,
                                         asyncActionsExecutor,
-                                        settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID),
+                                        settings.findSettingsByComponentId(OverallLeaderboardPanelLifecycle.ID),
                                         preselectedRace != null, preselectedRace, competitorSelectionProvider, timer,
                                         leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
                                         false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
