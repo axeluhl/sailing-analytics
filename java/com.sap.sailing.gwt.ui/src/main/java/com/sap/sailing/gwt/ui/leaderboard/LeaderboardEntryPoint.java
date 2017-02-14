@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
@@ -180,8 +181,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     }
     
     private DetailType getActualChartDetailType(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings) {
-        // FIXME use constant from lifecycle when it is implemented
-        MultiCompetitorLeaderboardChartSettings chartSettings = settings.findSettingsByComponentId("MultiCompetitorLeaderboardChart");
+        MultiCompetitorLeaderboardChartSettings chartSettings = settings.findSettingsByComponentId(MultiCompetitorLeaderboardChartLifecycle.ID);
         DetailType chartDetailType = chartSettings == null ? null : chartSettings.getDetailType();
         
         if (chartDetailType == DetailType.REGATTA_RANK
