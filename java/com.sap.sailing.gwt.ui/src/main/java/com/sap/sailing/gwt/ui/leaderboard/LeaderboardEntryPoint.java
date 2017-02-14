@@ -184,9 +184,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         MultiCompetitorLeaderboardChartSettings chartSettings = settings.findSettingsByComponentId(MultiCompetitorLeaderboardChartLifecycle.ID);
         DetailType chartDetailType = chartSettings == null ? null : chartSettings.getDetailType();
         
-        if (chartDetailType == DetailType.REGATTA_RANK
-                || chartDetailType == DetailType.OVERALL_RANK
-                || chartDetailType == DetailType.REGATTA_NET_POINTS_SUM) {
+        if (chartDetailType == DetailType.REGATTA_NET_POINTS_SUM) {
             return chartDetailType;
         }
         return leaderboardType.isMetaLeaderboard() ? DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
