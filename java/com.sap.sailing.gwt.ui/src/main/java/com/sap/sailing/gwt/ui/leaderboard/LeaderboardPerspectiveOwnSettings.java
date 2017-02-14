@@ -21,7 +21,8 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     }
 
     LeaderboardPerspectiveOwnSettings(boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn,
-            boolean showCharts, boolean showOverallLeaderboard, boolean showSeriesLeaderboards, String zoomTo) {
+            boolean showCharts, boolean showOverallLeaderboard, boolean showSeriesLeaderboards, String zoomTo,
+            boolean embedded) {
         this.showRaceDetails.setValue(showRaceDetails);
         this.hideToolbar.setValue(hideToolbar);
         this.autoExpandLastRaceColumn.setValue(autoExpandLastRaceColumn);
@@ -29,6 +30,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
         this.showOverallLeaderboard.setValue(showOverallLeaderboard);
         this.showSeriesLeaderboards.setValue(showSeriesLeaderboards);
         this.zoomTo.setValue(zoomTo);
+        this.embedded.setValue(embedded);
     }
 
     @Override
@@ -63,7 +65,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     public String getZoomTo() {
         return zoomTo.getValue();
     }
-    public boolean getEmbedded() {
+    public boolean isEmbedded() {
         return embedded.getValue();
     }
 }

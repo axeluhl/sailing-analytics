@@ -194,7 +194,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
         RootLayoutPanel.get().add(mainPanel);
-        if (!ownSettings.getEmbedded()) {
+        if (!ownSettings.isEmbedded()) {
             // Hack to shorten the leaderboardName in case of overall leaderboards
             String leaderboardDisplayName = leaderboardContextSettings.getDisplayName();
             if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {

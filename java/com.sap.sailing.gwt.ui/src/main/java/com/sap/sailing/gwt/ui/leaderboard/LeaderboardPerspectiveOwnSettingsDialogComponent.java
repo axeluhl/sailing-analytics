@@ -20,7 +20,9 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
     private CheckBox showCharts;
     private CheckBox showOverallLeaderboard;
     private CheckBox showSeriesLeaderboards;
+
     private TextBox zoomTo;
+    private CheckBox embedded;
 
     public LeaderboardPerspectiveOwnSettingsDialogComponent(LeaderboardPerspectiveOwnSettings settings) {
         this.initialSettings = settings;
@@ -56,6 +58,10 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
         showSeriesLeaderboards.setValue(initialSettings.isShowSeriesLeaderboards());
         vp.add(showSeriesLeaderboards);
 
+        embedded = dialog.createCheckbox(stringMessages.embedded());
+        embedded.setValue(initialSettings.isEmbedded());
+        vp.add(embedded);
+
         zoomTo = dialog.createTextBox(stringMessages.zoom());
         zoomTo.setValue(initialSettings.getZoomTo());
         vp.add(zoomTo);
@@ -66,7 +72,7 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
     public LeaderboardPerspectiveOwnSettings getResult() {
         return new LeaderboardPerspectiveOwnSettings(showRaceDetails.getValue(), hideToolbar.getValue(),
                 autoExpandLastRaceColumn.getValue(), showCharts.getValue(), showOverallLeaderboard.getValue(),
-                showSeriesLeaderboards.getValue(), zoomTo.getValue());
+                showSeriesLeaderboards.getValue(), zoomTo.getValue(), embedded.getValue());
     }
 
     @Override
