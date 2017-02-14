@@ -40,20 +40,16 @@ import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
 
-    private final SettingsToUrlSerializer settingsToUrlSerializer = new SettingsToUrlSerializer();
-
     private String leaderboardName;
     private String leaderboardGroupName;
     private LeaderboardType leaderboardType;
     private EventDTO event;
 
-    private UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsManager;
-
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
 
-        final LeaderboardContextSettings leaderboardContextSettings = settingsToUrlSerializer
+        final LeaderboardContextSettings leaderboardContextSettings = new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new LeaderboardContextSettings());
 
         final UUID eventId = leaderboardContextSettings.getEventId();
@@ -125,8 +121,9 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             mainPanel.addNorth(header, 75);
         }
 
-        settingsManager = new UserSettingsStorageManager<>(getUserService(),
-                UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint"), leaderboardName);
+        final UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsManager = new UserSettingsStorageManager<>(
+                getUserService(), UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint"),
+                leaderboardName);
 
 
         ScrollPanel contentScrollPanel = new ScrollPanel();
