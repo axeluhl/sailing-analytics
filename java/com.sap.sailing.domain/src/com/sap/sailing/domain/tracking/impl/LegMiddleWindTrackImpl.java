@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
 
 public class LegMiddleWindTrackImpl extends CombinedWindTrackImpl {
     private static final long serialVersionUID = -3014653185579457125L;
@@ -13,7 +15,7 @@ public class LegMiddleWindTrackImpl extends CombinedWindTrackImpl {
     }
 
     @Override
-    protected LegMiddleWindAsNavigableSet createVirtualInternalRawFixes(TrackedRace trackedRace) {
-        return new LegMiddleWindAsNavigableSet(this, trackedRace, trackedLeg, /* resolutionInMilliseconds */ 1000l);
+    protected Position getDefaultPosition(TimePoint at) {
+        return trackedLeg.getMiddleOfLeg(at);
     }
 }

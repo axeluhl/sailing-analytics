@@ -302,6 +302,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String details();
     String noGroupSelected();
     String combinedWindSourceTypeName();
+    String legMiddleWindSourceTypeName();
     String courseBasedWindSourceTypeName();
     String trackBasedEstimationWindSourceTypeName();
     String windSensorWindSourceTypeName();
@@ -925,6 +926,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showWindSpeedSeriesTooltip();
     String showWindDirectionSeriesTooltip();
     String combinedWindSourceTypeTooltip();
+    String legMiddleWindSourceTypeTooltip();
     String courseBasedWindSourceTypeTooltip();
     String trackBasedEstimationWindSourceTypeTooltip();
     String windSensorWindSourceTypeTooltip();
