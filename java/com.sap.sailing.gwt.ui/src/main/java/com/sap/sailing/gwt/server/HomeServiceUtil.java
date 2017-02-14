@@ -372,11 +372,10 @@ public final class HomeServiceUtil {
         return dto;
     }
     
-    public static EventListEventDTO convertToEventListDTO(EventBase event, URL baseURL, boolean onRemoteServer, RacingEventService service) {
+    public static EventListEventDTO convertToEventListDTO(EventBase event, URL baseURL, boolean onRemoteServer,
+            RacingEventService service) {
         EventListEventDTO dto = new EventListEventDTO();
-        mapToMetadataDTO(event, dto, service);
-        dto.setBaseURL(baseURL.toString());
-        dto.setOnRemoteServer(onRemoteServer);
+        mapToLinkAndMetadataDTO(event, dto, baseURL, onRemoteServer, service);
         return dto;
     }
     
