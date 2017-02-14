@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -152,11 +153,11 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
     public LeaderboardSettings() {
     }
     
-    public LeaderboardSettings(List<String> namesOfRaceColumnsToShow) {
+    public LeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow) {
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
     }
     
-    public LeaderboardSettings(List<String> namesOfRaceColumnsToShow, Long delayBetweenAutoAdvancesInMilliseconds) {
+    public LeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow, Long delayBetweenAutoAdvancesInMilliseconds) {
         this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
         this.delayBetweenAutoAdvancesInMilliseconds.setValue(delayBetweenAutoAdvancesInMilliseconds);
     }
@@ -464,4 +465,10 @@ public class LeaderboardSettings extends AbstractGenericSerializableSettings {
         return leaderboardSettings;
     }
     
+    public static LeaderboardSettings createDefaultSettings(Collection<String> defaultNamesOfRaceColumnsToShow) {
+        LeaderboardSettings leaderboardSettings = new LeaderboardSettings();
+        leaderboardSettings.namesOfRaceColumnsToShow.setDefaultValues(defaultNamesOfRaceColumnsToShow);
+        
+        return leaderboardSettings;
+    }
 }

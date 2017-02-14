@@ -2280,6 +2280,9 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
+                            currentSettings = LeaderboardSettingsFactory.getInstance()
+                                    .createNewSettingsWithCustomDefaults(
+                                            new LeaderboardSettings(result.getNamesOfRaceColumns()), currentSettings);
                             try {
                                 updateLeaderboard(result);
                                 // reapply, as columns might have changed
@@ -3124,7 +3127,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
 
     @Override
     public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return new LeaderboardSettingsDialogComponent(getSettings(), leaderboard.getRaceList(), stringMessages);
+        return new LeaderboardSettingsDialogComponent(getSettings(), leaderboard.getNamesOfRaceColumns(), stringMessages);
     }
 
     @Override 

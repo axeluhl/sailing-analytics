@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.DebugIdHelper;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -32,8 +31,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class LeaderboardSettingsDialogComponent implements SettingsDialogComponent<LeaderboardSettings> {
-    private final Map<RaceColumnDTO, CheckBox> raceColumnCheckboxes;
-    private final List<RaceColumnDTO> raceAllRaceColumns;
+    private final Map<String, CheckBox> raceColumnCheckboxes;
+    private final List<String> raceAllRaceColumnNames;
     private final Map<DetailType, CheckBox> maneuverDetailCheckboxes;
     private final Map<DetailType, CheckBox> legDetailCheckboxes;
     private final Map<DetailType, CheckBox> raceDetailCheckboxes;
@@ -51,14 +50,14 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
     private CheckBox showCompetitorFullNameColumnCheckBox;
     private LeaderboardSettings initialSettings;
 
-    public LeaderboardSettingsDialogComponent(LeaderboardSettings initialSettings, List<RaceColumnDTO> allRaceColumns, StringMessages stringMessages) {
+    public LeaderboardSettingsDialogComponent(LeaderboardSettings initialSettings, List<String> allRaceColumnNames, StringMessages stringMessages) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
-        this.raceAllRaceColumns = allRaceColumns;
+        this.raceAllRaceColumnNames = allRaceColumnNames;
         this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
         
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
-        raceColumnCheckboxes = new LinkedHashMap<RaceColumnDTO, CheckBox>();
+        raceColumnCheckboxes = new LinkedHashMap<>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         overallDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
@@ -235,7 +234,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         selectedRacesPanel.add(selectedRacesContent);
         
         // Attention: We need to consider that there are regattas with more than 30 races
-        int racesCount = raceAllRaceColumns.size();
+        int racesCount = raceAllRaceColumnNames.size();
         if (racesCount > 0) {
             final FlowPanel explicitRaceSelectionContent = new FlowPanel();
             explicitRaceSelectionContent.ensureDebugId("ExplicitRaceSelectionPanel");
@@ -270,10 +269,10 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
             }
             Grid grid = new Grid(rowCount, maxRacesPerRow);
             List<String> namesOfRaceColumnsToShow = initialSettings.getNamesOfRaceColumnsToShow();
-            for (RaceColumnDTO raceColumnDTO : raceAllRaceColumns) {
-                CheckBox checkbox = createCheckbox(dialog, raceColumnDTO.getRaceColumnName(),
-                        Util.contains(namesOfRaceColumnsToShow, raceColumnDTO.getRaceColumnName()), null);
-                raceColumnCheckboxes.put(raceColumnDTO, checkbox);
+            for (String raceColumnName : raceAllRaceColumnNames) {
+                CheckBox checkbox = createCheckbox(dialog, raceColumnName,
+                        Util.contains(namesOfRaceColumnsToShow, raceColumnName), null);
+                raceColumnCheckboxes.put(raceColumnName, checkbox);
                 grid.setWidget(rowIndex, columnIndex++, checkbox);
                 if(columnIndex == maxRacesPerRow) {
                     rowIndex++;
@@ -368,9 +367,9 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         List<String> namesOfRaceColumnsToShow = null;
         if (activeRaceColumnSelectionStrategy == RaceColumnSelectionStrategies.EXPLICIT) {
             namesOfRaceColumnsToShow = new ArrayList<String>();
-            for (Map.Entry<RaceColumnDTO, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
+            for (Map.Entry<String, CheckBox> entry : raceColumnCheckboxes.entrySet()) {
                 if (entry.getValue().getValue()) {
-                    namesOfRaceColumnsToShow.add(entry.getKey().getRaceColumnName());
+                    namesOfRaceColumnsToShow.add(entry.getKey());
                 }
             }
         }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
@@ -13,26 +12,22 @@ public class LeaderboardPanelLifecycle
     protected static final String ID = "LeaderboardPanel";
 
     private final StringMessages stringMessages;
-    private final List<RaceColumnDTO> raceList;
+    private final List<String> namesOfRaceColumns;
 
     public LeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        this.raceList = leaderboard != null ? leaderboard.getRaceList() : new ArrayList<RaceColumnDTO>();
+        this.namesOfRaceColumns = leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>();
     }
 
     @Override
     public LeaderboardSettingsDialogComponent getSettingsDialogComponent(LeaderboardSettings settings) {
-        return new LeaderboardSettingsDialogComponent(settings, raceList, stringMessages);
+        return new LeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages);
     }
 
     @Override
     public LeaderboardSettings createDefaultSettings() {
-        List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
-        for (RaceColumnDTO raceColumn : raceList) {
-            namesOfRaceColumnsToShow.add(raceColumn.getName());
-        }
         return LeaderboardSettingsFactory.getInstance()
-                .createNewSettingsWithCustomDefaults(new LeaderboardSettings(namesOfRaceColumnsToShow, 1000L));
+                .createNewSettingsWithCustomDefaults(new LeaderboardSettings(namesOfRaceColumns, 1000L));
     }
 
     @Override
