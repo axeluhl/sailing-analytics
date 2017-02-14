@@ -27,7 +27,7 @@ public class CompositeSettings extends AbstractSettings implements SettingsMap {
     }
     
     @SuppressWarnings("unchecked")
-    public <C extends ComponentLifecycle<S, ?>, S extends Settings> S findSettingsByComponentId(String componentId) {
+    public <S extends Settings> S findSettingsByComponentId(String componentId) {
         return (S) settingsPerComponentId.get(componentId);
     }
 }
