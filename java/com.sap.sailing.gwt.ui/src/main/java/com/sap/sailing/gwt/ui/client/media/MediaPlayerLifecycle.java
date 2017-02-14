@@ -28,7 +28,7 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerSetti
 
     @Override
     public String getComponentId() {
-        return "MediaPlayer";
+        return "mpl";
     }
 
     @Override

@@ -29,7 +29,7 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
 
     @Override
     public String getComponentId() {
-        return "MultiCompetitorRaceChart";
+        return "mcrcl";
     }
 
     @Override

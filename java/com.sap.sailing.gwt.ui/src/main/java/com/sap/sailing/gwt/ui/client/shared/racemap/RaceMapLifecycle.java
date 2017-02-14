@@ -30,7 +30,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings, Rac
 
     @Override
     public String getComponentId() {
-        return "RaceMap";
+        return "rml";
     }
 
     @Override

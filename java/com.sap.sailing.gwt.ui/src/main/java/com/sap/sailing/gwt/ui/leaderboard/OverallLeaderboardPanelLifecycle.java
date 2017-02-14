@@ -5,7 +5,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class OverallLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
 
-    protected static final String ID = "OverallLeaderboardPanel";
+    protected static final String ID = "olpl";
 
     public OverallLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         super(leaderboard, stringMessages);

@@ -54,7 +54,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
 
     @Override
     public String getComponentId() {
-        return "LeaderboardWithHeader";
+        return "lbwhpl";
     }
 
     @Override

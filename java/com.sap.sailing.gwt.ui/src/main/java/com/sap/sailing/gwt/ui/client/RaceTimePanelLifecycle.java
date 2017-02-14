@@ -27,7 +27,7 @@ public class RaceTimePanelLifecycle implements
 
     @Override
     public String getComponentId() {
-        return "RaceTimePanel";
+        return "rtpl";
     }
 
     @Override

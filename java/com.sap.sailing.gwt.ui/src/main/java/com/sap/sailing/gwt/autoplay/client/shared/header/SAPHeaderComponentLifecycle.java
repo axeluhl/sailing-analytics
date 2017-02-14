@@ -34,7 +34,7 @@ public class SAPHeaderComponentLifecycle implements ComponentLifecycle<SAPHeader
     
     @Override
     public String getComponentId() {
-        return "SAPHeaderComponent";
+        return "shcl";
     }
 
     @Override

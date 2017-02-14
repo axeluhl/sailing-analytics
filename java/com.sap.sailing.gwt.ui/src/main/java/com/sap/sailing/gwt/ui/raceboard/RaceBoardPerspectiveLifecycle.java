@@ -90,7 +90,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
 
     @Override
     public String getComponentId() {
-        return "RaceBoard";
+        return "rbpl";
     }
 
     @Override

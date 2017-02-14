@@ -32,7 +32,7 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings,
 
     @Override
     public String getComponentId() {
-        return "WindChart";
+        return "wcl";
     }
 
     @Override
