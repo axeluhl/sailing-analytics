@@ -26,9 +26,9 @@ public class LeaderboardContextSettings extends AbstractGenericSerializableSetti
 
     @Override
     protected void addChildSettings() {
-        eventId = new UUIDSetting(LeaderboardUrlSettings.PARAM_EVENT_ID, this);
+        eventId = new UUIDSetting("eventId", this);
         leaderboardName = new StringSetting("name", this);
-        leaderboardGroupName = new StringSetting(LeaderboardUrlSettings.PARAM_LEADERBOARD_GROUP_NAME, this);
+        leaderboardGroupName = new StringSetting("leaderboardGroupName", this);
         displayName = new StringSetting("displayName", this);
         raceName = new StringSetting(LeaderboardUrlSettings.PARAM_RACE_NAME, this);
         regattaName = new StringSetting(LeaderboardUrlSettings.PARAM_REGATTA_NAME, this);
