@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChartSettings;
@@ -267,7 +268,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         final LeaderboardContextSettings leaderboardContextSettings = new LeaderboardContextSettings(leaderboard.name,
                 leaderboard.getDisplayName());
         final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
-                "/gwt/Leaderboard.html", leaderboardContextSettings);
+                EntryPointLinkFactory.LEADERBOARD_PATH, leaderboardContextSettings);
         new SettingsDialogForLinkSharing<>(linkWithSettingsGenerator, lifeCycle, stringmessages)
                 .show();
     }

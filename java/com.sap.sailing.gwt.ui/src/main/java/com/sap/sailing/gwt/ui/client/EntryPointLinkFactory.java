@@ -6,6 +6,8 @@ import java.util.Map;
 import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
 
 public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
+    public static final String LEADERBOARD_PATH = "/gwt/Leaderboard.html";
+
     public static String createRaceBoardLink(Map<String, String> parameters) {
         return createEntryPointLink("/gwt/RaceBoard.html", parameters);
     }
@@ -15,7 +17,7 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     }
 
     public static String createLeaderboardLink(Map<String, String> parameters) {
-        return createEntryPointLink("/gwt/Leaderboard.html", parameters);
+        return createEntryPointLink(LEADERBOARD_PATH, parameters);
     }
     
     public static String createLeaderboardEditingLink(Map<String, String> parameters) {
