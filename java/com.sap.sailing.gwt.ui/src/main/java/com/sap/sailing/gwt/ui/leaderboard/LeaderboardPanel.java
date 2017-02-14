@@ -418,8 +418,19 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         this.initialCompetitorFilterHasBeenApplied = !autoApplyTopNFilter;
         this.showCompetitorFilterStatus = showCompetitorFilterStatus;
         this.enableSyncedScroller = enableSyncScroller;
+        this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
+        this.timer = timer;
         overallDetailColumnMap = createOverallDetailColumnMap();
         raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+
+        if (settings.getLegDetailsToShow() != null) {
+            selectedLegDetails.addAll(settings.getLegDetailsToShow());
+        }
+        if (settings.getOverallDetailsToShow() != null) {
+            selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
+        }
+        timer.addPlayStateListener(this);
+        timer.addTimeListener(this);
 
         switch (settings.getActiveRaceColumnSelectionStrategy()) {
         case EXPLICIT:
@@ -433,17 +444,6 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
             setRaceColumnSelectionToLastNStrategy(settings.getNumberOfLastRacesToShow());
             break;
         }
-
-        if (settings.getLegDetailsToShow() != null) {
-            selectedLegDetails.addAll(settings.getLegDetailsToShow());
-        }
-        if (settings.getOverallDetailsToShow() != null) {
-            selectedOverallDetailColumns.addAll(settings.getOverallDetailsToShow());
-        }
-        this.autoExpandLastRaceColumn = autoExpandLastRaceColumn;
-        this.timer = timer;
-        timer.addPlayStateListener(this);
-        timer.addTimeListener(this);
 
         totalRankColumn = new TotalRankColumn();
         leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(/* pageSize */10000,
