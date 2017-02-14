@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
+import com.sap.sse.common.settings.generic.StringSetting;
 
 public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 8978956250485028963L;
@@ -12,6 +13,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     private transient BooleanSetting showCharts;
     private transient BooleanSetting showOverallLeaderboard;
     private transient BooleanSetting showSeriesLeaderboards;
+    private transient StringSetting zoomTo;
     
     LeaderboardPerspectiveOwnSettings() {
 
@@ -35,6 +37,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
         showCharts = new BooleanSetting(LeaderboardUrlSettings.PARAM_SHOW_CHARTS, this, false);
         showOverallLeaderboard = new BooleanSetting(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_LEADERBOARD, this, false);
         showSeriesLeaderboards = new BooleanSetting(LeaderboardUrlSettings.PARAM_SHOW_SERIES_LEADERBOARDS, this, false);
+        zoomTo = new StringSetting(LeaderboardUrlSettings.PARAM_ZOOM_TO, this, "1");
     }
     public boolean isShowRaceDetails() {
         return showRaceDetails.getValue();
@@ -54,5 +57,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     public boolean isShowSeriesLeaderboards() {
         return showSeriesLeaderboards.getValue();
     }
-    
+    public String getZoomTo() {
+        return zoomTo.getValue();
+    }
 }
