@@ -40,7 +40,7 @@ public abstract class AbstractParallelAggregationProcessor<InputType, Aggregated
 
 
     /**
-     * Method to handle the element. This method is only called in a way, that is thread safe, so
+     * Method to handle the element. This method is only called in a way that is thread safe so
      * that multiple threads can't corrupt the data.
      */
     protected abstract void handleElement(InputType element);

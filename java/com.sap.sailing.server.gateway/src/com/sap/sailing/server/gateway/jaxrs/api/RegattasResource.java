@@ -49,19 +49,25 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.jaxrs.RoundingUtil;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.GateJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.AbstractTrackedRaceDataJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithChangingBoatJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DefaultWindTrackJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.DistanceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.GPSFixJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuverJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.ManeuversJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.MarkPassingsJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
@@ -70,12 +76,14 @@ import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SeriesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TargetTimeInfoSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.TrackedRaceJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.WindJsonSerializer;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.util.RoundingUtil;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 
 @Path("/v1/regattas")
@@ -753,11 +761,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 from = Util.getLatestOfTimePoints(from, trackedRace.getStartOfTracking());
                 to = Util.getEarliestOfTimePoints(to, Util.getEarliestOfTimePoints(trackedRace.getEndOfTracking(), trackedRace.getTimePointOfNewestEvent()));
                 TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(
-                        new DefaultWindTrackJsonSerializer(/* maxNumberOfFixes */ 10000));
-                serializer.setWindSource(windSource);
-                serializer.setWindSourceId(windSourceId);
-                serializer.setFromTime(from);
-                serializer.setToTime(to);
+                        new DefaultWindTrackJsonSerializer(/* maxNumberOfFixes */ 10000), windSource, windSourceId, from, to);
 
                 JSONObject jsonWindTracks = serializer.serialize(trackedRace);
                 String json = jsonWindTracks.toJSONString();
@@ -827,7 +831,35 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                MarkPassingsJsonSerializer serializer = new MarkPassingsJsonSerializer();
+                AbstractTrackedRaceDataJsonSerializer serializer = new MarkPassingsJsonSerializer();
+                JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
+                String json = jsonMarkPassings.toJSONString();
+                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/maneuvers")
+    public Response getManeuvers(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
+                    .build();
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.").type(MediaType.TEXT_PLAIN)
+                        .build();
+            } else {
+                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
+                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(new CompetitorJsonSerializer(),
+                        new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
                 return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();

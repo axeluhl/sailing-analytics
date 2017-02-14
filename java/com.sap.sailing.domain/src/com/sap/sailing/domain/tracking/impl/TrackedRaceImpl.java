@@ -2840,7 +2840,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            <code>competitor</code>, reduced to the interval requested, will be returned.
      */
     @Override
-    public List<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
+    public Iterable<Maneuver> getManeuvers(Competitor competitor, TimePoint from, TimePoint to, boolean waitForLatest) {
         com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>> allManeuvers = maneuverCache.get(competitor, waitForLatest);
         List<Maneuver> result;
         if (allManeuvers == null) {
@@ -4004,7 +4004,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         LockUtil.lockForWrite(sensorTracksLock);
         try {
             TrackT result = getTrackInternal(key);
-            if (result == null) {
+            if (result == null && tracks.containsKey(competitor)) {
+                // A track is only added if the given Competitor is known to participate in this race
                 result = newTrackFactory.get();
                 addSensorTrackInternal(key, result);
             }

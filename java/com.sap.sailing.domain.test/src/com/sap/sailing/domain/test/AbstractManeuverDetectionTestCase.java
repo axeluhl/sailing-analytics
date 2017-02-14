@@ -41,7 +41,7 @@ public abstract class AbstractManeuverDetectionTestCase extends OnlineTracTracBa
      * @param toleranceInMillis
      *            The tolerance of time, the maneuver should have happened in milliseconds.
      */
-    protected void assertManeuver(List<Maneuver> maneuverList, ManeuverType maneuverType,
+    protected void assertManeuver(Iterable<Maneuver> maneuverList, ManeuverType maneuverType,
             TimePoint maneuverTimePoint, int toleranceInMillis) {
         for (Maneuver maneuver : maneuverList) {
             assertNotNull(maneuver.getTimePoint());

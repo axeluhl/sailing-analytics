@@ -20,6 +20,9 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
     
     @Dimension(messageKey="Tack", ordinal=13)
     Tack getTack();
+    
+    @Dimension(messageKey="ToSide")
+    NauticalSide getToSide();
 
     @Connector(messageKey="SpeedBefore", ordinal=0)
     SpeedWithBearing getSpeedBefore();
@@ -28,14 +31,10 @@ public interface HasManeuverContext extends HasWindOnTrackedLeg, HasManeuver, Ha
     
     @Statistic(messageKey="DirectionChange", resultDecimals=2, ordinal=2)
     Double getDirectionChangeInDegrees();
-
-    @Statistic(messageKey="AbsoluteDirectionChange", resultDecimals=2, ordinal=2)
+    @Statistic(messageKey="AbsoluteDirectionChange", resultDecimals=2, ordinal=3)
     Double getAbsoluteDirectionChangeInDegrees();
     
-    @Dimension(messageKey="ToSide")
-    NauticalSide getToSide();
-    
-    @Statistic(messageKey="ManeuverLoss", resultDecimals=0, ordinal=3)
+    @Statistic(messageKey="ManeuverLoss", resultDecimals=0, ordinal=4)
     Distance getManeuverLoss();
 
 }

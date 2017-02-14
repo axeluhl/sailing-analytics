@@ -738,7 +738,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
             }
             if (intervalStart == null) {
                 if (beforeFixIter.hasNext()) {
-                    // No before fix within half averaging interval, but there is one further away; is its next neighbour even further away?
+                    // No before fix within half averaging interval, but there is one further away; is its next neighbor even further away?
                     // If so, or no more neighbours are found, it's affected and marks the invalidation interval start; otherwise, fix'
                     // time point is the invalidation interval start
                     TimePoint intervalStartCandidate = beforeFixIter.next().getTimePoint();
@@ -783,7 +783,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends MappedTra
         } finally {
             unlockAfterRead();
         }
-        return new TimeRangeImpl(intervalStart, intervalEnd);
+        return new TimeRangeImpl(intervalStart, intervalEnd, /* inclusive */ true);
     }
     
     protected FixType createDummyGPSFix(TimePoint at) {
