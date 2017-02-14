@@ -208,12 +208,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             mainPanel.addNorth(header, 75);
         }
 
-
-        ScrollPanel contentScrollPanel = new ScrollPanel();
-        
-        mainPanel.add(contentScrollPanel);
-        
-        contentScrollPanel.setWidget(leaderboardViewer);
+        mainPanel.add(new ScrollPanel(leaderboardViewer));
     }
 
     protected void configureWithSettings(
