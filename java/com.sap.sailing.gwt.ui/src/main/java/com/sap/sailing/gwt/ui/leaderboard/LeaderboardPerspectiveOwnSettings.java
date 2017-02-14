@@ -20,13 +20,14 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     }
 
     LeaderboardPerspectiveOwnSettings(boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn,
-            boolean showCharts, boolean showOverallLeaderboard, boolean showSeriesLeaderboards) {
+            boolean showCharts, boolean showOverallLeaderboard, boolean showSeriesLeaderboards, String zoomTo) {
         this.showRaceDetails.setValue(showRaceDetails);
         this.hideToolbar.setValue(hideToolbar);
         this.autoExpandLastRaceColumn.setValue(autoExpandLastRaceColumn);
         this.showCharts.setValue(showCharts);
         this.showOverallLeaderboard.setValue(showOverallLeaderboard);
         this.showSeriesLeaderboards.setValue(showSeriesLeaderboards);
+        this.zoomTo.setValue(zoomTo);
     }
 
     @Override

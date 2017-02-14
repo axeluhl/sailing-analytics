@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -19,6 +20,7 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
     private CheckBox showCharts;
     private CheckBox showOverallLeaderboard;
     private CheckBox showSeriesLeaderboards;
+    private TextBox zoomTo;
 
     public LeaderboardPerspectiveOwnSettingsDialogComponent(LeaderboardPerspectiveOwnSettings settings) {
         this.initialSettings = settings;
@@ -54,6 +56,9 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
         showSeriesLeaderboards.setValue(initialSettings.isShowSeriesLeaderboards());
         vp.add(showSeriesLeaderboards);
 
+        zoomTo = dialog.createTextBox(stringMessages.zoom());
+        zoomTo.setValue(initialSettings.getZoomTo());
+        vp.add(zoomTo);
         return vp;
     }
 
@@ -61,7 +66,7 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
     public LeaderboardPerspectiveOwnSettings getResult() {
         return new LeaderboardPerspectiveOwnSettings(showRaceDetails.getValue(), hideToolbar.getValue(),
                 autoExpandLastRaceColumn.getValue(), showCharts.getValue(), showOverallLeaderboard.getValue(),
-                showSeriesLeaderboards.getValue());
+                showSeriesLeaderboards.getValue(), zoomTo.getValue());
     }
 
     @Override

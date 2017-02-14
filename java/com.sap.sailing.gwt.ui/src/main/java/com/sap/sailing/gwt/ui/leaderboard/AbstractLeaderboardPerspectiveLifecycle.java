@@ -21,7 +21,7 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
     public LeaderboardPerspectiveOwnSettings clonePerspectiveOwnSettings(LeaderboardPerspectiveOwnSettings settings) {
         return new LeaderboardPerspectiveOwnSettings(settings.isShowRaceDetails(), settings.isHideToolbar(),
                 settings.isAutoExpandLastRaceColumn(), settings.isShowCharts(), settings.isShowOverallLeaderboard(),
-                settings.isShowSeriesLeaderboards());
+                settings.isShowSeriesLeaderboards(), settings.getZoomTo());
     }
 
     @Override
@@ -34,7 +34,7 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
     protected LeaderboardPerspectiveOwnSettings extractOwnGlobalSettings(LeaderboardPerspectiveOwnSettings settings) {
         return new LeaderboardPerspectiveOwnSettings(settings.isShowRaceDetails(), settings.isHideToolbar(),
                 settings.isAutoExpandLastRaceColumn(), settings.isShowCharts(), settings.isShowOverallLeaderboard(),
-                settings.isShowSeriesLeaderboards());
+                settings.isShowSeriesLeaderboards(), settings.getZoomTo());
     }
 
     @Override
