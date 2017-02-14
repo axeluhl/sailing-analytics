@@ -112,7 +112,7 @@ public class AbstractComponentContextWithSettingsStorage<L extends ComponentLife
             public void onSuccess(S result) {
                 currentDefaultSettings = result;
                 if (onInitialSettingsLoaded != null) {
-                    onInitialSettingsLoaded.onSuccess(rootLifecycle.cloneSettings(result));
+                    onInitialSettingsLoaded.onSuccess(result);
                 }
                 SettingsReceiverCallback<S> callback;
                 while ((callback = settingsReceiverCallbacks.poll()) != null) {
