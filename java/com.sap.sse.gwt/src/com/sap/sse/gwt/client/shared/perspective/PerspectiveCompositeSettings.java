@@ -23,8 +23,6 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
  *            is assigned to which component, or how the perspective displays itself, such as embedded or not
  */
 public class PerspectiveCompositeSettings<PS extends Settings> extends CompositeSettings {
-    private static final String OWN_SETTINGS_KEY = "_";
-    
     private final PS perspectiveOwnSettings;
     
     public PerspectiveCompositeSettings(PS perspectiveOwnSettings, Map<String, Settings> settingsPerComponent) {
@@ -60,7 +58,7 @@ public class PerspectiveCompositeSettings<PS extends Settings> extends Composite
             allSettings = super.getSettingsPerComponentId();
         } else {
             allSettings = new HashMap<>(super.getSettingsPerComponentId());
-            allSettings.put(OWN_SETTINGS_KEY, perspectiveOwnSettings);
+            allSettings.put(null, perspectiveOwnSettings);
         }
         return allSettings;
     }

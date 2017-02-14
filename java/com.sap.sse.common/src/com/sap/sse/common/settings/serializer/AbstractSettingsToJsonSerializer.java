@@ -80,32 +80,49 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     
     public OBJECT serialize(SettingsMap settingsMap) {
         final OBJECT jsonObject = newOBJECT();
+        serializeToObject(settingsMap, jsonObject);
+        return jsonObject;
+    }
+
+    private void serializeToObject(SettingsMap settingsMap, final OBJECT jsonObject) {
         for (Map.Entry<String, Settings> entry : settingsMap.getSettingsPerComponentId().entrySet()) {
+            String key = entry.getKey();
             Settings settings = entry.getValue();
-            final Object serializedObject;
-            if(settings instanceof SettingsMap) {
-                serializedObject = serialize((SettingsMap)settings);
-            } else if(settings instanceof GenericSerializableSettings) {
-                serializedObject = serialize((GenericSerializableSettings)settings);
+            if(key == null) {
+                if(settings instanceof SettingsMap) {
+                    serializeToObject((SettingsMap)settings, jsonObject);
+                } else if(settings instanceof GenericSerializableSettings) {
+                    serializeToObject((GenericSerializableSettings)settings, jsonObject);
+                }
             } else {
-                serializedObject = null;
-            }
-            if(serializedObject != null) {
-                set(jsonObject, entry.getKey().toString(), serializedObject);
+                final OBJECT serializedObject;
+                if(settings instanceof SettingsMap) {
+                    serializedObject = serialize((SettingsMap)settings);
+                } else if(settings instanceof GenericSerializableSettings) {
+                    serializedObject = serialize((GenericSerializableSettings)settings);
+                } else {
+                    serializedObject = null;
+                }
+                if(serializedObject != null) {
+                    set(jsonObject, key.toString(), serializedObject);
+                }
             }
         }
-        return jsonObject;
     }
 
     public OBJECT serialize(GenericSerializableSettings settings) {
         final OBJECT jsonObject = newOBJECT();
+        serializeToObject(settings, jsonObject);
+        return jsonObject;
+    }
+
+    private void serializeToObject(GenericSerializableSettings settings, final OBJECT jsonObject) {
         for (Map.Entry<String, Setting> entry : settings.getChildSettings().entrySet()) {
             Setting setting = entry.getValue();
             if (!setting.isDefaultValue()) {
                 set(jsonObject, entry.getKey(), serialize(setting));
             }
         }
-        return jsonObject;
     }
 
     private Object serialize(Setting setting) {
@@ -146,9 +163,15 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     public <T extends SettingsMap> T deserialize(T settingsMap, OBJECT json) {
         if (json != null) {
             for (Map.Entry<String, Settings> entry : settingsMap.getSettingsPerComponentId().entrySet()) {
-                String key = entry.getKey().toString();
-                if(hasProperty(json, key)) {
-                    Settings settings = entry.getValue();
+                String key = entry.getKey();
+                Settings settings = entry.getValue();
+                if(key == null) {
+                    if(settings instanceof SettingsMap) {
+                        deserialize((SettingsMap)settings, json);
+                    } else if(settings instanceof GenericSerializableSettings) {
+                        deserializeObject((GenericSerializableSettings)settings, json);
+                    }
+                } else if(hasProperty(json, key)) {
                     Object serializedObject = get(json, key);
                     if(settings instanceof SettingsMap) {
                         @SuppressWarnings("unchecked")

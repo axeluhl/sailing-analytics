@@ -27,7 +27,6 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
     
     @Test
     public void testSettingsMapWithMultipleSerializableSettings() throws Exception {
-        
         final GenericSerializableSettings settingsValues1 = createTestSettingsWithValues();
         final GenericSerializableSettings settingsValues2 = createTestSettingsWithValues2();
         Map<String, Settings> settings = new HashMap<>();
@@ -39,6 +38,24 @@ public abstract class AbstractSettingsSerializationTestWithSettingsMap<SOT> exte
         final SettingsMap deserializedSettingsMap = serializeAndDeserialize(settingsMapToSave);
         Settings deserializedSettingsValues1 = deserializedSettingsMap.getSettingsPerComponentId().get("aaa");
         Settings deserializedSettingsValues2 = deserializedSettingsMap.getSettingsPerComponentId().get("bbb");
+        assertEquals(deserializedSettingsValues1, createTestSettingsWithValues());
+        assertEquals(deserializedSettingsValues2, createTestSettingsWithValues2());
+        assertEquals(deserializedSettingsMap.getSettingsPerComponentId().size(), 2);
+    }
+    
+    @Test
+    public void testSettingsMapWithNullKey() throws Exception {
+        final GenericSerializableSettings settingsValues1 = createTestSettingsWithValues();
+        final GenericSerializableSettings settingsValues2 = createTestSettingsWithValues2();
+        Map<String, Settings> settings = new HashMap<>();
+        settings.put("aaa", settingsValues1);
+        settings.put(null, settingsValues2);
+        
+        SettingsMap settingsMapToSave = new SettingsMapImpl(settings);
+        
+        final SettingsMap deserializedSettingsMap = serializeAndDeserialize(settingsMapToSave);
+        Settings deserializedSettingsValues1 = deserializedSettingsMap.getSettingsPerComponentId().get("aaa");
+        Settings deserializedSettingsValues2 = deserializedSettingsMap.getSettingsPerComponentId().get(null);
         assertEquals(deserializedSettingsValues1, createTestSettingsWithValues());
         assertEquals(deserializedSettingsValues2, createTestSettingsWithValues2());
         assertEquals(deserializedSettingsMap.getSettingsPerComponentId().size(), 2);
