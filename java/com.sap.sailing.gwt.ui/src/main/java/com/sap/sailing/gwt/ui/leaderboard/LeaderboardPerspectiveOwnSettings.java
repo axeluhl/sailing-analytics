@@ -14,6 +14,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     private transient BooleanSetting showOverallLeaderboard;
     private transient BooleanSetting showSeriesLeaderboards;
     private transient StringSetting zoomTo;
+    private transient BooleanSetting embedded;
     
     LeaderboardPerspectiveOwnSettings() {
 
@@ -39,6 +40,7 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
         showOverallLeaderboard = new BooleanSetting(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_LEADERBOARD, this, false);
         showSeriesLeaderboards = new BooleanSetting(LeaderboardUrlSettings.PARAM_SHOW_SERIES_LEADERBOARDS, this, false);
         zoomTo = new StringSetting(LeaderboardUrlSettings.PARAM_ZOOM_TO, this, "1");
+        embedded = new BooleanSetting(LeaderboardUrlSettings.PARAM_EMBEDDED, this, false);
     }
     public boolean isShowRaceDetails() {
         return showRaceDetails.getValue();
@@ -60,5 +62,8 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     }
     public String getZoomTo() {
         return zoomTo.getValue();
+    }
+    public boolean getEmbedded() {
+        return embedded.getValue();
     }
 }

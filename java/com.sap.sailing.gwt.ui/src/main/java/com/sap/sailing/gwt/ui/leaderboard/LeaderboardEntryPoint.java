@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -71,7 +72,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                                     && leaderboardName.equals(leaderboardNameAndType.getA())) {
                                                 Window.setTitle(leaderboardName);
                                                 leaderboardType = leaderboardNameAndType.getB();
-                                                createUI(leaderboardContextSettings, event);
+                                                loadSettingsAndCreateUI(leaderboardContextSettings, event);
                                             } else {
                                                 RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                                             }
@@ -107,28 +108,10 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         }
     }
 
-    private void createUI(LeaderboardContextSettings leaderboardContextSettings, EventDTO event) {
-        DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
-        RootLayoutPanel.get().add(mainPanel);
-        if (!leaderboardContextSettings.getEmbedded()) {
-            // Hack to shorten the leaderboardName in case of overall leaderboards
-            String leaderboardDisplayName = leaderboardContextSettings.getDisplayName();
-            if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
-                leaderboardDisplayName = leaderboardName;
-            }
-            SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(leaderboardDisplayName);
-            new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
-            mainPanel.addNorth(header, 75);
-        }
-
-        final UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsManager = new UserSettingsStorageManager<>(
-                getUserService(), UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint"),
-                leaderboardName);
-
-
-        ScrollPanel contentScrollPanel = new ScrollPanel();
+    private void loadSettingsAndCreateUI(LeaderboardContextSettings leaderboardContextSettings, EventDTO event) {
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         final Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
+        
         String chartDetailParam = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_CHART_DETAIL,
                 null);
         final DetailType chartDetailType;
@@ -139,10 +122,12 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         } else {
             chartDetailType = leaderboardType.isMetaLeaderboard() ? DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
         }
-
         final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
 
+        final UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsManager = new UserSettingsStorageManager<>(
+                getUserService(), UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint"),
+                leaderboardName);
         if (leaderboardType.isMetaLeaderboard()) {
             // overall
 
@@ -162,7 +147,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
                                     timer, null, preselectedRace, leaderboardGroupName, leaderboardName,
                                     LeaderboardEntryPoint.this, getStringMessages(), userAgent, chartDetailType);
-                            contentScrollPanel.setWidget(leaderboardViewer);
+                            createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextSettings);
                         }
 
                         @Override
@@ -190,7 +175,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
                                     timer, preselectedRace, leaderboardGroupName, leaderboardName,
                                     LeaderboardEntryPoint.this, getStringMessages(), userAgent, chartDetailType);
-                            contentScrollPanel.setWidget(leaderboardViewer);
+                            createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextSettings);
                         }
 
                         @Override
@@ -201,7 +186,31 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                         }
                     });
         }
+        
+    }
+    
+    private void createUi(Widget leaderboardViewer, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer, LeaderboardContextSettings leaderboardContextSettings) {
+        LeaderboardPerspectiveOwnSettings ownSettings = settings.getPerspectiveOwnSettings();
+        
+        DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+        RootLayoutPanel.get().add(mainPanel);
+        if (!ownSettings.getEmbedded()) {
+            // Hack to shorten the leaderboardName in case of overall leaderboards
+            String leaderboardDisplayName = leaderboardContextSettings.getDisplayName();
+            if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
+                leaderboardDisplayName = leaderboardName;
+            }
+            SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(leaderboardDisplayName);
+            new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+            mainPanel.addNorth(header, 75);
+        }
+
+
+        ScrollPanel contentScrollPanel = new ScrollPanel();
+        
         mainPanel.add(contentScrollPanel);
+        
+        contentScrollPanel.setWidget(leaderboardViewer);
     }
 
     protected void configureWithSettings(
