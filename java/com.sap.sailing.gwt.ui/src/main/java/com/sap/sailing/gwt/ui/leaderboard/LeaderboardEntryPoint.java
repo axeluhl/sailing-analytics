@@ -22,6 +22,8 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChartLifecycle;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -35,7 +37,6 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSet
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
-import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
@@ -112,16 +113,6 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         final Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         
-        String chartDetailParam = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_CHART_DETAIL,
-                null);
-        final DetailType chartDetailType;
-        if (chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam)
-                || DetailType.OVERALL_RANK.name().equals(chartDetailParam)
-                || DetailType.REGATTA_NET_POINTS_SUM.name().equals(chartDetailParam))) {
-            chartDetailType = DetailType.valueOf(chartDetailParam);
-        } else {
-            chartDetailType = leaderboardType.isMetaLeaderboard() ? DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
-        }
         final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
 
@@ -146,7 +137,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                             final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(null, context,
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
                                     timer, null, preselectedRace, leaderboardGroupName, leaderboardName,
-                                    LeaderboardEntryPoint.this, getStringMessages(), userAgent, chartDetailType);
+                                    LeaderboardEntryPoint.this, getStringMessages(), userAgent, getActualChartDetailType(defaultSettings));
                             createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextSettings);
                         }
 
@@ -174,7 +165,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                             final LeaderboardViewer leaderboardViewer = new LeaderboardViewer(null, context,
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
                                     timer, preselectedRace, leaderboardGroupName, leaderboardName,
-                                    LeaderboardEntryPoint.this, getStringMessages(), userAgent, chartDetailType);
+                                    LeaderboardEntryPoint.this, getStringMessages(), userAgent, getActualChartDetailType(defaultSettings));
                             createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextSettings);
                         }
 
@@ -187,6 +178,18 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                     });
         }
         
+    }
+    
+    private DetailType getActualChartDetailType(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings) {
+        MultiCompetitorLeaderboardChartSettings chartSettings = settings.findSettingsByComponentId(MultiCompetitorLeaderboardChartLifecycle.ID);
+        DetailType chartDetailType = chartSettings == null ? null : chartSettings.getDetailType();
+        
+        if (chartDetailType == DetailType.REGATTA_RANK
+                || chartDetailType == DetailType.OVERALL_RANK
+                || chartDetailType == DetailType.REGATTA_NET_POINTS_SUM) {
+            return chartDetailType;
+        }
+        return leaderboardType.isMetaLeaderboard() ? DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
     }
     
     private void createUi(Widget leaderboardViewer, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer, LeaderboardContextSettings leaderboardContextSettings) {
@@ -205,12 +208,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             mainPanel.addNorth(header, 75);
         }
 
-
-        ScrollPanel contentScrollPanel = new ScrollPanel();
-        
-        mainPanel.add(contentScrollPanel);
-        
-        contentScrollPanel.setWidget(leaderboardViewer);
+        mainPanel.add(new ScrollPanel(leaderboardViewer));
     }
 
     protected void configureWithSettings(
