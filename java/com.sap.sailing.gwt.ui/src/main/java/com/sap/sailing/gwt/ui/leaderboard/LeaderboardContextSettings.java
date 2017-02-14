@@ -15,7 +15,6 @@ public class LeaderboardContextSettings extends AbstractGenericSerializableSetti
     private transient StringSetting leaderboardName;
     private transient StringSetting leaderboardGroupName;
     private transient StringSetting displayName;
-    private transient StringSetting zoomTo;
     private transient StringSetting raceName;
     private transient StringSetting regattaName;
 
@@ -34,7 +33,6 @@ public class LeaderboardContextSettings extends AbstractGenericSerializableSetti
         leaderboardName = new StringSetting("name", this);
         leaderboardGroupName = new StringSetting(LeaderboardUrlSettings.PARAM_LEADERBOARD_GROUP_NAME, this);
         displayName = new StringSetting("displayName", this);
-        zoomTo = new StringSetting(LeaderboardUrlSettings.PARAM_ZOOM_TO, this);
         raceName = new StringSetting(LeaderboardUrlSettings.PARAM_RACE_NAME, this);
         regattaName = new StringSetting(LeaderboardUrlSettings.PARAM_REGATTA_NAME, this);
     }
@@ -52,9 +50,6 @@ public class LeaderboardContextSettings extends AbstractGenericSerializableSetti
     }
     public String getDisplayName() {
         return displayName.getValue();
-    }
-    public String getZoomTo() {
-        return zoomTo.getValue();
     }
     public String getRaceName() {
         return raceName.getValue();

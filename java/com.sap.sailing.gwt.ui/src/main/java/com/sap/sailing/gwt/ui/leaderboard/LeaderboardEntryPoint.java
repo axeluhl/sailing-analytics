@@ -109,14 +109,6 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         } else {
             RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
         }
-        final String zoomTo = leaderboardContextSettings.getZoomTo();
-        if (zoomTo != null) {
-            RootPanel.getBodyElement().setAttribute("style",
-                    "zoom: " + zoomTo + ";-moz-transform: scale(" + zoomTo
-                            + ");-moz-transform-origin: 0 0;-o-transform: scale(" + zoomTo
-                            + ");-o-transform-origin: 0 0;-webkit-transform: scale(" + zoomTo
-                            + ");-webkit-transform-origin: 0 0;");
-        }
     }
 
     private void createUI(LeaderboardContextSettings leaderboardContextSettings, EventDTO event) {
@@ -217,6 +209,16 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
 
     protected void configureWithSettings(
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer) {
+        LeaderboardPerspectiveOwnSettings perspectiveOwnSettings = settings.getPerspectiveOwnSettings();
+        final String zoomTo = perspectiveOwnSettings.getZoomTo();
+        if (zoomTo != null) {
+            RootPanel.getBodyElement().setAttribute("style",
+                    "zoom: " + zoomTo + ";-moz-transform: scale(" + zoomTo
+                            + ");-moz-transform-origin: 0 0;-o-transform: scale(" + zoomTo
+                            + ");-o-transform-origin: 0 0;-webkit-transform: scale(" + zoomTo
+                            + ");-webkit-transform-origin: 0 0;");
+        }
+        
         LeaderboardSettings leaderboardSettings = settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID);
         if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
             timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, goes "live" and "playing"
