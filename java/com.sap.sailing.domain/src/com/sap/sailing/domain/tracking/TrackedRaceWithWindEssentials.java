@@ -78,6 +78,9 @@ public abstract class TrackedRaceWithWindEssentials implements TrackedRace {
      * @param delayForWindEstimationCacheInvalidation
      *            if <code>-1</code> and the parameter is accessed, it will be replaced by
      *            {@link #getMillisecondsOverWhichToAverageWind()}/2
+     * 
+     * @return {@code null} in case the {@link WindSourceType#LEG_MIDDLE} type is requested for an
+     *         {@link WindSourceWithAdditionalID#getId() ID} that doesn't identify an existing leg
      */
     @Override
     public WindTrack getOrCreateWindTrack(WindSource windSource, long delayForWindEstimationCacheInvalidation) {
