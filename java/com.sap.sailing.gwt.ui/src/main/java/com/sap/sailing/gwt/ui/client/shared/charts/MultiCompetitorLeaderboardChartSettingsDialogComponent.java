@@ -19,11 +19,9 @@ public class MultiCompetitorLeaderboardChartSettingsDialogComponent implements S
     private ListBox chartTypeSelectionListBox;
     private final DetailType initialDetailType;
     private final List<DetailType> availableDetailsTypes;
-    private final StringMessages stringMessages;
 
-    public MultiCompetitorLeaderboardChartSettingsDialogComponent(MultiCompetitorLeaderboardChartSettings settings, StringMessages stringMessages) {
+    public MultiCompetitorLeaderboardChartSettingsDialogComponent(MultiCompetitorLeaderboardChartSettings settings) {
         this.initialDetailType = settings.getDetailType();
-        this.stringMessages = stringMessages;
 
         availableDetailsTypes = new ArrayList<DetailType>();
         availableDetailsTypes.add(DetailType.REGATTA_RANK);
@@ -46,7 +44,7 @@ public class MultiCompetitorLeaderboardChartSettingsDialogComponent implements S
         VerticalPanel mainPanel = new VerticalPanel();
         mainPanel.setSpacing(5);
 
-        Label chartSelectionLabel = new Label(stringMessages.chooseChart());
+        Label chartSelectionLabel = new Label(StringMessages.INSTANCE.chooseChart());
         mainPanel.add(chartSelectionLabel);
         chartTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
         chartTypeSelectionListBox.ensureDebugId("ChartTypeListBox");
