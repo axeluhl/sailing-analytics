@@ -75,7 +75,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         addChildComponent(leaderboardPanel);
         dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addNorth(sapHeader, SAP_HEADER_HEIGHT);
-        OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel);
+        OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel, stringMessages);
         leaderboardPanel.addLeaderboardUpdateListener(oldLeaderboard);
         currentContentWidget = oldLeaderboard.getContentWidget();
         if (getPerspectiveSettings().isLeaderboardAutoZoom()) {

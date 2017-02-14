@@ -177,7 +177,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
 
     private final ErrorReporter errorReporter;
 
-    private final StringMessages stringMessages;
+    public final StringMessages stringMessages;
 
     private final FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO> leaderboardTable;
 
@@ -582,10 +582,6 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
         refreshAndSettingsPanel.add(refreshPanel);
         toolbarPanel.add(refreshAndSettingsPanel, DockPanel.EAST);
         return toolbarPanel;
-    }
-
-    protected StringMessages getStringMessages() {
-        return stringMessages;
     }
 
     @Override
@@ -2975,7 +2971,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
     }
 
     protected CompetitorColumn createCompetitorColumn() {
-        return new CompetitorColumn(new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(),
+        return new CompetitorColumn(new CompetitorColumnBase<LeaderboardRowDTO>(this, stringMessages,
                 new CompetitorFetcher<LeaderboardRowDTO>() {
             @Override
             public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {

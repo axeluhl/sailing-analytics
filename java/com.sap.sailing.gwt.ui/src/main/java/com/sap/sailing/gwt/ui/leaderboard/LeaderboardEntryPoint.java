@@ -42,6 +42,7 @@ import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
 
+    private StringMessages stringmessages = StringMessages.INSTANCE;
     private String leaderboardName;
     private String leaderboardGroupName;
     private LeaderboardType leaderboardType;
@@ -123,7 +124,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             // overall
 
             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
-                    StringMessages.INSTANCE);
+                    stringmessages);
             AbstractComponentContextWithSettingsStorage<MetaLeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new AbstractComponentContextWithSettingsStorage<>(
                     rootComponentLifeCycle,
                     settingsManager);
@@ -251,20 +252,23 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
      * The implementation by and large uses the {@link LeaderboardSettingsDialogComponent}'s widget and adds to it a
      * checkbox for driving the {@link #LeaderboardUrlSettings.PARAM_EMBEDDED} field.
      * 
+     * @param stringmessages
+     * 
      * @see LeaderboardEntryPoint#getUrl(String, LeaderboardSettings, boolean)
      */
-    public static void openUrlConfigurationDialog(final AbstractLeaderboardDTO leaderboard) {
+    public static void openUrlConfigurationDialog(final AbstractLeaderboardDTO leaderboard,
+            StringMessages stringmessages) {
         final AbstractLeaderboardPerspectiveLifecycle lifeCycle;
         if (leaderboard.type.isMetaLeaderboard()) {
-            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(StringMessages.INSTANCE, leaderboard);
+            lifeCycle = new MetaLeaderboardPerspectiveLifecycle(stringmessages, leaderboard);
         } else {
-            lifeCycle = new LeaderboardPerspectiveLifecycle(StringMessages.INSTANCE, leaderboard);
+            lifeCycle = new LeaderboardPerspectiveLifecycle(stringmessages, leaderboard);
         }
         final LeaderboardContextSettings leaderboardContextSettings = new LeaderboardContextSettings(leaderboard.name,
                 leaderboard.getDisplayName());
         final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
                 "/gwt/Leaderboard.html", leaderboardContextSettings);
-        new SettingsDialogForLinkSharing<>(linkWithSettingsGenerator, lifeCycle, StringMessages.INSTANCE)
+        new SettingsDialogForLinkSharing<>(linkWithSettingsGenerator, lifeCycle, stringmessages)
                 .show();
     }
 }

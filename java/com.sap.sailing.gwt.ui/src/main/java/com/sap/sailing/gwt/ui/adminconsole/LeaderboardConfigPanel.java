@@ -506,7 +506,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
      * are no-ops.
      */
     private void openLeaderboardUrlConfigDialog(AbstractLeaderboardDTO leaderboard) {
-        LeaderboardEntryPoint.openUrlConfigurationDialog(leaderboard);
+        LeaderboardEntryPoint.openUrlConfigurationDialog(leaderboard, stringMessages);
     }
 
     private void setStartTime(RaceColumnDTO raceColumnDTO, FleetDTO fleetDTO) {

@@ -142,7 +142,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public Header<String> getHeader() {
-            return new TextHeader(getStringMessages().competitor());
+            return new TextHeader(stringMessages.competitor());
         }
 
         @Override
@@ -576,7 +576,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
         @Override
         public String getValue(LeaderboardRowDTO object) {
-            return getStringMessages().edit();
+            return stringMessages.edit();
         }
     }
 
@@ -599,7 +599,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     @Override
                     public void onSuccess(Iterable<String> providerNames) {
                         ResultSelectionAndApplyDialog dialog = new ResultSelectionAndApplyDialog(EditableLeaderboardPanel.this, providerNames, getSailingService(), 
-                                getStringMessages(), getErrorReporter());
+                                stringMessages, getErrorReporter());
                         dialog.show();
                     }
                     
@@ -666,7 +666,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
             }
         });
         getContentPanel().insert(scoreCorrectionInfoGrid, 0);
-        getContentPanel().add(new Label(getStringMessages().suppressedCompetitors()+":"));
+        getContentPanel().add(new Label(stringMessages.suppressedCompetitors() + ":"));
         getContentPanel().add(suppressedCompetitorsTable);
 
         // add a dedicated settings button that allows users to remove columns if needed; the settings
@@ -687,7 +687,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         suppressedSailIDColumn.setSortable(true);
         result.addColumn(suppressedSailIDColumn, suppressedSailIDColumn.getHeader());
         final SuppressedCompetitorColumn suppressedCompetitorColumn = new SuppressedCompetitorColumn(
-                new CompetitorColumnBase<CompetitorDTO>(this, getStringMessages(), new CompetitorFetcher<CompetitorDTO>() {
+                new CompetitorColumnBase<CompetitorDTO>(this, stringMessages, new CompetitorFetcher<CompetitorDTO>() {
                     @Override
                     public CompetitorDTO getCompetitor(CompetitorDTO t) {
                         return t;
@@ -698,7 +698,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         final Column<CompetitorDTO, String> unsuppressButtonColumn = new Column<CompetitorDTO, String>(new ButtonCell()) {
             @Override
             public String getValue(CompetitorDTO object) {
-                return getStringMessages().unsuppress();
+                return stringMessages.unsuppress();
             }
         };
         unsuppressButtonColumn.setFieldUpdater(new FieldUpdater<CompetitorDTO, String>() {
@@ -752,7 +752,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     @Override
     protected CompetitorColumn createCompetitorColumn() {
         return new EditableCompetitorColumn(getCellListForEditableCompetitorColumn(),
-                new CompetitorColumnBase<LeaderboardRowDTO>(this, getStringMessages(), new CompetitorFetcher<LeaderboardRowDTO>() {
+                new CompetitorColumnBase<LeaderboardRowDTO>(this, stringMessages,
+                        new CompetitorFetcher<LeaderboardRowDTO>() {
                     @Override
                     public CompetitorDTO getCompetitor(LeaderboardRowDTO t) {
                         return t.competitor;
@@ -795,7 +796,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
             @Override
             public String getValue(LeaderboardRowDTO object) {
-                return getStringMessages().suppress();
+                return stringMessages.suppress();
             }
         });
         final class OptionalBoldRenderer implements SafeHtmlRenderer<String> {
@@ -865,7 +866,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 return new FieldUpdater<LeaderboardRowDTO, String>() {
                     @Override
                     public void update(int index, final LeaderboardRowDTO row, String valueToUpdate) {
-                        new EditCompetitorNameDialog(getStringMessages(), row.competitor.getName(), new DialogCallback<String>() {
+                        new EditCompetitorNameDialog(stringMessages, row.competitor.getName(),
+                                new DialogCallback<String>() {
                             @Override
                             public void ok(final String value) {
                                 getSailingService().updateCompetitorDisplayNameInLeaderboard(getLeaderboardName(), row.competitor.getIdAsString(),
@@ -900,7 +902,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
             @Override
             public String getValue(LeaderboardRowDTO object) {
-                return getStringMessages().edit();
+                return stringMessages.edit();
             }
         });
         return result;
@@ -920,7 +922,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 return new FieldUpdater<LeaderboardRowDTO, String>() {
                     @Override
                     public void update(int index, final LeaderboardRowDTO row, String value) {
-                        new EditCarryValueDialog(getStringMessages(), row.competitor.getName(), row.carriedPoints, new DialogCallback<Double>() {
+                        new EditCarryValueDialog(stringMessages, row.competitor.getName(), row.carriedPoints,
+                                new DialogCallback<Double>() {
                             @Override
                             public void ok(final Double value) {
                                 updateCarriedPoints(EditableLeaderboardPanel.this.getData().getList().indexOf(row), row, value);
@@ -935,7 +938,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
             @Override
             public String getValue(LeaderboardRowDTO object) {
-                return getStringMessages().edit();
+                return stringMessages.edit();
             }
         });
         final EditTextCell carryTextCell = new EditTextCell();
@@ -996,7 +999,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         list.add(totalPointsEditCellProvider);
         final UncorrectedTotalPointsViewProvider uncorrectedViewProvider = new UncorrectedTotalPointsViewProvider(race.getRaceColumnName());
         list.add(uncorrectedViewProvider);
-        list.add(new MaxPointsReasonAndTotalPointsEditButtonCell(getStringMessages(), race.getRaceColumnName(),
+        list.add(new MaxPointsReasonAndTotalPointsEditButtonCell(stringMessages, race.getRaceColumnName(),
                 maxPointsDropDownCellProvider, totalPointsEditCellProvider));
         return list;
     }
