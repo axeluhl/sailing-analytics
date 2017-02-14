@@ -30,7 +30,7 @@ public interface DataMiningServiceAsync {
     void getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName,
             AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>> asyncCallback);
 
-    void getDimensionsFor(FunctionDTO statisticToCalculate, String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
+    void getDimensionsFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
     void getDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,
             AsyncCallback<HashMap<DataRetrieverLevelDTO, HashSet<FunctionDTO>>> callback);
     public void getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinitionDTO dataRetrieverChainDefinitionDTO, String localeInfoName,

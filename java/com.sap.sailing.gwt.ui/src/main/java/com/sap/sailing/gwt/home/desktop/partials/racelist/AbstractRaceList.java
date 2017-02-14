@@ -45,9 +45,9 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
     private final SortedCellTable<T> cellTable = new SortedCellTable<T>(0, CleanCellTableResources.INSTANCE);
     private boolean tableColumnsInitialized = false;
     
-    protected AbstractRaceList(EventView.Presenter presenter, RaceListColumnSet columnSet) {
+    protected AbstractRaceList(EventView.Presenter presenter, RaceListColumnSet columnSet, boolean showNotTracked) {
         CSS.ensureInjected();
-        this.raceViewerButtonColumn = RaceListColumnFactory.getRaceViewerButtonColumn(presenter);
+        this.raceViewerButtonColumn = RaceListColumnFactory.getRaceViewerButtonColumn(presenter, showNotTracked);
         this.columnSet = columnSet;
         this.cellTableContainer.setWidget(this.cellTable);
         this.initTableStyle();
@@ -133,5 +133,10 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
         }
         return filterableValues;
     }
-    
+
+    public abstract boolean hasWind();
+
+    public abstract boolean hasVideos();
+
+    public abstract boolean hasAudios();
 }

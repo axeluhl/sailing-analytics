@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 /**
  * Implementation of {@link BravoFix} that wraps a {@link DoubleVectorFix} which holds the actual sensor data.
@@ -35,7 +36,7 @@ public class BravoFixImpl implements BravoFix {
 
     @Override
     public Distance getRideHeight() {
-        return new MeterDistance(fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightColumn));
+        return Util.min(getRideHeightPortHull(), getRideHeightStarboardHull());
     }
     
     @Override
@@ -48,6 +49,11 @@ public class BravoFixImpl implements BravoFix {
         return new MeterDistance(fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn));
     }
     
+    @Override
+    public boolean isFoiling() {
+        return getRideHeight().compareTo(MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
+    }
+
     @Override
     public double getPitch() {
         return fix.get(BravoSensorDataMetadata.INSTANCE.pitchColumn);

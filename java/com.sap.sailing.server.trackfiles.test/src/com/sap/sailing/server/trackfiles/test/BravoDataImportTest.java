@@ -60,7 +60,9 @@ public class BravoDataImportTest {
     }
     
     private enum ImportData {
-        FILE_UNDEFINED_RACE_BRAVO(870, 0.77176) {
+        // find out the number of fixes using the following bash line:
+        //    tail -n +5 Undefined\ Race\ -\ BRAVO.txt | awk '{if ($5<$6) print v=$5; else v=$6; sum+=v; count++; } END {print "Sum: ", sum, "Count: ", count, "Average:", sum/count;}'
+        FILE_UNDEFINED_RACE_BRAVO(870, 0.661037) {
             @Override
             protected InputStream getInputStream() {
                 return getClass().getResourceAsStream("/Undefined Race - BRAVO.txt");
@@ -72,13 +74,13 @@ public class BravoDataImportTest {
                 return new ByteArrayInputStream(HEADER_ORDER_DEFAULT.getBytes(StandardCharsets.UTF_8));
             }
         },
-        DUMMY_DEAFULT_HEADER_ONE_LINE(1, 0.77151) {
+        DUMMY_DEAFULT_HEADER_ONE_LINE(1, 0.661044) {
             @Override
             protected InputStream getInputStream() {
                 return new ByteArrayInputStream((HEADER_ORDER_DEFAULT + DUMMY_CONTENT).getBytes(StandardCharsets.UTF_8));
             }
         },
-        DUMMY_RANDOM_HAEDER_ONE_LINE(1, 0.01346) {
+        DUMMY_RANDOM_HAEDER_ONE_LINE(1, 0.092727) {
             @Override
             protected InputStream getInputStream() {
                 return new ByteArrayInputStream((HEADER_ORDER_RANDOM + DUMMY_CONTENT).getBytes(StandardCharsets.UTF_8));

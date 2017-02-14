@@ -7,11 +7,15 @@ import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AbstractResultDataProvider;
+import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.BearingDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DistanceDataProvider;
+import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DurationDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.NumberDataProvider;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -28,6 +32,10 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
         dataProviders = new HashMap<>();
         AbstractResultDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();
         dataProviders.put(distanceDataProvider.getResultType().getName(), distanceDataProvider);
+        AbstractResultDataProvider<Duration> durationDataProvider = new DurationDataProvider();
+        dataProviders.put(durationDataProvider.getResultType().getName(), durationDataProvider);
+        AbstractResultDataProvider<Bearing> bearingDataProvider = new BearingDataProvider();
+        dataProviders.put(bearingDataProvider.getResultType().getName(), bearingDataProvider);
     }
     
     protected void internalShowResults(QueryResultDTO<?> result) {
