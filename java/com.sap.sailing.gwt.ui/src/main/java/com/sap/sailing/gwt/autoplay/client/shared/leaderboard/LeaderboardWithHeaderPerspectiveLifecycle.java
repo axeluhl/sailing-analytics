@@ -58,12 +58,6 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     }
 
     @Override
-    public LeaderboardWithHeaderPerspectiveSettings clonePerspectiveOwnSettings(
-            LeaderboardWithHeaderPerspectiveSettings settings) {
-        return new LeaderboardWithHeaderPerspectiveSettings(settings.isLeaderboardAutoZoom(), settings.getLeaderboardZoomFactor());
-    }
-
-    @Override
     protected LeaderboardWithHeaderPerspectiveSettings extractOwnGlobalSettings(
             LeaderboardWithHeaderPerspectiveSettings settings) {
         return createPerspectiveOwnDefaultSettings();

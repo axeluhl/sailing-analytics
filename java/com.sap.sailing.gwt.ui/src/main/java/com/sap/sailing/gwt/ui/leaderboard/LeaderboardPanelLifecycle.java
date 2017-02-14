@@ -36,20 +36,6 @@ public class LeaderboardPanelLifecycle
     }
 
     @Override
-    public LeaderboardSettings cloneSettings(LeaderboardSettings settings) {
-        LeaderboardSettings clonedSettings = new LeaderboardSettings(settings.getManeuverDetailsToShow(),
-                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(),
-                settings.getNamesOfRaceColumnsToShow(), settings.getNamesOfRacesToShow(),
-                settings.getNumberOfLastRacesToShow(), settings.isAutoExpandPreSelectedRace(),
-                settings.getDelayBetweenAutoAdvancesInMilliseconds(), settings.getNameOfRaceToSort(),
-                settings.isSortAscending(), settings.isUpdateUponPlayStateChange(),
-                settings.getActiveRaceColumnSelectionStrategy(), settings.isShowAddedScores(),
-                settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                settings.isShowCompetitorSailIdColumn(), settings.isShowCompetitorFullNameColumn());
-        return LeaderboardSettingsFactory.getInstance().keepDefaults(settings, clonedSettings);
-    }
-
-    @Override
     public String getLocalizedShortName() {
         return stringMessages.leaderboard();
     }

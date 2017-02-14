@@ -116,7 +116,7 @@ public class AbstractComponentContextWithSettingsStorage<L extends ComponentLife
                 }
                 SettingsReceiverCallback<S> callback;
                 while ((callback = settingsReceiverCallbacks.poll()) != null) {
-                    callback.receiveSettings(rootLifecycle.cloneSettings(result));
+                    callback.receiveSettings(result);
                 }
             }
         });
@@ -163,7 +163,7 @@ public class AbstractComponentContextWithSettingsStorage<L extends ComponentLife
         if (currentDefaultSettings == null) {
             throw new IllegalStateException("Settings have not been initialized yet.");
         }
-        return rootLifecycle.cloneSettings(currentDefaultSettings);
+        return currentDefaultSettings;
     }
 
     /**

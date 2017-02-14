@@ -21,13 +21,6 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings,
     }
 
     @Override
-    public WindChartSettings cloneSettings(WindChartSettings settings) {
-        return new WindChartSettings(settings.isShowWindSpeedSeries(), settings.getWindSpeedSourcesToDisplay(),
-                settings.isShowWindDirectionsSeries(), settings.getWindDirectionSourcesToDisplay(),
-                settings.getResolutionInMilliseconds());
-    }
-
-    @Override
     public String getLocalizedShortName() {
         return stringMessages.wind();
     }

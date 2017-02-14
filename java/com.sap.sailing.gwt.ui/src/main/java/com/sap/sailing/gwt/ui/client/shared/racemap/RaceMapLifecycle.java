@@ -24,11 +24,6 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings, Rac
     }
 
     @Override
-    public RaceMapSettings cloneSettings(RaceMapSettings settings) {
-        return new RaceMapSettings(settings);
-    }
-
-    @Override
     public String getLocalizedShortName() {
         return stringMessages.map();
     }

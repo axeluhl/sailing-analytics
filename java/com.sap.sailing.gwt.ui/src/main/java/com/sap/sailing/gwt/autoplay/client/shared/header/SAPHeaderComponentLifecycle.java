@@ -14,17 +14,12 @@ public class SAPHeaderComponentLifecycle implements ComponentLifecycle<SAPHeader
     
     @Override
     public SAPHeaderComponentSettingsDialogComponent getSettingsDialogComponent(SAPHeaderComponentSettings settings) {
-        return new SAPHeaderComponentSettingsDialogComponent(cloneSettings(settings), stringMessages);
+        return new SAPHeaderComponentSettingsDialogComponent(settings, stringMessages);
     }
 
     @Override
     public SAPHeaderComponentSettings createDefaultSettings() {
         return new SAPHeaderComponentSettings(defaultTitle);
-    }
-
-    @Override
-    public SAPHeaderComponentSettings cloneSettings(SAPHeaderComponentSettings settings) {
-        return new SAPHeaderComponentSettings(settings.getTitle());
     }
 
     @Override

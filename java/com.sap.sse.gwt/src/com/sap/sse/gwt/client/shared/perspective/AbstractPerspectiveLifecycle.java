@@ -44,19 +44,6 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
         return new PerspectiveCompositeSettings<>(perspectiveOwnSettings, createDefaultComponentIdsAndSettings());
     }
     
-    @Override
-    public PerspectiveCompositeSettings<PS> cloneSettings(PerspectiveCompositeSettings<PS> settings) {
-        return new PerspectiveCompositeSettings<>(this.clonePerspectiveOwnSettings(settings.getPerspectiveOwnSettings()), cloneComponentIdsAndSettings(settings));
-    }
-    
-    public Map<String, Settings> cloneComponentIdsAndSettings(PerspectiveCompositeSettings<PS> settings) {
-        Map<String, Settings> componentIdsAndSettings = new HashMap<>();
-        for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
-            componentIdsAndSettings.put(componentLifecycle.getComponentId(), cloneChildComponentSettings(componentLifecycle, settings));
-        }
-        return componentIdsAndSettings;
-    }
-    
     public Map<String, Settings> createDefaultComponentIdsAndSettings() {
         Map<String, Settings> componentIdsAndSettings = new HashMap<>();
         for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
@@ -78,12 +65,6 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
             }
         }
         throw new IllegalStateException("No componentlivecycle for id " + id + " found");
-    }
-
-    private static<S extends Settings> S cloneChildComponentSettings(ComponentLifecycle<S, ?> childComponentLifecycle, PerspectiveCompositeSettings<?> settings) {
-        @SuppressWarnings("unchecked")
-        S childSettings = (S) settings.findSettingsByComponentId(childComponentLifecycle.getComponentId());
-        return childComponentLifecycle.cloneSettings(childSettings);
     }
 
     @Override

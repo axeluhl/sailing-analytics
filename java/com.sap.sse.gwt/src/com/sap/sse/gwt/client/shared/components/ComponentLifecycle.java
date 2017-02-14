@@ -16,8 +16,6 @@ public interface ComponentLifecycle<S extends Settings, SDC extends SettingsDial
     SDC getSettingsDialogComponent(S settings);
 
     S createDefaultSettings();
-
-    S cloneSettings(S settings);
     
     /**
      * @return the display name of the component

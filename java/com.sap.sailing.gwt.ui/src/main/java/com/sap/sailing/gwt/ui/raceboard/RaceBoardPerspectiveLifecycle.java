@@ -94,11 +94,6 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     }
 
     @Override
-    public RaceBoardPerspectiveSettings clonePerspectiveOwnSettings(RaceBoardPerspectiveSettings settings) {
-        return new RaceBoardPerspectiveSettings(settings.getActiveCompetitorsFilterSetName(), settings.isShowLeaderboard(), settings.isShowWindChart(), settings.isShowCompetitorsChart(), settings.isCanReplayDuringLiveRaces(), settings.getInitialDurationAfterRaceStartInReplay());
-    }
-
-    @Override
     protected RaceBoardPerspectiveSettings extractOwnGlobalSettings(RaceBoardPerspectiveSettings settings) {
         return createPerspectiveOwnDefaultSettings();
     }

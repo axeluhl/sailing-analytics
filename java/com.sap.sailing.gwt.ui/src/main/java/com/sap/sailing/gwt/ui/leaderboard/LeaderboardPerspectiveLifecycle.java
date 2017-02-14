@@ -17,4 +17,5 @@ public class LeaderboardPerspectiveLifecycle extends AbstractLeaderboardPerspect
     public boolean hasSettings() {
         return true;
     }
+
 }

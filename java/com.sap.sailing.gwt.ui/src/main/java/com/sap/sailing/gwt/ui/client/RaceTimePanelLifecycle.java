@@ -12,17 +12,12 @@ public class RaceTimePanelLifecycle implements
 
     @Override
     public RaceTimePanelSettingsDialogComponent getSettingsDialogComponent(RaceTimePanelSettings settings) {
-        return new RaceTimePanelSettingsDialogComponent(cloneSettings(settings), stringMessages);
+        return new RaceTimePanelSettingsDialogComponent(settings, stringMessages);
     }
 
     @Override
     public RaceTimePanelSettings createDefaultSettings() {
         return new RaceTimePanelSettings();
-    }
-
-    @Override
-    public RaceTimePanelSettings cloneSettings(RaceTimePanelSettings settings) {
-        return new RaceTimePanelSettings(settings.getRefreshInterval());
     }
 
     @Override

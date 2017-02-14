@@ -18,13 +18,6 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
     }
     
     @Override
-    public LeaderboardPerspectiveOwnSettings clonePerspectiveOwnSettings(LeaderboardPerspectiveOwnSettings settings) {
-        return new LeaderboardPerspectiveOwnSettings(settings.isShowRaceDetails(), settings.isHideToolbar(),
-                settings.isAutoExpandLastRaceColumn(), settings.isShowCharts(), settings.isShowOverallLeaderboard(),
-                settings.isShowSeriesLeaderboards(), settings.getZoomTo());
-    }
-
-    @Override
     public SettingsDialogComponent<LeaderboardPerspectiveOwnSettings> getPerspectiveOwnSettingsDialogComponent(
             LeaderboardPerspectiveOwnSettings settings) {
         return new LeaderboardPerspectiveOwnSettingsDialogComponent(settings);

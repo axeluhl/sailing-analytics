@@ -747,7 +747,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public SettingsDialogComponent<MediaPlayerSettings> getSettingsDialogComponent() {
-        return mediaPlayerLifecycle.getSettingsDialogComponent(mediaPlayerLifecycle.cloneSettings(settings));
+        return mediaPlayerLifecycle.getSettingsDialogComponent(settings);
     }
 
     @Override

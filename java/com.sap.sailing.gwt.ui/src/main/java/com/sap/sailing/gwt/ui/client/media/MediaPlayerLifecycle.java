@@ -22,11 +22,6 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerSetti
     }
 
     @Override
-    public MediaPlayerSettings cloneSettings(MediaPlayerSettings settings) {
-        return new MediaPlayerSettings(settings.isAutoSelectMedia());
-    }
-    
-    @Override
     public String getLocalizedShortName() {
         return stringMessages.videoComponentShortName();
     }
