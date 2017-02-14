@@ -38,6 +38,11 @@
                     	    the GRIB files you use are adequate in resolution and region as well as adequate in time. Obtaining
                     	    a forecast 72h in the future makes little sense for an in-shore race starting in 30min.
                     	</li>
+                    	<li>The REST service for wind (/sailingservice/api/v1/regattas/{regatta}/races/{race}/wind) now considers
+                    	    the center of the course to calculate the COMBINED wind readings. Previously, all wind readings for the COMBINED
+                    	    wind track as published through the REST API were equally considered, regardless of how far away a
+                    	    wind sensor was from the course. Now, sensors closer to the course count more than those further away.
+                    	</li>
                     </ul>
                     <h2 class="articleSubheadline">January 2017</h2>
                     <ul class="bulletList">
