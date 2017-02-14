@@ -20,11 +20,11 @@ public class MultiCompetitorLeaderboardChartSettingsDialogComponent implements S
     private final DetailType initialDetailType;
     private final List<DetailType> availableDetailsTypes;
 
-    public MultiCompetitorLeaderboardChartSettingsDialogComponent(MultiCompetitorLeaderboardChartSettings settings) {
+    public MultiCompetitorLeaderboardChartSettingsDialogComponent(MultiCompetitorLeaderboardChartSettings settings, boolean isOverall) {
         this.initialDetailType = settings.getDetailType();
 
         availableDetailsTypes = new ArrayList<DetailType>();
-        availableDetailsTypes.add(DetailType.REGATTA_RANK);
+        availableDetailsTypes.add(isOverall ? DetailType.OVERALL_RANK : DetailType.REGATTA_RANK);
         availableDetailsTypes.add(DetailType.REGATTA_NET_POINTS_SUM);
     }
 

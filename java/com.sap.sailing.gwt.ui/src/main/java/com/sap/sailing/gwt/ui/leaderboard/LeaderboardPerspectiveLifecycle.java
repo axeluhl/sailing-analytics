@@ -9,7 +9,7 @@ public class LeaderboardPerspectiveLifecycle extends AbstractLeaderboardPerspect
     }
     
     public LeaderboardPerspectiveLifecycle(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
-        super(stringMessages, leaderboard);
+        super(stringMessages, leaderboard, false);
         addLifeCycle(new OverallLeaderboardPanelLifecycle(null, stringMessages));
     }
 

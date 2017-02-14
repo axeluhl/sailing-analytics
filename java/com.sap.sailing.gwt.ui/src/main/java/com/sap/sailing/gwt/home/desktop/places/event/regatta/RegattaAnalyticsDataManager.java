@@ -67,7 +67,7 @@ public class RegattaAnalyticsDataManager {
         if(multiCompetitorChart == null) {
             multiCompetitorChart = new MultiCompetitorLeaderboardChart(null, null, sailingService, asyncActionsExecutor,
                     leaderboardName, chartDetailType,
-                    competitorSelectionProvider, timer, StringMessages.INSTANCE, errorReporter);
+                    competitorSelectionProvider, timer, StringMessages.INSTANCE, false, errorReporter);
             multiCompetitorChart.setVisible(false); 
         }
         return multiCompetitorChart;

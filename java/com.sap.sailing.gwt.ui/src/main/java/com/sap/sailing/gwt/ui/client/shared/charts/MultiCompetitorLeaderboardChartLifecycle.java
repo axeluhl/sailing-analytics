@@ -7,14 +7,16 @@ public class MultiCompetitorLeaderboardChartLifecycle implements
         ComponentLifecycle<MultiCompetitorLeaderboardChartSettings, MultiCompetitorLeaderboardChartSettingsDialogComponent> {
     
     public static final String ID = "MultiCompetitorLeaderboardChart";
+    private final boolean isOverall;
 
-    public MultiCompetitorLeaderboardChartLifecycle() {
+    public MultiCompetitorLeaderboardChartLifecycle(boolean isOverall) {
+        this.isOverall = isOverall;
     }
 
     @Override
     public MultiCompetitorLeaderboardChartSettingsDialogComponent getSettingsDialogComponent(
             MultiCompetitorLeaderboardChartSettings settings) {
-        return new MultiCompetitorLeaderboardChartSettingsDialogComponent(settings);
+        return new MultiCompetitorLeaderboardChartSettingsDialogComponent(settings, isOverall);
     }
 
     @Override

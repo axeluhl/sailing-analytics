@@ -72,7 +72,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
         multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, getComponentContext(), sailingService,
                 asyncActionsExecutor,
                 leaderboardName, chartDetailType,
-                competitorSelectionProvider, timer, stringMessages, errorReporter);
+                competitorSelectionProvider, timer, stringMessages, false, errorReporter);
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);

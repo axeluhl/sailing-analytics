@@ -78,7 +78,7 @@ public class MetaLeaderboardViewer extends AbstractLeaderboardViewer<MetaLeaderb
         multiCompetitorChart = new MultiCompetitorLeaderboardChart(this, componentContext, sailingService,
                 asyncActionsExecutor,
                 metaLeaderboardName,
-                chartDetailType, competitorSelectionProvider, timer, stringMessages, errorReporter);
+                chartDetailType, competitorSelectionProvider, timer, stringMessages, true, errorReporter);
         multiCompetitorChart.setVisible(showCharts); 
         multiCompetitorChart.getElement().getStyle().setMarginTop(10, Unit.PX);
         multiCompetitorChart.getElement().getStyle().setMarginBottom(10, Unit.PX);

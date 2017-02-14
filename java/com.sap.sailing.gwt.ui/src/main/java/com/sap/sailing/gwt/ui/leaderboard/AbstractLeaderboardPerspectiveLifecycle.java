@@ -9,9 +9,9 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardPerspectiveOwnSettings> {
 
     protected AbstractLeaderboardPerspectiveLifecycle(StringMessages stringMessages,
-            AbstractLeaderboardDTO leaderboard) {
+            AbstractLeaderboardDTO leaderboard, boolean isOverall) {
         addLifeCycle(new LeaderboardPanelLifecycle(leaderboard, stringMessages));
-        addLifeCycle(new MultiCompetitorLeaderboardChartLifecycle());
+        addLifeCycle(new MultiCompetitorLeaderboardChartLifecycle(isOverall));
     }
     
     @Override

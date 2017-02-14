@@ -81,7 +81,7 @@ public class EventSeriesAnalyticsDataManager {
             multiCompetitorChart = new MultiCompetitorLeaderboardChart(parent, context, sailingService,
                     asyncActionsExecutor,
                     leaderboardName, chartDetailType,
-                    competitorSelectionProvider, timer, StringMessages.INSTANCE, errorReporter);
+                    competitorSelectionProvider, timer, StringMessages.INSTANCE, true, errorReporter);
             multiCompetitorChart.setVisible(false); 
         }
         return multiCompetitorChart;

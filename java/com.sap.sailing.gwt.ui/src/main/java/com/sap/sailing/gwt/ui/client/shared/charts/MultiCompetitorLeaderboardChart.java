@@ -14,12 +14,14 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboardChart<MultiCompetitorLeaderboardChartSettings>  {
     private MultiCompetitorLeaderboardChartSettings settings;
+    private final boolean isOverall;
 
-    public MultiCompetitorLeaderboardChart(Component<?> parent,ComponentContext<?, ?> context,SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
+    public MultiCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?, ?> context,SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             String leaderboardName, DetailType detailType, CompetitorSelectionProvider competitorSelectionProvider,
-            Timer timer, StringMessages stringMessages, ErrorReporter errorReporter) {
+            Timer timer, StringMessages stringMessages, boolean isOverall, ErrorReporter errorReporter) {
         super(parent, context,sailingService, asyncActionsExecutor, leaderboardName, detailType, competitorSelectionProvider,
                 timer, stringMessages, errorReporter);
+        this.isOverall = isOverall;
         settings = new MultiCompetitorLeaderboardChartSettings(detailType);
     }
 
@@ -36,7 +38,7 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
     @Override
     public SettingsDialogComponent<MultiCompetitorLeaderboardChartSettings> getSettingsDialogComponent() {
         MultiCompetitorLeaderboardChartSettings chartSettings = new MultiCompetitorLeaderboardChartSettings(settings.getDetailType());
-        return new MultiCompetitorLeaderboardChartSettingsDialogComponent(chartSettings);
+        return new MultiCompetitorLeaderboardChartSettingsDialogComponent(chartSettings, isOverall);
     }
 
     @Override
