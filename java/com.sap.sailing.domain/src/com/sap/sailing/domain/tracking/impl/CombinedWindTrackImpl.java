@@ -28,7 +28,7 @@ public class CombinedWindTrackImpl extends VirtualWindTrackImpl {
     public CombinedWindTrackImpl(TrackedRace trackedRace, double baseConfidence) {
         super(trackedRace, /* millisecondsOverWhichToAverage not used, see overridden method */ -1, baseConfidence,
                 /* useSpeed */ WindSourceType.COMBINED.useSpeed());
-        virtualInternalRawFixes = new CombinedWindAsNavigableSet(this, trackedRace, /* resolutionInMilliseconds */ 10000l);
+        virtualInternalRawFixes = new CombinedWindAsNavigableSet(this, trackedRace, /* resolutionInMilliseconds */ 1000l);
     }
 
     @Override
