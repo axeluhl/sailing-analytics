@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -62,7 +63,10 @@ public class LeaderboardPerspectiveOwnSettingsDialogComponent
         embedded.setValue(initialSettings.isEmbedded());
         vp.add(embedded);
 
-        zoomTo = dialog.createTextBox(stringMessages.zoom());
+        Label zoomDescription = new Label(stringMessages.zoom());
+        vp.add(zoomDescription);
+
+        zoomTo = dialog.createTextBox("1");
         zoomTo.setValue(initialSettings.getZoomTo());
         vp.add(zoomTo);
         return vp;
