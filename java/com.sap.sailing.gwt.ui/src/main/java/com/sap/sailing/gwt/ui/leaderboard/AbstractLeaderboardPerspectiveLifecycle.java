@@ -27,7 +27,7 @@ public abstract class AbstractLeaderboardPerspectiveLifecycle extends AbstractPe
     @Override
     public SettingsDialogComponent<LeaderboardPerspectiveOwnSettings> getPerspectiveOwnSettingsDialogComponent(
             LeaderboardPerspectiveOwnSettings settings) {
-        return null;
+        return new LeaderboardPerspectiveOwnSettingsDialogComponent(settings);
     }
 
     @Override
