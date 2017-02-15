@@ -35,6 +35,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -126,9 +127,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
 
             MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
                     stringmessages);
-            AbstractComponentContextWithSettingsStorage<MetaLeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new AbstractComponentContextWithSettingsStorage<>(
-                    rootComponentLifeCycle,
-                    settingsManager);
+            ComponentContext<MetaLeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new AbstractComponentContextWithSettingsStorage<>(
+                    rootComponentLifeCycle, settingsManager);
             context.initInitialSettings(
                     new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                         @Override
@@ -154,9 +154,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
 
             LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
                     StringMessages.INSTANCE);
-            AbstractComponentContextWithSettingsStorage<LeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new AbstractComponentContextWithSettingsStorage<>(
-                    rootComponentLifeCycle,
-                    settingsManager);
+            ComponentContext<LeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new AbstractComponentContextWithSettingsStorage<>(
+                    rootComponentLifeCycle, settingsManager);
             context.initInitialSettings(
                     new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
                         @Override
