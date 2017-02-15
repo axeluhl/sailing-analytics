@@ -190,19 +190,19 @@ public class DesktopStartView extends Composite implements StartView {
             this.updatePerspectives(selectedLeaderboard);
 
             createPerspectiveSettingsUI(leaderboardLifecycle, leaderboardSettings, leaderboardPerspectiveSettingsPanel,
-                    true, new OnSettingsCallback() {
+                    true, new OnSettingsCallback<LeaderboardWithHeaderPerspectiveSettings>() {
 
                         @Override
-                        public void newSettings(PerspectiveCompositeSettings newSettings) {
+                        public void newSettings(PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> newSettings) {
                             leaderboardSettings = newSettings;
                         }
                     });
 
             createPerspectiveSettingsUI(raceboardLifecycle, raceboardSettings, raceboardPerspectiveSettingsPanel,
-                    false, new OnSettingsCallback() {
+                    false, new OnSettingsCallback<RaceBoardPerspectiveSettings>() {
 
                         @Override
-                        public void newSettings(PerspectiveCompositeSettings newSettings) {
+                        public void newSettings(PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> newSettings) {
                             raceboardSettings = newSettings;
                         }
                     });
