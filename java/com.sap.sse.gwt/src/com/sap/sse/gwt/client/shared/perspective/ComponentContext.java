@@ -58,4 +58,6 @@ public interface ComponentContext<L extends ComponentLifecycle<S, ?>, S extends 
     boolean hasMakeCustomDefaultSettingsSupport(Component<?> component);
 
     void initInitialSettings(OnSettingsLoadedCallback<S> onInitialSettingsLoaded);
+
+    void initInitialSettings();
 }

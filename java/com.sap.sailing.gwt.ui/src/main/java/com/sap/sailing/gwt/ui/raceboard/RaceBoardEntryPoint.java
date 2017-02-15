@@ -27,8 +27,8 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.shared.perspective.SettingsReceiverCallback;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceWithCompetitorsDTO selectedRace;
@@ -129,17 +129,16 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     return;
                 }
                 
-                context.receiveInitialSettings(new SettingsReceiverCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>() {
-                    
+                context.initInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>() {
                     @Override
-                    public void receiveSettings(PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> initialSettings) {
-                                final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, context,
-                                        raceboardData, showChartMarkEditMediaButtonsAndVideo);
+                    public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> initialSettings) {
+                        final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, context, initialSettings,
+                                raceboardData, showChartMarkEditMediaButtonsAndVideo);
                         if (finalMode != null) {
                             finalMode.applyTo(raceBoardPanel);
                         }
                     }
-                });
+                    });
             }
             
             @Override
@@ -161,7 +160,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private RaceBoardPanel createPerspectivePage(Component<?> parent, RaceBoardComponentContext context,
-            RaceboardDataDTO raceboardData,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings, RaceboardDataDTO raceboardData,
             boolean showChartMarkEditMediaButtonsAndVideo) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
@@ -170,10 +169,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
   
-        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveCompositeSettings = context.getDefaultSettings();
-
         RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(parent, context, context.getRootLifecycle(),
-                perspectiveCompositeSettings,
+                settings,
                 sailingService, mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,
                 leaderboardGroupName, eventId, RaceBoardEntryPoint.this, getStringMessages(), userAgent,

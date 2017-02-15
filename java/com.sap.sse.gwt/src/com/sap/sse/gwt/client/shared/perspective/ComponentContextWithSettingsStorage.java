@@ -1,9 +1,7 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
@@ -49,18 +47,6 @@ public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S,
     private final SettingsStorageManager<S> settingsStorageManager;
 
     /**
-     * Contains {@link SettingsReceiverCallback}s which are waiting to receive the initial settings of the root
-     * component.
-     */
-    private Queue<SettingsReceiverCallback<S>> settingsReceiverCallbacks = new LinkedList<>();
-
-    /**
-     * Current initial/default settings for the whole settings tree which corresponds to the root component and its
-     * subcomponents.
-     */
-    private S currentDefaultSettings = null;
-
-    /**
      * 
      * @param rootLifecycle
      *            The {@link ComponentLifecycle} of the root component/perspective
@@ -72,73 +58,11 @@ public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S,
         super(rootLifecycle);
         this.settingsStorageManager = settingsStorageManager;
     }
-
-    /**
-     * Initialises the instance with initial settings. This method may be called only once during the whole lifecycle of
-     * this instance. The call of this method is mandatory, otherwise it will not be possible to obtain initial
-     * settings.
-     * 
-     * @see #initInitialSettings(OnSettingsLoadedCallback)
-     */
-    public void initInitialSettings() {
-        initInitialSettings(null);
-    }
-
-    /**
-     * Initializes the instance with initial settings. This method may be called only once during the whole lifecycle of
-     * this instance. The call of this method is mandatory, otherwise it will not be possible to obtain initial
-     * settings.
-     * 
-     * @param onInitialSettingsLoaded
-     *            Callback to be called when the settings initialisation finishes
-     * @see #initInitialSettings()
-     */
+    
     @Override
-    public void initInitialSettings(final OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {
-        if (currentDefaultSettings != null) {
-            throw new IllegalStateException(
-                    "Settings have been already initialized. You may only call this method once.");
-        }
+    protected void loadDefaultSettings(OnSettingsLoadedCallback<S> callback) {
         S systemDefaultSettings = rootLifecycle.createDefaultSettings();
-        settingsStorageManager.retrieveDefaultSettings(systemDefaultSettings, new OnSettingsLoadedCallback<S>() {
-
-            @Override
-            public void onError(Throwable caught, S fallbackDefaultSettings) {
-                if (onInitialSettingsLoaded != null) {
-                    onInitialSettingsLoaded.onError(caught, fallbackDefaultSettings);
-                }
-            }
-
-            @Override
-            public void onSuccess(S result) {
-                currentDefaultSettings = result;
-                if (onInitialSettingsLoaded != null) {
-                    onInitialSettingsLoaded.onSuccess(result);
-                }
-                SettingsReceiverCallback<S> callback;
-                while ((callback = settingsReceiverCallbacks.poll()) != null) {
-                    callback.receiveSettings(result);
-                }
-            }
-        });
-    }
-
-    /**
-     * Retrieve settings for the root component managed by this context. The provided callback gets called when
-     * initial/default settings are available. That means if the initialisation of this instance is finished, the
-     * provided callback is called immediately. If initialisation is not done yet, then the callback gets called when
-     * the initialisation gets finished and thus, initial settings are available. Make sure to call
-     * {@link #initInitialSettings()} when using this method, otherwise the provided callback will be never called.
-     * 
-     * @param settingsReceiverCallback
-     *            The callback which supplies the caller with initial settings
-     */
-    public void receiveInitialSettings(SettingsReceiverCallback<S> settingsReceiverCallback) {
-        if (currentDefaultSettings == null) {
-            settingsReceiverCallbacks.add(settingsReceiverCallback);
-        } else {
-            settingsReceiverCallback.receiveSettings(currentDefaultSettings);
-        }
+        settingsStorageManager.retrieveDefaultSettings(systemDefaultSettings, callback);
     }
 
     /**
@@ -148,23 +72,6 @@ public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S,
      */
     public Throwable getLastError() {
         return settingsStorageManager.getLastError();
-    }
-
-    /**
-     * Gets the current default {@link Settings} of the root component managed by this {@link ComponentContext}. The
-     * returned {@link Settings} should contain all settings for the root component and its subcomponents.
-     * 
-     * @return The {@link Settings} of the root component
-     * @throws IllegalStateException
-     *             When the instance has not been initialised yet
-     * @see #initInitialSettings()
-     */
-    @Override
-    public S getDefaultSettings() {
-        if (currentDefaultSettings == null) {
-            throw new IllegalStateException("Settings have not been initialized yet.");
-        }
-        return currentDefaultSettings;
     }
 
     /**

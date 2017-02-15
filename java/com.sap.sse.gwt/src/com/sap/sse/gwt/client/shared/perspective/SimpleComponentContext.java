@@ -1,5 +1,8 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
@@ -24,6 +27,20 @@ public class SimpleComponentContext<L extends ComponentLifecycle<S, ?>, S extend
         implements ComponentContext<L, S> {
 
     protected final L rootLifecycle;
+
+    /**
+     * Contains {@link SettingsReceiverCallback}s which are waiting to receive the initial settings of the root
+     * component.
+     */
+    private Queue<OnSettingsLoadedCallback<S>> settingsReceiverCallbacks = new LinkedList<>();
+
+    /**
+     * Current initial/default settings for the whole settings tree which corresponds to the root component and its
+     * subcomponents.
+     */
+    private S currentDefaultSettings = null;
+    
+    private boolean loadingDefaultSettings = false;
 
     /**
      * 
@@ -68,8 +85,68 @@ public class SimpleComponentContext<L extends ComponentLifecycle<S, ?>, S extend
         return false;
     }
     
+
+    /**
+     * Initializes the instance with initial settings. This method may be called only once during the whole lifecycle of
+     * this instance. The call of this method is mandatory, otherwise it will not be possible to obtain initial
+     * settings.
+     * 
+     * @see #initInitialSettings(OnSettingsLoadedCallback)
+     */
+    public void initInitialSettings() {
+        loadDefaultSettingsIfNecessary();
+    }
+
+    /**
+     * Initializes the instance with initial settings. This method may be called only once during the whole lifecycle of
+     * this instance. The call of this method is mandatory, otherwise it will not be possible to obtain initial
+     * settings.
+     * 
+     * @param onInitialSettingsLoaded
+     *            Callback to be called when the settings initialization finishes
+     * @see #initInitialSettings()
+     */
     @Override
-    public void initInitialSettings(OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {
-        onInitialSettingsLoaded.onSuccess(getDefaultSettings());
+    public void initInitialSettings(final OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {
+        settingsReceiverCallbacks.add(onInitialSettingsLoaded);
+        loadDefaultSettingsIfNecessary();
+    }
+    
+    private void loadDefaultSettingsIfNecessary() {
+        if (loadingDefaultSettings) {
+            return;
+        }
+        if (currentDefaultSettings == null) {
+            loadingDefaultSettings = true;
+            loadDefaultSettings(new OnSettingsLoadedCallback<S>() {
+                @Override
+                public void onError(Throwable caught, S fallbackDefaultSettings) {
+                    S fallbackSettings = getDefaultSettings();
+                    OnSettingsLoadedCallback<S> callback;
+                    while ((callback = settingsReceiverCallbacks.poll()) != null) {
+                        callback.onError(caught, fallbackSettings);
+                    }
+                }
+
+                @Override
+                public void onSuccess(S result) {
+                    currentDefaultSettings = result;
+                    OnSettingsLoadedCallback<S> callback;
+                    while ((callback = settingsReceiverCallbacks.poll()) != null) {
+                        callback.onSuccess(result);
+                    }
+                }
+
+            });
+        } else {
+            OnSettingsLoadedCallback<S> callback;
+            while ((callback = settingsReceiverCallbacks.poll()) != null) {
+                callback.onSuccess(currentDefaultSettings);
+            }
+        }
+    }
+    
+    protected void loadDefaultSettings(OnSettingsLoadedCallback<S> callback) {
+        callback.onSuccess(getDefaultSettings());
     }
 }
