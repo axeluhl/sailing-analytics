@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -8,7 +9,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.CombinedWindAsNavigableSet;
 import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
@@ -41,6 +46,9 @@ public class VirtualWindFixesTest {
         when(race.getName()).thenReturn("Race Name");
         when(trackedRace.getRace()).thenReturn(race);
         when(trackedRace.getStartOfRace()).thenReturn(oddStart);
+        when(trackedRace.getWind(any(), any())).thenAnswer(invocation->new WindImpl(
+                (Position) invocation.getArguments()[0], (TimePoint) invocation.getArguments()[1],
+                new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123))));
         windTrack = new CombinedWindTrackImpl(trackedRace, /* baseConfidence */ 0.9) {
             private static final long serialVersionUID = 123L;
 
@@ -59,7 +67,37 @@ public class VirtualWindFixesTest {
         };
         
     }
-    
+
+    @Test
+    public void testSubsetWithInclusiveEnd() {
+        windTrack.lockForRead();
+        try {
+            final Iterable<Wind> fixes = windTrack.getFixes(evenStart, /* fromInclusive */ true,
+                            evenStart.plus(virtualSet.getResolutionInMilliseconds()), /* toInclusive */ true);
+            assertEquals(2, Util.size(fixes));
+            Wind wind1 = fixes.iterator().next();
+            assertEquals(evenStart, wind1.getTimePoint());
+            Wind wind2 = Util.get(fixes, 1);
+            assertEquals(evenStart.plus(virtualSet.getResolutionInMilliseconds()), wind2.getTimePoint());
+        } finally {
+            windTrack.unlockAfterRead();
+        }
+    }
+
+    @Test
+    public void testSubsetWithInclusiveEndAndExclusiveStart() {
+        windTrack.lockForRead();
+        try {
+            final Iterable<Wind> fixes = windTrack.getFixes(evenStart, /* fromInclusive */ false,
+                            evenStart.plus(virtualSet.getResolutionInMilliseconds()), /* toInclusive */ true);
+            assertEquals(1, Util.size(fixes));
+            Wind wind1 = fixes.iterator().next();
+            assertEquals(evenStart.plus(virtualSet.getResolutionInMilliseconds()), wind1.getTimePoint());
+        } finally {
+            windTrack.unlockAfterRead();
+        }
+    }
+
     @Test
     public void testSubset() {
         windTrack.lockForRead();
@@ -68,7 +106,7 @@ public class VirtualWindFixesTest {
                             evenStart.plus(virtualSet.getResolutionInMilliseconds()), /* toInclusive */ false);
             assertEquals(1, Util.size(fixes));
             Wind wind = fixes.iterator().next();
-            assertEquals(oddStart.plus(virtualSet.getResolutionInMilliseconds()), wind.getTimePoint());
+            assertEquals(evenStart, wind.getTimePoint());
         } finally {
             windTrack.unlockAfterRead();
         }

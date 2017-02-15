@@ -122,7 +122,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
     protected TimePoint higherToResolution(TimePoint timePoint) {
         TimePoint result;
         final TimePoint startOfTracking = getTrackedRace().getStartOfTracking();
-        if (startOfTracking == null && timePoint.compareTo(startOfTracking) < 0) {
+        if (startOfTracking != null && timePoint.compareTo(startOfTracking) < 0) {
             result = higherToResolution(startOfTracking);
         } else {
             result = new MillisecondsTimePoint((timePoint.asMillis() / getResolutionInMilliseconds() + 1)
