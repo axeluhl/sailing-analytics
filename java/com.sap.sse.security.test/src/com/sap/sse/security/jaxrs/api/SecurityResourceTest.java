@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.AccessControlListStore;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
@@ -26,6 +27,7 @@ import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
 import com.sap.sse.security.userstore.mongodb.PersistenceFactory;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -41,10 +43,11 @@ public class SecurityResourceTest {
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
             final UserStoreImpl store = new UserStoreImpl();
+            final AccessControlListStore aclStore = new AccessControlListStoreImpl(store);
             Activator.setTestUserStore(store);
             UsernamePasswordRealm.setTestUserStore(store);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,
-                    store, /* setAsActivatorSecurityService */ true);
+                    store, aclStore, /* setAsActivatorSecurityService */ true);
             SecurityUtils.setSecurityManager(service.getSecurityManager());
             authenticatedAdmin = SecurityUtils.getSubject();
             authenticatedAdmin.login(new UsernamePasswordToken("admin", "admin"));

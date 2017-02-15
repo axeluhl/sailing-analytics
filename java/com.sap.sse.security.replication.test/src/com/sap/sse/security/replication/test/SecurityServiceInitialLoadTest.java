@@ -9,9 +9,12 @@ import org.junit.Test;
 
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
+import com.sap.sse.security.AccessControlListStore;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServiceReplicationTest<SecurityService, SecurityServiceImpl> {
@@ -27,7 +30,9 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
             @Override
             protected SecurityServiceImpl createNewMaster()
                     throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException {
-                final SecurityServiceImpl newMaster = new SecurityServiceImpl(new UserStoreImpl(null, null)); // no persistence
+                final UserStore userStore = new UserStoreImpl(null, null); // no persistence
+                final AccessControlListStore aclStore = new AccessControlListStoreImpl(null, null, userStore); // no persistence
+                final SecurityServiceImpl newMaster = new SecurityServiceImpl(userStore, aclStore);
                 newMaster.clearReplicaState();
                 newMaster.createSimpleUser(username, email, password, fullName, company, /* validationBaseURL */ null);
                 accessToken = newMaster.createAccessToken(username);

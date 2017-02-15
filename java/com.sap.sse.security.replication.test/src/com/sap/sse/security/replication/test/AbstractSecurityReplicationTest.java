@@ -7,9 +7,11 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp;
 import com.sap.sse.replication.testsupport.AbstractServerWithSingleServiceReplicationTest;
+import com.sap.sse.security.AccessControlListStore;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public abstract class AbstractSecurityReplicationTest extends AbstractServerWithSingleServiceReplicationTest<SecurityService, SecurityServiceImpl> {
@@ -31,14 +33,18 @@ public abstract class AbstractSecurityReplicationTest extends AbstractServerWith
         @Override
         protected SecurityServiceImpl createNewMaster() throws MalformedURLException, IOException, InterruptedException,
                 UserManagementException, MailException {
-            SecurityServiceImpl result = new SecurityServiceImpl(new UserStoreImpl());
+            final UserStoreImpl userStore = new UserStoreImpl();
+            final AccessControlListStore aclStore = new AccessControlListStoreImpl(userStore);
+            SecurityServiceImpl result = new SecurityServiceImpl(userStore, aclStore);
             result.clearReplicaState();
             return result;
         }
 
         @Override
         protected SecurityServiceImpl createNewReplica() {
-            return new SecurityServiceImpl(new UserStoreImpl());
+            final UserStoreImpl userStore = new UserStoreImpl();
+            final AccessControlListStore aclStore = new AccessControlListStoreImpl(userStore);
+            return new SecurityServiceImpl(userStore, aclStore);
         }
     }
 }
