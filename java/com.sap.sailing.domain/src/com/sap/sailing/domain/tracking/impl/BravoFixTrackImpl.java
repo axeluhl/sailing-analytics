@@ -28,7 +28,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      *            the name of the track by which it can be obtained from the {@link TrackedRace}.
      */
     public BravoFixTrackImpl(ItemType trackedItem, String trackName) {
-        super(trackedItem, trackName, BravoSensorDataMetadata.INSTANCE.getColumns(), 
+        super(trackedItem, trackName, BravoSensorDataMetadata.INSTANCE.getFileColumns(), 
                 BravoFixTrack.TRACK_NAME + " for " + trackedItem);
     }
 
