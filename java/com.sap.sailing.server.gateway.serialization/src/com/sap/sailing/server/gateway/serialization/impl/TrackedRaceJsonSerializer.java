@@ -84,6 +84,9 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
             windSources.remove(windSourceToExclude);
         }
         windSources.add(new WindSourceImpl(WindSourceType.COMBINED));
+        for (final WindSource trackedLegMiddleWindSource : trackedRace.getWindSources(WindSourceType.LEG_MIDDLE)) {
+            windSources.add(trackedLegMiddleWindSource);
+        }
         return windSources;
     }
 }

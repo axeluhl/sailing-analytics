@@ -192,7 +192,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
             @Override
             public Wind next() {
-                Wind result = floor(new DummyWind(timePoint));
+                Wind result = floor(createDummyWindFix(timePoint));
                 timePoint = new MillisecondsTimePoint(timePoint.asMillis() + getResolutionInMilliseconds());
                 return result;
             }
@@ -331,6 +331,10 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     protected TimePoint getToInternal() {
         return to;
+    }
+
+    protected DummyWind createDummyWindFix(TimePoint timePoint) {
+        return new DummyWind(timePoint);
     }
 }
 

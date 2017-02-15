@@ -3851,8 +3851,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public Position getCenterOfCourse(TimePoint at) {
         int count = 0;
         ScalablePosition sum = null;
+        final MarkPositionAtTimePointCache cache = new MarkPositionAtTimePointCacheImpl(this, at);
         for (Waypoint waypoint : getRace().getCourse().getWaypoints()) {
-            final Position waypointPosition = getApproximatePosition(waypoint, at);
+            final Position waypointPosition = getApproximatePosition(waypoint, at, cache);
             if (waypointPosition != null) {
                 ScalablePosition p = new ScalablePosition(waypointPosition);
                 if (sum == null) {
