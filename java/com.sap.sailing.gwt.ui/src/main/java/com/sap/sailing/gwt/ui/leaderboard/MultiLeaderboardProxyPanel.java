@@ -31,7 +31,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.AbstractLazyComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.AbstractComponentContextWithSettingsStorage;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
@@ -164,9 +164,9 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     public void updateSettings(LeaderboardSettings newSettings) {
         ComponentContext<?, ?> ctx = getComponentContext();
         // store contextspecific setting in this hashmap, so they are not lost on tab change
-        if (ctx instanceof AbstractComponentContextWithSettingsStorage) {
+        if (ctx instanceof ComponentContextWithSettingsStorage) {
             @SuppressWarnings("unchecked")
-            AbstractComponentContextWithSettingsStorage<?, LeaderboardSettings> cctx = (AbstractComponentContextWithSettingsStorage) ctx;
+            ComponentContextWithSettingsStorage<?, LeaderboardSettings> cctx = (ComponentContextWithSettingsStorage) ctx;
             LeaderboardSettings contextSettings = cctx.extractContextSettings(this, newSettings);
             contextStore.put(selectedLeaderboardPanel.getLeaderboardName(), contextSettings);
         }

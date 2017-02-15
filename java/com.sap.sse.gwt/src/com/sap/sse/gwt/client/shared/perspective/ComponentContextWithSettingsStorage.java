@@ -40,7 +40,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  *            The {@link Settings} type of the settings of the root component/perspective containing all the settings
  *            for itself and its subcomponents
  */
-public class AbstractComponentContextWithSettingsStorage<L extends ComponentLifecycle<S, ?>, S extends Settings>
+public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S, ?>, S extends Settings>
         extends SimpleComponentContext<L, S> {
 
     /**
@@ -67,7 +67,7 @@ public class AbstractComponentContextWithSettingsStorage<L extends ComponentLife
      * @param settingsStorageManager
      *            The {@link SettingsStorageManager} to be used access stored settings and store new settings
      */
-    public AbstractComponentContextWithSettingsStorage(L rootLifecycle,
+    public ComponentContextWithSettingsStorage(L rootLifecycle,
             SettingsStorageManager<S> settingsStorageManager) {
         super(rootLifecycle);
         this.settingsStorageManager = settingsStorageManager;

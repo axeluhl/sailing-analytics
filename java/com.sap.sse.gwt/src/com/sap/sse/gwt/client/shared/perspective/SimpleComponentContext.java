@@ -9,7 +9,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  * storage. It is only capable of creating new default settings by means of {@link ComponentLifecycle} of the root
  * component managed by this {@link ComponentContext}. All in all, it is a dummy implementation for components which do
  * not have support for settings storage. If you need settings storage support, consider
- * {@link AbstractComponentContextWithSettingsStorage}.
+ * {@link ComponentContextWithSettingsStorage}.
  * 
  * @author Vladislav Chumak
  *

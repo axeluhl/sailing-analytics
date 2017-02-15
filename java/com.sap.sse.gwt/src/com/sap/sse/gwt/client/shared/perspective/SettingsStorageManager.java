@@ -7,7 +7,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 
 /**
- * Manages the persistence of settings. The interface was designed to support {@link AbstractComponentContextWithSettingsStorage}.
+ * Manages the persistence of settings. The interface was designed to support {@link ComponentContextWithSettingsStorage}.
  * The {@link SettingsStorageManager} stores values of {@link GenericSerializableSettings} which do not match the default values,
  * in other words the delta between current settings values and the default settings values.
  * The implementation may use different kind of storages, e.g. LocalStorage, and/or {@link UserService}, and etc.
@@ -15,7 +15,7 @@ import com.sap.sse.common.settings.generic.GenericSerializableSettings;
  * @author Vladislav Chumak
  *
  * @param <S> The {@link Settings} type of the settings of the root component/perspective containing all the settings for itself and its subcomponents
- * @see AbstractComponentContextWithSettingsStorage
+ * @see ComponentContextWithSettingsStorage
  */
 public interface SettingsStorageManager<S extends Settings> {
 
@@ -36,7 +36,7 @@ public interface SettingsStorageManager<S extends Settings> {
      * will be stored.
      * 
      * @param globalSettings The global settings to store
-     * @see AbstractComponentContextWithSettingsStorage
+     * @see ComponentContextWithSettingsStorage
      * @see GenericSerializableSettings
      */
     void storeGlobalSettings(JSONObject patchedGlobal);
@@ -46,7 +46,7 @@ public interface SettingsStorageManager<S extends Settings> {
      * will be stored.
      * 
      * @param contextSpecificSettings The context specific settings to store
-     * @see AbstractComponentContextWithSettingsStorage
+     * @see ComponentContextWithSettingsStorage
      * @see GenericSerializableSettings
      */
     void storeContextSpecificSettings(JSONObject contextSpecificSettings);
