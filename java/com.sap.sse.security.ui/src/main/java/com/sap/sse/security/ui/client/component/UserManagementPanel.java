@@ -37,6 +37,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public class UserManagementPanel extends DockPanel {
     
@@ -44,8 +45,8 @@ public class UserManagementPanel extends DockPanel {
     
     private List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
     
-    private SingleSelectionModel<TenantDTO> tenantSingleSelectionModel;
-    private TenantListDataProvider tenantListDataProvider;
+    private SingleSelectionModel<UserGroupDTO> userGroupSingleSelectionModel;
+    private UserGroupListDataProvider userGroupListDataProvider;
     
     private SingleSelectionModel<UserDTO> singleSelectionModel;
 
@@ -101,58 +102,58 @@ public class UserManagementPanel extends DockPanel {
         buttonPanel.add(deleteButton);
         deleteButton.setEnabled(singleSelectionModel.getSelectedObject() != null);
         
-        // TODO: find the right place for the tenant controls
-        Button createTenantButton = new Button("Create tenant", new ClickHandler() {
+        // TODO: find the right place for the user group controls
+        Button createUserGroupButton = new Button("Create user group", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new CreateTenantDialog(stringMessages, userManagementService, tenantListDataProvider).show();
+                new CreateUserGroupDialog(stringMessages, userManagementService, userGroupListDataProvider).show();
             }
         });
-        buttonPanel.add(createTenantButton);
-        Button addUserToTenantButton = new Button("Add user to tenant", new ClickHandler() {
+        buttonPanel.add(createUserGroupButton);
+        Button addUserToUserGroupButton = new Button("Add user to user group", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                TenantDTO tenant = tenantSingleSelectionModel.getSelectedObject();
+                UserGroupDTO userGroup = userGroupSingleSelectionModel.getSelectedObject();
                 UserDTO user = singleSelectionModel.getSelectedObject();
-                if (tenant != null && user != null) {
-                    userManagementService.addUserToTenant(user.getName(), tenant.getName(), new AsyncCallback<TenantDTO>() {
+                if (userGroup != null && user != null) {
+                    userManagementService.addUserToUserGroup(user.getName(), userGroup.getName(), new AsyncCallback<UserGroupDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert("Error adding user to tenant.");
+                            Window.alert("Error adding user to user group.");
                         }
                         @Override
-                        public void onSuccess(TenantDTO result) {
-                            tenantListDataProvider.updateDisplays();
+                        public void onSuccess(UserGroupDTO result) {
+                            userGroupListDataProvider.updateDisplays();
                         }
                     });
                 }
             }
         });
-        buttonPanel.add(addUserToTenantButton);
-        Button removeUserFromTenantButton = new Button("Remove user from tenant", new ClickHandler() {
+        buttonPanel.add(addUserToUserGroupButton);
+        Button removeUserFromUserGroupButton = new Button("Remove user from user group", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                TenantDTO tenant = tenantSingleSelectionModel.getSelectedObject();
+                UserGroupDTO userGroup = userGroupSingleSelectionModel.getSelectedObject();
                 UserDTO user = singleSelectionModel.getSelectedObject();
-                if (tenant != null && user != null) {
-                    userManagementService.removeUserFromTenant(user.getName(), tenant.getName(), new AsyncCallback<TenantDTO>() {
+                if (userGroup != null && user != null) {
+                    userManagementService.removeUserFromUserGroup(user.getName(), userGroup.getName(), new AsyncCallback<UserGroupDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            Window.alert("Error removing user from tenant.");
+                            Window.alert("Error removing user from user group.");
                         }
                         @Override
-                        public void onSuccess(TenantDTO result) {
-                            tenantListDataProvider.updateDisplays();
+                        public void onSuccess(UserGroupDTO result) {
+                            userGroupListDataProvider.updateDisplays();
                         }
                     });
                 }
             }
         });
-        buttonPanel.add(removeUserFromTenantButton);
-        tenantSingleSelectionModel = new SingleSelectionModel<>();
-        final CellList<TenantDTO> tenantList = new CellList<TenantDTO>(new AbstractCell<TenantDTO>() {
+        buttonPanel.add(removeUserFromUserGroupButton);
+        userGroupSingleSelectionModel = new SingleSelectionModel<>();
+        final CellList<UserGroupDTO> userGroupList = new CellList<UserGroupDTO>(new AbstractCell<UserGroupDTO>() {
             @Override
-            public void render(Context context, TenantDTO value, SafeHtmlBuilder sb) {
+            public void render(Context context, UserGroupDTO value, SafeHtmlBuilder sb) {
                 if (value == null) {
                     return;
                 }
@@ -171,20 +172,23 @@ public class UserManagementPanel extends DockPanel {
                 }
                 sb.appendEscaped(concated);
                 sb.appendHtmlConstant("</td>");
+                sb.appendHtmlConstant("<td>");
+                sb.appendEscaped((value instanceof TenantDTO) ? "Tenant" : "User Group");
+                sb.appendHtmlConstant("</td>");
                 sb.appendHtmlConstant("</tr>");
                 sb.appendHtmlConstant("</table>");
             }
             
         });
-        tenantList.setSelectionModel(tenantSingleSelectionModel);
-        tenantListDataProvider = new TenantListDataProvider(userManagementService);
-        tenantList.setPageSize(20);
-        tenantListDataProvider.addDataDisplay(tenantList);
-        SimplePager tenantPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
-        tenantPager.setDisplay(tenantList);
-        ScrollPanel tenantPanel = new ScrollPanel(tenantList);
-        west.add(tenantPager);
-        west.add(tenantPanel);
+        userGroupList.setSelectionModel(userGroupSingleSelectionModel);
+        userGroupListDataProvider = new UserGroupListDataProvider(userManagementService);
+        userGroupList.setPageSize(20);
+        userGroupListDataProvider.addDataDisplay(userGroupList);
+        SimplePager userGroupPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
+        userGroupPager.setDisplay(userGroupList);
+        ScrollPanel userGroupPanel = new ScrollPanel(userGroupList);
+        west.add(userGroupPager);
+        west.add(userGroupPanel);
         
         final UserList userList = new UserList();
         userList.setSelectionModel(singleSelectionModel);

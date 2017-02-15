@@ -71,6 +71,7 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.security.AccessControlList;
 import com.sap.sse.security.AccessControlListStore;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
@@ -85,6 +86,7 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.Tenant;
 import com.sap.sse.security.User;
+import com.sap.sse.security.UserGroup;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
@@ -271,8 +273,41 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
+    public Iterable<AccessControlList> getAccessControlListList() {
+        return aclStore.getAccessControlLists();
+    }
+    
+    /*
+     * @param name The name of the user or user group to add
+     */
+    @Override
+    public AccessControlList addToACL(String acl, String permission, String name) {
+        aclStore.addPermission(acl, name, permission);
+        return aclStore.getAccessControlListByName(acl);
+    }
+    
+    /*
+     * @param name The name of the user or user group to remove
+     */
+    @Override
+    public AccessControlList removeFromACL(String acl, String permission, String name) {
+        aclStore.removePermission(acl, name, permission);
+        return aclStore.getAccessControlListByName(acl);
+    }
+    
+    @Override
+    public Iterable<UserGroup> getUserGroupList() {
+        return userStore.getUserGroups();
+    }
+    
+    @Override
     public Iterable<Tenant> getTenantList() {
         return userStore.getTenants();
+    }
+    
+    @Override
+    public UserGroup createUserGroup(String name, String owner) throws UserGroupManagementException {
+        return userStore.createUserGroup(name, owner, aclStore);
     }
     
     @Override
@@ -281,19 +316,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public Tenant addUserToTenant(String user, String name) {
-        Tenant tenant = userStore.getTenantByName(name);
-        tenant.add(user);
-        userStore.updateTenant(tenant);
-        return tenant;
+    public UserGroup addUserToUserGroup(String user, String name) {
+        UserGroup userGroup = userStore.getUserGroupByName(name);
+        userGroup.add(user);
+        userStore.updateUserGroup(userGroup);
+        return userGroup;
     }
 
     @Override
-    public Tenant removeUserFromTenant(String user, String name) {
-        Tenant tenant = userStore.getTenantByName(name);
-        tenant.remove(user);
-        userStore.updateTenant(tenant);
-        return tenant;
+    public UserGroup removeUserFromUserGroup(String user, String name) {
+        UserGroup userGroup = userStore.getUserGroupByName(name);
+        userGroup.remove(user);
+        userStore.updateUserGroup(userGroup);
+        return userGroup;
     }
 
     @Override
@@ -371,7 +406,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-        final User result = userStore.createUser(username, email, upa);
+        final User result = userStore.createUser(username, email, "admin", aclStore, upa); // TODO: get the principal as owner
         result.setFullName(fullName);
         result.setCompany(company);
         final String emailValidationSecret = result.startEmailValidation();
@@ -635,7 +670,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userStore.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        return userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), socialUserAccount);
+        return userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), "admin", aclStore, socialUserAccount); // TODO: get the principal as owner
     }
 
     @Override

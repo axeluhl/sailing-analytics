@@ -9,18 +9,30 @@ import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
+import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public interface UserManagementService extends RemoteService {
+    Collection<AccessControlListDTO> getAccessControlListList();
+    
+    AccessControlListDTO addToACL(String acl, String permission, String name);
+    
+    AccessControlListDTO removeFromACL(String acl, String permission, String name);
+    
+    Collection<UserGroupDTO> getUserGroupList(boolean withTenants);
+    
     Collection<TenantDTO> getTenantList();
+    
+    UserGroupDTO createUserGroup(String name, String owner);
     
     TenantDTO createTenant(String name, String owner);
     
-    TenantDTO addUserToTenant(String user, String tenant);
+    UserGroupDTO addUserToUserGroup(String user, String userGroup);
     
-    TenantDTO removeUserFromTenant(String user, String tenant);
+    UserGroupDTO removeUserFromUserGroup(String user, String userGroup);
     
     Collection<UserDTO> getUserList();
 

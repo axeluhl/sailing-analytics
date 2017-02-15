@@ -127,6 +127,39 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
+    public Collection<AccessControlListDTO> getAccessControlListList() {
+        List<AccessControlListDTO> acls = new ArrayList<>();
+        for (AccessControlList acl : getSecurityService().getAccessControlListList()) {
+            AccessControlListDTO aclDTO = createAclDTOFromAcl(acl);
+            acls.add(aclDTO);
+        }
+        return acls;
+    }
+    
+    @Override
+    public AccessControlListDTO addToACL(String acl, String permission, String name) {
+        return createAclDTOFromAcl(getSecurityService().addToACL(acl, permission, name));
+    }
+    
+    @Override
+    public AccessControlListDTO removeFromACL(String acl, String permission, String name) {
+        return createAclDTOFromAcl(getSecurityService().removeFromACL(acl, permission, name));
+    }
+    
+    @Override
+    public Collection<UserGroupDTO> getUserGroupList(boolean withTenants) {
+        List<UserGroupDTO> userGroups = new ArrayList<>();
+        for (UserGroup u : getSecurityService().getUserGroupList()) {
+            UserGroupDTO userGroupDTO = createUserGroupDTOFromUserGroup(u);
+            userGroups.add(userGroupDTO);
+        }
+        if (withTenants) {
+            userGroups.addAll(getTenantList());
+        }
+        return userGroups;
+    }
+    
+    @Override
     public Collection<TenantDTO> getTenantList() {
         List<TenantDTO> tenants = new ArrayList<>();
         for (Tenant t : getSecurityService().getTenantList()) {
@@ -137,8 +170,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
+    public UserGroupDTO createUserGroup(String name, String owner) {
+        // TODO: create UserGroupManagementException_CustomSeri.....?
+        try {
+            return createUserGroupDTOFromUserGroup(getSecurityService().createUserGroup(name, owner));
+        } catch (UserGroupManagementException e) {
+            return null;
+        }
+    }
+    
+    @Override
     public TenantDTO createTenant(String name, String owner) {
         // TODO: create TenantManagementException_CustomSeri.....?
+        //String subject = (String) SecurityUtils.getSubject().getPrincipal(); // TODO: use this as owner
         try {
             return createTenantDTOFromTenant(getSecurityService().createTenant(name, owner));
         } catch (TenantManagementException | UserGroupManagementException e) {
@@ -147,18 +191,18 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
-    public TenantDTO addUserToTenant(String user, String tenant) {
-        if (SecurityUtils.getSubject().isPermitted("tenant:add_user:" + tenant + ":" + user)) {
-            return createTenantDTOFromTenant(getSecurityService().addUserToTenant(user, tenant));
+    public UserGroupDTO addUserToUserGroup(String user, String userGroup) {
+        if (SecurityUtils.getSubject().isPermitted("usergroup:add_user:" + userGroup + ":" + user)) {
+            return createUserGroupDTOFromUserGroup(getSecurityService().addUserToUserGroup(user, userGroup));
         } else {
             return null; // TODO: implement this with exception
         }
     }
     
     @Override
-    public TenantDTO removeUserFromTenant(String user, String tenant) {
-        if (SecurityUtils.getSubject().isPermitted("tenant:remove_user:" + tenant + ":" + user)) {
-            return createTenantDTOFromTenant(getSecurityService().removeUserFromTenant(user, tenant));
+    public UserGroupDTO removeUserFromUserGroup(String user, String userGroup) {
+        if (SecurityUtils.getSubject().isPermitted("usergroup:remove_user:" + userGroup + ":" + user)) {
+            return createUserGroupDTOFromUserGroup(getSecurityService().removeUserFromUserGroup(user, userGroup));
         } else {
             return null; // TODO: implement this with exception
         }

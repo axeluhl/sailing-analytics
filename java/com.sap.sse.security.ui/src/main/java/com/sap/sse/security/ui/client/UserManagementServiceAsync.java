@@ -6,18 +6,30 @@ import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
+import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.ui.shared.UserGroupDTO;
 
 public interface UserManagementServiceAsync {
+    void getAccessControlListList(AsyncCallback<Collection<AccessControlListDTO>> callback);
+    
+    void addToACL(String acl, String permission, String name, AsyncCallback<AccessControlListDTO> callback);
+    
+    void removeFromACL(String acl, String permission, String name, AsyncCallback<AccessControlListDTO> callback);
+    
+    void getUserGroupList(boolean withTenants, AsyncCallback<Collection<UserGroupDTO>> callback);
+    
     void getTenantList(AsyncCallback<Collection<TenantDTO>> callback);
+    
+    void createUserGroup(String name, String owner, AsyncCallback<UserGroupDTO> callback);
     
     void createTenant(String name, String owner, AsyncCallback<TenantDTO> callback);
     
-    void addUserToTenant(String user, String tenant, AsyncCallback<TenantDTO> asyncCallback);
+    void addUserToUserGroup(String user, String userGroup, AsyncCallback<UserGroupDTO> asyncCallback);
     
-    void removeUserFromTenant(String user, String tenant, AsyncCallback<TenantDTO> asyncCallback);
+    void removeUserFromUserGroup(String user, String userGroup, AsyncCallback<UserGroupDTO> asyncCallback);
     
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
 

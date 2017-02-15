@@ -407,11 +407,12 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public User createUser(String name, String email, Account... accounts) throws UserManagementException {
+    public User createUser(String name, String email, String owner, AccessControlListStore aclStore, Account... accounts) throws UserManagementException {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         User user = new User(name, email, accounts);
+        aclStore.createAccessControlList(name, owner);
         logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);

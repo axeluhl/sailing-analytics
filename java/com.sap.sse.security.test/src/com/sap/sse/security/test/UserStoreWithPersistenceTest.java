@@ -18,6 +18,7 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
@@ -33,6 +34,7 @@ public class UserStoreWithPersistenceTest {
     private final String prefValue = "pv";
 
     private UserStoreImpl store;
+    private AccessControlListStoreImpl aclStore;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException {
@@ -48,11 +50,12 @@ public class UserStoreWithPersistenceTest {
 
     private void newStore() {
         store = new UserStoreImpl();
+        aclStore = new AccessControlListStoreImpl(null, null, store);
     }
 
     @Test
     public void testCreateUser() throws UserManagementException {
-        store.createUser(username, email);
+        store.createUser(username, email, "admin", aclStore);
         assertNotNull(store.getUserByName(username));
         assertNotNull(store.getUserByEmail(email));
 
@@ -63,7 +66,7 @@ public class UserStoreWithPersistenceTest {
     
     @Test
     public void testMasterdataIsSaved() throws UserManagementException {
-        store.createUser(username, email);
+        store.createUser(username, email, "admin", aclStore);
         store.updateUser(new User(username, email, fullName, company, Locale.GERMAN, false, null, null, Collections.emptySet()));
         newStore();
         User savedUser = store.getUserByName(username);
@@ -79,7 +82,7 @@ public class UserStoreWithPersistenceTest {
      */
     @Test
     public void testDeleteUser() throws UserManagementException {
-        store.createUser(username, email);
+        store.createUser(username, email, "admin", aclStore);
         store.deleteUser(username);
         assertNull(store.getUserByName(username));
         assertNull(store.getUserByEmail(email));
@@ -91,7 +94,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testSetPreferences() throws UserManagementException {
-        store.createUser(username, email);
+        store.createUser(username, email, "admin", aclStore);
         store.setPreference(username, prefKey, prefValue);
         assertEquals(prefValue, store.getPreference(username, prefKey));
         newStore();
@@ -100,7 +103,7 @@ public class UserStoreWithPersistenceTest {
 
     @Test
     public void testUnsetPreferences() throws UserManagementException {
-        store.createUser(username, email);
+        store.createUser(username, email, "admin", aclStore);
         store.setPreference(username, prefKey, prefValue);
         store.unsetPreference(username, prefKey);
         assertNull(store.getPreference(username, prefKey));
@@ -113,7 +116,7 @@ public class UserStoreWithPersistenceTest {
      */
     @Test
     public void testDeleteUserWithPreferences() throws UserManagementException {
-        store.createUser(username, email);
+        store.createUser(username, email, "admin", aclStore);
         store.setPreference(username, prefKey, prefValue);
         store.deleteUser(username);
         assertNull(store.getPreference(username, prefKey));

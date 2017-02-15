@@ -1,5 +1,6 @@
 package com.sap.sse.security.userstore.mongodb;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,6 +37,11 @@ public class AccessControlListStoreImpl implements AccessControlListStore {
         this.domainObjectFactory = domainObjectFactory;
         
         this.userStore = userStore;
+    }
+    
+    @Override
+    public Iterable<AccessControlList> getAccessControlLists() {
+        return new ArrayList<>(accessControlLists.values());
     }
     
     /**

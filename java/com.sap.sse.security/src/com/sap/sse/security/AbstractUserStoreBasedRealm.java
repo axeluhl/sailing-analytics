@@ -25,6 +25,7 @@ import com.sap.sse.security.shared.UserManagementException;
 public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
     private static final Logger logger = Logger.getLogger(AbstractUserStoreBasedRealm.class.getName());
     private final Future<UserStore> userStore;
+    private final Future<AccessControlListStore> aclStore;
     private PermissionsForRoleProvider permissionsForRoleProvider;
 
     /**
@@ -34,9 +35,14 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
      * default constructor is invoked.
      */
     private static UserStore testUserStore;
+    private static AccessControlListStore testAclStore;
 
     public static void setTestUserStore(UserStore theTestUserStore) {
         testUserStore = theTestUserStore;
+    }
+    
+    public static void setTestAclStore(AccessControlListStore theTestAclStore) {
+        testAclStore = theTestAclStore;
     }
 
     public AbstractUserStoreBasedRealm() {
@@ -45,8 +51,10 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
         BundleContext context = Activator.getContext();
         if (context != null) {
             userStore = createUserStoreFuture(context);
+            aclStore = createAclStoreFuture(context);
         } else {
             userStore = null;
+            aclStore = null;
         }
     }
     
@@ -83,6 +91,36 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
         }.start();
         return result;
     }
+    
+    private Future<AccessControlListStore> createAclStoreFuture(BundleContext bundleContext) {
+        final ServiceTracker<AccessControlListStore, AccessControlListStore> tracker = new ServiceTracker<>(bundleContext, AccessControlListStore.class, /* customizer */ null);
+        tracker.open();
+        final FutureTask<AccessControlListStore> result = new FutureTask<>(new Callable<AccessControlListStore>() {
+            @Override
+            public AccessControlListStore call() throws InterruptedException {
+                try {
+                    logger.info("Waiting for AccessControlListStore service...");
+                    AccessControlListStore aclStore = tracker.waitForService(0);
+                    logger.info("Obtained AccessControlListStore service "+aclStore);
+                    return aclStore;
+                } catch (InterruptedException e) {
+                    logger.log(Level.SEVERE, "Interrupted while waiting for AccessControlListStore service", e);
+                    throw e;
+                }
+            }
+        });
+        new Thread("ServiceTracker waiting for AccessControlListStore service") {
+            @Override
+            public void run() {
+                try {
+                    result.run();
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Exception while waiting for AccessControlListStore service", e);
+                }
+            }
+        }.start();
+        return result;
+    }
 
     protected UserStore getUserStore() {
         UserStore result;
@@ -94,6 +132,21 @@ public abstract class AbstractUserStoreBasedRealm extends AuthorizingRealm {
             } catch (InterruptedException | ExecutionException e) {
                 result = null;
                 logger.log(Level.SEVERE, "Error retrieving user store", e);
+            }
+        }
+        return result;
+    }
+    
+    protected AccessControlListStore getAccessControlListStore() {
+        AccessControlListStore result;
+        if (testAclStore != null) {
+            result = testAclStore;
+        } else {
+            try {
+                result = aclStore.get();
+            } catch (InterruptedException | ExecutionException e) {
+                result = null;
+                logger.log(Level.SEVERE, "Error retrieving access control list store", e);
             }
         }
         return result;

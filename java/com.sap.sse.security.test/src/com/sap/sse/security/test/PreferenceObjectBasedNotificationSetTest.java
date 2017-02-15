@@ -19,6 +19,7 @@ import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.userstore.mongodb.AccessControlListStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
@@ -31,6 +32,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     private static final String C = "c";
 
     private UserStoreImpl store;
+    private AccessControlListStoreImpl aclStore;
     
     private static final String user1 = "me";
     private static final String user2 = "somebody_else";
@@ -52,6 +54,7 @@ public class PreferenceObjectBasedNotificationSetTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         store = new UserStoreImpl();
+        aclStore = new AccessControlListStoreImpl(null, null, store);
     }
     
     @Test
@@ -183,7 +186,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     @Test
     public void userWithNonVerifiedEmailIsSkippedTest() throws UserManagementException {
-        store.createUser(user1, mail);
+        store.createUser(user1, mail, "admin", aclStore);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -230,7 +233,7 @@ public class PreferenceObjectBasedNotificationSetTest {
      */
     @Test
     public void deleteUserWithMappingTest() throws UserManagementException {
-        store.createUser(user1, mail);
+        store.createUser(user1, mail, "admin", aclStore);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -242,7 +245,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     
     @Test
     public void removePreferenceConverterTest() throws UserManagementException {
-        store.createUser(user1, mail);
+        store.createUser(user1, mail, "admin", aclStore);
         store.registerPreferenceConverter(prefKey, prefConverter);
         store.setPreferenceObject(user1, prefKey, values1);
         PreferenceObjectBasedNotificationSetImpl notificationSet = new PreferenceObjectBasedNotificationSetImpl(prefKey, store);
@@ -261,7 +264,7 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException {
-        store.createUser(username, email);
+        store.createUser(username, email, "admin", aclStore);
         store.updateUser(new User(username, email, null, null, null, true, null, null, Collections.emptySet()));
     }
     

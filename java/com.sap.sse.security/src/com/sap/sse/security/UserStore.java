@@ -50,7 +50,7 @@ public interface UserStore extends Named {
     
     User getUserByAccessToken(String accessToken);
 
-    User createUser(String name, String email, Account... accounts) throws UserManagementException;
+    User createUser(String name, String email, String owner, AccessControlListStore aclStore, Account... accounts) throws UserManagementException;
 
     void updateUser(User user);
 

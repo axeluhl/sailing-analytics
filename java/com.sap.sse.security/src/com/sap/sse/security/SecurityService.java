@@ -32,13 +32,29 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     SecurityManager getSecurityManager();
     
+    Iterable<AccessControlList> getAccessControlListList();
+    
+    /*
+     * @param name The name of the user or user group to add
+     */
+    AccessControlList addToACL(String acl, String permission, String name);
+    
+    /*
+     * @param name The name of the user or user group to remove
+     */
+    AccessControlList removeFromACL(String acl, String permission, String name);
+    
+    Iterable<UserGroup> getUserGroupList();
+    
     Iterable<Tenant> getTenantList();
+    
+    UserGroup createUserGroup(String name, String owner) throws UserGroupManagementException;
     
     Tenant createTenant(String name, String owner) throws TenantManagementException, UserGroupManagementException;
     
-    Tenant addUserToTenant(String user, String tenant);
+    UserGroup addUserToUserGroup(String user, String userGroup);
 
-    Tenant removeUserFromTenant(String user, String tenant);
+    UserGroup removeUserFromUserGroup(String user, String userGroup);
 
     Iterable<User> getUserList();
 

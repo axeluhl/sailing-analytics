@@ -5,6 +5,7 @@ import java.util.Set;
 import com.sap.sse.common.Named;
 
 public interface AccessControlListStore extends Named {
+    Iterable<AccessControlList> getAccessControlLists();
     AccessControlList getAccessControlListByName(String name);
     
     /**

@@ -180,7 +180,7 @@ public class OAuthRealm extends AbstractUserStoreBasedRealm {
         User user = getUserStore().getUserByName(socialname);
         if (user == null) {
             try {
-                user = getUserStore().createUser(socialname, socialUser.getProperty(Social.EMAIL.name()), socialUser);
+                user = getUserStore().createUser(socialname, socialUser.getProperty(Social.EMAIL.name()), "admin", getAccessControlListStore(), socialUser);
             } catch (UserManagementException e) {
                 throw new AuthenticationException(e.getMessage());
             }

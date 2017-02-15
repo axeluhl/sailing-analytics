@@ -38,7 +38,7 @@ public class LoginTest {
         db.getCollection(CollectionNames.SETTINGS.name()).drop();
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         store = new UserStoreImpl();
-        aclStore = new AccessControlListStoreImpl(store);
+        aclStore = new AccessControlListStoreImpl(null, null, store);
         
         UsernamePasswordRealm.setTestUserStore(store);
         Activator.setTestUserStore(store);
@@ -68,7 +68,7 @@ public class LoginTest {
 
     @Test
     public void rolesTest() throws UserManagementException {
-        store.createUser("me", "me@sap.com");
+        store.createUser("me", "me@sap.com", "admin", aclStore);
         store.addRoleForUser("me", "testrole");
         UserStoreImpl store2 = new UserStoreImpl();
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), "testrole"));
@@ -76,7 +76,7 @@ public class LoginTest {
 
     @Test
     public void permissionsTest() throws UserManagementException {
-        store.createUser("me", "me@sap.com");
+        store.createUser("me", "me@sap.com", "admin", aclStore);
         store.addPermissionForUser("me", "a:b:c");
         UserStoreImpl store2 = new UserStoreImpl();
         assertTrue(store2.getUserByName("me").hasPermission("a:b:c"));
