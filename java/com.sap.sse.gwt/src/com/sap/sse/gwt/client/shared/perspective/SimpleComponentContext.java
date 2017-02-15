@@ -67,4 +67,9 @@ public class SimpleComponentContext<L extends ComponentLifecycle<S, ?>, S extend
     public boolean hasMakeCustomDefaultSettingsSupport(Component<?> component) {
         return false;
     }
+    
+    @Override
+    public void initInitialSettings(OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {
+        onInitialSettingsLoaded.onSuccess(getDefaultSettings());
+    }
 }

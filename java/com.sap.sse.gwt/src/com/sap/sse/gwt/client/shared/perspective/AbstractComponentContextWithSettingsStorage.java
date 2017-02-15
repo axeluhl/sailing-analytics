@@ -85,7 +85,7 @@ public class AbstractComponentContextWithSettingsStorage<L extends ComponentLife
     }
 
     /**
-     * Initialises the instance with initial settings. This method may be called only once during the whole lifecycle of
+     * Initializes the instance with initial settings. This method may be called only once during the whole lifecycle of
      * this instance. The call of this method is mandatory, otherwise it will not be possible to obtain initial
      * settings.
      * 
@@ -93,6 +93,7 @@ public class AbstractComponentContextWithSettingsStorage<L extends ComponentLife
      *            Callback to be called when the settings initialisation finishes
      * @see #initInitialSettings()
      */
+    @Override
     public void initInitialSettings(final OnSettingsLoadedCallback<S> onInitialSettingsLoaded) {
         if (currentDefaultSettings != null) {
             throw new IllegalStateException(

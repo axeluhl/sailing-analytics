@@ -56,4 +56,6 @@ public interface ComponentContext<L extends ComponentLifecycle<S, ?>, S extends 
      * storage support
      */
     boolean hasMakeCustomDefaultSettingsSupport(Component<?> component);
+
+    void initInitialSettings(OnSettingsLoadedCallback<S> onInitialSettingsLoaded);
 }
