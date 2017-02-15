@@ -235,7 +235,7 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     @Override
     public NavigableSet<Wind> subSet(Wind fromElement, boolean fromInclusive, Wind toElement, boolean toInclusive) {
-        return createSubset(track, getTrackedRace(), fromInclusive ? ceilingToResolution(fromElement.getTimePoint())
+        return createSubset(getTrack(), getTrackedRace(), fromInclusive ? ceilingToResolution(fromElement.getTimePoint())
                 : higherToResolution(fromElement.getTimePoint()), toInclusive ? floorToResolution(toElement.getTimePoint())
                 : lowerToResolution(toElement.getTimePoint()));
     }
@@ -247,13 +247,13 @@ public abstract class VirtualWindFixesAsNavigableSet extends AbstractUnmodifiabl
 
     @Override
     public NavigableSet<Wind> headSet(Wind toElement, boolean inclusive) {
-        return createSubset(track, getTrackedRace(), /* from */ null,
+        return createSubset(getTrack(), getTrackedRace(), /* from */ null,
                 inclusive ? ceilingToResolution(toElement.getTimePoint()) : lowerToResolution(toElement.getTimePoint()));
     }
 
     @Override
     public NavigableSet<Wind> tailSet(Wind fromElement, boolean inclusive) {
-        return createSubset(track, getTrackedRace(), inclusive ? floorToResolution(fromElement.getTimePoint())
+        return createSubset(getTrack(), getTrackedRace(), inclusive ? floorToResolution(fromElement.getTimePoint())
                 : higherToResolution(fromElement.getTimePoint()),
         /* to */ null);
     }
