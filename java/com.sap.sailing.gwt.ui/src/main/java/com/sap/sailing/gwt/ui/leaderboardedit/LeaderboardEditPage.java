@@ -2,12 +2,14 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.List;
 
-import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
@@ -48,8 +50,10 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                         }
                     });
                     
-                    RootPanel.get().add(authorizedContentDecorator);
-                    RootPanel.get().add(header);
+                    DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+                    RootLayoutPanel.get().add(mainPanel);
+                    mainPanel.addNorth(header, 75);
+                    mainPanel.add(new ScrollPanel(authorizedContentDecorator));
                 } else {
                     RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                 }
@@ -63,8 +67,8 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
 
     private SAPHeaderWithAuthentication initHeader() {
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().editScores());
-        header.getElement().getStyle().setPosition(Position.FIXED);
-        header.getElement().getStyle().setTop(0, Unit.PX);
+//        header.getElement().getStyle().setPosition(Position.FIXED);
+//        header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);
         return header;
     }
