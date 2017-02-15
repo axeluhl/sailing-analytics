@@ -34,6 +34,7 @@ import com.sap.sse.security.ui.client.UserChangeEventHandler;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.shared.AccessControlListDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.TenantDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -44,6 +45,9 @@ public class UserManagementPanel extends DockPanel {
     private List<UserCreatedEventHandler> userCreatedHandlers = new ArrayList<>();
     
     private List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
+    
+    private SingleSelectionModel<AccessControlListDTO> aclSingleSelectionModel;
+    private AccessControlListListDataProvider aclListDataProvider;
     
     private SingleSelectionModel<UserGroupDTO> userGroupSingleSelectionModel;
     private UserGroupListDataProvider userGroupListDataProvider;
@@ -102,6 +106,53 @@ public class UserManagementPanel extends DockPanel {
         buttonPanel.add(deleteButton);
         deleteButton.setEnabled(singleSelectionModel.getSelectedObject() != null);
         
+        // TODO: find the right place for the acl controls
+        Button editACLButton = new Button("Edit ACL", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                
+            }
+        });
+        buttonPanel.add(editACLButton);
+        aclSingleSelectionModel = new SingleSelectionModel<>();
+        final CellList<AccessControlListDTO> aclList = new CellList<AccessControlListDTO>(new AbstractCell<AccessControlListDTO>() {
+            @Override
+            public void render(Context context, AccessControlListDTO value, SafeHtmlBuilder sb) {
+                if (value == null) {
+                    return;
+                }
+                sb.appendHtmlConstant("<table>");
+                sb.appendHtmlConstant("<tr>");
+                sb.appendHtmlConstant("<td>");
+                sb.appendEscaped(value.getId());
+                sb.appendHtmlConstant("</td>");
+                sb.appendHtmlConstant("<td>");
+                sb.appendEscaped(value.getOwner());
+                sb.appendHtmlConstant("</td>");
+                for (UserGroupDTO group : value.getPermissionMap().keySet()) {
+                    sb.appendHtmlConstant("<td>");
+                    String concated = group.getName() + ": ";
+                    for (String name : value.getPermissionMap().get(group)) {
+                        concated += name + ", ";
+                    }
+                    sb.appendEscaped(concated);
+                    sb.appendHtmlConstant("</td>");
+                }
+                sb.appendHtmlConstant("</tr>");
+                sb.appendHtmlConstant("</table>");
+            }
+            
+        });
+        aclList.setSelectionModel(aclSingleSelectionModel);
+        aclListDataProvider = new AccessControlListListDataProvider(userManagementService);
+        aclList.setPageSize(20);
+        aclListDataProvider.addDataDisplay(aclList);
+        SimplePager aclPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
+        aclPager.setDisplay(aclList);
+        ScrollPanel aclPanel = new ScrollPanel(aclList);
+        west.add(aclPager);
+        west.add(aclPanel);
+               
         // TODO: find the right place for the user group controls
         Button createUserGroupButton = new Button("Create user group", new ClickHandler() {
             @Override

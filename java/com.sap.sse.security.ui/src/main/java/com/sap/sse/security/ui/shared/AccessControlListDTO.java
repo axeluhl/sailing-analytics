@@ -35,4 +35,8 @@ public class AccessControlListDTO implements IsSerializable {
         }
         return false;
     }
+    
+    public Map<UserGroupDTO, Set<String>> getPermissionMap() {
+        return permissionMap;
+    }
 }
