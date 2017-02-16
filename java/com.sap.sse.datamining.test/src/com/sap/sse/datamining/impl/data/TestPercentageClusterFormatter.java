@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.data;
+package com.sap.sse.datamining.impl.data;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.data;
+package com.sap.sse.datamining.impl.data;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -14,7 +14,6 @@ import com.sap.sse.datamining.impl.data.ComparableClusterBoundary;
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 import com.sap.sse.datamining.impl.data.LinearDoubleClusterGroup;
 
-// TODO Move to sse bundle, after 49er analysis
 public class TestLinearDoubleClusterGroup {
     
     private LinearDoubleClusterGroup hardPercentageClusterGroup;
