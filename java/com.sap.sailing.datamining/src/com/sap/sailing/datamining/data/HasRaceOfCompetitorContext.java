@@ -19,9 +19,6 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="")
     public Competitor getCompetitor();
     
-    @Dimension(messageKey="CompetitorSearchTag", ordinal=11) // TODO Clean me: Move Dimension to Competitor when possible
-    public String getCompetitorSearchTag();
-    
     @Dimension(messageKey="TackAtStart", ordinal=12)
     public Tack getTackAtStart() throws NoWindException;
     

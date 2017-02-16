@@ -83,8 +83,8 @@
 				<source>Team</source>
 				<target state="signed-off">チーム</target>
 			</trans-unit>
-			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CompetitorSearchTag" resname="CompetitorSearchTag">
-				<source>Competitor Search Tag</source>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SearchTag" resname="SearchTag">
+				<source>Search Tag</source>
 				<target state="signed-off">競技者検索タグ</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LeaderboardSailingDomainRetrieverChain" resname="LeaderboardSailingDomainRetrieverChain">

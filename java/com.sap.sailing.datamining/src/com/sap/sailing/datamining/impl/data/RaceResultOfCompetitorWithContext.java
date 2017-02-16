@@ -77,11 +77,6 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         final String result = leaderboard.getName();
         return result;
     }
-
-    @Override
-    public String getCompetitorSearchTag() {
-        return getCompetitor().getSearchTag();
-    }
     
     @Override
     public ClusterDTO getPercentageClusterForRelativeScore() {

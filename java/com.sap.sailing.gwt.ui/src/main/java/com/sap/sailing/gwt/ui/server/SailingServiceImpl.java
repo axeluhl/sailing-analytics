@@ -1365,6 +1365,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            "best effort" readings are provided for the time interval requested, no matter if based on any sensor
      *            evidence or not, regardless of {@link TrackedRace#getTimePointOfNewestEvent()
      *            trackedRace.getTimePointOfNewestEvent()}.
+     * @param windSourceTypeNames
+     *            if {@code null}, all wind sources delivered by {@link TrackedRace#getWindSources()} plus the
+     *            {@link WindSourceType#COMBINED} wind source are delivered. Note that this does not include
+     *            the {@link WindSourceType#LEG_MIDDLE} wind sources.
      * @param includeCombinedWindForAllLegMiddles
      *            if <code>true</code>, the result will return non-<code>null</code> results for calls to
      *            {@link WindInfoForRaceDTO#getCombinedWindOnLegMiddle(int)}.
@@ -1384,20 +1388,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.windSourcesToExclude = windSourcesToExclude;
             Map<WindSource, WindTrackInfoDTO> windTrackInfoDTOs = new HashMap<WindSource, WindTrackInfoDTO>();
             result.windTrackInfoByWindSource = windTrackInfoDTOs;
-            List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
-            Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
-            final WindSource combinedWindSource = new WindSourceImpl(WindSourceType.COMBINED);
-            windSourcesToDeliver.add(combinedWindSource);
+            final List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+            final WindSourceImpl combinedWindSource = new WindSourceImpl(WindSourceType.COMBINED);
+            if (windSourceTypeNames == null) {
+                Util.addAll(trackedRace.getWindSources(), windSourcesToDeliver);
+                windSourcesToDeliver.add(combinedWindSource);
+            } else {
+                for (final String windSourceTypeToAdd : windSourceTypeNames) {
+                    for (final WindSource windSource : trackedRace.getWindSources(WindSourceType.valueOf(windSourceTypeToAdd))) {
+                        windSourcesToDeliver.add(windSource);
+                    }
+                }
+            }
             for (final WindSource windSource : windSourcesToDeliver) {
                 // TODO consider parallelizing
-                if (windSourceTypeNames == null || windSourceTypeNames.contains(windSource.getType().name())) {
-                    WindTrackInfoDTO windTrackInfoDTO = createWindTrackInfoDTO(from, millisecondsStepWidth,
-                            numberOfFixes, trackedRace, onlyUpToNewestEvent, newestEvent, windSource,
-                            new PositionAtTimeProvider() { @Override public Position getPosition(TimePoint at) {
-                                return windSource == combinedWindSource ? trackedRace.getCenterOfCourse(at) : null;
-                            }});
-                    windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
-                }
+                WindTrackInfoDTO windTrackInfoDTO = createWindTrackInfoDTO(from, millisecondsStepWidth,
+                        numberOfFixes, trackedRace, onlyUpToNewestEvent, newestEvent, windSource, /* use default positions */ at->null);
+                windTrackInfoDTOs.put(windSource, windTrackInfoDTO);
             }
             if (includeCombinedWindForAllLegMiddles) {
                 int zeroBasedLegNumber = 0;

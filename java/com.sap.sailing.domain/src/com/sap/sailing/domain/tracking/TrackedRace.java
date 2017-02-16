@@ -376,15 +376,17 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     /**
      * Retrieves the wind sources used so far by this race that have the specified <code>type</code> as their
      * {@link WindSource#getType() type}. Always returns a non-<code>null</code> iterable which may be empty in case the
-     * race does not use any wind source of the specified type (yet). Additional sources may be returned after
+     * race does not use any wind source of the specified type (yet).<p>
      * 
+     * It is possible to ask for the {@link WindSourceType#COMBINED} and {@link WindSourceType#LEG_MIDDLE} types and
+     * get a non-empty result although those sources are never returned by {@link #getWindSources()}.
      */
     Set<WindSource> getWindSources(WindSourceType type);
 
     /**
      * Retrieves all wind sources known to this race, including those {@link #getWindSourcesToExclude() to exclude}.
      * Callers can freely iterate because a copied collection is returned. The {@link WindSourceType#COMBINED} wind source
-     * is never part of the result.
+     * as well as the {@link WindSourceType#LEG_MIDDLE} sources are never part of the result.
      */
     Set<WindSource> getWindSources();
 

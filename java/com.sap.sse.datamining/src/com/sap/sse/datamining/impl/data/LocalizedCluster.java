@@ -31,5 +31,9 @@ public class LocalizedCluster<ElementType extends Serializable> implements Clust
     public Class<ElementType> getClusterElementsType() {
         return cluster.getClusterElementsType();
     }
+    
+    public Cluster<ElementType> getInnerCluster() {
+        return cluster;
+    }
 
 }

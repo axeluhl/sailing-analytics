@@ -65,8 +65,8 @@
       <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Team" resname="Team">
         <source>Team</source>
       </trans-unit>
-      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CompetitorSearchTag" resname="CompetitorSearchTag">
-        <source>Competitor Search Tag</source>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SearchTag" resname="SearchTag">
+        <source>Search Tag</source>
       </trans-unit>
       <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LeaderboardSailingDomainRetrieverChain" resname="LeaderboardSailingDomainRetrieverChain">
         <source>Leaderboards</source>

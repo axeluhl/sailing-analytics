@@ -18,24 +18,23 @@ public class DefaultWindTrackJsonSerializer implements WindTrackJsonSerializer {
     public static final String FIELD_PUBLICATION_URL = "publicationUrl";
     public static final String FIELD_VENUE = "venue";
 
-    private TimePoint fromTime;
-    private TimePoint toTime;
-    private WindSource windSource;
+    private final TimePoint fromTime;
+    private final TimePoint toTime;
+    private final WindSource windSource;
     
     /**
      * -1 means unlimited.
      */
     private final int maxNumberOfFixes;
     
-    public DefaultWindTrackJsonSerializer(int maxNumberOfFixes) {
+    public DefaultWindTrackJsonSerializer(int maxNumberOfFixes, TimePoint fromTime, TimePoint toTime, WindSource windSource) {
         super();
         this.maxNumberOfFixes = maxNumberOfFixes;
+        this.fromTime = fromTime;
+        this.toTime = toTime;
+        this.windSource = windSource;
     }
     
-    public DefaultWindTrackJsonSerializer() {
-        this(-1);
-    }
-
     public JSONObject serialize(WindTrack windTrack) {
         JSONObject result = new JSONObject();
         JSONArray jsonWindFixes = new JSONArray();
@@ -73,17 +72,5 @@ public class DefaultWindTrackJsonSerializer implements WindTrackJsonSerializer {
         }
         result.put(windSource.getType() + (windSource.getId() != null ? "-"+windSource.getId().toString() : ""), jsonWindFixes);
         return result;
-    }
-
-    public void setFromTime(TimePoint fromTime) {
-        this.fromTime = fromTime;
-    }
-
-    public void setToTime(TimePoint toTime) {
-        this.toTime = toTime;
-    }
-
-    public void setWindSource(WindSource windSource) {
-        this.windSource = windSource;
     }
 }

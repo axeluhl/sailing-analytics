@@ -1,4 +1,4 @@
-package com.sap.sailing.datamining.impl.data;
+package com.sap.sse.datamining.impl.data;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
+import com.sap.sse.datamining.impl.data.LinearDoubleClusterGroup;
+import com.sap.sse.datamining.impl.data.PercentageClusterFormatter;
 
 public class TestPercentageClusterFormatter {
 

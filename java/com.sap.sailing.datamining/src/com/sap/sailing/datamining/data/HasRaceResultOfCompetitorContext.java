@@ -21,9 +21,6 @@ public interface HasRaceResultOfCompetitorContext {
     @Dimension(messageKey="Regatta", ordinal=4)
     String getRegattaName();
     
-    @Dimension(messageKey="CompetitorSearchTag", ordinal=5) // TODO Clean me: Move Dimension to Competitor when possible
-    public String getCompetitorSearchTag();
-    
     @Dimension(messageKey="RelativeScoreInPercent", ordinal=6)
     public ClusterDTO getPercentageClusterForRelativeScore();
 

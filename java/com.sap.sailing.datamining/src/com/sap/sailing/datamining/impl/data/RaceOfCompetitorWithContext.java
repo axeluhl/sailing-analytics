@@ -52,11 +52,6 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
     public Competitor getCompetitor() {
         return competitor;
     }
-
-    @Override
-    public String getCompetitorSearchTag() {
-        return getCompetitor().getSearchTag();
-    }
     
     @Override
     public Tack getTackAtStart() throws NoWindException {
