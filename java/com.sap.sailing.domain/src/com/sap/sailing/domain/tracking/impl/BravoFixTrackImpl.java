@@ -53,6 +53,12 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
     }
     
     @Override
+    public boolean isFoiling(TimePoint timePoint) {
+        final Distance rideHeight = getRideHeight(timePoint);
+        return rideHeight != null && rideHeight.compareTo(BravoFix.MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
+    }
+
+    @Override
     public Distance getAverageRideHeight(TimePoint from, TimePoint to) {
         final Distance result;
         lockForRead();
