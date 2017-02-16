@@ -366,4 +366,19 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
     protected LeaderboardType getLeaderboardType() {
         return LeaderboardType.FlexibleLeaderboard;
     }
+
+    /**
+     * In addition to invoking the superclass implementation, a flexible leaderboard also
+     * detaches all race logs from any tracked race currently linked to any of the race columns
+     * of this leaderboard.
+     */
+    @Override
+    public void destroy() {
+        super.destroy();
+        for (final RaceColumn raceColumn : getRaceColumns()) {
+            for (final Fleet fleet : raceColumn.getFleets()) {
+                raceColumn.setTrackedRace(fleet, null); // this will in particular detach the race log
+            }
+        }
+    }
 }
