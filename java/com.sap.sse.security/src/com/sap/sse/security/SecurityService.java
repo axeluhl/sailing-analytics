@@ -35,6 +35,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     Iterable<AccessControlList> getAccessControlListList();
     
+    AccessControlList getAccessControlListByName(String id);
+    
     AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap);
     
     /*

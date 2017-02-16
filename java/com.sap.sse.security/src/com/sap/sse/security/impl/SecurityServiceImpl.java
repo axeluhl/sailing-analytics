@@ -278,6 +278,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
+    public AccessControlList getAccessControlListByName(String id) {
+        return aclStore.getAccessControlListByName(id);
+    }
+    
+    @Override
     public AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap) {
         for (UserGroup group : permissionMap.keySet()) {
             aclStore.putPermissions(id, group.getName(), permissionMap.get(group));

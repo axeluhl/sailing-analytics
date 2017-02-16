@@ -215,7 +215,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     @Override
     public UserGroupDTO removeUserFromUserGroup(String user, String userGroup) {
-        if (SecurityUtils.getSubject().isPermitted("usergroup:remove_user:" + userGroup + ":" + user)) {
+        String currUser = (String) SecurityUtils.getSubject().getPrincipal();
+        UserGroup group = getSecurityService().getUserGroupByName(userGroup);
+        if (getSecurityService().getAccessControlListByName(group.getName()).hasPermission(currUser, "removeUser")) {
             return createUserGroupDTOFromUserGroup(getSecurityService().removeUserFromUserGroup(user, userGroup));
         } else {
             return null; // TODO: implement this with exception
