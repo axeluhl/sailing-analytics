@@ -185,4 +185,14 @@ public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S,
         }
         return current;
     }
+    
+    public static <L extends ComponentLifecycle<S, ?>, S extends Settings> ComponentContext<L, S> createComponentContext(L rootLifecycle,
+            SettingsStorageManager<S> settingsStorageManager) {
+        final String ignoreLocalSettingsString = Window.Location.getParameter("ignoreLocalSettings");
+        final boolean ignoreLocalSettings = Boolean.TRUE.toString().equals(ignoreLocalSettingsString);
+        if (ignoreLocalSettings) {
+            return new SimpleComponentContext<>(rootLifecycle);
+        }
+        return new ComponentContextWithSettingsStorage<>(rootLifecycle, settingsStorageManager);
+    }
 }

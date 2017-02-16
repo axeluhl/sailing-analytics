@@ -55,7 +55,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
 
         siteHeader.addWidgetToRightSide(clockLabel);
         containerPanel.addNorth(siteHeader, 75);
-
+        
         RegattaOverviewBaseSettings regattaOverviewSettings = serializer
                 .deserializeFromCurrentLocation(new RegattaOverviewBaseSettings());
 
@@ -65,7 +65,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         }
 
         createAndAddDetailPanel();
-        createAndAddRegattaPanel(regattaOverviewSettings.getEvent(), regattaOverviewSettings.isIgnoreLocalSettings());
+        createAndAddRegattaPanel(regattaOverviewSettings);
         toggleDetailPanel(false);
         
         regattaPanel.setEntryClickedHandler(new EntryHandler() { 
@@ -87,9 +87,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         containerPanel.animate(500);
     }
 
-    private void createAndAddRegattaPanel(UUID eventId, boolean ignoreLocalSettings) {
-        RegattaRaceStatesSettings settings = createRegattaRaceStatesSettingsFromURL();
-        regattaPanel = new RegattaOverviewPanel(sailingService, this, getStringMessages(), eventId, settings, userAgent, ignoreLocalSettings);
+    private void createAndAddRegattaPanel(RegattaOverviewBaseSettings regattaOverviewContextDefinition) {
+        regattaPanel = new RegattaOverviewPanel(sailingService, getUserService(), this, getStringMessages(), regattaOverviewContextDefinition, userAgent);
 
         regattaPanel.addHandler(new EventDTOLoadedEvent.Handler() {
             @Override
@@ -120,10 +119,6 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
             }
         });
         containerPanel.addSouth(detailPanel, 110);
-    }
-
-    public static RegattaRaceStatesSettings createRegattaRaceStatesSettingsFromURL() {
-        return serializer.deserializeFromCurrentLocation(new RegattaRaceStatesSettings());
     }
 
     public static String getUrl(UUID eventId, RegattaRaceStatesSettings settings) {

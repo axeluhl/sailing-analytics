@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.regattaoverview.client;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -21,6 +20,7 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewBaseSettings;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -37,8 +37,15 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
+import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
+import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class RegattaOverviewPanel extends SimplePanel {
     
@@ -52,7 +59,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     protected final StringMessages stringMessages;
     protected final ErrorReporter errorReporter;
     
-    private final UUID eventId;
+    private final RegattaOverviewBaseSettings regattaOverviewContextDefinition;
     private EventDTO eventDTO;
     private List<RaceGroupDTO> raceGroupDTOs;
     private List<EventAndRaceGroupAvailabilityListener> eventRaceGroupListeners;
@@ -60,11 +67,11 @@ public class RegattaOverviewPanel extends SimplePanel {
     
     private RegattaRaceStatesComponent regattaRaceStatesComponent;
     
-    private final TabPanel leaderboardsTabPanel;
+    private TabPanel leaderboardsTabPanel;
     private final Anchor settingsButton;
     private final Anchor refreshNowButton;
     private final Anchor startStopUpdatingButton;
-    private final CheckBox leaderboardCheckBox;
+    private CheckBox leaderboardCheckBox;
     private final UserAgentDetails userAgent;
     private final FlowPanel repeatedInfoLabel = new FlowPanel();
     
@@ -76,18 +83,17 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
     
     public RegattaOverviewPanel(
-            SailingServiceAsync sailingService, 
+            SailingServiceAsync sailingService,
+            UserService userService,
             final ErrorReporter errorReporter, 
             final StringMessages stringMessages, 
-            UUID eventId, 
-            RegattaRaceStatesSettings settings, 
-            UserAgentDetails userAgent,
-            boolean ignoreLocalSettings) {
+            RegattaOverviewBaseSettings regattaOverviewContextDefinition, 
+            UserAgentDetails userAgent) {
         
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
-        this.eventId = eventId;
+        this.regattaOverviewContextDefinition = regattaOverviewContextDefinition;
         this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRateInMs);
         this.uiUpdateTimer = new Timer(PlayModes.Live, uiUpdateRateInMs);
         this.eventDTO = null;
@@ -102,12 +108,6 @@ public class RegattaOverviewPanel extends SimplePanel {
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
         mainPanel.addStyleName(style.contentWrapper());
-        
-        regattaRaceStatesComponent = new RegattaRaceStatesComponent(null, null, sailingService, errorReporter,
-                stringMessages,
-                eventId, settings, uiUpdateTimer, ignoreLocalSettings);
-        this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
-        regattaRaceStatesComponent.setWidth("100%");
         
         refreshNowButton = new Anchor(stringMessages.refreshNow());
         refreshNowButton.setStyleName(RES.mainCss().button());
@@ -128,7 +128,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         settingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages).show();
+                new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages, new LinkWithSettingsGenerator<>(regattaOverviewContextDefinition)).show();
             }            
         });
         
@@ -149,6 +149,20 @@ public class RegattaOverviewPanel extends SimplePanel {
             }
             
         });
+        
+        final RegattaRaceStatesComponentLifecycle lifecycle = new RegattaRaceStatesComponentLifecycle();
+        final SettingsStorageManager<RegattaRaceStatesSettings> settingsStorageManager = new UserSettingsStorageManager<>(
+                userService, "RegattaOverview", UserSettingsStorageManager
+                        .buildContextDefinitionId(regattaOverviewContextDefinition.getEvent().toString()));
+        final ComponentContext<RegattaRaceStatesComponentLifecycle, RegattaRaceStatesSettings> componentContext = ComponentContextWithSettingsStorage
+                .createComponentContext(lifecycle, settingsStorageManager);
+        
+        regattaRaceStatesComponent = new RegattaRaceStatesComponent(null, componentContext, sailingService, errorReporter,
+                stringMessages,
+                regattaOverviewContextDefinition.getEvent(), lifecycle.createDefaultSettings(), uiUpdateTimer);
+        this.eventRaceGroupListeners.add(regattaRaceStatesComponent);
+        regattaRaceStatesComponent.setWidth("100%");
+        
         this.serverUpdateTimer.addTimeListener(new TimeListener() {
             @Override
             public void timeChanged(Date newTime, Date oldTime) {
@@ -167,7 +181,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.uiUpdateTimer.play();
         
 
-
+        // TODO create a perspective and add this parameter to the perspectiveOwnSettings
         final boolean showLeaderboardButton = Window.Location.getParameter("enableLeaderboard") != null
                 && Window.Location.getParameter("enableLeaderboard").equalsIgnoreCase("true");
         if (showLeaderboardButton) {
@@ -208,6 +222,12 @@ public class RegattaOverviewPanel extends SimplePanel {
             leaderboardsTabPanel = null;
         }
         
+        componentContext.initInitialSettings(new DefaultOnSettingsLoadedCallback<RegattaRaceStatesSettings>() {
+            @Override
+            public void onSuccess(RegattaRaceStatesSettings defaultSettings) {
+                regattaRaceStatesComponent.updateSettings(defaultSettings);
+            }
+        });
     }
 
     private CheckBox addLeaderboardEnablerButton() {
@@ -278,12 +298,12 @@ public class RegattaOverviewPanel extends SimplePanel {
 
     
     private void retrieveEvent() {
-        sailingService.getEventById(eventId, false, new MarkedAsyncCallback<EventDTO>(
+        sailingService.getEventById(regattaOverviewContextDefinition.getEvent(), false, new MarkedAsyncCallback<EventDTO>(
                 new AsyncCallback<EventDTO>() {
                     @Override
                     public void onFailure(Throwable cause) {
                         settingsButton.setEnabled(false);
-                        errorReporter.reportError("Error trying to load event with id " + eventId + " : "
+                        errorReporter.reportError("Error trying to load event with id " + regattaOverviewContextDefinition.getEvent() + " : "
                                 + cause.getMessage());
                     }
         
@@ -313,11 +333,11 @@ public class RegattaOverviewPanel extends SimplePanel {
     }
     
     private void retrieveRegattaStructure() {
-        sailingService.getRegattaStructureForEvent(eventId, new MarkedAsyncCallback<List<RaceGroupDTO>>(
+        sailingService.getRegattaStructureForEvent(regattaOverviewContextDefinition.getEvent(), new MarkedAsyncCallback<List<RaceGroupDTO>>(
                 new AsyncCallback<List<RaceGroupDTO>>() {
                     @Override
                     public void onFailure(Throwable cause) {
-                        errorReporter.reportError("Error trying to load regattas for event with id " + eventId + " : "
+                        errorReporter.reportError("Error trying to load regattas for event with id " + regattaOverviewContextDefinition.getEvent() + " : "
                                 + cause.getMessage());
                     }
         

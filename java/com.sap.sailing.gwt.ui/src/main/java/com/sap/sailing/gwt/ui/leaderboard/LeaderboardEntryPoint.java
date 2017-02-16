@@ -120,8 +120,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         // make a single live request as the default but don't continue to play by default
 
         final UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsManager = new UserSettingsStorageManager<>(
-                getUserService(), UserSettingsStorageManager.buildContextDefinitionId("LeaderboardEntryPoint"),
-                leaderboardName);
+                getUserService(), "LeaderboardEntryPoint",
+                UserSettingsStorageManager.buildContextDefinitionId(leaderboardName));
         if (leaderboardType.isMetaLeaderboard()) {
             // overall
 

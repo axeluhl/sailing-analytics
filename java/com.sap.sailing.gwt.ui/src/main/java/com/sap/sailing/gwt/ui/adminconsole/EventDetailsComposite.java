@@ -139,7 +139,7 @@ public class EventDetailsComposite extends Composite  {
             baseURL.setHref(event.getBaseURL());
             sailorsInfoWebsiteURLList.setValues(new ArrayList<String>(event.getSailorsInfoWebsiteURLs().values()));
             String regattaOverviewLink = EntryPointWithSettingsLinkFactory
-                    .createRegattaOverviewLink(new RegattaOverviewBaseSettings(event.id, false));
+                    .createRegattaOverviewLink(new RegattaOverviewBaseSettings(event.id));
             eventOverviewURL.setText(regattaOverviewLink);
             eventOverviewURL.setHref(UriUtils.fromString(regattaOverviewLink));
      

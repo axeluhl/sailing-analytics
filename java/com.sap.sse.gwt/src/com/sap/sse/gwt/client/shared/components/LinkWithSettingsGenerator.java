@@ -13,6 +13,10 @@ public class LinkWithSettingsGenerator<S extends Settings> {
 
     private final String path;
     private final GenericSerializableSettings contextDefinition;
+    
+    public LinkWithSettingsGenerator(GenericSerializableSettings contextDefinition) {
+        this(null, contextDefinition);
+    }
 
     public LinkWithSettingsGenerator(String path, GenericSerializableSettings contextDefinition) {
         this.path = path;

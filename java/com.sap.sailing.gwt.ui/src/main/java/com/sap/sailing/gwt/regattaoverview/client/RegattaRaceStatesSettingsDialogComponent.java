@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -30,7 +29,6 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
 
     private final StringMessages stringMessages;
     private final RegattaRaceStatesSettings initialSettings;
-    private final UUID eventId;
     private final List<CourseAreaDTO> courseAreas;
     private final List<RaceGroupDTO> raceGroups;
 
@@ -38,22 +36,19 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     private CheckBox showOnlyCurrentlyRunningRacesCheckBox;
     private final Map<UUID, CheckBox> courseAreaCheckBoxMap;
     private final Map<String, CheckBox> regattaCheckBoxMap;
-    private final Anchor resultingLink;
     private Button courseAreaDeselectButton;
     private Button regattaDeselectButton;
     
     private final static String SETTINGS_DIALOG_COMPONENT = "SettingsDialogComponent";
     
     public RegattaRaceStatesSettingsDialogComponent(RegattaRaceStatesSettings settings, StringMessages stringMessages, 
-            UUID eventId, List<CourseAreaDTO> courseAreas, List<RaceGroupDTO> raceGroups) {
+            List<CourseAreaDTO> courseAreas, List<RaceGroupDTO> raceGroups) {
         this.stringMessages = stringMessages;
         this.initialSettings = settings;
-        this.eventId = eventId;
         this.courseAreas = courseAreas;
         this.raceGroups = raceGroups;
         this.courseAreaCheckBoxMap = new HashMap<UUID, CheckBox>();
         this.regattaCheckBoxMap = new HashMap<String, CheckBox>();
-        this.resultingLink = new Anchor(stringMessages.asLink());
     }
 
     private FlowPanel fillCourseAreaWidget(DataEntryDialog<?> dialog) {
@@ -214,7 +209,6 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         verticalPanel.add(fillCourseAreaWidget(dialog));
         verticalPanel.add(fillRegattaNamesWidget(dialog));
         verticalPanel.add(getAdditionalSettingsWidget(dialog));
-        verticalPanel.add(resultingLink);
         
         return verticalPanel;
     }
@@ -250,11 +244,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         return new Validator<RegattaRaceStatesSettings>() {
             @Override
             public String getErrorMessage(RegattaRaceStatesSettings settings) {
-                String errorMessage = null;
-                if (errorMessage == null) {
-                    updateLinkUrl(eventId, settings);
-                }
-                return errorMessage;
+                return null;
             }
         };
     }
@@ -263,9 +253,4 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     public FocusWidget getFocusWidget() {
         return null;
     }
-    
-    private void updateLinkUrl(UUID eventId, RegattaRaceStatesSettings settings) {
-        resultingLink.setHref(RegattaOverviewEntryPoint.getUrl(eventId, settings));
-    }
-
 }
