@@ -22,14 +22,18 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
 
     public static final String ALL_WINDSOURCES = "ALL";
 
-    private String windSourceToSerialize;
-    private String windSourceIdToSerialize;
-    private TimePoint fromTime;
-    private TimePoint toTime;
+    private final String windSourceToSerialize;
+    private final String windSourceIdToSerialize;
+    private final TimePoint fromTime;
+    private final TimePoint toTime;
     private final WindTrackJsonSerializer windTrackSerializer;
 
-    public TrackedRaceJsonSerializer(WindTrackJsonSerializer windTrackSerializer) {
+    public TrackedRaceJsonSerializer(WindTrackJsonSerializer windTrackSerializer, String windSourceToSerialize, String windSourceIdToSerialize, TimePoint fromTime, TimePoint toTime) {
         this.windTrackSerializer = windTrackSerializer;
+        this.windSourceToSerialize = windSourceToSerialize;
+        this.windSourceIdToSerialize = windSourceIdToSerialize;
+        this.fromTime = fromTime;
+        this.toTime = toTime;
         windSourceToSerialize = WindSourceType.COMBINED.name();
     }
 
@@ -71,18 +75,6 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
         return jsonRace;
     }
 
-    public void setWindSource(String windSourceToSerialize) {
-        this.windSourceToSerialize = windSourceToSerialize;
-    }
-
-    public void setFromTime(TimePoint fromTime) {
-        this.fromTime = fromTime;
-    }
-
-    public void setToTime(TimePoint toTime) {
-        this.toTime = toTime;
-    }
-    
     private List<WindSource> getAvailableWindSources(TrackedRace trackedRace) {
         List<WindSource> windSources = new ArrayList<WindSource>();
         for (WindSource windSource : trackedRace.getWindSources()) {
@@ -92,10 +84,9 @@ public class TrackedRaceJsonSerializer implements JsonSerializer<TrackedRace> {
             windSources.remove(windSourceToExclude);
         }
         windSources.add(new WindSourceImpl(WindSourceType.COMBINED));
+        for (final WindSource trackedLegMiddleWindSource : trackedRace.getWindSources(WindSourceType.LEG_MIDDLE)) {
+            windSources.add(trackedLegMiddleWindSource);
+        }
         return windSources;
     }
-
-    public void setWindSourceId(String windSourceId) {
-        this.windSourceIdToSerialize = windSourceId;
-    }   
 }
