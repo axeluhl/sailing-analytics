@@ -33,9 +33,7 @@ public interface BravoFix extends SensorFix {
     @Statistic(messageKey="pitch", resultDecimals=1)
     double getPitch();
 
-    @Statistic(messageKey="yaw", resultDecimals=1)
-    double getYaw();
+    @Statistic(messageKey = "heel", resultDecimals = 1)
+    double getHeel();
 
-    @Statistic(messageKey="roll", resultDecimals=1)
-    double getRoll();
 }

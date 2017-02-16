@@ -2,6 +2,7 @@ package com.sap.sailing.datamining.data;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.tracking.BravoFix;
@@ -29,4 +30,7 @@ public interface HasBravoFixContext extends HasWindOnTrackedLeg {
     default TimePoint getTimePoint() {
         return getBravoFix().getTimePoint();
     }
+    
+    @Connector(messageKey="VMG")
+    Speed getVelocityMadeGood();
 }
