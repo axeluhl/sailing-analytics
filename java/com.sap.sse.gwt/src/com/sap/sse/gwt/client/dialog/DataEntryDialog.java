@@ -168,12 +168,12 @@ public abstract class DataEntryDialog<T> {
         if (errorMessage == null || errorMessage.isEmpty()) {
             getStatusLabel().setText("");
             getOkButton().setEnabled(true);
+            onChange(result);
         } else {
             getStatusLabel().setText(errorMessage);
             getStatusLabel().setStyleName("errorLabel");
             getOkButton().setEnabled(false);
         }
-        onChange(result);
         return errorMessage == null;
     }
 

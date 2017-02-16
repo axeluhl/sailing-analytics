@@ -11,17 +11,21 @@ import com.sap.sse.gwt.client.StringMessages;
 public class SettingsDialog<SettingsType extends Settings> extends AbstractSettingsDialog<SettingsType> {
 
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages) {
-        this(component, stringMessages, /* animationEnabled */ true);
+        this(component, stringMessages, /* animationEnabled */ true, null);
     }
-
+    
+    public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages, LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator) {
+        this(component, stringMessages, /* animationEnabled */ true, linkWithSettingsGenerator);
+    }
+    
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages,
-            boolean animationEnabled) {
-        this(component, component.getSettingsDialogComponent(), stringMessages, animationEnabled, null);
+            boolean animationEnabled, LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator) {
+        this(component, component.getSettingsDialogComponent(), stringMessages, animationEnabled, linkWithSettingsGenerator, null);
     }
 
     public SettingsDialog(final Component<SettingsType> component, StringMessages stringMessages,
             DialogCallback<SettingsType> callback) {
-        this(component, component.getSettingsDialogComponent(), stringMessages, /* animationEnabled */ true, callback);
+        this(component, component.getSettingsDialogComponent(), stringMessages, /* animationEnabled */ true, null, callback);
     }
 
     /**
@@ -50,8 +54,8 @@ public class SettingsDialog<SettingsType extends Settings> extends AbstractSetti
      */
     private SettingsDialog(final Component<SettingsType> component,
             SettingsDialogComponent<SettingsType> dialogComponent, StringMessages stringMessages,
-            boolean animationEnabled, final DialogCallback<SettingsType> callback) {
-        super(component.getLocalizedShortName(), dialogComponent, stringMessages, animationEnabled,
+            boolean animationEnabled, LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator, final DialogCallback<SettingsType> callback) {
+        super(component.getLocalizedShortName(), dialogComponent, stringMessages, animationEnabled, linkWithSettingsGenerator,
                 new DialogCallback<SettingsType>() {
                     @Override
                     public void cancel() {
