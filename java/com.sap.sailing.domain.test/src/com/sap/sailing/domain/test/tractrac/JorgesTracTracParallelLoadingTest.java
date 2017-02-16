@@ -236,7 +236,7 @@ public class JorgesTracTracParallelLoadingTest {
             fail("Key set differs: a-b="+diff1+", b-a="+diff2+"; in the meantime the following keys were updated: "+outputs.keySet());
         }
         for (String key : firstRunsOutput.keySet()) {
-            assertEquals("values for key "+key+" differ", firstRunsOutput.get(key), outputs.get(key));
+            assertEquals("values for key "+key+" differ", firstRunsOutput.get(key).toString(), secondRunsOutput.get(key).toString());
         }
     }
 }
