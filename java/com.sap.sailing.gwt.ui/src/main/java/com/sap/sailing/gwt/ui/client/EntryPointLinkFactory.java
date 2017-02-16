@@ -7,6 +7,7 @@ import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
 
 public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     public static final String LEADERBOARD_PATH = "/gwt/Leaderboard.html";
+    public static final String AUTOPLAY_PATH = "/gwt/AutoPlay.html";
 
     public static String createRaceBoardLink(Map<String, String> parameters) {
         return createEntryPointLink("/gwt/RaceBoard.html", parameters);

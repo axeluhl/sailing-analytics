@@ -1,12 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.player;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class PlayerPlace extends AbstractBasePlace {
     private final AutoPlayerConfiguration playerConfiguration;
@@ -24,11 +19,7 @@ public class PlayerPlace extends AbstractBasePlace {
         //these are currently regenerated in the PlayerActivity, based on the historydata. Once the settings are properly stored, this should be replaced.
     }
 
-    public PlayerPlace(AutoPlayerConfiguration playerConfiguration,
-            LeaderboardWithHeaderPerspectiveLifecycle leaderboardLifecycle,
-            PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings,
-            RaceBoardPerspectiveLifecycle raceboardLifecycle,
-            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> raceboardSettings) {
+    public PlayerPlace(AutoPlayerConfiguration playerConfiguration) {
         super(AutoPlayerConfiguration.PARAM_EVENTID, playerConfiguration.getEventUidAsString(),
                 AutoPlayerConfiguration.PARAM_FULLSCREEN, String.valueOf(playerConfiguration.isFullscreenMode()), 
                 AutoPlayerConfiguration.PARAM_LEADEROARD_NAME, playerConfiguration.getLeaderboardName(),

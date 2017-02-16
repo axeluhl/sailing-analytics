@@ -16,7 +16,7 @@ public class SettingsDialogForLinkSharing<SettingsType extends Settings> extends
                 true, null);
     }
 
-    private SettingsDialogForLinkSharing(LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator,
+    public SettingsDialogForLinkSharing(LinkWithSettingsGenerator<SettingsType> linkWithSettingsGenerator,
             ComponentLifecycle<SettingsType, ?> componentLifecycle, SettingsType settings,
             StringMessages stringMessages, boolean animationEnabled, DialogCallback<SettingsType> callback) {
         super(componentLifecycle.getLocalizedShortName(), componentLifecycle.getSettingsDialogComponent(settings),
