@@ -4,7 +4,6 @@ import java.util.Calendar;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
@@ -51,11 +50,6 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     @Override
     public CourseArea getCourseArea() {
         return getRegatta().getDefaultCourseArea();
-    }
-    
-    @Override
-    public BoatClass getBoatClass() {
-        return getRegatta().getBoatClass();
     }
     
     @Override

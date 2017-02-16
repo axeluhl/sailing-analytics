@@ -25,9 +25,6 @@ public interface HasTrackedRaceContext {
     @Connector(messageKey="CourseArea", ordinal=3)
     public CourseArea getCourseArea();
     
-    @Connector(messageKey="BoatClass", ordinal=1)
-    public BoatClass getBoatClass();
-    
     @Connector(messageKey="Fleet", ordinal=4)
     public Fleet getFleet();
     
