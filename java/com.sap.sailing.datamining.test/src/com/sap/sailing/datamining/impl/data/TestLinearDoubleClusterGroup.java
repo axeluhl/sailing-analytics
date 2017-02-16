@@ -12,6 +12,7 @@ import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;
 import com.sap.sse.datamining.impl.data.ClusterWithSingleBoundary;
 import com.sap.sse.datamining.impl.data.ComparableClusterBoundary;
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
+import com.sap.sse.datamining.impl.data.LinearDoubleClusterGroup;
 
 // TODO Move to sse bundle, after 49er analysis
 public class TestLinearDoubleClusterGroup {
