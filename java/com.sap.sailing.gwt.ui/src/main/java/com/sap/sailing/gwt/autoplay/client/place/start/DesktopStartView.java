@@ -39,6 +39,7 @@ import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.settings.SettingsToStringSerializer;
 import com.sap.sse.security.ui.client.UserService;
 
 public class DesktopStartView extends Composite implements StartView {
@@ -176,7 +177,13 @@ public class DesktopStartView extends Composite implements StartView {
 
             @Override
             public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {
-                autoplayPerspectiveSettings = editedObject;
+                String settingsString = new SettingsToStringSerializer().fromSettings(editedObject);
+                // TODO testingcode remove once done
+                GWT.log(settingsString);
+                PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> restored = new SettingsToStringSerializer()
+                        .fromString(settingsString, autoplayLifecycle.createDefaultSettings());
+                GWT.log(editedObject.equals(restored) + " Equals " + restored);
+                autoplayPerspectiveSettings = restored;
             }
 
             @Override
@@ -184,8 +191,11 @@ public class DesktopStartView extends Composite implements StartView {
             }
         };
 
+        if (autoplayPerspectiveSettings == null) {
+            autoplayPerspectiveSettings = autoplayLifecycle.createDefaultSettings();
+        }
         SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> dialog = new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(
-                linkWithSettingsGenerator, autoplayLifecycle, autoplayLifecycle.createDefaultSettings(),
+                linkWithSettingsGenerator, autoplayLifecycle, autoplayPerspectiveSettings,
                 StringMessages.INSTANCE, true, callback);
         dialog.show();
 
@@ -205,9 +215,11 @@ public class DesktopStartView extends Composite implements StartView {
 
         if (selectedEvent != null && selectedLeaderboardName != null) {
             // TODO generate place settings url, and directly start other place
+            String settingsString = new SettingsToStringSerializer().fromSettings(autoplayPerspectiveSettings);
             navigator.goToPlayer(new AutoPlayerConfiguration(selectedEvent.id.toString(), selectedLeaderboardName,
                     autoplayPerspectiveSettings.getPerspectiveOwnSettings().isFullscreen(),
-                    autoplayPerspectiveSettings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart()));
+                    autoplayPerspectiveSettings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart()),
+                    settingsString);
         }
     }
 

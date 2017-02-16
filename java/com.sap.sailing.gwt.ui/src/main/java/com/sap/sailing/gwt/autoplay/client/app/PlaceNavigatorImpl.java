@@ -19,8 +19,8 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     }
     
     @Override
-    public void goToPlayer(AutoPlayerConfiguration playerConfig) {
-        PlayerPlace playerPlace = new PlayerPlace(playerConfig);
+    public void goToPlayer(AutoPlayerConfiguration playerConfig, String settingsplace) {
+        PlayerPlace playerPlace = new PlayerPlace(playerConfig, settingsplace);
         placeController.goTo(playerPlace); 
     }
 

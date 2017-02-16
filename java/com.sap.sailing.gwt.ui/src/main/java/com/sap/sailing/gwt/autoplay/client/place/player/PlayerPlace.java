@@ -19,11 +19,12 @@ public class PlayerPlace extends AbstractBasePlace {
         //these are currently regenerated in the PlayerActivity, based on the historydata. Once the settings are properly stored, this should be replaced.
     }
 
-    public PlayerPlace(AutoPlayerConfiguration playerConfiguration) {
+    public PlayerPlace(AutoPlayerConfiguration playerConfiguration, String settingsplace) {
         super(AutoPlayerConfiguration.PARAM_EVENTID, playerConfiguration.getEventUidAsString(),
                 AutoPlayerConfiguration.PARAM_FULLSCREEN, String.valueOf(playerConfiguration.isFullscreenMode()), 
                 AutoPlayerConfiguration.PARAM_LEADEROARD_NAME, playerConfiguration.getLeaderboardName(),
                AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START, String.valueOf(playerConfiguration.getTimeToSwitchBeforeRaceStartInSeconds()));
+
         this.playerConfiguration = playerConfiguration;
     }
 

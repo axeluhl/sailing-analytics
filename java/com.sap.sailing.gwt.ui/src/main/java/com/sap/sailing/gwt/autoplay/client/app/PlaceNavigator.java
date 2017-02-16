@@ -5,5 +5,5 @@ import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 public interface PlaceNavigator {
     void goToStart();
 
-    void goToPlayer(AutoPlayerConfiguration playerConfig);
+    void goToPlayer(AutoPlayerConfiguration playerConfig, String settingsString);
 }
