@@ -60,7 +60,7 @@ public class AccessControlListStoreImpl implements AccessControlListStore {
 
     @Override
     public AccessControlList createAccessControlList(String name, String owner) {
-        AccessControlList acl = new AccessControlListWithStore(name, owner, userStore, this);
+        AccessControlList acl = new AccessControlListWithStore(name, owner, userStore);
         accessControlLists.put(name, acl);
         mongoObjectFactory.storeAccessControlList(acl);
         return acl;

@@ -71,7 +71,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String owner = (String) aclDBObject.get(FieldNames.AccessControlList.OWNER.name());
         @SuppressWarnings("unchecked")
         Map<String, Set<String>> permissionMap = (Map<String, Set<String>>) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name());
-        AccessControlList result = new AccessControlListWithStore(name, owner, permissionMap, userStore, aclStore);
+        AccessControlList result = new AccessControlListWithStore(name, owner, permissionMap, userStore);
         return result;
     }
     

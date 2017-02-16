@@ -110,7 +110,7 @@ public class UserManagementPanel extends DockPanel {
         Button editACLButton = new Button("Edit ACL", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                
+                new EditAccessControlListDialog(stringMessages, userManagementService, aclListDataProvider, aclSingleSelectionModel.getSelectedObject()).show();
             }
         });
         buttonPanel.add(editACLButton);

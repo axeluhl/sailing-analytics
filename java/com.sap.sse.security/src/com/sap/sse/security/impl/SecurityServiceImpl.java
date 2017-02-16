@@ -277,6 +277,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return aclStore.getAccessControlLists();
     }
     
+    @Override
+    public AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap) {
+        for (UserGroup group : permissionMap.keySet()) {
+            aclStore.putPermissions(id, group.getName(), permissionMap.get(group));
+        }
+        return aclStore.getAccessControlListByName(id);
+    }
+    
     /*
      * @param name The name of the user or user group to add
      */
@@ -298,6 +306,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Iterable<UserGroup> getUserGroupList() {
         return userStore.getUserGroups();
+    }
+    
+    @Override
+    public UserGroup getUserGroupByName(String name) {
+        return userStore.getUserGroupByName(name);
     }
     
     @Override

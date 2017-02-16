@@ -2,6 +2,7 @@ package com.sap.sse.security;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.servlet.ServletContext;
@@ -34,6 +35,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     Iterable<AccessControlList> getAccessControlListList();
     
+    AccessControlList updateACL(String id, Map<UserGroup, Set<String>> permissionMap);
+    
     /*
      * @param name The name of the user or user group to add
      */
@@ -45,6 +48,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     AccessControlList removeFromACL(String acl, String permission, String name);
     
     Iterable<UserGroup> getUserGroupList();
+    
+    UserGroup getUserGroupByName(String name);
     
     Iterable<Tenant> getTenantList();
     

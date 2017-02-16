@@ -11,7 +11,6 @@ public class AccessControlListWithStore implements AccessControlList {
     private final String id;
     private String owner;
     
-    private final AccessControlListStore store;
     private final UserStore userStore;
     
     /**
@@ -19,16 +18,15 @@ public class AccessControlListWithStore implements AccessControlList {
      */
     private final Map<String, Set<String>> permissionMap;
     
-    public AccessControlListWithStore(String id, String owner, Map<String, Set<String>> permissionMap, UserStore userStore, AccessControlListStore store) {
+    public AccessControlListWithStore(String id, String owner, Map<String, Set<String>> permissionMap, UserStore userStore) {
         this.id = id;
         this.owner = owner;
         this.permissionMap = permissionMap;
-        this.store = store;
         this.userStore = userStore;
     }
     
-    public AccessControlListWithStore(String id, String owner, UserStore userStore, AccessControlListStore store) {
-        this(id, owner, new HashMap<>(), userStore, store);
+    public AccessControlListWithStore(String id, String owner, UserStore userStore) {
+        this(id, owner, new HashMap<>(), userStore);
     }
     
     @Override
@@ -45,7 +43,6 @@ public class AccessControlListWithStore implements AccessControlList {
     @Override
     public AccessControlList putPermissions(String group, Set<String> permissions) {
         permissionMap.put(group,  permissions);
-        store.putPermissions(id, group, permissions);
         return this;
     }
 
@@ -54,7 +51,6 @@ public class AccessControlListWithStore implements AccessControlList {
         Set<String> permissionsForGroup = permissionMap.get(group);
         if (permissionsForGroup != null) {
             permissionsForGroup.add(permission);
-            store.addPermission(id, group, permission);
         }
         return this;
     }
@@ -64,7 +60,6 @@ public class AccessControlListWithStore implements AccessControlList {
         Set<String> permissionsForGroup = permissionMap.get(group);
         if (permissionsForGroup != null) {
             permissionsForGroup.remove(permission);
-            store.removePermission(id, group, permission);
         }
         return null;
     }

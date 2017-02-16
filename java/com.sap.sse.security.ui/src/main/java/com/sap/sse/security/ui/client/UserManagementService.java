@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.client;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.mail.MailException;
@@ -18,11 +19,15 @@ import com.sap.sse.security.ui.shared.UserGroupDTO;
 public interface UserManagementService extends RemoteService {
     Collection<AccessControlListDTO> getAccessControlListList();
     
+    AccessControlListDTO updateACL(String id, Map<String, Set<String>> permissionStrings);
+    
     AccessControlListDTO addToACL(String acl, String permission, String name);
     
     AccessControlListDTO removeFromACL(String acl, String permission, String name);
     
     Collection<UserGroupDTO> getUserGroupList(boolean withTenants);
+    
+    UserGroupDTO getUserGroupByName(String name);
     
     Collection<TenantDTO> getTenantList();
     

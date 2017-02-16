@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.client;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.security.shared.DefaultRoles;
@@ -15,11 +16,15 @@ import com.sap.sse.security.ui.shared.UserGroupDTO;
 public interface UserManagementServiceAsync {
     void getAccessControlListList(AsyncCallback<Collection<AccessControlListDTO>> callback);
     
+    void updateACL(String id, Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlListDTO> callback);
+    
     void addToACL(String acl, String permission, String name, AsyncCallback<AccessControlListDTO> callback);
     
     void removeFromACL(String acl, String permission, String name, AsyncCallback<AccessControlListDTO> callback);
     
     void getUserGroupList(boolean withTenants, AsyncCallback<Collection<UserGroupDTO>> callback);
+    
+    void getUserGroupByName(String name, AsyncCallback<UserGroupDTO> callback);
     
     void getTenantList(AsyncCallback<Collection<TenantDTO>> callback);
     

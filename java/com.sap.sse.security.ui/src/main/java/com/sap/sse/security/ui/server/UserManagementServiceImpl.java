@@ -137,6 +137,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
+    public AccessControlListDTO updateACL(String id, Map<String, Set<String>> permissionStrings) {
+        Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
+        for (String group : permissionStrings.keySet()) {
+            permissionMap.put(getSecurityService().getUserGroupByName(group), permissionStrings.get(group));
+        }
+        return createAclDTOFromAcl(getSecurityService().updateACL(id, permissionMap));
+    }
+    
+    @Override
     public AccessControlListDTO addToACL(String acl, String permission, String name) {
         return createAclDTOFromAcl(getSecurityService().addToACL(acl, permission, name));
     }
@@ -157,6 +166,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             userGroups.addAll(getTenantList());
         }
         return userGroups;
+    }
+    
+    @Override
+    public UserGroupDTO getUserGroupByName(String name) {
+        return createUserGroupDTOFromUserGroup(getSecurityService().getUserGroupByName(name));
     }
     
     @Override
