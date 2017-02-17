@@ -340,7 +340,6 @@
 </profiles>
 
 <build>
-  <directory>bin</directory>
   <outputDirectory>bin</outputDirectory>
   <testOutputDirectory>bin</testOutputDirectory>
 
