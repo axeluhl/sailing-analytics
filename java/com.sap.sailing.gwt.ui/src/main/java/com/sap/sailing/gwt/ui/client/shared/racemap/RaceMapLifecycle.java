@@ -4,6 +4,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings, RaceMapSettingsDialogComponent> {
+    public static final String ID = "rml";
+
     private final StringMessages stringMessages;
     
     public RaceMapLifecycle(StringMessages stringMessages) {
@@ -30,7 +32,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings, Rac
 
     @Override
     public String getComponentId() {
-        return "rml";
+        return ID;
     }
 
     @Override

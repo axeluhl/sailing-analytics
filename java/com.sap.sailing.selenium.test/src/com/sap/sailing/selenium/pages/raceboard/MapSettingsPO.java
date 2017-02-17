@@ -34,7 +34,9 @@ public class MapSettingsPO extends PageArea {
     }
 
     void waitForAlertAndDispose(WebDriver driver) throws InterruptedException {
-        while (true) {
+        int i = 0;
+        while (i < DEFAULT_WAIT_TIMEOUT_SECONDS) {
+            i++;
             try {
                 Alert alert = driver.switchTo().alert();
                 alert.dismiss();
@@ -43,6 +45,9 @@ public class MapSettingsPO extends PageArea {
                 Thread.sleep(1000);
                 continue;
             }
+        }
+        if (i >= DEFAULT_WAIT_TIMEOUT_SECONDS) {
+            throw new NoAlertPresentException();
         }
     }
 

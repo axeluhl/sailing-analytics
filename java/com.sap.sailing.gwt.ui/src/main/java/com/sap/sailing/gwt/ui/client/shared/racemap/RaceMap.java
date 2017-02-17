@@ -2922,7 +2922,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public String getId() {
-        return "RaceMap";
+        return RaceMapLifecycle.ID;
     }
 
 }

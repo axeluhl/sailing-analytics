@@ -68,7 +68,7 @@ public class SettingsTest extends AbstractSeleniumTest {
         tracTracEvents.setTrackSettings(true, false, false);
         tracTracEvents.startTrackingForRace(this.trackableRace);
         TrackedRacesListPO trackedRacesList = tracTracEvents.getTrackedRacesList();
-        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED); // with the TracAPI, REPLAY races
+        trackedRacesList.waitForTrackedRace(this.trackedRace, Status.FINISHED, 600); // with the TracAPI, REPLAY races
         // status FINISHED when done loading
 
         LeaderboardConfigurationPanelPO leaderboard = adminConsole.goToLeaderboardConfiguration();
