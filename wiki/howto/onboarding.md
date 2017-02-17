@@ -10,7 +10,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 1. Eclipse (Eclipse IDE for Eclipse Committers, e.g. version 4.5.2 "Mars SR2"), http://www.eclipse.org
 2. Eclipse Extensions
-  * Install GWT Eclipse plugin for Eclipse (http://gwt-plugins.github.io/documentation/gwt-eclipse-plugin/Download.html)
+  * Install GWT Eclipse plugin for Eclipse (https://github.com/gwt-plugins/gwt-eclipse-plugin/tree/gpe-fork using http://storage.googleapis.com/gwt-eclipse-plugin/release as the update site URL)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
 3. Git (e.g. msysGit for Windows v2.9.2), http://git-scm.com
 4. MongoDB (e.g. Production Release 2.6.7), download: http://www.mongodb.org/
