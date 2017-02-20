@@ -68,7 +68,17 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
             resultsBuilder.appendHtmlConstant("<tr>");
             resultsBuilder.appendHtmlConstant("<td><b>").appendEscaped(mainKey + ":").appendHtmlConstant("</b></td>");
             for (GroupKey subKey : sortedSubKeys) {
-                resultsBuilder.appendHtmlConstant("<td>").append(unfoldedResultValues.get(mainKey).get(subKey).doubleValue()).appendHtmlConstant("</td>");
+                Number value = null;
+                if (unfoldedResultValues.containsKey(mainKey) &&
+                    unfoldedResultValues.get(mainKey).containsKey(subKey)) {
+                    value = unfoldedResultValues.get(mainKey).get(subKey);
+                }
+                
+                resultsBuilder.appendHtmlConstant("<td>");
+                if (value != null) {
+                    resultsBuilder.append(value.doubleValue());
+                }
+                resultsBuilder.appendHtmlConstant("</td>");
             }
             resultsBuilder.appendHtmlConstant("</tr>");
         }
