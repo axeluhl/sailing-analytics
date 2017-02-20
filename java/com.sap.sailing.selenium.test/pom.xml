@@ -67,6 +67,7 @@
             </goals>
             <configuration>
               <skip>${skipTests}</skip>
+              <skipTests>${skipTests}</skipTests>
               <excludes>
                 <exclude>**/core/**</exclude>
               </excludes>
