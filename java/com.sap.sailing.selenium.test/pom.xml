@@ -53,6 +53,7 @@
         <artifactId>tycho-surefire-plugin</artifactId>
         <configuration>
           <!-- Skip the normal tests, we'll run them in the integration-test phase -->
+          <skipTests>true</skipTests>
           <skip>true</skip>
         </configuration>
 
