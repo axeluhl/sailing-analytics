@@ -26,6 +26,7 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
         <configuration>
           <dependency-resolution>
             <extraRequirements>
@@ -51,6 +52,7 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-surefire-plugin</artifactId>
+		<version>${tycho-version}</version>
         <configuration>
           <!-- Skip the normal tests, we'll run them in the integration-test phase -->
           <skipTests>true</skipTests>
