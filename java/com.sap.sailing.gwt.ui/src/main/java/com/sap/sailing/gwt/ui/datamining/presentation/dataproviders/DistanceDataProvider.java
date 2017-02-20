@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class DistanceDataProvider extends AbstractResultDataProvider<Distance> {
+public class DistanceDataProvider extends AbstractNumericDataProvider<Distance> {
     
     private static final String CENTRAL_ANGLE_RADIAN = "CentralAngleRadian";
     private static final String CENTRAL_ANGLE_DEGREE = "CentralAngleDegree";

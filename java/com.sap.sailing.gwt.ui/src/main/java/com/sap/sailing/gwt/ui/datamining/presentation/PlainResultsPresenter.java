@@ -15,7 +15,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class PlainResultsPresenter extends AbstractResultsPresenterWithDataProviders<Settings> {
+public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Settings> {
     
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
@@ -28,7 +28,7 @@ public class PlainResultsPresenter extends AbstractResultsPresenterWithDataProvi
     }
 
     @Override
-    protected void internalShowNumberResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues) {
         QueryResultDTO<?> result = getCurrentResult();
         SafeHtmlBuilder resultsBuilder = new SafeHtmlBuilder();
         resultsBuilder.appendHtmlConstant("<b>");
