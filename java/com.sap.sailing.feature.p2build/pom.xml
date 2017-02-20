@@ -12,13 +12,6 @@
 	<artifactId>com.sap.sailing.feature.p2build</artifactId>
 	<packaging>eclipse-repository</packaging>
 
-<pluginRepositories>
-   <pluginRepository>
-     <id>tycho-snapshots</id>
-     <url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</url>
-   </pluginRepository>
-</pluginRepositories>
-
 	<build>
 	    <directory>target</directory>
 	    <plugins>
