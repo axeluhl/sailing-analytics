@@ -61,13 +61,13 @@ public interface HasRaceOfCompetitorContext {
     @Statistic(messageKey="NumberOfManeuvers", resultDecimals=0, ordinal=10)
     public int getNumberOfManeuvers();
 
-    @Statistic(messageKey="NumberOfTacks", resultDecimals=2, ordinal=11)
+    @Statistic(messageKey="NumberOfTacks", resultDecimals=0, ordinal=11)
     public int getNumberOfTacks();
 
-    @Statistic(messageKey="NumberOfJibes", resultDecimals=2, ordinal=12)
+    @Statistic(messageKey="NumberOfJibes", resultDecimals=0, ordinal=12)
     public int getNumberOfJibes();
 
-    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=2, ordinal=13)
+    @Statistic(messageKey="NumberOfPenaltyCircles", resultDecimals=0, ordinal=13)
     public int getNumberOfPenaltyCircles();
     
 }

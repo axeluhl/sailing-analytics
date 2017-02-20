@@ -194,6 +194,7 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     @Override
     protected void internalShowNumberResult(Map<GroupKey, Number> resultValues) {
         this.currentResultValues = resultValues;
+        decimalsListBox.setValue(getCurrentResult().getValueDecimals(), false);
         updateKeyComparatorListBox();
         resetChartSeries();
         updateChartLabels();
