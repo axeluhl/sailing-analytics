@@ -10,9 +10,9 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderComponentContext;
+import com.sap.sailing.gwt.autoplay.client.place.start.AutoplayPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.place.start.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspective;
-import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
@@ -22,9 +22,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardComponentContext;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
@@ -63,22 +61,15 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     // raceboard perspective related attributes
     private RegattaAndRaceIdentifier currentLiveRace;
     
-    private LeaderboardWithHeaderPerspectiveLifecycle leaderboardLifecycle;
-    private PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings;
-    private RaceBoardPerspectiveLifecycle raceboardLifecycle;
-    private PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> raceboardSettings;
-
     private final PlayerView playerView;
-    private final AutoPlayerConfiguration autoPlayerConfiguration;
-    
-    private final LeaderboardWithHeaderComponentContext leaderboardWithHeaderContext;
-    private final RaceBoardComponentContext raceBoardContext;
-    
-    public AutoPlayController(LeaderboardWithHeaderComponentContext leaderboardWithHeaderContext, RaceBoardComponentContext raceBoardContext, SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-            UserService userService, ErrorReporter errorReporter, AutoPlayerConfiguration autoPlayerConfiguration,
-            UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails, PlayerView playerView) {
-        this.leaderboardWithHeaderContext = leaderboardWithHeaderContext;
-        this.raceBoardContext = raceBoardContext;
+    private final AutoPlayerContext autoPlayerConfiguration;
+    private PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings;
+    private AutoplayPerspectiveLifecycle autoplayLiveCycle;
+
+    public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+            UserService userService, ErrorReporter errorReporter, AutoPlayerContext autoPlayerConfiguration,
+            PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> settings,
+            UserAgentDetails userAgent, PlayerView playerView, AutoplayPerspectiveLifecycle autoplayLiveCycle) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.userService = userService;
@@ -86,15 +77,18 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
         this.autoPlayerConfiguration = autoPlayerConfiguration;
         this.userAgent = userAgent;
         this.playerView = playerView;
+        this.settings = settings;
+        this.autoplayLiveCycle = autoplayLiveCycle;
 
         asyncActionsExecutor = new AsyncActionsExecutor();
         currentLeaderboard = null;
         leaderboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS);
-        leaderboardTimer.setLivePlayDelayInMillis(delayToLiveInMillis);
+        leaderboardTimer
+                .setLivePlayDelayInMillis(settings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart());
         leaderboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_LEADERBOARD);
         leaderboardTimer.play();
         raceboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
-        raceboardTimer.setLivePlayDelayInMillis(delayToLiveInMillis);
+        raceboardTimer.setLivePlayDelayInMillis(settings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart());
         raceboardTimer.setRefreshInterval(REFRESH_INTERVAL_IN_MILLIS_RACEBOARD);
         raceboardTimer.play();
 
@@ -105,21 +99,18 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     private void showLeaderboard() {
         if (activeTvView != AutoPlayModes.Leaderboard) {
             
-            if (leaderboardLifecycle == null) {
-                leaderboardLifecycle = leaderboardWithHeaderContext.getRootLifecycle();
-            }
-            if (leaderboardSettings == null) {
-                leaderboardSettings = leaderboardWithHeaderContext.getDefaultSettings();
-            }
-            
             playerView.clearContent();
-            boolean withFullscreenButton = autoPlayerConfiguration.isFullscreenMode() && isInitialScreen;
+            boolean withFullscreenButton = settings.getPerspectiveOwnSettings().isFullscreen() && isInitialScreen;
+
+            PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> leaderboardSettings = settings
+                    .findSettingsByComponentId(autoplayLiveCycle.getLeaderboardLifecycle().getComponentId());
+
             LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(null,
-                    leaderboardWithHeaderContext, leaderboardLifecycle, leaderboardSettings, 
+                    null, autoplayLiveCycle.getLeaderboardLifecycle(), leaderboardSettings, 
                     sailingService, userService, asyncActionsExecutor,
                     new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
                     autoPlayerConfiguration.getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
-                    userAgent, withFullscreenButton);
+                    withFullscreenButton);
 
             playerView.setContent(leaderboardPerspective);
             currentLiveRace = null;
@@ -138,15 +129,13 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                 @Override
                 public void onSuccess(RaceboardDataDTO result) {
                     
-                    if (raceboardLifecycle == null) {
-                        raceboardLifecycle = raceBoardContext.getRootLifecycle();
-                    }
-                    if (raceboardSettings == null) {
-                        raceboardSettings = raceBoardContext.getDefaultSettings();
-                    }
                     playerView.clearContent();
 
-                    RaceBoardPanel raceboardPerspective = new RaceBoardPanel(null, raceBoardContext, raceboardLifecycle,
+                    PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> raceboardSettings = settings
+                            .findSettingsByComponentId(autoplayLiveCycle.getRaceboardLifecycle().getComponentId());
+
+                    RaceBoardPanel raceboardPerspective = new RaceBoardPanel(null, null,
+                            autoplayLiveCycle.getRaceboardLifecycle(),
                             raceboardSettings,
                             sailingService, mediaService, userService, asyncActionsExecutor,
                             result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, autoPlayerConfiguration.getLeaderboardName(), 
@@ -217,7 +206,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                     RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
                     if (raceTimes != null && raceTimes.startOfTracking != null && raceTimes.getStartOfRace() != null && raceTimes.endOfRace == null) {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
-                        long timeToSwitchBeforeRaceStartInMs = autoPlayerConfiguration.getTimeToSwitchBeforeRaceStartInSeconds() * 1000;
+                        long timeToSwitchBeforeRaceStartInMs = settings.getPerspectiveOwnSettings()
+                                .getTimeToSwitchBeforeRaceStart() * 1000;
                         long delayToLiveInMs = raceTimes.delayToLiveInMs;
                         // the switch to the live race should happen at a defined timepoint before the race start (default is 3 min) 
                         if (serverTimePointAsMillis - delayToLiveInMs > startTimeInMs - timeToSwitchBeforeRaceStartInMs) {

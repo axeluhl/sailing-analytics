@@ -23,6 +23,20 @@ public class SettingsToStringSerializer {
         return writeParameterMapToString(serializedValues);
     }
 
+    public String fromSettings(GenericSerializableSettings context, GenericSerializableSettings settings) {
+        Map<String, Iterable<String>> serializedContext = settingsToStringMapSerializer.serialize(context);
+        Map<String, Iterable<String>> serializedValues = settingsToStringMapSerializer.serialize(settings);
+        serializedValues.putAll(serializedContext);
+        return writeParameterMapToString(serializedValues);
+    }
+
+    public String fromSettings(GenericSerializableSettings context, SettingsMap settings) {
+        Map<String, Iterable<String>> serializedContext = settingsToStringMapSerializer.serialize(context);
+        Map<String, Iterable<String>> serializedValues = settingsToStringMapSerializer.serialize(settings);
+        serializedValues.putAll(serializedContext);
+        return writeParameterMapToString(serializedValues);
+    }
+
     private String writeParameterMapToString(Map<String, Iterable<String>> serializedValues) {
         String settingsString = "";
         for (Entry<String, Iterable<String>> val : serializedValues.entrySet()) {
@@ -36,6 +50,21 @@ public class SettingsToStringSerializer {
             }
         }
         return settingsString;
+    }
+
+    public final <T extends GenericSerializableSettings, C extends GenericSerializableSettings> void fromString(
+            String serializedSettings, C contextSettings,
+            T settings) {
+        Map<String, Iterable<String>> values = deserializeStringToMap(serializedSettings);
+        settingsToStringMapSerializer.deserialize(settings, values);
+        settingsToStringMapSerializer.deserialize(contextSettings, values);
+    }
+
+    public final <T extends SettingsMap, C extends GenericSerializableSettings> void fromString(
+            String serializedSettings, C contextSettings, T settings) {
+        Map<String, Iterable<String>> values = deserializeStringToMap(serializedSettings);
+        settingsToStringMapSerializer.deserializeSettingsMap(settings, values);
+        settingsToStringMapSerializer.deserialize(contextSettings, values);
     }
 
     public final <T extends GenericSerializableSettings> T fromString(String serializedSettings, T settings) {

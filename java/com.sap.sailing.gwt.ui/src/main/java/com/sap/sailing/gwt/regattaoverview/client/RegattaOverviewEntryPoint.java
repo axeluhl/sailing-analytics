@@ -88,7 +88,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     }
 
     private void createAndAddRegattaPanel(RegattaOverviewBaseSettings regattaOverviewContextDefinition) {
-        regattaPanel = new RegattaOverviewPanel(sailingService, getUserService(), this, getStringMessages(), regattaOverviewContextDefinition, userAgent);
+        regattaPanel = new RegattaOverviewPanel(sailingService, getUserService(), this, getStringMessages(),
+                regattaOverviewContextDefinition);
 
         regattaPanel.addHandler(new EventDTOLoadedEvent.Handler() {
             @Override

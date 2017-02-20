@@ -124,7 +124,6 @@ import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
  * A leaderboard essentially consists of a table widget that in its columns displays the entries.
@@ -366,10 +365,10 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
     public LeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
-            ErrorReporter errorReporter, final StringMessages stringMessages, final UserAgentDetails userAgent,
+            ErrorReporter errorReporter, final StringMessages stringMessages,
             boolean showRaceDetails) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, false, /* preSelectedRace */null,
-                competitorSelectionProvider, null, leaderboardName, errorReporter, stringMessages, userAgent,
+                competitorSelectionProvider, null, leaderboardName, errorReporter, stringMessages, 
                 showRaceDetails);
     }
 
@@ -377,14 +376,14 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
             AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded,
             RegattaAndRaceIdentifier preSelectedRace, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardGroupName, String leaderboardName, ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails) {
+            final StringMessages stringMessages, boolean showRaceDetails) {
         this(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
                 competitorSelectionProvider,
                 new Timer(
                         // perform the first request as "live" but don't by default auto-play
                         PlayModes.Live, PlayStates.Paused,
                         /* delayBetweenAutoAdvancesInMilliseconds */ LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS),
-                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, userAgent, showRaceDetails,
+                leaderboardGroupName, leaderboardName, errorReporter, stringMessages, showRaceDetails,
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
                 /* optionalRaceTimesInfoProvider */ null, /* autoExpandLastRaceColumn */ false,
                 /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
@@ -395,7 +394,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
             AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded,
             RegattaAndRaceIdentifier preSelectedRace, CompetitorSelectionProvider competitorSelectionProvider,
             Timer timer, String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserAgentDetails userAgent, boolean showRaceDetails,
+            final StringMessages stringMessages, boolean showRaceDetails,
             CompetitorFilterPanel competitorSearchTextBox, boolean showSelectionCheckbox,
             RaceTimesInfoProvider optionalRaceTimesInfoProvider, boolean autoExpandLastRaceColumn,
             boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus,

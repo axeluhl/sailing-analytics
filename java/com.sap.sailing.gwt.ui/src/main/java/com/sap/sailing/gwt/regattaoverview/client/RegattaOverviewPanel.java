@@ -43,7 +43,6 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
@@ -72,7 +71,6 @@ public class RegattaOverviewPanel extends SimplePanel {
     private final Anchor refreshNowButton;
     private final Anchor startStopUpdatingButton;
     private CheckBox leaderboardCheckBox;
-    private final UserAgentDetails userAgent;
     private final FlowPanel repeatedInfoLabel = new FlowPanel();
     
     private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
@@ -87,8 +85,7 @@ public class RegattaOverviewPanel extends SimplePanel {
             UserService userService,
             final ErrorReporter errorReporter, 
             final StringMessages stringMessages, 
-            RegattaOverviewBaseSettings regattaOverviewContextDefinition, 
-            UserAgentDetails userAgent) {
+            RegattaOverviewBaseSettings regattaOverviewContextDefinition) {
         
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -97,7 +94,6 @@ public class RegattaOverviewPanel extends SimplePanel {
         this.serverUpdateTimer = new Timer(PlayModes.Live, serverUpdateRateInMs);
         this.uiUpdateTimer = new Timer(PlayModes.Live, uiUpdateRateInMs);
         this.eventDTO = null;
-        this.userAgent = userAgent;
         this.raceGroupDTOs = new ArrayList<RaceGroupDTO>();
         this.eventRaceGroupListeners = new ArrayList<EventAndRaceGroupAvailabilityListener>();
 
@@ -271,7 +267,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                                             /*preSelectedRace*/null, 
                                             competitorSelectionProvider, 
                                             null, leaderboard.name, 
-                                            errorReporter, stringMessages, userAgent, /*showRaceDetails*/false);
+                                            errorReporter, stringMessages, /* showRaceDetails */false);
                                     leaderboardsTabPanel.add(leaderboardPanel,
                                             (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName())
                                             + " " + stringMessages.leaderboard());

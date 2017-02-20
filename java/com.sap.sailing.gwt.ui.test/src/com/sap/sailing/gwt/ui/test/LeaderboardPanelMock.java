@@ -12,7 +12,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class LeaderboardPanelMock extends LeaderboardPanel {
 
@@ -21,7 +20,8 @@ public class LeaderboardPanelMock extends LeaderboardPanel {
             StringMessages stringMessages) {
         super(null, null, sailingService, new AsyncActionsExecutor(), new LeaderboardSettings(),
                 new CompetitorSelectionModel(
-                /* hasMultiSelection */true), leaderboardName, errorReporter, stringMessages, new UserAgentDetails("gecko1_8"), /* showRaceDetails */ true);
+                        /* hasMultiSelection */true),
+                leaderboardName, errorReporter, stringMessages, /* showRaceDetails */ true);
     }
 
     @Override

@@ -488,7 +488,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
                 leaderboardSettings,
                 selectedRaceIdentifier != null, selectedRaceIdentifier,
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter, stringMessages,
-                userAgent, /* showRaceDetails */ true, competitorSearchTextBox,
+                /* showRaceDetails */ true, competitorSearchTextBox,
                 /* showSelectionCheckbox */ true, raceTimesInfoProvider, /* autoExpandLastRaceColumn */ false,
                 /* don't adjust the timer's delay from the leaderboard; control it solely from the RaceTimesInfoProvider */ false,
                 /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);

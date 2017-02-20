@@ -41,8 +41,10 @@ public abstract class AbstractSettingsDialog<SettingsType extends Settings> exte
     
     @Override
     protected void onChange(SettingsType result) {
-        String link = linkWithSettingsGenerator.createUrl(result);
-        shareAnchor.setHref(link);
+        if (linkWithSettingsGenerator != null) {
+            String link = linkWithSettingsGenerator.createUrl(result);
+            shareAnchor.setHref(link);
+        }
     }
 
     @Override

@@ -30,6 +30,14 @@ public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<A
         return new AutoplaySettingsDialogComponent(settings);
     }
 
+    public LeaderboardWithHeaderPerspectiveLifecycle getLeaderboardLifecycle() {
+        return leaderboardLifecycle;
+    }
+
+    public RaceBoardPerspectiveLifecycle getRaceboardLifecycle() {
+        return raceboardLifecycle;
+    }
+
     @Override
     public String getLocalizedShortName() {
         return StringMessages.INSTANCE.autoplayConfiguration();

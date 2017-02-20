@@ -26,7 +26,6 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
  * A viewer for an overall series leaderboard. Additionally the viewer can render a chart for the series leaderboard and
@@ -43,18 +42,17 @@ public class EventSeriesAnalyticsDataManager {
     private final CompetitorSelectionModel competitorSelectionProvider;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ErrorReporter errorReporter;
-    private final UserAgentDetails userAgent;
     private final SailingServiceAsync sailingService;
     private final Timer timer;
     private final int MAX_COMPETITORS_IN_CHART = 30; 
 
-    public EventSeriesAnalyticsDataManager(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
+    public EventSeriesAnalyticsDataManager(final SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter) {
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.timer = timer;
         this.errorReporter = errorReporter;
-        this.userAgent = userAgent;
         this.overallLeaderboardPanel = null;
         this.multiCompetitorChart = null;
     }
@@ -67,7 +65,8 @@ public class EventSeriesAnalyticsDataManager {
             overallLeaderboardPanel = new LeaderboardPanel(parent, context, sailingService, asyncActionsExecutor,
                     leaderboardSettings, true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                    StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,
+                    StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
+                    /* showSelectionCheckbox */ true,
                     /* raceTimesInfoProvider */null, autoExpandLastRaceColumn, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                     /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
         }
@@ -95,7 +94,7 @@ public class EventSeriesAnalyticsDataManager {
             multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, preselectedRace, errorReporter, StringMessages.INSTANCE,
-                    userAgent, showRaceDetails, autoExpandLastRaceColumn, null);
+                    showRaceDetails, autoExpandLastRaceColumn, null);
         }
         return multiLeaderboardPanel;
     }

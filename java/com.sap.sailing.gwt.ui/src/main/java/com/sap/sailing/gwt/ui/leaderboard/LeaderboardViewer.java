@@ -18,7 +18,6 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
  * A viewer for a single leaderboard and a leaderboard chart.
@@ -36,11 +35,11 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
             final Timer timer, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserAgentDetails userAgent, DetailType chartDetailType) {
+            final StringMessages stringMessages, DetailType chartDetailType) {
         this(parent, componentContext, lifecycle, settings, new CompetitorSelectionModel(/* hasMultiSelection */true),
                 sailingService, asyncActionsExecutor, timer,
                 preselectedRace, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, userAgent, chartDetailType);
+                stringMessages, chartDetailType);
     }
 
     private LeaderboardViewer(Component<?> parent,
@@ -51,14 +50,14 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
             final Timer timer, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, final UserAgentDetails userAgent, DetailType chartDetailType) {
+            final StringMessages stringMessages, DetailType chartDetailType) {
         super(parent, componentContext, lifecycle, settings, competitorSelectionModel, asyncActionsExecutor, timer,
                 stringMessages);
         // FIXME: Cleanup with java8 using supplier
         init(new LeaderboardPanel(this, getComponentContext(), sailingService, asyncActionsExecutor,
                 settings.findSettingsByComponentId(LeaderboardPanelLifecycle.ID), preselectedRace != null,
                 preselectedRace, competitorSelectionModel, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, userAgent, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
+                stringMessages, settings.getPerspectiveOwnSettings().isShowRaceDetails(),
                 /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null,
                 settings.getPerspectiveOwnSettings().isAutoExpandLastRaceColumn(), /* adjustTimerDelay */ true,
                 /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false,
@@ -101,7 +100,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
                                         asyncActionsExecutor,
                                         settings.findSettingsByComponentId(OverallLeaderboardPanelLifecycle.ID),
                                         preselectedRace != null, preselectedRace, competitorSelectionProvider, timer,
-                                        leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages, userAgent,
+                                        leaderboardGroupName, overallLeaderboardName, errorReporter, stringMessages,
                                         false, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null,
                                         false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                                         /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);

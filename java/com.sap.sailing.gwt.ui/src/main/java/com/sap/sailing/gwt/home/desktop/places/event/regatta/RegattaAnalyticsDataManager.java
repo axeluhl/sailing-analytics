@@ -18,7 +18,6 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.perspective.SimpleComponentContext;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
  * A class managing analytical data on the regatta level (like leaderboard, regatta rank, etc.)
@@ -32,17 +31,16 @@ public class RegattaAnalyticsDataManager {
     private final CompetitorSelectionModel competitorSelectionProvider;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final ErrorReporter errorReporter;
-    private final UserAgentDetails userAgent;
     private final SailingServiceAsync sailingService;
     private final Timer timer;
     
-    public RegattaAnalyticsDataManager(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter, UserAgentDetails userAgent) {
+    public RegattaAnalyticsDataManager(final SailingServiceAsync sailingService,
+            AsyncActionsExecutor asyncActionsExecutor, Timer timer, ErrorReporter errorReporter) {
         this.competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */true);
         this.sailingService = sailingService;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.timer = timer;
         this.errorReporter = errorReporter;
-        this.userAgent = userAgent;
         this.leaderboardPanel = null;
         this.multiCompetitorChart = null;
     }
@@ -57,7 +55,8 @@ public class RegattaAnalyticsDataManager {
                     leaderboardSettings,
                     true, preselectedRace,
                     competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                    StringMessages.INSTANCE, userAgent, showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null, autoExpandLastRaceColumn,
+                    StringMessages.INSTANCE, showRaceDetails, /* competitorSearchTextBox */ null,
+                    /* showSelectionCheckbox */ true, /* raceTimesInfoProvider */ null, autoExpandLastRaceColumn,
                     /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false, /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ true);
         }
         return leaderboardPanel;

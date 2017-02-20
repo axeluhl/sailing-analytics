@@ -34,8 +34,8 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
@@ -139,7 +139,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                             final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(null, context,
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
                                     timer, null, preselectedRace, leaderboardGroupName, leaderboardName,
-                                    LeaderboardEntryPoint.this, getStringMessages(), userAgent, getActualChartDetailType(defaultSettings));
+                                    LeaderboardEntryPoint.this, getStringMessages(),
+                                    getActualChartDetailType(defaultSettings));
                             createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextSettings);
                         }
 
@@ -166,7 +167,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
                             final LeaderboardViewer leaderboardViewer = new LeaderboardViewer(null, context,
                                     rootComponentLifeCycle, defaultSettings, sailingService, new AsyncActionsExecutor(),
                                     timer, preselectedRace, leaderboardGroupName, leaderboardName,
-                                    LeaderboardEntryPoint.this, getStringMessages(), userAgent, getActualChartDetailType(defaultSettings));
+                                    LeaderboardEntryPoint.this, getStringMessages(), getActualChartDetailType(defaultSettings));
                             createUi(leaderboardViewer, defaultSettings, timer, leaderboardContextSettings);
                         }
 

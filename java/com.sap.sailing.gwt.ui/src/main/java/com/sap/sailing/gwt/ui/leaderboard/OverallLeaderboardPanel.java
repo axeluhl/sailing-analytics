@@ -10,7 +10,6 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class OverallLeaderboardPanel extends LeaderboardPanel {
     public OverallLeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context,
@@ -18,13 +17,13 @@ public class OverallLeaderboardPanel extends LeaderboardPanel {
             boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
             String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-            UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
+            boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter,
             boolean showCompetitorFilterStatus, boolean enableSyncScroller) {
         super(parent, context, sailingService, asyncActionsExecutor, settings, isEmbedded, preSelectedRace,
                 competitorSelectionProvider, timer, leaderboardGroupName, leaderboardName, errorReporter,
-                stringMessages, userAgent, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
+                stringMessages, showRaceDetails, competitorSearchTextBox, showSelectionCheckbox,
                 optionalRaceTimesInfoProvider, autoExpandLastRaceColumn, adjustTimerDelay, autoApplyTopNFilter,
                 showCompetitorFilterStatus, enableSyncScroller);
     }

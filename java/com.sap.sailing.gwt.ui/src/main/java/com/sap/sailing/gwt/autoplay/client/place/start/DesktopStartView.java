@@ -22,11 +22,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
-import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
+import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerContext;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -36,7 +35,6 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
-import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.SettingsToStringSerializer;
@@ -169,21 +167,11 @@ public class DesktopStartView extends Composite implements StartView {
     }
 
     protected void openSettingsDialog() {
-        final AutoplayContextSettings autoplayContextSettings = new AutoplayContextSettings();
-        final LinkWithSettingsGenerator<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
-                EntryPointLinkFactory.AUTOPLAY_PATH, autoplayContextSettings);
-
         DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> callback = new DialogCallback<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>() {
 
             @Override
             public void ok(PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> editedObject) {
-                String settingsString = new SettingsToStringSerializer().fromSettings(editedObject);
-                // TODO testingcode remove once done
-                GWT.log(settingsString);
-                PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings> restored = new SettingsToStringSerializer()
-                        .fromString(settingsString, autoplayLifecycle.createDefaultSettings());
-                GWT.log(editedObject.equals(restored) + " Equals " + restored);
-                autoplayPerspectiveSettings = restored;
+                autoplayPerspectiveSettings = editedObject;
             }
 
             @Override
@@ -194,10 +182,9 @@ public class DesktopStartView extends Composite implements StartView {
         if (autoplayPerspectiveSettings == null) {
             autoplayPerspectiveSettings = autoplayLifecycle.createDefaultSettings();
         }
-        SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>> dialog = new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(
-                linkWithSettingsGenerator, autoplayLifecycle, autoplayPerspectiveSettings,
-                StringMessages.INSTANCE, true, callback);
-        dialog.show();
+
+        new SettingsDialogForLinkSharing<PerspectiveCompositeSettings<AutoplayPerspectiveOwnSettings>>(null,
+                autoplayLifecycle, autoplayPerspectiveSettings, StringMessages.INSTANCE, true, callback).show();
 
     }
 
@@ -215,11 +202,9 @@ public class DesktopStartView extends Composite implements StartView {
 
         if (selectedEvent != null && selectedLeaderboardName != null) {
             // TODO generate place settings url, and directly start other place
-            String settingsString = new SettingsToStringSerializer().fromSettings(autoplayPerspectiveSettings);
-            navigator.goToPlayer(new AutoPlayerConfiguration(selectedEvent.id.toString(), selectedLeaderboardName,
-                    autoplayPerspectiveSettings.getPerspectiveOwnSettings().isFullscreen(),
-                    autoplayPerspectiveSettings.getPerspectiveOwnSettings().getTimeToSwitchBeforeRaceStart()),
-                    settingsString);
+            String contextAndSettings = new SettingsToStringSerializer().fromSettings(
+                    new AutoPlayerContext(selectedEvent.id, selectedLeaderboardName), autoplayPerspectiveSettings);
+            navigator.goToPlayer(contextAndSettings);
         }
     }
 

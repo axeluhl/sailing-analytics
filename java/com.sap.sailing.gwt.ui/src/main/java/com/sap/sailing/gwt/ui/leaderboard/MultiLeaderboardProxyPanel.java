@@ -31,9 +31,8 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.AbstractLazyComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 
 /**
  * A panel managing multiple {@link LeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
@@ -51,7 +50,6 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     private String selectedLeaderboardName;
 
     private final AsyncActionsExecutor asyncActionsExecutor;
-    private final UserAgentDetails userAgent;
     private final boolean showRaceDetails;
     private final Timer timer;
 
@@ -73,7 +71,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
             AsyncActionsExecutor asyncActionsExecutor,
             Timer timer, boolean isEmbedded, String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
             ErrorReporter errorReporter, StringMessages stringMessages,
-            UserAgentDetails userAgent, boolean showRaceDetails, boolean autoExpandLastRaceColumn,
+            boolean showRaceDetails, boolean autoExpandLastRaceColumn,
             LeaderboardSettings settings) {
         super(parent, context);
 
@@ -87,7 +85,6 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
         this.sailingService = sailingService;
         this.metaLeaderboardName = metaLeaderboardName;
         this.asyncActionsExecutor = asyncActionsExecutor;
-        this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
         this.timer = timer;
         this.isEmbedded = isEmbedded;
@@ -247,7 +244,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
                     sailingService,
                     asyncActionsExecutor, toMerge, isEmbedded,
                     /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
-                    null, newSelectedLeaderboardName, errorReporter, stringMessages, userAgent,
+                    null, newSelectedLeaderboardName, errorReporter, stringMessages, 
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
                     false, /* adjustTimerDelay */ true, /* autoApplyTopNFilter */ false,
                     /* showCompetitorFilterStatus */ false, /* enableSyncScroller */ false);
