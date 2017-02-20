@@ -4,12 +4,13 @@ import java.util.LinkedHashMap;
 import java.util.function.Function;
 
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class BearingDataProvider extends AbstractDataProvider<Bearing> {
+public class BearingDataProvider extends AbstractResultDataProvider<Bearing> {
     
-    private static final String DEGREES = "Angle in Degrees";
-    private static final String RADIANS = "Angle in Radians";
+    private static final String DEGREES = "Degrees";
+    private static final String RADIANS = "Radians";
 
     public BearingDataProvider() {
         super(Bearing.class, getMappings());
@@ -25,5 +26,16 @@ public class BearingDataProvider extends AbstractDataProvider<Bearing> {
     @Override
     public String getDefaultDataKeyFor(QueryResultDTO<?> result) {
         return DEGREES;
+    }
+
+    @Override
+    public String getLocalizedNameForDataKey(StringMessages stringMessages, String dataKey) {
+        switch (dataKey) {
+        case DEGREES:
+            return stringMessages.angleInDegree();
+        case RADIANS:
+            return stringMessages.angleInRadian();
+        }
+        throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
     }
 }

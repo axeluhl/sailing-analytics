@@ -7,9 +7,13 @@ import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AbstractResultDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.BearingDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DistanceDataProvider;
@@ -24,10 +28,12 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
     
     private final NumberDataProvider numberDataProvider;
     private final Map<String, AbstractResultDataProvider<? extends Object>> dataProviders;
+    private final ValueListBox<String> dataSelectionListBox;
     private AbstractResultDataProvider<? extends Object> currentDataProvider;
 
     public AbstractResultsPresenterWithDataProviders(StringMessages stringMessages) {
         super(stringMessages);
+        
         numberDataProvider = new NumberDataProvider();
         dataProviders = new HashMap<>();
         AbstractResultDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();
@@ -36,6 +42,21 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
         dataProviders.put(durationDataProvider.getResultType().getName(), durationDataProvider);
         AbstractResultDataProvider<Bearing> bearingDataProvider = new BearingDataProvider();
         dataProviders.put(bearingDataProvider.getResultType().getName(), bearingDataProvider);
+        
+        dataSelectionListBox = new ValueListBox<>(new AbstractObjectRenderer<String>() {
+            @Override
+            protected String convertObjectToString(String dataKey) {
+                return currentDataProvider.getLocalizedNameForDataKey(stringMessages, dataKey);
+            }
+        });
+        dataSelectionListBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
+                internalShowNumberResult(resultValues);
+            }
+        });
+        addControl(dataSelectionListBox);
     }
     
     protected void internalShowResults(QueryResultDTO<?> result) {
@@ -53,12 +74,6 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
         } else {
             showError(getStringMessages().cantDisplayDataOfType(getCurrentResult().getResultType()));
         }
-    }
-    
-    @Override
-    protected void onDataSelectionValueChange() {
-        Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-        internalShowNumberResult(resultValues);
     }
     
     private AbstractResultDataProvider<? extends Object> selectCurrentDataProvider() {
