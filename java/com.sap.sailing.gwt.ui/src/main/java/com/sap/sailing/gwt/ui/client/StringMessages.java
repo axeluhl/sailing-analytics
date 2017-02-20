@@ -1777,4 +1777,20 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String eventRegattaHeaderLegendAudioNo();
     String set();
     String gribWindImport_Title();
+    String angleInDegree();
+    String angleInRadian();
+    String centralAngleInRadian();
+    String centralAngleInDegree();
+    String kilometers();
+    String meters();
+    String nauticalMiles();
+    String seaMiles();
+    String geographicalMiles();
+    String days();
+    String hours();
+    String minutes();
+    String seconds();
+    String milliseconds();
+    String floatNumber();
+    String integer();
 }
