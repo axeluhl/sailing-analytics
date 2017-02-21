@@ -10,12 +10,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public abstract class AbstractResultDataProvider<T> {
+public abstract class AbstractNumericDataProvider<T> {
 
     private final Class<T> resultType;
     private final LinkedHashMap<String, Function<T, Number>> mappings;
 
-    public AbstractResultDataProvider(Class<T> resultType, LinkedHashMap<String, Function<T, Number>> mappings) {
+    public AbstractNumericDataProvider(Class<T> resultType, LinkedHashMap<String, Function<T, Number>> mappings) {
         this.resultType = resultType;
         this.mappings = mappings;
     }
@@ -26,6 +26,10 @@ public abstract class AbstractResultDataProvider<T> {
 
     public Collection<String> getDataKeys() {
         return mappings.keySet();
+    }
+
+    public boolean isValidDataKey(String dataKey) {
+        return mappings.containsKey(dataKey);
     }
     
     public Map<GroupKey, Number> getData(QueryResultDTO<?> result, String dataKey) {

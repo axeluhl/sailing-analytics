@@ -14,7 +14,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
-import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AbstractResultDataProvider;
+import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AbstractNumericDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.BearingDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DistanceDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DurationDataProvider;
@@ -24,23 +24,23 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public abstract class AbstractResultsPresenterWithDataProviders<SettingsType extends Settings> extends AbstractResultsPresenter<Settings> {
+public abstract class AbstractNumericResultsPresenter<SettingsType extends Settings> extends AbstractResultsPresenter<Settings> {
     
     private final NumberDataProvider numberDataProvider;
-    private final Map<String, AbstractResultDataProvider<? extends Object>> dataProviders;
+    private final Map<String, AbstractNumericDataProvider<? extends Object>> dataProviders;
     private final ValueListBox<String> dataSelectionListBox;
-    private AbstractResultDataProvider<? extends Object> currentDataProvider;
+    private AbstractNumericDataProvider<? extends Object> currentDataProvider;
 
-    public AbstractResultsPresenterWithDataProviders(StringMessages stringMessages) {
+    public AbstractNumericResultsPresenter(StringMessages stringMessages) {
         super(stringMessages);
         
         numberDataProvider = new NumberDataProvider();
         dataProviders = new HashMap<>();
-        AbstractResultDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();
+        AbstractNumericDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();
         dataProviders.put(distanceDataProvider.getResultType().getName(), distanceDataProvider);
-        AbstractResultDataProvider<Duration> durationDataProvider = new DurationDataProvider();
+        AbstractNumericDataProvider<Duration> durationDataProvider = new DurationDataProvider();
         dataProviders.put(durationDataProvider.getResultType().getName(), durationDataProvider);
-        AbstractResultDataProvider<Bearing> bearingDataProvider = new BearingDataProvider();
+        AbstractNumericDataProvider<Bearing> bearingDataProvider = new BearingDataProvider();
         dataProviders.put(bearingDataProvider.getResultType().getName(), bearingDataProvider);
         
         dataSelectionListBox = new ValueListBox<>(new AbstractObjectRenderer<String>() {
@@ -53,7 +53,7 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-                internalShowNumberResult(resultValues);
+                internalShowNumericResult(resultValues);
             }
         });
         addControl(dataSelectionListBox);
@@ -64,7 +64,7 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
         updateDataSelectionListBox();
         if (currentDataProvider != null) {
             Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-            internalShowNumberResult(resultValues);
+            internalShowNumericResult(resultValues);
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
                 public void execute() {
@@ -76,7 +76,7 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
         }
     }
     
-    private AbstractResultDataProvider<? extends Object> selectCurrentDataProvider() {
+    private AbstractNumericDataProvider<? extends Object> selectCurrentDataProvider() {
         if (numberDataProvider.acceptsResultsOfType(getCurrentResult().getResultType())) {
             return numberDataProvider;
         }
@@ -94,11 +94,17 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
         }
     }
 
-    protected abstract void internalShowNumberResult(Map<GroupKey, Number> resultValues);
+    protected abstract void internalShowNumericResult(Map<GroupKey, Number> resultValues);
 
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
+    String getSelectedDataKey() {
+        return dataSelectionListBox.getValue();
+    }
+    
+    void setSelectedDataKey(String dataKey) {
+        if (!currentDataProvider.isValidDataKey(dataKey)) {
+            throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
+        }
+        dataSelectionListBox.setValue(dataKey, true);
     }
 
 }

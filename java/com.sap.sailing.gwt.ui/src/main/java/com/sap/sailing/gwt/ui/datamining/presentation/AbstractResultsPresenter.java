@@ -34,6 +34,7 @@ implements ResultsPresenterWithControls<SettingsType> {
     
     private QueryResultDTO<?> currentResult;
     private boolean isCurrentResultSimple;
+    private boolean isCurrentResultTwoDimensional;
     
     public AbstractResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -87,12 +88,12 @@ implements ResultsPresenterWithControls<SettingsType> {
             }
             
             this.currentResult = result;
-            updateIsCurrentResultSimple();
+            updateCurrentResultInfo();
             
             internalShowResults(getCurrentResult());
         } else {
             this.currentResult = null;
-            updateIsCurrentResultSimple();
+            updateCurrentResultInfo();
             showError(getStringMessages().noDataFound() + ".");
         }
     }
@@ -110,7 +111,7 @@ implements ResultsPresenterWithControls<SettingsType> {
         }
         
         currentResult = null;
-        updateIsCurrentResultSimple();
+        updateCurrentResultInfo();
         presentationPanel.setWidget(errorLabel);
     }
     
@@ -132,25 +133,41 @@ implements ResultsPresenterWithControls<SettingsType> {
         }
         
         currentResult = null;
-        updateIsCurrentResultSimple();
+        updateCurrentResultInfo();
     }
     
-    private void updateIsCurrentResultSimple() {
+    private void updateCurrentResultInfo() {
         boolean isSimple = false;
+        boolean isTwoDimensional = false;
         if (currentResult != null) {
             isSimple = true;
+            isTwoDimensional = true;
             for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
-                if (groupKey.hasSubKeys()) {
+                int size = groupKey.size();
+                if (size != 1) {
                     isSimple = false;
-                    break;
+                    if (!isTwoDimensional) {
+                        break;
+                    }
+                }
+                if (size != 2) {
+                    isTwoDimensional = false;
+                    if (!isSimple) {
+                        break;
+                    }
                 }
             }
         }
         isCurrentResultSimple = isSimple;
+        isCurrentResultTwoDimensional = isTwoDimensional;
     }
 
     protected boolean isCurrentResultSimple() {
         return isCurrentResultSimple;
+    }
+    
+    protected boolean isCurrentResultTwoDimensional() {
+        return isCurrentResultTwoDimensional;
     }
     
     protected StringMessages getStringMessages() {

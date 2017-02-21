@@ -6,7 +6,7 @@ import java.util.function.Function;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class NumberDataProvider extends AbstractResultDataProvider<Number> {
+public class NumberDataProvider extends AbstractNumericDataProvider<Number> {
     private final static String FLOAT = "Float";
     private final static String INTEGER = "Integer";
 
