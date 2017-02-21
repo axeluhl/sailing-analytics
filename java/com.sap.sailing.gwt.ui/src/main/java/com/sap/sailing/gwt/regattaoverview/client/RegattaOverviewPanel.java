@@ -124,7 +124,10 @@ public class RegattaOverviewPanel extends SimplePanel {
         settingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages, new LinkWithSettingsGenerator<>(regattaOverviewContextDefinition)).show();
+                // TODO should we always set ignoreLocalSettings=true when creating links?
+                new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages,
+                        new LinkWithSettingsGenerator<>(regattaOverviewContextDefinition,
+                                ComponentContextWithSettingsStorage.getIgnoreLocalSettings())).show();
             }            
         });
         

@@ -12,13 +12,13 @@ public class LinkWithSettingsGenerator<S extends Settings> {
     private final SettingsToUrlSerializer settingsToUrlSerializer = new SettingsToUrlSerializer();
 
     private final String path;
-    private final GenericSerializableSettings contextDefinition;
+    private final GenericSerializableSettings[] contextDefinition;
     
-    public LinkWithSettingsGenerator(GenericSerializableSettings contextDefinition) {
+    public LinkWithSettingsGenerator(GenericSerializableSettings... contextDefinition) {
         this(null, contextDefinition);
     }
 
-    public LinkWithSettingsGenerator(String path, GenericSerializableSettings contextDefinition) {
+    public LinkWithSettingsGenerator(String path, GenericSerializableSettings... contextDefinition) {
         this.path = path;
         this.contextDefinition = contextDefinition;
     }
@@ -30,7 +30,9 @@ public class LinkWithSettingsGenerator<S extends Settings> {
         } else {
             urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParametersAndPath(path);
         }
-        serializeSettingsToUrlBuilder(urlBuilder, settings, contextDefinition);
+        for(GenericSerializableSettings contextDefinitionItem : contextDefinition) {
+            serializeSettingsToUrlBuilder(urlBuilder, settings, contextDefinitionItem);
+        }
         return urlBuilder.buildString();
     }
 
