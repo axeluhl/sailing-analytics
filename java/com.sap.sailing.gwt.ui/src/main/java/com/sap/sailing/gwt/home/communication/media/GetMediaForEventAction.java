@@ -6,6 +6,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
+import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
@@ -43,12 +44,15 @@ public class GetMediaForEventAction implements SailingAction<MediaDTO>, IsClient
     @GwtIncompatible
     public MediaDTO execute(SailingDispatchContext ctx) throws DispatchException {
         Event event = ctx.getRacingEventService().getEvent(eventId);
+        EventLinkAndMetadataDTO eventLink = HomeServiceUtil.convertToEventLinkAndMetadataDTO(event, event.getBaseURL(),
+                false, ctx.getRacingEventService());
         EventReferenceDTO eventRef = new EventReferenceDTO(event);
 
         String eventName = event.getName();
         MediaDTO media = new MediaDTO();
         for(ImageDescriptor image : HomeServiceUtil.getPhotoGalleryImages(event)) {
-            SailingImageDTO imageDTO = new SailingImageDTO(eventRef, image.getURL().toString(), image.getCreatedAtDate().asDate());
+            SailingImageDTO imageDTO = new SailingImageDTO(eventLink, image.getURL().toString(),
+                    image.getCreatedAtDate().asDate());
             imageDTO.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
             imageDTO.setTitle(image.getTitle() != null ? image.getTitle(): eventName);
             imageDTO.setSubtitle(image.getSubtitle());
