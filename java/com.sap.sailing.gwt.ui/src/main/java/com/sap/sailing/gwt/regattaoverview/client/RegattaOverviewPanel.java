@@ -127,7 +127,7 @@ public class RegattaOverviewPanel extends SimplePanel {
                 // TODO should we always set ignoreLocalSettings=true when creating links?
                 new SettingsDialog<RegattaRaceStatesSettings>(regattaRaceStatesComponent, stringMessages,
                         new LinkWithSettingsGenerator<>(regattaOverviewContextDefinition,
-                                ComponentContextWithSettingsStorage.getIgnoreLocalSettings())).show();
+                                UserSettingsStorageManager.getIgnoreLocalSettings())).show();
             }            
         });
         
@@ -150,11 +150,11 @@ public class RegattaOverviewPanel extends SimplePanel {
         });
         
         final RegattaRaceStatesComponentLifecycle lifecycle = new RegattaRaceStatesComponentLifecycle();
-        final SettingsStorageManager<RegattaRaceStatesSettings> settingsStorageManager = new UserSettingsStorageManager<>(
-                userService, "RegattaOverview", UserSettingsStorageManager
+        final SettingsStorageManager<RegattaRaceStatesSettings> settingsStorageManager = UserSettingsStorageManager
+                .createSettingsStorageManager(userService, "RegattaOverview", UserSettingsStorageManager
                         .buildContextDefinitionId(regattaOverviewContextDefinition.getEvent().toString()));
-        final ComponentContext<RegattaRaceStatesSettings> componentContext = ComponentContextWithSettingsStorage
-                .createComponentContext(lifecycle, settingsStorageManager);
+        final ComponentContext<RegattaRaceStatesSettings> componentContext = new ComponentContextWithSettingsStorage<>(
+                lifecycle, settingsStorageManager);
         
         regattaRaceStatesComponent = new RegattaRaceStatesComponent(null, componentContext, sailingService, errorReporter,
                 stringMessages,
