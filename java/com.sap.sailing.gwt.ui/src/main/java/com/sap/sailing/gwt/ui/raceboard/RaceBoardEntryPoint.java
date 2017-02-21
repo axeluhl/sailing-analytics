@@ -27,8 +27,10 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceWithCompetitorsDTO selectedRace;
@@ -103,9 +105,14 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             componentContextGlobalDefinition += "." + modeType.toString();
         }
         RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE);
-        final RaceBoardComponentContext context = new RaceBoardComponentContext(getUserService(),
-                componentContextGlobalDefinition, lifeCycle, regattaName, raceName, leaderboardName,
-                leaderboardGroupName, eventId);
+        ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> context = new ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>(
+                lifeCycle,
+                new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>(
+                        getUserService(), componentContextGlobalDefinition + "." + lifeCycle.getComponentId(),
+                        UserSettingsStorageManager.buildContextDefinitionId(regattaName, raceName, leaderboardName,
+                                leaderboardGroupName,
+                eventId == null ? null : eventId.toString())));
+        
         context.initInitialSettings();
         AsyncCallback<RaceboardDataDTO> asyncCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
@@ -162,7 +169,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         vp.add(new Label(message));
     }
 
-    private RaceBoardPanel createPerspectivePage(Component<?> parent, RaceBoardComponentContext context,
+    private RaceBoardPanel createPerspectivePage(Component<?> parent,
+            ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> context,
             PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings, RaceboardDataDTO raceboardData,
             boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle) {
         selectedRace = raceboardData.getRace();

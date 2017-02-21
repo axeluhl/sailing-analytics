@@ -29,6 +29,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -46,7 +47,8 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     private final LeaderboardPanel leaderboardPanel;
     private final StringMessages stringMessages;
     
-    public LeaderboardWithHeaderPerspective(Component<?> parent, LeaderboardWithHeaderComponentContext context,
+    public LeaderboardWithHeaderPerspective(Component<?> parent,
+            ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>> context,
             LeaderboardWithHeaderPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings,
             SailingServiceAsync sailingService, UserService userService, AsyncActionsExecutor asyncActionsExecutor,
