@@ -82,6 +82,9 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
         if (!component.hasSettings()) {
             return false;
         }
+        if(!settingsStorageManager.supportsStore()) {
+            return false;
+        }
         Settings settings = component.getSettings();
         if (settings instanceof SettingsMap || settings instanceof GenericSerializableSettings) {
             return true;
