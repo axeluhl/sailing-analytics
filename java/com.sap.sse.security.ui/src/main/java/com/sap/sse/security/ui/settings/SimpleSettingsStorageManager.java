@@ -20,6 +20,11 @@ import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
  */
 public class SimpleSettingsStorageManager<S extends Settings> implements SettingsStorageManager<S> {
     private final SettingsToUrlSerializer urlSerializer = new SettingsToUrlSerializer();
+
+    @Override
+    public boolean supportsStore() {
+        return false;
+    }
     
     /**
      * {@inheritDoc}

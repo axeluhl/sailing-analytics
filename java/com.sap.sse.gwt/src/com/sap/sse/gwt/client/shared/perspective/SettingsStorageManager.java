@@ -18,6 +18,8 @@ import com.sap.sse.common.settings.generic.GenericSerializableSettings;
  * @see ComponentContextWithSettingsStorage
  */
 public interface SettingsStorageManager<S extends Settings> {
+    
+    boolean supportsStore();
 
     /**
      * Retrieves the {@link Settings} of the root component using the provided callback.

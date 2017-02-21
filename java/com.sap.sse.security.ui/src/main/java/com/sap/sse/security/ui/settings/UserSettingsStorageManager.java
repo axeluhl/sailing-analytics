@@ -72,6 +72,11 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
         this.storageGlobalKey = globalDefinitionId;
         this.storageContextSpecificKey = this.storageGlobalKey + "#" + contextDefinitionId;
     }
+    
+    @Override
+    public boolean supportsStore() {
+        return true;
+    }
 
     private void storeContextSpecificSettingsJsonOnLocalStorage(String serializedContextSpecificSettings) {
         Storage localStorage = Storage.getLocalStorageIfSupported();
