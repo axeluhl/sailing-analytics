@@ -28,7 +28,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  *            for itself and its subcomponents
  * @see SettingsStorageManager
  */
-public class UserSettingsStorageManager<S extends Settings> implements SettingsStorageManager<S> {
+public class UserSettingsStorageManager<S extends Settings> extends SimpleSettingsStorageManager<S> {
 
     /**
      * The key which is associated with the global settings. Different keys will cause multiple/different settings
@@ -47,7 +47,6 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
     private UserService userService;
 
     private final SettingsToJsonSerializerGWT jsonSerializer = new SettingsToJsonSerializerGWT();
-    private final SettingsToUrlSerializer urlSerializer = new SettingsToUrlSerializer();
 
     /**
      * This is used, to ensure that only once the data is loaded remote, if a user logs in later, he must refresh, to
@@ -207,18 +206,6 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
         } else {
             callback.onSuccess(defaultSettings);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private final S deserializeFromCurrentUrl(S defaultSettings) {
-        if (defaultSettings instanceof GenericSerializableSettings) {
-            defaultSettings = (S) urlSerializer
-                    .deserializeFromCurrentLocation((GenericSerializableSettings) defaultSettings);
-        } else if (defaultSettings instanceof SettingsMap) {
-            defaultSettings = (S) urlSerializer
-                    .deserializeSettingsMapFromCurrentLocation((SettingsMap) defaultSettings);
-        }
-        return defaultSettings;
     }
 
     @SuppressWarnings("unchecked")
