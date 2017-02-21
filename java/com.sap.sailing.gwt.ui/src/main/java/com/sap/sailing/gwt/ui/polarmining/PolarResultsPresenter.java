@@ -77,7 +77,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     private final Map<Series, Series> histogramSeriesForPolarSeries= new HashMap<>();
     private final Map<Series, Map<Long, Series>> perAngleHistogramSeriesForAngle = new HashMap<>();
 
-    public PolarResultsPresenter(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+    public PolarResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
         polarChart = createPolarChart();

@@ -29,7 +29,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
     private LeaderboardPanel overallLeaderboardPanel;
     
     public LeaderboardViewer(Component<?> parent,
-            ComponentContext<LeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
+            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             final SailingServiceAsync sailingService, final AsyncActionsExecutor asyncActionsExecutor,
@@ -43,7 +43,7 @@ public class LeaderboardViewer extends AbstractLeaderboardViewer<LeaderboardPers
     }
 
     private LeaderboardViewer(Component<?> parent,
-            ComponentContext<LeaderboardPerspectiveLifecycle, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
+            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             LeaderboardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionModel,

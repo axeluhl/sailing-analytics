@@ -55,7 +55,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
 
     private final List<Component<?>> retrieverLevelSettingsComponents;
     
-    public SimpleDataRetrieverChainDefinitionProvider(Component<?> parent, ComponentContext<?, ?> context,
+    public SimpleDataRetrieverChainDefinitionProvider(Component<?> parent, ComponentContext<?> context,
             final StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataMiningSettingsControl settingsControl) {

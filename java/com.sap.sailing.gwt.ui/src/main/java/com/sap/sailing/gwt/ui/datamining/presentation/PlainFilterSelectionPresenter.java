@@ -40,7 +40,7 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
     private final HorizontalPanel mainPanel;
     private final VerticalPanel presentationPanel;
     
-    public PlainFilterSelectionPresenter(Component<?> parent, ComponentContext<?, ?> context,
+    public PlainFilterSelectionPresenter(Component<?> parent, ComponentContext<?> context,
             StringMessages stringMessages,
             DataRetrieverChainDefinitionProvider retrieverChainProvider,
             FilterSelectionProvider filterSelectionProvider) {

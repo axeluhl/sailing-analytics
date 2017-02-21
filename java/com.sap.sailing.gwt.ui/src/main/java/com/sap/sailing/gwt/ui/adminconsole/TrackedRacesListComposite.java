@@ -38,7 +38,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private ExportPopup exportPopup;
     private boolean actionButtonsEnabled;
 
-    public TrackedRacesListComposite(Component<?> parent, ComponentContext<?, ?> context,
+    public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService,
             final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {

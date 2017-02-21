@@ -37,7 +37,7 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     
     private StatisticQueryDefinitionDTO currentDefinition;
 
-    public QueryDefinitionViewer(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+    public QueryDefinitionViewer(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context);
         this.stringMessages = stringMessages;
         queryDefinitionParser = new QueryDefinitionParser();

@@ -153,7 +153,7 @@ public class RegattaOverviewPanel extends SimplePanel {
         final SettingsStorageManager<RegattaRaceStatesSettings> settingsStorageManager = new UserSettingsStorageManager<>(
                 userService, "RegattaOverview", UserSettingsStorageManager
                         .buildContextDefinitionId(regattaOverviewContextDefinition.getEvent().toString()));
-        final ComponentContext<RegattaRaceStatesComponentLifecycle, RegattaRaceStatesSettings> componentContext = ComponentContextWithSettingsStorage
+        final ComponentContext<RegattaRaceStatesSettings> componentContext = ComponentContextWithSettingsStorage
                 .createComponentContext(lifecycle, settingsStorageManager);
         
         regattaRaceStatesComponent = new RegattaRaceStatesComponent(null, componentContext, sailingService, errorReporter,

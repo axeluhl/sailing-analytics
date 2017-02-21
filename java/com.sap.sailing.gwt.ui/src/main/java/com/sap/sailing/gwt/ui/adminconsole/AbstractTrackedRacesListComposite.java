@@ -97,7 +97,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         }
     }
 
-    public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?, ?> context,
+    public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
             final StringMessages stringMessages, boolean hasMultiSelection) {

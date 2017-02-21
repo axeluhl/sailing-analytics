@@ -99,7 +99,7 @@ public class TimePanel<T extends TimePanelSettings> extends AbstractCompositeCom
      *            charts such as the competitor chart or the wind chart shown above it, otherwise the padding depends
      *            on the flag set by {@link #setLiveGenerallyPossible(boolean)}
      */
-    public TimePanel(Component<?> parent, ComponentContext<?, ?> context, Timer timer,
+    public TimePanel(Component<?> parent, ComponentContext<?> context, Timer timer,
             TimeRangeWithZoomProvider timeRangeProvider,
             StringMessages stringMessages,
             boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts) {

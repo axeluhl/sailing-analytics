@@ -53,7 +53,7 @@ public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> im
     private final ResultsPresenter<?> resultsPresenter;
     private final Button runButton;
 
-    public SimpleQueryRunner(Component<?> parent, ComponentContext<?, ?> context, DataMiningSession session,
+    public SimpleQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
             StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, QueryDefinitionProvider<?> queryDefinitionProvider,
             ResultsPresenter<?> resultsPresenter) {

@@ -92,7 +92,7 @@ public class WindChart extends AbstractRaceChart<WindChartSettings> implements R
      *            constructor must ensure to trigger {@link RaceSelectionChangeListener#onRaceSelectionChange(List)} at
      *            least once to ensure that this chart sets its {@link AbstractRaceChart#selectedRaceIdentifier} field.
      */
-    public WindChart(Component<?> parent, ComponentContext<?, ?> context, WindChartLifecycle windChartLifecycle,
+    public WindChart(Component<?> parent, ComponentContext<?> context, WindChartLifecycle windChartLifecycle,
             SailingServiceAsync sailingService,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
             TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 

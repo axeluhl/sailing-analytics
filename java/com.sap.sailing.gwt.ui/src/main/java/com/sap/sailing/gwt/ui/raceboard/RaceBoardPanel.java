@@ -112,7 +112,9 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize
+public class RaceBoardPanel
+        extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings>
+        implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize
 {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
@@ -174,7 +176,8 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
      *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that
      *            aligns its right border with that of the chart. Otherwise those components will be hidden.
      */
-    public RaceBoardPanel(Component<?> parent, ComponentContext<RaceBoardPerspectiveLifecycle, PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> context,
+    public RaceBoardPanel(Component<?> parent,
+            ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> context,
             RaceBoardPerspectiveLifecycle lifecycle,
             PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings,
             SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,

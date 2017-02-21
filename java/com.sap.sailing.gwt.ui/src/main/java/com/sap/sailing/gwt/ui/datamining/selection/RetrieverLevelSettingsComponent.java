@@ -13,7 +13,7 @@ public abstract class RetrieverLevelSettingsComponent extends AbstractComponent<
     private final String localizedName;
     private final String componentId;
 
-    public RetrieverLevelSettingsComponent(Component<?> parent, ComponentContext<?, ?> context,
+    public RetrieverLevelSettingsComponent(Component<?> parent, ComponentContext<?> context,
             DataRetrieverLevelDTO retrieverLevel, String componentId, String localizedName) {
         super(parent, context);
         this.retrieverLevel = retrieverLevel;

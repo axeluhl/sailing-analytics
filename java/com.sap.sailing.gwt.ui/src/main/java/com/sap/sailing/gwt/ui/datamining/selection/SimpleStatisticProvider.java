@@ -52,7 +52,7 @@ public class SimpleStatisticProvider extends AbstractComponent<SerializableSetti
     private final ValueListBox<FunctionDTO> extractionFunctionListBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
 
-    public SimpleStatisticProvider(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages,
+    public SimpleStatisticProvider(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                    DataRetrieverChainDefinitionProvider retrieverChainProvider) {
         super(parent, context);

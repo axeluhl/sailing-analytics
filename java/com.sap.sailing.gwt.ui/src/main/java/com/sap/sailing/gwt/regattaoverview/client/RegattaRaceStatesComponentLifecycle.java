@@ -4,7 +4,7 @@ import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSett
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<RegattaRaceStatesSettings, RegattaRaceStatesSettingsDialogComponent> {
+public class RegattaRaceStatesComponentLifecycle implements ComponentLifecycle<RegattaRaceStatesSettings> {
     
     @Override
     public RegattaRaceStatesSettingsDialogComponent getSettingsDialogComponent(RegattaRaceStatesSettings settings) {

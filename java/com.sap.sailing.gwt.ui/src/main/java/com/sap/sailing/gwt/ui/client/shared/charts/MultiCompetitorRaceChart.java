@@ -35,7 +35,8 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     
     private final MultiCompetitorRaceChartLifecycle lifeycycle;
     
-    public MultiCompetitorRaceChart(Component<?> parent,ComponentContext<?, ?> context, MultiCompetitorRaceChartLifecycle lifeycycle,
+    public MultiCompetitorRaceChart(Component<?> parent, ComponentContext<?> context,
+            MultiCompetitorRaceChartLifecycle lifeycycle,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,

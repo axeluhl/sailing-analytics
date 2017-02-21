@@ -44,7 +44,7 @@ public abstract class AbstractLeaderboardViewer<PL extends AbstractLeaderboardPe
 
 
     public AbstractLeaderboardViewer(Component<?> parent,
-            ComponentContext<PL, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
+            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> componentContext,
             PL lifecycle,
             PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
             CompetitorSelectionModel competitorSelectionProvider, AsyncActionsExecutor asyncActionsExecutor,

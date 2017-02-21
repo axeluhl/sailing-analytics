@@ -134,7 +134,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
      *            Whenever this component makes a service call and receives an update on the current server time, the
      *            timer passed for this argument will be synchronized.
      */
-    public RegattaRaceStatesComponent(Component<?> parent, ComponentContext<?, ?> context,
+    public RegattaRaceStatesComponent(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService,
             ErrorReporter errorReporter,
             final StringMessages stringMessages, final UUID eventId, RegattaRaceStatesSettings settings,

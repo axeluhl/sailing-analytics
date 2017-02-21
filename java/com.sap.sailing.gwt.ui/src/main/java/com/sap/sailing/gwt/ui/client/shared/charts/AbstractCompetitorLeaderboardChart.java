@@ -76,7 +76,7 @@ public abstract class AbstractCompetitorLeaderboardChart<SettingsType extends Ge
     protected final String leaderboardName;
     protected final StringMessages stringMessages;
     
-    public AbstractCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?, ?> context,
+    public AbstractCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, String leaderboardName,
             DetailType detailType, CompetitorSelectionProvider competitorSelectionProvider, Timer timer,

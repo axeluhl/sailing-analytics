@@ -131,7 +131,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private final Map<GroupKey, Double> averagePerMainKey;
     private final Map<GroupKey, Double> medianPerMainKey;
 
-    public ResultsChart(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+    public ResultsChart(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
         sortByPanel = new HorizontalPanel();

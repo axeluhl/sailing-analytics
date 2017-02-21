@@ -4,7 +4,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class MultiCompetitorLeaderboardChartLifecycle implements
-        ComponentLifecycle<MultiCompetitorLeaderboardChartSettings, MultiCompetitorLeaderboardChartSettingsDialogComponent> {
+        ComponentLifecycle<MultiCompetitorLeaderboardChartSettings> {
     
     public static final String ID = "mclcl";
     private final boolean isOverall;

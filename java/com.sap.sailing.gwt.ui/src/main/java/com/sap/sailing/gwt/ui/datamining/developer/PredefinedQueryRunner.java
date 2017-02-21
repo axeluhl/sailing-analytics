@@ -43,7 +43,7 @@ public class PredefinedQueryRunner extends ComponentWithoutSettings {
     private final ValueListBox<PredefinedQueryIdentifier> selectionListBox;
     private final Button runButton;
 
-    public PredefinedQueryRunner(Component<?> parent, ComponentContext<?, ?> context, DataMiningSession session,
+    public PredefinedQueryRunner(Component<?> parent, ComponentContext<?> context, DataMiningSession session,
             StringMessages stringMessages,
                                  DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                  ResultsPresenter<?> resultsPresenter) {

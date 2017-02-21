@@ -415,7 +415,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
     
-    public RaceMap(Component<?> parent, ComponentContext<?, ?> context, RaceMapLifecycle raceMapLifecycle,
+    public RaceMap(Component<?> parent, ComponentContext<?> context, RaceMapLifecycle raceMapLifecycle,
             RaceMapSettings raceMapSettings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,

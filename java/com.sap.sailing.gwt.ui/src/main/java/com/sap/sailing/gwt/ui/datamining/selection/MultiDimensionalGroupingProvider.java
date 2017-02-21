@@ -49,7 +49,8 @@ public class MultiDimensionalGroupingProvider extends AbstractComponent<Serializ
     private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
     private final List<FunctionDTO> availableDimensions;
 
-    public MultiDimensionalGroupingProvider(Component<?> parent, ComponentContext<?, ?> context,StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
+    public MultiDimensionalGroupingProvider(Component<?> parent, ComponentContext<?> context,
+            StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
                                             DataRetrieverChainDefinitionProvider retrieverChainProvider) {
         super(parent, context);
         this.stringMessages = stringMessages;

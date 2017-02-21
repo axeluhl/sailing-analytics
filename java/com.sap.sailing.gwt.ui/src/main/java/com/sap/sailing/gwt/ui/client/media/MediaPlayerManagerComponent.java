@@ -87,7 +87,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     private PlayerChangeListener playerChangeListener;
 
-    public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?, ?> context,
+    public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
             MediaPlayerLifecycle mediaPlayerLifecycle,
             RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,

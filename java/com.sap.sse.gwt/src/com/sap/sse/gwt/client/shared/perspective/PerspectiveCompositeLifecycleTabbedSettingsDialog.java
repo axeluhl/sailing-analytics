@@ -18,7 +18,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 public class PerspectiveCompositeLifecycleTabbedSettingsDialog<PL extends PerspectiveLifecycle<PS>, PS extends Settings>
     extends SettingsDialog<PerspectiveCompositeSettings<PS>> {
 
-    public PerspectiveCompositeLifecycleTabbedSettingsDialog(Component<?> parent, ComponentContext<?, ?> context,
+    public PerspectiveCompositeLifecycleTabbedSettingsDialog(Component<?> parent, ComponentContext<?> context,
             StringMessages stringConstants,
             PL lifecycle,
             PerspectiveCompositeSettings<PS> settings, String title) {
@@ -27,7 +27,7 @@ public class PerspectiveCompositeLifecycleTabbedSettingsDialog<PL extends Perspe
                 stringConstants);
     }
 
-    public PerspectiveCompositeLifecycleTabbedSettingsDialog(Component<?> parent, ComponentContext<?, ?> context,
+    public PerspectiveCompositeLifecycleTabbedSettingsDialog(Component<?> parent, ComponentContext<?> context,
             StringMessages stringConstants,
             PL lifecycle,
             PerspectiveCompositeSettings<PS> settings,

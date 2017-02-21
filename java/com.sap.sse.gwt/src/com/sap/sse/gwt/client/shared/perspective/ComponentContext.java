@@ -13,7 +13,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  * @param <L> The {@link ComponentLifecycle} type of the root component/perspective containing all settings for itself and its subcomponents
  * @param <S> The {@link Settings} type of the settings of the root component/perspective containing all settings for itself and its subcomponents
  */
-public interface ComponentContext<L extends ComponentLifecycle<S, ?>, S extends Settings> {
+public interface ComponentContext<S extends Settings> {
 
     /**
      * Stores the {@link Settings} of the passed {@link Component} in the default component settings tree. Make sure to
@@ -34,7 +34,7 @@ public interface ComponentContext<L extends ComponentLifecycle<S, ?>, S extends 
      * 
      * @return The {@link ComponentLifecycle} of the root component
      */
-    L getRootLifecycle();
+    ComponentLifecycle<S> getRootLifecycle();
 
     /**
      * Gets the current default {@link Settings} of the root component managed

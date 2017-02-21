@@ -23,10 +23,9 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  *            The {@link Settings} type of the settings of the root component/perspective containing all the settings
  *            for itself and its subcomponents
  */
-public class SimpleComponentContext<L extends ComponentLifecycle<S, ?>, S extends Settings>
-        implements ComponentContext<L, S> {
+public class SimpleComponentContext<S extends Settings> implements ComponentContext<S> {
 
-    protected final L rootLifecycle;
+    protected final ComponentLifecycle<S> rootLifecycle;
 
     /**
      * Contains {@link SettingsReceiverCallback}s which are waiting to receive the initial settings of the root
@@ -47,7 +46,7 @@ public class SimpleComponentContext<L extends ComponentLifecycle<S, ?>, S extend
      * @param rootLifecycle
      *            The {@link ComponentLifecycle} of the root component/perspective
      */
-    public SimpleComponentContext(L rootLifecycle) {
+    public SimpleComponentContext(ComponentLifecycle<S> rootLifecycle) {
         this.rootLifecycle = rootLifecycle;
     }
 
@@ -65,7 +64,7 @@ public class SimpleComponentContext<L extends ComponentLifecycle<S, ?>, S extend
      * {@inheritDoc}
      */
     @Override
-    public L getRootLifecycle() {
+    public ComponentLifecycle<S> getRootLifecycle() {
         return rootLifecycle;
     }
 

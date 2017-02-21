@@ -23,7 +23,7 @@ public class ComponentTreeNodeInfo {
     /**
      * The {@link ComponentContext} maintaining the default settings of the whole component/perspective tree.
      */
-    private ComponentContext<?, ?> componentContext = null;
+    private ComponentContext<?> componentContext = null;
     
     /**
      * @param parentPerspective The parent perspective of the component corresponding to this instance
@@ -47,7 +47,7 @@ public class ComponentTreeNodeInfo {
      * 
      * @param componentContext
      */
-    public void setComponentContext(ComponentContext<?, ?> componentContext) {
+    public void setComponentContext(ComponentContext<?> componentContext) {
         this.componentContext = componentContext;
     }
     
@@ -58,7 +58,7 @@ public class ComponentTreeNodeInfo {
      * 
      * @return
      */
-    public ComponentContext<?, ?> getComponentContext() {
+    public ComponentContext<?> getComponentContext() {
         return componentContext;
     }
     

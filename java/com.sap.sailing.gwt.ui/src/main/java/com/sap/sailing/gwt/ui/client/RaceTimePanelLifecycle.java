@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class RaceTimePanelLifecycle implements
-        ComponentLifecycle<RaceTimePanelSettings, RaceTimePanelSettingsDialogComponent> {
+        ComponentLifecycle<RaceTimePanelSettings> {
     private final StringMessages stringMessages;
 
     public RaceTimePanelLifecycle(StringMessages stringMessages) {

@@ -39,8 +39,7 @@ import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
  *            The {@link Settings} type of the settings of the root component/perspective containing all the settings
  *            for itself and its subcomponents
  */
-public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S, ?>, S extends Settings>
-        extends SimpleComponentContext<L, S> {
+public class ComponentContextWithSettingsStorage<S extends Settings> extends SimpleComponentContext<S> {
 
     /**
      * Manages the persistence layer of settings.
@@ -54,7 +53,7 @@ public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S,
      * @param settingsStorageManager
      *            The {@link SettingsStorageManager} to be used access stored settings and store new settings
      */
-    public ComponentContextWithSettingsStorage(L rootLifecycle,
+    public ComponentContextWithSettingsStorage(ComponentLifecycle<S> rootLifecycle,
             SettingsStorageManager<S> settingsStorageManager) {
         super(rootLifecycle);
         this.settingsStorageManager = settingsStorageManager;
@@ -92,28 +91,28 @@ public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S,
 
     @SuppressWarnings("unchecked")
     public S extractGlobalSettings(Component<? extends Settings> component, Settings newDefaultSettings) {
-        L targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
+        ComponentLifecycle<S> targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
         return extractGlobalSettings((S) newDefaultSettings, targetLifeCycle);
     }
 
     @SuppressWarnings("unchecked")
     public S extractContextSettings(Component<? extends Settings> component, Settings newDefaultSettings) {
-        L targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
+        ComponentLifecycle<S> targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
         return extractContextSettings((S) newDefaultSettings, targetLifeCycle);
     }
 
-    private S extractGlobalSettings(S newDefaultSettings, L targetLifeCycle) {
+    private S extractGlobalSettings(S newDefaultSettings, ComponentLifecycle<S> targetLifeCycle) {
         return targetLifeCycle.extractGlobalSettings((S) newDefaultSettings);
     }
 
-    private S extractContextSettings(S newDefaultSettings, L targetLifeCycle) {
+    private S extractContextSettings(S newDefaultSettings, ComponentLifecycle<S> targetLifeCycle) {
         return targetLifeCycle.extractContextSettings((S) newDefaultSettings);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void makeSettingsDefault(Component<? extends Settings> component, Settings newDefaultSettings) {
-        L targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
+        ComponentLifecycle<S> targetLifeCycle = determineLifeCycle(component.getPath(), rootLifecycle);
         S globalSettings = extractGlobalSettings((S) newDefaultSettings, targetLifeCycle);
         S contextSettings = extractContextSettings((S) newDefaultSettings, targetLifeCycle);
         updateSettings(component.getPath(), globalSettings, contextSettings);
@@ -176,10 +175,10 @@ public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S,
      * Travels the Component tree, to find the correct LifeCycle for the Rootcomponent of the subtree to save
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private L determineLifeCycle(ArrayList<String> path, L current) {
+    private ComponentLifecycle<S> determineLifeCycle(ArrayList<String> path, ComponentLifecycle<S> current) {
         while (current instanceof PerspectiveLifecycle<?> && !path.isEmpty()) {
             String last = path.remove(path.size() - 1);
-            current = (L) ((PerspectiveLifecycle) current).getLiveCycleForId(last);
+            current = (ComponentLifecycle<S>) ((PerspectiveLifecycle) current).getLiveCycleForId(last);
         }
         if (!path.isEmpty()) {
             throw new IllegalStateException("Settings path is not finished, but no perspective at current level");
@@ -187,7 +186,8 @@ public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S,
         return current;
     }
     
-    public static <L extends ComponentLifecycle<S, ?>, S extends Settings> ComponentContext<L, S> createComponentContext(L rootLifecycle,
+    public static <S extends Settings> ComponentContext<S> createComponentContext(
+            ComponentLifecycle<S> rootLifecycle,
             SettingsStorageManager<S> settingsStorageManager) {
         if (getIgnoreLocalSettings().isIgnoreLocalSettings()) {
             return new SimpleComponentContext<>(rootLifecycle);

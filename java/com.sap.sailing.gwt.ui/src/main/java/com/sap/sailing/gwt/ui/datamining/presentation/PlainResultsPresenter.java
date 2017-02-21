@@ -26,7 +26,7 @@ public class PlainResultsPresenter extends AbstractNumericResultsPresenter<Setti
     private final ScrollPanel scrollPanel;
     private final HTML resultsLabel;
 
-    public PlainResultsPresenter(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+    public PlainResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
         resultsLabel = new HTML();

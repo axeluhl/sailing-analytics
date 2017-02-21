@@ -12,8 +12,8 @@ import com.sap.sse.common.settings.Settings;
  *            the SettingsDialogComponent type
  * @author Frank Mittag
  */
-public interface ComponentLifecycle<S extends Settings, SDC extends SettingsDialogComponent<S>> {
-    SDC getSettingsDialogComponent(S settings);
+public interface ComponentLifecycle<S extends Settings> {
+    SettingsDialogComponent<S> getSettingsDialogComponent(S settings);
 
     S createDefaultSettings();
     

@@ -57,7 +57,7 @@ public class EventSeriesAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createOverallLeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context,
+    public LeaderboardPanel createOverallLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
@@ -74,7 +74,7 @@ public class EventSeriesAnalyticsDataManager {
     }
 
     public MultiCompetitorLeaderboardChart createMultiCompetitorChart(Component<?> parent,
-            ComponentContext<?, ?> context, String leaderboardName,
+            ComponentContext<?> context, String leaderboardName,
             DetailType chartDetailType) {
         if(multiCompetitorChart == null) {
             multiCompetitorChart = new MultiCompetitorLeaderboardChart(parent, context, sailingService,
@@ -86,7 +86,7 @@ public class EventSeriesAnalyticsDataManager {
         return multiCompetitorChart;
     }
 
-    public MultiLeaderboardProxyPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context,
+    public MultiLeaderboardProxyPanel createMultiLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
             LeaderboardSettings leaderboardSettings,
             String preselectedLeaderboardName, RaceIdentifier preselectedRace, String leaderboardGroupName,
             String metaLeaderboardName, boolean showRaceDetails, boolean autoExpandLastRaceColumn) {

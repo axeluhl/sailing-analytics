@@ -64,7 +64,7 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
     private final FilterSelectionPresenter selectionPresenter;
     private final ScrollPanel selectionPresenterScrollPanel;
 
-    public ListRetrieverChainFilterSelectionProvider(Component<?> parent, ComponentContext<?, ?> context,
+    public ListRetrieverChainFilterSelectionProvider(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             DataRetrieverChainDefinitionProvider retrieverChainProvider) {

@@ -71,7 +71,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
     private final SplitLayoutPanel filterSplitPanel;
     private final FilterSelectionProvider filterSelectionProvider;
 
-    public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?, ?> context,
+    public QueryDefinitionProviderWithControls(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session, StringMessages stringMessages,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter, DataMiningSettingsControl settingsControl,
             ResultsPresenter<?> resultsPresenter) {

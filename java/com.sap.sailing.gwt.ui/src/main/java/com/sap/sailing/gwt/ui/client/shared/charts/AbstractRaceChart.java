@@ -91,7 +91,7 @@ public abstract class AbstractRaceChart<SettingsType extends Settings> extends A
     
     private final Button settingsButton;
     
-    protected AbstractRaceChart(Component<?> parent, ComponentContext<?, ?> context, SailingServiceAsync sailingService,
+    protected AbstractRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
             TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {

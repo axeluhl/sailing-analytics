@@ -16,7 +16,8 @@ public class MultiCompetitorLeaderboardChart extends AbstractCompetitorLeaderboa
     private MultiCompetitorLeaderboardChartSettings settings;
     private final boolean isOverall;
 
-    public MultiCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?, ?> context,SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
+    public MultiCompetitorLeaderboardChart(Component<?> parent, ComponentContext<?> context,
+            SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
             String leaderboardName, DetailType detailType, CompetitorSelectionProvider competitorSelectionProvider,
             Timer timer, StringMessages stringMessages, boolean isOverall, ErrorReporter errorReporter) {
         super(parent, context,sailingService, asyncActionsExecutor, leaderboardName, detailType, competitorSelectionProvider,

@@ -33,7 +33,8 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
     private final ValueListBox<String> dataSelectionListBox;
     private AbstractNumericDataProvider<? extends Object> currentDataProvider;
 
-    public AbstractNumericResultsPresenter(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+    public AbstractNumericResultsPresenter(Component<?> parent, ComponentContext<?> context,
+            StringMessages stringMessages) {
         super(parent, context, stringMessages);
         
         numberDataProvider = new NumberDataProvider();

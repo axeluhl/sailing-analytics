@@ -42,7 +42,7 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
     private boolean blockChangeNotification;
     private final Set<QueryDefinitionChangedListener> listeners;
 
-    public AbstractQueryDefinitionProvider(Component<?> parent, ComponentContext<?, ?> context,
+    public AbstractQueryDefinitionProvider(Component<?> parent, ComponentContext<?> context,
             StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         super(parent, context);
         this.stringMessages = stringMessages;

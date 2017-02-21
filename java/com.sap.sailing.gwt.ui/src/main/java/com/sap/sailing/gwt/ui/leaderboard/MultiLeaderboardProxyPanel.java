@@ -66,7 +66,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     private HashMap<String, LeaderboardSettings> contextStore;
     private LeaderboardSettings loadedSettings;
 
-    public MultiLeaderboardProxyPanel(Component<?> parent, ComponentContext<?, ?> context,
+    public MultiLeaderboardProxyPanel(Component<?> parent, ComponentContext<?> context,
             SailingServiceAsync sailingService, String metaLeaderboardName,
             AsyncActionsExecutor asyncActionsExecutor,
             Timer timer, boolean isEmbedded, String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
@@ -159,11 +159,11 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<Leaderboar
     @SuppressWarnings("rawtypes")
     @Override
     public void updateSettings(LeaderboardSettings newSettings) {
-        ComponentContext<?, ?> ctx = getComponentContext();
+        ComponentContext<?> ctx = getComponentContext();
         // store contextspecific setting in this hashmap, so they are not lost on tab change
         if (ctx instanceof ComponentContextWithSettingsStorage) {
             @SuppressWarnings("unchecked")
-            ComponentContextWithSettingsStorage<?, LeaderboardSettings> cctx = (ComponentContextWithSettingsStorage) ctx;
+            ComponentContextWithSettingsStorage<LeaderboardSettings> cctx = (ComponentContextWithSettingsStorage) ctx;
             LeaderboardSettings contextSettings = cctx.extractContextSettings(this, newSettings);
             contextStore.put(selectedLeaderboardPanel.getLeaderboardName(), contextSettings);
         }

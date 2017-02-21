@@ -19,14 +19,14 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
  *
  */
 public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implements PerspectiveLifecycle<PS> {
-    final List<ComponentLifecycle<?, ?>> componentLifecycles;
+    final List<ComponentLifecycle<?>> componentLifecycles;
     
     public AbstractPerspectiveLifecycle() {
         componentLifecycles = new ArrayList<>();
     }
     
-    protected final void addLifeCycle(ComponentLifecycle<?, ?> cycle) {
-        for (ComponentLifecycle<?, ?> old : componentLifecycles) {
+    protected final void addLifeCycle(ComponentLifecycle<?> cycle) {
+        for (ComponentLifecycle<?> old : componentLifecycles) {
             if (old.getComponentId().equals(cycle.getComponentId())) {
                 throw new IllegalStateException("LifeCycle with duplicate ID " + cycle.getComponentId());
             }
@@ -46,22 +46,22 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
     
     public Map<String, Settings> createDefaultComponentIdsAndSettings() {
         Map<String, Settings> componentIdsAndSettings = new HashMap<>();
-        for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
+        for (ComponentLifecycle<?> componentLifecycle : componentLifecycles) {
             componentIdsAndSettings.put(componentLifecycle.getComponentId(), componentLifecycle.createDefaultSettings());
         }
         return componentIdsAndSettings;
     }
 
-    public Iterable<ComponentLifecycle<?,?>> getComponentLifecycles() {
+    public Iterable<ComponentLifecycle<?>> getComponentLifecycles() {
         return componentLifecycles;
     }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <SS extends Settings> ComponentLifecycle<SS, ?> getLiveCycleForId(String id) {
-        for (ComponentLifecycle<?, ?> componentLifecycle : componentLifecycles) {
+    public <SS extends Settings> ComponentLifecycle<SS> getLiveCycleForId(String id) {
+        for (ComponentLifecycle<?> componentLifecycle : componentLifecycles) {
             if (id.equals(componentLifecycle.getComponentId())) {
-                return (ComponentLifecycle<SS, ?>) componentLifecycle;
+                return (ComponentLifecycle<SS>) componentLifecycle;
             }
         }
         throw new IllegalStateException("No componentlivecycle for id " + id + " found");
@@ -73,7 +73,7 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
         for (Entry<String, Settings> childSet : settings.getSettingsPerComponentId().entrySet()) {
             String childId = childSet.getKey();
             Settings childNewSettings = childSet.getValue();
-            ComponentLifecycle<Settings, ?> childLiveCycle = getLiveCycleForId(childId);
+            ComponentLifecycle<Settings> childLiveCycle = getLiveCycleForId(childId);
             Settings extracted = childLiveCycle.extractContextSettings(childNewSettings);
             settingsPerComponent.put(childId, extracted);
         }
@@ -89,7 +89,7 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implemen
         for (Entry<String, Settings> childSet : settings.getSettingsPerComponentId().entrySet()) {
             String childId = childSet.getKey();
             Settings childNewSettings = childSet.getValue();
-            ComponentLifecycle<Settings, ?> childLiveCycle = getLiveCycleForId(childId);
+            ComponentLifecycle<Settings> childLiveCycle = getLiveCycleForId(childId);
             Settings extracted = childLiveCycle.extractGlobalSettings(childNewSettings);
             settingsPerComponent.put(childId, extracted);
         }

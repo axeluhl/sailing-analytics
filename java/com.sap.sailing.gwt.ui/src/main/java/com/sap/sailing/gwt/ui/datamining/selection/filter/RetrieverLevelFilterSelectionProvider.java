@@ -40,7 +40,7 @@ public class RetrieverLevelFilterSelectionProvider extends AbstractComponent<Abs
     private final HorizontalPanel mainPanel;
     private final Collection<DimensionFilterSelectionProvider> dimensionSelectionProviders;
 
-    public RetrieverLevelFilterSelectionProvider(Component<?> parent, ComponentContext<?, ?> context,
+    public RetrieverLevelFilterSelectionProvider(Component<?> parent, ComponentContext<?> context,
             DataMiningSession session,
             DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, ListRetrieverChainFilterSelectionProvider retrieverChainSelectionProvider, DataRetrieverChainDefinitionDTO retrieverChain,

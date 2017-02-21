@@ -18,7 +18,7 @@ public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComp
     
     private final SAPSailingHeaderWithAuthentication sapHeader;
     
-    public SAPHeaderComponent(Component<?> parent, ComponentContext<?, ?> context,
+    public SAPHeaderComponent(Component<?> parent, ComponentContext<?> context,
             SAPHeaderComponentLifecycle componentLifecycle,
             UserService userService, SAPHeaderComponentSettings settings,
             StringMessages stringMessages, boolean startInAutoScreenMode) {

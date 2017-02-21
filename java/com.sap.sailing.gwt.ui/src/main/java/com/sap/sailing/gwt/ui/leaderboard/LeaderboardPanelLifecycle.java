@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class LeaderboardPanelLifecycle
-        implements ComponentLifecycle<LeaderboardSettings, LeaderboardSettingsDialogComponent> {
+        implements ComponentLifecycle<LeaderboardSettings> {
     public static final String ID = "lpl";
 
     private final StringMessages stringMessages;

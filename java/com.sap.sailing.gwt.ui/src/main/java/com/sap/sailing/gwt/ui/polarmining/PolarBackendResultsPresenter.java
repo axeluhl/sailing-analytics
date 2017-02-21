@@ -54,7 +54,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
     private final Chart angleChart;
     private final DockLayoutPanel speedAndAngleChart;
     
-    public PolarBackendResultsPresenter(Component<?> parent, ComponentContext<?, ?> context,
+    public PolarBackendResultsPresenter(Component<?> parent, ComponentContext<?> context,
             StringMessages stringMessages) {
         super(parent, context, stringMessages);
         

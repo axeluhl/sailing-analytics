@@ -8,7 +8,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.settings.UserSettingsStorageManager;
 
 public class RaceBoardComponentContext
-        extends ComponentContextWithSettingsStorage<RaceBoardPerspectiveLifecycle, PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> {
+        extends ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> {
 
     public RaceBoardComponentContext(UserService userService, String entryPointId, RaceBoardPerspectiveLifecycle raceBoardPerspectiveLifecycle,
             String regattaName, String raceName, String leaderboardName, String leaderboardGroupName, UUID eventId) {

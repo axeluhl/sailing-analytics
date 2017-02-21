@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent> {
+public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChartSettings> {
     private final StringMessages stringMessages;
     private final boolean hasOverallLeaderboard;
     

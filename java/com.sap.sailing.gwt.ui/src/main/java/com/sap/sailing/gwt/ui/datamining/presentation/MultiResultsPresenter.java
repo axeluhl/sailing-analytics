@@ -33,7 +33,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
 
     private List<PresenterDescriptor<Object>> availablePresenters;
     
-    public MultiResultsPresenter(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+    public MultiResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context);
         this.stringMessages = stringMessages;
         availablePresenters = new ArrayList<>();

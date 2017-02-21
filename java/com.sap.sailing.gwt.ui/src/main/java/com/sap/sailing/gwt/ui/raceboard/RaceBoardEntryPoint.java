@@ -102,7 +102,10 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         if(modeType != null) {
             componentContextGlobalDefinition += "." + modeType.toString();
         }
-        final RaceBoardComponentContext context = new RaceBoardComponentContext(getUserService(), componentContextGlobalDefinition, new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE), regattaName, raceName, leaderboardName, leaderboardGroupName, eventId);
+        RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE);
+        final RaceBoardComponentContext context = new RaceBoardComponentContext(getUserService(),
+                componentContextGlobalDefinition, lifeCycle, regattaName, raceName, leaderboardName,
+                leaderboardGroupName, eventId);
         context.initInitialSettings();
         AsyncCallback<RaceboardDataDTO> asyncCallback = new AsyncCallback<RaceboardDataDTO>() {
             @Override
@@ -133,7 +136,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     @Override
                     public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> initialSettings) {
                         final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, context, initialSettings,
-                                raceboardData, showChartMarkEditMediaButtonsAndVideo);
+                                        raceboardData, showChartMarkEditMediaButtonsAndVideo, lifeCycle);
                         if (finalMode != null) {
                             finalMode.applyTo(raceBoardPanel);
                         }
@@ -161,7 +164,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
 
     private RaceBoardPanel createPerspectivePage(Component<?> parent, RaceBoardComponentContext context,
             PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings, RaceboardDataDTO raceboardData,
-            boolean showChartMarkEditMediaButtonsAndVideo) {
+            boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
         Timer timer = new Timer(PlayModes.Replay, 1000l);
@@ -169,7 +172,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, this,
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
   
-        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(parent, context, context.getRootLifecycle(),
+        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(parent, context,
+                raceLifeCycle,
                 settings,
                 sailingService, mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,

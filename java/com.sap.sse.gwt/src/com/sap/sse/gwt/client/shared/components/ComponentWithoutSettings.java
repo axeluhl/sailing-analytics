@@ -10,7 +10,7 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
  */
 public abstract class ComponentWithoutSettings extends AbstractComponent<AbstractSettings> {
 
-    public ComponentWithoutSettings(Component<?> parent, ComponentContext<?, ?> context) {
+    public ComponentWithoutSettings(Component<?> parent, ComponentContext<?> context) {
         super(parent, context);
     }
 

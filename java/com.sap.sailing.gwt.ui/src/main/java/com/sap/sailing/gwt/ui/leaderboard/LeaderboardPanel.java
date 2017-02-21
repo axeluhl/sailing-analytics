@@ -362,7 +362,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
      */
     private final boolean enableSyncedScroller;
 
-    public LeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context, SailingServiceAsync sailingService,
+    public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings,
             CompetitorSelectionProvider competitorSelectionProvider, String leaderboardName,
             ErrorReporter errorReporter, final StringMessages stringMessages,
@@ -372,7 +372,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                 showRaceDetails);
     }
 
-    public LeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context, SailingServiceAsync sailingService,
+    public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded,
             RegattaAndRaceIdentifier preSelectedRace, CompetitorSelectionProvider competitorSelectionProvider,
             String leaderboardGroupName, String leaderboardName, ErrorReporter errorReporter,
@@ -390,7 +390,7 @@ public class LeaderboardPanel extends AbstractCompositeComponent<LeaderboardSett
                 /* enableSyncScroller */ false);
     }
 
-    public LeaderboardPanel(Component<?> parent, ComponentContext<?, ?> context, SailingServiceAsync sailingService,
+    public LeaderboardPanel(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor, LeaderboardSettings settings, boolean isEmbedded,
             RegattaAndRaceIdentifier preSelectedRace, CompetitorSelectionProvider competitorSelectionProvider,
             Timer timer, String leaderboardGroupName, String leaderboardName, final ErrorReporter errorReporter,

@@ -38,7 +38,7 @@ implements ResultsPresenterWithControls<SettingsType> {
     private boolean isCurrentResultSimple;
     private boolean isCurrentResultTwoDimensional;
     
-    public AbstractResultsPresenter(Component<?> parent, ComponentContext<?, ?> context,
+    public AbstractResultsPresenter(Component<?> parent, ComponentContext<?> context,
             StringMessages stringMessages) {
         super(parent, context);
         this.stringMessages = stringMessages;

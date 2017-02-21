@@ -36,7 +36,7 @@ public class TabbedResultsPresenter extends AbstractComponent<Settings> implemen
     private final ScrolledTabLayoutPanel tabPanel;
     private final Map<Widget, ResultsPresenter<?>> presentersMappedByHeader;
     
-    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
+    public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages) {
         super(parent, context);
         this.stringMessages = stringMessages;
         

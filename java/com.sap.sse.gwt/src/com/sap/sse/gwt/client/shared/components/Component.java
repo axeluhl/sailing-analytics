@@ -71,5 +71,5 @@ public interface Component<SettingsType extends Settings> {
      */
     Component<?> getParentComponent();
 
-    ComponentContext<?, ?> getComponentContext();
+    ComponentContext<?> getComponentContext();
 }

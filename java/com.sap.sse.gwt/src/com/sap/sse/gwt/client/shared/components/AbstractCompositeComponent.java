@@ -9,9 +9,9 @@ import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 public abstract class AbstractCompositeComponent<SettingsType extends Settings> extends Composite implements Component<SettingsType> {
     private Component<?> parentComponent;
-    private ComponentContext<?, ?> context;
+    private ComponentContext<?> context;
 
-    public AbstractCompositeComponent(Component<?> parent, ComponentContext<?, ?> context) {
+    public AbstractCompositeComponent(Component<?> parent, ComponentContext<?> context) {
         this.context = context;
         this.parentComponent = parent;
         if (parentComponent == null) {
@@ -32,7 +32,7 @@ public abstract class AbstractCompositeComponent<SettingsType extends Settings> 
     }
 
     @Override
-    public ComponentContext<?, ?> getComponentContext() {
+    public ComponentContext<?> getComponentContext() {
         return context;
     }
 

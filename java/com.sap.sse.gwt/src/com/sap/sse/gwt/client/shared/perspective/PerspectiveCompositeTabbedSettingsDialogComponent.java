@@ -115,7 +115,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     public PerspectiveCompositeTabbedSettingsDialogComponent(PerspectiveLifecycle<PS> lifecycle,
             PerspectiveCompositeSettings<PS> settings) {
         this.componentIdsAndDialogComponents = new ArrayList<>();
-        for (ComponentLifecycle<?, ?> componentLifecycle : lifecycle.getComponentLifecycles()) {
+        for (ComponentLifecycle<?> componentLifecycle : lifecycle.getComponentLifecycles()) {
             if (componentLifecycle.hasSettings()) {
                 createComponentIdWithSettingsAndDialogComponent(settings, componentLifecycle);
             }
@@ -125,7 +125,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     }
 
     private <S extends Settings, C extends Component<S>> void createComponentIdWithSettingsAndDialogComponent(CompositeSettings componentSettings,
-            ComponentLifecycle<S, ?> componentLifecycle) {
+            ComponentLifecycle<S> componentLifecycle) {
         @SuppressWarnings("unchecked")
         S settingsOfComponent = (S) componentSettings.findSettingsByComponentId(componentLifecycle.getComponentId());
         for (ComponentIdWithSettingsAndDialogComponent<?> c : componentIdsAndDialogComponents) {

@@ -102,7 +102,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private final TimingHolder primary = new TimingHolder();
     private final TimingHolder secondary = new TimingHolder();
 
-    AbstractCompetitorRaceChart(Component<?> parent, ComponentContext<?, ?> context, SailingServiceAsync sailingService,
+    AbstractCompetitorRaceChart(Component<?> parent, ComponentContext<?> context, SailingServiceAsync sailingService,
             AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,

@@ -74,7 +74,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     
     private final Duration initialTimeAfterRaceStartInReplayMode;
     
-    public RaceTimePanel(Component<?> parent, ComponentContext<?, ?> context, RaceTimePanelLifecycle componentLifecycle,
+    public RaceTimePanel(Component<?> parent, ComponentContext<?> context, RaceTimePanelLifecycle componentLifecycle,
             UserService userService,
             Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,

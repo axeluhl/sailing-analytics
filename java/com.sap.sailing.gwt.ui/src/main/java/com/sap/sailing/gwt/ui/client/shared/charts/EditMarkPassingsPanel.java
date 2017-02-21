@@ -88,7 +88,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
     private final Button removeSuppressedPassingButton;
     private Label selectCompetitorLabel = new Label();
 
-    public EditMarkPassingsPanel(Component<?> parent, ComponentContext<?, ?> context,
+    public EditMarkPassingsPanel(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService,
             final RegattaAndRaceIdentifier raceIdentifier,
             final StringMessages stringMessages, final CompetitorSelectionProvider competitorSelectionModel,
