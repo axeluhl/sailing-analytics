@@ -7,7 +7,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
-import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.CallbacksJoinerHelper;
 import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
@@ -305,7 +304,7 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
     }
 
     /**
-     * Utility method used to build a {@link ComponentContextWithSettingsStorage#contextDefinitionId context
+     * Utility method used to build a {@link UserSettingsStorageManager#storageContextSpecificKey context
      * definition id} in order to construct an object of this class.
      * 
      * @param contextDefinitionParameters
