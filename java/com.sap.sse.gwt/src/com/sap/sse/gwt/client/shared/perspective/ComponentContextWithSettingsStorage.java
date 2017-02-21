@@ -13,7 +13,6 @@ import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
-import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 /**
  * Manages all default settings of a component/perspective and its subcomponents if there are any. It supplies
@@ -187,18 +186,5 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
             throw new IllegalStateException("Settings path is not finished, but no perspective at current level");
         }
         return current;
-    }
-    
-    public static <S extends Settings> ComponentContext<S> createComponentContext(
-            ComponentLifecycle<S> rootLifecycle,
-            SettingsStorageManager<S> settingsStorageManager) {
-        if (getIgnoreLocalSettings().isIgnoreLocalSettings()) {
-            return new SimpleComponentContext<>(rootLifecycle);
-        }
-        return new ComponentContextWithSettingsStorage<>(rootLifecycle, settingsStorageManager);
-    }
-    
-    public static IgnoreLocalSettings getIgnoreLocalSettings() {
-        return new SettingsToUrlSerializer().deserializeFromCurrentLocation(new IgnoreLocalSettings());
     }
 }
