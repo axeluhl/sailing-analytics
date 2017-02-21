@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.charts;
+package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;

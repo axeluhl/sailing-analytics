@@ -1,11 +1,11 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class OverallLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
 
-    protected static final String ID = "olpl";
+    public static final String ID = "olpl";
 
     public OverallLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         super(leaderboard, stringMessages);

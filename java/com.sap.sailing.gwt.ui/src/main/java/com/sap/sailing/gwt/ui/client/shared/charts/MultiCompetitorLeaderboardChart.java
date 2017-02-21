@@ -2,6 +2,9 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;

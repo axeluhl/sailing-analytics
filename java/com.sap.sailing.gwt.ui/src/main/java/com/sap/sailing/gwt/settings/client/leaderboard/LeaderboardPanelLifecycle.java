@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
 import java.util.List;

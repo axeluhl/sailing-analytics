@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.charts;
+package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;

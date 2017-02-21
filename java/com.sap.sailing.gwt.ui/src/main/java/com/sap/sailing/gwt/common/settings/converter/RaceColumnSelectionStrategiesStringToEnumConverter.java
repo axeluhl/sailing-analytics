@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.common.settings.converter;
 
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sse.common.settings.generic.StringToEnumConverter;
 
 public class RaceColumnSelectionStrategiesStringToEnumConverter implements StringToEnumConverter<RaceColumnSelectionStrategies> {

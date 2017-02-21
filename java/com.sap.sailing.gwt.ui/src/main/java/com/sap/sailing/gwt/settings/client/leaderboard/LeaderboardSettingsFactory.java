@@ -1,11 +1,12 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -44,10 +45,13 @@ public class LeaderboardSettingsFactory {
      *            show the regatta rank are left unchanged; otherwise, a non-<code>null</code> overall details
      *            collection will be put to the settings and the {@link DetailType#REGATTA_RANK} will be added to the
      *            overall details if and only if this parameter is <code>true</code>
+     * @param raceColumnSelectionType
+     * @param raceColumnSelection
      */
     public LeaderboardSettings createNewSettingsForPlayMode(PlayModes playMode, String nameOfRaceToSort, String nameOfRaceColumnToShow,
-            String nameOfRaceToShow, RaceColumnSelection raceColumnSelection, boolean showRegattaRank, boolean showCompetitorSailIdColumn,
-            boolean showCompetitorNameColumn) {
+            String nameOfRaceToShow, boolean showRegattaRank, boolean showCompetitorSailIdColumn,
+            boolean showCompetitorNameColumn, Integer raceColumnSelectionNumber,
+            RaceColumnSelectionStrategies raceColumnSelectionType) {
         if (nameOfRaceColumnToShow != null && nameOfRaceToShow != null) {
             throw new IllegalArgumentException("Can identify only one race to show, either by race name or by its column name, but not both");
         }
@@ -74,10 +78,10 @@ public class LeaderboardSettingsFactory {
                 final List<DetailType> overallDetails = createOverallDetailsForShowRegattaRank(showRegattaRank);
                 settings = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                         namesOfRaceColumnsToShow,
-                        namesOfRacesToShow, raceColumnSelection.getNumberOfLastRaceColumnsToShow(),
+                    namesOfRacesToShow, raceColumnSelectionNumber,
                         /* set autoExpandPreSelectedRace to true if we look at a single race */ nameOfRaceColumnToShow != null || nameOfRaceToShow != null,
                         /* refresh interval */ null, /* name of race to sort */ nameOfRaceToSort,
-                        /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelection.getType(),
+                    /* ascending */ true, /* updateUponPlayStateChange */ true, raceColumnSelectionType,
                         /*showAddedScores*/ false, /*showOverallRacesCompleted*/ false,
                         showCompetitorSailIdColumn, showCompetitorNameColumn);
                 break;
