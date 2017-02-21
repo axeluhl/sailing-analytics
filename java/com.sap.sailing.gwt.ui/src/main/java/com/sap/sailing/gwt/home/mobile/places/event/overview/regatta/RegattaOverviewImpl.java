@@ -49,7 +49,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupProgress(Panel container) {
-        eventStepsUi = new EventSteps();
+        eventStepsUi = new EventSteps(currentPresenter.getRegatta());
         refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
         container.add(eventStepsUi);
     }
