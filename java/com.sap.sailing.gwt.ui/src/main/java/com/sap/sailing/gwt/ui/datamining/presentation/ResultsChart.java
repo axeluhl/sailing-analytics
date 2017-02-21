@@ -42,7 +42,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
-public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Settings> {
+public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     
     private final Comparator<GroupKey> standardKeyComparator = new Comparator<GroupKey>() {
         @Override
@@ -194,8 +194,9 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     }
 
     @Override
-    protected void internalShowNumberResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues) {
         this.currentResultValues = resultValues;
+        decimalsListBox.setValue(getCurrentResult().getValueDecimals(), false);
         updateKeyComparatorListBox();
         resetChartSeries();
         updateChartLabels();
@@ -407,5 +408,10 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     @Override
     public Settings getSettings() {
         return null;
+    }
+
+    @Override
+    public String getId() {
+        return "rc";
     }
 }

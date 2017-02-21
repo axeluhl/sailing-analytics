@@ -1,16 +1,12 @@
-package com.sap.sailing.datamining.impl.data;
+package com.sap.sse.datamining.impl.data;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterGroup;
-import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;
-import com.sap.sse.datamining.impl.data.ClusterWithSingleBoundary;
-import com.sap.sse.datamining.impl.data.ComparableClusterBoundary;
-import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 
-// TODO: Improve and move to com.sap.sse.datamining
+// TODO: Cache the clusters
 public class LinearDoubleClusterGroup implements ClusterGroup<Double> {
     private static final long serialVersionUID = 1559316450183865115L;
     

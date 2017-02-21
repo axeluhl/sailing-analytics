@@ -7,10 +7,14 @@ import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.ui.ValueListBox;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AbstractResultDataProvider;
+import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
+import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.AbstractNumericDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.BearingDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DistanceDataProvider;
 import com.sap.sailing.gwt.ui.datamining.presentation.dataproviders.DurationDataProvider;
@@ -22,23 +26,39 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
-public abstract class AbstractResultsPresenterWithDataProviders<SettingsType extends Settings> extends AbstractResultsPresenter<Settings> {
+public abstract class AbstractNumericResultsPresenter<SettingsType extends Settings> extends AbstractResultsPresenter<Settings> {
     
     private final NumberDataProvider numberDataProvider;
-    private final Map<String, AbstractResultDataProvider<? extends Object>> dataProviders;
-    private AbstractResultDataProvider<? extends Object> currentDataProvider;
+    private final Map<String, AbstractNumericDataProvider<? extends Object>> dataProviders;
+    private final ValueListBox<String> dataSelectionListBox;
+    private AbstractNumericDataProvider<? extends Object> currentDataProvider;
 
-    public AbstractResultsPresenterWithDataProviders(Component<?> parent, ComponentContext<?, ?> context,
-            StringMessages stringMessages) {
+    public AbstractNumericResultsPresenter(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
         super(parent, context, stringMessages);
+        
         numberDataProvider = new NumberDataProvider();
         dataProviders = new HashMap<>();
-        AbstractResultDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();
+        AbstractNumericDataProvider<Distance> distanceDataProvider = new DistanceDataProvider();
         dataProviders.put(distanceDataProvider.getResultType().getName(), distanceDataProvider);
-        AbstractResultDataProvider<Duration> durationDataProvider = new DurationDataProvider();
+        AbstractNumericDataProvider<Duration> durationDataProvider = new DurationDataProvider();
         dataProviders.put(durationDataProvider.getResultType().getName(), durationDataProvider);
-        AbstractResultDataProvider<Bearing> bearingDataProvider = new BearingDataProvider();
+        AbstractNumericDataProvider<Bearing> bearingDataProvider = new BearingDataProvider();
         dataProviders.put(bearingDataProvider.getResultType().getName(), bearingDataProvider);
+        
+        dataSelectionListBox = new ValueListBox<>(new AbstractObjectRenderer<String>() {
+            @Override
+            protected String convertObjectToString(String dataKey) {
+                return currentDataProvider.getLocalizedNameForDataKey(stringMessages, dataKey);
+            }
+        });
+        dataSelectionListBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
+                internalShowNumericResult(resultValues);
+            }
+        });
+        addControl(dataSelectionListBox);
     }
     
     protected void internalShowResults(QueryResultDTO<?> result) {
@@ -46,7 +66,7 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
         updateDataSelectionListBox();
         if (currentDataProvider != null) {
             Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-            internalShowNumberResult(resultValues);
+            internalShowNumericResult(resultValues);
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
                 public void execute() {
@@ -58,13 +78,7 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
         }
     }
     
-    @Override
-    protected void onDataSelectionValueChange() {
-        Map<GroupKey, Number> resultValues = currentDataProvider.getData(getCurrentResult(), dataSelectionListBox.getValue());
-        internalShowNumberResult(resultValues);
-    }
-    
-    private AbstractResultDataProvider<? extends Object> selectCurrentDataProvider() {
+    private AbstractNumericDataProvider<? extends Object> selectCurrentDataProvider() {
         if (numberDataProvider.acceptsResultsOfType(getCurrentResult().getResultType())) {
             return numberDataProvider;
         }
@@ -82,11 +96,17 @@ public abstract class AbstractResultsPresenterWithDataProviders<SettingsType ext
         }
     }
 
-    protected abstract void internalShowNumberResult(Map<GroupKey, Number> resultValues);
+    protected abstract void internalShowNumericResult(Map<GroupKey, Number> resultValues);
 
-    @Override
-    public String getId() {
-        return getLocalizedShortName();
+    String getSelectedDataKey() {
+        return dataSelectionListBox.getValue();
+    }
+    
+    void setSelectedDataKey(String dataKey) {
+        if (!currentDataProvider.isValidDataKey(dataKey)) {
+            throw new IllegalArgumentException("The given data key '" + dataKey + "' isn't valid");
+        }
+        dataSelectionListBox.setValue(dataKey, true);
     }
 
 }

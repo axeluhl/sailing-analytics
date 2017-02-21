@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractObjectRenderer;
 import com.sap.sailing.gwt.ui.datamining.ResultsPresenter;
-import com.sap.sailing.gwt.ui.datamining.ResultsPresenterWithControls;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
@@ -29,45 +28,51 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
     
     private final DeckLayoutPanel presenterPanel;
     private final HorizontalPanel controlsPanel;
-    private final ValueListBox<Descriptor<Object>> presentersListBox;
-    private ResultsPresenter<?> currentPresenter;
+    private final ValueListBox<PresenterDescriptor<Object>> presentersListBox;
+    private AbstractResultsPresenter<?> currentPresenter;
 
-    private List<Descriptor<Object>> availableDescriptors;
+    private List<PresenterDescriptor<Object>> availablePresenters;
     
     public MultiResultsPresenter(Component<?> parent, ComponentContext<?, ?> context, StringMessages stringMessages) {
         super(parent, context);
         this.stringMessages = stringMessages;
-        availableDescriptors = new ArrayList<>();
-        availableDescriptors.add(new ColumnChartDescriptor());
-        availableDescriptors.add(new PlainDescriptor());
+        availablePresenters = new ArrayList<>();
+        availablePresenters.add(new ColumnChartDescriptor());
+        availablePresenters.add(new PlainDescriptor());
 
         presenterPanel = new DeckLayoutPanel();
         
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
         controlsPanel.add(new Label(stringMessages.choosePresentation() + ":"));
-        presentersListBox = new ValueListBox<>(new AbstractObjectRenderer<Descriptor<? extends Object>>() {
+        presentersListBox = new ValueListBox<>(new AbstractObjectRenderer<PresenterDescriptor<? extends Object>>() {
             @Override
-            protected String convertObjectToString(Descriptor<? extends Object> nonNullObject) {
+            protected String convertObjectToString(PresenterDescriptor<? extends Object> nonNullObject) {
                 return nonNullObject.getName();
             }
         });
-        presentersListBox.addValueChangeHandler(new ValueChangeHandler<Descriptor<Object>>() {
+        presentersListBox.addValueChangeHandler(new ValueChangeHandler<PresenterDescriptor<Object>>() {
             @Override
-            public void onValueChange(ValueChangeEvent<Descriptor<Object>> event) {
+            public void onValueChange(ValueChangeEvent<PresenterDescriptor<Object>> event) {
                 setCurrentPresenter(event.getValue().getPresenter());
             }
         });
         controlsPanel.add(presentersListBox);
-        presentersListBox.setValue(availableDescriptors.get(0), false);
-        presentersListBox.setAcceptableValues(availableDescriptors);
+        presentersListBox.setValue(availablePresenters.get(0), false);
+        presentersListBox.setAcceptableValues(availablePresenters);
         
-        setCurrentPresenter(availableDescriptors.get(0).getPresenter());
+        setCurrentPresenter(availablePresenters.get(0).getPresenter());
     }
 
-    private void setCurrentPresenter(ResultsPresenterWithControls<?> presenter) {
+    private void setCurrentPresenter(AbstractResultsPresenter<?> presenter) {
         controlsPanel.removeFromParent();
         presenter.addControl(controlsPanel);
+        
+        if (presenter instanceof AbstractNumericResultsPresenter &&
+            currentPresenter instanceof AbstractNumericResultsPresenter) {
+            String dataKey = ((AbstractNumericResultsPresenter<?>) currentPresenter).getSelectedDataKey();
+            ((AbstractNumericResultsPresenter<?>) presenter).setSelectedDataKey(dataKey);
+        }
         
         currentPresenter = presenter;
         presenterPanel.setWidget(currentPresenter.getEntryWidget());
@@ -86,28 +91,28 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
 
     @Override
     public void showResult(QueryResultDTO<?> result) {
-        for (Descriptor<Object> descriptor : availableDescriptors) {
+        for (PresenterDescriptor<Object> descriptor : availablePresenters) {
             descriptor.getPresenter().showResult(result);
         }
     }
 
     @Override
     public void showError(String error) {
-        for (Descriptor<Object> descriptor : availableDescriptors) {
+        for (PresenterDescriptor<Object> descriptor : availablePresenters) {
             descriptor.getPresenter().showError(error);
         }
     }
 
     @Override
     public void showError(String mainError, Iterable<String> detailedErrors) {
-        for (Descriptor<Object> descriptor : availableDescriptors) {
+        for (PresenterDescriptor<Object> descriptor : availablePresenters) {
             descriptor.getPresenter().showError(mainError, detailedErrors);
         }
     }
 
     @Override
     public void showBusyIndicator() {
-        for (Descriptor<Object> descriptor : availableDescriptors) {
+        for (PresenterDescriptor<Object> descriptor : availablePresenters) {
             descriptor.getPresenter().showBusyIndicator();
         }
     }
@@ -157,15 +162,15 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
         return "multiResultsPresenter";
     }
 
-    private interface Descriptor<ResultType> {
+    private interface PresenterDescriptor<ResultType> {
         
         public String getName();
         
-        public ResultsPresenterWithControls<?> getPresenter();
+        public AbstractResultsPresenter<?> getPresenter();
         
     }
     
-    private class PlainDescriptor implements Descriptor<Object> {
+    private class PlainDescriptor implements PresenterDescriptor<Object> {
         
         private final AbstractResultsPresenter<?> presenter;
         
@@ -185,7 +190,7 @@ public class MultiResultsPresenter extends AbstractComponent<Settings> implement
         
     }
     
-    private class ColumnChartDescriptor implements Descriptor<Object> {
+    private class ColumnChartDescriptor implements PresenterDescriptor<Object> {
         
         private final ResultsChart presenter;
 

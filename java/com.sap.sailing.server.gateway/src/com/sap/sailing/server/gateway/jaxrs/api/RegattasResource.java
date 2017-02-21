@@ -758,10 +758,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                             .type(MediaType.TEXT_PLAIN).build();
                 }
                 // Crop request interval to startOfTracking / [endOfTracking|timePointOfLastEvent]
-                from = Util.getLatestOfTimePoints(from, trackedRace.getStartOfTracking());
-                to = Util.getEarliestOfTimePoints(to, Util.getEarliestOfTimePoints(trackedRace.getEndOfTracking(), trackedRace.getTimePointOfNewestEvent()));
+                final TimePoint finalFrom = Util.getLatestOfTimePoints(from, trackedRace.getStartOfTracking());
+                final TimePoint finalTo = Util.getEarliestOfTimePoints(to, Util.getEarliestOfTimePoints(trackedRace.getEndOfTracking(), trackedRace.getTimePointOfNewestEvent()));
                 TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(
-                        new DefaultWindTrackJsonSerializer(/* maxNumberOfFixes */ 10000), windSource, windSourceId, from, to);
+                        ws->new DefaultWindTrackJsonSerializer(/* maxNumberOfFixes */ 10000, finalFrom, finalTo, ws), windSource, windSourceId);
 
                 JSONObject jsonWindTracks = serializer.serialize(trackedRace);
                 String json = jsonWindTracks.toJSONString();
