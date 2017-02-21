@@ -40,7 +40,7 @@ import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Settings> {
+public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     
     private final Comparator<GroupKey> standardKeyComparator = new Comparator<GroupKey>() {
         @Override
@@ -192,8 +192,9 @@ public class ResultsChart extends AbstractResultsPresenterWithDataProviders<Sett
     }
 
     @Override
-    protected void internalShowNumberResult(Map<GroupKey, Number> resultValues) {
+    protected void internalShowNumericResult(Map<GroupKey, Number> resultValues) {
         this.currentResultValues = resultValues;
+        decimalsListBox.setValue(getCurrentResult().getValueDecimals(), false);
         updateKeyComparatorListBox();
         resetChartSeries();
         updateChartLabels();

@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry exported="true" kind="lib" path="WEB-INF/lib/gwt-maps-api-3.9.0-build-17.jar"/>
 	<classpathentry exported="true" kind="lib" path="WEB-INF/lib/gwt-ajaxloader.jar"/>

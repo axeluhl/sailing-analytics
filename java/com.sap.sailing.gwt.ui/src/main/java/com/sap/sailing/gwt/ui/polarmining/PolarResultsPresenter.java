@@ -206,12 +206,6 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     }
 
     @Override
-    protected void onDataSelectionValueChange() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());

@@ -4,7 +4,6 @@ import java.util.Calendar;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
@@ -54,11 +53,6 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     }
     
     @Override
-    public BoatClass getBoatClass() {
-        return getRegatta().getBoatClass();
-    }
-    
-    @Override
     public TrackedRace getTrackedRace() {
         return trackedRace;
     }
@@ -85,12 +79,15 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     private Integer calculateYear() {
         TimePoint startOfRace = getTrackedRace().getStartOfRace();
         TimePoint time = startOfRace != null ? startOfRace : getTrackedRace().getStartOfTracking();
+        final Integer result;
         if (time == null) {
-            year = 0;
+            result = 0;
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(time.asDate());
+            result = calendar.get(Calendar.YEAR);
         }
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(time.asDate());
-        return calendar.get(Calendar.YEAR);
+        return result;
     }
     
     @Override

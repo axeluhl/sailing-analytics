@@ -24,8 +24,9 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<IRaceCompetit
     private final IPositionListener listener;
 
     public RawPositionReceiver(DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
-            DomainFactory domainFactory, Simulator simulator, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
-        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
+            DomainFactory domainFactory, Simulator simulator, IEventSubscriber eventSubscriber,
+            IRaceSubscriber raceSubscriber, long timeoutInMilliseconds) {
+        super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber, timeoutInMilliseconds);
         listener = new IPositionListener() {
             @Override
             public void gotPosition(IRaceCompetitor controlPoint, IPosition position) {

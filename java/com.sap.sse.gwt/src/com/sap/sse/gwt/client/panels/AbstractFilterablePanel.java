@@ -1,7 +1,6 @@
 package com.sap.sse.gwt.client.panels;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +12,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.Util;
@@ -177,7 +177,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public void filter() {
         filtered.getList().clear();
         retainElementsInFilteredThatPassFilter();
-        filtered.refresh();
+        filtered.flush();
         sort();
     }
 
@@ -211,7 +211,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         getTextBox().addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                filterer.setKeywords(Arrays.asList(getTextBox().getText().split(" ")));
+                filterer.setKeywords(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(getTextBox().getText()));
                 filter();
             }
         });

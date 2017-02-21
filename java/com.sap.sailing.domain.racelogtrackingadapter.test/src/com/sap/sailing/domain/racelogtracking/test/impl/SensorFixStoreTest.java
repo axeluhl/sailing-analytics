@@ -32,6 +32,7 @@ import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifie
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class SensorFixStoreTest {
     private static final long FIX_TIMESTAMP = 110;
@@ -114,10 +115,26 @@ public class SensorFixStoreTest {
     }
     
     @Test
-    public void testFixesOnExclusiveBoundsArentLoaded() throws Exception {
-        addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+    public void testFixesOnExclusiveEndBoundsArentLoaded() throws Exception {
+        DoubleVectorFix fix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
         addBravoFix(device, FIX_TIMESTAMP2, FIX_RIDE_HEIGHT2);
-        verifyNoFix(FIX_TIMESTAMP, FIX_TIMESTAMP2, device, false);
+        verifySingleFix(fix, FIX_TIMESTAMP, FIX_TIMESTAMP2, device, false);
+    }
+    
+    @Test
+    public void testYoungestFix() throws Exception {
+        addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        addBravoFix(device, FIX_TIMESTAMP + 2, FIX_RIDE_HEIGHT2);
+        DoubleVectorFix youngestFix = addBravoFix(device, FIX_TIMESTAMP + 5, FIX_RIDE_HEIGHT2);
+        verifyYoungestFix(youngestFix, FIX_TIMESTAMP, FIX_TIMESTAMP2, device);
+    }
+    
+    @Test
+    public void testOldestFix() throws Exception {
+        DoubleVectorFix oldestFix = addBravoFix(device, FIX_TIMESTAMP, FIX_RIDE_HEIGHT);
+        addBravoFix(device, FIX_TIMESTAMP + 2, FIX_RIDE_HEIGHT2);
+        addBravoFix(device, FIX_TIMESTAMP + 5, FIX_RIDE_HEIGHT2);
+        verifyOldestFix(oldestFix, FIX_TIMESTAMP, FIX_TIMESTAMP2, device);
     }
     
     @Test
@@ -268,23 +285,42 @@ public class SensorFixStoreTest {
         return listener;
     }
     
-    private void verifySingleFix(Timed expectedFix, long start, long end, DeviceIdentifier device, boolean inclusive) throws Exception {
-        List<Timed> loadedFixes = loadFixes(start, end, device, inclusive);
+    private void verifySingleFix(Timed expectedFix, long start, long end, DeviceIdentifier device, boolean endIsInclusive) throws Exception {
+        List<Timed> loadedFixes = loadFixes(start, end, device, endIsInclusive);
         assertEquals(1, loadedFixes.size());
         assertEquals(expectedFix, loadedFixes.get(0));
     }
     
-    private void verifyNoFix(long start, long end, DeviceIdentifier device, boolean inclusive) throws Exception {
-        List<Timed> loadedFixes = loadFixes(start, end, device, inclusive);
-        assertEquals(0, loadedFixes.size());
-    }
-
-    private List<Timed> loadFixes(long start, long end, DeviceIdentifier device, boolean inclusive)
+    private List<Timed> loadFixes(long start, long end, DeviceIdentifier device, boolean endIsInclusive)
             throws TransformationException {
         List<Timed> loadedFixes = new ArrayList<>();
         
-        store.loadFixes(loadedFixes::add, device, new MillisecondsTimePoint(start), new MillisecondsTimePoint(end), inclusive);
+        store.loadFixes(loadedFixes::add, device, new MillisecondsTimePoint(start), new MillisecondsTimePoint(end), endIsInclusive);
         return loadedFixes;
+    }
+    
+    private void verifyYoungestFix(Timed expectedFix, long start, long end, DeviceIdentifier device) throws Exception {
+        assertEquals(expectedFix, loadYoungestFix(start, end, device));
+    }
+    
+    private Timed loadYoungestFix(long start, long end, DeviceIdentifier device)
+            throws TransformationException {
+        List<Timed> loadedFixes = new ArrayList<>();
+        store.loadYoungestFix(loadedFixes::add, device, new TimeRangeImpl(new MillisecondsTimePoint(start), new MillisecondsTimePoint(end)));
+        assert(loadedFixes.size() <= 1);
+        return loadedFixes.isEmpty() ? null : loadedFixes.get(0);
+    }
+    
+    private void verifyOldestFix(Timed expectedFix, long start, long end, DeviceIdentifier device) throws Exception {
+        assertEquals(expectedFix, loadOldestFix(start, end, device));
+    }
+    
+    private Timed loadOldestFix(long start, long end, DeviceIdentifier device)
+            throws TransformationException {
+        List<Timed> loadedFixes = new ArrayList<>();
+        store.loadOldestFix(loadedFixes::add, device, new TimeRangeImpl(new MillisecondsTimePoint(start), new MillisecondsTimePoint(end)));
+        assert(loadedFixes.size() <= 1);
+        return loadedFixes.isEmpty() ? null : loadedFixes.get(0);
     }
 
     private DoubleVectorFix addBravoFix(DeviceIdentifier device, long timestamp, double rideHeight) {
@@ -294,8 +330,9 @@ public class SensorFixStoreTest {
     }
 
     private DoubleVectorFix createBravoDoubleVectorFixWithRideHeight(long timestamp, double rideHeight) {
-        double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.columnCount];
-        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeight;
+        double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.trackColumnCount];
+        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn] = rideHeight;
+        fixData[BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn] = rideHeight;
         return new DoubleVectorFixImpl(new MillisecondsTimePoint(timestamp), fixData);
     }
 }

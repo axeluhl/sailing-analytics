@@ -39,8 +39,10 @@ public interface RaceLogTrackingAdapter {
      * <li>Is a {@link RaceLogRaceTracker} already listening for this racelog? If not, add one.</li>
      * <li>Is a {@link RaceLogStartTrackingEvent} present in the racelog? If not, add one</li>
      * </ul>
+     * @param trackWind TODO
+     * @param correctWindDirectionByMagneticDeclination TODO
      */
-    RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
+    RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception;
 
     RaceLogTrackingState getRaceLogTrackingState(RacingEventService service, RaceColumn raceColumn, Fleet fleet);

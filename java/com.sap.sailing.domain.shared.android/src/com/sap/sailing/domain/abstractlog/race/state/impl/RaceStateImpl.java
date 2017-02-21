@@ -45,6 +45,7 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 
 /**
  * Write-enabled {@link RaceState}.
@@ -169,8 +170,9 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
 
     @Override
-    public void setProtestTime(TimePoint now, TimePoint timePoint) {
-        raceLog.add(new RaceLogProtestStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), timePoint));
+    public void setProtestTime(TimePoint now, TimeRange protestTime) {
+        assert protestTime != null && protestTime.from() != null && protestTime.to() != null;
+        raceLog.add(new RaceLogProtestStartTimeEventImpl(now, author, raceLog.getCurrentPassId(), protestTime));
     }
 
     @Override

@@ -1,9 +1,12 @@
 package com.sap.sailing.domain.swisstimingreplayadapter.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -18,13 +21,15 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.racelog.RaceLogStore;
+import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayListener;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sse.util.ByteArrayOutputStreamWithVisibleBuffer;
 
 public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
@@ -35,11 +40,9 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     private static final TimeZone DEFAULT_TIMEZONE = TimeZone.getTimeZone("GMT");
 
     private final DomainFactory domainFactory;
-    private final RaceLogResolver raceLogResolver;
 
-    public SwissTimingReplayServiceImpl(DomainFactory domainFactory, RaceLogResolver raceLogResolver) {
+    public SwissTimingReplayServiceImpl(DomainFactory domainFactory) {
         this.domainFactory = domainFactory;
-        this.raceLogResolver = raceLogResolver;
     }
 
     @Override
@@ -146,10 +149,11 @@ public class SwissTimingReplayServiceImpl implements SwissTimingReplayService {
     }
 
     @Override
-    public void loadRaceData(String link, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            boolean useInternalMarkPassingAlgorithm) {
-        SwissTimingReplayListener listener = new SwissTimingReplayToDomainAdapter(regatta, domainFactory,
-                trackedRegattaRegistry, useInternalMarkPassingAlgorithm, raceLogResolver);
-        loadRaceData(link, listener);
+    public void loadRaceData(RegattaIdentifier regattaToAddTo, String link, String raceName, String raceID,
+            String boatClassName, TrackerManager trackerManager, TrackedRegattaRegistry trackedRegattaRegistry,
+            boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore)
+            throws MalformedURLException, FileNotFoundException, URISyntaxException, Exception {
+        trackerManager.addRace(regattaToAddTo, new SwissTimingReplayConnectivityParameters(link, raceName, raceID,
+                boatClassName, useInternalMarkPassingAlgorithm, domainFactory, this, raceLogStore, regattaLogStore), /* timeout */ -1);
     }
 }

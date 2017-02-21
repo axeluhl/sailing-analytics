@@ -38,6 +38,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -100,9 +101,10 @@ public class ManeuverAnalysisIDMChampionsFinalTest extends AbstractManeuverDetec
         Date fromDate = new Date(toDate.getTime()-450000l);
         final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         TimePoint maneuverTime = new MillisecondsTimePoint(dateFormatter.parse("2011-10-03T15:52:30.000+0200"));
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
+        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(competitor, new MillisecondsTimePoint(fromDate),
                 new MillisecondsTimePoint(toDate), /* waitForLatest */ true);
-        maneuversInvalid = new ArrayList<Maneuver>(maneuvers);
+        maneuversInvalid = new ArrayList<Maneuver>();
+        Util.addAll(maneuvers, maneuversInvalid);
         assertManeuver(maneuvers, ManeuverType.PENALTY_CIRCLE, maneuverTime, PENALTYCIRCLE_TOLERANCE);
         List<ManeuverType> maneuverTypesFound = new ArrayList<ManeuverType>();
         maneuverTypesFound.add(ManeuverType.PENALTY_CIRCLE);

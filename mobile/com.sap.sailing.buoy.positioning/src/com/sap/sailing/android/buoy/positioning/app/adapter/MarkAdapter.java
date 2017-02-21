@@ -39,8 +39,7 @@ public class MarkAdapter extends ResourceCursorAdapter {
             if (accuracy == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER) {
                 accuracyString = context.getString(R.string.set);
             } else {
-                accuracyString = context.getString(R.string.set) + " " +
-                        String.format(context.getString(R.string.mark_list_accuracy), df.format(accuracy));
+                accuracyString = context.getString(R.string.set) + " " + context.getString(R.string.mark_list_accuracy, df.format(accuracy));
             }
             setText = accuracyString;
         }

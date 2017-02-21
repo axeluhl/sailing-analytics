@@ -557,22 +557,23 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $gwtcompile -eq 1 ] && [[ "$clean" == "clean" ]]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*)"
 	    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
-        GWT_XML_FILES=`find com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources -name '*.gwt.xml'`
+        GWT_XML_FILES=`find . -name '*.gwt.xml'`
         if [ $onegwtpermutationonly -eq 1 ]; then
             echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
             for i in $GWT_XML_FILES; do
                 echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
                 cp $i $i.bak
-                cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="gecko1_8" \/>/' >$i.sed
-                mv $i.sed $i
+                cat $i | sed -e 's/AllPermutations/SinglePermutation/' >$i.sed
+                mv $i.sed $i                
             done
         else
             echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
             for i in $GWT_XML_FILES; do
                 echo "INFO: Patching $i files such that all GWT permutations are compiled"
                 cp $i $i.bak
-                cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="gecko1_8" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
+                cat $i | sed -e 's/SinglePermutation/AllPermutations/' >$i.sed
                 mv $i.sed $i
+                
             done
         fi
 

@@ -38,10 +38,9 @@ public class Activator implements BundleActivator {
     
     private static final String DEFAULT_CLIENT_ID = "d29eae61621af3057db0e638232a027e96b1d2291b1b89a1481dfcac075b0bf4";
     private static final String DEFAULT_CLIENT_SECRET = "537dbd14a84fcb470c91d85e8c4f8f7a356ac5ffc8727594d1bfe900ee5942ef";
-    private static final String DEFAULT_CLIENT_REDIRECT_URI = "http://sapsailing.com/igtimi/oauth/v1/authorizationcallback";
+    private static final String CLIENT_REDIRECT_PATH = "/igtimi/oauth/v1/authorizationcallback";
     private static final String CLIENT_ID_PROPERTY_NAME = "igtimi.client.id";
     private static final String CLIENT_SECRET_PROPERTY_NAME = "igtimi.client.secret";
-    private static final String CLIENT_REDIRECT_URI_PROPERTY_NAME = "igtimi.client.redirecturi";
     private final Future<IgtimiConnectionFactoryImpl> connectionFactory;
     private final Future<IgtimiWindTrackerFactory> windTrackerFactory;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
@@ -50,8 +49,7 @@ public class Activator implements BundleActivator {
         logger.info(getClass().getName()+" constructor");
         final String clientId = System.getProperty(CLIENT_ID_PROPERTY_NAME, DEFAULT_CLIENT_ID);
         final String clientSecret = System.getProperty(CLIENT_SECRET_PROPERTY_NAME, DEFAULT_CLIENT_SECRET);
-        final String clientRedirectUri = System.getProperty(CLIENT_REDIRECT_URI_PROPERTY_NAME, DEFAULT_CLIENT_REDIRECT_URI);
-        final Client client = new ClientImpl(clientId, clientSecret, clientRedirectUri);
+        final Client client = new ClientImpl(clientId, clientSecret, "https", "www.sapsailing.com", /* port==null means default */ null, CLIENT_REDIRECT_PATH);
         final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
         final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
         connectionFactory = executor.submit(new Callable<IgtimiConnectionFactoryImpl>() {

@@ -81,13 +81,20 @@ public interface DynamicTrackedRace extends TrackedRace {
     DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
     
     /**
-     * Gets an existing {@link DynamicSensorFixTrack} or creates and returns a new one if there is none yet.
+     * Gets an existing {@link DynamicSensorFixTrack} or creates and returns a new one if there is none yet. If a
+     * Competitor is given who is not part of this race, no track is created.
+     * 
      * @see #getDynamicSensorTrack(Competitor, String)
      * 
-     * @param competitor the competitor to get the track for
-     * @param trackName the name of the track to get
-     * @param newTrackFactory factory to create a new track instance if there isn't one yet for the competitor and the given track name.
-     * @return the track for the competitor and track name
+     * @param competitor
+     *            the competitor to get the track for
+     * @param trackName
+     *            the name of the track to get
+     * @param newTrackFactory
+     *            factory to create a new track instance if there isn't one yet for the competitor and the given track
+     *            name.
+     * @return the track for the competitor and track name of null if the given {@link Competitor} isn't part of this
+     *         race
      */
     <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory);

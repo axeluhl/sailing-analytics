@@ -126,8 +126,6 @@ public class ListRetrieverChainFilterSelectionProvider extends AbstractComponent
             } else if (!isAwaitingReload) {
                 clearContent();
             }
-        } else if (retrieverChain != null && !isAwaitingReload) {
-            updateRetrievalLevels();
         }
     }
 
