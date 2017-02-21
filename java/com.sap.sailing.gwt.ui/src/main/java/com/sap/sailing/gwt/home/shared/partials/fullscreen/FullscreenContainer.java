@@ -93,7 +93,7 @@ public class FullscreenContainer<T extends Widget> {
     
     @UiHandler("closeActionUi")
     void onCloseActionClicked(ClickEvent event) {
-        popup.hide();
+        this.hide();
     }
     
     public HandlerRegistration addCloseHandler(CloseHandler<PopupPanel> handler) {
@@ -132,6 +132,10 @@ public class FullscreenContainer<T extends Widget> {
         this.onShow();
     }
     
+    public void hide() {
+        popup.hide();
+    }
+
     private class FullscreenPopupPanel extends PopupPanel {
         private FullscreenPopupPanel() {
             super(false, true);
