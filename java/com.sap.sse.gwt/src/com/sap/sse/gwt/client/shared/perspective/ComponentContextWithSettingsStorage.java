@@ -13,6 +13,7 @@ import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 /**
  * Manages all default settings of a component/perspective and its subcomponents if there are any. It supplies
@@ -188,11 +189,13 @@ public class ComponentContextWithSettingsStorage<L extends ComponentLifecycle<S,
     
     public static <L extends ComponentLifecycle<S, ?>, S extends Settings> ComponentContext<L, S> createComponentContext(L rootLifecycle,
             SettingsStorageManager<S> settingsStorageManager) {
-        final String ignoreLocalSettingsString = Window.Location.getParameter("ignoreLocalSettings");
-        final boolean ignoreLocalSettings = Boolean.TRUE.toString().equals(ignoreLocalSettingsString);
-        if (ignoreLocalSettings) {
+        if (getIgnoreLocalSettings().isIgnoreLocalSettings()) {
             return new SimpleComponentContext<>(rootLifecycle);
         }
         return new ComponentContextWithSettingsStorage<>(rootLifecycle, settingsStorageManager);
+    }
+    
+    public static IgnoreLocalSettings getIgnoreLocalSettings() {
+        return new SettingsToUrlSerializer().deserializeFromCurrentLocation(new IgnoreLocalSettings());
     }
 }
