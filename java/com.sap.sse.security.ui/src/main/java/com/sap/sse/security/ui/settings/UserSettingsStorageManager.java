@@ -9,6 +9,7 @@ import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
 import com.sap.sse.gwt.client.shared.perspective.CallbacksJoinerHelper;
+import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
 import com.sap.sse.gwt.client.shared.perspective.OnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
@@ -416,4 +417,19 @@ public class UserSettingsStorageManager<S extends Settings> implements SettingsS
         }
     }
 
+    /**
+     * Creates a {@link SettingsStorageManager} instance based on the ignoreLocalSettings URL flag. if
+     * ignoreLocalSettings is set to <code>true</code>, a SimpleSettingsStorageManager is created. A
+     * UserSettingsStorageManager is created otherwise.
+     */
+    public static <S extends Settings> SettingsStorageManager<S> createSettingsStorageManager(UserService userService, String globalDefinitionId, String contextDefinitionId) {
+        if (getIgnoreLocalSettings().isIgnoreLocalSettings()) {
+            return new SimpleSettingsStorageManager<>();
+        }
+        return new UserSettingsStorageManager<>(userService, globalDefinitionId, contextDefinitionId);
+    }
+    
+    public static IgnoreLocalSettings getIgnoreLocalSettings() {
+        return new SettingsToUrlSerializer().deserializeFromCurrentLocation(new IgnoreLocalSettings());
+    }
 }
