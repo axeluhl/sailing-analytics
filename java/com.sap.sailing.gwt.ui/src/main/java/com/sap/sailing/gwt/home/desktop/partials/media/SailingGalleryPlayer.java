@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.partials.media;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -8,14 +10,17 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.HasSelectionChangedHandlers;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sse.common.Util;
 
-public class SailingGalleryPlayer extends ResizeComposite {
+public class SailingGalleryPlayer extends ResizeComposite implements HasSelectionChangedHandlers {
    
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
@@ -27,14 +32,26 @@ public class SailingGalleryPlayer extends ResizeComposite {
 
     private boolean autoplay;
     private int selectedIdx;
+    private final List<SailingImageDTO> images;
 
     public SailingGalleryPlayer(SailingImageDTO selected, Collection<SailingImageDTO> images) {
         initWidget(uiBinder.createAndBindUi(this));
         selectedIdx = Math.max(0, Util.indexOf(images, selected));
+        this.images = new ArrayList<SailingImageDTO>(images.size());
         for (SailingImageDTO i : images) {
             mainSliderUi.appendChild(createMainImgElement(i));
             subSliderUi.appendChild(createThumbImgElement(i));
+            this.images.add(i);
         }
+    }
+
+    @Override
+    public HandlerRegistration addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
+        return addHandler(handler, SelectionChangeEvent.getType());
+    }
+    
+    public SailingImageDTO getSelectedImage() {
+        return images.get(selectedIdx);
     }
 
     private ImageElement createThumbImgElement(SailingImageDTO i ) {
@@ -52,10 +69,15 @@ public class SailingGalleryPlayer extends ResizeComposite {
         img.getStyle().setProperty("backgroundPosition", "center");
         return img;
     }
+    
+    private void updateCurrentSlide(int currentIndex) {
+        this.selectedIdx = currentIndex;
+        SelectionChangeEvent.fire(this);
+    }
 
     @Override
     protected void onLoad() {
-        _onLoad();
+        _onLoad(this);
         mainSliderUi.getChild(0).<Element>cast().setTabIndex(0);
         mainSliderUi.getChild(0).<Element>cast().focus();
     }
@@ -75,7 +97,7 @@ public class SailingGalleryPlayer extends ResizeComposite {
      *
      * @param uniqueId
      */
-    native void _onLoad() /*-{
+    native void _onLoad(SailingGalleryPlayer player) /*-{
 	$wnd
 		.$('.mainSlider')
 		.slick(
@@ -93,6 +115,10 @@ public class SailingGalleryPlayer extends ResizeComposite {
 			    asNavFor : '.subSlider',
 			    initialSlide : this.@com.sap.sailing.gwt.home.desktop.partials.media.SailingGalleryPlayer::selectedIdx
 			});
+	$wnd.$('.mainSlider').on('beforeChange',
+            $entry(function(event, slick, currentSlide, nextSlide) {
+                player.@com.sap.sailing.gwt.home.desktop.partials.media.SailingGalleryPlayer::updateCurrentSlide(I)(nextSlide);
+            }));
 	$wnd
 		.$('.subSlider')
 		.slick(
