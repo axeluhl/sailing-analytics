@@ -395,7 +395,7 @@ public final class HomeServiceUtil {
     private static void mapToLinkAndMetadataDTO(EventBase event, EventLinkAndMetadataDTO dto, URL baseURL,
             boolean onRemoteServer, RacingEventService service) {
         mapToMetadataDTO(event, dto, service);
-        dto.setBaseURL(baseURL.toString());
+        dto.setBaseURL(String.valueOf(baseURL));
         dto.setOnRemoteServer(onRemoteServer);
     }
 
