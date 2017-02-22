@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -23,8 +21,8 @@ import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthenticat
 import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -121,7 +119,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         final Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         
-        final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
+        final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(leaderboardContextSettings);
         // make a single live request as the default but don't continue to play by default
 
         final UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsManager = new UserSettingsStorageManager<>(
@@ -234,14 +232,12 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         }
     }
 
-    private RegattaAndRaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
+    private RegattaAndRaceIdentifier getPreselectedRace(LeaderboardContextSettings leaderboardContextSettings) {
+        final String raceName = leaderboardContextSettings.getRaceName();
+        final String regattaName = leaderboardContextSettings.getRegattaName();
         RegattaAndRaceIdentifier result;
-        if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_NAME)
-                && parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).size() == 1
-                && parameterMap.containsKey(LeaderboardUrlSettings.PARAM_REGATTA_NAME)
-                && parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).size() == 1) {
-            result = new RegattaNameAndRaceName(parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).get(0),
-                    parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).get(0));
+        if (raceName != null && !raceName.isEmpty() && regattaName != null && !regattaName.isEmpty()) {
+            result = new RegattaNameAndRaceName(regattaName, raceName);
         } else {
             result = null;
         }
