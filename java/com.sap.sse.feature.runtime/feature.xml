@@ -25,6 +25,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.jetty.continuation"
+         download-size="0"
+         install-size="0"
+         version="9.2.2.v20140723"
+         unpack="false"/>
+
+   <plugin
          id="slf4j.jdk14"
          download-size="0"
          install-size="0"
