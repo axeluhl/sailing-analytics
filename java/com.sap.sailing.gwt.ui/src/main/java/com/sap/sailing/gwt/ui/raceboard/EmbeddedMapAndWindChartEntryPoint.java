@@ -86,7 +86,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         }
         
         // read optional parameters
-        final RaceBoardPerspectiveSettings raceboardPerspectiveSettings = RaceBoardPerspectiveSettings
+        final RaceBoardPerspectiveOwnSettings raceboardPerspectiveSettings = RaceBoardPerspectiveOwnSettings
                 .readSettingsFromURL(/* defaultForViewShowLeaderboard */ true, /* defaultForViewShowWindchart */ true,
                         /* defaultForViewShowCompetitorsChart */ false, /* defaultForViewCompetitorFilter */ null,
                         /* defaultForCanReplayDuringLiveRaces */ false);
@@ -154,7 +154,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
     }
 
     private void createEmbeddedMap(final RegattaAndRaceIdentifier selectedRaceIdentifier, Map<CompetitorDTO, BoatDTO> competitorBoats,
-            final RaceBoardPerspectiveSettings raceboardPerspectiveSettings, final RaceMapSettings raceMapSettings, 
+            final RaceBoardPerspectiveOwnSettings raceboardPerspectiveSettings, final RaceMapSettings raceMapSettings, 
             final boolean showCompetitors, final boolean play) {
         final StringBuilder title = new StringBuilder(regattaLikeName);
         title.append('/');

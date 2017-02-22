@@ -93,10 +93,10 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
     }
 
     public RaceMapSettings(RaceMapZoomSettings zoomSettings, RaceMapHelpLinesSettings helpLinesSettings,
-            boolean transparentHoverlines, int hoverlineStrokeWeight, long tailLengthInMilliseconds, boolean windUp,
-            Distance buoyZoneRadius, boolean showOnlySelectedCompetitors, boolean showSelectedCompetitorsInfo,
-            boolean showWindStreamletColors, boolean showWindStreamletOverlay, boolean showSimulationOverlay,
-            boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, boolean showDouglasPeuckerPoints) {
+            Boolean transparentHoverlines, Integer hoverlineStrokeWeight, Long tailLengthInMilliseconds, Boolean windUp,
+            Distance buoyZoneRadius, Boolean showOnlySelectedCompetitors, Boolean showSelectedCompetitorsInfo,
+            Boolean showWindStreamletColors, Boolean showWindStreamletOverlay, Boolean showSimulationOverlay,
+            Boolean showMapControls, Collection<ManeuverType> maneuverTypesToShow, Boolean showDouglasPeuckerPoints) {
         this.zoomSettings.init(zoomSettings);
         this.helpLinesSettings.init(helpLinesSettings);
         this.transparentHoverlines.setValue(transparentHoverlines);

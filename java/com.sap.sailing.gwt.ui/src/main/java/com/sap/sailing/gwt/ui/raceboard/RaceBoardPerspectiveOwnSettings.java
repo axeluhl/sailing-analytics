@@ -13,7 +13,7 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
  * @author Frank
  *
  */
-public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSettings {
+public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializableSettings {
     
     private static final long serialVersionUID = 5471954179434008459L;
     
@@ -35,7 +35,7 @@ public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSet
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
     public static final String PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS = "t";
     
-    public RaceBoardPerspectiveSettings() {
+    public RaceBoardPerspectiveOwnSettings() {
     }
     
     @Override
@@ -48,8 +48,8 @@ public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSet
         this.initialDurationAfterRaceStartInReplay = new DurationSetting("initialDurationAfterRaceStartInReplay", this, null);
     }
 
-    public RaceBoardPerspectiveSettings(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean canReplayDuringLiveRaces,
+    public RaceBoardPerspectiveOwnSettings(String activeCompetitorsFilterSetName, Boolean showLeaderboard,
+            Boolean showWindChart, Boolean showCompetitorsChart, Boolean canReplayDuringLiveRaces,
             Duration initialDurationAfterRaceStartInReplay) {
         this.activeCompetitorsFilterSetName.setValue(activeCompetitorsFilterSetName);
         this.showLeaderboard.setValue(showLeaderboard);
@@ -79,7 +79,7 @@ public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSet
         return canReplayDuringLiveRaces.getValue();
     }
 
-    public static RaceBoardPerspectiveSettings readSettingsFromURL(boolean defaultForViewShowLeaderboard,
+    public static RaceBoardPerspectiveOwnSettings readSettingsFromURL(boolean defaultForViewShowLeaderboard,
             boolean defaultForViewShowWindchart, boolean defaultForViewShowCompetitorsChart,
             String defaultForViewCompetitorFilter, boolean defaultForCanReplayDuringLiveRaces) {
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, defaultForViewShowLeaderboard /* default */);
@@ -89,7 +89,7 @@ public class RaceBoardPerspectiveSettings extends AbstractGenericSerializableSet
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(PARAM_CAN_REPLAY_DURING_LIVE_RACES, defaultForCanReplayDuringLiveRaces /* default */);
         final Duration initialDurationAfterRaceStartInReplay = parseDuration(GwtHttpRequestUtils.getStringParameter(
                 PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, null /* default */));
-        return new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
+        return new RaceBoardPerspectiveOwnSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
                 showCompetitorsChart, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay);
     }
 

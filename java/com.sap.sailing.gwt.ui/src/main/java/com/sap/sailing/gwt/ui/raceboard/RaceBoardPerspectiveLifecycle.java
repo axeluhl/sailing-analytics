@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 
 
-public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveSettings> {
+public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveOwnSettings> {
 
     private final StringMessages stringMessages;
     private final RaceMapLifecycle raceMapLifecycle;
@@ -45,12 +45,12 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     }
 
     @Override
-    public RaceBoardPerspectiveSettings createPerspectiveOwnDefaultSettings() {
-        return new RaceBoardPerspectiveSettings();
+    public RaceBoardPerspectiveOwnSettings createPerspectiveOwnDefaultSettings() {
+        return new RaceBoardPerspectiveOwnSettings();
     }
 
     @Override
-    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getPerspectiveOwnSettingsDialogComponent(RaceBoardPerspectiveSettings perspectiveSettings) {
+    public SettingsDialogComponent<RaceBoardPerspectiveOwnSettings> getPerspectiveOwnSettingsDialogComponent(RaceBoardPerspectiveOwnSettings perspectiveSettings) {
         return new RaceBoardPerspectiveSettingsDialogComponent(perspectiveSettings, stringMessages);
     }
 
@@ -94,12 +94,12 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     }
 
     @Override
-    protected RaceBoardPerspectiveSettings extractOwnGlobalSettings(RaceBoardPerspectiveSettings settings) {
+    protected RaceBoardPerspectiveOwnSettings extractOwnGlobalSettings(RaceBoardPerspectiveOwnSettings settings) {
         return createPerspectiveOwnDefaultSettings();
     }
 
     @Override
-    protected RaceBoardPerspectiveSettings extractOwnContextSettings(RaceBoardPerspectiveSettings settings) {
+    protected RaceBoardPerspectiveOwnSettings extractOwnContextSettings(RaceBoardPerspectiveOwnSettings settings) {
         return createPerspectiveOwnDefaultSettings();
     }
 }

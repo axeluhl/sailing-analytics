@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -131,7 +131,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                     
                     playerView.clearContent();
 
-                    PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> raceboardSettings = settings
+                    PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> raceboardSettings = settings
                             .findSettingsByComponentId(autoplayLiveCycle.getRaceboardLifecycle().getComponentId());
 
                     RaceBoardPanel raceboardPerspective = new RaceBoardPanel(null, null,

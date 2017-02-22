@@ -113,7 +113,7 @@ import com.sap.sse.security.ui.client.UserService;
  *
  */
 public class RaceBoardPanel
-        extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings>
+        extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveOwnSettings>
         implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize
 {
     private final SailingServiceAsync sailingService;
@@ -177,9 +177,9 @@ public class RaceBoardPanel
      *            aligns its right border with that of the chart. Otherwise those components will be hidden.
      */
     public RaceBoardPanel(Component<?> parent,
-            ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> context,
+            ComponentContext<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context,
             RaceBoardPerspectiveLifecycle lifecycle,
-            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings,
             SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,
             AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
@@ -367,7 +367,7 @@ public class RaceBoardPanel
      *            the charts are created.
      */
     private void createOneScreenView(RaceBoardPerspectiveLifecycle lifecycle,
-            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings, String leaderboardName,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, String leaderboardName,
             String leaderboardGroupName, UUID event,
             FlowPanel mainPanel, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap,
             UserService userService, boolean showChartMarkEditMediaButtonsAndVideo) {
@@ -472,7 +472,7 @@ public class RaceBoardPanel
     }
     
     private LeaderboardPanel createLeaderboardPanel(RaceBoardPerspectiveLifecycle lifecycle,
-            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings, String leaderboardName,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, String leaderboardName,
             String leaderboardGroupName,
             CompetitorFilterPanel competitorSearchTextBox, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard) {
         LeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
@@ -718,7 +718,7 @@ public class RaceBoardPanel
     }
 
     @Override
-    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getPerspectiveOwnSettingsDialogComponent() {
+    public SettingsDialogComponent<RaceBoardPerspectiveOwnSettings> getPerspectiveOwnSettingsDialogComponent() {
         return new RaceBoardPerspectiveSettingsDialogComponent(getPerspectiveSettings(), stringMessages);
     }
 

@@ -73,9 +73,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             componentContextGlobalDefinition += "." + raceBoardContextSettings.getMode().toString();
         }
         RaceBoardPerspectiveLifecycle lifeCycle = new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE);
-        ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> context = new ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>(
+        ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
                 lifeCycle,
-                new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>(
+                new UserSettingsStorageManager<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>(
                         getUserService(), componentContextGlobalDefinition + "." + lifeCycle.getComponentId(),
                         UserSettingsStorageManager.buildContextDefinitionId(raceBoardContextSettings.getRegattaName(),
                                 raceBoardContextSettings.getRaceName(), raceBoardContextSettings.getLeaderboardName(),
@@ -115,9 +115,9 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                     return;
                 }
                 
-                context.initInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>>() {
+                context.initInitialSettings(new DefaultOnSettingsLoadedCallback<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>>() {
                     @Override
-                    public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> initialSettings) {
+                    public void onSuccess(PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> initialSettings) {
                         final RaceBoardPanel raceBoardPanel = createPerspectivePage(null, context, initialSettings,
                                         raceboardData, showChartMarkEditMediaButtonsAndVideo, lifeCycle);
                                 if (finalMode != null) {
@@ -149,8 +149,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private RaceBoardPanel createPerspectivePage(Component<?> parent,
-            ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>> context,
-            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings, RaceboardDataDTO raceboardData,
+            ComponentContextWithSettingsStorage<PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings>> context,
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings, RaceboardDataDTO raceboardData,
             boolean showChartMarkEditMediaButtonsAndVideo, RaceBoardPerspectiveLifecycle raceLifeCycle) {
         selectedRace = raceboardData.getRace();
         Window.setTitle(selectedRace.getName());
