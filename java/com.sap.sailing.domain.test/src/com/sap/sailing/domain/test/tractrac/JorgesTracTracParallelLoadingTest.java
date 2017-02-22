@@ -3,14 +3,26 @@ package com.sap.sailing.domain.test.tractrac;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.junit.Test;
 
 import com.tractrac.model.lib.api.ModelLocator;
 import com.tractrac.model.lib.api.data.IControlPassing;
@@ -29,14 +41,13 @@ import com.tractrac.subscription.lib.api.event.IConnectionStatusListener;
 import com.tractrac.subscription.lib.api.event.ILiveDataEvent;
 import com.tractrac.subscription.lib.api.event.IStoredDataEvent;
 import com.tractrac.util.lib.api.autolog.LoggerLocator;
-import org.junit.Test;
 
 /**
  * Created by jorge on 15/02/17.
  */
 public class JorgesTracTracParallelLoadingTest {
     private CountDownLatch lock;
-    private Map<String, StringBuilder> outputs;
+    private ConcurrentHashMap<String, StringBuilder> outputs;
 
     private void start(String params) throws CreateModelException, URISyntaxException, InterruptedException, IOException {
         // Initialize the log
@@ -217,16 +228,16 @@ public class JorgesTracTracParallelLoadingTest {
 
     @Test
     public void logParallelLoading() throws CreateModelException, URISyntaxException, InterruptedException, IOException {
-        outputs = new HashMap<>();
+        outputs = new ConcurrentHashMap<>();
         final String jsonUrl = "http://skitrac.traclive.dk/events/event_20160622_ESSCardiff/jsonservice.php";
         start(jsonUrl);
         lock.await(60, TimeUnit.SECONDS);
         Map<String, StringBuilder> firstRunsOutput = outputs;
-        outputs = new HashMap<>();
+        outputs = new ConcurrentHashMap<>();
         start(jsonUrl);
         lock.await(60, TimeUnit.SECONDS);
         Map<String, StringBuilder> secondRunsOutput = outputs;
-        outputs = new HashMap<>();
+        outputs = new ConcurrentHashMap<>();
         final Set<String> diff1 = new HashSet<>(firstRunsOutput.keySet());
         final Set<String> diff2 = new HashSet<>(secondRunsOutput.keySet());
         if (!diff1.equals(diff2)) {
