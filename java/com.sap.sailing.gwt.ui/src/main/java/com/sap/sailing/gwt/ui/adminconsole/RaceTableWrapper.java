@@ -11,7 +11,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
-import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorTemplates;
@@ -52,7 +52,7 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                 if (raceInLeaderboardDTOAndFleetName.getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB()) != null) {
                     RegattaNameAndRaceName raceIdentifier = (RegattaNameAndRaceName) raceInLeaderboardDTOAndFleetName
                             .getA().getRaceIdentifier(raceInLeaderboardDTOAndFleetName.getB());
-                            RaceboardContextSettings raceboardContext = new RaceboardContextSettings(
+                            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
                                     raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
                                     selectedLeaderboardName, null, null, null);
                             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings

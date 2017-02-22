@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
-import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewBaseSettings;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -56,8 +56,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         siteHeader.addWidgetToRightSide(clockLabel);
         containerPanel.addNorth(siteHeader, 75);
         
-        RegattaOverviewBaseSettings regattaOverviewSettings = serializer
-                .deserializeFromCurrentLocation(new RegattaOverviewBaseSettings());
+        RegattaOverviewContextDefinition regattaOverviewSettings = serializer
+                .deserializeFromCurrentLocation(new RegattaOverviewContextDefinition());
 
         if (regattaOverviewSettings.getEvent() == null) {
             Window.alert("Missing parameter");
@@ -87,7 +87,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         containerPanel.animate(500);
     }
 
-    private void createAndAddRegattaPanel(RegattaOverviewBaseSettings regattaOverviewContextDefinition) {
+    private void createAndAddRegattaPanel(RegattaOverviewContextDefinition regattaOverviewContextDefinition) {
         regattaPanel = new RegattaOverviewPanel(sailingService, getUserService(), this, getStringMessages(),
                 regattaOverviewContextDefinition);
 
@@ -124,7 +124,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
 
     public static String getUrl(UUID eventId, RegattaRaceStatesSettings settings) {
         UrlBuilder urlBuilder = serializer.serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(settings);
-        serializer.serializeToUrlBuilder(new RegattaOverviewBaseSettings(eventId), urlBuilder);
+        serializer.serializeToUrlBuilder(new RegattaOverviewContextDefinition(eventId), urlBuilder);
         return urlBuilder.buildString();
     }
 }

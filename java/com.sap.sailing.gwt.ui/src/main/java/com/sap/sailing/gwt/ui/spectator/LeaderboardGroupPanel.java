@@ -33,7 +33,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
-import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
@@ -406,7 +406,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         if (race != null) {
             RegattaAndRaceIdentifier raceIdentifier = race.getRaceIdentifier();
 
-            RaceboardContextSettings raceboardContext = new RaceboardContextSettings(raceIdentifier.getRegattaName(),
+            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
                     raceIdentifier.getRaceName(), leaderboardName, leaderboardGroup.getName(), null, viewMode);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(canReplayDuringLiveRaces);

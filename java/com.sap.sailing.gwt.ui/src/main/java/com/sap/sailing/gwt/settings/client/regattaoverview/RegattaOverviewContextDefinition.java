@@ -5,18 +5,18 @@ import java.util.UUID;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.UUIDSetting;
 
-public final class RegattaOverviewBaseSettings extends AbstractGenericSerializableSettings {
+public final class RegattaOverviewContextDefinition extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -8541790130000694098L;
     private transient UUIDSetting event;
 
-    public RegattaOverviewBaseSettings() {
+    public RegattaOverviewContextDefinition() {
     }
     
-    public RegattaOverviewBaseSettings(String event) {
+    public RegattaOverviewContextDefinition(String event) {
         this(UUID.fromString(event));
     }
     
-    public RegattaOverviewBaseSettings(UUID event) {
+    public RegattaOverviewContextDefinition(UUID event) {
         this.event.setValue(event);
     }
     

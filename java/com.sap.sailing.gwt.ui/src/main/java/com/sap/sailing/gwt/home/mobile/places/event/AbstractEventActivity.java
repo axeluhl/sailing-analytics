@@ -45,7 +45,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
-import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
@@ -264,7 +264,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     private String getRaceViewerURL(String leaderboardName, String leaderboardGroupName,
             RegattaAndRaceIdentifier raceIdentifier, String mode) {
-        RaceboardContextSettings raceboardContext = new RaceboardContextSettings(raceIdentifier.getRegattaName(),
+        RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName,
                 UUID.fromString(getCtx().getEventId()), mode);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings

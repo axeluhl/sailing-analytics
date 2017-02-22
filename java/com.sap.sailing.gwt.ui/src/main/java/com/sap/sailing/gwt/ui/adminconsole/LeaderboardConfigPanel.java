@@ -36,7 +36,7 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
@@ -143,7 +143,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             public SafeHtml getValue(StrippedLeaderboardDTO object) {
                 final LinkWithSettingsGenerator<Settings> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
                         EntryPointLinkFactory.LEADERBOARD_PATH,
-                        new LeaderboardContextSettings(object.name, object.displayName));
+                        new LeaderboardContextDefinition(object.name, object.displayName));
                 LeaderboardPerspectiveOwnSettings perspectiveOwnSettings = new LeaderboardPerspectiveOwnSettings(
                         showRaceDetails);
                 final PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>(

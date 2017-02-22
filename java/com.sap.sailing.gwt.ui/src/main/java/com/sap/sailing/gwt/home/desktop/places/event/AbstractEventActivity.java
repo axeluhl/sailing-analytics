@@ -35,8 +35,8 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
-import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextSettings;
-import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewBaseSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
@@ -156,7 +156,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     @Override
     public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
         RaceIdentifier raceIdentifier = raceMetadata.getRegattaAndRaceIdentifier();
-        RaceboardContextSettings raceboardContext = new RaceboardContextSettings(raceIdentifier.getRegattaName(),
+        RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName(), raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(),
                 null, null);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
@@ -172,7 +172,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     @Override
     public String getRaceViewerURL(String leaderboardName, String leaderboardGroupName, RegattaAndRaceIdentifier raceIdentifier) {
-        RaceboardContextSettings raceboardContext = new RaceboardContextSettings(raceIdentifier.getRegattaName(),
+        RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName(), leaderboardName, leaderboardGroupName, null, null);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                 .createDefaultWithCanReplayDuringLiveRaces(true);
@@ -247,7 +247,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
                 regattaRaceStatesSettings.getVisibleRegattaSettings().addValue(getRegattaId());
             }
         }
-        return EntryPointWithSettingsLinkFactory.createRegattaOverviewLink(new RegattaOverviewBaseSettings(getCtx().getEventId()), regattaRaceStatesSettings);
+        return EntryPointWithSettingsLinkFactory.createRegattaOverviewLink(new RegattaOverviewContextDefinition(getCtx().getEventId()), regattaRaceStatesSettings);
     }
     
     @Override

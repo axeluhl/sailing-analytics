@@ -6,7 +6,7 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
 
-public class LeaderboardContextSettings extends AbstractGenericSerializableSettings {
+public class LeaderboardContextDefinition extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 6699950643747065960L;
     
     private transient UUIDSetting eventId;
@@ -16,10 +16,10 @@ public class LeaderboardContextSettings extends AbstractGenericSerializableSetti
     private transient StringSetting raceName;
     private transient StringSetting regattaName;
 
-    public LeaderboardContextSettings() {
+    public LeaderboardContextDefinition() {
     }
 
-    public LeaderboardContextSettings(String leaderboardName, String displayName) {
+    public LeaderboardContextDefinition(String leaderboardName, String displayName) {
         this.leaderboardName.setValue(leaderboardName);
         this.displayName.setValue(displayName);
     }

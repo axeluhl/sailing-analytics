@@ -48,7 +48,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
-import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
@@ -897,7 +897,7 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
 
     private String createRaceLink(RegattaOverviewEntryDTO entryDTO) {
         if (entryDTO.raceInfo.raceIdentifier != null && entryDTO.raceInfo.isTracked) {
-            RaceboardContextSettings raceboardContext = new RaceboardContextSettings(entryDTO.regattaName,
+            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(entryDTO.regattaName,
                     entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.regattaName, null, null, null);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(true);

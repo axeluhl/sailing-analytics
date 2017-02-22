@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewBaseSettings;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContextDefinition;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -58,7 +58,7 @@ public class RegattaOverviewPanel extends SimplePanel {
     protected final StringMessages stringMessages;
     protected final ErrorReporter errorReporter;
     
-    private final RegattaOverviewBaseSettings regattaOverviewContextDefinition;
+    private final RegattaOverviewContextDefinition regattaOverviewContextDefinition;
     private EventDTO eventDTO;
     private List<RaceGroupDTO> raceGroupDTOs;
     private List<EventAndRaceGroupAvailabilityListener> eventRaceGroupListeners;
@@ -85,7 +85,7 @@ public class RegattaOverviewPanel extends SimplePanel {
             UserService userService,
             final ErrorReporter errorReporter, 
             final StringMessages stringMessages, 
-            RegattaOverviewBaseSettings regattaOverviewContextDefinition) {
+            RegattaOverviewContextDefinition regattaOverviewContextDefinition) {
         
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;

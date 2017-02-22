@@ -19,7 +19,7 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspectiveLifecycle;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
@@ -58,8 +58,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
 
-        final LeaderboardContextSettings leaderboardContextSettings = new SettingsToUrlSerializer()
-                .deserializeFromCurrentLocation(new LeaderboardContextSettings());
+        final LeaderboardContextDefinition leaderboardContextSettings = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new LeaderboardContextDefinition());
 
         final UUID eventId = leaderboardContextSettings.getEventId();
 
@@ -116,7 +116,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         }
     }
 
-    private void loadSettingsAndCreateUI(LeaderboardContextSettings leaderboardContextSettings, EventDTO event) {
+    private void loadSettingsAndCreateUI(LeaderboardContextDefinition leaderboardContextSettings, EventDTO event) {
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         final Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         
@@ -196,7 +196,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         return leaderboardType.isMetaLeaderboard() ? DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
     }
     
-    private void createUi(Widget leaderboardViewer, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer, LeaderboardContextSettings leaderboardContextSettings) {
+    private void createUi(Widget leaderboardViewer, PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer, LeaderboardContextDefinition leaderboardContextSettings) {
         LeaderboardPerspectiveOwnSettings ownSettings = settings.getPerspectiveOwnSettings();
         
         DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
@@ -233,7 +233,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         }
     }
 
-    private RegattaAndRaceIdentifier getPreselectedRace(LeaderboardContextSettings leaderboardContextSettings) {
+    private RegattaAndRaceIdentifier getPreselectedRace(LeaderboardContextDefinition leaderboardContextSettings) {
         final String raceName = leaderboardContextSettings.getRaceName();
         final String regattaName = leaderboardContextSettings.getRegattaName();
         RegattaAndRaceIdentifier result;
@@ -266,7 +266,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         } else {
             lifeCycle = new LeaderboardPerspectiveLifecycle(stringmessages, leaderboard);
         }
-        final LeaderboardContextSettings leaderboardContextSettings = new LeaderboardContextSettings(leaderboard.name,
+        final LeaderboardContextDefinition leaderboardContextSettings = new LeaderboardContextDefinition(leaderboard.name,
                 leaderboard.getDisplayName());
         final LinkWithSettingsGenerator<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> linkWithSettingsGenerator = new LinkWithSettingsGenerator<>(
                 EntryPointLinkFactory.LEADERBOARD_PATH, leaderboardContextSettings);
