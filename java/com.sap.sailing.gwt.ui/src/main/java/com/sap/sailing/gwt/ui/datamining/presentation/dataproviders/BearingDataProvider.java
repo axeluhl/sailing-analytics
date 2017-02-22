@@ -7,7 +7,7 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 
-public class BearingDataProvider extends AbstractResultDataProvider<Bearing> {
+public class BearingDataProvider extends AbstractNumericDataProvider<Bearing> {
     
     private static final String DEGREES = "Degrees";
     private static final String RADIANS = "Radians";

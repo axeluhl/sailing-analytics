@@ -20,6 +20,18 @@ public interface GroupKey extends Serializable, Comparable<GroupKey> {
     public boolean hasSubKeys();
     
     /**
+     * Returns the number of group keys represented by this key:
+     * <ul>
+     *   <li>{@link #hasSubKeys()} == <code>false</code>: 1
+     *   </li>
+     *   <li>{@link #hasSubKeys()} == <code>true</code>: The sum of the size of each {@link #getKeys() contained key}.
+     *    </li>
+     * </ul>
+     * @return the number of group keys represented by this key.
+     */
+    public int size();
+    
+    /**
      * Returns a non-empty {@link List} of group keys that are represented by this key:
      * <ul>
      *   <li>If {@link #hasSubKeys()} of this key <code>false</code>, a singleton List
