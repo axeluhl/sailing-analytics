@@ -41,10 +41,10 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
 
     @Override
     protected void addChildSettings() {
-        showRaceDetails = new BooleanSetting(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, this, false);
+        showRaceDetails = new BooleanSetting("showRaceDetails", this, false);
         hideToolbar = new BooleanSetting("hideToolbar", this, false);
         autoExpandLastRaceColumn = new BooleanSetting(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, this, false);
-        showCharts = new BooleanSetting(LeaderboardUrlSettings.PARAM_SHOW_CHARTS, this, false);
+        showCharts = new BooleanSetting("showCharts", this, false);
         showOverallLeaderboard = new BooleanSetting("showOverallLeaderboard", this, false);
         showSeriesLeaderboards = new BooleanSetting("showSeriesLeaderboards", this, false);
         zoomTo = new StringSetting("zoomTo", this, "1");

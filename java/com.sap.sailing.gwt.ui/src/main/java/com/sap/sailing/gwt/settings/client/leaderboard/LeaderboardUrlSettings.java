@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 import com.sap.sse.common.settings.AbstractSettings;
 
 public class LeaderboardUrlSettings extends AbstractSettings {
-    public static final String PARAM_SHOW_RACE_DETAILS = "showRaceDetails";
     public static final String PARAM_RACE_NAME = "raceName";
     public static final String PARAM_RACE_DETAIL = "raceDetail";
     public static final String PARAM_OVERALL_DETAIL = "overallDetail";
@@ -13,7 +12,6 @@ public class LeaderboardUrlSettings extends AbstractSettings {
     public static final String PARAM_AUTO_EXPAND_LAST_RACE_COLUMN = "autoExpandLastRaceColumn";
     public static final String PARAM_REGATTA_NAME = "regattaName";
     public static final String PARAM_REFRESH_INTERVAL_MILLIS = "refreshIntervalMillis";
-    public static final String PARAM_SHOW_CHARTS = "showCharts";
     public static final String PARAM_SHOW_ADDED_SCORES = "showAddedScores";
     public static final String PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED = "showNumberOfRacesCompleted";
     
