@@ -3,7 +3,7 @@ ANDROID_RELEASE_BRANCH=android-xmake-release
 RELEASE_BRANCH=rel-1.4
 APP_MANIFESTS="mobile/com.sap.sailing.android.tracking.app/AndroidManifest.xml mobile/com.sap.sailing.buoy.positioning/AndroidManifest.xml mobile/com.sap.sailing.racecommittee.app/AndroidManifest.xml"
 GIT_REMOTE=origin
-# proxy can be requested with -p
+# proxy can be requested with -x
 PROXY_SETTINGS=
 UPDATE_ANDROID_MANIFEST_VERSIONS=1
 UPDATE_POM_VERSIONS=1
@@ -58,7 +58,7 @@ if [ $# -eq 0 ]; then
     exit 2
 fi
 
-options='mpgr:'
+options='mpgrx:'
 while getopts $options option
 do
     case $option in
@@ -66,7 +66,7 @@ do
         p) UPDATE_POM_VERSIONS=0;;
         g) PERFORM_GIT_OPERATIONS=0;;
 	r) GIT_REMOTE=$OPTARG;;
-	p) PROXY_SETTINGS="-Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080";;
+	x) PROXY_SETTINGS="-Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080";;
         \?) echo "Invalid option"
             exit 4;;
     esac
