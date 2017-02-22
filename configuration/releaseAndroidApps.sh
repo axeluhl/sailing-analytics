@@ -36,7 +36,7 @@ upgrade_pom_and_manifest_versions() {
   sed -e "1,$((snip_area_start_line - 1)) d" -e "$((snip_area_end_line + 1)),$ d" <"$POM" >"$PARENT_SPEC"
   cp "$POM_WITH_PARENT_SPEC_REMOVED" "$POM"
   echo mvn $PROXY_SETTINGS -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
-  mvn $PROXY_SETTINGS -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
+  mvn $PROXY_SETTINGS -Dldi.releaseBuild=true -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
   sed --in-place -e 's/$/\\/' "$PARENT_SPEC"
   cat "$POM" | sed -e "$snip_area_start_line i \\`cat "$PARENT_SPEC"`" | sed -e "$snip_area_start_line,$snip_area_end_line s/\\\\$//" >"$RESTORED_POM_WITH_NEW_VERSION_AND_PARENT_SPEC"
   cp "$RESTORED_POM_WITH_NEW_VERSION_AND_PARENT_SPEC" "$POM"
