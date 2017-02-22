@@ -94,7 +94,7 @@ public class EventSeriesAnalyticsDataManager {
             multiLeaderboardPanel = new MultiLeaderboardProxyPanel(parent, context, sailingService, metaLeaderboardName,
                     asyncActionsExecutor, timer, true /* isEmbedded */,
                     preselectedLeaderboardName, preselectedRace, errorReporter, StringMessages.INSTANCE,
-                    showRaceDetails, autoExpandLastRaceColumn, null);
+                    showRaceDetails, autoExpandLastRaceColumn, leaderboardSettings);
         }
         return multiLeaderboardPanel;
     }

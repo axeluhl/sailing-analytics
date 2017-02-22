@@ -158,7 +158,7 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         RaceIdentifier raceIdentifier = raceMetadata.getRegattaAndRaceIdentifier();
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName(), raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(),
-                null, null);
+                null, mode);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                 .createDefaultWithCanReplayDuringLiveRaces(true);
         ;
