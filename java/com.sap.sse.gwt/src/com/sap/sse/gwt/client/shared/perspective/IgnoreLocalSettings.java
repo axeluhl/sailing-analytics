@@ -8,6 +8,13 @@ public class IgnoreLocalSettings extends AbstractGenericSerializableSettings {
     
     private transient BooleanSetting ignoreLocalSettings;
     
+    public IgnoreLocalSettings() {
+    }
+    
+    public IgnoreLocalSettings(boolean ignoreLocalSettings) {
+        this.ignoreLocalSettings.setValue(ignoreLocalSettings);
+    }
+    
     @Override
     protected void addChildSettings() {
         ignoreLocalSettings = new BooleanSetting("ignoreLocalSettings", this, false);
