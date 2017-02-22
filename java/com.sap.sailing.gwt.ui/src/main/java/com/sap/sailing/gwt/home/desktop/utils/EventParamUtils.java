@@ -16,7 +16,7 @@ import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 public class EventParamUtils {
 
-    public static RegattaAndRaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
+    public static RegattaAndRaceIdentifier getPreselectedRace() {
         return new SettingsToUrlSerializer()
                 .deserializeFromCurrentLocation(new RegattaAndRaceIdentifierSettings()).getRegattaAndRaceIdentifier();
     }

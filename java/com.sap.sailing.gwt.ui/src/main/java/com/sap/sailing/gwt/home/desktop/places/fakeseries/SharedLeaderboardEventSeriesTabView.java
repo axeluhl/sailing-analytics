@@ -29,7 +29,7 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
                 .createLeaderboardSettingsFromURLParameters(Window.Location
                 .getParameterMap());
         final RegattaAndRaceIdentifier preselectedRace = EventParamUtils
-                .getPreselectedRace(Window.Location.getParameterMap());
+                .getPreselectedRace();
 
         LeaderboardPanelLifecycle lifeCycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
         LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createOverallLeaderboardPanel(null,
