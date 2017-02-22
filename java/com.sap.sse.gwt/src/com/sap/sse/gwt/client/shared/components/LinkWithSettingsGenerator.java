@@ -30,16 +30,14 @@ public class LinkWithSettingsGenerator<S extends Settings> {
         } else {
             urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParametersAndPath(path);
         }
-        for(GenericSerializableSettings contextDefinitionItem : contextDefinition) {
-            serializeSettingsToUrlBuilder(urlBuilder, settings, contextDefinitionItem);
-        }
+        serializeSettingsToUrlBuilder(urlBuilder, settings, contextDefinition);
         return urlBuilder.buildString();
     }
 
     protected void serializeSettingsToUrlBuilder(UrlBuilder urlBuilder, S settings,
-            GenericSerializableSettings contextDefinition) {
-        if (contextDefinition != null) {
-            settingsToUrlSerializer.serializeToUrlBuilder(contextDefinition, urlBuilder);
+            GenericSerializableSettings... contextDefinition) {
+        for(GenericSerializableSettings contextDefinitionItem : contextDefinition) {
+            settingsToUrlSerializer.serializeToUrlBuilder(contextDefinitionItem, urlBuilder);
         }
         if (settings instanceof SettingsMap) {
             settingsToUrlSerializer.serializeSettingsMapToUrlBuilder((SettingsMap) settings, urlBuilder);
