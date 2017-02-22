@@ -43,7 +43,7 @@ upgrade_pom_and_manifest_versions() {
 }
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-m -p -g -r <git-remote>] CR-Id: <TheJCWBCRId>"
+    echo "$0 [-m -p -g -r <git-remote>] CR-Id: <TheJCWBCRId>"
     echo ""
     echo "Request a new Java Correction Workbench (JCWB) Correction Request ID at:"
     echo "  https://css.wdf.sap.corp/sap(bD1lbiZjPTAwMQ==)/bc/bsp/spn/jcwb/default.htm?newCMForProject=sapsailingcapture#"
@@ -66,7 +66,7 @@ do
         p) UPDATE_POM_VERSIONS=0;;
         g) PERFORM_GIT_OPERATIONS=0;;
 	r) GIT_REMOTE=$OPTARG;;
-	x) PROXY_SETTINGS="-Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080";;
+	x) PROXY_SETTINGS="-s configuration/maven-settings-proxy.xml -Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080";;
         \?) echo "Invalid option"
             exit 4;;
     esac
