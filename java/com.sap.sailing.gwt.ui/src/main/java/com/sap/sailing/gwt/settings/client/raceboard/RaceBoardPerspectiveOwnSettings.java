@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sailing.gwt.settings.client.raceboard;
 
 import com.sap.sailing.gwt.common.settings.DurationSetting;
 import com.sap.sse.common.Duration;

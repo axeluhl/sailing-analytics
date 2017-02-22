@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.autoplay.client.place.start.AutoplayPerspectiveLifecy
 import com.sap.sailing.gwt.autoplay.client.place.start.AutoplayPerspectiveOwnSettings;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspective;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -23,7 +24,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sse.gwt.client.ErrorReporter;

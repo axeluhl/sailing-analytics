@@ -43,6 +43,9 @@ import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPoint
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveLifecycle;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;

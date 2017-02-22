@@ -12,6 +12,8 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveLifecycle;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;

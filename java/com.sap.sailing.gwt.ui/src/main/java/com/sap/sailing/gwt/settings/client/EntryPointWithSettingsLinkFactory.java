@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.settings.client;
 
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextSettings;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewBaseSettings;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
