@@ -66,12 +66,11 @@ public class EventSeriesLeaderboardsTabView extends Composite implements SeriesT
             EventSeriesAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getAnalyticsManager();
             boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
             final LeaderboardSettings leaderboardSettings = EventParamUtils.createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
-            final RaceIdentifier preselectedRace = EventParamUtils.getPreselectedRace();
 
             MultiLeaderboardProxyPanel leaderboardPanel = regattaAnalyticsManager.createMultiLeaderboardPanel(null, null,
                     leaderboardSettings,
                     null, // TODO: preselectedLeaderboardName
-                    preselectedRace,
+                    null,
                     "leaderboardGroupName",
                     leaderboardName,
                     true, // TODO @FM this information came from place, now hard coded. check with frank

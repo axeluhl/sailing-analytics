@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.desktop.utils.EventParamUtils;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
@@ -27,10 +26,9 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                 LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
         final LeaderboardSettings leaderboardSettings = EventParamUtils
                 .createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
-        final RegattaAndRaceIdentifier preselectedRace = EventParamUtils.getPreselectedRace();
         final LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel( //
                 leaderboardSettings, //
-                preselectedRace, //
+                null, //
                 "leaderboardGroupName", // TODO: keep using magic string? ask frank!
                 leaderboardName, //
                 true,

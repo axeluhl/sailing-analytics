@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.desktop.utils.EventParamUtils;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
@@ -28,14 +27,12 @@ public abstract class SharedLeaderboardEventSeriesTabView<T extends AbstractSeri
         final LeaderboardSettings leaderboardSettings = EventParamUtils
                 .createLeaderboardSettingsFromURLParameters(Window.Location
                 .getParameterMap());
-        final RegattaAndRaceIdentifier preselectedRace = EventParamUtils
-                .getPreselectedRace();
 
         LeaderboardPanelLifecycle lifeCycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
         LeaderboardPanel leaderboardPanel = eventSeriesAnalyticsManager.createOverallLeaderboardPanel(null,
                 new SimpleComponentContext<>(lifeCycle),
                 leaderboardSettings,
-                preselectedRace,
+                null,
                 "leaderboardGroupName",
                 leaderboardName,
                 true, // this information came from place, now hard coded. check with frank

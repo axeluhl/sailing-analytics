@@ -7,20 +7,11 @@ import java.util.Map;
 
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.settings.client.base.RegattaAndRaceIdentifierSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
-import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 public class EventParamUtils {
-
-    public static RegattaAndRaceIdentifier getPreselectedRace() {
-        return new SettingsToUrlSerializer()
-                .deserializeFromCurrentLocation(new RegattaAndRaceIdentifierSettings()).getRegattaAndRaceIdentifier();
-    }
-
     public static LeaderboardSettings createLeaderboardSettingsFromURLParameters(Map<String, List<String>> parameterMap) {
         LeaderboardSettings result;
         Long refreshIntervalMillis = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_REFRESH_INTERVAL_MILLIS) ? Long
