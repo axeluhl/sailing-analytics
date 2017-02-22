@@ -3,6 +3,8 @@ ANDROID_RELEASE_BRANCH=android-xmake-release
 RELEASE_BRANCH=rel-1.4
 APP_MANIFESTS="mobile/com.sap.sailing.android.tracking.app/AndroidManifest.xml mobile/com.sap.sailing.buoy.positioning/AndroidManifest.xml mobile/com.sap.sailing.racecommittee.app/AndroidManifest.xml"
 GIT_REMOTE=origin
+# proxy can be requested with -p
+PROXY_SETTINGS=
 UPDATE_ANDROID_MANIFEST_VERSIONS=1
 UPDATE_POM_VERSIONS=1
 PERFORM_GIT_OPERATIONS=1
@@ -33,8 +35,8 @@ upgrade_pom_and_manifest_versions() {
   sed -e "$snip_area_start_line,$snip_area_end_line d" <"$POM" >"$POM_WITH_PARENT_SPEC_REMOVED"
   sed -e "1,$((snip_area_start_line - 1)) d" -e "$((snip_area_end_line + 1)),$ d" <"$POM" >"$PARENT_SPEC"
   cp "$POM_WITH_PARENT_SPEC_REMOVED" "$POM"
-  echo mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
-  mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
+  echo mvn $PROXY_SETTINGS -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
+  mvn $PROXY_SETTINGS -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
   sed --in-place -e 's/$/\\/' "$PARENT_SPEC"
   cat "$POM" | sed -e "$snip_area_start_line i \\`cat "$PARENT_SPEC"`" | sed -e "$snip_area_start_line,$snip_area_end_line s/\\\\$//" >"$RESTORED_POM_WITH_NEW_VERSION_AND_PARENT_SPEC"
   cp "$RESTORED_POM_WITH_NEW_VERSION_AND_PARENT_SPEC" "$POM"
@@ -64,6 +66,7 @@ do
         p) UPDATE_POM_VERSIONS=0;;
         g) PERFORM_GIT_OPERATIONS=0;;
 	r) GIT_REMOTE=$OPTARG;;
+	p) PROXY_SETTINGS="-Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080";;
         \?) echo "Invalid option"
             exit 4;;
     esac
