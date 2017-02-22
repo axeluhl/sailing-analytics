@@ -250,12 +250,6 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     }
     
     @Override
-    public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata) {
-        return getRaceViewerURL(raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(),
-                raceMetadata.getRegattaAndRaceIdentifier(), null);
-    }
-    
-    @Override
     public String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
         RegattaAndRaceIdentifier raceid = raceMetadata.getRegattaAndRaceIdentifier();
         return getRaceViewerURL(raceMetadata.getLeaderboardName(), raceMetadata.getLeaderboardGroupName(), raceid,
