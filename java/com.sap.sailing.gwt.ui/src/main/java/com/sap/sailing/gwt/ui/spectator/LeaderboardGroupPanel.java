@@ -274,7 +274,6 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         }
         linkParams.put("displayName", stringMessages.overallStandings());
         linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
-        linkParams.put("root", root);
         return linkParams;
     }
 
@@ -291,7 +290,6 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
             linkParams.put("displayName", leaderboard.displayName);
         }
         linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
-        linkParams.put("root", root);
         return linkParams;
     }
 
@@ -425,7 +423,6 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         Map<String, String> linkParams = new HashMap<String, String>();
         linkParams.put("leaderboardName", leaderboardName);
         linkParams.put("raceName", raceIdentifier.getRaceName());
-        linkParams.put("root", root);
         if (canReplayDuringLiveRaces) {
             linkParams.put(RaceBoardPerspectiveSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         }
