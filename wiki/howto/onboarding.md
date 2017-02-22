@@ -23,7 +23,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Automatic Eclipse plugin installation
 
-The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.6.2 "Neon.2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neon2) by using the script "configuration/installPluginsForEclipseLuna.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
+The necessary Eclipse plugins described above can be automatically be installed into a newly unzipped version of [Eclipse IDE for Eclipse Committers 4.6.2 "Neon.2"](http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neon2) by using the script "configuration/installPluginsForEclipseNeon.sh". In addition, the script applies some updates to plugins packaged with Eclipse itself. To start the plugin installation, run the following command using your Eclipse installation directory as command line parameter for the script:
 
     ./installPluginsForEclipseLuna.sh "/some/path/on/my/computer/eclipse"
 
