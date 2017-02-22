@@ -120,6 +120,7 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
             loadDefaultSettings(new OnSettingsLoadedCallback<S>() {
                 @Override
                 public void onError(Throwable caught, S fallbackDefaultSettings) {
+                    loadingDefaultSettings = false;
                     S fallbackSettings = getDefaultSettings();
                     OnSettingsLoadedCallback<S> callback;
                     while ((callback = settingsReceiverCallbacks.poll()) != null) {
@@ -129,6 +130,7 @@ public class SimpleComponentContext<S extends Settings> implements ComponentCont
 
                 @Override
                 public void onSuccess(S result) {
+                    loadingDefaultSettings = false;
                     currentDefaultSettings = result;
                     OnSettingsLoadedCallback<S> callback;
                     while ((callback = settingsReceiverCallbacks.poll()) != null) {
