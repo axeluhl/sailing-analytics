@@ -7,6 +7,10 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 
+/**
+ * This lifecycle contains the necessary child lifecycles to allow AutoPlay to create and use both, a Leaderboard for
+ * non life, and a RaceBoard for life races.
+ */
 public class AutoplayPerspectiveLifecycle extends AbstractPerspectiveLifecycle<AutoplayPerspectiveOwnSettings> {
     public static final String ID = "appl";
     private LeaderboardWithHeaderPerspectiveLifecycle leaderboardLifecycle;

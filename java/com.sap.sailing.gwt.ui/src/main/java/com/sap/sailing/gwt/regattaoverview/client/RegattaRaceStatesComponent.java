@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.cell.client.FieldUpdater;
@@ -48,11 +46,14 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextSettings;
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
@@ -73,6 +74,7 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 /**
  * This component shows a table displaying the current state of races for a given event. Which races are shown depends
@@ -895,12 +897,15 @@ public class RegattaRaceStatesComponent extends AbstractCompositeComponent<Regat
 
     private String createRaceLink(RegattaOverviewEntryDTO entryDTO) {
         if (entryDTO.raceInfo.raceIdentifier != null && entryDTO.raceInfo.isTracked) {
-            Map<String, String> raceLinkParameters = new HashMap<String, String>();
-            raceLinkParameters.put("leaderboardName", entryDTO.regattaName);
-            raceLinkParameters.put("raceName", entryDTO.raceInfo.raceIdentifier.getRaceName());
-            raceLinkParameters.put("canReplayDuringLiveRaces", "true");
-            raceLinkParameters.put("regattaName", entryDTO.regattaName);
-            return EntryPointLinkFactory.createRaceBoardLink(raceLinkParameters);
+            RaceboardContextSettings raceboardContext = new RaceboardContextSettings(entryDTO.regattaName,
+                    entryDTO.raceInfo.raceIdentifier.getRaceName(), entryDTO.regattaName, null, null, null);
+            RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
+                    .createDefaultWithCanReplayDuringLiveRaces(true);
+            ;
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                    perspectiveOwnSettings, Collections.emptyMap());
+
+            return EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
         }
         return null;
     }

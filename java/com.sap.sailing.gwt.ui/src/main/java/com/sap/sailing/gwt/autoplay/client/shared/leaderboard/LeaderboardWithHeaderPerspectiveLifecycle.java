@@ -7,6 +7,10 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 
+/**
+ * A special stand alone Leaderboard with an SAP Header is handled by this lifecycle
+ *
+ */
 public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspectiveSettings> {
     
     private final SAPHeaderComponentLifecycle sapHeaderLifecycle;

@@ -66,8 +66,10 @@ public class RaceMapZoomSettings extends AbstractGenericSerializableSettings {
     }
     
     protected void init(RaceMapZoomSettings settings) {
-        this.typesToConsiderOnZoom.setValues(settings.getTypesToConsiderOnZoom());
-        this.zoomToSelectedCompetitors.setValue(settings.isZoomToSelectedCompetitors());
+        if (settings != null) {
+            this.typesToConsiderOnZoom.setValues(settings.getTypesToConsiderOnZoom());
+            this.zoomToSelectedCompetitors.setValue(settings.isZoomToSelectedCompetitors());
+        }
     }
     
     public LatLngBounds getNewBounds(RaceMap forMap) {

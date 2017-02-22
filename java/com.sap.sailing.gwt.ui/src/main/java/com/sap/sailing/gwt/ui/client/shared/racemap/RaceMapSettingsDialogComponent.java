@@ -31,6 +31,9 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
+/**
+ * The view responsible for manipulating an instance of RaceMapSettings, is handled by the RaceMapLifecycle
+ */
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
     private static final Distance MAX_BUOY_ZONE_RADIUS = new MeterDistance(100);
     private static final int MAX_STROKE_WEIGHT = 33;

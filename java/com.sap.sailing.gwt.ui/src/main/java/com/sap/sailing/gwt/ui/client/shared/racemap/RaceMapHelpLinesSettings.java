@@ -52,7 +52,9 @@ public class RaceMapHelpLinesSettings extends AbstractGenericSerializableSetting
      * <code>FINISHLINE</code> and <code>ADVANTAGELINE</code>.<br />
      */
      protected void init(RaceMapHelpLinesSettings settings) {
-         this.visibleHelpLines.setValues(settings.getVisibleHelpLineTypes());
+        if (settings != null) {
+            this.visibleHelpLines.setValues(settings.getVisibleHelpLineTypes());
+        }
      }
     
     public RaceMapHelpLinesSettings(Iterable<HelpLineTypes> visibleHelpLines) {

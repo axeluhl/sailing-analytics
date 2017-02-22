@@ -26,7 +26,6 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
-    public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
     public static final String PARAM_VIEW_SHOW_WINDCHART = "viewShowWindChart";
     public static final String PARAM_VIEW_SHOW_COMPETITORSCHART = "viewShowCompetitorsChart";
     public static final String PARAM_VIEW_SHOW_MAPCONTROLS = "viewShowMapControls";
@@ -38,6 +37,13 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     public RaceBoardPerspectiveOwnSettings() {
     }
     
+    public static RaceBoardPerspectiveOwnSettings createDefaultWithCanReplayDuringLiveRaces(
+            boolean canReplayDuringLiveRaces) {
+        RaceBoardPerspectiveOwnSettings settings = new RaceBoardPerspectiveOwnSettings();
+        settings.canReplayDuringLiveRaces.setValue(canReplayDuringLiveRaces);
+        return settings;
+    }
+
     @Override
     protected void addChildSettings() {
         this.showLeaderboard = new BooleanSetting("showLeaderboard", this, true);

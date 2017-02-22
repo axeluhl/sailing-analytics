@@ -7,11 +7,8 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
- * A lifecycle interface for a {@link Perspective}
- *
- * @param <PS>
- *            the perspective specific settings type
- * @author Frank Mittag
+ * A lifecycle interface for a {@link Perspective}, it can support own Settings that are PerspeciveWide and manage
+ * various subcomponent lifecycles.
  */
 public interface PerspectiveLifecycle<PS extends Settings> extends
         ComponentLifecycle<PerspectiveCompositeSettings<PS>> {

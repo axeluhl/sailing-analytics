@@ -5,6 +5,10 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
+/**
+ * This is a special lifecycle that uses a different ID, which is required to allow a MultiLeaderboard and a normal
+ * Leaderboard to coexist.
+ */
 public class MultiLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle {
     public static final String MID = "MultiLeaderboardPanel";
 

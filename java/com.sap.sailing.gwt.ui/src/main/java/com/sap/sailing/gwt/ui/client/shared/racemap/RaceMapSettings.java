@@ -114,6 +114,12 @@ public class RaceMapSettings extends AbstractGenericSerializableSettings {
         this.showDouglasPeuckerPoints.setValue(showDouglasPeuckerPoints);
     }
 
+    public static RaceMapSettings getDefaultWithShowMapControls(boolean showMapControlls) {
+        RaceMapSettings raceMapSetting = new RaceMapSettings();
+        raceMapSetting.showMapControls.setValue(showMapControlls);
+        return raceMapSetting;
+    }
+
     private RaceMapSettings(boolean showMapControls, boolean showCourseGeometry, boolean windUp, Distance buoyZoneRadius, boolean showWindStreamletOverlay, boolean showWindStreamletColors, boolean showSimulationOverlay) {
         this(showMapControls, new RaceMapHelpLinesSettings(createHelpLineSettings(showCourseGeometry)), windUp, buoyZoneRadius, showWindStreamletOverlay, showWindStreamletColors, showSimulationOverlay);
     }

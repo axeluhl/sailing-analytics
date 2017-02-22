@@ -9,6 +9,11 @@ import com.sap.sse.gwt.client.shared.perspective.IgnoreLocalSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.settings.AbstractEntryPointWithSettingsLinkFactory;
 
+/**
+ * Creates a link to a Entrypoint, supports passing Context and Settings in a type save manner, and is responsible to
+ * create the url correctly.
+ *
+ */
 public class EntryPointWithSettingsLinkFactory extends AbstractEntryPointWithSettingsLinkFactory {
 
     public static String createRegattaOverviewLink(RegattaOverviewBaseSettings regattaOverviewSettings) {

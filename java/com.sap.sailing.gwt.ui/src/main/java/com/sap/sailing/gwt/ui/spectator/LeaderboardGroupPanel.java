@@ -408,12 +408,11 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
 
             RaceboardContextSettings raceboardContext = new RaceboardContextSettings(raceIdentifier.getRegattaName(),
                     raceIdentifier.getRaceName(), leaderboardName, leaderboardGroup.getName(), null, viewMode);
-            RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(null, null,
-                    null, null, canReplayDuringLiveRaces, null);
+            RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
+                    .createDefaultWithCanReplayDuringLiveRaces(canReplayDuringLiveRaces);
             HashMap<String, Settings> innerSettings = new HashMap<>();
             innerSettings.put(RaceMapLifecycle.ID,
-                    new RaceMapSettings(null, null, null, null, null, null, null, null, null, null, null, null,
-                            showMapControls, null, null));
+                    RaceMapSettings.getDefaultWithShowMapControls(showMapControls));
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
                     perspectiveOwnSettings, innerSettings);
                     

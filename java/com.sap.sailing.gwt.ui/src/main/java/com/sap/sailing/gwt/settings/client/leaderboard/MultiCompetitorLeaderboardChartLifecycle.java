@@ -3,6 +3,10 @@ package com.sap.sailing.gwt.settings.client.leaderboard;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
+/**
+ * This lifecycle is responsible for a MultiCompetitorLeaderboardChart
+ *
+ */
 public class MultiCompetitorLeaderboardChartLifecycle implements
         ComponentLifecycle<MultiCompetitorLeaderboardChartSettings> {
     

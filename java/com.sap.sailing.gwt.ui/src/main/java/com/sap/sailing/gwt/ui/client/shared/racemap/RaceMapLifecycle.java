@@ -3,6 +3,10 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
+/**
+ * This lifecycle corresponds with the RaceMap
+ *
+ */
 public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings> {
     public static final String ID = "rml";
 
