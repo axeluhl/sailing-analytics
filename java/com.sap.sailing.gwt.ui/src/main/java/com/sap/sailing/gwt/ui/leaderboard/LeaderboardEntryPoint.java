@@ -14,10 +14,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.settings.client.base.RegattaAndRaceIdentifierSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.AbstractLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
@@ -120,7 +120,9 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
         final Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         
-        final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(leaderboardContextSettings);
+        final RegattaAndRaceIdentifier preselectedRace = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new RegattaAndRaceIdentifierSettings()).getRegattaAndRaceIdentifier();
+        
         // make a single live request as the default but don't continue to play by default
 
         final UserSettingsStorageManager<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> settingsManager = new UserSettingsStorageManager<>(
@@ -231,18 +233,6 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, goes "live" and "playing"
                                                // if an auto-refresh
         }
-    }
-
-    private RegattaAndRaceIdentifier getPreselectedRace(LeaderboardContextDefinition leaderboardContextSettings) {
-        final String raceName = leaderboardContextSettings.getRaceName();
-        final String regattaName = leaderboardContextSettings.getRegattaName();
-        RegattaAndRaceIdentifier result;
-        if (raceName != null && !raceName.isEmpty() && regattaName != null && !regattaName.isEmpty()) {
-            result = new RegattaNameAndRaceName(regattaName, raceName);
-        } else {
-            result = null;
-        }
-        return result;
     }
 
     /**

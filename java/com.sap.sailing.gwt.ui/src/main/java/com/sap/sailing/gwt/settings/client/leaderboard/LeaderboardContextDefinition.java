@@ -13,8 +13,6 @@ public class LeaderboardContextDefinition extends AbstractGenericSerializableSet
     private transient StringSetting leaderboardName;
     private transient StringSetting leaderboardGroupName;
     private transient StringSetting displayName;
-    private transient StringSetting raceName;
-    private transient StringSetting regattaName;
 
     public LeaderboardContextDefinition() {
     }
@@ -30,8 +28,6 @@ public class LeaderboardContextDefinition extends AbstractGenericSerializableSet
         leaderboardName = new StringSetting("name", this);
         leaderboardGroupName = new StringSetting("leaderboardGroupName", this);
         displayName = new StringSetting("displayName", this);
-        raceName = new StringSetting(LeaderboardUrlSettings.PARAM_RACE_NAME, this);
-        regattaName = new StringSetting(LeaderboardUrlSettings.PARAM_REGATTA_NAME, this);
     }
     public UUID getEventId() {
         return eventId.getValue();
@@ -45,12 +41,4 @@ public class LeaderboardContextDefinition extends AbstractGenericSerializableSet
     public String getDisplayName() {
         return displayName.getValue();
     }
-    public String getRaceName() {
-        return raceName.getValue();
-    }
-    public String getRegattaName() {
-        return regattaName.getValue();
-    }
-    
-    
 }

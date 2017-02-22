@@ -8,25 +8,17 @@ import java.util.Map;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.gwt.settings.client.base.RegattaAndRaceIdentifierSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 public class EventParamUtils {
 
     public static RegattaAndRaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
-        RegattaAndRaceIdentifier result;
-        if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_NAME)
-                && parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).size() == 1
-                && parameterMap.containsKey(LeaderboardUrlSettings.PARAM_REGATTA_NAME)
-                && parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).size() == 1) {
-            result = new RegattaNameAndRaceName(parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).get(0),
-                    parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).get(0));
-        } else {
-            result = null;
-        }
-        return result;
+        return new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new RegattaAndRaceIdentifierSettings()).getRegattaAndRaceIdentifier();
     }
 
     public static LeaderboardSettings createLeaderboardSettingsFromURLParameters(Map<String, List<String>> parameterMap) {
