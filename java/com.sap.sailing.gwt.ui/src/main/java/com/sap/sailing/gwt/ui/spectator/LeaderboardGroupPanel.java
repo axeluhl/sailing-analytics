@@ -32,10 +32,11 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
-import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -207,7 +208,11 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         flexTable.setWidget(0, 1, legendPanel);
         
         if (leaderboardGroup.hasOverallLeaderboard()) {
-            String link = EntryPointLinkFactory.createLeaderboardLink(createOverallLeaderboardLinkParameters());
+            final String link = EntryPointWithSettingsLinkFactory.createLeaderboardLink(
+                    new LeaderboardContextDefinition(
+                            leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL,
+                            stringMessages.overallStandings(), leaderboardGroup.getName()),
+                    new LeaderboardPerspectiveOwnSettings(showRaceDetails, isEmbedded));
             Anchor overallStandingsLink = new Anchor(stringMessages.overallStandings(), true, link);
             overallStandingsLink.setStyleName(STYLE_ACTIVE_LEADERBOARD);
             overallStandingsLink.addStyleName("overallStandings");
@@ -231,7 +236,10 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                 nameAnchorCell) {
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO leaderboard) {
-                String link = EntryPointLinkFactory.createLeaderboardLink(createLeaderboardLinkParameters(leaderboard));
+                final String link = EntryPointWithSettingsLinkFactory.createLeaderboardLink(
+                        new LeaderboardContextDefinition(leaderboard.name, leaderboard.displayName,
+                                leaderboardGroup.getName()),
+                        new LeaderboardPerspectiveOwnSettings(showRaceDetails, isEmbedded));
                 return getAnchor(link, stringMessages.leaderboard(), STYLE_ACTIVE_LEADERBOARD);
             }
         };
@@ -261,36 +269,6 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         }
         flexTable.setWidget(1, 0,leaderboardsTable);
         flexTable.getFlexCellFormatter().setColSpan(1, 0,2);
-    }
-
-    private Map<String, String> createOverallLeaderboardLinkParameters() {
-        Map<String, String> linkParams = new HashMap<String, String>();
-        linkParams.put("name", leaderboardGroup.getName() + " " + LeaderboardNameConstants.OVERALL);
-        if (showRaceDetails) {
-            linkParams.put("showRaceDetails", "true");
-        }
-        if (isEmbedded) {
-            linkParams.put("embedded", "true");
-        }
-        linkParams.put("displayName", stringMessages.overallStandings());
-        linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
-        return linkParams;
-    }
-
-    private Map<String, String> createLeaderboardLinkParameters(StrippedLeaderboardDTO leaderboard) {
-        Map<String, String> linkParams = new HashMap<String, String>();
-        linkParams.put("name", leaderboard.name);
-        if (showRaceDetails) {
-            linkParams.put("showRaceDetails", "true");
-        }
-        if (isEmbedded) {
-            linkParams.put("embedded", "true");                   
-        }
-        if (leaderboard.displayName != null) {
-            linkParams.put("displayName", leaderboard.displayName);
-        }
-        linkParams.put("leaderboardGroupName", leaderboardGroup.getName());
-        return linkParams;
     }
 
     private HorizontalPanel createLegendPanel() {

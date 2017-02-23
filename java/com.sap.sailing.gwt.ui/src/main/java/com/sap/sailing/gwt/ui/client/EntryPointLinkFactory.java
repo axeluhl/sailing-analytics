@@ -12,10 +12,6 @@ public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     public static String createSimulatorLink(Map<String, String> parameters) {
         return createEntryPointLink("/gwt/Simulator.html", parameters);
     }
-
-    public static String createLeaderboardLink(Map<String, String> parameters) {
-        return createEntryPointLink(LEADERBOARD_PATH, parameters);
-    }
     
     public static String createLeaderboardEditingLink(Map<String, String> parameters) {
         return createEntryPointLink("/gwt/LeaderboardEditing.html", parameters);

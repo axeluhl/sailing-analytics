@@ -24,18 +24,22 @@ public class LeaderboardPerspectiveOwnSettings extends AbstractGenericSerializab
     public LeaderboardPerspectiveOwnSettings(boolean showRaceDetails) {
         this.showRaceDetails.setValue(showRaceDetails);
     }
+    
+    public LeaderboardPerspectiveOwnSettings(boolean showRaceDetails, boolean embedded) {
+        this(showRaceDetails);
+        this.embedded.setValue(embedded);
+    }
 
     LeaderboardPerspectiveOwnSettings(boolean showRaceDetails, boolean hideToolbar, boolean autoExpandLastRaceColumn,
             boolean showCharts, boolean showOverallLeaderboard, boolean showSeriesLeaderboards, String zoomTo,
             boolean embedded, boolean lifeplay) {
-        this(showRaceDetails);
+        this(showRaceDetails, embedded);
         this.hideToolbar.setValue(hideToolbar);
         this.autoExpandLastRaceColumn.setValue(autoExpandLastRaceColumn);
         this.showCharts.setValue(showCharts);
         this.showOverallLeaderboard.setValue(showOverallLeaderboard);
         this.showSeriesLeaderboards.setValue(showSeriesLeaderboards);
         this.zoomTo.setValue(zoomTo);
-        this.embedded.setValue(embedded);
         this.livePlay.setValue(lifeplay);
     }
 
