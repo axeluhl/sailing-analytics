@@ -53,11 +53,6 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
                 public void onSuccess(LeaderboardGroupDTO group) {                }
             });
         }
-        String root = Window.Location.getParameter("root");
-        //Check if the root contains an allowed value
-        if (root != null) {
-            root = (root.equals("leaderboardGroupPanel") || root.equals("overview")) ? root : null;
-        }
         
         RootPanel rootPanel = RootPanel.get();
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
@@ -74,7 +69,7 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, getStringMessages(), this,
-                    groupName, root, viewModeParamValue, embedded, showRaceDetails, canReplayDuringLiveRaces,
+                    groupName, viewModeParamValue, embedded, showRaceDetails, canReplayDuringLiveRaces,
                     showMapControls);
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {

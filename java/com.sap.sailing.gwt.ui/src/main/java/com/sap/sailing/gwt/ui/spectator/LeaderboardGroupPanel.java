@@ -113,7 +113,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
     private final Timer timerForClientServerOffset;
     
     public LeaderboardGroupPanel(SailingServiceAsync sailingService, StringMessages stringConstants,
-            ErrorReporter errorReporter, final String groupName, String root, String viewMode, boolean embedded,
+            ErrorReporter errorReporter, final String groupName, String viewMode, boolean embedded,
             boolean showRaceDetails, boolean canReplayDuringLiveRaces, boolean showMapControls) {
         super();
         this.isEmbedded = embedded;
