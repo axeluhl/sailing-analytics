@@ -47,56 +47,43 @@ public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClient
     public StartViewDTO execute(SailingDispatchContext context) {
         EventStageCandidateCalculator stageCandidateCalculator = new EventStageCandidateCalculator();
         RecentEventsCalculator recentEventsCalculator = new RecentEventsCalculator();
-        
         HomeServiceUtil.forAllPublicEvents(context.getRacingEventService(), context.getRequest(), stageCandidateCalculator, recentEventsCalculator);
-        
         StartViewDTO result = new StartViewDTO();
-        
         int count = 0;
-        for(Pair<StageEventType, EventHolder> pair : stageCandidateCalculator.getFeaturedEvents()) {
+        for (Pair<StageEventType, EventHolder> pair : stageCandidateCalculator.getFeaturedEvents()) {
             StageEventType stageType = pair.getA();
             EventHolder holder = pair.getB();
-
             count++;
-            if(count > EventStageCandidateCalculator.MAX_STAGE_EVENTS && stageType != StageEventType.RUNNING) {
+            if (count > EventStageCandidateCalculator.MAX_STAGE_EVENTS && stageType != StageEventType.RUNNING) {
                 break;
             }
-            
             result.addStageEvent(HomeServiceUtil.convertToEventStageDTO(holder.event, holder.baseURL, holder.onRemoteServer, stageType, context.getRacingEventService(), false));
-            
             EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
-
             Iterable<VideoDescriptor> videosOfEvent = holder.event.getVideos();
             if (!Util.isEmpty(videosOfEvent) && result.getVideos().size() < MAX_VIDEO_COUNT) {
                 VideoDescriptor youTubeRandomUrl = HomeServiceUtil.getRandomVideo(videosOfEvent);
-
                 MimeType type = youTubeRandomUrl.getMimeType();
                 if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
-                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, youTubeRandomUrl.getURL().toString(), type, //
-                            youTubeRandomUrl.getCreatedAtDate().asDate()
-                            );
+                    SailingVideoDTO candidate = new SailingVideoDTO(eventRef, youTubeRandomUrl.getURL().toString(), type,
+                            youTubeRandomUrl.getCreatedAtDate().asDate());
                     candidate.setTitle(holder.event.getName());
                     result.addVideo(candidate);
                 }
             }
         }
-        
         final Set<SailingImageDTO> photoGalleryUrls = new HashSet<>(); // using a HashSet here leads to a reasonable
-                                                                        // amount of shuffling
+                                                                       // amount of shuffling
         final List<SailingVideoDTO> videoCandidates = new ArrayList<>();
-        
-        for(EventHolder holder : recentEventsCalculator.getRecentEventsOfLast12Month()) {
-            if(result.getRecentEvents().size() < MAX_RECENT_EVENTS) {
+        for (EventHolder holder : recentEventsCalculator.getRecentEventsOfLast12Month()) {
+            if (result.getRecentEvents().size() < MAX_RECENT_EVENTS) {
                 result.addRecentEvent(HomeServiceUtil.convertToEventListDTO(holder.event, holder.baseURL, holder.onRemoteServer, context.getRacingEventService()));
             }
-            
             EventBase event = holder.event;
             EventLinkAndMetadataDTO eventLink = HomeServiceUtil.convertToEventLinkAndMetadataDTO(holder.event,
                     holder.baseURL, holder.onRemoteServer, context.getRacingEventService());
             EventReferenceDTO eventRef = new EventReferenceDTO(holder.event);
-
             for (ImageDescriptor url : HomeServiceUtil.getSailingLovesPhotographyImages(event)) {
-                if(url.hasSize()) {
+                if (url.hasSize()) {
                     SailingImageDTO sailingImageDTO = new SailingImageDTO(eventLink, url.getURL().toString(), null);
                     sailingImageDTO.setSizeInPx(url.getWidthInPx(), url.getHeightInPx());
                     photoGalleryUrls.add(sailingImageDTO);
@@ -113,7 +100,6 @@ public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClient
                 }
             }
         }
-        
         final int numberOfCandidatesAvailable = videoCandidates.size();
         if (numberOfCandidatesAvailable <= (MAX_VIDEO_COUNT - result.getVideos().size())) {
             // add all we have, no randomize

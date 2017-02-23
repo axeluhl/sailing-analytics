@@ -50,7 +50,7 @@ public class GetMediaForEventAction implements SailingAction<MediaDTO>, IsClient
 
         String eventName = event.getName();
         MediaDTO media = new MediaDTO();
-        for(ImageDescriptor image : HomeServiceUtil.getPhotoGalleryImages(event)) {
+        for (ImageDescriptor image : HomeServiceUtil.getPhotoGalleryImages(event)) {
             SailingImageDTO imageDTO = new SailingImageDTO(eventLink, image.getURL().toString(),
                     image.getCreatedAtDate().asDate());
             imageDTO.setSizeInPx(image.getWidthInPx(), image.getHeightInPx());
@@ -61,7 +61,7 @@ public class GetMediaForEventAction implements SailingAction<MediaDTO>, IsClient
             imageDTO.setLocale(image.getLocale() != null ? image.getLocale().toString() : null);
             media.addPhoto(imageDTO);
         }
-        for(VideoDescriptor video : event.getVideos()) {
+        for (VideoDescriptor video : event.getVideos()) {
             MimeType type = video.getMimeType();
             if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
                 SailingVideoDTO videoDTO = HomeServiceUtil.toSailingVideoDTO(eventRef, video);
