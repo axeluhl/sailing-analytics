@@ -1,15 +1,22 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
-import com.sap.sailing.gwt.home.desktop.utils.EventParamUtils;
+import com.sap.sailing.gwt.home.desktop.places.Consumer;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver;
 import com.sap.sse.gwt.client.mutationobserver.ElementSizeMutationObserver.DomMutationCallback;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContextWithSettingsStorage;
+import com.sap.sse.gwt.client.shared.perspective.DefaultOnSettingsLoadedCallback;
+import com.sap.sse.gwt.client.shared.perspective.SettingsStorageManager;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.settings.PlaceBasedUserSettingsStorageManager;
 
 /**
  * An abstract regatta tabView with some shared functions between the leaderboard tab and competitors chart tab 
@@ -21,33 +28,52 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
     public SharedLeaderboardRegattaTabView() {
     }
 
-    public LeaderboardPanel createSharedLeaderboardPanel(String leaderboardName, RegattaAnalyticsDataManager regattaAnalyticsManager) {
+    public void createSharedLeaderboardPanel(String leaderboardName, RegattaAnalyticsDataManager regattaAnalyticsManager, UserService userService,
+            String placeToken, final Consumer<LeaderboardPanel> consumer) {
+        
+        // FIXME remove
         boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
                 LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-        final LeaderboardSettings leaderboardSettings = EventParamUtils
-                .createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
-        final LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel( //
-                leaderboardSettings, //
-                null, //
-                "leaderboardGroupName", // TODO: keep using magic string? ask frank!
-                leaderboardName, //
-                true,
-                autoExpandLastRaceColumn);
         
-        if(ElementSizeMutationObserver.isSupported()) {
-            ElementSizeMutationObserver observer = new ElementSizeMutationObserver(new DomMutationCallback() {
-                @Override
-                public void onSizeChanged(int newWidth, int newHeight) {
-                    if(newWidth > 0 && newHeight > 0 && newWidth > 1500 && initialLeaderboardSizeCalculated == false) {
-                        int numberOfLastRacesToShow = (1500 - 600) / 50;
-                        leaderboardPanel.setRaceColumnSelectionToLastNStrategy(numberOfLastRacesToShow);
-                        initialLeaderboardSizeCalculated = true;
-                    }
+        final ComponentContext<LeaderboardSettings> componentContext = createLeaderboardComponentContext(leaderboardName, userService,
+                placeToken);
+        componentContext.initInitialSettings(new DefaultOnSettingsLoadedCallback<LeaderboardSettings>() {
+            @Override
+            public void onSuccess(LeaderboardSettings leaderboardSettings) {
+                final LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createLeaderboardPanel(null, componentContext, //
+                        leaderboardSettings, //
+                        null, //
+                        "leaderboardGroupName", // TODO: keep using magic string? ask frank!
+                        leaderboardName, //
+                        true,
+                        autoExpandLastRaceColumn);
+                
+                if(ElementSizeMutationObserver.isSupported()) {
+                    ElementSizeMutationObserver observer = new ElementSizeMutationObserver(new DomMutationCallback() {
+                        @Override
+                        public void onSizeChanged(int newWidth, int newHeight) {
+                            if(newWidth > 0 && newHeight > 0 && newWidth > 1500 && initialLeaderboardSizeCalculated == false) {
+                                int numberOfLastRacesToShow = (1500 - 600) / 50;
+                                leaderboardPanel.setRaceColumnSelectionToLastNStrategy(numberOfLastRacesToShow);
+                                initialLeaderboardSizeCalculated = true;
+                            }
+                        }
+                    }); 
+                    observer.observe(leaderboardPanel.getLeaderboardTable().getElement());
                 }
-            }); 
-            observer.observe(leaderboardPanel.getLeaderboardTable().getElement());
-        }
+                consumer.consume(leaderboardPanel);
+            }
+        });
+    }
+    
+    protected ComponentContext<LeaderboardSettings> createLeaderboardComponentContext(String leaderboardName, UserService userService,
+            String placeToken) {
+        final LeaderboardPanelLifecycle lifeCycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
+        final SettingsStorageManager<LeaderboardSettings> settingsStorageManager = new PlaceBasedUserSettingsStorageManager<>(
+                userService, "EventRegattaLeaderboard", leaderboardName, placeToken);
 
-        return leaderboardPanel;
+        final ComponentContext<LeaderboardSettings> componentContext = new ComponentContextWithSettingsStorage<>(
+                lifeCycle, settingsStorageManager);
+        return componentContext;
     }
 }

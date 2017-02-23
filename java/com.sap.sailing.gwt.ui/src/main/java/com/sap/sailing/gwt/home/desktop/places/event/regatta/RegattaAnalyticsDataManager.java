@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -17,7 +16,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
-import com.sap.sse.gwt.client.shared.perspective.SimpleComponentContext;
+import com.sap.sse.gwt.client.shared.perspective.ComponentContext;
 
 /**
  * A class managing analytical data on the regatta level (like leaderboard, regatta rank, etc.)
@@ -45,12 +44,12 @@ public class RegattaAnalyticsDataManager {
         this.multiCompetitorChart = null;
     }
 
-    public LeaderboardPanel createLeaderboardPanel(final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
+    public LeaderboardPanel createLeaderboardPanel(Component<?> parent, ComponentContext<?> context,
+            final LeaderboardSettings leaderboardSettings, final RegattaAndRaceIdentifier preselectedRace,
             final String leaderboardGroupName, String leaderboardName, boolean showRaceDetails, 
             boolean autoExpandLastRaceColumn) {
         if (leaderboardPanel == null) {
-            LeaderboardPanelLifecycle lifeCycle = new LeaderboardPanelLifecycle(null, StringMessages.INSTANCE);
-            leaderboardPanel = new LeaderboardPanel(null, new SimpleComponentContext<>(lifeCycle), sailingService,
+            leaderboardPanel = new LeaderboardPanel(parent, context, sailingService,
                     asyncActionsExecutor,
                     leaderboardSettings,
                     true, preselectedRace,
