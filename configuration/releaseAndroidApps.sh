@@ -3,6 +3,8 @@ ANDROID_RELEASE_BRANCH=android-xmake-release
 RELEASE_BRANCH=rel-1.4
 APP_MANIFESTS="mobile/com.sap.sailing.android.tracking.app/AndroidManifest.xml mobile/com.sap.sailing.buoy.positioning/AndroidManifest.xml mobile/com.sap.sailing.racecommittee.app/AndroidManifest.xml"
 GIT_REMOTE=origin
+# proxy can be requested with -x
+PROXY_SETTINGS=
 UPDATE_ANDROID_MANIFEST_VERSIONS=1
 UPDATE_POM_VERSIONS=1
 PERFORM_GIT_OPERATIONS=1
@@ -33,15 +35,15 @@ upgrade_pom_and_manifest_versions() {
   sed -e "$snip_area_start_line,$snip_area_end_line d" <"$POM" >"$POM_WITH_PARENT_SPEC_REMOVED"
   sed -e "1,$((snip_area_start_line - 1)) d" -e "$((snip_area_end_line + 1)),$ d" <"$POM" >"$PARENT_SPEC"
   cp "$POM_WITH_PARENT_SPEC_REMOVED" "$POM"
-  echo mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
-  mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
+  echo mvn $PROXY_SETTINGS -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
+  mvn $PROXY_SETTINGS -Dldi.releaseBuild=true -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$NEW_POM_VERSION
   sed --in-place -e 's/$/\\/' "$PARENT_SPEC"
   cat "$POM" | sed -e "$snip_area_start_line i \\`cat "$PARENT_SPEC"`" | sed -e "$snip_area_start_line,$snip_area_end_line s/\\\\$//" >"$RESTORED_POM_WITH_NEW_VERSION_AND_PARENT_SPEC"
   cp "$RESTORED_POM_WITH_NEW_VERSION_AND_PARENT_SPEC" "$POM"
 }
 
 if [ $# -eq 0 ]; then
-    echo "buildAndUpdateProduct [-m -p -g -r <git-remote>] CR-Id: <TheJCWBCRId>"
+    echo "$0 [-m -p -g -r <git-remote>] CR-Id: <TheJCWBCRId>"
     echo ""
     echo "Request a new Java Correction Workbench (JCWB) Correction Request ID at:"
     echo "  https://css.wdf.sap.corp/sap(bD1lbiZjPTAwMQ==)/bc/bsp/spn/jcwb/default.htm?newCMForProject=sapsailingcapture#"
@@ -56,7 +58,7 @@ if [ $# -eq 0 ]; then
     exit 2
 fi
 
-options='mpgr:'
+options='mpgrx:'
 while getopts $options option
 do
     case $option in
@@ -64,6 +66,7 @@ do
         p) UPDATE_POM_VERSIONS=0;;
         g) PERFORM_GIT_OPERATIONS=0;;
 	r) GIT_REMOTE=$OPTARG;;
+	x) PROXY_SETTINGS="-s configuration/maven-settings-proxy.xml -Dhttp.proxyHost=proxy.wdf.sap.corp -Dhttp.proxyPort=8080";;
         \?) echo "Invalid option"
             exit 4;;
     esac

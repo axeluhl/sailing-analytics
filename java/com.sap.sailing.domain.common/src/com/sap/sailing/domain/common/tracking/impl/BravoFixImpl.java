@@ -6,23 +6,39 @@ import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 
 /**
  * Implementation of {@link BravoFix} that wraps a {@link DoubleVectorFix} which holds the actual sensor data.
  */
 public class BravoFixImpl implements BravoFix {
     private static final long serialVersionUID = 2033254212013221160L;
-    
     private final DoubleVectorFix fix;
+    private final MeterDistance computedRideHeight;
+    private final MeterDistance rideHeightPortHull;
+    private final MeterDistance rideHeightStarboardHull;
+    private final double pitch;
+    private final double heel;
+    private final boolean computedIsFoiling;
 
     public BravoFixImpl(DoubleVectorFix fix) {
         this.fix = fix;
+
+        pitch = fix.get(BravoSensorDataMetadata.INSTANCE.pitchColumn);
+        heel = fix.get(BravoSensorDataMetadata.INSTANCE.heelColumn);
+        double rideHeightPortHullasDouble = fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn);
+        double rideHeightStarboardHullasDouble = fix
+                .get(BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn);
+
+        rideHeightPortHull = new MeterDistance(rideHeightPortHullasDouble);
+        rideHeightStarboardHull = new MeterDistance(rideHeightStarboardHullasDouble);
+
+        computedRideHeight = new MeterDistance(Math.min(rideHeightPortHullasDouble, rideHeightStarboardHullasDouble));
+        computedIsFoiling = computedRideHeight.compareTo(MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
     }
 
     @Override
     public double get(String valueName) {
-        int index = BravoSensorDataMetadata.INSTANCE.getColumnIndex(valueName);
+        int index = BravoSensorDataMetadata.INSTANCE.getTrackColumnIndex(valueName);
         if (index < 0) {
             throw new IllegalArgumentException("Unknown value \"" + valueName + "\" for " + getClass().getSimpleName());
         }
@@ -36,36 +52,31 @@ public class BravoFixImpl implements BravoFix {
 
     @Override
     public Distance getRideHeight() {
-        return Util.min(getRideHeightPortHull(), getRideHeightStarboardHull());
+        return computedRideHeight;
     }
-    
+
     @Override
     public Distance getRideHeightPortHull() {
-        return new MeterDistance(fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightPortHullColumn));
+        return rideHeightPortHull;
     }
-    
+
     @Override
     public Distance getRideHeightStarboardHull() {
-        return new MeterDistance(fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightStarboardHullColumn));
+        return rideHeightStarboardHull;
     }
-    
+
     @Override
     public boolean isFoiling() {
-        return getRideHeight().compareTo(MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
+        return computedIsFoiling;
     }
 
     @Override
     public double getPitch() {
-        return fix.get(BravoSensorDataMetadata.INSTANCE.pitchColumn);
+        return pitch;
     }
-    
+
     @Override
-    public double getYaw() {
-        return fix.get(BravoSensorDataMetadata.INSTANCE.yawColumn);
-    }
-    
-    @Override
-    public double getRoll() {
-        return fix.get(BravoSensorDataMetadata.INSTANCE.rollColumn);
+    public double getHeel() {
+        return heel;
     }
 }

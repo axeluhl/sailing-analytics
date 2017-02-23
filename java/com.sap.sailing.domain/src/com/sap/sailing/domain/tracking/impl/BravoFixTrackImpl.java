@@ -28,7 +28,7 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
      *            the name of the track by which it can be obtained from the {@link TrackedRace}.
      */
     public BravoFixTrackImpl(ItemType trackedItem, String trackName) {
-        super(trackedItem, trackName, BravoSensorDataMetadata.INSTANCE.getColumns(), 
+        super(trackedItem, trackName, BravoSensorDataMetadata.INSTANCE.getFileColumns(), 
                 BravoFixTrack.TRACK_NAME + " for " + trackedItem);
     }
 
@@ -52,6 +52,12 @@ public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends S
         return fixBefore.getRideHeight();
     }
     
+    @Override
+    public boolean isFoiling(TimePoint timePoint) {
+        final Distance rideHeight = getRideHeight(timePoint);
+        return rideHeight != null && rideHeight.compareTo(BravoFix.MIN_FOILING_HEIGHT_THRESHOLD) >= 0;
+    }
+
     @Override
     public Distance getAverageRideHeight(TimePoint from, TimePoint to) {
         final Distance result;

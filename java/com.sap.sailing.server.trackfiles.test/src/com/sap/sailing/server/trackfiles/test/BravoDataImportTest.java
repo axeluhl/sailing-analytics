@@ -9,15 +9,31 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.server.trackfiles.impl.BravoDataImporterImpl;
+import com.sap.sailing.server.trackfiles.impl.doublefix.DownsamplerTo1HzProcessor;
+import com.sap.sailing.server.trackfiles.impl.doublefix.LearningBatchProcessor;
 
 public class BravoDataImportTest {
     
-    private final DoubleVectorFixImporter bravoDataImporter = new BravoDataImporterImpl();
+    private LearningBatchProcessor batchProcessor;
+    private DownsamplerTo1HzProcessor downsampler;
+
+    private final DoubleVectorFixImporter bravoDataImporter = new BravoDataImporterImpl() {
+        protected com.sap.sailing.server.trackfiles.impl.doublefix.DoubleFixProcessor createProcessor(
+                BravoSensorDataMetadata metadata,
+                DoubleVectorFixImporter.Callback callback,
+                TrackFileImportDeviceIdentifier trackIdentifier) {
+            batchProcessor = new LearningBatchProcessor(5000, 5000, callback, trackIdentifier);
+            downsampler = new DownsamplerTo1HzProcessor(metadata.trackColumnCount, batchProcessor);
+            return downsampler;
+        };
+    };
     private int callbackCallCount = 0;
     private double sumRideHeightInMeters = 0.0;
     
@@ -48,39 +64,40 @@ public class BravoDataImportTest {
     }
     
     private void testImport(ImportData importData) throws FormatNotSupportedException, IOException {
+
         bravoDataImporter.importFixes(importData.getInputStream(), (fixes, device) -> {
             for (DoubleVectorFix fix : fixes) {
                 callbackCallCount++;
                 sumRideHeightInMeters += new BravoFixImpl(fix).getRideHeight().getMeters();
             }
         }, "filename", "source");
-        Assert.assertEquals(importData.expectedFixesCount, callbackCallCount);
-        Assert.assertEquals(importData.expectedAverageRideHeight, 
-                callbackCallCount == 0 ? sumRideHeightInMeters : sumRideHeightInMeters / callbackCallCount, 0.00001);
+        Assert.assertEquals(importData.expectedFixesCount, downsampler.getCountSourceTtl());
+        Assert.assertEquals(importData.expectedFixesConsolidated, downsampler.getCountImportedTtl());
+        Assert.assertEquals(importData.expectedFixesConsolidated, callbackCallCount);
     }
     
     private enum ImportData {
         // find out the number of fixes using the following bash line:
         //    tail -n +5 Undefined\ Race\ -\ BRAVO.txt | awk '{if ($5<$6) print v=$5; else v=$6; sum+=v; count++; } END {print "Sum: ", sum, "Count: ", count, "Average:", sum/count;}'
-        FILE_UNDEFINED_RACE_BRAVO(870, 0.661037) {
+        FILE_UNDEFINED_RACE_BRAVO(870, 89) {
             @Override
             protected InputStream getInputStream() {
                 return getClass().getResourceAsStream("/Undefined Race - BRAVO.txt");
             }
         },
-        DUMMY_DEFAULT_HEADER_NO_DATA(0, 0.0) {
+        DUMMY_DEFAULT_HEADER_NO_DATA(0, 0) {
             @Override
             protected InputStream getInputStream() {
                 return new ByteArrayInputStream(HEADER_ORDER_DEFAULT.getBytes(StandardCharsets.UTF_8));
             }
         },
-        DUMMY_DEAFULT_HEADER_ONE_LINE(1, 0.661044) {
+        DUMMY_DEAFULT_HEADER_ONE_LINE(1, 1) {
             @Override
             protected InputStream getInputStream() {
                 return new ByteArrayInputStream((HEADER_ORDER_DEFAULT + DUMMY_CONTENT).getBytes(StandardCharsets.UTF_8));
             }
         },
-        DUMMY_RANDOM_HAEDER_ONE_LINE(1, 0.092727) {
+        DUMMY_RANDOM_HAEDER_ONE_LINE(1, 1) {
             @Override
             protected InputStream getInputStream() {
                 return new ByteArrayInputStream((HEADER_ORDER_RANDOM + DUMMY_CONTENT).getBytes(StandardCharsets.UTF_8));
@@ -88,11 +105,11 @@ public class BravoDataImportTest {
         };
         
         private final int expectedFixesCount;
-        private final double expectedAverageRideHeight;
+        private final int expectedFixesConsolidated;
 
-        private ImportData(int expectedFixesCount, double expectedAverageRideHeight) {
+        private ImportData(int expectedFixesCount, int expectedFixesConsolidated) {
             this.expectedFixesCount = expectedFixesCount;
-            this.expectedAverageRideHeight = expectedAverageRideHeight;
+            this.expectedFixesConsolidated = expectedFixesConsolidated;
         }
         
         protected abstract InputStream getInputStream();

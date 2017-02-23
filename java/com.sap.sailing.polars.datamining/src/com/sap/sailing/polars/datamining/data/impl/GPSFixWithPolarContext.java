@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.datamining.data.HasCompetitorPolarContext;
@@ -51,4 +52,15 @@ public class GPSFixWithPolarContext implements HasGPSFixPolarContext {
         return competitorPolarContext;
     }
 
+    @Override
+    public boolean isFoiling() {
+        final boolean result;
+        final BravoFixTrack<Competitor> competitorBravoFixTrack = trackedRace.getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+        if (competitorBravoFixTrack != null) {
+            result = competitorBravoFixTrack.isFoiling(fix.getTimePoint());
+        } else {
+            result = false;
+        }
+        return result;
+    }
 }

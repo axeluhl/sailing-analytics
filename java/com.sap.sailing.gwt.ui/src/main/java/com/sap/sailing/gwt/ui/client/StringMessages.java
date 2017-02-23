@@ -302,6 +302,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String details();
     String noGroupSelected();
     String combinedWindSourceTypeName();
+    String legMiddleWindSourceTypeName();
     String courseBasedWindSourceTypeName();
     String trackBasedEstimationWindSourceTypeName();
     String windSensorWindSourceTypeName();
@@ -925,6 +926,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String showWindSpeedSeriesTooltip();
     String showWindDirectionSeriesTooltip();
     String combinedWindSourceTypeTooltip();
+    String legMiddleWindSourceTypeTooltip();
     String courseBasedWindSourceTypeTooltip();
     String trackBasedEstimationWindSourceTypeTooltip();
     String windSensorWindSourceTypeTooltip();
@@ -1775,4 +1777,20 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String eventRegattaHeaderLegendAudioNo();
     String set();
     String gribWindImport_Title();
+    String angleInDegree();
+    String angleInRadian();
+    String centralAngleInRadian();
+    String centralAngleInDegree();
+    String kilometers();
+    String meters();
+    String nauticalMiles();
+    String seaMiles();
+    String geographicalMiles();
+    String days();
+    String hours();
+    String minutes();
+    String seconds();
+    String milliseconds();
+    String floatNumber();
+    String integer();
 }
