@@ -121,6 +121,9 @@ public class ComponentContextWithSettingsStorage<S extends Settings> extends Sim
     }
 
     private JSONObject patchJsonObject(JSONObject root, List<String> path, Settings newSettings) {
+        if(path.isEmpty()) {
+            return (JSONObject) settingsStorageManager.settingsToJSON(newSettings);
+        }
         String current = path.remove(path.size() - 1);
         // we need to go further
         if (!path.isEmpty()) {
