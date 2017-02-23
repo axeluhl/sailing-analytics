@@ -59,7 +59,7 @@ public abstract class AbstractNumericResultsPresenter<SettingsType extends Setti
         addControl(dataSelectionListBox);
     }
     
-    protected void internalShowResults(QueryResultDTO<?> result) {
+    protected void internalShowResult(QueryResultDTO<?> result) {
         currentDataProvider = selectCurrentDataProvider();
         updateDataSelectionListBox();
         if (currentDataProvider != null) {

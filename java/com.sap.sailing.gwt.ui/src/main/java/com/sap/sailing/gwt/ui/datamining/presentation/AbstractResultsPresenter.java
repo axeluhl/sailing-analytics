@@ -34,7 +34,6 @@ implements ResultsPresenterWithControls<SettingsType> {
     
     private QueryResultDTO<?> currentResult;
     private boolean isCurrentResultSimple;
-    private boolean isCurrentResultTwoDimensional;
     
     public AbstractResultsPresenter(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
@@ -90,7 +89,7 @@ implements ResultsPresenterWithControls<SettingsType> {
             this.currentResult = result;
             updateCurrentResultInfo();
             
-            internalShowResults(getCurrentResult());
+            internalShowResult(getCurrentResult());
         } else {
             this.currentResult = null;
             updateCurrentResultInfo();
@@ -98,7 +97,7 @@ implements ResultsPresenterWithControls<SettingsType> {
         }
     }
 
-    abstract protected void internalShowResults(QueryResultDTO<?> result);
+    abstract protected void internalShowResult(QueryResultDTO<?> result);
 
     protected abstract Widget getPresentationWidget();
 
@@ -138,38 +137,23 @@ implements ResultsPresenterWithControls<SettingsType> {
     
     private void updateCurrentResultInfo() {
         boolean isSimple = false;
-        boolean isTwoDimensional = false;
         if (currentResult != null) {
             isSimple = true;
-            isTwoDimensional = true;
             for (GroupKey groupKey : getCurrentResult().getResults().keySet()) {
                 int size = groupKey.size();
                 if (size != 1) {
                     isSimple = false;
-                    if (!isTwoDimensional) {
-                        break;
-                    }
-                }
-                if (size != 2) {
-                    isTwoDimensional = false;
-                    if (!isSimple) {
-                        break;
-                    }
+                    break;
                 }
             }
         }
         isCurrentResultSimple = isSimple;
-        isCurrentResultTwoDimensional = isTwoDimensional;
     }
 
     protected boolean isCurrentResultSimple() {
         return isCurrentResultSimple;
     }
-    
-    protected boolean isCurrentResultTwoDimensional() {
-        return isCurrentResultTwoDimensional;
-    }
-    
+
     protected StringMessages getStringMessages() {
         return stringMessages;
     }

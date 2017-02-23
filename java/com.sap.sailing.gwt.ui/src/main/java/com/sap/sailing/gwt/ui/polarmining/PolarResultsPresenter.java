@@ -206,7 +206,7 @@ public class PolarResultsPresenter extends AbstractResultsPresenter<Settings> {
     }
 
     @Override
-    protected void internalShowResults(QueryResultDTO<?> result) {
+    protected void internalShowResult(QueryResultDTO<?> result) {
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
         Collections.sort(sortedNaturally, new Comparator<GroupKey>() {

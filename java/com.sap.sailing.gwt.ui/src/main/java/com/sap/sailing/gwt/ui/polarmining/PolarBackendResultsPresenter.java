@@ -123,7 +123,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
     }
 
     @Override
-    protected void internalShowResults(QueryResultDTO<?> result) {
+    protected void internalShowResult(QueryResultDTO<?> result) {
         final Set<Series> seriesToHideAfterRendering = new HashSet<>();
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
