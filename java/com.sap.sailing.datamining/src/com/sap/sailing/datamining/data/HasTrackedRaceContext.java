@@ -1,6 +1,5 @@
 package com.sap.sailing.datamining.data;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
@@ -24,9 +23,6 @@ public interface HasTrackedRaceContext {
     
     @Connector(messageKey="CourseArea", ordinal=3)
     public CourseArea getCourseArea();
-    
-    @Connector(messageKey="BoatClass", ordinal=1)
-    public BoatClass getBoatClass();
     
     @Connector(messageKey="Fleet", ordinal=4)
     public Fleet getFleet();

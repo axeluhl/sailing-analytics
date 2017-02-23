@@ -1,6 +1,5 @@
 package com.sap.sailing.datamining.data;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
@@ -14,9 +13,6 @@ public interface HasRaceResultOfCompetitorContext {
 
     @Connector(messageKey="Competitor", ordinal=2)
     public Competitor getCompetitor();
-    
-    @Connector(messageKey="BoatClass", ordinal=3)
-    BoatClass getBoatClass();
 
     @Dimension(messageKey="Regatta", ordinal=4)
     String getRegattaName();
