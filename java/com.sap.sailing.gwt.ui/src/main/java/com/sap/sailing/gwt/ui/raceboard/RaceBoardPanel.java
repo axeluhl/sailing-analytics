@@ -51,7 +51,6 @@ import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
@@ -361,8 +360,7 @@ public class RaceBoardPanel
     
     /**
      * @param event
-     *            an optional event; may be <code>null</code> or else can be used to show some context information in
-     * the {@link GlobalNavigationPanel}.
+     *            an optional event; may be <code>null</code> or else can be used to show some context information.
      * @param showChartMarkEditMediaButtonsAndVideo 
      * @param isScreenLargeEnoughToOfferChartSupport
      *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
