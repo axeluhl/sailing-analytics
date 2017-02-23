@@ -80,20 +80,22 @@ public class SettingsToStringSerializer {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Map<String, Iterable<String>> deserializeStringToMap(String serializedSettings) {
         Map<String, Iterable<String>> values = new HashMap<>();
-        String[] singleSettings = serializedSettings.split("&");
-        for (String entry : singleSettings) {
-            String[] entryParts = entry.split("=");
-            // TODO determine what kind of error handling could be done here, if the url was wrongly edited manually
-            String key = URL.decode(entryParts[0]);
-            String value = URL.decode(entryParts[1]);
-            Iterable<String> listOrNull = values.get(key);
-            if(listOrNull == null){
-                listOrNull = new ArrayList<>();
-                values.put(key, listOrNull);
+        if(serializedSettings != null && !serializedSettings.isEmpty()) {
+            String[] singleSettings = serializedSettings.split("&");
+            for (String entry : singleSettings) {
+                String[] entryParts = entry.split("=");
+                // TODO determine what kind of error handling could be done here, if the url was wrongly edited manually
+                String key = URL.decode(entryParts[0]);
+                String value = URL.decode(entryParts[1]);
+                Iterable<String> listOrNull = values.get(key);
+                if(listOrNull == null){
+                    listOrNull = new ArrayList<>();
+                    values.put(key, listOrNull);
+                }
+                // can only be a arraylist at this point
+                ((ArrayList)listOrNull).add(value);
+                
             }
-            // can only be a arraylist at this point
-            ((ArrayList)listOrNull).add(value);
-            
         }
 
         return values;
