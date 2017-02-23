@@ -30,6 +30,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.security.ui.client.UserService;
 
 public class SeriesActivity extends AbstractActivity implements SeriesView.Presenter {
 
@@ -135,5 +136,10 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public ErrorAndBusyClientFactory getErrorAndBusyClientFactory() {
         return clientFactory;
+    }
+    
+    @Override
+    public UserService getUserService() {
+        return clientFactory.getUserService();
     }
 }

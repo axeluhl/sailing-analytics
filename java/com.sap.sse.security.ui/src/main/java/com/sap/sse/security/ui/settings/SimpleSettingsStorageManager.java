@@ -34,7 +34,7 @@ public class SimpleSettingsStorageManager<S extends Settings> implements Setting
     }
 
     @SuppressWarnings("unchecked")
-    protected final S deserializeFromCurrentUrl(S defaultSettings) {
+    protected S deserializeFromCurrentUrl(S defaultSettings) {
         if (defaultSettings instanceof GenericSerializableSettings) {
             defaultSettings = (S) urlSerializer
                     .deserializeFromCurrentLocation((GenericSerializableSettings) defaultSettings);
