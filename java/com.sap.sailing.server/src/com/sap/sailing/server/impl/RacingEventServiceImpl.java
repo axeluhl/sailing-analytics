@@ -1566,8 +1566,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // try a quick read first, protected by regattasByName being a concurrent hash set
         if (!regattasByName.containsKey(regatta.getName())) {
             // now we need to obtain exclusive write access; in between, some other thread may have added a regatta by
-            // that
-            // name, so we need to check again:
+            // that name, so we need to check again:
             LockUtil.lockForWrite(regattasByNameLock);
             try {
                 if (!regattasByName.containsKey(regatta.getName())) {
