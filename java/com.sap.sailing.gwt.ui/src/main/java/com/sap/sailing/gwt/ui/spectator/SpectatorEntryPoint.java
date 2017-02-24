@@ -11,6 +11,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.settings.client.spectator.SpectatorContextDefinition;
+import com.sap.sailing.gwt.settings.client.spectator.SpectatorSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
@@ -28,9 +30,8 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
         
-        final SpectatorSettings settings = new SettingsToUrlSerializer().deserializeFromCurrentLocation(new SpectatorSettings());
-
-        final String groupParamValue = settings.getLeaderboardGroupName();
+        final String groupParamValue = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new SpectatorContextDefinition()).getLeaderboardGroupName();
         final String groupName;
         if (groupParamValue == null || groupParamValue.isEmpty()) {
             groupName = null;
@@ -47,6 +48,7 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
             });
         }
         
+        final SpectatorSettings settings = new SettingsToUrlSerializer().deserializeFromCurrentLocation(new SpectatorSettings());
         RootPanel rootPanel = RootPanel.get();
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
         boolean embedded = settings.isEmbedded();

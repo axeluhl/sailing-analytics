@@ -38,6 +38,8 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.settings.client.spectator.SpectatorContextDefinition;
+import com.sap.sailing.gwt.settings.client.spectator.SpectatorSettings;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -229,8 +231,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         Column<LeaderboardGroupDTO, SafeHtml> groupsNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(groupsNameAnchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
-                String link = new LinkWithSettingsGenerator<SpectatorSettings>()
-                        .createUrl(new SpectatorSettings(group.getName(), showRaceDetails));
+                String link = new LinkWithSettingsGenerator<SpectatorSettings>(new SpectatorContextDefinition(group.getName()))
+                        .createUrl(new SpectatorSettings(showRaceDetails));
                 return ANCHORTEMPLATE.anchor(link, group.getName());
             }
         };

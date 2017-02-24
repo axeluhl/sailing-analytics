@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.spectator;
+package com.sap.sailing.gwt.settings.client.spectator;
 
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
@@ -8,9 +8,8 @@ import com.sap.sse.common.settings.generic.StringSetting;
 
 public class SpectatorSettings extends AbstractGenericSerializableSettings {
     
-    private static final long serialVersionUID = 3490708255272671012L;
+    private static final long serialVersionUID = -883043012807297001L;
     
-    private transient StringSetting leaderboardGroupName;
     private transient StringSetting viewMode;
     private transient BooleanSetting canReplayDuringLiveRaces;
     private transient BooleanSetting showMapControls;
@@ -20,23 +19,17 @@ public class SpectatorSettings extends AbstractGenericSerializableSettings {
     public SpectatorSettings() {
     }
     
-    public SpectatorSettings(String leaderboardGroupName, boolean showRaceDetails) {
-        this.leaderboardGroupName.setValue(leaderboardGroupName);
+    public SpectatorSettings(boolean showRaceDetails) {
         this.showRaceDetails.setValue(showRaceDetails);
     }
     
     @Override
     protected void addChildSettings() {
-        leaderboardGroupName = new StringSetting("leaderboardGroupName", this);
         viewMode = new StringSetting("viewMode", this);
         canReplayDuringLiveRaces = new BooleanSetting(RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, this, false);
         showMapControls = new BooleanSetting(RaceMapSettings.PARAM_SHOW_MAPCONTROLS, this, true);
         showRaceDetails = new BooleanSetting("showRaceDetails", this, false);
         embedded = new BooleanSetting("embedded", this, false);
-    }
-    
-    public String getLeaderboardGroupName() {
-        return leaderboardGroupName.getValue();
     }
     
     public String getViewMode() {
