@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 import java.util.List;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -15,9 +14,11 @@ import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.settings.client.leaderboardedit.LeaderboardEditContextDefinition;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
@@ -33,7 +34,9 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                 new AsyncCallback<List<String>>() {
             @Override
             public void onSuccess(List<String> leaderboardNames) {
-                final String leaderboardName = Window.Location.getParameter("name");
+                final LeaderboardEditContextDefinition settings = new SettingsToUrlSerializer()
+                        .deserializeFromCurrentLocation(new LeaderboardEditContextDefinition());
+                final String leaderboardName = settings.getLeaderboardName();
                 if (leaderboardNames.contains(leaderboardName)) {
                     
                     SAPHeaderWithAuthentication header = initHeader();
