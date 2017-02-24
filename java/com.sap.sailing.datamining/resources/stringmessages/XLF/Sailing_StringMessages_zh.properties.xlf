@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2017-02-01T15:21:19Z" original="/usr/sap/ljs/app/Converter_8942097082529348960/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="ja">
+	<file datatype="javapropertyresourcebundle" date="2017-02-02T13:58:48Z" original="/usr/sap/ljs/app/Converter_8942097082529348960/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="zh-CN">
 		<header>
 			<skl>
 				<internal-file crc="11279ec7a00e268a726fb84cbe0bc2fa" form="base64">H4sIAAAAAAAAAIVWW28qNxB+96/wy5HgoWo4p1dVrkRCIWlzQQE1qtQXs8wuFouNbJMc+us7M96LQ07Ii3cun73jmfFnL/YAa7WgUfC4BLuAwtl1uITSeUg+OboIcsUGMTEhalvA0utnqHF2a5CtRdzrHSgaxC1Uy+MeFH4lCWKhTX0zUfSR94fdCrz4B7RXNBA62RjfuO91NM7q2sSjymQxLryzx51qvuIRKh2jVs1XXLmDDzD2oFUSJcni0ul4VesQFEmSRTGtAaLiUTzqAhQNuMJuD9FE51Uv8gI8VyxB7xQNGXKB+yg2S11lU2QySrTiFvUa/Mppv6YcGFtN3E4b+wjRG3gGf7VBTWWwwBGdA5M/UPLOr1gFMZsvpubrORgiJEJwvSdj1x+ACdKg77TfzjGVCD03g2CywaWNPUI41PGj7ckES1MeyizfH+VFulL2cArUwgEh56NMmLxaM+8O+7wuki05JPdSOSjneWJe7Z4A+Ua45THWou+02T5gctuStAXpst5tpY+XXIvowVZxc2MvQR/wyMY0o7VLY2XrEZdlvFBXut6RNFK3ptpEqY0n9XOjrjzAf0CWL2oGNtaQmX5Qdw73rGNu/FFNPYRNZvlJ4e+drTLTz+oal5cvGBupv6iZrtnxa4utGsPoAi3OpxhH6m/jagxDhs72WV0fvDcFpgFpoEaSeIZFQezVapJVObhAFgvxNzmSL9gMcfgafmPn4Atc+3QepuzTKZS669wEblueOF4FVx8iPGq7Va0iSUsFI4Z9Uy2mXSpVGTvKHcdF1IjoGDc6yRaJTMZCIvGnDbI4qdR0aaXXgFOWT8v2VJ+szQwKdBynBvNFDaxIp/XYIskkElU/lG0jBpUs1NCdrUMtdbHNEax33j8Nlijzst5554D0H49Xxhf1K1jjkI2Ho57hYQ4P/taFgFiOm00SOTkZ+9vM0WYTL5v1u5lOJ58QcvCJfnvLZ2rYx+fW5rCbGmvCJo+OzTLZs+1grfNNkPo28kuILwC2q8CYeIB/8K0tycGoKYv87vfmj0NxE/B2LrZ4Xd8E2YhdFD0LMZlnAWWXWOL5vtJ+ewrmf7bXQSo6X/6tkl4AVG1FQ2rFV8+Mpu86PmPruIzIcQnAcu+fGA8FPQmQt20FqtNlMtABmkCFnBO6U3g6pzuQZybLwdwFQ+d7KLBTsPxq6Zo2mOOZld/33THsNk/16DdPmnjSx70zyBetINpLk9ZsZF6Y89S2IcnvHmHOyekJTonqD/ByY3w8vp3BHfTlZAIx0AtupT8c4/WztlFX4A7hD7t+KG+NBdXiZH5McqhELJ8SQ8xMPEJ/udZ1iSywAe5ouigTpXAEcQNygwCaRnLJLFPjTfrtGN793dLsAPNh402bKEUmyTaqbWMVd7DWNb/6WGLiTsSMz0bcPLVw4mTWUxf3fn7s5n5++NK1NvUO34f+AJLdfX8Nlk+TIUO4YH9ZF0MGTFUcbGMYShHS7ZAwmUes8FFJ/N48bh31GD1JcIHBv4eyLNfLIYfJpz1FyKL4H/vwm9H1CwAA</internal-file>
@@ -13,15 +13,15 @@
 		<body>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Speed" resname="Speed">
 				<source>Speed</source>
-				<target state="signed-off">速力</target>
+				<target state="signed-off">速度</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedTenSecondsBefore" resname="SpeedTenSecondsBefore">
 				<source>Speed 10s before</source>
-				<target state="signed-off">10 秒前の艇速</target>
+				<target state="signed-off">前 10 秒的速度</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="DistanceTraveled" resname="DistanceTraveled">
 				<source>Distance Traveled</source>
-				<target state="signed-off">移動した距離</target>
+				<target state="signed-off">航行距离</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Name" resname="Name">
 				<source>Name</source>
@@ -29,19 +29,19 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LegType" resname="LegType">
 				<source>Leg Type</source>
-				<target state="signed-off">レグタイプ</target>
+				<target state="signed-off">航段形式</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SailID" resname="SailID">
 				<source>Sail Number</source>
-				<target state="signed-off">セールナンバー</target>
+				<target state="signed-off">帆号</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Year" resname="Year">
 				<source>Year</source>
-				<target state="signed-off">年</target>
+				<target state="signed-off">年份</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LegNumber" resname="LegNumber">
 				<source>Leg Number</source>
-				<target state="signed-off">レグ番号</target>
+				<target state="signed-off">航段编号</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Nationality" resname="Nationality">
 				<source>Nationality</source>
@@ -49,351 +49,351 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Acronym" resname="Acronym">
 				<source>Acronym</source>
-				<target state="signed-off">頭字語</target>
+				<target state="signed-off">首字母缩略词</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Regatta" resname="Regatta">
 				<source>Regatta</source>
-				<target state="signed-off">レガッタ</target>
+				<target state="signed-off">比赛</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CourseArea" resname="CourseArea">
 				<source>Course Area</source>
-				<target state="signed-off">コースエリア</target>
+				<target state="signed-off">场地区域</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="BoatClass" resname="BoatClass">
 				<source>Boat Class</source>
-				<target state="signed-off">艇種</target>
+				<target state="signed-off">船只级别</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Fleet" resname="Fleet">
 				<source>Fleet</source>
-				<target state="signed-off">フリート</target>
+				<target state="signed-off">船队</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Race" resname="Race">
 				<source>Race</source>
-				<target state="signed-off">レース</target>
+				<target state="signed-off">比赛轮次</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Competitor" resname="Competitor">
 				<source>Competitor</source>
-				<target state="signed-off">競技者</target>
+				<target state="signed-off">参赛队</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Boat" resname="Boat">
 				<source>Boat</source>
-				<target state="signed-off">艇</target>
+				<target state="signed-off">船只</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Team" resname="Team">
 				<source>Team</source>
-				<target state="signed-off">チーム</target>
+				<target state="signed-off">团队</target>
 			</trans-unit>
-			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SearchTag" resname="SearchTag">
-				<source>Search Tag</source>
-				<target state="signed-off">競技者検索タグ</target>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CompetitorSearchTag" resname="CompetitorSearchTag">
+				<source>Competitor Search Tag</source>
+				<target state="signed-off">参赛队搜索标记</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LeaderboardSailingDomainRetrieverChain" resname="LeaderboardSailingDomainRetrieverChain">
 				<source>Leaderboards</source>
-				<target state="signed-off">リーダーボード</target>
+				<target state="signed-off">积分榜</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RaceSailingDomainRetrieverChain" resname="RaceSailingDomainRetrieverChain">
 				<source>Races</source>
-				<target state="signed-off">レース</target>
+				<target state="signed-off">比赛轮次</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LegSailingDomainRetrieverChain" resname="LegSailingDomainRetrieverChain">
 				<source>Legs</source>
-				<target state="signed-off">レグ</target>
+				<target state="signed-off">航段</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="GPSFixSailingDomainRetrieverChain" resname="GPSFixSailingDomainRetrieverChain">
 				<source>GPS Fixes</source>
-				<target state="translated">GPS フィックス</target>
+				<target state="signed-off">GPS 修复</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindFixSailingDomainRetrieverChain" resname="WindFixSailingDomainRetrieverChain">
 				<source>Wind Fixes</source>
-				<target>風フィックス</target>
+				<target>风力修复</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="MarkPassingSailingDomainRetrieverChain" resname="MarkPassingSailingDomainRetrieverChain">
 				<source>Mark Passings</source>
-				<target state="signed-off">マーク通過</target>
+				<target state="signed-off">绕标</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RaceResultSailingDomainRetrieverChain" resname="RaceResultSailingDomainRetrieverChain">
 				<source>Race Results</source>
-				<target state="signed-off">レース結果</target>
+				<target state="signed-off">比赛轮次结果</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RaceOfCompetitorSailingDomainRetrieverChain" resname="RaceOfCompetitorSailingDomainRetrieverChain">
 				<source>Races of Competitors</source>
-				<target state="signed-off">競技者のレース</target>
+				<target state="signed-off">参赛队的比赛轮次</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ManeuverSailingDomainRetrieverChain" resname="ManeuverSailingDomainRetrieverChain">
 				<source>Maneuver</source>
-				<target state="signed-off">マニューバー</target>
+				<target state="signed-off">操作</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LeaderboardGroup" resname="LeaderboardGroup">
 				<source>Leaderboard Group</source>
-				<target state="signed-off">リーダーボードグループ</target>
+				<target state="signed-off">积分榜分组</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Leaderboard" resname="Leaderboard">
 				<source>Leaderboard</source>
-				<target state="signed-off">リーダーボード</target>
+				<target state="signed-off">积分榜</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Leg" resname="Leg">
 				<source>Leg</source>
-				<target state="signed-off">レグ</target>
+				<target state="signed-off">航段</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="MarkPassing" resname="MarkPassing">
 				<source>Mark Passing</source>
-				<target state="signed-off">マーク通過</target>
+				<target state="signed-off">绕标</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LegOfCompetitor" resname="LegOfCompetitor">
 				<source>Leg of competitor</source>
-				<target state="signed-off">競技者のレグ</target>
+				<target state="signed-off">参赛队的航段</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="GpsFix" resname="GpsFix">
 				<source>GPS Fix</source>
-				<target state="translated">GPS フィックス</target>
+				<target state="signed-off">GPS 修复</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindFix" resname="WindFix">
 				<source>Wind Fix</source>
-				<target>風フィックス</target>
+				<target>风力修复</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Maneuver" resname="Maneuver">
 				<source>Maneuver</source>
-				<target state="signed-off">マニューバー</target>
+				<target state="signed-off">操作</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindStrengthInBeaufort" resname="WindStrengthInBeaufort">
 				<source>Wind Strength in Beaufort</source>
-				<target state="signed-off">ビューフォート風力</target>
+				<target state="signed-off">风力（蒲福风级）</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft0" resname="Bft0">
 				<source>Calm</source>
-				<target state="signed-off">平穏</target>
+				<target state="signed-off">无风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft1" resname="Bft1">
 				<source>Light air</source>
-				<target state="signed-off">至軽風</target>
+				<target state="signed-off">软风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft2" resname="Bft2">
 				<source>Light breeze</source>
-				<target state="signed-off">軽風</target>
+				<target state="signed-off">轻风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft3" resname="Bft3">
 				<source>Gentle breeze</source>
-				<target state="signed-off">軟風</target>
+				<target state="signed-off">微风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft4" resname="Bft4">
 				<source>Moderate breeze</source>
-				<target state="signed-off">和風</target>
+				<target state="signed-off">和风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft5" resname="Bft5">
 				<source>Fresh breeze</source>
-				<target state="signed-off">疾風</target>
+				<target state="signed-off">劲风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft6" resname="Bft6">
 				<source>Strong breeze</source>
-				<target state="signed-off">雄風</target>
+				<target state="signed-off">强风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft7" resname="Bft7">
 				<source>High wind</source>
-				<target state="signed-off">強風</target>
+				<target state="signed-off">疾风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft8" resname="Bft8">
 				<source>Gale</source>
-				<target state="signed-off">疾強風</target>
+				<target state="signed-off">大风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft9" resname="Bft9">
 				<source>Strong gale</source>
-				<target state="signed-off">大強風</target>
+				<target state="signed-off">烈风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft10" resname="Bft10">
 				<source>Storm</source>
-				<target state="signed-off">全強風</target>
+				<target state="signed-off">暴风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft11" resname="Bft11">
 				<source>Violent storm</source>
-				<target state="signed-off">暴風</target>
+				<target state="signed-off">飓风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Bft12" resname="Bft12">
 				<source>Hurricane</source>
-				<target state="signed-off">颶風 (ぐふう)</target>
+				<target state="signed-off">台风</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RelativeScore" resname="RelativeScore">
 				<source>Relative Score (0 best; 1 worst)</source>
-				<target state="signed-off">相対スコア (0 が最高、1 が最低)</target>
+				<target state="signed-off">相对得分（0 最佳；1 最差）</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RelativeScoreInPercent" resname="RelativeScoreInPercent">
 				<source>Relative Score in %</source>
-				<target state="signed-off">相対スコア (%)</target>
+				<target state="signed-off">相对得分 (%)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RelativeScoreInRaceInPercent" resname="RelativeScoreInRaceInPercent">
 				<source>Relative Score in Race in %</source>
-				<target state="signed-off">レース中の相対スコア (%)</target>
+				<target state="signed-off">比赛轮次中的相对得分 (%)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AbsoluteRank" resname="AbsoluteRank">
 				<source>Absolute Rank</source>
-				<target state="signed-off">絶対順位</target>
+				<target state="signed-off">绝对名次</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindSpeedInBeaufort" resname="WindSpeedInBeaufort">
 				<source>Wind Speed in Bft</source>
-				<target state="signed-off">風速 (Bft)</target>
+				<target state="signed-off">风速（单位：Bft）</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="DistanceAtStart" resname="DistanceAtStart">
 				<source>Distance to Start at Start</source>
-				<target state="signed-off">スタート時のスタートラインまでの距離</target>
+				<target state="signed-off">起航前与起航线的距离</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedWhenStarting" resname="SpeedWhenStarting">
 				<source>Speed at Start</source>
-				<target state="signed-off">スタート時の艇速</target>
+				<target state="signed-off">起航时的速度</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedTenSecondsBeforeStart" resname="SpeedTenSecondsBeforeStart">
 				<source>Speed 10s Before Start</source>
-				<target state="signed-off">スタート 10 秒前の艇速</target>
+				<target state="signed-off">起航前 10 秒的速度</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RankAtFirstMark" resname="RankAtFirstMark">
 				<source>Rank at First Mark</source>
-				<target state="signed-off">第一マークでのランク</target>
+				<target state="signed-off">在第一个标志的名次</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfManeuvers" resname="NumberOfManeuvers">
 				<source>Number of Maneuvers</source>
-				<target state="signed-off">マニューバー回数</target>
+				<target state="signed-off">操作数量</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfTacks" resname="NumberOfTacks">
 				<source>Number of Tacks</source>
-				<target state="signed-off">タック回数</target>
+				<target state="signed-off">迎风转向次数</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfJibes" resname="NumberOfJibes">
 				<source>Number of Jibes</source>
-				<target state="signed-off">ジャイブ回数</target>
+				<target state="signed-off">顺风转向次数</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfPenaltyCircles" resname="NumberOfPenaltyCircles">
 				<source>Number of Penalty Circles</source>
-				<target state="signed-off">ペナルティー回転の数</target>
+				<target state="signed-off">惩罚圈数</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RankGainsOrLosses" resname="RankGainsOrLosses">
 				<source>Rank Gains or Losses</source>
-				<target state="signed-off">ランク上下</target>
+				<target state="signed-off">名次进阶或落后</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="DistanceToStarboardSideAtStart" resname="DistanceToStarboardSideAtStart">
 				<source>Distance to Starboard Side (% of Length)</source>
-				<target state="signed-off">スターボード側までの距離 (長さの %)</target>
+				<target state="signed-off">与右舷的距离（长度百分比）</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfPodiumFinish" resname="NumberOfPodiumFinish">
 				<source>Number of Podium Finishes</source>
-				<target state="signed-off">表彰台回数</target>
+				<target state="signed-off">跻身颁奖台次数</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfWins" resname="NumberOfWins">
 				<source>Number of Wins</source>
-				<target state="signed-off">優勝回数</target>
+				<target state="signed-off">获胜次数</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RankGainsOrLossesBetweenFirstMarkAndFinish" resname="RankGainsOrLossesBetweenFirstMarkAndFinish">
 				<source>Rank Gains or Losses (1st Mark -&gt; Finish)</source>
-				<target state="signed-off">ランク上下 (第一マーク -&gt; フィニッシュ)</target>
+				<target state="signed-off">名次进阶或落后（第一个标志 -&gt; 结束）</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="IsTracked" resname="IsTracked">
 				<source>Is Tracked</source>
-				<target state="signed-off">追跡済</target>
+				<target state="signed-off">是否跟踪</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfCompetitorFixes" resname="NumberOfCompetitorFixes">
 				<source>Number of Competitor Fixes</source>
-				<target state="signed-off">競技者フィックスの数</target>
+				<target state="signed-off">参赛队修复次数</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="NumberOfMarkFixes" resname="NumberOfMarkFixes">
 				<source>Number of Mark Fixes</source>
-				<target state="signed-off">マークフィックスの数</target>
+				<target state="signed-off">标志修复次数</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ManeuverType" resname="ManeuverType">
 				<source>Maneuver Type</source>
-				<target state="signed-off">マニューバータイプ</target>
+				<target state="signed-off">操作类型</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Tack" resname="Tack">
 				<source>Tack</source>
-				<target state="signed-off">タック</target>
+				<target state="signed-off">迎风转向</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedBefore" resname="SpeedBefore">
 				<source>Speed Before Maneuver</source>
-				<target state="signed-off">マニューバー前の艇速</target>
+				<target state="signed-off">操作前的速度</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedAfter" resname="SpeedAfter">
 				<source>Speed After Maneuver</source>
-				<target state="signed-off">マニューバー後の艇速</target>
+				<target state="signed-off">操作后的速度</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="DirectionChange" resname="DirectionChange">
 				<source>Direction Change in Degrees</source>
-				<target state="signed-off">方向転換 (度)</target>
+				<target state="signed-off">风向变化角度</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AbsoluteDirectionChange" resname="AbsoluteDirectionChange">
 				<source>Absolute Direction Change in Degrees (Positive)</source>
-				<target>方向転換 (度) の絶対値</target>
+				<target>绝对风向变化角度（正向）</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ToSide" resname="ToSide">
 				<source>To Side (Port / Starboard)</source>
-				<target>方向転換する側 (ポート/スターボード)</target>
+				<target>至侧（端口/右舷）</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="ManeuverLoss" resname="ManeuverLoss">
 				<source>Maneuver Loss</source>
-				<target state="signed-off">マニューバーロス</target>
+				<target state="signed-off">操作损失</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="Waypoint" resname="Waypoint">
 				<source>Waypoint</source>
-				<target state="signed-off">変針点</target>
+				<target state="signed-off">航路点</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="PassingSide" resname="PassingSide">
 				<source>Passing Side</source>
-				<target state="signed-off">通過サイド</target>
+				<target state="signed-off">绕标侧</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="TackAtStart" resname="TackAtStart">
 				<source>Tack at Start</source>
-				<target state="signed-off">スタート時のタック</target>
+				<target state="signed-off">起航时迎风转向</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SpeedTenSecondsAfterStart" resname="SpeedTenSecondsAfterStart">
 				<source>Speed 10s After Start</source>
-				<target state="signed-off">スタート 10 秒後の艇速</target>
+				<target state="signed-off">起航后 10 秒的速度</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RankThirtySecondsAfterStart" resname="RankThirtySecondsAfterStart">
 				<source>Rank 30s After Start</source>
-				<target state="signed-off">スタート 30 秒後の順位</target>
+				<target state="signed-off">起航后 30 秒的名次</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindwardDistanceToAdvantageousEndOfLine" resname="WindwardDistanceToAdvantageousEndOfLine">
 				<source>Windward Distance to Advantageous End of Line</source>
-				<target state="signed-off">ラインの有利な端までの風上距離</target>
+				<target state="signed-off">与有利航线终点的上风距离</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="RankAfterHalfOfTheFirstLeg" resname="RankAfterHalfOfTheFirstLeg">
 				<source>Rank after the half of the first leg</source>
-				<target state="signed-off">第一レグ中間点の順位</target>
+				<target state="signed-off">第一航段过半后的名次</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="AdvantageousEndOfLine" resname="AdvantageousEndOfLine">
 				<source>Advantageous End of Line</source>
-				<target state="signed-off">ラインの有利な端</target>
+				<target state="signed-off">有利航线终点</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="TimeSpentInSeconds" resname="TimeSpentInSeconds">
 				<source>Time Spent in Seconds</source>
-				<target state="signed-off">所要時間 (秒)</target>
+				<target state="signed-off">所用时间（秒）</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="MedalRace" resname="MedalRace">
 				<source>Medal Race</source>
-				<target state="signed-off">メダルレース</target>
+				<target state="signed-off">奖牌轮</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindSourceType" resname="WindSourceType">
 				<source>Wind Source Type</source>
-				<target>風源タイプ</target>
+				<target>风源类型</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindSourceName" resname="WindSourceName">
 				<source>Wind Source Name</source>
-				<target>風源名</target>
+				<target>风源名称</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="windFrom" resname="windFrom">
 				<source>True Wind Direction (TWD)</source>
-				<target>真風向 (TWD)</target>
+				<target>实际风向 (TWD)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="windSpeedKnots" resname="windSpeedKnots">
 				<source>True Wind Speed (kts) </source>
-				<target>真風速 (kt) </target>
+				<target>实际风速 (kts) </target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="speedInKnots" resname="speedInKnots">
 				<source>Speed (kts)</source>
-				<target>速度 (kt)</target>
+				<target>速度 (kts)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="bearing" resname="bearing">
 				<source>Course over Ground (�T)</source>
-				<target>対地コース (�T)</target>
+				<target>真实航向 (�T)</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="WindTrack" resname="WindTrack">
 				<source>Wind Track</source>
-				<target>風追跡</target>
+				<target>风力跟踪</target>
 			</trans-unit>
 		</body>
 	</file>
