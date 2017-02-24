@@ -9,6 +9,13 @@ public class LeaderboardEditContextDefinition extends AbstractGenericSerializabl
     
     private transient StringSetting leaderboardName;
     
+    public LeaderboardEditContextDefinition() {
+    }
+    
+    public LeaderboardEditContextDefinition(String leaderboardName) {
+        this.leaderboardName.setValue(leaderboardName);
+    }
+    
     @Override
     protected void addChildSettings() {
         leaderboardName = new StringSetting("name", this);

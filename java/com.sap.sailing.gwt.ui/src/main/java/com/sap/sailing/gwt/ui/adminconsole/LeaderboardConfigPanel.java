@@ -308,9 +308,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                         }
                     }
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_SCORES.equals(value)) {
-                    Map<String, String> leaderboardEditingParams = new HashMap<>();
-                    leaderboardEditingParams.put("name", leaderboardDTO.name);
-                    String leaderboardEditingUrl = EntryPointLinkFactory.createLeaderboardEditingLink(leaderboardEditingParams);
+                    String leaderboardEditingUrl = EntryPointWithSettingsLinkFactory.createLeaderboardEditingLink(leaderboardDTO.name);
                     Window.open(leaderboardEditingUrl, "_blank", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS.equals(value)) {
                     EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, leaderboardDTO.name, stringMessages, 
