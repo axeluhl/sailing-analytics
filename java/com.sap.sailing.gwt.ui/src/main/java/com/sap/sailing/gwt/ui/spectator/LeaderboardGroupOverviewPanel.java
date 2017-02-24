@@ -51,6 +51,7 @@ import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
+import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 
 /**
  * 
@@ -228,11 +229,8 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         Column<LeaderboardGroupDTO, SafeHtml> groupsNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(groupsNameAnchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
-                String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLEncoder.encode("/gwt/Spectator.html?"+
-                        (showRaceDetails ? "showRaceDetails=true&" : "") +
-                        "leaderboardGroupName=" + group.getName() + "&root=overview"
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                String link = new LinkWithSettingsGenerator<SpectatorSettings>()
+                        .createUrl(new SpectatorSettings(group.getName(), showRaceDetails));
                 return ANCHORTEMPLATE.anchor(link, group.getName());
             }
         };

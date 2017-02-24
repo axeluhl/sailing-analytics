@@ -17,6 +17,14 @@ public class SpectatorSettings extends AbstractGenericSerializableSettings {
     private transient BooleanSetting showRaceDetails;
     private transient BooleanSetting embedded;
     
+    public SpectatorSettings() {
+    }
+    
+    public SpectatorSettings(String leaderboardGroupName, boolean showRaceDetails) {
+        this.leaderboardGroupName.setValue(leaderboardGroupName);
+        this.showRaceDetails.setValue(showRaceDetails);
+    }
+    
     @Override
     protected void addChildSettings() {
         leaderboardGroupName = new StringSetting("leaderboardGroupName", this);
