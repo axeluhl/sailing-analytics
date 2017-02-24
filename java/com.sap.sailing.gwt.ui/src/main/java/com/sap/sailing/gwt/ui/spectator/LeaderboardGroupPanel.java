@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.spectator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -388,8 +389,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
                     raceIdentifier.getRaceName(), leaderboardName, leaderboardGroup.getName(), null, viewMode);
             RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = RaceBoardPerspectiveOwnSettings
                     .createDefaultWithCanReplayDuringLiveRaces(canReplayDuringLiveRaces);
-            HashMap<String, Settings> innerSettings = new HashMap<>();
-            innerSettings.put(RaceMapLifecycle.ID,
+            Map<String, Settings> innerSettings = Collections.singletonMap(RaceMapLifecycle.ID,
                     RaceMapSettings.getDefaultWithShowMapControls(showMapControls));
             PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
                     perspectiveOwnSettings, innerSettings);
