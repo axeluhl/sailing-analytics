@@ -11,13 +11,11 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
-import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
-import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 /**
  * 
@@ -29,15 +27,10 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
+        
+        final SpectatorSettings settings = new SettingsToUrlSerializer().deserializeFromCurrentLocation(new SpectatorSettings());
 
-        String groupParamValue = Window.Location.getParameter("leaderboardGroupName");
-        String viewModeParamValue = Window.Location.getParameter("viewMode");
-        final boolean canReplayDuringLiveRaces = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, /* defaultValue */ false);
-        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(
-                RaceMapSettings.PARAM_SHOW_MAPCONTROLS, /* defaultValue */ true);
-        boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null
-                && Window.Location.getParameter("showRaceDetails").equalsIgnoreCase("true");
+        final String groupParamValue = settings.getLeaderboardGroupName();
         final String groupName;
         if (groupParamValue == null || groupParamValue.isEmpty()) {
             groupName = null;
@@ -56,21 +49,20 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
         
         RootPanel rootPanel = RootPanel.get();
         FlowPanel groupAndFeedbackPanel = new FlowPanel();
-        boolean embedded = Window.Location.getParameter("embedded") != null
-                && Window.Location.getParameter("embedded").equalsIgnoreCase("true");
+        boolean embedded = settings.isEmbedded();
         if (groupName == null) {
             FlowPanel groupOverviewPanel = new FlowPanel();
             groupOverviewPanel.addStyleName("contentOuterPanel");
             // DON'T DELETE -> the EventOverviewPanel will replace the LeaderboardGroupOverviewPanel later on
 //            EventOverviewPanel eventOverviewPanel = new EventOverviewPanel(sailingService, this, stringMessages, showRaceDetails);
 //            groupOverviewPanel.add( eventOverviewPanel);
-            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(sailingService, this, getStringMessages(), showRaceDetails);
+            LeaderboardGroupOverviewPanel leaderboardGroupOverviewPanel = new LeaderboardGroupOverviewPanel(sailingService, this, getStringMessages(), settings.isShowRaceDetails());
             groupOverviewPanel.add(leaderboardGroupOverviewPanel);
             rootPanel.add(groupOverviewPanel);
         } else {
             LeaderboardGroupPanel groupPanel = new LeaderboardGroupPanel(sailingService, getStringMessages(), this,
-                    groupName, viewModeParamValue, embedded, showRaceDetails, canReplayDuringLiveRaces,
-                    showMapControls);
+                    groupName, settings.getViewMode(), embedded, settings.isShowRaceDetails(), settings.isCanReplayDuringLiveRaces(),
+                    settings.isShowMapControls());
             groupAndFeedbackPanel.add(groupPanel);
             if (!embedded) {
                 groupPanel.setWelcomeWidget(new SimpleWelcomeWidget(getStringMessages().welcomeToSailingAnalytics(),
