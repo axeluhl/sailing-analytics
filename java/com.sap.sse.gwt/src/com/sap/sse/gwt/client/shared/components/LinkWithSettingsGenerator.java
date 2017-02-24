@@ -52,6 +52,13 @@ public class LinkWithSettingsGenerator<S extends Settings> {
     }
 
     /**
+     * Creates a link using the contextDefinition (see constructors) but with no other {@link Settings}.
+     */
+    public String createUrl() {
+        return createUrl(null);
+    }
+    
+    /**
      * Creates a link using the contextDefinition (see constructors) and the given {@link Settings} instance.
      * 
      */
